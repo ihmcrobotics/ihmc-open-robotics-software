@@ -97,7 +97,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
-   private final YoBoolean turnOnNaturalPostureControl = new YoBoolean("turnOnNaturalPostureControl", registry);
    private final YoBoolean useNaturalPostureCommand = new YoBoolean("useNaturalPostureCommand", registry);
    private final YoBoolean usePelvisPrivilegedPoseCommand = new YoBoolean("usePelvisPrivilegedPoseCommand", registry);
    private final YoBoolean useBodyManagerCommands = new YoBoolean("useBodyManagerCommands", registry);
@@ -163,10 +162,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final ExecutionTimer managerUpdateTimer = new ExecutionTimer("managerUpdateTimer", registry);
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
-   private boolean firstTick = true;
-
-
-
+   // YMC: firstTick doesn't seem necessary?
+   //   private boolean firstTick = true;
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusOutputManager,
@@ -174,8 +171,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                              WalkingControllerParameters walkingControllerParameters,
                                              HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      turnOnNaturalPostureControl.set(true);
       useNaturalPostureCommand.set(true);
+      //      useNaturalPostureCommand.set(false);
       usePelvisPrivilegedPoseCommand.set(false);
       useBodyManagerCommands.set(true);
       usePelvisOrientationCommand.set(true);
@@ -304,7 +301,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
-
 
    }
 
@@ -560,7 +556,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.avoidManipulationAbortForDuration(RigidBodyControlManager.INITIAL_GO_HOME_TIME);
    }
 
-
    private void initializeManagers()
    {
       balanceManager.disablePelvisXYControl();
@@ -576,7 +571,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.initialize();
-      if (turnOnNaturalPostureControl.getValue())
+      if (useNaturalPostureCommand.getValue())
       {
          naturalPosturePrivilegedManager.initialize();
          naturalPostureManager.initialize();
@@ -665,8 +660,10 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       walkingStateTimer.startMeasurement();
       // Do transitions will request ICP planner updates.
-      if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
-         stateMachine.doTransitions();
+      // YMC: firstTick doesn't seem necessary?
+      //      if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
+      //        stateMachine.doTransitions();
+      stateMachine.doTransitions();
       // Do action is relying on the ICP plan being valid.
       stateMachine.doAction();
       walkingStateTimer.stopMeasurement();
@@ -699,10 +696,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          legElasticityDebuggator.update();
 
-      if (turnOnNaturalPostureControl.getValue())
-      {
-         firstTick = false;
-      }
+      // YMC: firstTick doesn't seem necessary?
+      //      if (useNaturalPostureCommand.getValue())
+      //      {
+      //         firstTick = false;
+      //      }
    }
 
    private void handleChangeInContactState()
@@ -771,7 +769,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       pelvisOrientationManager.compute();
-      if (turnOnNaturalPostureControl.getValue())
+      if (useNaturalPostureCommand.getValue())
       {
          naturalPostureManager.compute();
          naturalPosturePrivilegedManager.compute();
@@ -885,23 +883,25 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void submitControllerCoreCommands()
    {
-      if (turnOnNaturalPostureControl.getValue())
+      //      useNaturalPostureCommand.set(!stateMachine.getCurrentState().isDoubleSupportState());
+      if (useNaturalPostureCommand.getValue())
       {
          useNaturalPostureCommand.set(true);
-         usePelvisPrivilegedPoseCommand.set(true);
-         usePelvisOrientationCommand.set(false);
          useBodyManagerCommands.set(false);
-
-      
          usePelvisPrivilegedPoseCommand.set(false);
          usePelvisOrientationCommand.set(true);
 
-      
+         useBodyManagerCommands.set(false);
+      } else {
+         usePelvisPrivilegedPoseCommand.set(false);
+         usePelvisOrientationCommand.set(true);
+
+         useBodyManagerCommands.set(true);
       }
 
       planeContactStateCommandPool.clear();
 
-      if (turnOnNaturalPostureControl.getValue())
+      if (useNaturalPostureCommand.getValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPosturePrivilegedManager.getInverseDynamicsCommand());
          controllerCoreCommand.addFeedbackControlCommand(naturalPosturePrivilegedManager.getFeedbackControlCommand());
@@ -983,8 +983,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       //      System.out.println(controllerCoreCommand);
       //      System.out.println("");
    }
-
-
 
    public ControllerCoreCommand getControllerCoreCommand()
    {
