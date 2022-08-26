@@ -60,7 +60,7 @@ public class GDXRobotLowLevelMessenger
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stand prep")))
       {
-         robotLowLevelMessenger.sendStandRequest();
+         sendStandRequest();
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Abort")))
@@ -99,6 +99,11 @@ public class GDXRobotLowLevelMessenger
             sendPSIRequest();
          }
       }
+   }
+
+   public void sendStandRequest()
+   {
+      robotLowLevelMessenger.sendStandRequest();
    }
 
    private void sendPSIRequest()

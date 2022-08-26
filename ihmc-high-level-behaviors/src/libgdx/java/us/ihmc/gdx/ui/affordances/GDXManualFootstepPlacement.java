@@ -61,8 +61,8 @@ public class GDXManualFootstepPlacement implements RenderableProvider
 
       //NOTE: adding hot button for left and right foot
 
-      String leftFootFileName = "leftFoot.png";
-      String rightFootFileName = "rightFoot.png";
+      String leftFootFileName = "leftFoot_depress.png";
+      String rightFootFileName = "rightFoot_depress.png";
       Runnable leftFootRunnable = () -> createNewFootStep(RobotSide.LEFT);
       Runnable rightFootRunnable = () -> createNewFootStep(RobotSide.RIGHT);
       baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("leftFootStep", iconDirectory, leftFootFileName, leftFootRunnable));
