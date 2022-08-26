@@ -85,7 +85,7 @@ public class GDXManualFootstepPlacement implements RenderableProvider
 
       if (footstepBeingPlaced != null)
       {
-         footstepBeingPlaced.process3DViewInput(input);
+         footstepBeingPlaced.process3DViewInput(input, true);
 
          Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
          renderTooltip = true;
