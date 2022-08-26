@@ -20,8 +20,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
-import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
 import us.ihmc.gdx.ui.missionControl.processes.KinematicsStreamingToolboxProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
@@ -30,7 +30,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -47,7 +47,7 @@ public class GDXVRKinematicsStreamingMode
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final KinematicsStreamingToolboxProcess kinematicsStreamingToolboxProcess;
-   private GDXRobotModelGraphic ghostRobotGraphic;
+   private GDXMultiBodyGraphic ghostRobotGraphic;
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -61,12 +61,12 @@ public class GDXVRKinematicsStreamingMode
    private final SideDependentList<OneDoFJointBasics> wristJoints = new SideDependentList<>();
    private final SideDependentList<ImGuiPlot> wristJointAnglePlots = new SideDependentList<>();
    private PausablePeriodicThread wakeUpThread;
-   private ImBoolean wakeUpThreadRunning = new ImBoolean(false);
+   private final ImBoolean wakeUpThreadRunning = new ImBoolean(false);
    private GDXReferenceFrameGraphic headsetFrameGraphic;
-   private SideDependentList<ReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
-   private SideDependentList<GDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
-   private SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
-   private ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
+   private final SideDependentList<ModifiableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
+   private final SideDependentList<GDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
+   private final SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
+   private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, Map<String, Double> initialConfiguration, ROS2ControllerHelper ros2ControllerHelper)
@@ -79,14 +79,14 @@ public class GDXVRKinematicsStreamingMode
    public void create(GDXVRContext vrContext)
    {
       RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
-      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5));
+      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
       RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
       ghostFullRobotModel = robotModel.createFullRobotModel();
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostFullRobotModel);
-      ghostRobotGraphic = new GDXRobotModelGraphic(robotModel.getSimpleRobotName() + " (IK Preview Ghost)");
-      ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator(), robotModel);
+      ghostRobotGraphic = new GDXMultiBodyGraphic(robotModel.getSimpleRobotName() + " (IK Preview Ghost)");
+      ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator());
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
@@ -97,15 +97,28 @@ public class GDXVRKinematicsStreamingMode
          controllerFrameGraphics.put(side, new GDXReferenceFrameGraphic(length));
          handControlFrameGraphics.put(side, new GDXReferenceFrameGraphic(length));
          RigidBodyTransform wristToHandControlTransform = robotModel.getUIParameters().getTransformWristToHand(side);
-         RigidBodyTransform handControlToControllerTransform = new RigidBodyTransform();
-         handControlToControllerTransform.getTranslation().setX(-0.1);
-         handControlToControllerTransform.getRotation().setYawPitchRoll(side == RobotSide.RIGHT ? 0.0 : Math.toRadians(180.0),
-                                                                        side.negateIfLeftSide(Math.toRadians(90.0)),
-                                                                        0.0);
-         handDesiredControlFrames.put(side,
-                                      ReferenceFrameMissingTools
-                                            .constructFrameWithUnchangingTransformToParent(vrContext.getController(side).getXForwardZUpControllerFrame(),
-                                                                                           handControlToControllerTransform));
+         ModifiableReferenceFrame handDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+         // Atlas
+//         {
+//            handDesiredControlFrame.getTransformToParent().getTranslation().setX(-0.1);
+//            handDesiredControlFrame.getTransformToParent()
+//                                   .getRotation()
+//                                   .setYawPitchRoll(side == RobotSide.RIGHT ? 0.0 : Math.toRadians(180.0), side.negateIfLeftSide(Math.toRadians(90.0)), 0.0);
+//         }
+         // Nadia
+         {
+            handDesiredControlFrame.getTransformToParent().set(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
+            if (side == RobotSide.LEFT)
+            {
+               handDesiredControlFrame.getTransformToParent().appendPitchRotation(Math.PI);
+            }
+         }
+         handDesiredControlFrame.getReferenceFrame().update();
+         handDesiredControlFrames.put(side, handDesiredControlFrame);
+
+         //                                      ReferenceFrameMissingTools
+//                                            .constructFrameWithChangingTransformToParent(vrContext.getController(side).getXForwardZUpControllerFrame(),
+//                                                                                           handControlToControllerTransform));
          ArmJointName lastWristJoint = robotModel.getJointMap().getArmJointNames()[robotModel.getJointMap().getArmJointNames().length - 1];
          wristJoints.put(side, ghostFullRobotModel.getArmJoint(side, lastWristJoint));
          wristJointAnglePlots.put(side, new ImGuiPlot(labels.get(side + " Hand Joint Angle")));
@@ -149,10 +162,10 @@ public class GDXVRKinematicsStreamingMode
             {
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
-               tempFramePose.setToZero(handDesiredControlFrames.get(side));
+               tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-               handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side));
+               handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
