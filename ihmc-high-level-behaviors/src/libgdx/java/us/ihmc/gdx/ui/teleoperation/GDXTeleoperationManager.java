@@ -204,8 +204,8 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       // CALIBRATING
 
-      ArrayList<Runnable> calibrateRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCalibrateCommand(RobotSide.LEFT),
-                                                                             () -> publishHandCalibrateCommand(RobotSide.RIGHT)));
+      ArrayList<Runnable> calibrateRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
+                                                                             () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CALIBRATE)));
       baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true));
 
       // OPEN, CLOSE
@@ -295,20 +295,17 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          ImGui.sameLine();
          if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
          {
-            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CALIBRATE));
+            publishHandCommand(side, HandConfiguration.CALIBRATE);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
          {
-            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.OPEN));
+            publishHandCommand(side, HandConfiguration.OPEN);
          }
          ImGui.sameLine();
          if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
          {
-            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                        HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CLOSE));
+            publishHandCommand(side, HandConfiguration.CLOSE);
          }
          ImGui.sameLine();
          ImGui.pushItemWidth(100.0f);
@@ -338,12 +335,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    {
       communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
                                   HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
-   }
-
-   private void publishHandCalibrateCommand(RobotSide side)
-   {
-      communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                  HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.CALIBRATE));
    }
 
    @Override
