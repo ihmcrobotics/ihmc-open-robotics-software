@@ -140,7 +140,7 @@ public class ControllerNaturalPostureManager
 
       npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(), controlDT), false));
       npVelocityAlpha.addListener(v -> npVelocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(npVelocityAlpha.getDoubleValue(), controlDT), false));
-      npVelocityBreakFrequency.set(50.0);
+      npVelocityBreakFrequency.set(50.0);  //50
 
       npYawVelocity = new FilteredVelocityYoVariable("npYawVelocity", "", npVelocityAlpha, npYaw, controlDT, registry);
       npPitchVelocity = new FilteredVelocityYoVariable("npPitchVelocity", "", npVelocityAlpha, npPitch, controlDT, registry);
@@ -156,24 +156,24 @@ public class ControllerNaturalPostureManager
       CommonOps_DDRM.setIdentity(npQPselectionMatrix);
 
       // switches 
-      doNullSpaceProjectionForNaturalPosture.set(false);
+      doNullSpaceProjectionForNaturalPosture.set(true);
       doNullSpaceProjectionForPelvis.set(true);
 
       // Desired NP values (wrt world)
-      npPitchDesired.set(-0.03);
+      npPitchDesired.set(-0.0);   // -0.03
 
       double qpWeight = 5.0; //5.0;
-      npQPWeightX.set(1); //1
-      npQPWeightY.set(1); //1
       npQPWeightZ.set(1);
+      npQPWeightY.set(.01); //1
+      npQPWeightX.set(.01); //1
 
-      npKpYaw.set(50.0);
-      npKpPitch.set(25.0);
-      npKpRoll.set(50.0);
+      npKpYaw.set(10.0);   // 150 
+      npKpPitch.set(10.0);
+      npKpRoll.set(10.0);
 
-      npKdYaw.set(3.0);
-      npKdPitch.set(1.0);
-      npKdRoll.set(3.0);
+      npKdYaw.set(5.0);   // 20
+      npKdPitch.set(5.0);
+      npKdRoll.set(5.0);  // 3 // 6
 
 
       // Pelvis privileged pose

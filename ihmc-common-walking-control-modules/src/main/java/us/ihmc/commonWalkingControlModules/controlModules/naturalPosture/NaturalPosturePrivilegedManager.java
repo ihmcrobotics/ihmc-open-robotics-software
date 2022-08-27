@@ -50,6 +50,8 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
+   private final YoDouble npPoseSpineRollPitchKp = new YoDouble("npPoseSpineRollPitchKp", registry);
+   
    private final YoDouble pPoseSpineRollPitchKp = new YoDouble("pPoseSpineRollPitchKp", registry);
    private final YoDouble pPoseSpineRollPitchKdFactor = new YoDouble("pPoseSpineRollPitchKdFactor", registry);
 
@@ -85,11 +87,10 @@ public class NaturalPosturePrivilegedManager
       pPoseSpineRoll.set(0.0);
       pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
-      double delta = 0.0;
-      pPoseShoulderPitch.set(0.4 + delta); //0.1 //0.2   // This is the first joint from the body. The more negative this number is, the more forward the left arm is
-      pPoseShoulderRoll.set(0 - delta); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
+      pPoseShoulderPitch.set(0.1); //0.1 //0.2   // This is the first joint from the body. The more negative this number is, the more forward the left arm is
+      pPoseShoulderRoll.set(0); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
       pPoseShoulderYaw.set(0);
-      pPoseElbow.set(-0.4); //-0.5 //-1   // the smaller, the more bent the elbow is
+      pPoseElbow.set(-0.2); // 0 looks more natural, but -0.3 might avoid arm from colliding into the hydraulic manifold. //-0.5 //-1   // the smaller, the more bent the elbow is
 
       pPoseSpineYawWeight.set(1.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
       pPoseShoulderRollWeight.set(1.0);
@@ -100,8 +101,10 @@ public class NaturalPosturePrivilegedManager
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         pPoseSpinePitchGains.setKp(25.0);
-         pPoseSpineRollGains.setKp(25.0);
+         npPoseSpineRollPitchKp.set(100);
+         
+         pPoseSpinePitchGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
+         pPoseSpineRollGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
          pPoseSpinePitchGains.setZeta(0.7);
          pPoseSpineRollGains.setZeta(0.7);
          pPoseSpinePitchGains.createDerivativeGainUpdater(true);
@@ -109,9 +112,9 @@ public class NaturalPosturePrivilegedManager
       }
 
       pPoseSpineRollPitchKp.set(50.0);
-      pPoseSpineYawKp.set(300.0);
-
       pPoseSpineRollPitchKdFactor.set(0.15);
+      
+      pPoseSpineYawKp.set(300.0);
       pPoseSpineYawKdFactor.set(0.15);
 
       pPoseShoulderKp.set(80.0);
@@ -152,6 +155,9 @@ public class NaturalPosturePrivilegedManager
       // Testing -- track spine joint x and y with highest priority
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
+         pPoseSpinePitchGains.setKp(npPoseSpineRollPitchKp.getDoubleValue());
+         pPoseSpineRollGains.setKp(npPoseSpineRollPitchKp.getDoubleValue());
+
          OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
          OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
          spinePitchCommand.setJoint(spinePitch);
