@@ -891,6 +891,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          usePelvisOrientationCommand.set(true);
 
          useBodyManagerCommands.set(false);
+      } else {
+         usePelvisPrivilegedPoseCommand.set(false);
+         usePelvisOrientationCommand.set(true);
+
+         useBodyManagerCommands.set(true);
       }
 
       planeContactStateCommandPool.clear();
