@@ -50,6 +50,8 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseElbowKp = new YoDouble("pPoseElbowKp", registry);
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
+   private final YoDouble npPoseSpineRollPitchKp = new YoDouble("npPoseSpineRollPitchKp", registry);
+   
    private final YoDouble pPoseSpineRollPitchKp = new YoDouble("pPoseSpineRollPitchKp", registry);
    private final YoDouble pPoseSpineRollPitchKdFactor = new YoDouble("pPoseSpineRollPitchKdFactor", registry);
 
@@ -100,8 +102,10 @@ public class NaturalPosturePrivilegedManager
       useSpineRollPitchJointCommands.set(true); // Can turn off joint limit for the spine when this is true.
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
-         pPoseSpinePitchGains.setKp(25.0);
-         pPoseSpineRollGains.setKp(25.0);
+         npPoseSpineRollPitchKp.set(100);
+         
+         pPoseSpinePitchGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
+         pPoseSpineRollGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
          pPoseSpinePitchGains.setZeta(0.7);
          pPoseSpineRollGains.setZeta(0.7);
          pPoseSpinePitchGains.createDerivativeGainUpdater(true);
@@ -109,9 +113,9 @@ public class NaturalPosturePrivilegedManager
       }
 
       pPoseSpineRollPitchKp.set(50.0);
-      pPoseSpineYawKp.set(300.0);
-
       pPoseSpineRollPitchKdFactor.set(0.15);
+      
+      pPoseSpineYawKp.set(300.0);
       pPoseSpineYawKdFactor.set(0.15);
 
       pPoseShoulderKp.set(80.0);
@@ -152,6 +156,9 @@ public class NaturalPosturePrivilegedManager
       // Testing -- track spine joint x and y with highest priority
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
+         pPoseSpinePitchGains.setKp(npPoseSpineRollPitchKp.getDoubleValue());
+         pPoseSpineRollGains.setKp(npPoseSpineRollPitchKp.getDoubleValue());
+
          OneDoFJointBasics spineRoll = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
          OneDoFJointBasics spinePitch = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
          spinePitchCommand.setJoint(spinePitch);
