@@ -87,11 +87,10 @@ public class NaturalPosturePrivilegedManager
       pPoseSpineRoll.set(0.0);
       pPoseSpinePitch.set(0.0);
       pPoseSpineYaw.set(0.0);
-      double delta = 0.0;
-      pPoseShoulderPitch.set(0.4 + delta); //0.1 //0.2   // This is the first joint from the body. The more negative this number is, the more forward the left arm is
-      pPoseShoulderRoll.set(0 - delta); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
+      pPoseShoulderPitch.set(0.1); //0.1 //0.2   // This is the first joint from the body. The more negative this number is, the more forward the left arm is
+      pPoseShoulderRoll.set(0); // the smaller, the further away the arm is from the body   // start at -1 for hardware experiment to be safe
       pPoseShoulderYaw.set(0);
-      pPoseElbow.set(-0.4); //-0.5 //-1   // the smaller, the more bent the elbow is
+      pPoseElbow.set(-0.3); //-0.5 //-1   // the smaller, the more bent the elbow is
 
       pPoseSpineYawWeight.set(1.0); // weight used to complete with other privileged joint position. Other joint default weights are 1
       pPoseShoulderRollWeight.set(1.0);
