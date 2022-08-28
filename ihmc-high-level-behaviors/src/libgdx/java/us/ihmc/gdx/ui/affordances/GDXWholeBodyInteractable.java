@@ -34,7 +34,7 @@ public class GDXWholeBodyInteractable implements RenderableProvider
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2Helper;
-   private final GDXWholeBodyDesiredIKManager armSetpointManager;
+   private final GDXWholeBodyDesiredIKManager wholeBodyDesiredIKManager;
    private final YoVariableClientHelper yoVariableClientHelper;
    private GDXTeleoperationParameters teleoperationParameters;
 
@@ -65,11 +65,11 @@ public class GDXWholeBodyInteractable implements RenderableProvider
       this.ros2Helper = ros2Helper;
       this.yoVariableClientHelper = yoVariableClientHelper;
       this.teleoperationParameters = teleoperationParameters;
-      this.armSetpointManager = new GDXWholeBodyDesiredIKManager(robotModel,
-                                                                 syncedRobot,
-                                                                 desiredRobot.getDesiredFullRobotModel(),
-                                                                 ros2Helper,
-                                                                 teleoperationParameters);
+      this.wholeBodyDesiredIKManager = new GDXWholeBodyDesiredIKManager(robotModel,
+                                                                        syncedRobot,
+                                                                        desiredRobot.getDesiredFullRobotModel(),
+                                                                        ros2Helper,
+                                                                        teleoperationParameters);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -78,7 +78,7 @@ public class GDXWholeBodyInteractable implements RenderableProvider
       environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
       // create the manager for the desired arm setpoints
-      armSetpointManager.create(baseUI);
+      wholeBodyDesiredIKManager.create();
 
       for (GDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
       {
@@ -141,7 +141,7 @@ public class GDXWholeBodyInteractable implements RenderableProvider
                   handInteractables.put(side, handInteractable);
                   // TODO this should probably not handle the space event!
                   // This sends a command to the controller.
-                  handInteractable.setOnSpacePressed(armSetpointManager.getSubmitDesiredArmSetpointsCallback(side));
+                  handInteractable.setOnSpacePressed(wholeBodyDesiredIKManager.getSubmitDesiredArmSetpointsCallback(side));
                }
                else
                {
@@ -157,7 +157,7 @@ public class GDXWholeBodyInteractable implements RenderableProvider
    public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
    {
       // update the desired arm setpoints
-      armSetpointManager.update(handInteractables);
+      wholeBodyDesiredIKManager.update(handInteractables);
 
       if (interactablesEnabled.get())
       {
@@ -217,7 +217,7 @@ public class GDXWholeBodyInteractable implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      armSetpointManager.renderImGuiWidgets();
+      wholeBodyDesiredIKManager.renderImGuiWidgets();
       ImGui.checkbox("Interactables enabled", interactablesEnabled);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Delete all")))
@@ -305,7 +305,7 @@ public class GDXWholeBodyInteractable implements RenderableProvider
 
    public void setDesiredToCurrent()
    {
-      armSetpointManager.setDesiredToCurrent();
+      wholeBodyDesiredIKManager.setDesiredToCurrent();
    }
 
    public GDXWalkPathControlRing getWalkPathControlRing()
