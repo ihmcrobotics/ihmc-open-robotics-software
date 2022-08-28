@@ -39,7 +39,7 @@ public abstract class GDXVRTrackedDevice
          GDXTools.toEuclid(openVRRigidBodyTransform, deviceToPlayAreaTransform);
          deviceYUpZBackFrame.update();
 
-         if (modelInstance == null && isConnected)
+         if (modelInstance == null)
          {
             String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
                                                                                       VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
@@ -47,11 +47,9 @@ public abstract class GDXVRTrackedDevice
             Model model = GDXVRModelLoader.loadRenderModel(renderModelName);
             modelInstance = model != null ? new ModelInstance(model) : null;
          }
-         if (modelInstance != null)
-         {
-            deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
-            GDXTools.toGDX(tempOpenVRToWorldTransform, modelInstance.transform);
-         }
+
+         deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
+         GDXTools.toGDX(tempOpenVRToWorldTransform, modelInstance.transform);
       }
    }
 

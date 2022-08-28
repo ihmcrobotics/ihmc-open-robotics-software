@@ -294,6 +294,7 @@ public class GDXVRContext
             if (modelInstance != null)
             {
                modelInstance.getRenderables(renderables, pool);
+               controller.getSelectionSphere().getRenderables(renderables, pool);
             }
          }
       }
