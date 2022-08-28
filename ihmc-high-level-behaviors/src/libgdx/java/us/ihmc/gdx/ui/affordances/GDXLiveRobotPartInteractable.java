@@ -242,6 +242,11 @@ public class GDXLiveRobotPartInteractable
       return selectablePose3DGizmo.getPoseGizmo().getPose();
    }
 
+   public ReferenceFrame getControlReferenceFrame()
+   {
+      return selectablePose3DGizmo.getPoseGizmo().getGizmoFrame();
+   }
+
    public void setOnSpacePressed(Runnable onSpacePressed)
    {
       this.onSpacePressed = onSpacePressed;

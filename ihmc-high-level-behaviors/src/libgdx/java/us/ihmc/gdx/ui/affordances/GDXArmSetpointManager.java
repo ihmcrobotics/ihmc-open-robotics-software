@@ -10,7 +10,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -29,8 +28,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.tools.thread.MissingThreadTools;
-
-import java.util.function.Supplier;
 
 public class GDXArmSetpointManager
 {
@@ -55,7 +52,6 @@ public class GDXArmSetpointManager
    private static final int INVERSE_KINEMATICS_CALCULATIONS_PER_UPDATE = 5;
    private int maxIterations = 500;
 
-   private final SideDependentList<Supplier<FramePose3DReadOnly>> desiredHandControlFramePoseSuppliers = new SideDependentList<>();
    private final SideDependentList<FramePose3D> correctedDesiredHandControlFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> lastCorrectedDesiredHandControlFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<Boolean> ikFoundASolution = new SideDependentList<>();
@@ -126,17 +122,15 @@ public class GDXArmSetpointManager
    }
 
    // TODO this update should be moved into the control ring, and should use the control ring pose.
-   public void update()
+   public void update(SideDependentList<GDXHandInteractable> handInteractables)
    {
       boolean desiredHandsChanged = false;
-      for (RobotSide side : desiredHandControlFramePoseSuppliers.sides())
+      for (RobotSide side : handInteractables.sides())
       {
          computeArmJacobians(side);
 
-         FramePose3DReadOnly desiredHandControlFramePose = desiredHandControlFramePoseSuppliers.get(side).get();
-
          FramePose3D correctedDesiredHandControlFramePose = correctedDesiredHandControlFramePoses.get(side);
-         correctedDesiredHandControlFramePose.setIncludingFrame(desiredHandControlFramePose);
+         correctedDesiredHandControlFramePose.setToZero(handInteractables.get(side).getControlReferenceFrame());
          correctedDesiredHandControlFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          correctedDesiredHandControlFramePose.get(temporaryFrame.getTransformToParent());
          temporaryFrame.getReferenceFrame().update();
@@ -163,14 +157,14 @@ public class GDXArmSetpointManager
       if (readyToSolve && desiredHandsChanged)
       {
          readyToSolve = false;
-         for (RobotSide side : desiredHandControlFramePoseSuppliers.sides())
+         for (RobotSide side : handInteractables.sides())
          {
             copyOneDofJoints(actualArmJacobians.get(side).getJointsInOrder(), workArmJacobians.get(side).getJointsInOrder());
          }
 
          MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
          {
-            for (RobotSide side : desiredHandControlFramePoseSuppliers.sides())
+            for (RobotSide side : handInteractables.sides())
             {
                FramePose3D lastCorrectedDesiredHandControlFramePose = lastCorrectedDesiredHandControlFramePoses.get(side);
 
@@ -190,7 +184,7 @@ public class GDXArmSetpointManager
       if (readyToCopySolution)
       {
          readyToCopySolution = false;
-         for (RobotSide side : desiredHandControlFramePoseSuppliers.sides())
+         for (RobotSide side : handInteractables.sides())
          {
             copyOneDofJoints(workArmJacobians.get(side).getJointsInOrder(), desiredArmJacobians.get(side).getJointsInOrder());
          }
@@ -296,10 +290,5 @@ public class GDXArmSetpointManager
       {
          oneDofJoints2[i].setQ(oneDofJoints1[i].getQ());
       }
-   }
-
-   public SideDependentList<Supplier<FramePose3DReadOnly>> getDesiredHandControlFramePoseSuppliers()
-   {
-      return desiredHandControlFramePoseSuppliers;
    }
 }
