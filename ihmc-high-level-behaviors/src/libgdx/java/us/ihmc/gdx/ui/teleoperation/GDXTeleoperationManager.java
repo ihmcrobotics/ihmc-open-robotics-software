@@ -28,7 +28,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.affordances.GDXInteractableFootstepPlan;
-import us.ihmc.gdx.ui.affordances.GDXRobotWholeBodyInteractable;
+import us.ihmc.gdx.ui.affordances.GDXWholeBodyInteractable;
 import us.ihmc.gdx.ui.affordances.GDXManualFootstepPlacement;
 import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -60,7 +60,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final GDXFootstepPlanning footstepPlanning;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
-   private GDXRobotWholeBodyInteractable interactableRobot;
+   private GDXWholeBodyInteractable interactableRobot;
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
    // TODO: for interactable footings from stepPlan >>
    private final GDXInteractableFootstepPlan interactableFootstepPlan = new GDXInteractableFootstepPlan();
@@ -140,14 +140,14 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       if (robotSelfCollisionModel != null)
       {
          ROS2ControllerHelper ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
-         interactableRobot = new GDXRobotWholeBodyInteractable(robotSelfCollisionModel,
-                                                               robotEnvironmentCollisionModel,
-                                                               robotModel,
-                                                               syncedRobot,
-                                                               desiredRobot,
-                                                               ros2Helper,
-                                                               yoVariableClientHelper,
-                                                               teleoperationParameters);
+         interactableRobot = new GDXWholeBodyInteractable(robotSelfCollisionModel,
+                                                          robotEnvironmentCollisionModel,
+                                                          robotModel,
+                                                          syncedRobot,
+                                                          desiredRobot,
+                                                          ros2Helper,
+                                                          yoVariableClientHelper,
+                                                          teleoperationParameters);
       }
    }
 

@@ -29,7 +29,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.tools.thread.MissingThreadTools;
 
-public class GDXArmSetpointManager
+public class GDXWholeBodyDesiredIKManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final DRCRobotModel robotModel;
@@ -66,11 +66,11 @@ public class GDXArmSetpointManager
       JOINT_ANGLES, POSE_WORLD, POSE_CHEST
    }
 
-   public GDXArmSetpointManager(DRCRobotModel robotModel,
-                                ROS2SyncedRobotModel syncedRobot,
-                                FullHumanoidRobotModel desiredRobot,
-                                ROS2ControllerHelper ros2Helper,
-                                GDXTeleoperationParameters teleoperationParameters)
+   public GDXWholeBodyDesiredIKManager(DRCRobotModel robotModel,
+                                       ROS2SyncedRobotModel syncedRobot,
+                                       FullHumanoidRobotModel desiredRobot,
+                                       ROS2ControllerHelper ros2Helper,
+                                       GDXTeleoperationParameters teleoperationParameters)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
