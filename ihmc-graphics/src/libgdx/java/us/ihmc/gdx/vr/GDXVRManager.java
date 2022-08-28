@@ -16,6 +16,7 @@ import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -206,6 +207,16 @@ public class GDXVRManager
       pollEventsPlot.render(pollEventsFrequencyCalculator.getFrequency());
       vrFPSPlot.render(vrFPSCalculator.getFrequency());
       waitGetToRenderDelayPlot.render(waitGetToRenderDuration);
+   }
+
+   public void renderImGuiTunerWidgets()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         GDXVRController controller = context.getController(side);
+         ImGui.text(side.getPascalCaseName() + " controller selection point:");
+         controller.renderImGuiTunerWidgets();
+      }
    }
 
    public void dispose()
