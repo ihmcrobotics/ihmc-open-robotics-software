@@ -27,14 +27,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
 
-public class GDXRobotWholeBodyInteractable implements RenderableProvider
+public class GDXWholeBodyInteractable implements RenderableProvider
 {
    private final GDXRobotCollisionModel selfCollisionModel;
    private final GDXRobotCollisionModel environmentCollisionModel;
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2Helper;
-   private final GDXArmSetpointManager armSetpointManager;
+   private final GDXWholeBodyDesiredIKManager armSetpointManager;
    private final YoVariableClientHelper yoVariableClientHelper;
    private GDXTeleoperationParameters teleoperationParameters;
 
@@ -49,14 +49,14 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
 
-   public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
-                                        RobotCollisionModel robotEnvironmentCollisionModel,
-                                        DRCRobotModel robotModel,
-                                        ROS2SyncedRobotModel syncedRobot,
-                                        GDXDesiredRobot desiredRobot,
-                                        ROS2ControllerHelper ros2Helper,
-                                        YoVariableClientHelper yoVariableClientHelper,
-                                        GDXTeleoperationParameters teleoperationParameters)
+   public GDXWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
+                                   RobotCollisionModel robotEnvironmentCollisionModel,
+                                   DRCRobotModel robotModel,
+                                   ROS2SyncedRobotModel syncedRobot,
+                                   GDXDesiredRobot desiredRobot,
+                                   ROS2ControllerHelper ros2Helper,
+                                   YoVariableClientHelper yoVariableClientHelper,
+                                   GDXTeleoperationParameters teleoperationParameters)
    {
       selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
       environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
@@ -65,11 +65,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       this.ros2Helper = ros2Helper;
       this.yoVariableClientHelper = yoVariableClientHelper;
       this.teleoperationParameters = teleoperationParameters;
-      this.armSetpointManager = new GDXArmSetpointManager(robotModel,
-                                                          syncedRobot,
-                                                          desiredRobot.getDesiredFullRobotModel(),
-                                                          ros2Helper,
-                                                          teleoperationParameters);
+      this.armSetpointManager = new GDXWholeBodyDesiredIKManager(robotModel,
+                                                                 syncedRobot,
+                                                                 desiredRobot.getDesiredFullRobotModel(),
+                                                                 ros2Helper,
+                                                                 teleoperationParameters);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
