@@ -12,7 +12,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -80,7 +79,7 @@ public class GDXWholeBodyDesiredIKManager
       armJointNames = robotModel.getJointMap().getArmJointNames();
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create()
    {
       workingRobot = robotModel.createFullRobotModel();
 
