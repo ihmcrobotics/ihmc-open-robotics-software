@@ -35,7 +35,6 @@ import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.Run;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -48,7 +47,6 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
