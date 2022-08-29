@@ -23,13 +23,10 @@ public class GDXHandConfigurationManager
    private CommunicationHelper communicationHelper;
    private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
-
-   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
    private final SideDependentList<GDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper)
+   public void create(GDXImGuiBasedUI baseUI, WorkspaceDirectory iconDirectory, CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
 
