@@ -35,8 +35,6 @@ import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
@@ -78,7 +76,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
    private GDXIconTexture locationFlagIcon;
-   private final SideDependentList<GDXIconTexture> handIcons = new SideDependentList<>();
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -149,10 +146,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      for (RobotSide side : RobotSide.values)
-      {
-         handIcons.put(side, new GDXIconTexture(iconDirectory.file(side.getLowerCaseName() + "Hand.png")));
-      }
       locationFlagIcon = new GDXIconTexture(iconDirectory.file("locationFlag.png"));
 
       desiredRobot.create();
