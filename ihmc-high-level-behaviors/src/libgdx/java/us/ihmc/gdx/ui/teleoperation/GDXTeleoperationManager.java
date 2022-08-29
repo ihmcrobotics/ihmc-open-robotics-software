@@ -187,7 +187,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       button.setToolTipText("action: Stand prep");
       baseUI.getPrimary3DPanel().addHotButton(button);
 
-      handManager.create(baseUI, communicationHelper);
+      handManager.create(baseUI, iconDirectory, communicationHelper);
    }
 
    public void update()
