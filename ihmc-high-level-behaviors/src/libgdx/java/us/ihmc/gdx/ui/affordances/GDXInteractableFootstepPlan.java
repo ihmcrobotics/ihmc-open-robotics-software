@@ -81,7 +81,7 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
       for (int i = 0; i < footsteps.size(); i++)
       {
          GDXInteractableFootstep singleFootstep = footsteps.get(i);
-         singleFootstep.process3DViewInput(input,false);
+         singleFootstep.process3DViewInput(input, false);
 
          if (singleFootstep.isHovered())
          {
@@ -92,7 +92,7 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
       }
       if (selectedFootstep != null)
       {
-         selectedFootstep.process3DViewInput(input,false);
+         selectedFootstep.process3DViewInput(input, false);
       }
 
       if (footsteps.size() > 0)
