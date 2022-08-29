@@ -14,7 +14,6 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -33,7 +32,6 @@ import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -43,7 +41,6 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -188,8 +185,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
 
-      handManager.create(communicationHelper);
-
       // Note: hot button for calibrate, open / close hand
       WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources/icons");
       GDXToolButton button;
@@ -199,30 +194,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       button.setToolTipText("action: Stand prep");
       baseUI.getPrimary3DPanel().addHotButton(button);
 
-      // TOGGLING.
-      ArrayList<String> fileNames = new ArrayList<>(Arrays.asList("leftToggle.jpg", "rightToggle.jpg"));
-      button = new GDXToolButton("leftRightToggleButton", iconDirectory, fileNames, null, true, false);
-      button.setToolTipText("toggle: red - left | green - right");
-      baseUI.getPrimary3DPanel().addHotButton(button);
-
-      // CALIBRATING
-      ArrayList<Runnable> calibrateRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
-                                                                             () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CALIBRATE)));
-      button = new GDXToolButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true);
-      button.setToolTipText("action: Calibrate");
-      baseUI.getPrimary3DPanel().addHotButton(button);
-
-      // OPEN, CLOSE
-      ArrayList<Runnable> openRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
-                                                                        () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN)));
-      ArrayList<Runnable> closeRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
-                                                                         () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE)));
-      button = new GDXToolButton("openGripperButton", iconDirectory, "openGripper.jpg", openRunnables, false, true);
-      button.setToolTipText("action: OPEN gripper based on toggle (left, right)");
-      baseUI.getPrimary3DPanel().addHotButton(button);
-      button = new GDXToolButton("closeGripperButton", iconDirectory, "closeGripper.jpg", closeRunnables, false, true);
-      button.setToolTipText("action: CLOSE gripper based on toggle (left, right)");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      handManager.create(baseUI, communicationHelper);
    }
 
    public void update()
@@ -308,12 +280,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       }
 
       interactableRobot.renderImGuiWidgets();
-   }
-
-   private void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
-   {
-      communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                  HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
    }
 
    @Override
