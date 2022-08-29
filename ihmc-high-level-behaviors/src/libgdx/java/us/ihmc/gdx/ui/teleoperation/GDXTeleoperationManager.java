@@ -6,13 +6,16 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -32,6 +35,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -80,6 +84,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private final SideDependentList<GDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
+   private final ImString tempImGuiText = new ImString(1000);
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
@@ -243,6 +248,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+         baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
       }
 
@@ -447,6 +453,65 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       // TODO: Add transparency sliders
       // TODO: Add motion previews
+   }
+
+   private void renderTooltipsAndContextMenus()
+   {
+      for (RobotSide side : handInteractables.sides())
+      {
+         GDXHandInteractable handInteractable = handInteractables.get(side);
+         if (handInteractable.getContextMenuNotification().poll())
+         {
+            ImGui.openPopup(labels.get(handInteractable.getContextMenuName()));
+         }
+
+         if (ImGui.beginPopup(labels.get(handInteractable.getContextMenuName())))
+         {
+            ImGui.text("Real robot joint angles:");
+
+            tempImGuiText.clear();
+
+            tempImGuiText.set(buildJointAnglesString(side, syncedRobot.getFullRobotModel()));
+            ImGui.inputTextMultiline(labels.getHidden(side.getPascalCaseName() + "RealRobotJointAngles"), tempImGuiText, 0, 60, ImGuiInputTextFlags.ReadOnly);
+
+            ImGui.text("Desired joint angles:");
+            tempImGuiText.set(buildJointAnglesString(side, desiredRobot.getDesiredFullRobotModel()));
+            ImGui.inputTextMultiline(labels.getHidden(side.getPascalCaseName() + "DesiredRobotJointAngles"), tempImGuiText, 0, 60, ImGuiInputTextFlags.ReadOnly);
+
+            if (ImGui.menuItem("Close"))
+               ImGui.closeCurrentPopup();
+            ImGui.endPopup();
+         }
+      }
+   }
+
+   private String buildJointAnglesString(RobotSide side, FullHumanoidRobotModel fullRobotModel)
+   {
+      StringBuilder jointAnglesString = new StringBuilder();
+
+      ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames();
+      int i = 0;
+      for (ArmJointName armJoint : armJointNames)
+      {
+         double q = fullRobotModel.getArmJoint(side, armJoint).getQ();
+         jointAnglesString.append(FormattingTools.getFormattedDecimal3D(q));
+
+         if (i < armJointNames.length - 1)
+         {
+            jointAnglesString.append(",");
+         }
+         if ((i - 2) % 3 == 0)
+         {
+            jointAnglesString.append("\n");
+         }
+         else
+         {
+            jointAnglesString.append(" ");
+         }
+
+         ++i;
+      }
+      return jointAnglesString.toString();
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
