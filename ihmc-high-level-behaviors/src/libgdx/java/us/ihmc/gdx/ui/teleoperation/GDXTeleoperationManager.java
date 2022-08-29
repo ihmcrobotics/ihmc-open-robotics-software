@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -84,6 +85,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private final SideDependentList<GDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
+   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
@@ -117,6 +119,18 @@ public class GDXTeleoperationManager extends ImGuiPanel
       teleoperationParameters = new GDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
       teleoperationParameters.load();
       teleoperationParameters.save();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         armHomes.put(side,
+                      new double[] {side.negateIfLeftSide(-0.493),
+                                    -0.001,
+                                    -0.498,
+                                    side.negateIfLeftSide(0.996),
+                                    side.negateIfLeftSide(0.003),
+                                    0.000,
+                                    side.negateIfLeftSide(0.007)});
+      }
 
       syncedRobot = communicationHelper.newSyncedRobot();
 
@@ -365,6 +379,20 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public void renderImGuiWidgets()
    {
       robotLowLevelMessenger.renderImGuiWidgets();
+
+      ImGui.text("Arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        armHomes.get(side));
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+      }
+
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
