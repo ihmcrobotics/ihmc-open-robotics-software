@@ -6,10 +6,8 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -78,7 +76,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final GDXChestOrientationSlider chestYawSlider;
    private final GDXDesiredRobot desiredRobot;
 
-   private final GDXHandManager handManager = new GDXHandManager();
+   private final GDXHandConfigurationManager handManager = new GDXHandConfigurationManager();
 
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");

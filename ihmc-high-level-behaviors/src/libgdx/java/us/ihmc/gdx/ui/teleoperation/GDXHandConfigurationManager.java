@@ -5,17 +5,15 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.ui.affordances.GDXWholeBodyInteractable;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
-public class GDXHandManager
+public class GDXHandConfigurationManager
 {
    private CommunicationHelper communicationHelper;
    private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
@@ -38,12 +36,6 @@ public class GDXHandManager
       {
          handConfigurationNames[i] = values[i].name();
       }
-   }
-
-   private void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
-   {
-      communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
-                                  HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
    }
 
    public void renderImGuiWidgets()
@@ -78,5 +70,11 @@ public class GDXHandManager
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
          }
       }
+   }
+
+   private void publishHandCommand(RobotSide side, HandConfiguration handDesiredConfiguration)
+   {
+      communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                  HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
    }
 }
