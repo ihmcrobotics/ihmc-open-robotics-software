@@ -256,7 +256,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       @Override
       public void update(double time)
       {
-         isOpen = currentController == HighLevelControllerName.WALKING;
+         isOpen = currentController == HighLevelControllerName.WALKING || currentController == HighLevelControllerName.CUSTOM1;
 
          if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
          {
