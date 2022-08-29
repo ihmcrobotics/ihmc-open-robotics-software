@@ -21,7 +21,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 public class GDXHandInteractable extends GDXLiveRobotPartInteractable
 {
    private final RobotSide side;
-   private ROS2SyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private GDXSpatialVectorArrows wristWrenchArrows;
 
    public static boolean collisionLinkIsHand(RobotSide side, GDXRobotCollisionLink collisionLink, FullHumanoidRobotModel fullRobotModel)

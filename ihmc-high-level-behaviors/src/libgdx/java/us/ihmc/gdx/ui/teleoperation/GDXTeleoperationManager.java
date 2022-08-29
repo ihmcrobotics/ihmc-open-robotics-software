@@ -32,7 +32,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -79,11 +78,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
 
-   private final SideDependentList<GDXLiveRobotPartInteractable> footInteractables = new SideDependentList<>();
+   private final SideDependentList<GDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
-   private boolean interactableExists;
+   private final boolean interactableExists;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -208,25 +207,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
             for (RobotSide side : RobotSide.values)
             {
-               String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
-               String footName = fullRobotModel.getFoot(side).getName();
-               if (collisionLink.getRigidBodyName().equals(footName))
+               if (GDXFootInteractable.collisionLinkIsFoot(side, collisionLink, fullRobotModel))
                {
                   if (!footInteractables.containsKey(side))
                   {
-                     GDXLiveRobotPartInteractable interactableFoot = new GDXLiveRobotPartInteractable();
-                     //               String modelFileName = robotSidePrefix + "foot.g3dj";
-                     interactableFoot.create(collisionLink,
-                                             fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
-                                             modelFileName,
-                                             baseUI.getPrimary3DPanel());
-                     interactableFoot.setOnSpacePressed(() ->
-                                                        {
-                                                           ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
-                                                                                                                                           teleoperationParameters.getTrajectoryTime(),
-                                                                                                                                           interactableFoot.getPose()));
-                                                        });
-                     footInteractables.put(side, interactableFoot);
+                     GDXFootInteractable footInteractable = new GDXFootInteractable(side, baseUI, collisionLink, robotModel, fullRobotModel);
+                     footInteractable.setOnSpacePressed(() ->
+                             ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
+                                                                                                             teleoperationParameters.getTrajectoryTime(),
+                                                                                                             footInteractable.getPose())));
+                     footInteractables.put(side, footInteractable);
                   }
                   else
                   {
@@ -330,14 +320,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
                environmentCollisionModel.calculate3DViewPick(input);
 
             pelvisInteractable.calculate3DViewPick(input);
-            for (GDXLiveRobotPartInteractable footInteractable : footInteractables)
+            for (RobotSide side : footInteractables.sides())
             {
-               footInteractable.calculate3DViewPick(input);
+               footInteractables.get(side).calculate3DViewPick(input);
             }
-            for (GDXLiveRobotPartInteractable handInteractable : handInteractables)
+            for (RobotSide side : handInteractables.sides())
             {
-               if (handInteractable != null)
-                  handInteractable.calculate3DViewPick(input);
+               handInteractables.get(side).calculate3DViewPick(input);
             }
          }
       }
