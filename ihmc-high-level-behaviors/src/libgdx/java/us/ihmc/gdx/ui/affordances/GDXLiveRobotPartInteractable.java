@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.ImGui;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -37,6 +38,7 @@ public class GDXLiveRobotPartInteractable
    private GDXReferenceFrameGraphic graphicReferenceFrameGraphic;
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean isMouseHovering;
+   private final Notification contextMenuNotification = new Notification();
 
    public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, GDX3DPanel panel3D)
    {
@@ -72,6 +74,11 @@ public class GDXLiveRobotPartInteractable
       for (GDXRobotCollisionLink collisionLink : collisionLinks)
       {
          isMouseHovering |= collisionLink.getPickSelected();
+      }
+
+      if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
+      {
+         contextMenuNotification.set();
       }
 
       boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
@@ -255,5 +262,10 @@ public class GDXLiveRobotPartInteractable
    public void addAdditionalCollisionLink(GDXRobotCollisionLink collisionLink)
    {
       collisionLinks.add(collisionLink);
+   }
+
+   public Notification getContextMenuNotification()
+   {
+      return contextMenuNotification;
    }
 }

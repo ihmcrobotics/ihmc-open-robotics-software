@@ -23,6 +23,7 @@ public class GDXHandInteractable extends GDXLiveRobotPartInteractable
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private GDXSpatialVectorArrows wristWrenchArrows;
+   private String contextMenuName;
 
    public static boolean collisionLinkIsHand(RobotSide side, GDXRobotCollisionLink collisionLink, FullHumanoidRobotModel fullRobotModel)
    {
@@ -66,6 +67,8 @@ public class GDXHandInteractable extends GDXLiveRobotPartInteractable
                                                            side.getLowerCaseName() + "WristSensor");
          }
       }
+
+      contextMenuName = side + " Hand Context Menu";
    }
 
    public void update()
@@ -94,5 +97,10 @@ public class GDXHandInteractable extends GDXLiveRobotPartInteractable
             wristWrenchArrows.getRenderables(renderables, pool);
          }
       }
+   }
+
+   public String getContextMenuName()
+   {
+      return contextMenuName;
    }
 }

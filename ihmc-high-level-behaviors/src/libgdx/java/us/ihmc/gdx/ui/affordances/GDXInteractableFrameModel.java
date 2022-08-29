@@ -5,8 +5,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImString;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,7 +35,7 @@ public class GDXInteractableFrameModel
    private boolean isMouseHovering;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private boolean queuePopupToOpen = false;
+   private final Notification contextMenuNotification = new Notification();
 
    public void create(ReferenceFrame parentFrame,
                       GDX3DPanel panel3D,
@@ -86,7 +87,7 @@ public class GDXInteractableFrameModel
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
       {
-         queuePopupToOpen = true;
+         contextMenuNotification.set();
       }
 
       selectablePose3DGizmo.process3DViewInput(input, isMouseHovering);
@@ -100,10 +101,8 @@ public class GDXInteractableFrameModel
 
    private void renderTooltipsAndContextMenu()
    {
-      if (queuePopupToOpen)
+      if (contextMenuNotification.poll())
       {
-         queuePopupToOpen = false;
-
          ImGui.openPopup(labels.get("Popup"));
       }
 
