@@ -74,6 +74,17 @@ public class WorkspaceDirectory
                                                                  putTogetherResourcePath);
    }
 
+   private WorkspaceDirectory(Class<?> classForLoading,
+                              Path workspaceDirectory,
+                              String pathNecessaryForClasspathLoading,
+                              String pathNecessaryForResourceExploring)
+   {
+      this.classForLoading = classForLoading;
+      this.workspaceDirectory = workspaceDirectory;
+      this.pathNecessaryForClasspathLoading = pathNecessaryForClasspathLoading;
+      this.pathNecessaryForResourceExploring = pathNecessaryForResourceExploring;
+   }
+
    /** If the directory is available for reading/writing using files.
     *  If not, we are running from a JAR without the resource extracted,
     *  or the working directory is wrong. */
@@ -123,5 +134,13 @@ public class WorkspaceDirectory
    public WorkspaceFile file(String subsequentPathToFile)
    {
       return new WorkspaceFile(this, subsequentPathToFile);
+   }
+
+   public WorkspaceDirectory resolve(String subdirectory)
+   {
+      return new WorkspaceDirectory(classForLoading,
+                                    workspaceDirectory,
+                                    pathNecessaryForClasspathLoading + "/" + subdirectory,
+                                    pathNecessaryForResourceExploring + "." + subdirectory);
    }
 }
