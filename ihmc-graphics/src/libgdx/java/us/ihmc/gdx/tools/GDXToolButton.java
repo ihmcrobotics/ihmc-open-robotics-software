@@ -4,7 +4,7 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 
-public class GDXQuickButton
+public class GDXToolButton
 {
    private final String buttonName;
    private ArrayList<GDXIconTexture> icons = new ArrayList<>();
@@ -12,13 +12,14 @@ public class GDXQuickButton
    private boolean togglable = false;
    private boolean depends = false;
    private int stateIndex = 0;
+   private String toolTipText = new String();
 
-   public GDXQuickButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable)
+   public GDXToolButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable)
    {
       this(buttonName,iconDirectory,iconFileName,runnable,false);
    }
 
-   public GDXQuickButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable, boolean depends)
+   public GDXToolButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable, boolean depends)
    {
       this.buttonName = buttonName;
       icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
@@ -33,12 +34,12 @@ public class GDXQuickButton
       this.depends = depends;
    }
 
-   public GDXQuickButton(String buttonName,
-                         WorkspaceDirectory iconDirectory,
-                         String iconFileName,
-                         ArrayList<Runnable> runnables,
-                         boolean togglable,
-                         boolean depends)
+   public GDXToolButton(String buttonName,
+                        WorkspaceDirectory iconDirectory,
+                        String iconFileName,
+                        ArrayList<Runnable> runnables,
+                        boolean togglable,
+                        boolean depends)
    {
       this.buttonName = buttonName;
       icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
@@ -47,12 +48,12 @@ public class GDXQuickButton
       this.depends = depends;
    }
 
-   public GDXQuickButton(String buttonName,
-                         WorkspaceDirectory iconDirectory,
-                         ArrayList<String> iconFileNames,
-                         ArrayList<Runnable> runnables,
-                         boolean togglable,
-                         boolean depends)
+   public GDXToolButton(String buttonName,
+                        WorkspaceDirectory iconDirectory,
+                        ArrayList<String> iconFileNames,
+                        ArrayList<Runnable> runnables,
+                        boolean togglable,
+                        boolean depends)
    {
       this.buttonName = buttonName;
       for (String iconFileName : iconFileNames)
@@ -109,8 +110,18 @@ public class GDXQuickButton
       return togglable;
    }
 
-   public boolean isDepends()
+   public boolean doesDepend()
    {
       return depends;
+   }
+
+   public void setToolTipText(String text)
+   {
+      toolTipText = text;
+   }
+
+   public String getToolTipText()
+   {
+      return toolTipText;
    }
 }

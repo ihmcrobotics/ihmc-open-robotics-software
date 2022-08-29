@@ -23,7 +23,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.tools.GDXQuickButton;
+import us.ihmc.gdx.tools.GDXToolButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
@@ -71,13 +71,14 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
    private final DRCRobotModel robotModel;
    private final ROS2NodeInterface ros2Node;
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
-   private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final GDXPelvisHeightSlider pelvisHeightSlider;
    private final GDXChestOrientationSlider chestPitchSlider;
    private final GDXChestOrientationSlider chestYawSlider;
    private final GDXDesiredRobot desiredRobot;
+
+   private final GDXHandManager handManager = new GDXHandManager();
 
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
@@ -189,30 +190,41 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
          baseUI.getPrimaryScene().addRenderableProvider(interactableRobot);
       }
 
+      handManager.create(communicationHelper);
+
       // Note: hot button for calibrate, open / close hand
       WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-
+      GDXToolButton button;
       // STAND PREP
       Runnable standPrepRunnable = robotLowLevelMessenger::sendStandRequest;
-      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("standPrepButton", iconDirectory, "standPrep.png", standPrepRunnable));
+      button = new GDXToolButton("standPrepButton", iconDirectory, "standPrep.png", standPrepRunnable);
+      button.setToolTipText("action: Stand prep");
+      baseUI.getPrimary3DPanel().addHotButton(button);
 
       // TOGGLING.
       ArrayList<String> fileNames = new ArrayList<>(Arrays.asList("leftToggle.jpg", "rightToggle.jpg"));
-      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("leftRightToggleButton", iconDirectory, fileNames, null, true, false));
+      button = new GDXToolButton("leftRightToggleButton", iconDirectory, fileNames, null, true, false);
+      button.setToolTipText("toggle: red - left | green - right");
+      baseUI.getPrimary3DPanel().addHotButton(button);
 
       // CALIBRATING
-
       ArrayList<Runnable> calibrateRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
                                                                              () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CALIBRATE)));
-      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true));
+      button = new GDXToolButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true);
+      button.setToolTipText("action: Calibrate");
+      baseUI.getPrimary3DPanel().addHotButton(button);
 
       // OPEN, CLOSE
       ArrayList<Runnable> openRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
                                                                         () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN)));
       ArrayList<Runnable> closeRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
                                                                          () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE)));
-      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("openGripperButton", iconDirectory, "openGripper.jpg", openRunnables, false, true));
-      baseUI.getPrimary3DPanel().addHotButton(new GDXQuickButton("closeGripperButton", iconDirectory, "closeGripper.jpg", closeRunnables, false, true));
+      button = new GDXToolButton("openGripperButton", iconDirectory, "openGripper.jpg", openRunnables, false, true);
+      button.setToolTipText("action: OPEN gripper based on toggle (left, right)");
+      baseUI.getPrimary3DPanel().addHotButton(button);
+      button = new GDXToolButton("closeGripperButton", iconDirectory, "closeGripper.jpg", closeRunnables, false, true);
+      button.setToolTipText("action: CLOSE gripper based on toggle (left, right)");
+      baseUI.getPrimary3DPanel().addHotButton(button);
    }
 
    public void update()
@@ -287,36 +299,7 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       ImGui.separator();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.image(handIcons.get(side).getTexture().getTextureObjectHandle(), 22.0f,22.0f);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Calibrate", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, HandConfiguration.CALIBRATE);
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Open", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, HandConfiguration.OPEN);
-         }
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Close", side.getCamelCaseName())))
-         {
-            publishHandCommand(side, HandConfiguration.CLOSE);
-         }
-         ImGui.sameLine();
-         ImGui.pushItemWidth(100.0f);
-         ImGui.combo(labels.get("Grip", side.getCamelCaseName()), handConfigurationIndices.get(side), handConfigurationNames);
-         ImGui.popItemWidth();
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Send", side.getCamelCaseName())))
-         {
-            HandDesiredConfigurationMessage message
-                  = HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.values[handConfigurationIndices.get(side).get()]);
-            communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
-         }
-      }
+      handManager.renderImGuiWidgets();
 
       desiredRobot.renderImGuiWidgets();
       ImGui.sameLine();

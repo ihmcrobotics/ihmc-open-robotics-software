@@ -25,43 +25,19 @@ import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.tools.GDXQuickButton;
+import us.ihmc.gdx.tools.GDXToolButton;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 import java.util.function.Consumer;
 
 public class GDX3DPanel
 {
-   private class Pair<F,S>
-   {
-      private final F first;
-      private final S second;
-
-      public Pair(F first, S second)
-      {
-         this.first  = first;
-         this.second = second;
-      }
-
-      public F getFirst()
-      {
-         return first;
-      }
-
-      public S getSecond()
-      {
-         return second;
-      }
-   }
-
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private final String panelName;
    private final int antiAliasing;
@@ -106,8 +82,10 @@ public class GDX3DPanel
    private GDXIconTexture continueIcon;
    private GDXIconTexture shutdownIcon;
    private final boolean hotButtonTesting = true;
-   private ArrayList<GDXQuickButton> buttons = new ArrayList<>();
+   private ArrayList<GDXToolButton> buttons = new ArrayList<>();
    private ArrayList<GDXIconTexture> iconTextures;
+   // FIXME: Need proper (generalized) way to implement toggling later.
+   private int stateIndex = 0;
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -262,19 +240,18 @@ public class GDX3DPanel
             float currentWindowSize = sizeX;
             float offsetX = sizeX * 0.04476f;
             float offsetY = 12.0f;
-//            float panelWid = iconSize * numButtons + gap * (numButtons - 1) + 2 * offsetX;
-            float panelWid = iconSize * numButtons + gap * numButtons;
+//            float panelWidth = iconSize * numButtons + gap * (numButtons - 1) + 2 * offsetX;
+            float panelWidth = iconSize * numButtons + gap * numButtons;
             float panelHei = iconSize + 2 * offsetY;
             boolean oneLine = true;
             float widthLimit = sizeX * 0.9f;
-            if (panelWid > widthLimit)
+            if (panelWidth > widthLimit)
             {
                oneLine = false;
-               panelWid = widthLimit;
-               int numLine = (int)(widthLimit / panelWid);
+               panelWidth = widthLimit;
+               int numLine = (int)(widthLimit / panelWidth);
                panelHei =  (numLine + 1) *  panelHei;
             }
-
 
             // with tab bar
 //            int windowFlags = ImGuiWindowFlags.None;
@@ -283,19 +260,15 @@ public class GDX3DPanel
             // no tab bar
             int windowFlags =  ImGuiWindowFlags.NoTitleBar;
 
-            ImGui.setNextWindowSize(panelWid, panelHei);
+            ImGui.setNextWindowSize(panelWidth, panelHei);
             float centerX = posX + sizeX / 2;
-            float startX = centerX - panelWid / 2;
+            float startX = centerX - panelWidth / 2;
             ImGui.setNextWindowPos(startX, posY + 15.0f);
             ImGui.begin("Testing . . .", isShowing, windowFlags);
 
-            int state = 0;
-            ArrayList<RobotSide> sides = new ArrayList<>(Arrays.asList(RobotSide.LEFT, RobotSide.RIGHT));
-
-            int stateIndex = 0;
             for (int i = 0; i < buttons.size(); ++i)
             {
-               GDXQuickButton button = buttons.get(i);
+               GDXToolButton button = buttons.get(i);
 
                // button clicked.
                if (ImGui.imageButton(button.getIcon().getTexture().getTextureObjectHandle(), iconSize, iconSize))
@@ -305,11 +278,16 @@ public class GDX3DPanel
                   {
                      stateIndex = button.getStateIndex();
                   }
-                  if (button.isDepends())
+                  if (button.doesDepend())
                   {
                      button.setState(stateIndex);
                   }
                   button.execute();
+               }
+
+               if (!button.getToolTipText().isEmpty())
+               {
+                  ImGuiTools.previousWidgetTooltip(button.getToolTipText());
                }
                ImGui.sameLine();
             }
@@ -414,7 +392,7 @@ public class GDX3DPanel
    }
 
    // NOTE: hot button add feature from anywhere in other classes where baseUI (GDXImGuiBasedUI) is accessible.
-   public void addHotButton(GDXQuickButton quickButton)
+   public void addHotButton(GDXToolButton quickButton)
    {
       buttons.add(quickButton);
    }
