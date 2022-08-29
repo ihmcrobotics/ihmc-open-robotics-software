@@ -15,11 +15,9 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.tools.GDXToolButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
@@ -32,7 +30,6 @@ import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -46,36 +43,29 @@ import java.util.List;
  */
 public class GDXTeleoperationManager extends ImGuiPanel implements RenderableProvider
 {
-   private final CommunicationHelper communicationHelper;
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
+                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
+   private final ROS2NodeInterface ros2Node;
+   private final CommunicationHelper communicationHelper;
+   private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ImBoolean showGraphics = new ImBoolean(true);
+   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
+   private final GDXTeleoperationParameters teleoperationParameters;
+   private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
+   private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXFootstepPlanning footstepPlanning;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
-   private GDXWholeBodyInteractable interactableRobot;
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
-   // TODO: for interactable footings from stepPlan >>
    private final GDXInteractableFootstepPlan interactableFootstepPlan = new GDXInteractableFootstepPlan();
-   // <<
-   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
-   private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
-   private final GDXTeleoperationParameters teleoperationParameters;
-   private final DRCRobotModel robotModel;
-   private final ROS2NodeInterface ros2Node;
-   private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
-   private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
-   private final ImBoolean showGraphics = new ImBoolean(true);
    private final GDXPelvisHeightSlider pelvisHeightSlider;
    private final GDXChestOrientationSlider chestPitchSlider;
    private final GDXChestOrientationSlider chestYawSlider;
    private final GDXDesiredRobot desiredRobot;
-
    private final GDXHandConfigurationManager handManager = new GDXHandConfigurationManager();
-
-   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-   private GDXIconTexture locationFlagIcon;
+   private GDXWholeBodyInteractable interactableRobot;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -124,12 +114,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
       });
       footstepPlanning = new GDXFootstepPlanning(robotModel, syncedRobot);
 
-      HandConfiguration[] values = HandConfiguration.values;
-      for (int i = 0; i < values.length; i++)
-      {
-         handConfigurationNames[i] = values[i].name();
-      }
-
       if (robotSelfCollisionModel != null)
       {
          ROS2ControllerHelper ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
@@ -146,11 +130,10 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      locationFlagIcon = new GDXIconTexture(iconDirectory.file("locationFlag.png"));
-
       desiredRobot.create();
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
+      ballAndArrowMidFeetPosePlacement.setupIcon(iconDirectory);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
                                              FootstepPlannerParameterKeys.keys,
@@ -241,8 +224,6 @@ public class GDXTeleoperationManager extends ImGuiPanel implements RenderablePro
 
       manualFootstepPlacement.renderImGuiWidgets();
 
-      ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
-      ImGui.sameLine();
       ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
 
       ImGui.text("Walk path control ring planner:");

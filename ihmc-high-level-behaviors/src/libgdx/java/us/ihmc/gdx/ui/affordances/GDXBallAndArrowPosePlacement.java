@@ -25,10 +25,12 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
+import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.function.Consumer;
 
@@ -48,6 +50,7 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private Consumer<Pose3D> placedPoseConsumer;
    private final Notification placedNotification = new Notification();
+   private GDXIconTexture locationFlagIcon;
 
    public void create(Color color)
    {
@@ -82,6 +85,11 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
       });
 
       clear();
+   }
+
+   public void setupIcon(WorkspaceDirectory iconDirectory)
+   {
+      locationFlagIcon = new GDXIconTexture(iconDirectory.file("locationFlag.png"));
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -162,6 +170,11 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
 
    public void renderPlaceGoalButton()
    {
+      if (locationFlagIcon != null)
+      {
+         ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
+         ImGui.sameLine();
+      }
       boolean pushedFlags = false;
       if (placingGoal)
       {
