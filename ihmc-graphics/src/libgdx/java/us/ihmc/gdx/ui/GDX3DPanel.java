@@ -7,10 +7,10 @@ import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -24,11 +24,9 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.tools.GDXToolButton;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -69,23 +67,7 @@ public class GDX3DPanel
    private float windowDrawMaxX;
    private float windowDrawMaxY;
 
-
-   // NOTE: FOR ICONS (NON-BUTTON)
-   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-   private final float iconSize = 35.0f;
-   // NOTE: ICON TEXTURES
-   private GDXIconTexture homePoseIcon;
-   private GDXIconTexture standPrepIcon;
-   private GDXIconTexture abortIcon;
-   private GDXIconTexture pauseIcon;
-   private GDXIconTexture continueIcon;
-   private GDXIconTexture shutdownIcon;
-   private final boolean hotButtonTesting = true;
-   private ArrayList<GDXToolButton> buttons = new ArrayList<>();
-   private ArrayList<GDXIconTexture> iconTextures;
-   // FIXME: Need proper (generalized) way to implement toggling later.
-   private int stateIndex = 0;
+   private GDXToolBar toolbar = new GDXToolBar();
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -116,12 +98,6 @@ public class GDX3DPanel
          scene.addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
-
-      if (hotButtonTesting)
-      {
-//         addHotButton(new GDXQuickButton("homePoseButton",iconDirectory, "homePose.png", null));
-      }
-
    }
 
    public void render()
@@ -231,68 +207,8 @@ public class GDX3DPanel
 
          ImGui.end();
 
-
          // NOTE: Make Hot key button panel here.
-         if (hotButtonTesting && buttons.size()>0)
-         {
-            int numButtons = buttons.size();
-            float gap = 17.7f;
-            float currentWindowSize = sizeX;
-            float offsetX = sizeX * 0.04476f;
-            float offsetY = 12.0f;
-//            float panelWidth = iconSize * numButtons + gap * (numButtons - 1) + 2 * offsetX;
-            float panelWidth = iconSize * numButtons + gap * numButtons;
-            float panelHei = iconSize + 2 * offsetY;
-            boolean oneLine = true;
-            float widthLimit = sizeX * 0.9f;
-            if (panelWidth > widthLimit)
-            {
-               oneLine = false;
-               panelWidth = widthLimit;
-               int numLine = (int)(widthLimit / panelWidth);
-               panelHei =  (numLine + 1) *  panelHei;
-            }
-
-            // with tab bar
-//            int windowFlags = ImGuiWindowFlags.None;
-//            panelHei += ImGuiTools.TAB_BAR_HEIGHT;
-
-            // no tab bar
-            int windowFlags =  ImGuiWindowFlags.NoTitleBar;
-
-            ImGui.setNextWindowSize(panelWidth, panelHei);
-            float centerX = posX + sizeX / 2;
-            float startX = centerX - panelWidth / 2;
-            ImGui.setNextWindowPos(startX, posY + 15.0f);
-            ImGui.begin("Testing . . .", isShowing, windowFlags);
-
-            for (int i = 0; i < buttons.size(); ++i)
-            {
-               GDXToolButton button = buttons.get(i);
-
-               // button clicked.
-               if (ImGui.imageButton(button.getIcon().getTexture().getTextureObjectHandle(), iconSize, iconSize))
-               {
-                  button.isClicked();
-                  if (button.isTogglable())
-                  {
-                     stateIndex = button.getStateIndex();
-                  }
-                  if (button.doesDepend())
-                  {
-                     button.setState(stateIndex);
-                  }
-                  button.execute();
-               }
-
-               if (!button.getToolTipText().isEmpty())
-               {
-                  ImGuiTools.previousWidgetTooltip(button.getToolTipText());
-               }
-               ImGui.sameLine();
-            }
-            ImGui.end();
-         }
+         toolbar.render(sizeX, posX,posY);
       }
    }
 
@@ -394,7 +310,7 @@ public class GDX3DPanel
    // NOTE: hot button add feature from anywhere in other classes where baseUI (GDXImGuiBasedUI) is accessible.
    public void addHotButton(GDXToolButton quickButton)
    {
-      buttons.add(quickButton);
+      toolbar.addButton(quickButton);
    }
 
    public void setAddFocusSphere(boolean addFocusSphere)
@@ -486,4 +402,6 @@ public class GDX3DPanel
    {
       return windowDrawMaxY;
    }
+
+
 }
