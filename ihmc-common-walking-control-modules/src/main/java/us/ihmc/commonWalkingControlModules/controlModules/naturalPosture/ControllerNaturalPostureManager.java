@@ -164,7 +164,7 @@ public class ControllerNaturalPostureManager
 
       double qpWeight = 5.0; //5.0;
       npQPWeightZ.set(1);
-      npQPWeightY.set(.01); //1
+      npQPWeightY.set(.01); //1   // You need to set weight back to 1 if you want to do the arm raise experiment; and also don't do null space projection 
       npQPWeightX.set(.01); //1
 
       npKpYaw.set(10.0);   // 150 

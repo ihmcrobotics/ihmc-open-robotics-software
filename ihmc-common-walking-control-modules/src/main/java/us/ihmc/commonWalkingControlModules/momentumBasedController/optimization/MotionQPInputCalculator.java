@@ -443,8 +443,9 @@ public class MotionQPInputCalculator
          
          projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
-         // Testing
-//         if (weightMatrix.get(0, 0) > 1) {
+//         // Testing
+////       if (weightMatrix.get(0, 0) > 1) {
+//         if (weightMatrix.get(0, 0) < 0.05) {
 //            recordTaskJacobian(qpInputToPack.taskJacobian);
 //         }
       }
