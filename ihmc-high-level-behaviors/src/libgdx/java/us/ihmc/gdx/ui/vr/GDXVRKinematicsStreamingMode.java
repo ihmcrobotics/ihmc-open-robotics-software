@@ -67,6 +67,7 @@ public class GDXVRKinematicsStreamingMode
    private final SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
+   private boolean togglingStreamToController = false;
    private final Throttler messageThrottler = new Throttler();
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
@@ -133,19 +134,28 @@ public class GDXVRKinematicsStreamingMode
 
    public void processVRInput(GDXVRContext vrContext)
    {
+      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+      {
+         InputDigitalActionData aButton = controller.getAButtonActionData();
+         if (aButton.bChanged() && !aButton.bState())
+         {
+            streamToController = !streamToController;
+         }
+      });
+
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+         InputDigitalActionData aButton = controller.getAButtonActionData();
+         if (aButton.bChanged() && !aButton.bState())
+         {
+            setEnabled(!enabled.get());
+         }
+      });
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            if (side == RobotSide.LEFT)
-            {
-               InputDigitalActionData aButton = controller.getAButtonActionData();
-               if (aButton.bChanged() && !aButton.bState())
-               {
-                  streamToController = !streamToController;
-               }
-            }
-
             float currentGripX = controller.getGripActionData().x();
 //            if (currentGripX)
             {
@@ -196,6 +206,16 @@ public class GDXVRKinematicsStreamingMode
 //                                                                                               ReferenceFrame.getWorldFrame()));
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
+
+//         if (streamToController)
+//         {
+//            togglingStreamToController = false;
+//         }
+//         else
+//         {
+//            togglingStreamToController = !togglingStreamToController;
+//         }
+
          toolboxInputMessage.setStreamToController(streamToController);
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
@@ -233,6 +253,9 @@ public class GDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Toggle IK tracking enabled: Right A button");
+      ImGui.text("Toggle stream to controller: Left A button");
+
       kinematicsStreamingToolboxProcess.renderImGuiWidgets();
       ghostRobotGraphic.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
