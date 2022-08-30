@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import imgui.ImGui;
 import org.lwjgl.openvr.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -129,6 +130,13 @@ public class GDXVRHandPlacedFootstepMode
             });
          }
       }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      ImGui.text("Footstep placement: Hold and release respective trigger");
+      ImGui.text("Clear footsteps: Left B button");
+      ImGui.text("Walk: Right A button");
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

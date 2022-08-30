@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -27,7 +27,7 @@ public class GDXVRModeManager
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private GDXVRMode mode = GDXVRMode.INPUTS_DISABLED;
-   private boolean headsetIsConnected;
+   private boolean renderPanel;
 
    public void create(GDXImGuiBasedUI baseUI,
                       DRCRobotModel robotModel,
@@ -51,7 +51,7 @@ public class GDXVRModeManager
 
    public void processVRInput(GDXVRContext vrContext)
    {
-      headsetIsConnected = vrContext.getHeadset().isConnected();
+      renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
@@ -77,6 +77,9 @@ public class GDXVRModeManager
 
    private void renderImGuiWidgets()
    {
+      ImGui.text("Teleport: Right B button");
+      ImGui.text("Adjust user Z height: Right touchpad up/down");
+      ImGui.text("ImGui panels: Point and use right trigger to click and drag");
       if (ImGui.radioButton(labels.get("Inputs disabled"), mode == GDXVRMode.INPUTS_DISABLED))
       {
          mode = GDXVRMode.INPUTS_DISABLED;
@@ -88,30 +91,45 @@ public class GDXVRModeManager
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = GDXVRMode.WHOLE_BODY_IK_STREAMING;
+         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
+            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
-//      if (ImGui.radioButton(labels.get("Joystick"), mode == 2))
-//      {
-//         mode = 2;
-//      }
+      //      if (ImGui.radioButton(labels.get("Joystick"), mode == 2))
+      //      {
+      //         mode = 2;
+      //      }
 
-      kinematicsStreamingMode.renderImGuiWidgets();
-      imgui.ImGui.text("VR Controller Input Mappings:");
-      imgui.ImGui.text("Teleport - Right controller B button");
-      imgui.ImGui.text("Adjust VR Z height - Slide up and down on the right controller touchpad");
-      imgui.ImGui.text("Left/Right Triggers: Hold and release to place a footstep");
-      imgui.ImGui.text("Clear footsteps - Left controller B button");
-      imgui.ImGui.text("Walk - Right controller A button");
-      imgui.ImGui.text("Move ImGui panel - Grip right controller and drag the panel around");
-      imgui.ImGui.text("Click buttons on the ImGui panel - Right controller trigger click");
+      switch (mode)
+      {
+         case FOOTSTEP_PLACEMENT ->
+         {
+            handPlacedFootstepMode.renderImGuiWidgets();
+         }
+         case WHOLE_BODY_IK_STREAMING ->
+         {
+            kinematicsStreamingMode.renderImGuiWidgets();
+         }
+      }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      handPlacedFootstepMode.getRenderables(renderables, pool);
-      kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
+      switch (mode)
+      {
+         case FOOTSTEP_PLACEMENT ->
+         {
+            handPlacedFootstepMode.getRenderables(renderables, pool);
+         }
+         case WHOLE_BODY_IK_STREAMING ->
+         {
+            kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
+         }
+      }
 
-      if (headsetIsConnected)
+      if (renderPanel)
+      {
          leftHandPanel.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
