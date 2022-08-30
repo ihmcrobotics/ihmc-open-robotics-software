@@ -82,11 +82,11 @@ public class GDXVRModeManager
       {
          mode = GDXVRMode.INPUTS_DISABLED;
       }
-      if (ImGui.radioButton(labels.get("Rough Terrain"), mode == GDXVRMode.FOOTSTEP_PLACEMENT))
+      if (ImGui.radioButton(labels.get("Footstep placement"), mode == GDXVRMode.FOOTSTEP_PLACEMENT))
       {
          mode = GDXVRMode.FOOTSTEP_PLACEMENT;
       }
-      if (ImGui.radioButton(labels.get("Manipulation"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
+      if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = GDXVRMode.WHOLE_BODY_IK_STREAMING;
       }
