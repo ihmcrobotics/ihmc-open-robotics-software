@@ -51,7 +51,7 @@ public class NaturalPosturePrivilegedManager
    private final YoDouble pPoseElbowKdFactor = new YoDouble("pPoseElbowKdFactor", registry);
 
    private final YoDouble npPoseSpineRollPitchKp = new YoDouble("npPoseSpineRollPitchKp", registry);
-   
+
    private final YoDouble pPoseSpineRollPitchKp = new YoDouble("pPoseSpineRollPitchKp", registry);
    private final YoDouble pPoseSpineRollPitchKdFactor = new YoDouble("pPoseSpineRollPitchKdFactor", registry);
 
@@ -102,7 +102,7 @@ public class NaturalPosturePrivilegedManager
       if (useSpineRollPitchJointCommands.getBooleanValue())
       {
          npPoseSpineRollPitchKp.set(100);
-         
+
          pPoseSpinePitchGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
          pPoseSpineRollGains.setKp(npPoseSpineRollPitchKp.getDoubleValue()); //25
          pPoseSpinePitchGains.setZeta(0.7);
@@ -113,7 +113,7 @@ public class NaturalPosturePrivilegedManager
 
       pPoseSpineRollPitchKp.set(50.0);
       pPoseSpineRollPitchKdFactor.set(0.15);
-      
+
       pPoseSpineYawKp.set(300.0);
       pPoseSpineYawKdFactor.set(0.15);
 
@@ -246,11 +246,11 @@ public class NaturalPosturePrivilegedManager
          //                                                            0.0,
          //                                                            pPoseHipKp.getDoubleValue(),
          //                                                            pPoseHipKdFactor.getDoubleValue() * pPoseHipKp.getDoubleValue());
-         //         createAndAddJointPrivilegedConfigurationParameters(side,
-         //                                                            LegJointName.KNEE_PITCH,
-         //                                                            0.5,
-         //                                                            pPoseKneeKp.getDoubleValue(),
-         //                                                            pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
+         createAndAddJointPrivilegedConfigurationParameters(side,
+                                                            LegJointName.KNEE_PITCH,
+                                                            0.5,
+                                                            pPoseKneeKp.getDoubleValue(),
+                                                            pPoseKneeKdFactor.getDoubleValue() * pPoseKneeKp.getDoubleValue());
          createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_ROLL, 0.0, 4.0, 0.6);
          createAndAddJointPrivilegedConfigurationParameters(side, LegJointName.ANKLE_PITCH, 0.0, 4.0, 0.6);
       }
