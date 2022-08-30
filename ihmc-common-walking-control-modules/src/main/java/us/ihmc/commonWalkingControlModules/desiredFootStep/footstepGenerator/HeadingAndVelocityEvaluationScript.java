@@ -48,8 +48,8 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    public enum EvaluationEvent
    {
-      STEP_IN_PLACE(2.0),
-      GO_TO_CRUISE_STRAIGHT(5.0), // 300 //(6.0),
+      STEP_IN_PLACE(0.0),
+      GO_TO_CRUISE_STRAIGHT(12.0), // 300 //(6.0),
       TURN_180_CRUISE(8.0),
       SPEED_UP_TO_MAX_STRAIGHT(4.0),
       SLOW_DOWN_TO_ZERO(4.0),
@@ -113,7 +113,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private List<EventTask> createCompleteEventList()
    {
       return Arrays.asList(createStepInPlace(), 
-                           createGoToCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
+                           createGoToCruiseVelocity(),createGoToNegativeCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
                            createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(),
                            createDiagonallyRight45(), createSlowDownToZero(), createDiagonallyLeft45(), createSlowDownToZero(), createWaveCruise(),
                            createSlowDownToZero(), createTurnInPlace180(), createChangeHeadingWalkingStraight(), createSlowDownToZero());
@@ -206,6 +206,11 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private EventTask createGoToCruiseVelocity()
    {
       return createConstantVelocityEvent(EvaluationEvent.GO_TO_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(), 0.0);
+   }
+
+   private EventTask createGoToNegativeCruiseVelocity()
+   {
+      return createConstantVelocityEvent(EvaluationEvent.GO_TO_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue(), 0.0);
    }
 
    private EventTask createTurn180Cruise()
