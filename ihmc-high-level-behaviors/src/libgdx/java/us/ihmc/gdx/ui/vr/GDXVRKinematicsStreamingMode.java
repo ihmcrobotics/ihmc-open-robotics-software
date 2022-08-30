@@ -73,7 +73,7 @@ public class GDXVRKinematicsStreamingMode
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
-      kinematicsStreamingToolboxProcess = new KinematicsStreamingToolboxProcess(robotModel, initialConfiguration);
+      kinematicsStreamingToolboxProcess = new KinematicsStreamingToolboxProcess(robotModel, initialConfiguration, false);
    }
 
    public void create(GDXVRContext vrContext)
