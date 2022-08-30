@@ -7,19 +7,26 @@ public class RestartableJavaProcess extends RestartableMissionControlProcess
 {
    private final JavaProcessSpawner spawner;
    private final Class<?> mainClass;
+   private String[] javaArgs;
    private Process process;
    private int destroyCount = 0;
 
    public RestartableJavaProcess(Class<?> mainClass)
    {
+      this(mainClass, null);
+   }
+
+   public RestartableJavaProcess(Class<?> mainClass, String[] javaArgs)
+   {
       this.mainClass = mainClass;
+      this.javaArgs = javaArgs;
       spawner = new JavaProcessSpawner(true, true);
    }
 
    @Override
    protected void startInternal()
    {
-      process = spawner.spawn(mainClass);
+      process = spawner.spawn(mainClass, javaArgs, null);
       destroyCount = 0;
    }
 
