@@ -71,7 +71,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       super("Fusion View");
       l515Frame = referenceFrames.getSteppingCameraFrame();
       ousterFrame = referenceFrames.getObjectDetectionCameraFrame();
-      zed2Frame = referenceFrames.getHeadZED2CameraFrame();
+      zed2Frame = referenceFrames.getExperimentalCameraFrame();
    }
 
    @Override

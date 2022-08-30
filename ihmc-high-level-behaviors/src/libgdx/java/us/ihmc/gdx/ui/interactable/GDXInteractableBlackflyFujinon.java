@@ -1,8 +1,10 @@
 package us.ihmc.gdx.ui.interactable;
 
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDX3DPanel;
@@ -29,13 +31,13 @@ public class GDXInteractableBlackflyFujinon
 
    private void create(GDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
-      GDXModelInstance sensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj"));
+      GDXModelInstance sensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/blackflyFujinon/BlackflyFujinon.g3dj"));
       interactableFrameModel.create(referenceFrameToRepresent, transformToParentToModify, panel3D, sensorModel, this::calculateClosestCollision);
    }
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
    {
-      cylinderIntersection.setup(0.0734, 0.04, -0.0372, interactableFrameModel.getReferenceFrame().getTransformToWorldFrame());
+      cylinderIntersection.setup(0.08, 0.03, new Point3D(-0.03, 0.0, 0.0), Axis3D.X, interactableFrameModel.getReferenceFrame());
       return cylinderIntersection.intersect(mousePickRay);
    }
 
