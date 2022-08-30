@@ -67,7 +67,6 @@ public class GDXVRKinematicsStreamingMode
    private final SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
-   private boolean togglingStreamToController = false;
    private final Throttler messageThrottler = new Throttler();
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
@@ -206,15 +205,6 @@ public class GDXVRKinematicsStreamingMode
 //                                                                                               ReferenceFrame.getWorldFrame()));
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
-
-//         if (streamToController)
-//         {
-//            togglingStreamToController = false;
-//         }
-//         else
-//         {
-//            togglingStreamToController = !togglingStreamToController;
-//         }
 
          toolboxInputMessage.setStreamToController(streamToController);
          toolboxInputMessage.setTimestamp(System.nanoTime());
