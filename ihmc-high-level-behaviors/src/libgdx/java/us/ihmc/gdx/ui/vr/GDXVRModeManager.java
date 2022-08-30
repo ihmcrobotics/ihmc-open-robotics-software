@@ -12,10 +12,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Map;
 
 /**
  * TODO: Figure out how to incorporate this class with things better.
@@ -32,13 +31,13 @@ public class GDXVRModeManager
 
    public void create(GDXImGuiBasedUI baseUI,
                       DRCRobotModel robotModel,
-                      Map<String, Double> initialConfiguration,
-                      ROS2ControllerHelper controllerHelper)
+                      ROS2ControllerHelper controllerHelper,
+                      RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       handPlacedFootstepMode = new GDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(robotModel, controllerHelper);
 
-      kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(robotModel, initialConfiguration, controllerHelper);
+      kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(robotModel, controllerHelper, kinematicsStreamingToolboxProcess);
       kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);

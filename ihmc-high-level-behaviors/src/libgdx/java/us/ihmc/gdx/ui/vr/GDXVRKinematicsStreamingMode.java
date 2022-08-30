@@ -22,7 +22,8 @@ import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
-import us.ihmc.gdx.ui.missionControl.processes.KinematicsStreamingToolboxProcess;
+import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
+import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.log.LogTools;
@@ -40,13 +41,11 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
-import java.util.Map;
-
 public class GDXVRKinematicsStreamingMode
 {
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final KinematicsStreamingToolboxProcess kinematicsStreamingToolboxProcess;
+   private final RestartableJavaProcess kinematicsStreamingToolboxProcess;
    private GDXMultiBodyGraphic ghostRobotGraphic;
    private FullHumanoidRobotModel ghostFullRobotModel;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
@@ -68,12 +67,15 @@ public class GDXVRKinematicsStreamingMode
    private final SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
+   private final Throttler messageThrottler = new Throttler();
 
-   public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, Map<String, Double> initialConfiguration, ROS2ControllerHelper ros2ControllerHelper)
+   public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
+                                       ROS2ControllerHelper ros2ControllerHelper,
+                                       RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
-      kinematicsStreamingToolboxProcess = new KinematicsStreamingToolboxProcess(robotModel, initialConfiguration, false);
+      this.kinematicsStreamingToolboxProcess = kinematicsStreamingToolboxProcess;
    }
 
    public void create(GDXVRContext vrContext)
@@ -209,7 +211,8 @@ public class GDXVRKinematicsStreamingMode
          statusFrequencyPlot.recordEvent();
          if (latestStatus.getJointNameHash() == -1)
          {
-            if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD)
+            if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD
+             && messageThrottler.run(1.0))
                LogTools.warn("Status update: Toolbox failed initialization, missing RobotConfigurationData.");
             else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
                LogTools.info("Status update: Toolbox initialized successfully.");
@@ -324,7 +327,7 @@ public class GDXVRKinematicsStreamingMode
       }
    }
 
-   public KinematicsStreamingToolboxProcess getKinematicsStreamingToolboxProcess()
+   public RestartableMissionControlProcess getKinematicsStreamingToolboxProcess()
    {
       return kinematicsStreamingToolboxProcess;
    }
