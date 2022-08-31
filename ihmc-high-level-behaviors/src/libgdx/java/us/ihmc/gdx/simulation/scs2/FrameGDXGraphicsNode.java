@@ -62,4 +62,9 @@ public class FrameGDXGraphicsNode
          part.dispose();
       }
    }
+
+   public void scale(float x, float y ,float z)
+   {
+      coordinateFrame.transform.scale(x, y, z);
+   }
 }

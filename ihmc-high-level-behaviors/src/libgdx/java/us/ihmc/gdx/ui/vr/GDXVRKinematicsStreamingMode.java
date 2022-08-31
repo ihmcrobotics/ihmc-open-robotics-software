@@ -14,6 +14,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -26,6 +27,8 @@ import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -68,6 +71,9 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
+
+   private HandConfiguration leftHandConfiguration = HandConfiguration.CLOSE;
+   private HandConfiguration rightHandConfiguration = HandConfiguration.CLOSE;
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -141,6 +147,14 @@ public class GDXVRKinematicsStreamingMode
          {
             streamToController = !streamToController;
          }
+
+         // NOTE: Implement hand open close for controller trigger button.
+         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+         {
+            sendHandCommand(RobotSide.LEFT, leftHandConfiguration);
+            leftHandConfiguration = negateHandConfiguration(leftHandConfiguration);
+         }
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -149,6 +163,14 @@ public class GDXVRKinematicsStreamingMode
          if (aButton.bChanged() && !aButton.bState())
          {
             setEnabled(!enabled.get());
+         }
+
+         // NOTE: Implement hand open close for controller trigger button.
+         InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
+         if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
+         {
+            sendHandCommand(RobotSide.RIGHT, rightHandConfiguration);
+            rightHandConfiguration = negateHandConfiguration(rightHandConfiguration);
          }
       });
 
@@ -339,6 +361,17 @@ public class GDXVRKinematicsStreamingMode
       {
          controllerFrameGraphics.get(side).dispose();
       }
+   }
+
+   public void sendHandCommand(RobotSide robotSide, HandConfiguration desiredHandConfiguration)
+   {
+      ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                   HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, desiredHandConfiguration));
+   }
+
+   public HandConfiguration negateHandConfiguration(HandConfiguration handConfiguration)
+   {
+      return handConfiguration == HandConfiguration.CLOSE ? HandConfiguration.OPEN : HandConfiguration.CLOSE;
    }
 
    public RestartableMissionControlProcess getKinematicsStreamingToolboxProcess()

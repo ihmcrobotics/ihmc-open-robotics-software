@@ -205,4 +205,12 @@ public class GDXRigidBody implements RigidBodyBasics
    {
       return SubtreeStreams.from(GDXRigidBody.class, this);
    }
+
+   public void scale(float x, float y, float z)
+   {
+      if (visualGraphicsNode != null)
+         visualGraphicsNode.scale(x, y, z);
+      if (collisionGraphicsNode != null)
+         collisionGraphicsNode.scale(x, y, z);
+   }
 }
