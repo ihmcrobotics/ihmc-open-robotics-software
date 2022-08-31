@@ -32,6 +32,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -81,6 +82,9 @@ public class ControllerAPIDefinition
       commands.add(StepConstraintRegionCommand.class);
       commands.add(StepConstraintsListCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
+
+      /** Commands supported by the fast-walking controller, not in this repo */
+      commands.add(DirectionalControlInputCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(MultiContactTrajectoryCommand.class);
