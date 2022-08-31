@@ -1,13 +1,10 @@
 package us.ihmc.gdx.perception;
 
-import com.badlogic.gdx.math.Vector3;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -25,7 +22,6 @@ public class GDXARDemo
    private ImGuiGDXGlobalVisualizersPanel globalVisualizersPanel;
    private GDX3DPanel arPanel;
    private GDX3DSituatedImagePanel situatedImage3DPanel;
-   private final RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
 
    public GDXARDemo()
    {
@@ -92,17 +88,7 @@ public class GDXARDemo
 
             highLevelDepthSensorSimulator.getLowLevelSimulator().getCamera().update();
 
-            // Counter clockwise order
-            // Draw so thumb faces away and index right
-            Vector3[] planePoints = highLevelDepthSensorSimulator.getLowLevelSimulator().getCamera().frustum.planePoints;
-            Vector3 topLeftPosition = planePoints[7];
-            Vector3 bottomLeftPosition = planePoints[4];
-            Vector3 bottomRightPosition = planePoints[5];
-            Vector3 topRightPosition = planePoints[6];
-            Vector3[] cornerPoints = new Vector3[] {topLeftPosition, bottomLeftPosition, bottomRightPosition, topRightPosition};
-
             situatedImage3DPanel = new GDX3DSituatedImagePanel();
-            situatedImage3DPanel.create(highLevelDepthSensorSimulator.getLowLevelSimulator().getFrameBufferColorTexture(), cornerPoints);
 
             baseUI.getPrimaryScene().addRenderableProvider(situatedImage3DPanel::getRenderables, GDXSceneLevel.VIRTUAL);
 
@@ -122,14 +108,17 @@ public class GDXARDemo
          @Override
          public void render()
          {
+            boolean flipY = true;
+            situatedImage3DPanel.create(highLevelDepthSensorSimulator.getLowLevelSimulator().getFrameBufferColorTexture(),
+                                        highLevelDepthSensorSimulator.getLowLevelSimulator().getCamera().frustum,
+                                        highLevelDepthSensorSimulator.getSensorFrame(),
+                                        flipY);
+
             arPanel.getCamera3D().setPose(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
             globalVisualizersPanel.update();
 
-            rigidBodyTransform.set(highLevelDepthSensorSimulator.getSensorFrame().getTransformToWorldFrame());
-            rigidBodyTransform.appendYawRotation(-Math.PI / 2.0);
-            rigidBodyTransform.appendRollRotation(Math.PI / 2.0); // TODO: Why are these needed?
-            GDXTools.toGDX(rigidBodyTransform, situatedImage3DPanel.getModelInstance().transform);
+            situatedImage3DPanel.setPoseToReferenceFrame(highLevelDepthSensorSimulator.getSensorFrame());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
