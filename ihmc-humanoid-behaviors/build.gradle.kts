@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.thoughtworks.xstream:xstream:1.4.7")
+   api("com.thoughtworks.xstream:xstream:1.4.19")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.georegression:georegression:0.22")
