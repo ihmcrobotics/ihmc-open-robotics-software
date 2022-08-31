@@ -8,6 +8,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
@@ -30,6 +31,7 @@ public class GDXVRModeManager
    private GDXVRMode mode = GDXVRMode.INPUTS_DISABLED;
    private boolean renderPanel;
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
+   private final Notification showFloatVideoPanelNotification = new Notification();
 
    public void create(GDXImGuiBasedUI baseUI,
                       DRCRobotModel robotModel,
@@ -82,7 +84,11 @@ public class GDXVRModeManager
       ImGui.text("Teleport: Right B button");
       ImGui.text("Adjust user Z height: Right touchpad up/down");
       ImGui.text("ImGui panels: Point and use right trigger to click and drag");
-      ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel);
+      if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
+      {
+         if (showFloatingVideoPanel.get())
+            showFloatVideoPanelNotification.set();
+      }
       if (ImGui.radioButton(labels.get("Inputs disabled"), mode == GDXVRMode.INPUTS_DISABLED))
       {
          mode = GDXVRMode.INPUTS_DISABLED;
@@ -149,5 +155,10 @@ public class GDXVRModeManager
    public ImBoolean getShowFloatingVideoPanel()
    {
       return showFloatingVideoPanel;
+   }
+
+   public Notification getShowFloatVideoPanelNotification()
+   {
+      return showFloatVideoPanelNotification;
    }
 }
