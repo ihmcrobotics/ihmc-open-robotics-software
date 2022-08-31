@@ -74,13 +74,22 @@ public class MultiSpline1DSolver
 
       public void set(double time, double position, double velocity, double positionWeight, double velocityWeight)
       {
-         checkWeightValue(positionWeight);
-         checkWeightValue(velocityWeight);
-
          t = time;
          x = position;
          xd = velocity;
+         setPositionWeight(positionWeight);
+         setVelocityWeight(velocityWeight);
+      }
+
+      public void setPositionWeight(double positionWeight)
+      {
+         checkWeightValue(positionWeight);
          w = positionWeight;
+      }
+
+      public void setVelocityWeight(double velocityWeight)
+      {
+         checkWeightValue(velocityWeight);
          wd = velocityWeight;
       }
 
@@ -279,13 +288,42 @@ public class MultiSpline1DSolver
     * @throws IllegalArgumentException if the time is not increasing with respect to the previous
     *                                  waypoint if any.
     */
-   public void addWaypoint(double time, double position)
+   public WaypointData addWaypointPosition(double time, double position)
    {
       if (!waypoints.isEmpty() && time <= waypoints.getLast().t)
          throw new IllegalArgumentException("The given time is not greater than the previous waypoint: time=" + time + ", previous waypoint time="
                + waypoints.getLast().t);
 
-      addWaypoint().set(time, position);
+      WaypointData waypoint = addWaypoint();
+      waypoint.set(time, position);
+      return waypoint;
+   }
+
+   /**
+    * Adds a new waypoint to go through at a given time.
+    * <p>
+    * Weights should be in <tt>[0, &infin;[</tt>. A weight set to {@link Double#POSITIVE_INFINITY} will
+    * set up a hard constraint while any other real value will set up an objective to constrain the
+    * corresponding spline.
+    * </p>
+    * 
+    * @param time     the time at which the position should be reached.
+    * @param position the position to go through.
+    * @param weight   the weight associated with the position.
+    * @throws IllegalArgumentException if the time is not increasing with respect to the previous
+    *                                  waypoint if any.
+    * @throws IllegalArgumentException if the weight is not in the range <tt>[0, &infin;[</tt>.
+    */
+   public WaypointData addWaypointPosition(double time, double position, double weight)
+   {
+      if (!waypoints.isEmpty() && time <= waypoints.getLast().t)
+         throw new IllegalArgumentException("The given time is not greater than the previous waypoint: time=" + time + ", previous waypoint time="
+               + waypoints.getLast().t);
+
+      WaypointData waypoint = addWaypoint();
+      waypoint.set(time, position);
+      waypoint.setPositionWeight(weight);
+      return waypoint;
    }
 
    /**
@@ -293,16 +331,19 @@ public class MultiSpline1DSolver
     * 
     * @param time     the time at which the position should be reached.
     * @param position the position to go through.
+    * @return
     * @throws IllegalArgumentException if the time is not increasing with respect to the previous
     *                                  waypoint if any.
     */
-   public void addWaypoint(double time, double position, double velocity)
+   public WaypointData addWaypoint(double time, double position, double velocity)
    {
       if (!waypoints.isEmpty() && time <= waypoints.getLast().t)
          throw new IllegalArgumentException("The given time is not greater than the previous waypoint: time=" + time + ", previous waypoint time="
                + waypoints.getLast().t);
 
-      addWaypoint().set(time, position, velocity);
+      WaypointData waypoint = addWaypoint();
+      waypoint.set(time, position, velocity);
+      return waypoint;
    }
 
    /**
@@ -428,36 +469,42 @@ public class MultiSpline1DSolver
 
       // add initial condition
       WaypointData waypoint = waypoints.getFirst();
+      int nCoeffs = waypoint.numberOfCoefficients;
 
       if (waypoint.w == Double.POSITIVE_INFINITY)
       {
-         getPositionConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
+         getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
          b.set(constraintIndex, waypoint.x);
          constraintIndex++;
       }
 
       if (waypoint.wd == Double.POSITIVE_INFINITY)
       {
-         getVelocityConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
+         getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
          b.set(constraintIndex, waypoint.xd);
          constraintIndex++;
       }
 
       for (int i = 1; i < waypoints.size() - 1; i++)
       {
+         nCoeffs = waypoint.numberOfCoefficients;
          waypoint = waypoints.get(i);
-         int nextSplineOffset = splineOffset + waypoint.numberOfCoefficients;
+         int nextSplineOffset = splineOffset + nCoeffs;
 
-         if (waypoint.w <= 0.0)
-         { // No position constraint, we add a position matching constraint for continuity between splines
-            getPositionConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
-            MatrixTools.setMatrixBlock(A, constraintIndex, nextSplineOffset, A, constraintIndex, splineOffset, 1, waypoint.numberOfCoefficients, -1.0);
+         if (waypoint.w != Double.POSITIVE_INFINITY)
+         {
+            // Either:
+            // - No position target
+            // - The position target is setup as an objective (it's flexible)
+            // For both case we need to enforce continuity by adding a position matching constraint between the 2 splines
+            getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
+            MatrixTools.setMatrixBlock(A, constraintIndex, nextSplineOffset, A, constraintIndex, splineOffset, 1, nCoeffs, -1.0);
             b.set(constraintIndex, 0.0);
             constraintIndex++;
          }
-         else if (waypoint.w == Double.POSITIVE_INFINITY)
+         else
          {
-            getPositionConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
+            getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
             b.set(constraintIndex, waypoint.x);
             CommonOps_DDRM.extract(A, constraintIndex, constraintIndex + 1, splineOffset, nextSplineOffset, A, constraintIndex + 1, nextSplineOffset);
             constraintIndex++;
@@ -465,16 +512,16 @@ public class MultiSpline1DSolver
             constraintIndex++;
          }
 
-         if (waypoint.wd <= 0.0)
-         { // No velocity target, we add a velocity matching constraint for continuity between splines.
-            getVelocityConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
-            MatrixTools.setMatrixBlock(A, constraintIndex, nextSplineOffset, A, constraintIndex, splineOffset, 1, waypoint.numberOfCoefficients, -1.0);
+         if (waypoint.wd != Double.POSITIVE_INFINITY)
+         { // Same idea as for the position
+            getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
+            MatrixTools.setMatrixBlock(A, constraintIndex, nextSplineOffset, A, constraintIndex, splineOffset, 1, nCoeffs, -1.0);
             b.set(constraintIndex, 0.0);
             constraintIndex++;
          }
-         else if (waypoint.wd == Double.POSITIVE_INFINITY)
+         else
          {
-            getVelocityConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
+            getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
             b.set(constraintIndex, waypoint.xd);
             CommonOps_DDRM.extract(A, constraintIndex, constraintIndex + 1, splineOffset, nextSplineOffset, A, constraintIndex + 1, nextSplineOffset);
             constraintIndex++;
@@ -490,13 +537,13 @@ public class MultiSpline1DSolver
 
       if (waypoint.w == Double.POSITIVE_INFINITY)
       {
-         getPositionConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
+         getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
          b.set(constraintIndex, waypoint.x);
          constraintIndex++;
       }
       if (waypoint.wd == Double.POSITIVE_INFINITY)
       {
-         getVelocityConstraintABlock(waypoint.t, waypoint.numberOfCoefficients, constraintIndex, splineOffset, A);
+         getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
          b.set(constraintIndex, waypoint.xd);
       }
    }
@@ -521,7 +568,12 @@ public class MultiSpline1DSolver
 
          if (waypoint.w == Double.POSITIVE_INFINITY)
             constraints += 2;
-         if (waypoint.wd == Double.POSITIVE_INFINITY || waypoint.wd <= 0.0)
+         else
+            constraints++;
+
+         if (waypoint.wd == Double.POSITIVE_INFINITY)
+            constraints += 2;
+         else
             constraints++;
       }
 
@@ -576,38 +628,41 @@ public class MultiSpline1DSolver
       int splineOffset = 0;
 
       WaypointData waypoint = waypoints.getFirst();
+      int nCoeffs = waypoint.numberOfCoefficients;
 
       if (waypoint.w != Double.POSITIVE_INFINITY && waypoint.w > 0.0)
-         addPositionObjective(waypoint.t, waypoint.x, waypoint.w, waypoint.numberOfCoefficients, splineOffset, splineOffset, H, f);
+         addPositionObjective(waypoint.t, waypoint.x, waypoint.w, nCoeffs, splineOffset, splineOffset, H, f);
       if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
-         addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, waypoint.numberOfCoefficients, splineOffset, splineOffset, H, f);
+         addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, nCoeffs, splineOffset, splineOffset, H, f);
 
-      for (int i = 1; i < waypoints.size(); i++)
+      for (int i = 1; i < waypoints.size() - 1; i++)
       {
+         nCoeffs = waypoint.numberOfCoefficients;
          waypoint = waypoints.get(i);
-         int nextSplineOffset = splineOffset + waypoint.numberOfCoefficients;
 
          if (waypoint.w != Double.POSITIVE_INFINITY && waypoint.w > 0.0)
          {
-            addPositionObjective(waypoint.t, waypoint.x, waypoint.w, waypoint.numberOfCoefficients, splineOffset, splineOffset, H, f);
-            addPositionObjective(waypoint.t, waypoint.x, waypoint.w, waypoint.numberOfCoefficients, nextSplineOffset, nextSplineOffset, H, f);
+            addPositionObjective(waypoint.t, waypoint.x, waypoint.w, nCoeffs, splineOffset, splineOffset, H, f);
+            // No need to add the objective for the next spline as we have continuity enforced as a constraint in buildKnotEqualityConstraints(...)
+            // addPositionObjective(waypoint.t, waypoint.x, waypoint.w, waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, H, f);
          }
 
          if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
          {
-            addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, waypoint.numberOfCoefficients, splineOffset, splineOffset, H, f);
-            addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, waypoint.numberOfCoefficients, nextSplineOffset, nextSplineOffset, H, f);
+            addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, nCoeffs, splineOffset, splineOffset, H, f);
+            // No need to add the objective for the next spline as we have continuity enforced as a constraint in buildKnotEqualityConstraints(...)
+            // addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, H, f);
          }
 
-         splineOffset += waypoint.numberOfCoefficients;
+         splineOffset += nCoeffs;
       }
 
       waypoint = waypoints.getLast();
 
       if (waypoint.w != Double.POSITIVE_INFINITY && waypoint.w > 0.0)
-         addPositionObjective(waypoint.t, waypoint.x, waypoint.w, waypoint.numberOfCoefficients, splineOffset, splineOffset, H, f);
+         addPositionObjective(waypoint.t, waypoint.x, waypoint.w, nCoeffs, splineOffset, splineOffset, H, f);
       if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
-         addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, waypoint.numberOfCoefficients, splineOffset, splineOffset, H, f);
+         addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, nCoeffs, splineOffset, splineOffset, H, f);
    }
 
    public double computePosition(double time)
