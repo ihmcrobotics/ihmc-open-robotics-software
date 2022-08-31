@@ -36,6 +36,7 @@ public class GDXInteractableFrameModel
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private final Notification contextMenuNotification = new Notification();
+   private Runnable extendedContextMenu;
 
    public void create(ReferenceFrame parentFrame,
                       GDX3DPanel panel3D,
@@ -108,6 +109,8 @@ public class GDXInteractableFrameModel
 
       if (ImGui.beginPopup(labels.get("Popup")))
       {
+         if (extendedContextMenu != null)
+            extendedContextMenu.run();
          ImGui.text("Transform to parent:");
          transformText.set(transformToParent.toString());
          ImGui.inputTextMultiline(labels.getHidden("transformToParent"), transformText, 0, 60, ImGuiInputTextFlags.ReadOnly);
@@ -134,5 +137,10 @@ public class GDXInteractableFrameModel
    public ReferenceFrame getReferenceFrame()
    {
       return representativeReferenceFrame;
+   }
+
+   public void setExtendedContextMenu(Runnable runnable)
+   {
+      this.extendedContextMenu = runnable;
    }
 }
