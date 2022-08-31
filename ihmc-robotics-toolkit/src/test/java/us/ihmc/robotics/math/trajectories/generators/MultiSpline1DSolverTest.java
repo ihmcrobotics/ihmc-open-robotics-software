@@ -21,8 +21,8 @@ public class MultiSpline1DSolverTest
       MultiSpline1DSolver solver = new MultiSpline1DSolver();
       double[] times = {0.0, 0.25, 0.75, 1.0};
       solver.addWaypoint(times[0], 0, 1);
-      solver.addWaypoint(times[1], 2);
-      solver.addWaypoint(times[2], -2);
+      solver.addWaypointPosition(times[1], 2);
+      solver.addWaypointPosition(times[2], -2);
       solver.addWaypoint(times[3], 0, 1);
       double costUsingNative = solver.solveAndComputeCost();
 
@@ -98,7 +98,7 @@ public class MultiSpline1DSolverTest
 
          for (int j = 0; j < numberOfWaypoints; j++)
          {
-            solver.addWaypoint(waypointTimes[j], waypointPositions[j]);
+            solver.addWaypointPosition(waypointTimes[j], waypointPositions[j]);
          }
          solver.addWaypoint(1, endPosition, 0);
 
@@ -150,7 +150,7 @@ public class MultiSpline1DSolverTest
 
          for (int j = 0; j < numberOfWaypoints; j++)
          {
-            solver.addWaypoint(waypointTimes[j], waypointPositions[j]);
+            solver.addWaypointPosition(waypointTimes[j], waypointPositions[j]);
          }
          solver.addWaypoint(1, endPosition, endVelocity);
 
@@ -217,7 +217,7 @@ public class MultiSpline1DSolverTest
 
          for (int j = 0; j < numberOfWaypoints; j++)
          {
-            solver.addWaypoint(waypointTimes[j], waypointPositions[j]);
+            solver.addWaypointPosition(waypointTimes[j], waypointPositions[j]);
          }
          solver.addWaypoint(1, endPosition, endVelocity);
 
