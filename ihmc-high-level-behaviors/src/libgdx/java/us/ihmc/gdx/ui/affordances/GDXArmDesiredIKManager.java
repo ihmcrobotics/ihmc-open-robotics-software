@@ -1,9 +1,18 @@
 package us.ihmc.gdx.ui.affordances;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsOptimizationControlModule;
+import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -13,6 +22,10 @@ import us.ihmc.robotics.kinematics.InverseKinematicsCalculator;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class GDXArmDesiredIKManager
 {
@@ -32,6 +45,12 @@ public class GDXArmDesiredIKManager
    private InverseKinematicsCalculator inverseKinematicsCalculator;
    private final RigidBodyTransform controlToWristTransform = new RigidBodyTransform();
    private final ModifiableReferenceFrame temporaryFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+
+   private KinematicsToolboxController toolboxController;
+   private CommandInputManager commandInputManager;
+   private YoGraphicsListRegistry yoGraphicsListRegistry;
+   private YoRegistry mainRegistry;
+
 
    public GDXArmDesiredIKManager(RobotSide side)
    {
@@ -72,6 +91,26 @@ public class GDXArmDesiredIKManager
 
       controlToWristTransform.set(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
       controlToWristTransform.invert();
+
+      // TODO: need to replace ddogleg
+//      mainRegistry = new YoRegistry("main");
+//      yoGraphicsListRegistry = new YoGraphicsListRegistry();
+//
+//      FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
+//      commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
+//      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel.getRootBody()));
+//
+//      StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
+//
+//      double updateDT = 1.0e-3;
+//      toolboxController = new KinematicsToolboxController(commandInputManager,
+//                                                          statusOutputManager,
+//                                                          desiredFullRobotModel.getRootJoint(),
+//                                                          desiredFullRobotModel.getOneDoFJoints(),
+//                                                          null,
+//                                                          updateDT,
+//                                                          yoGraphicsListRegistry,
+//                                                          mainRegistry);
    }
 
    public void update(GDXHandInteractable handInteractable, FullHumanoidRobotModel desiredRobot)

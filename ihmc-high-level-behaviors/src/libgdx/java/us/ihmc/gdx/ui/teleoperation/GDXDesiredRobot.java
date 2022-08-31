@@ -1,10 +1,21 @@
 package us.ihmc.gdx.ui.teleoperation;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.gdx.simulation.scs2.GDXRigidBody;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -47,6 +58,16 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
       MaterialDefinition material = new MaterialDefinition(ghostColor);
       RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+
+      // NOTE: kneeJoint (CrossFourBarJoint) separate from robotDefinition. We iterate through the kneeJoints separately below.
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         CrossFourBarJointDefinition kneeJoint = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(robotModel.getJointMap()
+                                                                                                                            .getLegJointName(robotSide,
+                                                                                                                                             LegJointName.KNEE_PITCH));
+         kneeJoint.getBodyBC().getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
+         kneeJoint.getBodyDA().getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
+      }
       loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator());
    }
 
@@ -55,6 +76,8 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
    {
       if (isRobotLoaded())
       {
+//         // TODO: Scale the ghost robot bigger than actual
+//         getMultiBody().scale(1.01f,1.01f,1.01f);
          super.update();
       }
    }

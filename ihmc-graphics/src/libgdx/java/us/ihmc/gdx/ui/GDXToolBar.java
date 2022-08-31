@@ -6,7 +6,6 @@ import imgui.type.ImBoolean;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.gdx.tools.GDXToolButton;
-
 import java.util.ArrayList;
 
 // TODO: Extract tool bar method from GDX3DPanel

@@ -104,4 +104,14 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
    {
       return robotLoadedActivator.poll();
    }
+
+   public Activator getRobotLoadedActivator()
+   {
+      return robotLoadedActivator;
+   }
+
+   public GDXRigidBody getMultiBody()
+   {
+      return multiBody;
+   }
 }
