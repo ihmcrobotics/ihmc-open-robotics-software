@@ -283,6 +283,7 @@ public class SCS2AvatarSimulationFactory
       robot = simulationConstructionSet.addRobot(robotDefinition);
       robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
                                                                         gravity.get(),
+                                                                        robotModel.getEstimatorDT(),
                                                                         robot.getControllerManager().getControllerInput()),
                                    robotModel.getEstimatorDT());
 
