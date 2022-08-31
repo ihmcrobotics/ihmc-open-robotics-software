@@ -100,27 +100,28 @@ public class GDXVRKinematicsStreamingMode
          handControlFrameGraphics.put(side, new GDXReferenceFrameGraphic(length));
          RigidBodyTransform wristToHandControlTransform = robotModel.getUIParameters().getTransformWristToHand(side);
          ModifiableReferenceFrame handDesiredControlFrame = new ModifiableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame());
+         //            handDesiredControlFrame.getTransformToParent().set(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
          // Atlas
-//         {
-//            handDesiredControlFrame.getTransformToParent().getTranslation().setX(-0.1);
-//            handDesiredControlFrame.getTransformToParent()
-//                                   .getRotation()
-//                                   .setYawPitchRoll(side == RobotSide.RIGHT ? 0.0 : Math.toRadians(180.0), side.negateIfLeftSide(Math.toRadians(90.0)), 0.0);
-//         }
+         //         {
+         //            handDesiredControlFrame.getTransformToParent().getTranslation().setX(-0.1);
+         //            handDesiredControlFrame.getTransformToParent()
+         //                                   .getRotation()
+         //                                   .setYawPitchRoll(side == RobotSide.RIGHT ? 0.0 : Math.toRadians(180.0), side.negateIfLeftSide(Math.toRadians(90.0)), 0.0);
+         //         }
          // Nadia
          {
-            handDesiredControlFrame.getTransformToParent().set(robotModel.getJointMap().getHandControlFrameToWristTransform(side));
             if (side == RobotSide.LEFT)
             {
-               handDesiredControlFrame.getTransformToParent().appendPitchRotation(Math.PI);
+               handDesiredControlFrame.getTransformToParent().getRotation().setToYawOrientation(Math.PI);
+               handDesiredControlFrame.getTransformToParent().getRotation().appendRollRotation(Math.PI / 2.0);
+            }
+            else
+            {
+               handDesiredControlFrame.getTransformToParent().getRotation().setToRollOrientation(Math.PI / 2.0);
             }
          }
          handDesiredControlFrame.getReferenceFrame().update();
          handDesiredControlFrames.put(side, handDesiredControlFrame);
-
-         //                                      ReferenceFrameMissingTools
-//                                            .constructFrameWithChangingTransformToParent(vrContext.getController(side).getXForwardZUpControllerFrame(),
-//                                                                                           handControlToControllerTransform));
          ArmJointName lastWristJoint = robotModel.getJointMap().getArmJointNames()[robotModel.getJointMap().getArmJointNames().length - 1];
          wristJoints.put(side, ghostFullRobotModel.getArmJoint(side, lastWristJoint));
          wristJointAnglePlots.put(side, new ImGuiPlot(labels.get(side + " Hand Joint Angle")));
