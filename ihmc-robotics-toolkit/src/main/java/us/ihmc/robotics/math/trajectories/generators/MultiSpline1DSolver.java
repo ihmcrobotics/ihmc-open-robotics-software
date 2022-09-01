@@ -5,17 +5,19 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 
 public class MultiSpline1DSolver
 {
-   private static final double regularizationWeight = 1E-10;
    public static final int defaultCoefficients = 4;
 
-   public static class WaypointData
+   public class WaypointData
    {
+      /** The index of this waypoint. */
+      private final int index;
       /** Time at which this waypoint should be reached. */
       private double t;
       /** The waypoint position. */
@@ -47,19 +49,30 @@ public class MultiSpline1DSolver
       /** The number of coefficients for the spline succeeding this waypoint. */
       private int numberOfCoefficients;
 
-      public WaypointData()
+      private WaypointData(int index)
       {
+         this.index = index;
          clear();
       }
 
       public void clear()
       {
          t = Double.NaN;
-         x = Double.NaN;
-         xd = Double.NaN;
-         w = 0.0;
-         wd = 0.0;
+         clearPosition();
+         clearVelocity();
          numberOfCoefficients = defaultCoefficients;
+      }
+
+      public void clearPosition()
+      {
+         x = Double.NaN;
+         w = 0.0;
+      }
+
+      public void clearVelocity()
+      {
+         xd = Double.NaN;
+         wd = 0.0;
       }
 
       public void set(double time, double position)
@@ -81,10 +94,20 @@ public class MultiSpline1DSolver
          setVelocityWeight(velocityWeight);
       }
 
+      public void setPosition(double position)
+      {
+         x = position;
+      }
+
       public void setPositionWeight(double positionWeight)
       {
          checkWeightValue(positionWeight);
          w = positionWeight;
+      }
+
+      public void setVelocity(double velocity)
+      {
+         xd = velocity;
       }
 
       public void setVelocityWeight(double velocityWeight)
@@ -102,6 +125,11 @@ public class MultiSpline1DSolver
       public void setNumberOfCoefficients(int numberOfCoefficients)
       {
          this.numberOfCoefficients = numberOfCoefficients;
+      }
+
+      public int getIndex()
+      {
+         return index;
       }
 
       public double getTime()
@@ -133,40 +161,82 @@ public class MultiSpline1DSolver
       {
          return numberOfCoefficients;
       }
+
+      public boolean hasNext()
+      {
+         return index < waypoints.size() - 1;
+      }
+
+      public WaypointData next()
+      {
+         if (hasNext())
+            return waypoints.get(index + 1);
+         else
+            return null;
+      }
+
+      public boolean hasPrevious()
+      {
+         return index > 0;
+      }
+
+      public WaypointData previous()
+      {
+         if (hasPrevious())
+            return waypoints.get(index - 1);
+         else
+            return null;
+      }
+
+      public Spline1DSegment getNextSpline()
+      {
+         if (index < splineSegments.size())
+            return splineSegments.get(index);
+         else
+            return null;
+      }
+
+      public Spline1DSegment getPreviousSpline()
+      {
+         if (hasPrevious())
+            return previous().getNextSpline();
+         else
+            return null;
+      }
    }
 
    public class Spline1DSegment
    {
-      private WaypointData start, end;
-      private int indexOffset;
+      private final int index;
+      private int indexFirstCoefficient;
 
-      public Spline1DSegment()
+      public Spline1DSegment(int index)
       {
+         this.index = index;
          clear();
       }
 
       private void clear()
       {
-         start = null;
-         end = null;
-         indexOffset = -1;
+         indexFirstCoefficient = -1;
       }
 
-      private void set(WaypointData start, WaypointData end, int indexOffset)
+      private void update()
       {
-         this.start = start;
-         this.end = end;
-         this.indexOffset = indexOffset;
+         indexFirstCoefficient = 0;
+         Spline1DSegment previous = previous();
+         if (previous != null)
+            indexFirstCoefficient = previous.getIndexFirstCoefficient() + previous.getNumberOfCoefficients();
       }
 
       public WaypointData getStart()
       {
-         return start;
+         return waypoints.get(index);
       }
 
       public WaypointData getEnd()
       {
-         return end;
+         return waypoints.get(index + 1);
       }
 
       public double getCoefficient(int i)
@@ -174,19 +244,24 @@ public class MultiSpline1DSolver
          if (i < 0 || i >= getNumberOfCoefficients())
             throw new IllegalArgumentException("Index out of bounds: " + i + " should be in [0," + getNumberOfCoefficients() + "[.");
 
-         return solution.get(indexOffset + i);
+         return solution.get(indexFirstCoefficient + i);
+      }
+
+      public int getIndexFirstCoefficient()
+      {
+         return indexFirstCoefficient;
       }
 
       public int getNumberOfCoefficients()
       {
-         return start.numberOfCoefficients;
+         return getStart().numberOfCoefficients;
       }
 
       public double computePosition(double time)
       {
-         time = MathTools.clamp(time, start.t, end.t);
+         time = MathTools.clamp(time, getStart().t, getEnd().t);
 
-         int coefficientIndex = indexOffset + getNumberOfCoefficients() - 1;
+         int coefficientIndex = indexFirstCoefficient + getNumberOfCoefficients() - 1;
          double tPower = 1.0;
          double x = 0.0;
 
@@ -201,9 +276,9 @@ public class MultiSpline1DSolver
 
       public double computeVelocity(double time)
       {
-         time = MathTools.clamp(time, start.t, end.t);
+         time = MathTools.clamp(time, getStart().t, getEnd().t);
 
-         int coefficientIndex = indexOffset + getNumberOfCoefficients() - 2;
+         int coefficientIndex = indexFirstCoefficient + getNumberOfCoefficients() - 2;
          double tPower = 1.0;
          double xd = 0.0;
 
@@ -218,9 +293,9 @@ public class MultiSpline1DSolver
 
       public double computeAcceleration(double time)
       {
-         time = MathTools.clamp(time, start.t, end.t);
+         time = MathTools.clamp(time, getStart().t, getEnd().t);
 
-         int coefficientIndex = indexOffset + getNumberOfCoefficients() - 3;
+         int coefficientIndex = indexFirstCoefficient + getNumberOfCoefficients() - 3;
          double tPower = 1.0;
          double xdd = 0.0;
 
@@ -235,12 +310,38 @@ public class MultiSpline1DSolver
 
       public void getPolynomial(PolynomialBasics polynomialToPack)
       {
-         polynomialToPack.setDirectlyReverse(solution, indexOffset, getNumberOfCoefficients());
+         polynomialToPack.setDirectlyReverse(solution, indexFirstCoefficient, getNumberOfCoefficients());
+      }
+
+      public boolean hasNext()
+      {
+         return index < splineSegments.size() - 1;
+      }
+
+      public Spline1DSegment next()
+      {
+         if (hasNext())
+            return splineSegments.get(index + 1);
+         else
+            return null;
+      }
+
+      public boolean hasPrevious()
+      {
+         return index > 0;
+      }
+
+      public Spline1DSegment previous()
+      {
+         if (hasPrevious())
+            return splineSegments.get(index - 1);
+         else
+            return null;
       }
    }
 
-   private final RecyclingArrayList<WaypointData> waypoints = new RecyclingArrayList<>(WaypointData::new);
-   private final RecyclingArrayList<Spline1DSegment> splineSegments = new RecyclingArrayList<>(Spline1DSegment::new);
+   private final RecyclingArrayList<WaypointData> waypoints = new RecyclingArrayList<>(SupplierBuilder.indexedSupplier(WaypointData::new));
+   private final RecyclingArrayList<Spline1DSegment> splineSegments = new RecyclingArrayList<>(SupplierBuilder.indexedSupplier(Spline1DSegment::new));
 
    /**
     * Contains the Hessian only for minimizing the integrated acceleration. Allows to compute the
@@ -273,10 +374,18 @@ public class MultiSpline1DSolver
          waypoints.get(i).clear();
       }
       waypoints.clear();
+
+      for (int i = 0; i < splineSegments.size(); i++)
+      {
+         splineSegments.get(i).clear();
+      }
+      splineSegments.clear();
    }
 
    public WaypointData addWaypoint()
    {
+      if (!waypoints.isEmpty())
+         splineSegments.add().update();
       return waypoints.add();
    }
 
@@ -403,24 +512,6 @@ public class MultiSpline1DSolver
       nativeSolution.solve(E, d);
       nativeSolution.reshape(subProblemSize, 1);
       nativeSolution.get(solution);
-
-      int indexOffset = 0;
-
-      for (int i = 0; i < waypoints.size() - 1; i++)
-      {
-         WaypointData start = waypoints.get(i);
-         WaypointData end = waypoints.get(i + 1);
-
-         Spline1DSegment segment = splineSegments.getAndGrowIfNeeded(i);
-         segment.set(start, end, indexOffset);
-         indexOffset += start.numberOfCoefficients;
-      }
-
-      while (splineSegments.size() > waypoints.size() - 1)
-      {
-         splineSegments.getLast().clear();
-         splineSegments.remove(splineSegments.size() - 1);
-      }
    }
 
    public DMatrixRMaj getSolution()
@@ -465,87 +556,163 @@ public class MultiSpline1DSolver
       CommonOps_DDRM.fill(A, 0.0);
 
       int constraintIndex = 0;
-      int splineOffset = 0;
 
-      // add initial condition
-      WaypointData waypoint = waypoints.getFirst();
-      int nCoeffs = waypoint.numberOfCoefficients;
-
-      if (waypoint.w == Double.POSITIVE_INFINITY)
+      for (int i = 0; i < waypoints.size(); i++)
       {
-         getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-         b.set(constraintIndex, waypoint.x);
-         constraintIndex++;
-      }
+         WaypointData waypoint = waypoints.get(i);
 
-      if (waypoint.wd == Double.POSITIVE_INFINITY)
-      {
-         getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-         b.set(constraintIndex, waypoint.xd);
-         constraintIndex++;
-      }
-
-      for (int i = 1; i < waypoints.size() - 1; i++)
-      {
-         nCoeffs = waypoint.numberOfCoefficients;
-         waypoint = waypoints.get(i);
-         int nextSplineOffset = splineOffset + nCoeffs;
-
-         if (waypoint.w != Double.POSITIVE_INFINITY)
-         {
-            // Either:
-            // - No position target
-            // - The position target is setup as an objective (it's flexible)
-            // For both case we need to enforce continuity by adding a position matching constraint between the 2 splines
-            getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-            MatrixTools.setMatrixBlock(A, constraintIndex, nextSplineOffset, A, constraintIndex, splineOffset, 1, nCoeffs, -1.0);
-            b.set(constraintIndex, 0.0);
-            constraintIndex++;
-         }
+         if (waypoint.w == Double.POSITIVE_INFINITY)
+            constraintIndex = addDesiredWaypointPositionConstraint(waypoint, constraintIndex, A, b);
          else
-         {
-            getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-            b.set(constraintIndex, waypoint.x);
-            CommonOps_DDRM.extract(A, constraintIndex, constraintIndex + 1, splineOffset, nextSplineOffset, A, constraintIndex + 1, nextSplineOffset);
-            constraintIndex++;
-            b.set(constraintIndex, waypoint.x);
-            constraintIndex++;
-         }
+            constraintIndex = addPositionContinuityConstraint(waypoint, constraintIndex, A, b);
 
-         if (waypoint.wd != Double.POSITIVE_INFINITY)
-         { // Same idea as for the position
-            getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-            MatrixTools.setMatrixBlock(A, constraintIndex, nextSplineOffset, A, constraintIndex, splineOffset, 1, nCoeffs, -1.0);
-            b.set(constraintIndex, 0.0);
-            constraintIndex++;
-         }
+         if (waypoint.wd == Double.POSITIVE_INFINITY)
+            constraintIndex = addDesiredWaypointVelocityConstraint(waypoint, constraintIndex, A, b);
          else
-         {
-            getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-            b.set(constraintIndex, waypoint.xd);
-            CommonOps_DDRM.extract(A, constraintIndex, constraintIndex + 1, splineOffset, nextSplineOffset, A, constraintIndex + 1, nextSplineOffset);
-            constraintIndex++;
-            b.set(constraintIndex, waypoint.xd);
-            constraintIndex++;
-         }
-
-         splineOffset = nextSplineOffset;
+            constraintIndex = addVelocityContinuityConstraint(waypoint, constraintIndex, A, b);
       }
+   }
 
-      // add final condition
-      waypoint = waypoints.getLast();
+   /**
+    * Adds an equality constraint such that the preceding and succeeding splines of the given
+    * {@code waypoint} match in position at the waypoint time.
+    */
+   static int addPositionContinuityConstraint(WaypointData waypoint, int constraintIndex, DMatrixRMaj A, DMatrixRMaj b)
+   {
+      Spline1DSegment spline0 = waypoint.getPreviousSpline();
+      Spline1DSegment spline1 = waypoint.getNextSpline();
 
-      if (waypoint.w == Double.POSITIVE_INFINITY)
+      if (spline0 == null || spline1 == null)
+         return constraintIndex;
+
+      int nCoeffs0 = spline0.getNumberOfCoefficients();
+      int nCoeffs1 = spline1.getNumberOfCoefficients();
+
+      int i0 = spline0.getIndexFirstCoefficient();
+      int i1 = spline1.getIndexFirstCoefficient();
+
+      double t = waypoint.t;
+
+      getPositionConstraintABlock(t, nCoeffs0, constraintIndex, i0, A);
+
+      if (nCoeffs0 == nCoeffs1)
+         MatrixTools.setMatrixBlock(A, constraintIndex, i1, A, constraintIndex, i0, 1, nCoeffs0, -1.0);
+      else
+         getPositionConstraintABlock(t, nCoeffs1, true, constraintIndex, i1, A);
+
+      b.set(constraintIndex, 0.0);
+      return constraintIndex + 1;
+   }
+
+   /**
+    * Adds an equality constraint such that the preceding and succeeding splines of the given
+    * {@code waypoint} match in velocity at the waypoint time.
+    */
+   static int addVelocityContinuityConstraint(WaypointData waypoint, int constraintIndex, DMatrixRMaj A, DMatrixRMaj b)
+   {
+      Spline1DSegment spline0 = waypoint.getPreviousSpline();
+      Spline1DSegment spline1 = waypoint.getNextSpline();
+
+      if (spline0 == null || spline1 == null)
+         return constraintIndex;
+
+      int i0 = spline0.getIndexFirstCoefficient();
+      int i1 = spline1.getIndexFirstCoefficient();
+
+      int n0 = spline0.getNumberOfCoefficients();
+      int n1 = spline1.getNumberOfCoefficients();
+
+      double t = waypoint.t;
+
+      getVelocityConstraintABlock(t, n0, constraintIndex, i0, A);
+
+      if (n0 == n1)
+         MatrixTools.setMatrixBlock(A, constraintIndex, i1, A, constraintIndex, i0, 1, n0, -1.0);
+      else
+         getVelocityConstraintABlock(t, n1, true, constraintIndex, i1, A);
+
+      b.set(constraintIndex, 0.0);
+      return constraintIndex + 1;
+   }
+
+   /**
+    * Adds an equality constraint such that the preceding and succeeding splines of the given
+    * {@code waypoint} satisfy the waypoint position.
+    */
+   static int addDesiredWaypointPositionConstraint(WaypointData waypoint, int constraintIndex, DMatrixRMaj A, DMatrixRMaj b)
+   {
+      Spline1DSegment spline0 = waypoint.getPreviousSpline();
+      Spline1DSegment spline1 = waypoint.getNextSpline();
+
+      double t = waypoint.t;
+      double x = waypoint.x;
+
+      int i0 = -1;
+      int n0 = -1;
+
+      if (spline0 != null)
       {
-         getPositionConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-         b.set(constraintIndex, waypoint.x);
+         i0 = spline0.getIndexFirstCoefficient();
+         n0 = spline0.getNumberOfCoefficients();
+
+         getPositionConstraintABlock(t, n0, constraintIndex, i0, A);
+         b.set(constraintIndex, x);
          constraintIndex++;
       }
-      if (waypoint.wd == Double.POSITIVE_INFINITY)
+
+      if (spline1 != null)
       {
-         getVelocityConstraintABlock(waypoint.t, nCoeffs, constraintIndex, splineOffset, A);
-         b.set(constraintIndex, waypoint.xd);
+         int i1 = spline1.getIndexFirstCoefficient();
+         int n1 = spline1.getNumberOfCoefficients();
+
+         if (n1 == n0)
+            CommonOps_DDRM.extract(A, constraintIndex - 1, constraintIndex, i0, i1, A, constraintIndex, i1);
+         else
+            getPositionConstraintABlock(t, n1, constraintIndex, i1, A);
+         b.set(constraintIndex, x);
+         constraintIndex++;
       }
+      return constraintIndex;
+   }
+
+   /**
+    * Adds an equality constraint such that the preceding and succeeding splines of the given
+    * {@code waypoint} satisfy the waypoint velocity.
+    */
+   static int addDesiredWaypointVelocityConstraint(WaypointData waypoint, int constraintIndex, DMatrixRMaj A, DMatrixRMaj b)
+   {
+      Spline1DSegment spline0 = waypoint.getPreviousSpline();
+      Spline1DSegment spline1 = waypoint.getNextSpline();
+
+      double t = waypoint.t;
+      double xd = waypoint.xd;
+
+      int i0 = -1;
+      int n0 = -1;
+
+      if (spline0 != null)
+      {
+         i0 = spline0.getIndexFirstCoefficient();
+         n0 = spline0.getNumberOfCoefficients();
+
+         getVelocityConstraintABlock(t, n0, constraintIndex, i0, A);
+         b.set(constraintIndex, xd);
+         constraintIndex++;
+      }
+
+      if (spline1 != null)
+      {
+         int i1 = spline1.getIndexFirstCoefficient();
+         int n1 = spline1.getNumberOfCoefficients();
+
+         if (n1 == n0)
+            CommonOps_DDRM.extract(A, constraintIndex - 1, constraintIndex, i0, i1, A, constraintIndex, i1);
+         else
+            getVelocityConstraintABlock(t, n1, constraintIndex, i1, A);
+         b.set(constraintIndex, xd);
+         constraintIndex++;
+      }
+      return constraintIndex;
    }
 
    /**
@@ -597,7 +764,7 @@ public class MultiSpline1DSolver
       int size = getProblemSize();
 
       f.reshape(size, 1);
-      CommonOps_DDRM.fill(f, regularizationWeight);
+      f.zero();
 
       H.reshape(size, size);
       H.zero();
@@ -605,7 +772,6 @@ public class MultiSpline1DSolver
       H_minAccel.set(H);
 
       addKnotsCostFunction(H, f);
-      CommonOps_DDRM.scale(0.5, H); // TODO Should that be here?
    }
 
    private void getMinAccelerationCostFunction(DMatrixRMaj H)
@@ -626,44 +792,39 @@ public class MultiSpline1DSolver
     */
    private void addKnotsCostFunction(DMatrixRMaj H, DMatrixRMaj f)
    {
-      int splineOffset = 0;
-
-      WaypointData waypoint = waypoints.getFirst();
-      int nCoeffs = waypoint.numberOfCoefficients;
-
-      if (waypoint.w != Double.POSITIVE_INFINITY && waypoint.w > 0.0)
-         addPositionObjective(waypoint.t, waypoint.x, waypoint.w, nCoeffs, splineOffset, splineOffset, H, f);
-      if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
-         addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, nCoeffs, splineOffset, splineOffset, H, f);
-
-      for (int i = 1; i < waypoints.size() - 1; i++)
+      for (int i = 0; i < waypoints.size(); i++)
       {
-         nCoeffs = waypoint.numberOfCoefficients;
-         waypoint = waypoints.get(i);
+         WaypointData waypoint = waypoints.get(i);
 
          if (waypoint.w != Double.POSITIVE_INFINITY && waypoint.w > 0.0)
-         {
-            addPositionObjective(waypoint.t, waypoint.x, waypoint.w, nCoeffs, splineOffset, splineOffset, H, f);
-            // No need to add the objective for the next spline as we have continuity enforced as a constraint in buildKnotEqualityConstraints(...)
-            // addPositionObjective(waypoint.t, waypoint.x, waypoint.w, waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, H, f);
-         }
-
+            addDesiredWaypointPositionObjective(waypoint, H, f);
          if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
-         {
-            addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, nCoeffs, splineOffset, splineOffset, H, f);
-            // No need to add the objective for the next spline as we have continuity enforced as a constraint in buildKnotEqualityConstraints(...)
-            // addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, splineOffset + waypoint.numberOfCoefficients, H, f);
-         }
-
-         splineOffset += nCoeffs;
+            addDesiredWaypointVelocityObjective(waypoint, H, f);
       }
+   }
 
-      waypoint = waypoints.getLast();
+   static void addDesiredWaypointPositionObjective(WaypointData waypoint, DMatrixRMaj H, DMatrixRMaj f)
+   {
+      Spline1DSegment spline = waypoint.getNextSpline();
 
-      if (waypoint.w != Double.POSITIVE_INFINITY && waypoint.w > 0.0)
-         addPositionObjective(waypoint.t, waypoint.x, waypoint.w, nCoeffs, splineOffset, splineOffset, H, f);
-      if (waypoint.wd != Double.POSITIVE_INFINITY && waypoint.wd > 0.0)
-         addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, nCoeffs, splineOffset, splineOffset, H, f);
+      if (spline == null)
+         spline = waypoint.getPreviousSpline();
+
+      int i = spline.getIndexFirstCoefficient();
+      int n = spline.getNumberOfCoefficients();
+      addPositionObjective(waypoint.t, waypoint.x, waypoint.w, n, i, i, H, f);
+   }
+
+   static void addDesiredWaypointVelocityObjective(WaypointData waypoint, DMatrixRMaj H, DMatrixRMaj f)
+   {
+      Spline1DSegment spline = waypoint.getNextSpline();
+
+      if (spline == null)
+         spline = waypoint.getPreviousSpline();
+
+      int i = spline.getIndexFirstCoefficient();
+      int n = spline.getNumberOfCoefficients();
+      addVelocityObjective(waypoint.t, waypoint.xd, waypoint.wd, n, i, i, H, f);
    }
 
    public double computePosition(double time)
@@ -684,9 +845,29 @@ public class MultiSpline1DSolver
       return findSplineSegment(time).computeAcceleration(time);
    }
 
+   public int getNumberOfWaypoints()
+   {
+      return waypoints.size();
+   }
+
    public WaypointData getWaypoint(int index)
    {
       return waypoints.get(index);
+   }
+
+   public WaypointData getFirstWaypoint()
+   {
+      return waypoints.getFirst();
+   }
+
+   public WaypointData getLastWaypoint()
+   {
+      return waypoints.getLast();
+   }
+
+   public RecyclingArrayList<WaypointData> getWaypoints()
+   {
+      return waypoints;
    }
 
    public Spline1DSegment findSplineSegment(double time)
@@ -719,7 +900,12 @@ public class MultiSpline1DSolver
     */
    static void getPositionConstraintABlock(double t, int numberOfCoefficients, int row, int startColumn, DMatrixRMaj A)
    {
-      double tpow = 1.0;
+      getPositionConstraintABlock(t, numberOfCoefficients, false, row, startColumn, A);
+   }
+
+   static void getPositionConstraintABlock(double t, int numberOfCoefficients, boolean negate, int row, int startColumn, DMatrixRMaj A)
+   {
+      double tpow = negate ? -1.0 : 1.0;
 
       int column = startColumn + numberOfCoefficients - 1;
 
@@ -740,7 +926,12 @@ public class MultiSpline1DSolver
     */
    static void getVelocityConstraintABlock(double t, int numberOfCoefficients, int row, int startColumn, DMatrixRMaj A)
    {
-      double tpow = 1.0;
+      getVelocityConstraintABlock(t, numberOfCoefficients, false, row, startColumn, A);
+   }
+
+   static void getVelocityConstraintABlock(double t, int numberOfCoefficients, boolean negate, int row, int startColumn, DMatrixRMaj A)
+   {
+      double tpow = negate ? -1.0 : 1.0;
 
       int column = startColumn + numberOfCoefficients - 2;
 
@@ -886,7 +1077,8 @@ public class MultiSpline1DSolver
 
          for (int i = 0; i < size; i++)
          {
-            H.add(startRow + offsetRow, startColumn + offsetCol, tpow);
+            double scale = (blockSize - offsetRow) * (blockSize - offsetCol);
+            H.add(startRow + offsetRow, startColumn + offsetCol, scale * tpow);
             offsetRow--;
             offsetCol++;
          }
@@ -898,7 +1090,7 @@ public class MultiSpline1DSolver
 
       for (int i = 0; i < blockSize; i++)
       {
-         f.add(f_index--, 0, tpow);
+         f.add(f_index--, 0, (i + 1) * tpow);
          tpow *= t;
       }
    }

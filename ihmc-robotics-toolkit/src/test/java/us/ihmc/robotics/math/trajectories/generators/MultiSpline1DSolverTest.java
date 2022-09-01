@@ -11,9 +11,350 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.linearDynamicSystems.MatlabChart;
+import us.ihmc.robotics.math.functionGenerator.BaseFunctionGenerator;
 
 public class MultiSpline1DSolverTest
 {
+   @Test
+   public void testEndpointsObjective()
+   {
+      // Test the quality of the endpoints when setup as objectives.
+      double t0 = 0.0;
+      double t1 = 0.5;
+      double t2 = 1.0;
+
+      double x0 = 0.0;
+      double x1 = 1.0;
+      double x2 = 0.0;
+
+      double xd0 = 0.0;
+      double xd2 = 0.0;
+
+      MultiSpline1DSolver solver = new MultiSpline1DSolver();
+      solver.addWaypoint(t0, x0, xd0);
+      solver.addWaypointPosition(t1, x1);
+      solver.addWaypoint(t2, x2, xd2);
+      solver.solve();
+
+      double expected_xErr0 = Math.abs(x0 - solver.computePosition(t0));
+      double expected_xErr2 = Math.abs(x2 - solver.computePosition(t2));
+      double expected_xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
+      double expected_xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
+      //      System.out.println("xErr0: " + expected_xErr0 + ", xErr2: " + expected_xErr2 + ", xdErr0: " + expected_xdErr0 + ", xdErr2: " + expected_xdErr2);
+      //      plot(solver, null, false);
+
+      solver.getWaypoint(0).setVelocityWeight(1.0e6);
+      solver.solve();
+
+      double actual_xErr0 = Math.abs(x0 - solver.computePosition(t0));
+      double actual_xErr2 = Math.abs(x2 - solver.computePosition(t2));
+      double actual_xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
+      double actual_xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
+      //      System.out.println("xErr0: " + actual_xErr0 + ", xErr2: " + actual_xErr2 + ", xdErr0: " + actual_xdErr0 + ", xdErr2: " + actual_xdErr2);
+      //      plot(solver, null, false);
+      assertEquals(expected_xErr0, actual_xErr0, 1.0e-12);
+      assertEquals(expected_xErr2, actual_xErr2, 1.0e-12);
+      assertEquals(expected_xdErr0, actual_xdErr0, 1.0e-4);
+      assertEquals(expected_xdErr2, actual_xdErr2, 1.0e-12);
+
+      solver.getWaypoint(0).setVelocityWeight(Double.POSITIVE_INFINITY);
+      solver.getWaypoint(2).setVelocityWeight(1.0e6);
+      solver.solve();
+
+      actual_xErr0 = Math.abs(x0 - solver.computePosition(t0));
+      actual_xErr2 = Math.abs(x2 - solver.computePosition(t2));
+      actual_xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
+      actual_xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
+      //      System.out.println("xErr0: " + actual_xErr0 + ", xErr2: " + actual_xErr2 + ", xdErr0: " + actual_xdErr0 + ", xdErr2: " + actual_xdErr2);
+      //      plot(solver, null, false);
+      assertEquals(expected_xErr0, actual_xErr0, 1.0e-12);
+      assertEquals(expected_xErr2, actual_xErr2, 1.0e-12);
+      assertEquals(expected_xdErr0, actual_xdErr0, 1.0e-12);
+      assertEquals(expected_xdErr2, actual_xdErr2, 1.0e-4);
+
+      // Moving to testing position objectives
+      solver.getWaypoint(2).setVelocityWeight(Double.POSITIVE_INFINITY);
+      solver.getWaypoint(0).setPositionWeight(1.0e6);
+      solver.solve();
+
+      actual_xErr0 = Math.abs(x0 - solver.computePosition(t0));
+      actual_xErr2 = Math.abs(x2 - solver.computePosition(t2));
+      actual_xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
+      actual_xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
+      //      System.out.println("xErr0: " + actual_xErr0 + ", xErr2: " + actual_xErr2 + ", xdErr0: " + actual_xdErr0 + ", xdErr2: " + actual_xdErr2);
+      //      plot(solver, null, false);
+      assertEquals(expected_xErr0, actual_xErr0, 1.0e-4);
+      assertEquals(expected_xErr2, actual_xErr2, 1.0e-12);
+      assertEquals(expected_xdErr0, actual_xdErr0, 1.0e-12);
+      assertEquals(expected_xdErr2, actual_xdErr2, 1.0e-12);
+
+      solver.getWaypoint(0).setPositionWeight(Double.POSITIVE_INFINITY);
+      solver.getWaypoint(2).setPositionWeight(1.0e6);
+      solver.solve();
+
+      actual_xErr0 = Math.abs(x0 - solver.computePosition(t0));
+      actual_xErr2 = Math.abs(x2 - solver.computePosition(t2));
+      actual_xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
+      actual_xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
+      //      System.out.println("xErr0: " + actual_xErr0 + ", xErr2: " + actual_xErr2 + ", xdErr0: " + actual_xdErr0 + ", xdErr2: " + actual_xdErr2);
+      //      plot(solver, null, false);
+      assertEquals(expected_xErr0, actual_xErr0, 1.0e-12);
+      assertEquals(expected_xErr2, actual_xErr2, 1.0e-4);
+      assertEquals(expected_xdErr0, actual_xdErr0, 1.0e-12);
+      assertEquals(expected_xdErr2, actual_xdErr2, 1.0e-12);
+   }
+
+   @Test
+   public void testMidpointVelocityControl()
+   {
+      // Test the quality of the endpoints when setup as objectives.
+      double t0 = 0.0;
+      double t1 = 0.5;
+      double t2 = 1.0;
+
+      double x0 = 0.0;
+      double x1 = -1.0;
+      double x2 = 0.0;
+
+      double xd0 = 0.0;
+      double xd1 = 1.0;
+      double xd2 = 0.0;
+
+      MultiSpline1DSolver solver = new MultiSpline1DSolver();
+      solver.addWaypoint(t0, x0, xd0);
+      solver.addWaypoint(t1, x1, xd1);
+      solver.addWaypoint(t2, x2, xd2);
+      solver.solve();
+
+      double xErr1 = Math.abs(x1 - solver.computePosition(t1));
+      double xdErr1 = Math.abs(xd1 - solver.computeVelocity(t1));
+
+      double dt = 1.0e-5;
+
+      double xErr1Plus = Math.abs(x1 - solver.computePosition(t1 + dt));
+      double xdErr1Plus = Math.abs(xd1 - solver.computeVelocity(t1 + dt));
+      double xErr1Minus = Math.abs(x1 - solver.computePosition(t1 - dt));
+      double xdErr1Minus = Math.abs(xd1 - solver.computeVelocity(t1 - dt));
+
+      //      System.out.println("x1: " + solver.computePosition(t1) + ", xd1: " + solver.computeVelocity(t1));
+      //      System.out.println("x1-: " + solver.computePosition(t1 - dt) + ", xd1-: " + solver.computeVelocity(t1 - dt));
+      //      System.out.println("x1+: " + solver.computePosition(t1 + dt) + ", xd1+: " + solver.computeVelocity(t1 + dt));
+      //      plot(solver, null, false);
+
+      assertEquals(xErr1, xErr1Plus, 2.0e-5);
+      assertEquals(xErr1, xErr1Minus, 2.0e-5);
+      assertEquals(xdErr1, xdErr1Plus, 1.0e-3);
+      assertEquals(xdErr1, xdErr1Minus, 1.0e-3);
+
+      solver.getWaypoint(1).setVelocityWeight(1.0e6);
+      solver.solve();
+
+      xErr1Plus = Math.abs(x1 - solver.computePosition(t1 + dt));
+      xdErr1Plus = Math.abs(xd1 - solver.computeVelocity(t1 + dt));
+      xErr1Minus = Math.abs(x1 - solver.computePosition(t1 - dt));
+      xdErr1Minus = Math.abs(xd1 - solver.computeVelocity(t1 - dt));
+
+      //      System.out.println("x1: " + solver.computePosition(t1) + ", xd1: " + solver.computeVelocity(t1));
+      //      System.out.println("x1-: " + solver.computePosition(t1 - dt) + ", xd1-: " + solver.computeVelocity(t1 - dt));
+      //      System.out.println("x1+: " + solver.computePosition(t1 + dt) + ", xd1+: " + solver.computeVelocity(t1 + dt));
+      //      plot(solver, null, false);
+
+      solver.getWaypoint(1).setPositionWeight(1.0e6);
+      solver.getWaypoint(1).setVelocityWeight(Double.POSITIVE_INFINITY);
+      solver.solve();
+
+      xErr1Plus = Math.abs(x1 - solver.computePosition(t1 + dt));
+      xdErr1Plus = Math.abs(xd1 - solver.computeVelocity(t1 + dt));
+      xErr1Minus = Math.abs(x1 - solver.computePosition(t1 - dt));
+      xdErr1Minus = Math.abs(xd1 - solver.computeVelocity(t1 - dt));
+
+      //      System.out.println("x1: " + solver.computePosition(t1) + ", xd1: " + solver.computeVelocity(t1));
+      //      System.out.println("x1-: " + solver.computePosition(t1 - dt) + ", xd1-: " + solver.computeVelocity(t1 - dt));
+      //      System.out.println("x1+: " + solver.computePosition(t1 + dt) + ", xd1+: " + solver.computeVelocity(t1 + dt));
+      //      plot(solver, null, true);
+   }
+
+   @Test
+   public void testMultiOrders()
+   {
+      // Test the quality of the endpoints when setup as objectives.
+      double t0 = 0.0;
+      double t1 = 0.5;
+      double t2 = 1.0;
+
+      double x0 = 0.0;
+      double x1 = 1.0;
+      double x2 = 0.0;
+
+      double xd0 = 0.0;
+      double xd2 = 0.0;
+
+      MultiSpline1DSolver solver = new MultiSpline1DSolver();
+      solver.addWaypoint(t0, x0, xd0).setNumberOfCoefficients(3);
+      solver.addWaypointPosition(t1, x1);
+      solver.addWaypoint(t2, x2, xd2);
+      solver.solve();
+
+      double xErr0 = Math.abs(x0 - solver.computePosition(t0));
+      double xErr1 = Math.abs(x1 - solver.computePosition(t1));
+      double xErr2 = Math.abs(x2 - solver.computePosition(t2));
+      double xdErr0 = Math.abs(xd0 - solver.computeVelocity(t0));
+      double xdErr2 = Math.abs(xd2 - solver.computeVelocity(t2));
+//      System.out.println("xErr0: " + xErr0 + ", xErr1: " + xErr1 + ", xErr2: " + xErr2 + ", xdErr0: " + xdErr0 + ", xdErr2: " + xdErr2);
+//      plot(solver, null, true);
+
+      assertEquals(0.0, xErr0, 1.0e-12);
+      assertEquals(0.0, xErr1, 1.0e-12);
+      assertEquals(0.0, xErr2, 1.0e-12);
+      assertEquals(0.0, xdErr0, 1.0e-12);
+      assertEquals(0.0, xdErr2, 1.0e-12);
+   }
+
+   @Test
+   public void testAgainstSinewave()
+   {
+      boolean verbose = false;
+      Random random = new Random(34243);
+
+      Function function = new SineFunction(random);
+
+      MultiSpline1DSolver solver = nextFunctionBasedMultiSpline(random, function);
+
+      for (int i = 1; i < solver.getNumberOfWaypoints() - 1; i++)
+      {
+         solver.getWaypoint(i).setVelocityWeight(0.0); // Not constraining the velocity
+      }
+
+      solver.solve();
+      //      plot(solver, function);
+
+      int numTicks = 5000;
+      double t0 = solver.getFirstWaypoint().getTime();
+      double tf = solver.getLastWaypoint().getTime();
+
+      double xErrAvg = 0.0;
+      double xdErrAvg = 0.0;
+      double xErrSqAvg = 0.0;
+      double xdErrSqAvg = 0.0;
+
+      for (int i = 0; i < numTicks; i++)
+      {
+         double t = EuclidCoreTools.interpolate(t0, tf, i / (numTicks - 1.0));
+         function.compute(t);
+         assertEquals(function.getValue(), solver.computePosition(t), 1.0e-4 * Math.max(1.0, Math.abs(function.getValue())));
+         assertEquals(function.getValueDot(), solver.computeVelocity(t), 1.0e-3 * Math.max(1.0, Math.abs(function.getValueDot())));
+
+         if (verbose)
+         {
+            double xErr = Math.abs(function.getValue() - solver.computePosition(t));
+            double xdErr = Math.abs(function.getValueDot() - solver.computeVelocity(t));
+            xErrAvg += xErr;
+            xdErrAvg += xdErr;
+            xErrSqAvg += xErr * xErr;
+            xdErrSqAvg += xdErr * xdErr;
+         }
+      }
+
+      if (verbose)
+      {
+         xErrAvg /= numTicks;
+         xdErrAvg /= numTicks;
+         xErrSqAvg /= numTicks;
+         xdErrSqAvg /= numTicks;
+
+         System.out.println("xErrAvg: " + xErrAvg + ", xdErrAvg: " + xdErrAvg);
+         System.out.println("xErrSqAvg: " + xErrSqAvg + ", xdErrSqAvg: " + xdErrSqAvg);
+      }
+
+      // Test with explicit velocity constraints
+      for (int i = 1; i < solver.getNumberOfWaypoints() - 1; i++)
+      {
+         solver.getWaypoint(i).setVelocityWeight(Double.POSITIVE_INFINITY);
+      }
+
+      solver.solve();
+      //      plot(solver, function);
+
+      xErrAvg = 0.0;
+      xdErrAvg = 0.0;
+      xErrSqAvg = 0.0;
+      xdErrSqAvg = 0.0;
+
+      for (int i = 0; i < numTicks; i++)
+      {
+         double t = EuclidCoreTools.interpolate(t0, tf, i / (numTicks - 1.0));
+         function.compute(t);
+         assertEquals(function.getValue(), solver.computePosition(t), 1.0e-4 * Math.max(1.0, Math.abs(function.getValue())));
+         assertEquals(function.getValueDot(), solver.computeVelocity(t), 1.0e-3 * Math.max(1.0, Math.abs(function.getValueDot())));
+
+         if (verbose)
+         {
+            double xErr = Math.abs(function.getValue() - solver.computePosition(t));
+            double xdErr = Math.abs(function.getValueDot() - solver.computeVelocity(t));
+            xErrAvg += xErr;
+            xdErrAvg += xdErr;
+            xErrSqAvg += xErr * xErr;
+            xdErrSqAvg += xdErr * xdErr;
+         }
+      }
+
+      if (verbose)
+      {
+         xErrAvg /= numTicks;
+         xdErrAvg /= numTicks;
+         xErrSqAvg /= numTicks;
+         xdErrSqAvg /= numTicks;
+
+         System.out.println("xErrAvg: " + xErrAvg + ", xdErrAvg: " + xdErrAvg);
+         System.out.println("xErrSqAvg: " + xErrSqAvg + ", xdErrSqAvg: " + xdErrSqAvg);
+      }
+
+      // Test with velocity weight
+      for (int i = 1; i < solver.getNumberOfWaypoints() - 1; i++)
+      {
+         solver.getWaypoint(i).setVelocityWeight(1.0e6);
+      }
+
+      solver.solve();
+      //      plot(solver, function);
+
+      xErrAvg = 0.0;
+      xdErrAvg = 0.0;
+      xErrSqAvg = 0.0;
+      xdErrSqAvg = 0.0;
+
+      for (int i = 0; i < numTicks; i++)
+      {
+         double t = EuclidCoreTools.interpolate(t0, tf, i / (numTicks - 1.0));
+         function.compute(t);
+         assertEquals(function.getValue(), solver.computePosition(t), 1.0e-4 * Math.max(1.0, Math.abs(function.getValue())));
+         assertEquals(function.getValueDot(), solver.computeVelocity(t), 1.0e-3 * Math.max(1.0, Math.abs(function.getValueDot())));
+
+         if (verbose)
+         {
+            double xErr = Math.abs(function.getValue() - solver.computePosition(t));
+            double xdErr = Math.abs(function.getValueDot() - solver.computeVelocity(t));
+            xErrAvg += xErr;
+            xdErrAvg += xdErr;
+            xErrSqAvg += xErr * xErr;
+            xdErrSqAvg += xdErr * xdErr;
+         }
+      }
+
+      if (verbose)
+      {
+         xErrAvg /= numTicks;
+         xdErrAvg /= numTicks;
+         xErrSqAvg /= numTicks;
+         xdErrSqAvg /= numTicks;
+
+         System.out.println("xErrAvg: " + xErrAvg + ", xdErrAvg: " + xdErrAvg);
+         System.out.println("xErrSqAvg: " + xErrSqAvg + ", xdErrSqAvg: " + xdErrSqAvg);
+      }
+   }
+
    // Test from the MultiSpline1DSolverTest
    @Test
    public void testAccelerationIntegrationResult()
@@ -158,8 +499,8 @@ public class MultiSpline1DSolverTest
 
          assertEquals(startPosition, solver.computePosition(0.0), 1.0e-9 * Math.max(1.0, Math.abs(startPosition)));
          assertEquals(startPosition, solver.computePosition(-0.1), 1.0e-9 * Math.max(1.0, Math.abs(startPosition)));
-         assertEquals(endPosition, solver.computePosition(1.0), 1.0e-9 * Math.max(1.0, Math.abs(endPosition)));
-         assertEquals(endPosition, solver.computePosition(1.1), 1.0e-9 * Math.max(1.0, Math.abs(endPosition)));
+         assertEquals(endPosition, solver.computePosition(1.0), 1.0e-8 * Math.max(1.0, Math.abs(endPosition)));
+         assertEquals(endPosition, solver.computePosition(1.1), 1.0e-8 * Math.max(1.0, Math.abs(endPosition)));
 
          for (int segmentIndex = 0; segmentIndex < numberOfWaypoints; segmentIndex++)
          {
@@ -264,5 +605,156 @@ public class MultiSpline1DSolverTest
       int index = waypointIndex * defaultCoefficients;
       CommonOps_DDRM.extract(solution, index, index + defaultCoefficients, 0, 1, tempCoeffs, 0, 0);
       return CommonOps_DDRM.dot(tempCoeffs, tempLine);
+   }
+
+   public static Function wrap(BaseFunctionGenerator functionGenerator)
+   {
+      return new Function()
+      {
+         private double lastTime = 0.0;
+
+         @Override
+         public void compute(double t)
+         {
+            functionGenerator.integrateAngle(t - lastTime);
+         }
+
+         @Override
+         public double getValue()
+         {
+            return functionGenerator.getValue();
+         }
+
+         @Override
+         public double getValueDot()
+         {
+            return functionGenerator.getValueDot();
+         }
+      };
+   }
+
+   public static MultiSpline1DSolver nextFunctionBasedMultiSpline(Random random, Function function)
+   {
+      MultiSpline1DSolver next = new MultiSpline1DSolver();
+      int numberOfWaypoints = 2 + random.nextInt(100);
+
+      double t0 = random.nextDouble();
+      double duration = EuclidCoreRandomTools.nextDouble(random, 0.3, 2.0);
+      double tf = t0 + duration;
+      double[] times = new double[numberOfWaypoints];
+      times[0] = t0;
+      times[numberOfWaypoints - 1] = tf;
+
+      for (int i = 1; i < numberOfWaypoints - 1; i++)
+      {
+         double meanInterval = duration / (numberOfWaypoints - 1);
+         double refTime = t0 + i * meanInterval;
+         times[i] = refTime + EuclidCoreRandomTools.nextDouble(random, 0.5 * meanInterval);
+      }
+
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         function.compute(times[i]);
+         double x = function.getValue();
+         double xd = function.getValueDot();
+         next.addWaypoint().set(times[i], x, xd);
+      }
+
+      return next;
+   }
+
+   static void plot(MultiSpline1DSolver solver, Function function)
+   {
+      plot(solver, function, true);
+   }
+
+   static void plot(MultiSpline1DSolver solver, Function function, boolean wait)
+   {
+      int numTicks = 5000;
+      double[] time = new double[numTicks];
+      double[] x_solver = new double[numTicks];
+      double t0 = solver.getFirstWaypoint().getTime();
+      double tf = solver.getLastWaypoint().getTime();
+
+      for (int i = 0; i < numTicks; i++)
+      {
+         double t = EuclidCoreTools.interpolate(t0, tf, i / (numTicks - 1.0));
+         time[i] = t;
+         x_solver[i] = solver.computePosition(t);
+      }
+
+      double[] x_function = null;
+      if (function != null)
+      {
+         x_function = new double[numTicks];
+         for (int i = 0; i < numTicks; i++)
+         {
+            double t = EuclidCoreTools.interpolate(t0, tf, i / (numTicks - 1.0));
+            function.compute(t);
+            x_function[i] = function.getValue();
+         }
+      }
+
+      MatlabChart fig = new MatlabChart();
+      if (function != null)
+         fig.plot(time, x_function, ":b", 1.0f, "function");
+      fig.plot(time, x_solver, "-r", 2.0f, "solver");
+      fig.RenderPlot(); // First render plot before modifying
+      fig.title("Solver output"); // title('Stock 1 vs. Stock 2');
+      fig.xlabel("t"); // xlabel('Days');
+      fig.ylabel("x"); // ylabel('Price');
+      fig.grid("on", "on"); // grid on;
+      fig.legend("northeast"); // legend('AAPL','BAC','Location','northeast')
+      fig.font("Helvetica", 15); // .. 'FontName','Helvetica','FontSize',15
+      fig.displayInJFrame(wait);
+   }
+
+   static interface Function
+   {
+      void compute(double t);
+
+      double getValue();
+
+      double getValueDot();
+   }
+
+   static class SineFunction implements Function
+   {
+      private double amplitude, frequency, offset, phase;
+      private double t = 0.0;
+
+      public SineFunction(double amplitude, double frequency, double offset, double phase)
+      {
+         this.amplitude = amplitude;
+         this.frequency = frequency;
+         this.offset = offset;
+         this.phase = phase;
+      }
+
+      public SineFunction(Random random)
+      {
+         amplitude = random.nextDouble();
+         frequency = 1.0 + 2.0 * random.nextDouble();
+         offset = random.nextDouble();
+         phase = EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      }
+
+      @Override
+      public void compute(double t)
+      {
+         this.t = t;
+      }
+
+      @Override
+      public double getValue()
+      {
+         return offset + amplitude * Math.sin(2.0 * Math.PI * frequency * t + phase);
+      }
+
+      @Override
+      public double getValueDot()
+      {
+         return 2.0 * Math.PI * frequency * amplitude * Math.cos(2.0 * Math.PI * frequency * t + phase);
+      }
    }
 }
