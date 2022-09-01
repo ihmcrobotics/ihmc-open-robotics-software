@@ -180,7 +180,7 @@ public class GDXLiveRobotPartInteractable
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.radioButton(labels.get("Deleted"), !selectablePose3DGizmo.getSelected().get() && !modified))
+      if (ImGui.radioButton(labels.get("Deleted"), isDeleted()))
       {
          delete();
       }
@@ -232,6 +232,11 @@ public class GDXLiveRobotPartInteractable
       {
          collisionLink.setOverrideTransform(false);
       }
+   }
+
+   public boolean isDeleted()
+   {
+      return !selectablePose3DGizmo.getSelected().get() && !modified;
    }
 
    public void destroy()
