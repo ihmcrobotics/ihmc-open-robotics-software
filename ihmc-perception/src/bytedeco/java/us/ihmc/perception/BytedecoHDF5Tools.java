@@ -12,7 +12,7 @@ import static org.bytedeco.hdf5.global.hdf5.*;
 public class BytedecoHDF5Tools
 {
 
-   static final String FILE_NAME = "/home/quantum/Workspace/Storage/Other/Temp/ISR_Logs/atlas_01.h5";
+   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
    static final String DATASET_NAME = "/os_cloud_node/points/0";
    static final int DIM0 = 2048;
    static final int DIM1 = 64;
@@ -41,8 +41,6 @@ public class BytedecoHDF5Tools
 
       DataSpace space = dataset.getSpace();
       int nbDims = space.getSimpleExtentNdims();
-
-      System.out.println("Shape:" + extractShape(dataset, 0) + " " + extractShape(dataset, 1));
 
       FloatPointer p = new FloatPointer(pointsBuffer);
 
