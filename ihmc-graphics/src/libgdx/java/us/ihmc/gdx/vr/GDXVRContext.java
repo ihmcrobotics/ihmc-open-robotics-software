@@ -342,6 +342,11 @@ public class GDXVRContext
       return teleportFrameIHMCZUp;
    }
 
+   public RigidBodyTransform getTeleportIHMCZUpToIHMCZUpWorld()
+   {
+      return teleportIHMCZUpToIHMCZUpWorld;
+   }
+
    public void addPickResult(GDXVRPickResult pickResult)
    {
       pickResults.add(pickResult);

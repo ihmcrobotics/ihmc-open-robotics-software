@@ -165,4 +165,9 @@ public abstract class CommunicationsSyncedRobotModel
    {
       return dataReceptionTimer.createSnapshot();
    }
+
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
 }
