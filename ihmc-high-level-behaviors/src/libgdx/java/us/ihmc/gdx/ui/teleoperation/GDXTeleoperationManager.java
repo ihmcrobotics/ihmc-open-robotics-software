@@ -430,8 +430,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       handManager.renderImGuiWidgets();
 
-      desiredRobot.renderImGuiWidgets();
-      ImGui.sameLine();
+//      desiredRobot.renderImGuiWidgets();
+//      ImGui.sameLine();
       if (ImGui.button(labels.get("Set Desired To Current")))
       {
          wholeBodyDesiredIKManager.setDesiredToCurrent();
@@ -469,6 +469,17 @@ public class GDXTeleoperationManager extends ImGuiPanel
             ImGui.sameLine();
             footInteractables.get(side).renderImGuiWidgets();
          }
+
+         boolean allAreDeleted = pelvisInteractable.isDeleted();
+         for (RobotSide side : handInteractables.sides())
+         {
+            allAreDeleted &= handInteractables.get(side).isDeleted();
+         }
+         for (RobotSide side : footInteractables.sides())
+         {
+            allAreDeleted &= footInteractables.get(side).isDeleted();
+         }
+         desiredRobot.setActive(!allAreDeleted);
 
          ImGui.separator();
 
