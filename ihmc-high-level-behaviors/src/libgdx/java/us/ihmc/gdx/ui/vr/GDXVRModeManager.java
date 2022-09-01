@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -23,6 +23,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class GDXVRModeManager
 {
+   private ROS2SyncedRobotModel syncedRobot;
    private GDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private GDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private GDX3DSituatedImGuiPanel leftHandPanel;
@@ -34,14 +35,15 @@ public class GDXVRModeManager
    private final Notification showFloatVideoPanelNotification = new Notification();
 
    public void create(GDXImGuiBasedUI baseUI,
-                      DRCRobotModel robotModel,
+                      ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
                       RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
+      this.syncedRobot = syncedRobot;
       handPlacedFootstepMode = new GDXVRHandPlacedFootstepMode();
-      handPlacedFootstepMode.create(robotModel, controllerHelper);
+      handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
-      kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(robotModel, controllerHelper, kinematicsStreamingToolboxProcess);
+      kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
       kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
@@ -56,6 +58,17 @@ public class GDXVRModeManager
    public void processVRInput(GDXVRContext vrContext)
    {
       renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
+
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+         if (mode == GDXVRMode.INPUTS_DISABLED && controller.getAButtonActionData().bChanged() && !controller.getAButtonActionData().bState())
+         {
+            vrContext.teleport(transform ->
+            {
+               syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getTransformToDesiredFrame(transform, ReferenceFrame.getWorldFrame());
+            });
+         }
+      });
 
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
@@ -110,6 +123,10 @@ public class GDXVRModeManager
 
       switch (mode)
       {
+         case INPUTS_DISABLED ->
+         {
+            ImGui.text("Press right A button to teleport the playspace to the robot's location.");
+         }
          case FOOTSTEP_PLACEMENT ->
          {
             handPlacedFootstepMode.renderImGuiWidgets();

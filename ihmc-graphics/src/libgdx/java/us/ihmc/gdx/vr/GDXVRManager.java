@@ -30,7 +30,7 @@ public class GDXVRManager
    private boolean skipHeadset = false;
    private final Object syncObject = new Object();
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
-   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
+   private GDXPose3DGizmo scenePoseGizmo;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final Notification posesReady = new Notification();
@@ -114,6 +114,7 @@ public class GDXVRManager
                baseUI.setForegroundFPS(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
+            scenePoseGizmo = new GDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
             scenePoseGizmo.create(baseUI.getPrimary3DPanel());
             contextInitialized = true;
             waitGetPosesThreadRunning = true;
