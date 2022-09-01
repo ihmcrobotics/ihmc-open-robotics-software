@@ -605,6 +605,7 @@ public class MultiSpline1DSolver
       H_minAccel.set(H);
 
       addKnotsCostFunction(H, f);
+      CommonOps_DDRM.scale(0.5, H); // TODO Should that be here?
    }
 
    private void getMinAccelerationCostFunction(DMatrixRMaj H)
