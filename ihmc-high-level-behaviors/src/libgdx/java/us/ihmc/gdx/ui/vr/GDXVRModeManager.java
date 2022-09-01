@@ -13,7 +13,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.GDXJoystickBasedStepping;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,6 +28,7 @@ public class GDXVRModeManager
    private ROS2SyncedRobotModel syncedRobot;
    private GDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private GDXVRKinematicsStreamingMode kinematicsStreamingMode;
+   private GDXJoystickBasedStepping joystickBasedStepping;
    private GDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -45,6 +48,10 @@ public class GDXVRModeManager
 
       kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
       kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
+
+      joystickBasedStepping = new GDXJoystickBasedStepping(syncedRobot.getRobotModel());
+      joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
+      baseUI.getPrimaryScene().addRenderableProvider(joystickBasedStepping::getRenderables, GDXSceneLevel.VIRTUAL);
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
 
@@ -90,6 +97,7 @@ public class GDXVRModeManager
    {
       kinematicsStreamingMode.update();
       leftHandPanel.update();
+      joystickBasedStepping.update(mode == GDXVRMode.JOYSTICK_WALKING);
    }
 
    private void renderImGuiWidgets()
@@ -116,10 +124,10 @@ public class GDXVRModeManager
          if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
             kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
-      //      if (ImGui.radioButton(labels.get("Joystick"), mode == 2))
-      //      {
-      //         mode = 2;
-      //      }
+      if (ImGui.radioButton(labels.get("Joystick walking"), mode == GDXVRMode.JOYSTICK_WALKING))
+      {
+         mode = GDXVRMode.JOYSTICK_WALKING;
+      }
 
       switch (mode)
       {
@@ -134,6 +142,10 @@ public class GDXVRModeManager
          case WHOLE_BODY_IK_STREAMING ->
          {
             kinematicsStreamingMode.renderImGuiWidgets();
+         }
+         case JOYSTICK_WALKING ->
+         {
+            joystickBasedStepping.renderImGuiWidgets();
          }
       }
    }
