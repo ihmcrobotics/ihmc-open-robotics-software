@@ -255,10 +255,6 @@ public class GDXJoystickBasedStepping
             }
          }
       }
-      else
-      {
-         disableWalking();
-      }
 
       if (!continuousStepGenerator.isWalking())
       {
