@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,7 +34,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final ReferenceFrame collisionMeshFrame;
    private final FramePose3D boxPose = new FramePose3D();
    private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
-   private final Shape3DReadOnly shape;
+   private final FrameShape3DReadOnly shape;
    private final MovingReferenceFrame frameAfterJoint;
    private String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
@@ -67,7 +68,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
            color);
    }
 
-   public GDXRobotCollisionLink(Shape3DReadOnly shape,
+   public GDXRobotCollisionLink(FrameShape3DReadOnly shape,
                                 ReferenceFrame shapeFrame,
                                 MovingReferenceFrame frameAfterJoint,
                                 String rigidBodyName,
@@ -84,19 +85,19 @@ public class GDXRobotCollisionLink implements RenderableProvider
       overrideFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideFrame" + rigidBodyName,
                                                                                       ReferenceFrame.getWorldFrame(),
                                                                                       overrideTransform);
-      overrideMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName, overrideFrame, transformToJoint);
+      overrideMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName,
+                                                                                          overrideFrame,
+                                                                                          transformToJoint);
 
       modelInstance = new GDXModelInstance(GDXModelBuilder.buildModel(meshBuilder ->
       {
-         if (shape instanceof Sphere3DReadOnly)
+         if (shape instanceof FrameSphere3DReadOnly sphere)
          {
-            Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
             meshBuilder.addSphere((float) sphere.getRadius(), sphere.getPosition(), color);
             sphereRayIntersection = new SphereRayIntersection();
          }
-         else if (shape instanceof Capsule3DReadOnly)
+         else if (shape instanceof FrameCapsule3DReadOnly capsule)
          {
-            Capsule3DReadOnly capsule = (Capsule3DReadOnly) shape;
             Quaternion orientation = new Quaternion();
             EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), orientation);
             transformToJoint.appendTranslation(capsule.getPosition());
@@ -110,9 +111,8 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                    color);
             capsuleIntersection = new CapsuleRayIntersection();
          }
-         else if (shape instanceof Box3DReadOnly)
+         else if (shape instanceof FrameBox3DReadOnly box)
          {
-            Box3DReadOnly box = (Box3DReadOnly) shape;
             transformToJoint.appendTranslation(box.getPosition());
             transformToJoint.appendOrientation(box.getOrientation());
             meshBuilder.addBox(box.getSizeX(),
@@ -121,14 +121,12 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                color);
             boxRayIntersection = new BoxRayIntersection();
          }
-         else if (shape instanceof PointShape3DReadOnly)
+         else if (shape instanceof FramePointShape3DReadOnly pointShape)
          {
-            PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
             meshBuilder.addSphere((float) 0.01, pointShape, color);
          }
-         else if (shape instanceof Cylinder3DReadOnly)
+         else if (shape instanceof FrameCylinder3DReadOnly cylinder)
          {
-            Cylinder3DReadOnly cylinder = (Cylinder3DReadOnly) shape;
             Quaternion orientation = new Quaternion();
             transformToJoint.appendTranslation(cylinder.getPosition());
             EuclidGeometryTools.orientation3DFromZUpToVector3D(cylinder.getAxis(), orientation);
@@ -136,9 +134,8 @@ public class GDXRobotCollisionLink implements RenderableProvider
             meshBuilder.addCylinder(cylinder.getLength(), cylinder.getRadius(), new Point3D(0.0, 0.0, -cylinder.getHalfLength()), color);
             cylinderRayIntersection = new CylinderRayIntersection();
          }
-         else if (shape instanceof Ellipsoid3DReadOnly)
+         else if (shape instanceof FrameEllipsoid3DReadOnly ellipsoid)
          {
-            Ellipsoid3DReadOnly ellipsoid = (Ellipsoid3DReadOnly) shape;
             transformToJoint.appendTranslation(ellipsoid.getPosition());
             transformToJoint.appendOrientation(ellipsoid.getOrientation());
             meshBuilder.addEllipsoid(ellipsoid.getRadiusX(),
@@ -277,5 +274,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
    public String getRigidBodyName()
    {
       return rigidBodyName;
+   }
+
+   public FrameShape3DReadOnly getShape()
+   {
+      return shape;
    }
 }

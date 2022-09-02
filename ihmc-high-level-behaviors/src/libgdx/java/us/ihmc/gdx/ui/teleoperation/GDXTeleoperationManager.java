@@ -608,4 +608,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       return visualizers;
    }
+
+   public GDXRobotCollisionModel getSelfCollisionModel()
+   {
+      return selfCollisionModel;
+   }
 }
