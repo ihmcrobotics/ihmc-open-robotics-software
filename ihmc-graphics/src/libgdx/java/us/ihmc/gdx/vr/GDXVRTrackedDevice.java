@@ -36,20 +36,27 @@ public abstract class GDXVRTrackedDevice
       if (isConnected)
       {
          HmdMatrix34 openVRRigidBodyTransform = trackedDevicePoses.get(deviceIndex).mDeviceToAbsoluteTracking();
-         GDXTools.toEuclid(openVRRigidBodyTransform, deviceToPlayAreaTransform);
-         deviceYUpZBackFrame.update();
-
-         if (modelInstance == null)
+         if (OpenVRTools.containsNaN(openVRRigidBodyTransform))
          {
-            String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
-                                                                                      VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
-                                                                                      errorCode);
-            Model model = GDXVRModelLoader.loadRenderModel(renderModelName);
-            modelInstance = model != null ? new ModelInstance(model) : null;
+            isConnected = false;
          }
+         else
+         {
+            GDXTools.toEuclid(openVRRigidBodyTransform, deviceToPlayAreaTransform);
+            deviceYUpZBackFrame.update();
 
-         deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
-         GDXTools.toGDX(tempOpenVRToWorldTransform, modelInstance.transform);
+            if (modelInstance == null)
+            {
+               String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
+                                                                                         VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
+                                                                                         errorCode);
+               Model model = GDXVRModelLoader.loadRenderModel(renderModelName);
+               modelInstance = model != null ? new ModelInstance(model) : null;
+            }
+
+            deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
+            GDXTools.toGDX(tempOpenVRToWorldTransform, modelInstance.transform);
+         }
       }
    }
 

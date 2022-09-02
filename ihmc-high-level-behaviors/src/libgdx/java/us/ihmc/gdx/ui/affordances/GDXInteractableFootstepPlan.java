@@ -143,7 +143,7 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
       }
    }
 
-   // TODO: using recycling list to update planned footsteps. Make sure this only gets called when new plan comes in.
+   // NOTE: using RecyclingList to update planned footsteps. Make sure this only gets called when new plan comes in.
    public void updateFromPlan(FootstepPlan footstepPlan)
    {
       for (GDXInteractableFootstep step : footsteps)

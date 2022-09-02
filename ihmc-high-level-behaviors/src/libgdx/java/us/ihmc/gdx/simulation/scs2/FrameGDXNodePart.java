@@ -18,10 +18,10 @@ public class FrameGDXNodePart
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   private final DynamicGDXModel model;
-   private final ModelInstance modelInstance;
+   private DynamicGDXModel model;
+   private ModelInstance modelInstance;
    private final String name;
-   private final ReferenceFrame modelFrame;
+   private ReferenceFrame modelFrame;
 
    public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name)
    {
@@ -31,6 +31,12 @@ public class FrameGDXNodePart
       modelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("modelFrame" + INDEX.getAndIncrement(),
                                                                                      referenceFrame,
                                                                                      model.getLocalTransform());
+   }
+
+   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name, float x, float y, float z)
+   {
+      this(referenceFrame,model,name);
+      scale(x, y, z);
    }
 
    public void update()
@@ -44,6 +50,12 @@ public class FrameGDXNodePart
       {
          LogTools.warn(e.getMessage());
       }
+   }
+
+   public void scale(float x, float y, float z)
+   {
+      modelInstance.transform.scale(x, y, z);
+      model.getModelInstance().transform.scale(x, y, z);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

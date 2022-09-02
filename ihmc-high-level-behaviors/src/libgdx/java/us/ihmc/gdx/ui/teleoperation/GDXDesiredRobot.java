@@ -68,7 +68,7 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
          kneeJoint.getBodyBC().getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
          kneeJoint.getBodyDA().getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
       }
-      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator());
+      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), true);
    }
 
    @Override
