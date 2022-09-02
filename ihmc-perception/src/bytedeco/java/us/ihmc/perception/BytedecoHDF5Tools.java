@@ -30,10 +30,10 @@ public class BytedecoHDF5Tools
       else return 0;
    }
 
-   public static void loadPointCloud(String filename, RecyclingArrayList<Point3D32> points)
+   public static void loadPointCloud(String filename, RecyclingArrayList<Point3D32> points, int index)
    {
       H5File file = new H5File(filename, H5F_ACC_RDONLY);
-      DataSet dataset = file.openDataSet("/os_cloud_node/points/0");
+      DataSet dataset = file.openDataSet("/os_cloud_node/points/" + index);
       float[] pointsBuffer = new float[DIM0 * DIM1 * 3];
 
       DataSpace space = dataset.getSpace();
@@ -66,7 +66,7 @@ public class BytedecoHDF5Tools
 
          RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(100000, Point3D32::new);
 
-         BytedecoHDF5Tools.loadPointCloud(FILE_NAME, points);
+         BytedecoHDF5Tools.loadPointCloud(FILE_NAME, points, 0);
 
          for(Point3D32 point : points)
          {

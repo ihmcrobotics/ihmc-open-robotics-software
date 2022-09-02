@@ -68,6 +68,8 @@ public class GDXPerceptionVisualizerUI
 
    private Activator nativesLoadedActivator;
 
+   private int frameIndex = 0;
+
    public GDXPerceptionVisualizerUI()
    {
 
@@ -143,7 +145,7 @@ public class GDXPerceptionVisualizerUI
 
 //            ros1Node.execute();
 
-            BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5", pointsToRender);
+            BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5", pointsToRender, frameIndex);
 
             LogTools.info("Points Loaded: {}", pointsToRender.size());
 
@@ -195,6 +197,13 @@ public class GDXPerceptionVisualizerUI
 
             globalVisualizersUI.update();
 
+
+            frameIndex++;
+
+            if((frameIndex % 30) == 0) {
+               BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5", pointsToRender, frameIndex / 30);
+               LogTools.info("Loading Cloud: {}", frameIndex / 30);
+            }
 
             pointCloudRenderer.setPointsToRender(pointsToRender, Color.BLUE);
             if (!pointsToRender.isEmpty())
