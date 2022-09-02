@@ -64,9 +64,7 @@ public class GDXPerceptionVisualizerUI
 
    private GDXHighLevelDepthSensorSimulator ousterLidar;
 
-   private ArrayList<Point3D32> points;
-
-   RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>();
+   private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(200000, Point3D32::new);
 
    private Activator nativesLoadedActivator;
 
@@ -145,14 +143,11 @@ public class GDXPerceptionVisualizerUI
 
 //            ros1Node.execute();
 
-            points = BytedecoHDF5Tools.loadPointCloud("/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5");
+            BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5", pointsToRender);
 
-            LogTools.info("Points Loaded: {}", points.size());
-
-            pointsToRender.addAll(points);
+            LogTools.info("Points Loaded: {}", pointsToRender.size());
 
             baseUI.create();
-
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
 
             //                simulatedDepthSensor.create();
@@ -175,7 +170,7 @@ public class GDXPerceptionVisualizerUI
             //                environmentBuilderUI.getModelInput().addInstance(l515Model);
 
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
-            pointCloudRenderer.create(100000);
+            pointCloudRenderer.create(200000);
 
             ousterModel = new GDXOusterSensorObject();
             baseUI.getPrimaryScene().addRenderableProvider(ousterModel::getRealRenderables);
