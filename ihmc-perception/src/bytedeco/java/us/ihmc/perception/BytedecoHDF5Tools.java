@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bytedeco.javacpp.*;
 import org.bytedeco.hdf5.*;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
@@ -29,13 +30,9 @@ public class BytedecoHDF5Tools
       else return 0;
    }
 
-   public static ArrayList<Point3D32> loadPointCloud(String filename)
+   public static void loadPointCloud(String filename, RecyclingArrayList<Point3D32> points)
    {
-
-
-      ArrayList<Point3D32> points = new ArrayList<>();
-
-      H5File file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
+      H5File file = new H5File(filename, H5F_ACC_RDONLY);
       DataSet dataset = file.openDataSet("/os_cloud_node/points/0");
       float[] pointsBuffer = new float[DIM0 * DIM1 * 3];
 
@@ -47,15 +44,14 @@ public class BytedecoHDF5Tools
       dataset.read(p, PredType.NATIVE_FLOAT());
       p.get(pointsBuffer);
 
+      points.clear();
       for(int i = 0; i<pointsBuffer.length; i+=3)
       {
-         Point3D32 point = new Point3D32(pointsBuffer[i], pointsBuffer[i+1], pointsBuffer[i+2]);
-         points.add(point);
+         Point3D32 point = points.add();
+         point.set(pointsBuffer[i], pointsBuffer[i+1], pointsBuffer[i+2]);
       }
 
       file.close();
-
-      return points;
    }
 
    public static void main(String[] args)
@@ -68,7 +64,9 @@ public class BytedecoHDF5Tools
       try {
          org.bytedeco.hdf5.Exception.dontPrint();
 
-         ArrayList<Point3D32> points = BytedecoHDF5Tools.loadPointCloud(FILE_NAME);
+         RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(100000, Point3D32::new);
+
+         BytedecoHDF5Tools.loadPointCloud(FILE_NAME, points);
 
          for(Point3D32 point : points)
          {

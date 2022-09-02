@@ -55,6 +55,7 @@ val javaCPPVersion = "1.5.7"
 
 bytedecoDependencies {
    api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:ihmc-commons:0.31.0")
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.19-")
    apiBytedecoNatives("opencv", "4.5.5-")
