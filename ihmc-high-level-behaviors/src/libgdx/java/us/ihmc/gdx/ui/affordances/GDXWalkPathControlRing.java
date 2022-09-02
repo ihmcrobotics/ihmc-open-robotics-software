@@ -143,7 +143,9 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
 
+
       if (footstepPlanToGenerateMeshes != null)
+//      if (footstepPlan != null)
       {
          plannedFootstepPlacement.updateFromPlan(footstepPlan);
 //         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,

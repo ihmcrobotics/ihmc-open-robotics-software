@@ -402,6 +402,4 @@ public class GDX3DPanel
    {
       return windowDrawMaxY;
    }
-
-
 }

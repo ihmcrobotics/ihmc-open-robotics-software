@@ -184,7 +184,7 @@ public class GDXFocusBasedCamera extends Camera
       focusPointPose.getPosition().set(translation);
    }
 
-   private void updateCameraPose()
+   public void updateCameraPose()
    {
       zoom = MathTools.clamp(zoom, 0.1, 100.0);
 
@@ -230,18 +230,29 @@ public class GDXFocusBasedCamera extends Camera
 
       int orbitMouseButton = useMiddleClickViewOrbit ? ImGuiMouseButton.Middle : ImGuiMouseButton.Left;
       ImGuiMouseDragData orbitDragData = input.getMouseDragData(orbitMouseButton);
-
       boolean dragJustStarted = ImGui.isWindowHovered() && orbitDragData.getDragJustStarted();
+
+      ImGuiMouseDragData panDragData = !useMiddleClickViewOrbit ? input.getMouseDragData(ImGuiMouseButton.Middle) : null;
+      boolean panDrag = ImGui.isWindowHovered() && panDragData!=null && panDragData.getDragJustStarted();
+
       if (!useMiddleClickViewOrbit)
          dragJustStarted &= input.getClosestPick() == null;
       if (dragJustStarted)
       {
          orbitDragData.setObjectBeingDragged(this);
       }
-
       if (orbitDragData.isDragging() && orbitDragData.getObjectBeingDragged() == this)
       {
          mouseDragged(orbitDragData.getMouseDraggedX(), orbitDragData.getMouseDraggedY());
+      }
+
+      if (panDrag)
+      {
+         panDragData.setObjectBeingDragged(this);
+      }
+      if (panDragData!=null && panDragData.isDragging() && panDragData.getObjectBeingDragged() == this)
+      {
+         mousePanned(panDragData.getMouseDraggedX(), panDragData.getMouseDraggedY());
       }
 
       if (input.isWindowHovered() && !ImGui.getIO().getKeyCtrl())
@@ -254,6 +265,13 @@ public class GDXFocusBasedCamera extends Camera
    {
       latitude -= latitudeSpeed * deltaY;
       longitude += longitudeSpeed * deltaX;
+   }
+
+   private void mousePanned(float deltaX, float deltaY)
+   {
+      focusPointPose.appendTranslation(0.0, 0.005 * deltaX, 0.0);
+      focusPointPose.appendTranslation(0.005 * deltaY, 0.0, 0.0);
+      updateCameraPose();
    }
 
    private void scrolled(float amountY)
@@ -285,17 +303,18 @@ public class GDXFocusBasedCamera extends Camera
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
          if(ctrlHeld)
          {
-            if (isEPressed) zoom -= 0.05;
-
-            if (isCPressed) zoom += 0.05;
-
-            if (isAPressed) longitude += longitudeSpeed * 2.0;
-
-            if (isDPressed) longitude -= longitudeSpeed * 2.0;
-
-            if (isSPressed) latitude  += latitudeSpeed * 2.0;
-
-            if (isWPressed) latitude  -= latitudeSpeed * 2.0;
+            if (isEPressed)
+               zoom -= 0.1;
+            if (isCPressed)
+               zoom += 0.1;
+            if (isAPressed)
+               longitude += longitudeSpeed * 2.0;
+            if (isDPressed)
+               longitude -= longitudeSpeed * 2.0;
+            if (isSPressed)
+               latitude += latitudeSpeed * 2.0;
+            if (isWPressed)
+               latitude -= latitudeSpeed * 2.0;
          }
          else
          {
@@ -383,7 +402,7 @@ public class GDXFocusBasedCamera extends Camera
       return cameraFrame;
    }
 
-   public FramePose3DReadOnly getCameraPose()
+   public FramePose3D getCameraPose()
    {
       return cameraPose;
    }
@@ -411,5 +430,11 @@ public class GDXFocusBasedCamera extends Camera
    public void setUseMiddleClickViewOrbit(boolean useMiddleClickViewOrbit)
    {
       this.useMiddleClickViewOrbit = useMiddleClickViewOrbit;
+   }
+
+   public void setFocusPointPose(RigidBodyTransform rigidBodyTransform)
+   {
+      focusPointPose.set(rigidBodyTransform);
+      updateCameraPose();
    }
 }

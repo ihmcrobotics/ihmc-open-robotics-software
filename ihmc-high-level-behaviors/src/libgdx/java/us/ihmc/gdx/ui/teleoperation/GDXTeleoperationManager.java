@@ -17,7 +17,9 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -53,6 +55,8 @@ import java.util.List;
  */
 public class GDXTeleoperationManager extends ImGuiPanel
 {
+   GDXImGuiBasedUI baseUI;
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
                                                                            "ihmc-high-level-behaviors/src/libgdx/resources/icons");
@@ -170,6 +174,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      this.baseUI = baseUI;
       desiredRobot.create();
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
@@ -375,6 +380,15 @@ public class GDXTeleoperationManager extends ImGuiPanel
             {
                handInteractables.get(side).process3DViewInput(input);
             }
+         }
+      }
+      boolean ctrlHeld = imgui.internal.ImGui.getIO().getKeyCtrl();
+      boolean isPPressed = input.isWindowHovered() && ImGui.isKeyDown('P');
+      if (ctrlHeld)
+      {
+         if (isPPressed)
+         {
+            teleportCameraToRobotPelvis();
          }
       }
    }
@@ -627,5 +641,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public GDXRobotCollisionModel getSelfCollisionModel()
    {
       return selfCollisionModel;
+   }
+   
+      public void teleportCameraToRobotPelvis()
+   {
+      RigidBodyTransform robotTransform = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame();
+      GDXFocusBasedCamera camera = baseUI.getPrimary3DPanel().getCamera3D();
+      camera.setFocusPointPose(robotTransform);
    }
 }

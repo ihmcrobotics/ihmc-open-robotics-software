@@ -28,6 +28,11 @@ public class FrameGDXGraphicsNode
          coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.15);
    }
 
+   public void addModelPart(DynamicGDXModel model, String name, float x, float y, float z)
+   {
+      parts.add(new FrameGDXNodePart(referenceFrame, model, name, x, y, z));
+   }
+
    public void addModelPart(DynamicGDXModel model, String name)
    {
       parts.add(new FrameGDXNodePart(referenceFrame, model, name));
