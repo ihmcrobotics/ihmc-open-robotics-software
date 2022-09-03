@@ -25,6 +25,9 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Clean up to have lots of different font sizes available by number.
+ */
 public class ImGuiTools
 {
    private static final AtomicInteger GLOBAL_WIDGET_INDEX = new AtomicInteger();
@@ -293,13 +296,6 @@ public class ImGuiTools
    public static ImFont getMediumFont()
    {
       return mediumFont;
-   }
-
-   // TODO: get custom size fonts
-   public static ImFont getCustomFont(float fontSize)
-   {
-//      return io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), fontSize, customFontConfig);
-      return null;
    }
 
    public static ImFont getSmallFont()
