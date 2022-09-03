@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BigVideoPacket;
+import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import imgui.ImGui;
@@ -19,6 +20,7 @@ import imgui.type.ImFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -44,6 +46,7 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -97,7 +100,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private ByteBuffer rgb8Buffer;
 
    private ROS2NodeInterface ros2Node;
-   private boolean ros2IsLidarScan;
+   private Class<?> pointCloudMessageType;
    private IHMCROS2Publisher<?> publisher;
    private RealtimeROS2Node realtimeROS2Node;
    private IHMCRealtimeROS2Publisher<BigVideoPacket> ros2VideoPublisher;
@@ -133,6 +136,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final Color pointColorFromPicker = new Color();
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
+   private OpenCLManager openCLManager;
+   private _cl_program openCLProgram;
 
    public GDXHighLevelDepthSensorSimulator(String sensorName,
                                            ReferenceFrame sensorFrame,
@@ -223,9 +228,20 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
       this.ros2Node = ros2Node;
       this.ros2PointCloudTopic = ros2PointCloudTopic;
       ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
-      ros2IsLidarScan = ros2PointCloudTopic.getType().equals(LidarScanMessage.class);
-      if (!ros2IsLidarScan)
+      pointCloudMessageType = ros2PointCloudTopic.getType();
+      if (pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
+      {
          ros2ColorsToPublish = new int[imageWidth * imageHeight];
+      }
+      else if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
+      {
+         openCLManager = new OpenCLManager();
+         openCLManager.create();
+         openCLProgram = openCLManager.loadProgram(getClass().getSimpleName());
+         openCLManager.createKernel(openCLProgram, "createPointCloud");
+//         getLowLevelSimulator().
+      }
+
       LogTools.info("Publishing ROS 2 point cloud: {}", ros2PointCloudTopic.getName());
       publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.DEFAULT());
    }
@@ -455,14 +471,14 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
                long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
                tempSensorFramePose.setToZero(sensorFrame);
                tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               if (ros2IsLidarScan)
+               if (pointCloudMessageType.equals(LidarScanMessage.class))
                {
                   LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp,
                                                                                        ros2PointsToPublish,
                                                                                        tempSensorFramePose);
                   ((IHMCROS2Publisher<LidarScanMessage>) publisher).publish(message);
                }
-               else
+               else if (pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
                {
                   int size = ros2PointsToPublish.size();
                   Point3D[] points = ros2PointsToPublish.toArray(new Point3D[size]);
@@ -478,6 +494,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
                   message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
                   //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
                   ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
+               }
+               else if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
+               {
+
                }
             });
          }
