@@ -17,7 +17,7 @@ mainDependencies {
    api("org.georegression:georegression:0.22")
    api("org.ddogleg:ddogleg:0.18")
    api("org.apache.commons:commons-math3:3.6.1")
-   api("com.thoughtworks.xstream:xstream:1.4.7")
+   api("com.thoughtworks.xstream:xstream:1.4.19")
    api("org.jgrapht:jgrapht-core:0.9.0")
    api("org.jgrapht:jgrapht-ext:0.9.0")
    api("com.github.wendykierp:JTransforms:3.1")
