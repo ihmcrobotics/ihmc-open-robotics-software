@@ -152,10 +152,9 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
       }
       footsteps.clear();
 
-      ArrayList<PlannedFootstep> plannedSteps = footstepPlan.getFootsteps();
-      for (int i = 0; i < plannedSteps.size(); ++i)
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
-         PlannedFootstep plannedStep = plannedSteps.get(i);
+         PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
          GDXInteractableFootstep addedStep = footsteps.add();
          addedStep.updateFromPlannedStep(baseUI, plannedStep, i);
       }
