@@ -1,10 +1,11 @@
-package us.ihmc.gdx.tools;
+package us.ihmc.gdx.ui;
 
+import us.ihmc.gdx.tools.GDXIconTexture;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 
-public class GDXToolButton
+public class GDX3DPanelToolbarButton
 {
    private final String buttonName;
    private ArrayList<GDXIconTexture> icons = new ArrayList<>();
@@ -14,12 +15,12 @@ public class GDXToolButton
    private int stateIndex = 0;
    private String toolTipText = new String();
 
-   public GDXToolButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable)
+   public GDX3DPanelToolbarButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable)
    {
       this(buttonName,iconDirectory,iconFileName,runnable,false);
    }
 
-   public GDXToolButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable, boolean depends)
+   public GDX3DPanelToolbarButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable, boolean depends)
    {
       this.buttonName = buttonName;
       icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
@@ -34,12 +35,12 @@ public class GDXToolButton
       this.depends = depends;
    }
 
-   public GDXToolButton(String buttonName,
-                        WorkspaceDirectory iconDirectory,
-                        String iconFileName,
-                        ArrayList<Runnable> runnables,
-                        boolean togglable,
-                        boolean depends)
+   public GDX3DPanelToolbarButton(String buttonName,
+                                  WorkspaceDirectory iconDirectory,
+                                  String iconFileName,
+                                  ArrayList<Runnable> runnables,
+                                  boolean togglable,
+                                  boolean depends)
    {
       this.buttonName = buttonName;
       icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
@@ -48,12 +49,12 @@ public class GDXToolButton
       this.depends = depends;
    }
 
-   public GDXToolButton(String buttonName,
-                        WorkspaceDirectory iconDirectory,
-                        ArrayList<String> iconFileNames,
-                        ArrayList<Runnable> runnables,
-                        boolean togglable,
-                        boolean depends)
+   public GDX3DPanelToolbarButton(String buttonName,
+                                  WorkspaceDirectory iconDirectory,
+                                  ArrayList<String> iconFileNames,
+                                  ArrayList<Runnable> runnables,
+                                  boolean togglable,
+                                  boolean depends)
    {
       this.buttonName = buttonName;
       for (String iconFileName : iconFileNames)

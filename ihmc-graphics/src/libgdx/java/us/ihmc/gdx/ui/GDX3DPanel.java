@@ -24,7 +24,6 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXToolButton;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
@@ -67,7 +66,7 @@ public class GDX3DPanel
    private float windowDrawMaxX;
    private float windowDrawMaxY;
 
-   private GDXToolBar toolbar = new GDXToolBar();
+   private GDX3DPanelToolbar toolbar = new GDX3DPanelToolbar();
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -308,7 +307,7 @@ public class GDX3DPanel
    }
 
    // NOTE: hot button add feature from anywhere in other classes where baseUI (GDXImGuiBasedUI) is accessible.
-   public void addHotButton(GDXToolButton quickButton)
+   public void addToolbarButton(GDX3DPanelToolbarButton quickButton)
    {
       toolbar.addButton(quickButton);
    }

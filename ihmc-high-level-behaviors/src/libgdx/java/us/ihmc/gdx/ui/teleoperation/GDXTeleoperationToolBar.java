@@ -1,7 +1,7 @@
 package us.ihmc.gdx.ui.teleoperation;
 
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.tools.GDXToolButton;
+import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class GDXTeleoperationToolBar
    private GDXIconTexture continueIcon;
    private GDXIconTexture shutdownIcon;
    private final boolean hotButtonTesting = true;
-   private ArrayList<GDXToolButton> buttons = new ArrayList<>();
+   private ArrayList<GDX3DPanelToolbarButton> buttons = new ArrayList<>();
    private ArrayList<GDXIconTexture> iconTextures;
    // FIXME: Need proper (generalized) way to implement toggling later.
    private int stateIndex = 0;

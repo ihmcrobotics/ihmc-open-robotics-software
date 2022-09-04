@@ -18,7 +18,7 @@ import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.tools.GDXToolButton;
+import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -60,17 +60,17 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       feetIcon = new GDXIconTexture(iconDirectory.file("feet.png"));
 
       //NOTE: adding hot button for left and right foot
-      GDXToolButton button;
+      GDX3DPanelToolbarButton button;
       String leftFootFileName = "leftFoot_depress.png";
       String rightFootFileName = "rightFoot_depress.png";
       Runnable leftFootRunnable = () -> createNewFootStep(RobotSide.LEFT);
       Runnable rightFootRunnable = () -> createNewFootStep(RobotSide.RIGHT);
-      button = new GDXToolButton("leftFootStep", iconDirectory, leftFootFileName, leftFootRunnable);
+      button = new GDX3DPanelToolbarButton("leftFootStep", iconDirectory, leftFootFileName, leftFootRunnable);
       button.setToolTipText("action: Summon LEFT foot step");
-      baseUI.getPrimary3DPanel().addHotButton(button);
-      button = new GDXToolButton("rightFootStep", iconDirectory, rightFootFileName, rightFootRunnable);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
+      button = new GDX3DPanelToolbarButton("rightFootStep", iconDirectory, rightFootFileName, rightFootRunnable);
       button.setToolTipText("action: Summon RIGHT foot step");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
