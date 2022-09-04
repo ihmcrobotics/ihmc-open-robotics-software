@@ -4,21 +4,20 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.type.ImBoolean;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.tools.GDXToolButton;
+
 import java.util.ArrayList;
 
 // TODO: Extract tool bar method from GDX3DPanel
-public class GDXToolBar
+public class GDX3DPanelToolbar
 {
    private final float iconSize = 35.0f;
    private final float gap = 17.7f;
-   private ArrayList<GDXToolButton> buttons = new ArrayList<>();
+   private ArrayList<GDX3DPanelToolbarButton> buttons = new ArrayList<>();
    private final ImBoolean showFlag = new ImBoolean(true);
 
    // with tab bar
    //            int windowFlags = ImGuiWindowFlags.None;
-   //            panelHei += ImGuiTools.TAB_BAR_HEIGHT;
+   //            panelHeight += ImGuiTools.TAB_BAR_HEIGHT;
 
    // FIXME: Need proper (generalized) way to implement toggling later.
    private int stateIndex = 0;
@@ -32,9 +31,9 @@ public class GDXToolBar
          int numButtons = buttons.size();
          float offsetY = 12.0f;
          float panelWidth = iconSize * numButtons + gap * numButtons;
-         float panelHei = iconSize + 2 * offsetY;
+         float panelHeight = iconSize + 2 * offsetY;
 
-         ImGui.setNextWindowSize(panelWidth, panelHei);
+         ImGui.setNextWindowSize(panelWidth, panelHeight);
          float centerX = mainWindowPosX + mainWindowWidth / 2;
          float startX = centerX - panelWidth / 2;
          ImGui.setNextWindowPos(startX, mainWindowPosY + 15.0f);
@@ -44,7 +43,7 @@ public class GDXToolBar
 
          for (int i = 0; i < buttons.size(); ++i)
          {
-            GDXToolButton button = buttons.get(i);
+            GDX3DPanelToolbarButton button = buttons.get(i);
 
             // button clicked.
             if (ImGui.imageButton(button.getIcon().getTexture().getTextureObjectHandle(), iconSize, iconSize))
@@ -71,8 +70,8 @@ public class GDXToolBar
       }
    }
 
-   public void addButton(GDXToolButton gdxToolButton)
+   public void addButton(GDX3DPanelToolbarButton gdx3DPanelToolbarButton)
    {
-      buttons.add(gdxToolButton);
+      buttons.add(gdx3DPanelToolbarButton);
    }
 }

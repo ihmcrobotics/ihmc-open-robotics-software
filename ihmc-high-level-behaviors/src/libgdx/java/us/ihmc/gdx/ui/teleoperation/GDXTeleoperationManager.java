@@ -24,7 +24,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXToolButton;
+import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.*;
@@ -276,12 +276,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       // Note: hot button for calibrate, open / close hand
       WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-      GDXToolButton button;
+      GDX3DPanelToolbarButton button;
       // STAND PREP
       Runnable standPrepRunnable = robotLowLevelMessenger::sendStandRequest;
-      button = new GDXToolButton("standPrepButton", iconDirectory, "standPrep.png", standPrepRunnable);
+      button = new GDX3DPanelToolbarButton("standPrepButton", iconDirectory, "standPrep.png", standPrepRunnable);
       button.setToolTipText("action: Stand prep");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
 
       handManager.create(baseUI, iconDirectory, communicationHelper);
 

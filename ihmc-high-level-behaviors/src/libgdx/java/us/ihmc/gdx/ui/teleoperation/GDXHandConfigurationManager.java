@@ -7,7 +7,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.gdx.tools.GDXToolButton;
+import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -40,31 +40,31 @@ public class GDXHandConfigurationManager
          handConfigurationNames[i] = values[i].name();
       }
 
-      GDXToolButton button;
+      GDX3DPanelToolbarButton button;
       // TOGGLING.
       ArrayList<String> fileNames = new ArrayList<>(Arrays.asList("leftToggle.jpg", "rightToggle.jpg"));
-      button = new GDXToolButton("leftRightToggleButton", iconDirectory, fileNames, null, true, false);
+      button = new GDX3DPanelToolbarButton("leftRightToggleButton", iconDirectory, fileNames, null, true, false);
       button.setToolTipText("toggle: red - left | green - right");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
 
       // CALIBRATING
       ArrayList<Runnable> calibrateRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CALIBRATE),
                                                                              () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CALIBRATE)));
-      button = new GDXToolButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true);
+      button = new GDX3DPanelToolbarButton("calibrateButton", iconDirectory, "calibrate.png", calibrateRunnables, false, true);
       button.setToolTipText("action: Calibrate");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
 
       // OPEN, CLOSE
       ArrayList<Runnable> openRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.OPEN),
                                                                         () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.OPEN)));
       ArrayList<Runnable> closeRunnables = new ArrayList<>(Arrays.asList(() -> publishHandCommand(RobotSide.LEFT, HandConfiguration.CLOSE),
                                                                          () -> publishHandCommand(RobotSide.RIGHT, HandConfiguration.CLOSE)));
-      button = new GDXToolButton("openGripperButton", iconDirectory, "openGripper.jpg", openRunnables, false, true);
+      button = new GDX3DPanelToolbarButton("openGripperButton", iconDirectory, "openGripper.jpg", openRunnables, false, true);
       button.setToolTipText("action: OPEN gripper based on toggle (left, right)");
-      baseUI.getPrimary3DPanel().addHotButton(button);
-      button = new GDXToolButton("closeGripperButton", iconDirectory, "closeGripper.jpg", closeRunnables, false, true);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
+      button = new GDX3DPanelToolbarButton("closeGripperButton", iconDirectory, "closeGripper.jpg", closeRunnables, false, true);
       button.setToolTipText("action: CLOSE gripper based on toggle (left, right)");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      baseUI.getPrimary3DPanel().addToolbarButton(button);
    }
 
    public void renderImGuiWidgets()
