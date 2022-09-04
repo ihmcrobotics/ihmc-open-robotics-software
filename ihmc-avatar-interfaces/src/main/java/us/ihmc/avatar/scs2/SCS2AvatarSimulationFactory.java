@@ -603,7 +603,8 @@ public class SCS2AvatarSimulationFactory
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
-      controllerFactory.useDefaultPushRecoveryControlState();
+      if (pushRecoveryControllerParameters != null)
+         controllerFactory.useDefaultPushRecoveryControlState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
