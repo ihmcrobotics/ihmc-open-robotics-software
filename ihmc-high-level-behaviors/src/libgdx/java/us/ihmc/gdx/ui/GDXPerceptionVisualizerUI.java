@@ -40,6 +40,8 @@ import java.util.ArrayList;
 
 public class GDXPerceptionVisualizerUI
 {
+   private static final String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+
    private PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
    private PlanarRegionsList regionsUpdate = new PlanarRegionsList();
    //    private final GDXHighLevelDepthSensorSimulator simulatedDepthSensor;
@@ -145,7 +147,7 @@ public class GDXPerceptionVisualizerUI
 
 //            ros1Node.execute();
 
-            BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5", pointsToRender, frameIndex);
+            BytedecoHDF5Tools.loadPointCloud(HDF5_FILENAME, pointsToRender, frameIndex);
 
             LogTools.info("Points Loaded: {}", pointsToRender.size());
 
@@ -201,7 +203,7 @@ public class GDXPerceptionVisualizerUI
             frameIndex++;
 
             if((frameIndex % 30) == 0) {
-               BytedecoHDF5Tools.loadPointCloud("/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5", pointsToRender, frameIndex / 30);
+               BytedecoHDF5Tools.loadPointCloud(HDF5_FILENAME, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
             }
 
