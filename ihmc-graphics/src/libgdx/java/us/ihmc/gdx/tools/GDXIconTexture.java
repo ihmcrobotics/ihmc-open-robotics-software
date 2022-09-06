@@ -40,7 +40,6 @@ public class GDXIconTexture
 
       BytePointer bytePointer = new BytePointer(directByteBuffer);
       Mat encodedDataMat = new Mat(bytes.length, 1, opencv_core.CV_8UC1, bytePointer);
-      encodedDataMat.data(bytePointer);
 
       Mat readImage = opencv_imgcodecs.imdecode(encodedDataMat, opencv_imgcodecs.IMREAD_COLOR);
       texture = initialize(readImage);
