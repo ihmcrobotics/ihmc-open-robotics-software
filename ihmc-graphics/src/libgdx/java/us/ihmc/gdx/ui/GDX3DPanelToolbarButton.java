@@ -1,128 +1,46 @@
 package us.ihmc.gdx.ui;
 
 import us.ihmc.gdx.tools.GDXIconTexture;
-import us.ihmc.tools.io.WorkspaceDirectory;
-
-import java.util.ArrayList;
 
 public class GDX3DPanelToolbarButton
 {
-   private final String buttonName;
-   private ArrayList<GDXIconTexture> icons = new ArrayList<>();
-   private ArrayList<Runnable> runnables = new ArrayList<>();
-   private boolean togglable = false;
-   private boolean depends = false;
-   private int stateIndex = 0;
-   private String toolTipText = new String();
+   private Runnable onPressed;
+   private GDXIconTexture icon;
+   private String tooltipText = null;
 
-   public GDX3DPanelToolbarButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable)
+   public void setOnPressed(Runnable onPressed)
    {
-      this(buttonName,iconDirectory,iconFileName,runnable,false);
+      this.onPressed = onPressed;
    }
 
-   public GDX3DPanelToolbarButton(String buttonName, WorkspaceDirectory iconDirectory, String iconFileName, Runnable runnable, boolean depends)
+   public void setTooltipText(String text)
    {
-      this.buttonName = buttonName;
-      icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
-      if (runnable == null)
-      {
-         runnables = null;
-      }
-      else
-      {
-         runnables.add(runnable);
-      }
-      this.depends = depends;
+      tooltipText = text;
    }
 
-   public GDX3DPanelToolbarButton(String buttonName,
-                                  WorkspaceDirectory iconDirectory,
-                                  String iconFileName,
-                                  ArrayList<Runnable> runnables,
-                                  boolean togglable,
-                                  boolean depends)
+   public GDXIconTexture loadAndSetIcon(String iconAbsoluteResourcePath)
    {
-      this.buttonName = buttonName;
-      icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
-      this.runnables = runnables;
-      this.togglable = togglable;
-      this.depends = depends;
+      icon = new GDXIconTexture(iconAbsoluteResourcePath);
+      return icon;
    }
 
-   public GDX3DPanelToolbarButton(String buttonName,
-                                  WorkspaceDirectory iconDirectory,
-                                  ArrayList<String> iconFileNames,
-                                  ArrayList<Runnable> runnables,
-                                  boolean togglable,
-                                  boolean depends)
+   public void setIcon(GDXIconTexture iconTexture)
    {
-      this.buttonName = buttonName;
-      for (String iconFileName : iconFileNames)
-      {
-         icons.add(new GDXIconTexture(iconDirectory.file(iconFileName)));
-      }
-      this.runnables = runnables;
-      this.togglable = togglable;
-      this.depends = depends;
+      this.icon = iconTexture;
    }
 
-   public void isClicked()
+   public void onPressed()
    {
-      if (togglable)
-      {
-         stateIndex = (stateIndex + 1) % icons.size();
-      }
-   }
-
-   public void setState(int index)
-   {
-      this.stateIndex = index;
-   }
-
-   public int getStateIndex()
-   {
-      return stateIndex;
-   }
-
-   public void execute()
-   {
-      if (runnables == null)
-         return;
-      if (runnables.size() == 1)
-         runnables.get(0).run();
-      else
-         runnables.get(getStateIndex()).run();
+      onPressed.run();
    }
 
    public GDXIconTexture getIcon()
    {
-      if(icons.size()==1)
-         return icons.get(0);
-      return icons.get(getStateIndex());
+      return icon;
    }
 
-   public String getButtonName()
+   public String getTooltipText()
    {
-      return buttonName;
-   }
-
-   public boolean isTogglable()
-   {
-      return togglable;
-   }
-
-   public boolean doesDepend()
-   {
-      return depends;
-   }
-
-   public void setToolTipText(String text)
-   {
-      toolTipText = text;
-   }
-
-   public String getToolTipText()
-   {
-      return toolTipText;
+      return tooltipText;
    }
 }
