@@ -24,7 +24,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXToolButton;
+import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.*;
@@ -45,7 +45,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +57,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    GDXImGuiBasedUI baseUI;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                           "ihmc-high-level-behaviors/src/libgdx/resources/icons");
    private final CommunicationHelper communicationHelper;
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
@@ -178,7 +175,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       desiredRobot.create();
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
-      ballAndArrowMidFeetPosePlacement.setupIcon(iconDirectory);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
       footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
                                              FootstepPlannerParameterKeys.keys,
@@ -274,16 +270,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
          interactablesEnabled.set(true);
       }
 
-      // Note: hot button for calibrate, open / close hand
-      WorkspaceDirectory iconDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources/icons");
-      GDXToolButton button;
       // STAND PREP
-      Runnable standPrepRunnable = robotLowLevelMessenger::sendStandRequest;
-      button = new GDXToolButton("standPrepButton", iconDirectory, "standPrep.png", standPrepRunnable);
-      button.setToolTipText("action: Stand prep");
-      baseUI.getPrimary3DPanel().addHotButton(button);
+      GDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      standPrepButton.loadAndSetIcon("icons/standPrep.png");
+      standPrepButton.setOnPressed(robotLowLevelMessenger::sendStandRequest);
+      standPrepButton.setTooltipText("Stand prep");
 
-      handManager.create(baseUI, iconDirectory, communicationHelper);
+      handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }

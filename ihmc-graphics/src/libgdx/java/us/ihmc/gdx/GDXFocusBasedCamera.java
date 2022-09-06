@@ -74,7 +74,6 @@ public class GDXFocusBasedCamera extends Camera
    private boolean isZPressed = false;
    private boolean isCPressed = false;
    private boolean isEPressed = false;
-   private boolean isXPressed = false;
 
    public GDXFocusBasedCamera()
    {
@@ -226,14 +225,13 @@ public class GDXFocusBasedCamera extends Camera
       isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
       isCPressed = input.isWindowHovered() && ImGui.isKeyDown('C');
       isEPressed = input.isWindowHovered() && ImGui.isKeyDown('E');
-      isXPressed = input.isWindowHovered() && ImGui.isKeyDown('X');
 
       int orbitMouseButton = useMiddleClickViewOrbit ? ImGuiMouseButton.Middle : ImGuiMouseButton.Left;
       ImGuiMouseDragData orbitDragData = input.getMouseDragData(orbitMouseButton);
       boolean dragJustStarted = ImGui.isWindowHovered() && orbitDragData.getDragJustStarted();
 
       ImGuiMouseDragData panDragData = !useMiddleClickViewOrbit ? input.getMouseDragData(ImGuiMouseButton.Middle) : null;
-      boolean panDrag = ImGui.isWindowHovered() && panDragData!=null && panDragData.getDragJustStarted();
+      boolean panDrag = ImGui.isWindowHovered() && panDragData != null && panDragData.getDragJustStarted();
 
       if (!useMiddleClickViewOrbit)
          dragJustStarted &= input.getClosestPick() == null;
@@ -250,7 +248,7 @@ public class GDXFocusBasedCamera extends Camera
       {
          panDragData.setObjectBeingDragged(this);
       }
-      if (panDragData!=null && panDragData.isDragging() && panDragData.getObjectBeingDragged() == this)
+      if (panDragData != null && panDragData.isDragging() && panDragData.getObjectBeingDragged() == this)
       {
          mousePanned(panDragData.getMouseDraggedX(), panDragData.getMouseDraggedY());
       }
@@ -267,6 +265,10 @@ public class GDXFocusBasedCamera extends Camera
       longitude += longitudeSpeed * deltaX;
    }
 
+   /**
+    * TODO: This should pan along the plane orthogonal to the camera and on the focus point.
+    * TODO: It should also scale in speed w.r.t. zoom.
+    */
    private void mousePanned(float deltaX, float deltaY)
    {
       focusPointPose.appendTranslation(0.0, 0.005 * deltaX, 0.0);
