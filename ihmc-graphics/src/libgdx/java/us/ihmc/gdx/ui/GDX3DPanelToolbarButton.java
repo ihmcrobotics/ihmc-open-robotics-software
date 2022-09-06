@@ -31,7 +31,8 @@ public class GDX3DPanelToolbarButton
 
    public void onPressed()
    {
-      onPressed.run();
+      if (onPressed != null)
+         onPressed.run();
    }
 
    public GDXIconTexture getIcon()
