@@ -27,6 +27,8 @@ import java.time.Instant;
  */
 public class NettyOuster
 {
+   public static final int OUSTER_NUMBER_ROWS = 128;
+
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
    public static final int MAX_PACKET_SIZE = 24896; //Defined by software user manual
@@ -92,7 +94,7 @@ public class NettyOuster
 
                if (dataOkay)
                {
-                  for (int k = 0; k < 64; k++)
+                  for (int k = 0; k < OUSTER_NUMBER_ROWS; k++)
                   {
                      float rangeScaled = range[k] / 1000.0F;
                      if (rangeScaled > 30.0)
