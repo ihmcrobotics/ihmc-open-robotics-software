@@ -69,7 +69,6 @@ public class GDXROS2PointCloudMapVisualizer extends ImGuiGDXVisualizer implement
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-   private int pointCloudRendersSize = 0;
    private ROS2SyncedRobotModel syncedRobot;
    private Vector3D previousTranslation = null;
    private RotationMatrix previousRotation = null;
@@ -131,20 +130,19 @@ public class GDXROS2PointCloudMapVisualizer extends ImGuiGDXVisualizer implement
    public GDXPointCloudRenderer addPointCloudRenderer()
    {
       pointCloudRenderers.add(new GDXPointCloudRenderer());
-      pointCloudRendersSize++;
-      pointCloudRenderers.get(pointCloudRendersSize-1).create(pointsPerSegment);
+      pointCloudRenderers.get(pointCloudRenderers.size() - 1).create(pointsPerSegment);
 
-      return pointCloudRenderers.get(pointCloudRendersSize-1);
+      return pointCloudRenderers.get(pointCloudRenderers.size() - 1);
    }
 
    public GDXPointCloudRenderer getLatestRenderer()
    {
-      return pointCloudRenderers.get(pointCloudRendersSize-1);
+      return pointCloudRenderers.get(pointCloudRenderers.size() - 1);
    }
 
    public boolean isRobotMoved()
    {
-      RigidBodyTransform currentTransform = syncedRobot.getReferenceFrames().getPelvisZUpFrame().getTransformToWorldFrame();
+      RigidBodyTransform currentTransform = syncedRobot.getReferenceFrames().getOusterLidarFrame().getTransformToWorldFrame();
       Vector3D currentTranslation = (Vector3D) currentTransform.getTranslation();
       RotationMatrix currentRotation = (RotationMatrix) currentTransform.getRotation();
 
@@ -160,7 +158,7 @@ public class GDXROS2PointCloudMapVisualizer extends ImGuiGDXVisualizer implement
       previousTranslation = currentTranslation;
       previousRotation = currentRotation;
 
-      if (distRotated > Math.PI/60 || distTraveled > 0.1)
+      if (distRotated > Math.PI / 60 || distTraveled > 0.1)
       {
          return true;
       }
@@ -182,11 +180,6 @@ public class GDXROS2PointCloudMapVisualizer extends ImGuiGDXVisualizer implement
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-
-      GDXPointCloudRenderer latestRenderer = addPointCloudRenderer();
-
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, latestRenderer.getVertexBuffer());
-      pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    @Override
@@ -253,6 +246,11 @@ public class GDXROS2PointCloudMapVisualizer extends ImGuiGDXVisualizer implement
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (isActive())
-         getLatestRenderer().getRenderables(renderables, pool);
+      {
+         for (GDXPointCloudRenderer pointCloudRenderer : pointCloudRenderers)
+         {
+            pointCloudRenderer.getRenderables(renderables, pool);
+         }
+      }
    }
 }
