@@ -329,7 +329,6 @@ public class GDX3DSituatedImGuiPanel
    public void setTransformToReferenceFrame(ReferenceFrame referenceFrame)
    {
       modelInstance.setTransformToReferenceFrame(referenceFrame);
-//      modelInstance.transform.scale(0.005f, 0.005f, 0.005f);
    }
 
    public GDXModelInstance getModelInstance()

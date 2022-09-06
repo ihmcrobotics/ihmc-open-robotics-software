@@ -26,9 +26,9 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
@@ -42,6 +42,8 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.Random;
 
 import static us.ihmc.gdx.ui.gizmo.GDXGizmoTools.AXIS_COLORS;
 import static us.ihmc.gdx.ui.gizmo.GDXGizmoTools.AXIS_SELECTED_COLORS;
@@ -57,7 +59,6 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
    private final ImFloat arrowSpacingFactor = new ImFloat(2.22f);
    private final ImBoolean resizeAutomatically = new ImBoolean(true);
-   private double animationSpeed = 0.25 * Math.PI;
    private double arrowBodyRadius;
    private double arrowLength;
    private double arrowBodyLength;
@@ -97,6 +98,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private double lastDistanceToCamera = -1.0;
    private final double translateSpeedFactor = 0.5;
    private boolean queuePopupToOpen = false;
+   private final Random random = new Random();
 
    public GDXPose3DGizmo()
    {
@@ -249,13 +251,16 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
       }
 
-      // Note: Yaw scroll feature
-      if (ImGui.getIO().getKeyCtrl())  // control key held
+      // Use mouse wheel to yaw when ctrl key is held
+      if (ImGui.getIO().getKeyCtrl() && input.getMouseWheelDelta() != 0.0f)
       {
          float deltaScroll = input.getMouseWheelDelta();
          tempFramePose3D.setToZero(gizmoFrame);
          tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose3D.getOrientation().appendYawRotation(Math.signum(deltaScroll)*0.03*Math.PI);
+         // Add some noise to not get stuck in discrete space
+         double noise = random.nextDouble() * 0.005;
+         double speed = 0.012 + noise;
+         tempFramePose3D.getOrientation().appendYawRotation(Math.signum(deltaScroll) * speed * Math.PI);
          tempFramePose3D.changeFrame(parentReferenceFrame);
          tempFramePose3D.get(transformToParent);
       }

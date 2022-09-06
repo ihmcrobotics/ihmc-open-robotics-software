@@ -30,7 +30,6 @@ import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.function.Consumer;
 
@@ -85,11 +84,8 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
       });
 
       clear();
-   }
 
-   public void setupIcon(WorkspaceDirectory iconDirectory)
-   {
-      locationFlagIcon = new GDXIconTexture(iconDirectory.file("locationFlag.png"));
+      locationFlagIcon = new GDXIconTexture("icons/locationFlag.png");
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)

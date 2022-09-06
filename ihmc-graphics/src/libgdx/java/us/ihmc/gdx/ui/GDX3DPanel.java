@@ -24,7 +24,6 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXToolButton;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
@@ -43,11 +42,12 @@ public class GDX3DPanel
    private GDX3DScene scene;
    private GLProfiler glProfiler;
    private SensorFrameBuffer frameBuffer;
-   private float sizeX;
-   private float sizeY;
+   private float windowSizeX;
+   private float windowSizeY;
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
+   private final GDX3DPanelToolbar toolbar = new GDX3DPanelToolbar();
    private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
    private InputMultiplexer inputMultiplexer;
    private GDXFocusBasedCamera camera3D;
@@ -66,8 +66,6 @@ public class GDX3DPanel
    private float windowDrawMinY;
    private float windowDrawMaxX;
    private float windowDrawMaxY;
-
-   private GDXToolBar toolbar = new GDXToolBar();
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -112,12 +110,12 @@ public class GDX3DPanel
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
 
-         float posX = ImGui.getWindowPosX();
-         float posY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
-         sizeX = ImGui.getWindowSizeX();
-         sizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
-         renderSizeX = sizeX * antiAliasing;
-         renderSizeY = sizeY * antiAliasing;
+         float windowPositionX = ImGui.getWindowPosX();
+         float windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         windowSizeX = ImGui.getWindowSizeX();
+         windowSizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
+         renderSizeX = windowSizeX * antiAliasing;
+         renderSizeY = windowSizeY * antiAliasing;
 
          inputCalculator.compute();
          if (inputCalculator.isWindowHovered()) // If the window is not hovered, we should not be computing picks
@@ -183,10 +181,10 @@ public class GDX3DPanel
          float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
          float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
          int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
-         windowDrawMinX = posX;
-         windowDrawMinY = posY;
-         windowDrawMaxX = posX + sizeX;
-         windowDrawMaxY = posY + sizeY;
+         windowDrawMinX = windowPositionX;
+         windowDrawMinY = windowPositionY;
+         windowDrawMaxX = windowPositionX + windowSizeX;
+         windowDrawMaxY = windowPositionY + windowSizeY;
          float uvMinX = 0.0f;
          float uvMinY = percentOfFramebufferUsedY; // flip Y
          float uvMaxX = percentOfFramebufferUsedX;
@@ -207,8 +205,7 @@ public class GDX3DPanel
 
          ImGui.end();
 
-         // NOTE: Make Hot key button panel here.
-         toolbar.render(sizeX, posX,posY);
+         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
       }
    }
 
@@ -307,10 +304,9 @@ public class GDX3DPanel
       }
    }
 
-   // NOTE: hot button add feature from anywhere in other classes where baseUI (GDXImGuiBasedUI) is accessible.
-   public void addHotButton(GDXToolButton quickButton)
+   public GDX3DPanelToolbarButton addToolbarButton()
    {
-      toolbar.addButton(quickButton);
+      return toolbar.addButton();
    }
 
    public void setAddFocusSphere(boolean addFocusSphere)
@@ -325,12 +321,12 @@ public class GDX3DPanel
 
    public float getViewportSizeX()
    {
-      return sizeX;
+      return windowSizeX;
    }
 
    public float getViewportSizeY()
    {
-      return sizeY;
+      return windowSizeY;
    }
 
    public void addImGui3DViewPickCalculator(Consumer<ImGui3DViewInput> calculate3DViewPick)
