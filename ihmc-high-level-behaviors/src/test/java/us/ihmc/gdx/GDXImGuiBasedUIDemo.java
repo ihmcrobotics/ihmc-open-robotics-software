@@ -65,6 +65,10 @@ public class GDXImGuiBasedUIDemo
             GDX3DPanelToolbarButton flyingCarButton = baseUI.getPrimary3DPanel().addToolbarButton();
             flyingCarButton.loadAndSetIcon("icons/flyingCar.png");
             flyingCarButton.setOnPressed(() -> pressCount++);
+            flyingCarButton.setTooltipText("Tooltip text");
+
+            GDX3DPanelToolbarButton hoverboardButton = baseUI.getPrimary3DPanel().addToolbarButton();
+            hoverboardButton.loadAndSetIcon("icons/hoverboard.png");
 
             GDX3DPanel second3DPanel = new GDX3DPanel("Second 3D View", 2, true);
             baseUI.add3DPanel(second3DPanel);
