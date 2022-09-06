@@ -8,9 +8,8 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.gdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
+import us.ihmc.gdx.ui.graphics.live.GDXROS2PointCloudVisualizer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 
@@ -48,25 +47,26 @@ public class GDXROS2PointCloudSensorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
 
-            PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
             globalVisualizersPanel = new ImGuiGDXGlobalVisualizersPanel(false);
-            GDXROS2BigVideoVisualizer videoVisualizer = new GDXROS2BigVideoVisualizer("Video",
-                                                                                      pubSubImplementation,
-                                                                                      ROS2Tools.BIG_VIDEO);
-            globalVisualizersPanel.addVisualizer(videoVisualizer);
+            globalVisualizersPanel.addVisualizer(new GDXROS2PointCloudVisualizer("Ouster Point Cloud",
+                                                                                 ros2Node,
+                                                                                 ROS2Tools.OUSTER_POINT_CLOUD,
+                                                                                 2048 * 128,
+                                                                                 1));
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel, GDXSceneLevel.VIRTUAL);
 
-            // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix
-            double publishRateHz = 60.0;
-            double verticalFOV = 55.0;
-            int imageWidth = 640;
-            int imageHeight = 480;
-            // range should be as small as possible because depth precision is nonlinear
-            // it gets drastically less precise father away
+            double publishRateHz = 20.0;
+            double verticalFOV = 90.0;
+            int imageWidth = 2048;
+            int imageHeight = 128;
             double minRange = 0.105;
-            double maxRange = 5.0;
-            highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
+            double maxRange = 15.0;
+            double noiseAmplitudeAtMinRange = 0.015;
+            double noiseAmplitudeAtMaxRange = 0.05;
+            boolean simulateL515Noise = false;
+            highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Ouster",
                                                                                  sensorPoseGizmo.getGizmoFrame(),
                                                                                  () -> 0L,
                                                                                  verticalFOV,
@@ -74,11 +74,10 @@ public class GDXROS2PointCloudSensorDemo
                                                                                  imageHeight,
                                                                                  minRange,
                                                                                  maxRange,
-                                                                                 0.03,
-                                                                                 0.05,
-                                                                                 true,
+                                                                                 noiseAmplitudeAtMinRange,
+                                                                                 noiseAmplitudeAtMaxRange,
+                                                                                 simulateL515Noise,
                                                                                  publishRateHz);
-            highLevelDepthSensorSimulator.setupForROS2Color(pubSubImplementation, ROS2Tools.BIG_VIDEO);
             highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.OUSTER_POINT_CLOUD);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
