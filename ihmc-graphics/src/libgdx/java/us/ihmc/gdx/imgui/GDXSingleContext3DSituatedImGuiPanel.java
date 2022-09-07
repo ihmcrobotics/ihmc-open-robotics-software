@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.imgui;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -33,7 +33,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
@@ -45,6 +44,10 @@ import java.util.function.Consumer;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
+/**
+ * WARNING: Probably should not be used anymore.
+ * @deprecated Use GDX3DSituatedImGuiPanel
+ */
 public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 {
    private final boolean ENABLE_EXPERIMENTAL_TRACKING = false;

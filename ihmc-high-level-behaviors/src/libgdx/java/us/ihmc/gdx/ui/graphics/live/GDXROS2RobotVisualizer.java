@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 {
    private final ImBoolean trackRobot = new ImBoolean(false);
+   private final ImBoolean hideChest = new ImBoolean(false);
    private final Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier;
    private GDXFocusBasedCamera cameraForTracking;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
@@ -29,6 +30,7 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private String chestName;
 
    public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
@@ -44,6 +46,8 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
       syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::recordEvent);
 
       previousRobotMidFeetUnderPelvis.setToNaN();
+
+      chestName = robotModel.getJointMap().getChestName();
    }
 
    @Override
@@ -79,6 +83,15 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
             }
             previousRobotMidFeetUnderPelvis.set(latestRobotMidFeetUnderPelvis);
          }
+
+         if (hideChest.get())
+         {
+            getMultiBody().getRigidBodiesToHide().add(chestName);
+         }
+         else
+         {
+            getMultiBody().getRigidBodiesToHide().remove(chestName);
+         }
       }
    }
 
@@ -92,6 +105,8 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
          if (!trackRobot.get())
             previousRobotMidFeetUnderPelvis.setToNaN();
       }
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Hide chest"), hideChest);
    }
 
    public void destroy()
@@ -102,5 +117,10 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    public ImBoolean getTrackRobot()
    {
       return trackRobot;
+   }
+
+   public ImBoolean getHideChest()
+   {
+      return hideChest;
    }
 }

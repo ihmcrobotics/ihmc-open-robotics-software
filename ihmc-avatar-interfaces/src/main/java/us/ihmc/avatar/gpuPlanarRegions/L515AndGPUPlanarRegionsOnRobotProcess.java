@@ -44,7 +44,6 @@ import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.function.Consumer;
 

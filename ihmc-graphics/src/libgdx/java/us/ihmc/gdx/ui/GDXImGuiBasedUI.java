@@ -58,6 +58,7 @@ public class GDXImGuiBasedUI
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
+   private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
@@ -135,7 +136,7 @@ public class GDXImGuiBasedUI
 
    public void create()
    {
-      create(GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
+      create(GDXSceneLevel.MODEL, GDXSceneLevel.VIRTUAL);
    }
 
    public void create(GDXSceneLevel... sceneLevels)
@@ -163,8 +164,10 @@ public class GDXImGuiBasedUI
 
       vrManager.create();
       primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
    }
 
    public void renderBeforeOnScreenUI()
@@ -198,7 +201,7 @@ public class GDXImGuiBasedUI
       if (ImGui.beginMenu("Settings"))
       {
          ImGui.pushItemWidth(80.0f);
-         if (ImGui.inputInt(labels.get("Foreground FPS"), foregroundFPS, 1))
+         if (ImGuiTools.volatileInputInt(labels.get("Foreground FPS Limit"), foregroundFPS, 1))
          {
             Gdx.graphics.setForegroundFPS(foregroundFPS.get());
          }
@@ -210,22 +213,30 @@ public class GDXImGuiBasedUI
          {
             primaryScene.setShadowsEnabled(shadows.get());
          }
-         if (ImGui.inputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
+         if (ImGuiTools.volatileInputInt(labels.get("libGDX log level"), libGDXLogLevel, 1))
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
          }
-         if (ImGui.inputFloat(labels.get("Font Size"), imguiFontScale, 0.1f))
+         if (ImGuiTools.volatileInputFloat(labels.get("Font Size"), imguiFontScale, 0.1f))
          {
             ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
          }
          ImGui.separator();
-         boolean renderingRealEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.REAL_ENVIRONMENT);
-         if (ImGui.checkbox(labels.get("Render Real Environment"), renderingRealEnvironment))
+         boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.GROUND_TRUTH);
+         if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
-            if (renderingRealEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.REAL_ENVIRONMENT);
+            if (renderingGroundTruthEnvironment)
+               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.GROUND_TRUTH);
             else
-               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.REAL_ENVIRONMENT);
+               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.GROUND_TRUTH);
+         }
+         boolean renderingModelEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL);
+         if (ImGui.checkbox(labels.get("Render Model Environment"), renderingModelEnvironment))
+         {
+            if (renderingModelEnvironment)
+               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.MODEL);
+            else
+               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.MODEL);
          }
          boolean renderingVirtualEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.VIRTUAL);
          if (ImGui.checkbox(labels.get("Render Virtual Environment"), renderingVirtualEnvironment))
@@ -234,6 +245,11 @@ public class GDXImGuiBasedUI
                primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.VIRTUAL);
             else
                primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.VIRTUAL);
+         }
+         ImGui.separator();
+         if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
+         {
+            setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
          ImGui.popItemWidth();
          ImGui.endMenu();
@@ -348,5 +364,15 @@ public class GDXImGuiBasedUI
    public long getRenderIndex()
    {
       return renderIndex;
+   }
+
+   public void setUseMiddleClickViewOrbit(boolean useMiddleClickViewOrbit)
+   {
+      this.middleClickOrbit.set(useMiddleClickViewOrbit);
+      primary3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
+      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      {
+         additional3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
+      }
    }
 }

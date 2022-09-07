@@ -3,14 +3,20 @@ package us.ihmc.gdx.input;
 import com.badlogic.gdx.math.Vector3;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.gdx.GDXFocusBasedCamera;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDX3DPanel;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.function.Supplier;
 
 /**
  * This class is just to do the non-trivial or high computation stuff.
@@ -19,9 +25,7 @@ import java.util.function.Supplier;
  */
 public class ImGui3DViewInput
 {
-   private final GDXFocusBasedCamera camera;
-   private final Supplier<Float> viewportSizeXSupplier;
-   private final Supplier<Float> viewportSizeYSupplier;
+   private final GDX3DPanel panel;
    private final ImGuiMouseDragData mouseDragDataLeft = new ImGuiMouseDragData(ImGuiMouseButton.Left);
    private final ImGuiMouseDragData mouseDragDataRight = new ImGuiMouseDragData(ImGuiMouseButton.Right);
    private final ImGuiMouseDragData mouseDragDataMiddle = new ImGuiMouseDragData(ImGuiMouseButton.Middle);
@@ -37,12 +41,13 @@ public class ImGui3DViewInput
    private boolean initialized = false;
    private final ArrayList<ImGui3DViewPickResult> pickResults = new ArrayList<>();
    private ImGui3DViewPickResult closestPick = null;
+   private final FramePoint3D tempCameraPose = new FramePoint3D();
+   private final FramePoint3D pickPoint = new FramePoint3D();
+   private double lastZCollision;
 
-   public ImGui3DViewInput(GDXFocusBasedCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
+   public ImGui3DViewInput(GDX3DPanel panel)
    {
-      this.camera = camera;
-      this.viewportSizeXSupplier = viewportSizeXSupplier;
-      this.viewportSizeYSupplier = viewportSizeYSupplier;
+      this.panel = panel;
    }
 
    public void compute()
@@ -60,7 +65,7 @@ public class ImGui3DViewInput
       mouseWheelDelta = -ImGui.getIO().getMouseWheel();
 
       for (ImGuiMouseDragData mouseDragDatum : mouseDragData)
-         mouseDragDatum.update(isWindowHovered);
+         mouseDragDatum.update();
 
       pickResults.clear();
    }
@@ -71,17 +76,17 @@ public class ImGui3DViewInput
       {
          computedPickRay = true;
 
-         float viewportWidth = viewportSizeXSupplier.get();
-         float viewportHeight = viewportSizeYSupplier.get();
+         float viewportWidth = panel.getViewportSizeX();
+         float viewportHeight = panel.getViewportSizeY();
 
          float viewportX = (2.0f * getMousePosX()) / viewportWidth - 1.0f;
          float viewportY = (2.0f * (viewportHeight - getMousePosY())) / viewportHeight - 1.0f;
 
          gdxOrigin.set(viewportX, viewportY, -1.0f);
-         gdxOrigin.prj(camera.invProjectionView);
+         gdxOrigin.prj(panel.getCamera3D().invProjectionView);
 
          gdxDirection.set(viewportX, viewportY, 1.0f);
-         gdxDirection.prj(camera.invProjectionView);
+         gdxDirection.prj(panel.getCamera3D().invProjectionView);
 
          gdxDirection.sub(gdxOrigin).nor();
 
@@ -92,12 +97,84 @@ public class ImGui3DViewInput
       return pickRayInWorld;
    }
 
+   public Point3DReadOnly getPickPointInWorld()
+   {
+      return getPickPointInWorld(Double.NaN);
+   }
+
+   public Point3DReadOnly getPickPointInWorld(double fallbackXYPlaneIntersectionHeight)
+   {
+      ByteBuffer depthBuffer = panel.getNormalizedDeviceCoordinateDepthDirectByteBuffer();
+
+      boolean mouseInBounds = true;
+      mouseInBounds &= mousePosX >= 0.0f;
+      mouseInBounds &= mousePosY >= 0.0f;
+      mouseInBounds &= mousePosX < panel.getViewportSizeX();
+      mouseInBounds &= mousePosY < panel.getViewportSizeY();
+
+      if (mouseInBounds)
+      {
+         boolean fallbackToXYPlaneIntersection = true;
+
+         if (depthBuffer != null)
+         {
+            int mousePosXInt = (int) mousePosX;
+            int mousePosYInt = (int) mousePosY;
+            int aliasedRenderedAreaWidth = (int) panel.getRenderSizeX();
+            int aliasedRenderedAreaHeight = (int) panel.getRenderSizeY();
+            int antiAliasing = panel.getAntiAliasing();
+            int aliasedMouseY = mousePosYInt * antiAliasing;
+            int aliasedMouseX = mousePosXInt * antiAliasing;
+            int aliasedFlippedMouseY = aliasedRenderedAreaHeight - aliasedMouseY;
+
+            int rowAdjustment = aliasedFlippedMouseY * aliasedRenderedAreaWidth * Float.BYTES;
+            int columnAdjustment = aliasedMouseX * Float.BYTES;
+            float normalizedDeviceCoordinateZ = depthBuffer.getFloat(rowAdjustment + columnAdjustment);
+
+            if (normalizedDeviceCoordinateZ > 0.503)
+            {
+               fallbackToXYPlaneIntersection = false;
+
+               float cameraNear = panel.getCamera3D().near;
+               float cameraFar = panel.getCamera3D().far;
+               float twoXCameraFarNear = 2.0f * cameraNear * cameraFar;
+               float farPlusNear = cameraFar + cameraNear;
+               float farMinusNear = cameraFar - cameraNear;
+               float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
+
+               float principalOffsetXPixels = aliasedRenderedAreaWidth / 2.0f;
+               float principalOffsetYPixels = aliasedRenderedAreaHeight / 2.0f;
+               float fieldOfViewY = panel.getCamera3D().getVerticalFieldOfView();
+               float focalLengthPixels = (float) ((aliasedRenderedAreaHeight / 2.0) / Math.tan(Math.toRadians((fieldOfViewY / 2.0))));
+               float zUp3DX = eyeDepth;
+               float zUp3DY = -(aliasedMouseX - principalOffsetXPixels) / focalLengthPixels * eyeDepth;
+               float zUp3DZ = -(aliasedMouseY - principalOffsetYPixels) / focalLengthPixels * eyeDepth;
+
+               tempCameraPose.setToZero(panel.getCamera3D().getCameraFrame());
+               tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+               pickPoint.setIncludingFrame(panel.getCamera3D().getCameraFrame(), zUp3DX, zUp3DY, zUp3DZ);
+               pickPoint.changeFrame(ReferenceFrame.getWorldFrame());
+               lastZCollision = pickPoint.getZ();
+            }
+         }
+
+         if (fallbackToXYPlaneIntersection)
+         {
+            double xyZHeight = Double.isNaN(fallbackXYPlaneIntersectionHeight) ? lastZCollision : fallbackXYPlaneIntersectionHeight;
+            pickPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidCoreTools.origin3D);
+            pickPoint.setZ(xyZHeight);
+            getPickRayInWorld();
+            EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pickPoint, Axis3D.Z, pickRayInWorld.getPoint(), pickRayInWorld.getDirection(), pickPoint);
+         }
+      }
+
+      return pickPoint;
+   }
+
    public void addPickResult(ImGui3DViewPickResult pickResult)
    {
-      if (pickResult.getPickIntersects())
-      {
-         pickResults.add(pickResult);
-      }
+      pickResults.add(pickResult);
    }
 
    public void calculateClosestPick()
@@ -105,16 +182,13 @@ public class ImGui3DViewInput
       closestPick = null;
       for (ImGui3DViewPickResult pickResult : pickResults)
       {
-         if (pickResult.getPickIntersects())
+         if (closestPick == null)
          {
-            if (closestPick == null)
-            {
-               closestPick = pickResult;
-            }
-            else if (pickResult.getDistanceToCamera() < closestPick.getDistanceToCamera())
-            {
-               closestPick = pickResult;
-            }
+            closestPick = pickResult;
+         }
+         else if (pickResult.getDistanceToCamera() < closestPick.getDistanceToCamera())
+         {
+            closestPick = pickResult;
          }
       }
    }
@@ -132,19 +206,9 @@ public class ImGui3DViewInput
       return isWindowHovered;
    }
 
-   public boolean isDragging(int imGuiMouseButton)
+   public ImGuiMouseDragData getMouseDragData(int imGuiMouseButton)
    {
-      return mouseDragData[imGuiMouseButton].isDragging();
-   }
-
-   public float getMouseDraggedX(int imGuiMouseButton)
-   {
-      return mouseDragData[imGuiMouseButton].getMouseDraggedX();
-   }
-
-   public float getMouseDraggedY(int imGuiMouseButton)
-   {
-      return mouseDragData[imGuiMouseButton].getMouseDraggedY();
+      return mouseDragData[imGuiMouseButton];
    }
 
    public float getMousePosX()

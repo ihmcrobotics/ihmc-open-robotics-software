@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.gdx.imgui.GDXSingleContext3DSituatedImGuiPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2PointCloudVisualizer;
 import us.ihmc.gdx.vr.GDXVRApplication;

@@ -1,36 +1,49 @@
 package us.ihmc.gdx.ui;
 
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.property.*;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeSet;
 
 public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private StoredPropertySetBasics storedPropertySet;
    private StoredPropertyKeyList keys;
    private Runnable onParametersUpdatedCallback;
    private final TreeSet<String> versions = new TreeSet<>();
 
+   private record ValueRange(float min, float max) { }
+
    private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
    private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
    private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
+   private final HashMap<DoubleStoredPropertyKey, float[]> sliderValues = new HashMap<>();
+   private final HashMap<DoubleStoredPropertyKey, ValueRange> sliderMinMaxMap = new HashMap<>();
 
    public ImGuiStoredPropertySetTuner(String name)
    {
       super(name);
       setRenderMethod(this::renderImGuiWidgets);
+   }
+
+   public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys)
+   {
+      create(storedPropertySet, keys, () -> { });
    }
 
    public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, Runnable onParametersUpdatedCallback)
@@ -51,6 +64,12 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          }
          return FileVisitResult.CONTINUE;
       });
+      String currentWorkingVersion = versions.first();
+      if (!storedPropertySet.getCurrentVersionSuffix().equals(currentWorkingVersion))
+      {
+         storedPropertySet.updateBackingSaveFile(currentWorkingVersion);
+         storedPropertySet.load();
+      }
 
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
@@ -77,48 +96,44 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       }
    }
 
+   public void registerSlider(String titleCasedName, float min, float max)
+   {
+      for (StoredPropertyKey<?> key : getKeyList().keys())
+      {
+         if (Objects.equals(key.getTitleCasedName(), titleCasedName))
+         {
+            sliderValues.put( (DoubleStoredPropertyKey) key, new float[] {(float) getDoubleValueFromKey(key)} );
+            sliderMinMaxMap.put((DoubleStoredPropertyKey) key, new ValueRange(min, max));
+            break;
+         }
+      }
+   }
+
    public void renderImGuiWidgets()
    {
-      for (String version : versions)
+      ImGui.text("Version:");
+      if (versions.size() > 1)
       {
-         if (ImGui.radioButton(version.isEmpty() ? "Primary" : version, storedPropertySet.getCurrentVersionSuffix().equals(version)))
+         for (String version : versions)
          {
-            storedPropertySet.updateBackingSaveFile(version);
-            load();
+            if (ImGui.radioButton(version.isEmpty() ? "Primary" : version, storedPropertySet.getCurrentVersionSuffix().equals(version)))
+            {
+               storedPropertySet.updateBackingSaveFile(version);
+               load();
+            }
          }
+      }
+      else
+      {
+         ImGui.sameLine();
+         ImGui.text(storedPropertySet.getCurrentVersionSuffix());
       }
 
       //      ImGuiInputTextFlags. // TODO: Mess with various flags
       ImGui.pushItemWidth(150.0f);
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
-         if (propertyKey.getType().equals(Double.class))
-         {
-            if (ImGuiTools.volatileInputDouble(propertyKey.getTitleCasedName(), doubleValues.get(propertyKey), 0.01, 0.5))
-            {
-               DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
-               storedPropertySet.set(key, doubleValues.get(key).get());
-               onParametersUpdatedCallback.run();
-            }
-         }
-         else if (propertyKey.getType().equals(Integer.class))
-         {
-            if (ImGuiTools.volatileInputInt(propertyKey.getTitleCasedName(), integerValues.get(propertyKey), 1))
-            {
-               IntegerStoredPropertyKey key = (IntegerStoredPropertyKey) propertyKey;
-               storedPropertySet.set(key, integerValues.get(key).get());
-               onParametersUpdatedCallback.run();
-            }
-         }
-         else if (propertyKey.getType().equals(Boolean.class))
-         {
-            if (ImGui.checkbox(propertyKey.getTitleCasedName(), booleanValues.get(propertyKey)))
-            {
-               BooleanStoredPropertyKey key = (BooleanStoredPropertyKey) propertyKey;
-               storedPropertySet.set(key, booleanValues.get(key).get());
-               onParametersUpdatedCallback.run();
-            }
-         }
+         renderAPropertyTuner(propertyKey);
       }
       if (ImGui.button("Load"))
       {
@@ -128,6 +143,73 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       if (ImGui.button("Save"))
       {
          storedPropertySet.save();
+      }
+   }
+
+   public void renderAPropertyTuner(StoredPropertyKey<?> propertyKey)
+   {
+      if (propertyKey.getType().equals(Double.class))
+      {
+         renderADoublePropertyTuner(propertyKey, 0.01, 0.5);
+      }
+      else if (propertyKey.getType().equals(Integer.class))
+      {
+         renderAnIntegerPropertyTuner(propertyKey, 1);
+      }
+      else if (propertyKey.getType().equals(Boolean.class))
+      {
+         if (ImGui.checkbox(propertyKey.getTitleCasedName(), booleanValues.get(propertyKey)))
+         {
+            BooleanStoredPropertyKey key = (BooleanStoredPropertyKey) propertyKey;
+            storedPropertySet.set(key, booleanValues.get(key).get());
+            onParametersUpdatedCallback.run();
+         }
+      }
+   }
+
+   public void renderADoublePropertyTuner(StoredPropertyKey<?> propertyKey, double step, double stepFast)
+   {
+      renderADoublePropertyTuner(propertyKey, step, stepFast, Double.NaN, Double.NaN, false, null, "%.6f");
+   }
+
+   public void renderADoublePropertyTuner(StoredPropertyKey<?> propertyKey,
+                                          double step,
+                                          double stepFast,
+                                          double min,
+                                          double max,
+                                          boolean fancyLabel,
+                                          String unitString,
+                                          String format)
+   {
+      String label = fancyLabel ? labels.get(unitString, propertyKey.getTitleCasedName()) : propertyKey.getTitleCasedName();
+      if (fancyLabel)
+      {
+         ImGui.text(propertyKey.getTitleCasedName() + ":");
+         ImGui.sameLine();
+         ImGui.pushItemWidth(100.0f);
+      }
+
+      if (ImGuiTools.volatileInputDouble(label, doubleValues.get(propertyKey), step, stepFast, format))
+      {
+         DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
+         if (!Double.isNaN(min))
+            doubleValues.get(key).set(MathTools.clamp(doubleValues.get(key).get(), min, max));
+         storedPropertySet.set(key, doubleValues.get(key).get());
+         onParametersUpdatedCallback.run();
+      }
+      if (fancyLabel)
+      {
+         ImGui.popItemWidth();
+      }
+   }
+
+   private void renderAnIntegerPropertyTuner(StoredPropertyKey<?> propertyKey, int step)
+   {
+      if (ImGuiTools.volatileInputInt(propertyKey.getTitleCasedName(), integerValues.get(propertyKey), step))
+      {
+         IntegerStoredPropertyKey key = (IntegerStoredPropertyKey) propertyKey;
+         storedPropertySet.set(key, integerValues.get(key).get());
+         onParametersUpdatedCallback.run();
       }
    }
 
@@ -153,11 +235,80 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    public <T> void changeParameter(StoredPropertyKey<T> key, T value)
    {
       storedPropertySet.set(key, value);
+      // TODO: experimental . . .
+      doubleValues.get((DoubleStoredPropertyKey) key).set((double)value);
       onParametersUpdatedCallback.run();
    }
 
    public StoredPropertySetReadOnly getParameters()
    {
       return storedPropertySet;
+   }
+
+   public StoredPropertyKeyList getKeyList() {return keys;}
+
+   public StoredPropertyKey<?> getKeyFromName(String titleCasedName)
+   {
+      for (StoredPropertyKey<?> key : getKeyList().keys())
+      {
+         if (Objects.equals(key.getTitleCasedName(), titleCasedName))
+         {
+            return key;
+         }
+      }
+      return null;
+   }
+
+   public double getDoubleValueFromKey(StoredPropertyKey<?> inputKey)
+   {
+      DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) inputKey;
+      return doubleValues.get(key).get();
+   }
+
+   public void renderDoublePropertySliders()
+   {
+      for (DoubleStoredPropertyKey key : sliderValues.keySet())
+      {
+         renderADoublePropertySlider(key,
+                                    0.01,
+                                    0.5,
+                                    sliderMinMaxMap.get(key).min,
+                                    sliderMinMaxMap.get(key).max,
+                                    false,
+                                    key.getTitleCasedName(),
+                                    "%.6f");
+      }
+   }
+
+   // TODO: Fix this up
+   public void renderADoublePropertySlider(StoredPropertyKey<?> propertyKey,
+                                          double step,
+                                          double stepFast,
+                                          double min,
+                                          double max,
+                                          boolean fancyLabel,
+                                          String titleCasedName,
+                                          String format)
+   {
+      String label = fancyLabel ? labels.get(titleCasedName, propertyKey.getTitleCasedName()) : propertyKey.getTitleCasedName();
+      if (fancyLabel)
+      {
+         ImGui.text(propertyKey.getTitleCasedName() + ":");
+         ImGui.sameLine();
+         ImGui.pushItemWidth(100.0f);
+      }
+      DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
+      if (ImGui.sliderFloat(labels.get(label), sliderValues.get(key), (float) min, (float) max))
+      {
+         doubleValues.get(key).set(sliderValues.get(key)[0]);
+         if (!Double.isNaN(min))
+            doubleValues.get(key).set(MathTools.clamp(doubleValues.get(key).get(), min, max));
+         storedPropertySet.set(key, sliderValues.get(key)[0]);
+         onParametersUpdatedCallback.run();
+      }
+      if (fancyLabel)
+      {
+         ImGui.popItemWidth();
+      }
    }
 }

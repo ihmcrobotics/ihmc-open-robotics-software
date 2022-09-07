@@ -152,7 +152,17 @@ public class GDXSimulatedSensorFactory
       return highLevelDepthSensorSimulator;
    }
 
+   public static GDXHighLevelDepthSensorSimulator createBlackflyFisheye(ROS2SyncedRobotModel syncedRobot)
+   {
+      return createBlackflyFisheye(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(), syncedRobot::getTimestamp);
+   }
+
    public static GDXHighLevelDepthSensorSimulator createBlackflyFisheyeImageOnlyNoComms(ReferenceFrame sensorFrame)
+   {
+      return createBlackflyFisheye(sensorFrame, null);
+   }
+
+   public static GDXHighLevelDepthSensorSimulator createBlackflyFisheye(ReferenceFrame sensorFrame, LongSupplier timeSupplier)
    {
       double publishRateHz = 1.0;
       double verticalFOV = 100.0;
@@ -160,7 +170,6 @@ public class GDXSimulatedSensorFactory
       int imageHeight = 1024;
       double minRange = 0.105;
       double maxRange = 5.0;
-      LongSupplier timeSupplier = null;
       GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Blackfly Fisheye",
                                                                                                             sensorFrame,
                                                                                                             timeSupplier,

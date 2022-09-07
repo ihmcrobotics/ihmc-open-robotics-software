@@ -76,6 +76,8 @@ libgdxDependencies {
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
+
+   api("us.ihmc:ihmc-perception-javacv:source")
 }
 
 libgdxTestDependencies {

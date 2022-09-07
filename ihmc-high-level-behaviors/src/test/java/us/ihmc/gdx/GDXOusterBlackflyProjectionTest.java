@@ -66,7 +66,7 @@ public class GDXOusterBlackflyProjectionTest
             userReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
             userReferenceFrameGraphic.setToReferenceFrame(userReferenceFrame);
 
-            ousterPointInWorldGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            ousterPointInWorldGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(ousterPointInWorldGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ousterPointInWorldGizmo::process3DViewInput);
             ousterPointInWorldGizmo.setResizeAutomatically(false);

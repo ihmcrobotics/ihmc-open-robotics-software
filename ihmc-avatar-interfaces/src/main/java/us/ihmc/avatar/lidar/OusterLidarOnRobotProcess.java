@@ -39,9 +39,9 @@ public class OusterLidarOnRobotProcess
       nettyOuster = new NettyOuster();
       nettyOuster.setOnFrameReceived(() ->
       {
-         nettyOuster.getBytedecoImage().rewind();
-         byte[] heapByteArrayData = new byte[nettyOuster.getBytedecoImage().getBackingDirectByteBuffer().remaining()];
-         nettyOuster.getBytedecoImage().getBackingDirectByteBuffer().get(heapByteArrayData);
+         nettyOuster.getDepthImageMeters().rewind();
+         byte[] heapByteArrayData = new byte[nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().remaining()];
+         nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().get(heapByteArrayData);
 
          videoPacket.getData().resetQuick();
          videoPacket.getData().add(heapByteArrayData);
