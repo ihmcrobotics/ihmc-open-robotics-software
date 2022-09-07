@@ -4,9 +4,13 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 
 public class YoAppearanceTools
 {
-   public static AppearanceDefinition makeTransparent(AppearanceDefinition appearance, double f)
+   /**
+    * To support making a transparent YoAppearance inline such as
+    * YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4)
+    */
+   public static AppearanceDefinition makeTransparent(AppearanceDefinition appearance, double transparency)
    {
-      appearance.setTransparency(f);
+      appearance.setTransparency(transparency);
       return appearance;
    }
 }

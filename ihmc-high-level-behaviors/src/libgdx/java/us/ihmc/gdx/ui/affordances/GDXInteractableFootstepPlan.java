@@ -54,7 +54,7 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
       this.teleoperationParameters = teleoperationParameters;
       this.syncedRobot = syncedRobot;
 
-      stepChecker = new GDXFootstepChecker(baseUI, communicationHelper, syncedRobot, footstepPlannerParameters);
+      stepChecker = new GDXFootstepChecker(baseUI, syncedRobot, footstepPlannerParameters);
       clear();
    }
 
