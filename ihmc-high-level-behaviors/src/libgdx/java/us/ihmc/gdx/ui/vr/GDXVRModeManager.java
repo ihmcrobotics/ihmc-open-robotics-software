@@ -95,7 +95,7 @@ public class GDXVRModeManager
 
    public void update()
    {
-      kinematicsStreamingMode.update();
+      kinematicsStreamingMode.update(mode == GDXVRMode.WHOLE_BODY_IK_STREAMING);
       leftHandPanel.update();
       joystickBasedStepping.update(mode == GDXVRMode.JOYSTICK_WALKING);
    }
