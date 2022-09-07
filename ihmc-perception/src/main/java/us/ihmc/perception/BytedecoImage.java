@@ -230,4 +230,9 @@ public class BytedecoImage
    {
       return Byte.toUnsignedInt(pointerForAccessSpeed.get((long) y * imageWidth + x));
    }
+
+   public int getByteAsInteger(int byteIndex)
+   {
+      return Byte.toUnsignedInt(backingDirectByteBuffer.get(byteIndex));
+   }
 }

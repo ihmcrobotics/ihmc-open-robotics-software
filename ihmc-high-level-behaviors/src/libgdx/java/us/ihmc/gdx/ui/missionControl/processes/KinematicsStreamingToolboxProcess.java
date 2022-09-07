@@ -12,18 +12,19 @@ public class KinematicsStreamingToolboxProcess extends RestartableMissionControl
 {
    private final DRCRobotModel robotModel;
    private Map<String, Double> initialConfiguration;
+   private boolean startYoVariableServer;
    private KinematicsStreamingToolboxModule kinematicsStreamingToolboxModule;
 
-   public KinematicsStreamingToolboxProcess(DRCRobotModel robotModel, Map<String, Double> initialConfiguration)
+   public KinematicsStreamingToolboxProcess(DRCRobotModel robotModel, Map<String, Double> initialConfiguration, boolean startYoVariableServer)
    {
       this.robotModel = robotModel;
       this.initialConfiguration = initialConfiguration;
+      this.startYoVariableServer = startYoVariableServer;
    }
 
    @Override
    protected void startInternal()
    {
-      boolean startYoVariableServer = true;
       kinematicsStreamingToolboxModule = new KinematicsStreamingToolboxModule(robotModel, startYoVariableServer, PubSubImplementation.FAST_RTPS);
       KinematicsStreamingToolboxController controller = (KinematicsStreamingToolboxController) kinematicsStreamingToolboxModule.getToolboxController();
       controller.setInitialRobotConfigurationNamedMap(initialConfiguration);

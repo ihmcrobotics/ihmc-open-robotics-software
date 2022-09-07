@@ -21,7 +21,7 @@ public class GDXPoseModifiableObject
    public void create(GDX3DPanel panel3D, GDXEnvironmentObject object)
    {
       this.object = object;
-      pose3DGizmo.create(panel3D.getCamera3D());
+      pose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
       object.setTransformToWorld(pose3DGizmo.getTransformToParent());
    }

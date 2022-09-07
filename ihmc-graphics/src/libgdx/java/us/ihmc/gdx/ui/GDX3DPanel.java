@@ -3,14 +3,15 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -26,7 +27,10 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class GDX3DPanel
@@ -37,12 +41,14 @@ public class GDX3DPanel
    private ImGuiPanel imGuiPanel;
    private GDX3DScene scene;
    private GLProfiler glProfiler;
-   private FrameBuffer frameBuffer;
-   private float sizeX;
-   private float sizeY;
+   private SensorFrameBuffer frameBuffer;
+   private float windowSizeX;
+   private float windowSizeY;
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
+   private final GDX3DPanelToolbar toolbar = new GDX3DPanelToolbar();
+   private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
    private InputMultiplexer inputMultiplexer;
    private GDXFocusBasedCamera camera3D;
    private ScreenViewport viewport;
@@ -53,6 +59,13 @@ public class GDX3DPanel
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere;
    private Runnable backgroundRenderer;
+   private ByteBuffer normalizedDeviceCoordinateDepthDirectByteBuffer;
+   private float renderSizeX;
+   private float renderSizeY;
+   private float windowDrawMinX;
+   private float windowDrawMinY;
+   private float windowDrawMaxX;
+   private float windowDrawMaxY;
 
    public GDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
@@ -76,7 +89,7 @@ public class GDX3DPanel
 
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
-      inputCalculator = new ImGui3DViewInput(camera3D, this::getViewportSizeX, this::getViewportSizeY);
+      inputCalculator = new ImGui3DViewInput(this);
       imgui3DViewInputProcessors.add(camera3D::processImGuiInput);
 
       if (addFocusSphere)
@@ -87,6 +100,8 @@ public class GDX3DPanel
 
    public void render()
    {
+      // NOTE: show panel(window) here
+      ImBoolean isShowing = imGuiPanel.getIsShowing();
       if (imGuiPanel.getIsShowing().get())
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
@@ -95,19 +110,22 @@ public class GDX3DPanel
          ImGui.begin(panelName, flags);
          view3DPanelSizeHandler.handleSizeAfterBegin();
 
-         float posX = ImGui.getWindowPosX();
-         float posY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
-         sizeX = ImGui.getWindowSizeX();
-         sizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
-         float renderSizeX = sizeX * antiAliasing;
-         float renderSizeY = sizeY * antiAliasing;
+         float windowPositionX = ImGui.getWindowPosX();
+         float windowPositionY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
+         windowSizeX = ImGui.getWindowSizeX();
+         windowSizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
+         renderSizeX = windowSizeX * antiAliasing;
+         renderSizeY = windowSizeY * antiAliasing;
 
          inputCalculator.compute();
-         for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+         if (inputCalculator.isWindowHovered()) // If the window is not hovered, we should not be computing picks
          {
-            imgui3DViewPickCalculator.accept(inputCalculator);
+            for (Consumer<ImGui3DViewInput> imgui3DViewPickCalculator : imgui3DViewPickCalculators)
+            {
+               imgui3DViewPickCalculator.accept(inputCalculator);
+            }
+            inputCalculator.calculateClosestPick();
          }
-         inputCalculator.calculateClosestPick();
          for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
          {
             imGuiInputProcessor.accept(inputCalculator);
@@ -122,41 +140,72 @@ public class GDX3DPanel
             int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * antiAliasing : frameBuffer.getWidth() * 2;
             int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * antiAliasing : frameBuffer.getHeight() * 2;
             LogTools.info("Allocating framebuffer of size: {}x{}", newWidth, newHeight);
-            GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(newWidth, newHeight);
-            frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
-            frameBufferBuilder.addBasicStencilDepthPackedRenderBuffer();
+            SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(newWidth, newHeight);
+            frameBufferBuilder.addColorTextureAttachment(GL41.GL_RGBA8, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE);
+            frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
+            frameBufferBuilder.addColorTextureAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT);
             frameBuffer = frameBufferBuilder.build();
+
+            int bytesPerPixel = Float.BYTES;
+            normalizedDeviceCoordinateDepthDirectByteBuffer = ByteBuffer.allocateDirect(newWidth * newHeight * bytesPerPixel);
+            normalizedDeviceCoordinateDepthDirectByteBuffer.order(ByteOrder.nativeOrder());
          }
 
          setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
          renderShadowMap(Gdx.graphics.getWidth() * antiAliasing, Gdx.graphics.getHeight() * antiAliasing);
 
-         frameBuffer.begin();
-         renderScene();
-         frameBuffer.end();
-
          int frameBufferWidth = frameBuffer.getWidth();
          int frameBufferHeight = frameBuffer.getHeight();
+
+         // We do this render to get the Z buffer from just the model
+         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL))
+         {
+            frameBuffer.begin();
+            renderScene(GDXSceneLevel.MODEL.SINGLETON_SET);
+
+            normalizedDeviceCoordinateDepthDirectByteBuffer.rewind(); // SIGSEV otherwise
+            GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
+            GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
+            // Note: This line has significant performance impact
+            GL41.glReadPixels(0, 0, (int) renderSizeX, (int) renderSizeY, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthDirectByteBuffer);
+            GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
+
+            frameBuffer.end();
+         }
+
+         // The scene will render twice if both real and virtual environments are showing
+         frameBuffer.begin();
+         renderScene(scene.getSceneLevelsToRender());
+         frameBuffer.end();
+
          float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
          float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
          int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
-         float pMinX = posX;
-         float pMinY = posY;
-         float pMaxX = posX + sizeX;
-         float pMaxY = posY + sizeY;
+         windowDrawMinX = windowPositionX;
+         windowDrawMinY = windowPositionY;
+         windowDrawMaxX = windowPositionX + windowSizeX;
+         windowDrawMaxY = windowPositionY + windowSizeY;
          float uvMinX = 0.0f;
          float uvMinY = percentOfFramebufferUsedY; // flip Y
          float uvMaxX = percentOfFramebufferUsedX;
          float uvMaxY = 0.0f;
 
-         frameBuffer.begin();
-         renderScene();
-         frameBuffer.end();
+         ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+         ImGui.popStyleVar();
 
-         ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+         for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
+         {
+            imguiOverlayAddition.run();
+         }
+
+         if (ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
+         {
+            camera3D.setCameraFocusPoint(inputCalculator.getPickPointInWorld());
+         }
 
          ImGui.end();
-         ImGui.popStyleVar();
+
+         toolbar.render(windowSizeX, windowPositionX, windowPositionY);
       }
    }
 
@@ -170,15 +219,15 @@ public class GDX3DPanel
       scene.renderShadowMap(camera3D, x, y);
    }
 
-   private void renderScene()
+   private void renderScene(Set<GDXSceneLevel> sceneLevels)
    {
       preRender();
 
       if (backgroundRenderer != null)
          backgroundRenderer.run();
 
-      scene.render();
-      scene.postRender(camera3D, GDXSceneLevel.VIRTUAL);
+      scene.render(sceneLevels);
+      scene.postRender(camera3D, sceneLevels);
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          glProfiler.reset();
@@ -255,6 +304,11 @@ public class GDX3DPanel
       }
    }
 
+   public GDX3DPanelToolbarButton addToolbarButton()
+   {
+      return toolbar.addButton();
+   }
+
    public void setAddFocusSphere(boolean addFocusSphere)
    {
       this.addFocusSphere = addFocusSphere;
@@ -267,12 +321,12 @@ public class GDX3DPanel
 
    public float getViewportSizeX()
    {
-      return sizeX;
+      return windowSizeX;
    }
 
    public float getViewportSizeY()
    {
-      return sizeY;
+      return windowSizeY;
    }
 
    public void addImGui3DViewPickCalculator(Consumer<ImGui3DViewInput> calculate3DViewPick)
@@ -285,6 +339,11 @@ public class GDX3DPanel
       imgui3DViewInputProcessors.add(processImGuiInput);
    }
 
+   public void addImGuiOverlayAddition(Runnable imGuiOverlayAddition)
+   {
+      imGuiOverlayAdditions.add(imGuiOverlayAddition);
+   }
+
    public GDX3DScene getScene()
    {
       return scene;
@@ -295,13 +354,48 @@ public class GDX3DPanel
       return imGuiPanel;
    }
 
-   public FrameBuffer getFrameBuffer()
+   public SensorFrameBuffer getFrameBuffer()
    {
       return frameBuffer;
+   }
+
+   public ByteBuffer getNormalizedDeviceCoordinateDepthDirectByteBuffer()
+   {
+      return normalizedDeviceCoordinateDepthDirectByteBuffer;
    }
 
    public int getAntiAliasing()
    {
       return antiAliasing;
+   }
+
+   public float getRenderSizeX()
+   {
+      return renderSizeX;
+   }
+
+   public float getRenderSizeY()
+   {
+      return renderSizeY;
+   }
+
+   public float getWindowDrawMinX()
+   {
+      return windowDrawMinX;
+   }
+
+   public float getWindowDrawMinY()
+   {
+      return windowDrawMinY;
+   }
+
+   public float getWindowDrawMaxX()
+   {
+      return windowDrawMaxX;
+   }
+
+   public float getWindowDrawMaxY()
+   {
+      return windowDrawMaxY;
    }
 }

@@ -51,11 +51,9 @@ public class GDXArUcoCodeDetectionDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
 
-            sensorPoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
@@ -76,7 +74,7 @@ public class GDXArUcoCodeDetectionDemo
                   cameraSensor.setSensorEnabled(true);
                   cameraSensor.setRenderColorVideoDirectly(true);
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
-                  baseUI.getPrimaryScene().addRenderableProvider(cameraSensor, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   arUcoMarkerDetection.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage(),

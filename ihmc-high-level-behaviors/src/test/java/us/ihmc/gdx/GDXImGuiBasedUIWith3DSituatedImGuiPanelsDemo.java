@@ -1,9 +1,10 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import imgui.internal.ImGui;
-import us.ihmc.gdx.tools.GDXModelBuilder;
+import com.badlogic.gdx.graphics.Color;
+import imgui.ImGui;
+import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 {
@@ -11,7 +12,10 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources",
                                                               "3DSituatedPanelsDemo");
-   private final GDXMultiContext3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDXMultiContext3DSituatedImGuiPanelManager();
+   private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
+   private final GDXPose3DGizmo poseGizmo2 = new GDXPose3DGizmo();
+   private GDX3DSituatedImGuiPanel situatedImGuiPanel;
+   private GDX3DSituatedImGuiPanel situatedImGuiPanel2;
 
    public GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo()
    {
@@ -21,27 +25,38 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
          public void create()
          {
             baseUI.create();
+            baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
-            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getImGuiPanelManager().addPanel("Window 1", this::renderWindow2);
 
-            baseUI.getImGuiPanelManager().addPanel("Window 1", this::renderWindow1);
+            poseGizmo.createAndSetupDefault(baseUI.getPrimary3DPanel());
 
-            situatedImGuiPanelManager.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(),
-                                             baseUI.getImGuiWindowAndDockSystem().getImFont());
-            GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", this::renderWindow1);
-            situatedImGuiPanelManager.addPanel(panel);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanelManager::processImGuiInput);
+            poseGizmo2.createAndSetupDefault(baseUI.getPrimary3DPanel());
+            poseGizmo2.getTransformToParent().getTranslation().setZ(0.5);
 
-            baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanelManager);
+            situatedImGuiPanel = new GDX3DSituatedImGuiPanel("Window 2", this::renderWindow2);
+            situatedImGuiPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
+            situatedImGuiPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
+//            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(situatedImGuiPanel::processImGuiInput);
+            baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanel::getRenderables);
+
+            situatedImGuiPanel2 = new GDX3DSituatedImGuiPanel("Window 3", this::renderWindow3);
+            situatedImGuiPanel2.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
+            situatedImGuiPanel2.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
+            baseUI.getPrimaryScene().addRenderableProvider(situatedImGuiPanel2::getRenderables);
          }
 
          @Override
          public void render()
          {
-//            situatedImGuiPanelManager.render();
+            situatedImGuiPanel.setTransformToReferenceFrame(poseGizmo.getGizmoFrame());
+            situatedImGuiPanel.update();
+
+            situatedImGuiPanel2.setTransformToReferenceFrame(poseGizmo2.getGizmoFrame());
+            situatedImGuiPanel2.update();
 
             baseUI.renderBeforeOnScreenUI();
-//            baseUI.renderEnd(situatedImGuiPanelManager::render);
+            baseUI.renderEnd();
          }
 
          @Override
@@ -50,10 +65,16 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
             baseUI.dispose();
          }
 
-         private void renderWindow1()
+         private void renderWindow2()
          {
             ImGui.text("This is a 3D situated panel.");
             ImGui.button("Button");
+         }
+
+         private void renderWindow3()
+         {
+            ImGui.text("Another one!");
+            ImGui.button("Buttoneee");
          }
       });
    }

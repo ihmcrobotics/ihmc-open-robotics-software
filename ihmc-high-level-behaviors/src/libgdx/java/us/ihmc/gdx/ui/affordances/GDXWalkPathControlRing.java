@@ -1,36 +1,41 @@
 package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FootstepDataListMessage;
+import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
-import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -39,17 +44,16 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXWalkPathControlRing
+public class GDXWalkPathControlRing implements PathTypeStepParameters
 {
    private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
    private boolean selected = false;
    private boolean modified = false;
    private boolean mouseRingPickSelected;
-   private ROS2SyncedRobotModel syncedRobot;
-   private ROS2ControllerHelper ros2Helper;
+   private GDX3DPanel panel3D;
+   private GDXTeleoperationParameters teleoperationParameters;
    private MovingReferenceFrame midFeetZUpFrame;
    private ResettableExceptionHandlingExecutorService footstepPlanningThread;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -74,15 +78,24 @@ public class GDXWalkPathControlRing
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
    private final AxisAngle walkFacingDirection = new AxisAngle();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private boolean useAStarPlanner = false;
+   private int plannerToUse = 0;
    private TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
+   private TurnStraightTurnFootstepGenerator turnStraightTurnFootstepGenerator;
+   private SimplePathParameters turnStraightTurnParameters;
+   private SteppingParameters steppingParameters;
+   private GDXWalkPathType walkPathType = GDXWalkPathType.STRAIGHT;
+   private ImGui3DViewInput latestInput;
 
-   public void create(GDXFocusBasedCamera camera3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
+   public void create(GDX3DPanel panel3D,
+                      DRCRobotModel robotModel,
+                      ROS2SyncedRobotModel syncedRobot,
+                      GDXTeleoperationParameters teleoperationParameters)
    {
-      this.syncedRobot = syncedRobot;
-      this.ros2Helper = ros2Helper;
-      footstepPlannerGoalGizmo.create(camera3D);
+      this.panel3D = panel3D;
+      this.teleoperationParameters = teleoperationParameters;
+      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
+      panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
 
@@ -90,6 +103,7 @@ public class GDXWalkPathControlRing
       footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("WalkPathControlPlanning", true, 1);
 
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      steppingParameters = robotModel.getWalkingControllerParameters().getSteppingParameters();
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       leftStanceFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightStanceFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
@@ -114,19 +128,28 @@ public class GDXWalkPathControlRing
       rightStanceFootPose.getPosition().subY(halfIdealFootstepWidth);
       leftStanceFootstepGraphic.setPose(leftStanceFootPose);
       rightStanceFootstepGraphic.setPose(rightStanceFootPose);
+
+      SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>(syncedRobot.getReferenceFrames().getSoleFrames());
+      turnStraightTurnFootstepGenerator = new TurnStraightTurnFootstepGenerator(new SideDependentList<>(null, null),
+                                                                                soleFrames,
+                                                                                new FramePose2D(),
+                                                                                this);
    }
 
-   public void update()
+   public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
    {
       if (!modified)
       {
          footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
 
+
       if (footstepPlanToGenerateMeshes != null)
+//      if (footstepPlan != null)
       {
-         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
-                                                                                           "Walk Path Control Ring Plan"));
+         plannedFootstepPlacement.updateFromPlan(footstepPlan);
+//         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
+//                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();
@@ -140,9 +163,10 @@ public class GDXWalkPathControlRing
    // This happens after update.
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      latestInput = input;
+      boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
-      footstepPlannerGoalGizmo.process3DViewInput(input);
+      footstepPlannerGoalGizmo.process3DViewInput(input, selected);
       mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
 
       if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
@@ -170,18 +194,22 @@ public class GDXWalkPathControlRing
       {
          if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.STRAIGHT;
             walkFacingDirection.set(Axis3D.Z, 0.0);
          }
          else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.LEFT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
          }
          else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.REVERSE;
             walkFacingDirection.set(Axis3D.Z, Math.PI);
          }
          else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelected())
          {
+            walkPathType = GDXWalkPathType.RIGHT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
          }
          if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
@@ -191,28 +219,14 @@ public class GDXWalkPathControlRing
             queueFootstepPlan();
          }
       }
-      if (selected && footstepPlannerGoalGizmo.isBeingDragged())
+      if (selected && footstepPlannerGoalGizmo.isNewlyModified())
       {
          queueFootstepPlan();
-      }
-      if (selected && ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
-      {
-         // Send footsteps to robot
-         double swingDuration = 1.2;
-         double transferDuration = 0.8;
-         FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
-                                                                                                                       swingDuration,
-                                                                                                                       transferDuration);
-         footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
-         footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-         ros2Helper.publishToController(footstepDataListMessage);
       }
 
       if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
-         selected = false;
-         modified = false;
-         foostepPlanGraphic.clear();
+         delete();
       }
       if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
@@ -227,16 +241,20 @@ public class GDXWalkPathControlRing
    {
       footstepPlanningThread.clearQueueAndExecute(() ->
       {
-         if (useAStarPlanner)
+         if (plannerToUse == 0)
          {
             planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
                                           new Pose3D(rightStanceFootPose),
                                           new Pose3D(leftGoalFootPose),
                                           new Pose3D(rightGoalFootPose));
          }
-         else
+         else if (plannerToUse == 1)
          {
             planFootstepsUsingTurnWalkTurnPlanner();
+         }
+         else
+         {
+            planFootstepsUsingTurnStraightTurnFootstepGenerator();
          }
       });
    }
@@ -281,6 +299,14 @@ public class GDXWalkPathControlRing
       footstepPlan = footstepPlanToGenerateMeshes = turnWalkTurnPlanner.getPlan();
    }
 
+   public void planFootstepsUsingTurnStraightTurnFootstepGenerator()
+   {
+      turnStraightTurnFootstepGenerator.setStanceStartPreference(RobotSide.LEFT);
+      // TODO:
+//      turnStraightTurnFootstepGenerator.setFootstepPath(new TurnStraightTurnOverheadPath());
+
+   }
+
    private void planFoostepsUsingAStarPlanner(Pose3DReadOnly leftStanceFootPose,
                                               Pose3DReadOnly rightStanceFootPose,
                                               Pose3DReadOnly leftGoalFootPose,
@@ -301,13 +327,49 @@ public class GDXWalkPathControlRing
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.radioButton(labels.get("Turn Walk Turn"), !useAStarPlanner))
+      if (ImGui.radioButton(labels.get("A* Planner"), plannerToUse == 0))
       {
-         useAStarPlanner = false;
+         plannerToUse = 0;
       }
-      if (ImGui.radioButton(labels.get("A* Planner"), useAStarPlanner))
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Turn Walk Turn"), plannerToUse == 1))
       {
-         useAStarPlanner = true;
+         plannerToUse = 1;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Turn Straight Turn"), plannerToUse == 2))
+      {
+         plannerToUse = 2;
+      }
+   }
+
+   private void renderTooltips()
+   {
+      if (selected && footstepPlannerGoalGizmo.getGizmoHovered())
+      {
+         float offsetX = 10.0f;
+         float offsetY = 10.0f;
+         float mousePosX = latestInput.getMousePosX();
+         float mousePosY = latestInput.getMousePosY();
+         float drawStartX = panel3D.getWindowDrawMinX() + mousePosX + offsetX;
+         float drawStartY = panel3D.getWindowDrawMinY() + mousePosY + offsetY;
+
+         String message = """
+                          Use left mouse drag to translate.
+                          Use right mouse drag to yaw.
+                          Use keyboard arrows to translate. (Hold shift for slow)
+                          Use alt+left and alt+left arrows to yaw. (Hold shift for slow)
+                          """;
+
+         ImGui.getWindowDrawList()
+              .addRectFilled(drawStartX, drawStartY, drawStartX + 62 * 6.7f, drawStartY + 4 * 17.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
+         ImGui.getWindowDrawList()
+              .addText(ImGuiTools.getSmallFont(),
+                       ImGuiTools.getSmallFont().getFontSize(),
+                       drawStartX + 5.0f,
+                       drawStartY + 2.0f,
+                       Color.WHITE.toIntBits(),
+                       message);
       }
    }
 
@@ -327,6 +389,13 @@ public class GDXWalkPathControlRing
       }
    }
 
+   public void delete()
+   {
+      selected = false;
+      modified = false;
+      clearGraphics();
+   }
+
    public void clearGraphics()
    {
       leftStanceFootstepGraphic.setPose(BehaviorTools.createNaNPose());
@@ -340,5 +409,67 @@ public class GDXWalkPathControlRing
    {
       footstepPlanningThread.destroy();
       foostepPlanGraphic.destroy();
+   }
+
+   @Override
+   public double getAngle()
+   {
+      return switch (walkPathType)
+      {
+         case STRAIGHT -> 0.0;
+         case LEFT_SHUFFLE -> -Math.PI / 2.0;
+         case RIGHT_SHUFFLE -> Math.PI / 2.0;
+         case REVERSE -> Math.PI;
+      };
+   }
+
+   @Override
+   public double getStepWidth()
+   {
+      return switch (walkPathType)
+      {
+         case STRAIGHT -> teleoperationParameters.getStraightStepWidth();
+         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> teleoperationParameters.getShuffleStepWidth();
+         case REVERSE -> teleoperationParameters.getReverseStepWidth();
+      };
+   }
+
+   @Override
+   public double getStepLength()
+   {
+      return switch (walkPathType)
+      {
+         case STRAIGHT -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getStraightStepLength();
+         case LEFT_SHUFFLE, RIGHT_SHUFFLE -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getShuffleStepLength();
+         case REVERSE -> teleoperationParameters.getFootstepLengthMultiplier() * teleoperationParameters.getReverseStepLength();
+      };
+   }
+
+   @Override
+   public double getTurningOpenStepAngle()
+   {
+      double minimumHipOpeningAngle = Math.toRadians(10.0);
+      double hipOpeningAngle = EuclidCoreTools.interpolate(minimumHipOpeningAngle,
+                                                           steppingParameters.getMaxAngleTurnOutwards(),
+                                                           teleoperationParameters.getTurnAggressiveness());
+      return hipOpeningAngle;
+   }
+
+   @Override
+   public double getTurningCloseStepAngle()
+   {
+      double hipClosingAngle = -teleoperationParameters.getTurnAggressiveness() * steppingParameters.getMaxAngleTurnInwards();
+      return hipClosingAngle;
+   }
+
+   @Override
+   public double getTurningStepWidth()
+   {
+      return steppingParameters.getTurningStepWidth();
+   }
+
+   public FootstepPlan getFootstepPlan()
+   {
+      return footstepPlan;
    }
 }

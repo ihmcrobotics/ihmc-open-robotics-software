@@ -8,11 +8,11 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -26,7 +26,7 @@ public class GDXBehaviorActionSequenceManager
    private ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceDirectory behaviorSequenceStorageDirectory;
-   private GDXFocusBasedCamera camera3D;
+   private GDX3DPanel panel3D;
    private DRCRobotModel robotModel;
    private ROS2Node ros2Node;
    private ROS2SyncedRobotModel syncedRobot;
@@ -35,14 +35,14 @@ public class GDXBehaviorActionSequenceManager
    private final TreeSet<GDXBehaviorActionSequenceEditor> editors = new TreeSet<>(Comparator.comparing(GDXBehaviorActionSequenceEditor::getName));
 
    public void create(WorkspaceDirectory behaviorSequenceStorageDirectory,
-                      GDXFocusBasedCamera camera3D,
+                      GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
                       List<ReferenceFrame> referenceFrameLibrary)
    {
       this.behaviorSequenceStorageDirectory = behaviorSequenceStorageDirectory;
-      this.camera3D = camera3D;
+      this.panel3D = panel3D;
       this.robotModel = robotModel;
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
@@ -100,7 +100,7 @@ public class GDXBehaviorActionSequenceManager
 
    private void addEditor(GDXBehaviorActionSequenceEditor editor)
    {
-      editor.create(camera3D, robotModel, ros2Node, syncedRobot, referenceFrameLibrary);
+      editor.create(panel3D, robotModel, ros2Node, syncedRobot, referenceFrameLibrary);
       editors.add(editor);
       managerPanel.queueAddChild(editor.getPanel());
    }

@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
@@ -157,6 +158,8 @@ public class DualBlackflyCamera
             blackfly.setBytedecoPointerToSpinImageData(spinImage, spinImageDataPointer);
             blackflySourceImage.rewind();
             blackflySourceImage.changeAddress(spinImageDataPointer.address());
+
+//            opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
 
             opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
 

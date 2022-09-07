@@ -135,4 +135,9 @@ public class DynamicGDXModel
    {
       return localTransform;
    }
+
+   public ModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
 }

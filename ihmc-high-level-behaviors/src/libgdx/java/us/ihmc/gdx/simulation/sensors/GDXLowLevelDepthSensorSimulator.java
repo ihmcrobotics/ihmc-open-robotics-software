@@ -21,10 +21,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.gdx.perception.GDXCVImagePanel;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
-import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
@@ -210,7 +210,7 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.begin(camera);
       GL41.glViewport(0, 0, imageWidth, imageHeight);
 
-      scene.renderExternalBatch(modelBatch, GDX3DScene.REAL_ENVIRONMENT_ONLY);
+      scene.renderExternalBatch(modelBatch, GDXSceneLevel.GROUND_TRUTH.SINGLETON_SET);
 
       modelBatch.end();
 
@@ -234,6 +234,7 @@ public class GDXLowLevelDepthSensorSimulator
       frameBuffer.end();
 
       // libGDX renders this stuff upside down, so let's flip them right side up.
+      // TODO: Does it really? Sneaking suspicion that it doesn't and we end up flipping things again later on.
       opencv_core.flip(rgba8888ColorImage.getBytedecoOpenCVMat(), rgba8888ColorImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
       opencv_core.flip(normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),
                        normalizedDeviceCoordinateDepthImage.getBytedecoOpenCVMat(),

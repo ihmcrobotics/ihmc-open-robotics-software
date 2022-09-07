@@ -127,6 +127,10 @@ public class ROS2Tools
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
+   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> D435_COLORED_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
+                                                                                                       .withSuffix("d435_color");
+   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> OUSTER_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
+                                                                                                 .withSuffix("ouster");
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD
          = IHMC_ROOT.withModule(MULTISENSE_NAME).withType(StereoVisionPointCloudMessage.class).withSuffix("pointcloud");
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD
@@ -137,6 +141,15 @@ public class ROS2Tools
    public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
+   public static final ROS2Topic<RigidBodyTransformMessage> OBJECT_DETECTION_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                     .withModule("frame_update")
+                                                                                                     .withSuffix("object_detection");
+   public static final ROS2Topic<RigidBodyTransformMessage> STEPPING_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                             .withModule("frame_update")
+                                                                                             .withSuffix("stepping");
+   public static final ROS2Topic<RigidBodyTransformMessage> OUSTER_LIDAR_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                 .withModule("frame_update")
+                                                                                                 .withSuffix("ouster_lidar");
 
    /** Output regions from Lidar (Multisense) from REA */
    public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);

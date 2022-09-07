@@ -54,8 +54,12 @@ void main()
 in vec4 v_color;
 
 out vec4 color;
+out float out_processedDepth;
 
 void main()
 {
 	color = v_color;
+
+	// This is so the points can be detected by the depth sensors
+	out_processedDepth = 2.0 * gl_FragCoord.z - 1.0; // Normalized to -1.0 to 1.0
 }

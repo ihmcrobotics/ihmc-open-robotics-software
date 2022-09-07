@@ -11,7 +11,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.robotSide.RobotSide;

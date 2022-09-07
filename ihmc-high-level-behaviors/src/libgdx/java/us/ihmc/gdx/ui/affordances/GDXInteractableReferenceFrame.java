@@ -7,10 +7,10 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.collidables.GDXCoordinateFrameIntersection;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.ui.interactable.GDXModelInstanceScaler;
@@ -30,14 +30,14 @@ public class GDXInteractableReferenceFrame
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
 
-   public void create(ReferenceFrame parentFrame, double length, GDXFocusBasedCamera camera3D)
+   public void create(ReferenceFrame parentFrame, double length, GDX3DPanel panel3D)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
-      create(referenceFrame, transform, length, camera3D);
+      create(referenceFrame, transform, length, panel3D);
    }
 
-   public void create(ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify, double length, GDXFocusBasedCamera camera3D)
+   public void create(ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify, double length, GDX3DPanel panel3D)
    {
       representativeReferenceFrame = referenceFrameToRepresent;
       transformToParent = transformToParentToModify;
@@ -48,7 +48,7 @@ public class GDXInteractableReferenceFrame
       highlightReferenceFrameGraphicScaler.scale(1.01);
       GDXTools.setTransparency(highlightReferenceFrameGraphic, 0.5f);
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
-      selectablePose3DGizmo.create(camera3D);
+      selectablePose3DGizmo.create(panel3D);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -57,9 +57,11 @@ public class GDXInteractableReferenceFrame
 
       Line3DReadOnly pickRay = input.getPickRayInWorld();
       double closestCollisionDistance = coordinateFrameIntersection.intersect(representativeReferenceFrame, pickRay);
-      pickResult.setPickIntersects(!Double.isNaN(closestCollisionDistance));
-      pickResult.setDistanceToCamera(closestCollisionDistance);
-      input.addPickResult(pickResult);
+      if (!Double.isNaN(closestCollisionDistance))
+      {
+         pickResult.setDistanceToCamera(closestCollisionDistance);
+         input.addPickResult(pickResult);
+      }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
