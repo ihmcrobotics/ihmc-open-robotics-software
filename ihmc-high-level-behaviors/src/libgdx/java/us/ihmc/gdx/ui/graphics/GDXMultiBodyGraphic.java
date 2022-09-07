@@ -54,18 +54,19 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
       GDXRigidBody gdxRigidBody;
       if (scale)
       {
-          gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                                robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                                Gdx.app::postRunnable,
-                                                                                robotDefinition.getResourceClassLoader(), 1.1f, 1.1f, 1.1f);
+         gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                   Gdx.app::postRunnable,
+                                                                   robotDefinition.getResourceClassLoader(),
+                                                                   1.1f, 1.1f, 1.1f);
       }
 
       else
       {
          gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                                robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                                Gdx.app::postRunnable,
-                                                                                robotDefinition.getResourceClassLoader());
+                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                   Gdx.app::postRunnable,
+                                                                   robotDefinition.getResourceClassLoader());
       }
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
@@ -78,17 +79,17 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
             fourBarJoint.getJointA().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
                                                                                              fourBarJointDefinition.getBodyDA(),
                                                                                              Gdx.app::postRunnable,
-                                                                                             robotDefinition.getResourceClassLoader(), 1.1f, 1.1f, 1.1f));
+                                                                                             robotDefinition.getResourceClassLoader(),
+                                                                                             1.1f, 1.1f, 1.1f));
             fourBarJoint.getJointB().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
                                                                                              Gdx.app::postRunnable,
-                                                                                             robotDefinition.getResourceClassLoader(), 0.0f, 0.0f, 0.0f));
+                                                                                             robotDefinition.getResourceClassLoader(),
+                                                                                             0.0f, 0.0f, 0.0f));
          }
 
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition));
       }
-
-
 
       return gdxRigidBody;
    }

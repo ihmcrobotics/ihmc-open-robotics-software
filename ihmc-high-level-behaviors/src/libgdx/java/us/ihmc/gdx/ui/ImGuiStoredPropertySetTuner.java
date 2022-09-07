@@ -280,6 +280,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       }
    }
 
+   // TODO: Fix this up
    public void renderADoublePropertySlider(StoredPropertyKey<?> propertyKey,
                                           double step,
                                           double stepFast,
@@ -296,7 +297,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.sameLine();
          ImGui.pushItemWidth(100.0f);
       }
-      // TODO: Implement this in teleop panel for quick access
       DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
       if (ImGui.sliderFloat(labels.get(label), sliderValues.get(key), (float) min, (float) max))
       {
