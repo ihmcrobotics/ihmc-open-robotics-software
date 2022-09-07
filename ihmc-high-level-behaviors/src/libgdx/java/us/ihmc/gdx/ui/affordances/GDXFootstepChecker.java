@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.affordances;
 import com.badlogic.gdx.graphics.Color;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,7 +36,7 @@ public class GDXFootstepChecker
    private BipedalFootstepPlannerNodeRejectionReason reason = null;
    private final ArrayList<BipedalFootstepPlannerNodeRejectionReason> reasons = new ArrayList<>();
 
-   // TODO: swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
+   // TODO: Swap stance and swing if candidate step for the very first step of the footsteparraylist is going to be on different side compared to swing's side.
    private RigidBodyTransform stanceStepTransform;
    private RobotSide stanceSide;
    private RigidBodyTransform swingStepTransform;
@@ -47,7 +46,7 @@ public class GDXFootstepChecker
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
 
-   public GDXFootstepChecker(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
+   public GDXFootstepChecker(GDXImGuiBasedUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
@@ -58,19 +57,19 @@ public class GDXFootstepChecker
       setInitialFeet();
    }
 
-    public void setInitialFeet()
-    {
-      swingStepTransform   = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
+   public void setInitialFeet()
+   {
+      swingStepTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
       swingSide = RobotSide.RIGHT;
-      stanceStepTransform  = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+      stanceStepTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
       stanceSide = RobotSide.LEFT;
-    }
+   }
 
-    public void swapSides()
-    {
-       swingSide  = swingSide.getOppositeSide();
-       stanceSide = stanceSide.getOppositeSide();
-    }
+   public void swapSides()
+   {
+      swingSide = swingSide.getOppositeSide();
+      stanceSide = stanceSide.getOppositeSide();
+   }
 
    public void getInput(ImGui3DViewInput input)
    {
@@ -79,7 +78,7 @@ public class GDXFootstepChecker
 
    private void renderTooltips()
    {
-      if (latestInput!=null && renderTooltip)
+      if (latestInput != null && renderTooltip)
       {
          float offsetX = 10.0f;
          float offsetY = 31.0f;
@@ -89,7 +88,7 @@ public class GDXFootstepChecker
          float drawStartY = primary3DPanel.getWindowDrawMinY() + mousePosY + offsetY;
 
          ImGui.getWindowDrawList()
-              .addRectFilled(drawStartX, drawStartY, drawStartX + text.length()*7.2f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
+              .addRectFilled(drawStartX, drawStartY, drawStartX + text.length() * 7.2f, drawStartY + 21.0f, new Color(0.2f, 0.2f, 0.2f, 0.7f).toIntBits());
 
          ImGui.getWindowDrawList()
               .addText(ImGuiTools.getSmallFont(), ImGuiTools.getSmallFont().getFontSize(), drawStartX + 5.0f, drawStartY + 2.0f, Color.WHITE.toIntBits(), text);
@@ -105,7 +104,7 @@ public class GDXFootstepChecker
       // iterate through the list ( + current initial stance and swing) and check validity for all.
       for (int i = 0; i < stepList.size(); ++i)
       {
-         checkValidSingleStep(stepList, stepList.get(i).getFootTransformInWorld(), stepList.get(i).getFootstepSide(),i);
+         checkValidSingleStep(stepList, stepList.get(i).getFootTransformInWorld(), stepList.get(i).getFootstepSide(), i);
       }
    }
 
@@ -134,21 +133,21 @@ public class GDXFootstepChecker
       {
          GDXInteractableFootstep tempStance = stepList.get(0);
          RigidBodyTransform tempStanceTransform = tempStance.getFootTransformInWorld();
-         reason = stepChecker.checkValidity(candidateStepSide,candidateStepTransform, tempStanceTransform, stanceStepTransform);
+         reason = stepChecker.checkValidity(candidateStepSide, candidateStepTransform, tempStanceTransform, stanceStepTransform);
       }
       else
       {
          reason = stepChecker.checkValidity(candidateStepSide,
                                             candidateStepTransform,
-                           stepList.get(indexOfFootBeingChecked-1).getFootTransformInWorld(),
-                          stepList.get(indexOfFootBeingChecked - 2).getFootTransformInWorld());
+                                            stepList.get(indexOfFootBeingChecked - 1).getFootTransformInWorld(),
+                                            stepList.get(indexOfFootBeingChecked - 2).getFootTransformInWorld());
       }
       reasons.add(reason);
    }
 
    public void makeWarnings()
    {
-//      checkValidStepList(footstepArrayList);
+      // checkValidStepList(footstepArrayList);
       if (reason != null)
       {
          text = " Warning ! : " + reason.name();
@@ -176,15 +175,14 @@ public class GDXFootstepChecker
    }
 
    public BipedalFootstepPlannerNodeRejectionReason getReason()
-    {
-        return reason;
- }
+   {
+      return reason;
+   }
 
    public void setRenderTooltip(boolean renderTooltip)
    {
       this.renderTooltip = renderTooltip;
    }
-
 
    public GDX3DPanel getPrimary3DPanel()
    {
