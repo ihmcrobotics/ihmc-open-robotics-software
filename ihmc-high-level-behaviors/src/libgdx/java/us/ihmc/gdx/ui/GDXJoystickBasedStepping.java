@@ -97,10 +97,12 @@ public class GDXJoystickBasedStepping
       swingHeight.set(steppingParameters.getMinSwingHeightFromStanceFoot());
       swingDuration.set(walkingControllerParameters.getDefaultSwingTime());
       transferDuration.set(walkingControllerParameters.getDefaultTransferTime());
-      maxStepLength.set(steppingParameters.getMaxStepLength());
+//      maxStepLength.set(steppingParameters.getMaxStepLength());
+      maxStepLength.set(0.3);
       defaultStepWidth.set(steppingParameters.getInPlaceWidth());
       minStepWidth.set(steppingParameters.getMinStepWidth());
-      maxStepWidth.set(steppingParameters.getMaxStepWidth());
+//      maxStepWidth.set(steppingParameters.getMaxStepWidth());
+      maxStepWidth.set(0.3);
       turnStepWidth.set(steppingParameters.getTurningStepWidth());
       turnMaxAngleInward.set(steppingParameters.getMaxAngleTurnInwards());
       turnMaxAngleOutward.set(steppingParameters.getMaxAngleTurnOutwards());
