@@ -236,8 +236,14 @@ public class GDXVRKinematicsStreamingMode
       }
    }
 
-   public void update()
+   public void update(boolean ikStreamingModeEnabled)
    {
+      // Safety features!
+      if (!ikStreamingModeEnabled)
+         streamToController = false;
+      if (!enabled.get())
+         streamToController = false;
+
       if (status.getMessageNotification().poll())
       {
          KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
