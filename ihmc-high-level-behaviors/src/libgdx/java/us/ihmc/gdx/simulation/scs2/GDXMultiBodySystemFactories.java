@@ -198,7 +198,6 @@ public class GDXMultiBodySystemFactories
       }
    }
 
-
    private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,
                                             List<CollisionShapeDefinition> collisionShapeDefinitions,
                                             GDXRigidBody gdxRigidBody,
