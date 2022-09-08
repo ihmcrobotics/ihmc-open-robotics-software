@@ -1,35 +1,7 @@
 package us.ihmc.communication.packets;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import controller_msgs.msg.dds.BoundingBoxesPacket;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.DetectedFacesPacket;
-import controller_msgs.msg.dds.HeatMapPacket;
-import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanParametersMessage;
-import controller_msgs.msg.dds.ObjectDetectorResultPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SelectionMatrix3DMessage;
-import controller_msgs.msg.dds.SimulatedLidarScanPacket;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import controller_msgs.msg.dds.TextToSpeechPacket;
-import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
-import controller_msgs.msg.dds.WeightMatrix3DMessage;
-import gnu.trove.list.array.TByteArrayList;
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
+import controller_msgs.msg.dds.*;
+import gnu.trove.list.array.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -48,16 +20,16 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MessageTools
 {
@@ -1101,5 +1073,37 @@ public class MessageTools
       {
          robotConfigurationData.getForceSensorData().get(i).setSequenceId(sequenceId);
       }
+   }
+
+   public static void toMessage(RigidBodyTransform rigidBodyTransform, RigidBodyTransformMessage rigidBodyTransformMessage)
+   {
+      rigidBodyTransformMessage.setX (rigidBodyTransform.getTranslation().getX());
+      rigidBodyTransformMessage.setY (rigidBodyTransform.getTranslation().getY());
+      rigidBodyTransformMessage.setZ (rigidBodyTransform.getTranslation().getZ());
+      rigidBodyTransformMessage.setM00(rigidBodyTransform.getRotation().getM00());
+      rigidBodyTransformMessage.setM01(rigidBodyTransform.getRotation().getM01());
+      rigidBodyTransformMessage.setM02(rigidBodyTransform.getRotation().getM02());
+      rigidBodyTransformMessage.setM10(rigidBodyTransform.getRotation().getM10());
+      rigidBodyTransformMessage.setM11(rigidBodyTransform.getRotation().getM11());
+      rigidBodyTransformMessage.setM12(rigidBodyTransform.getRotation().getM12());
+      rigidBodyTransformMessage.setM20(rigidBodyTransform.getRotation().getM20());
+      rigidBodyTransformMessage.setM21(rigidBodyTransform.getRotation().getM21());
+      rigidBodyTransformMessage.setM22(rigidBodyTransform.getRotation().getM22());
+   }
+
+   public static void toEuclid(RigidBodyTransformMessage rigidBodyTransformMessage, RigidBodyTransform rigidBodyTransform)
+   {
+      rigidBodyTransform.getTranslation().setX(rigidBodyTransformMessage.getX());
+      rigidBodyTransform.getTranslation().setY(rigidBodyTransformMessage.getY());
+      rigidBodyTransform.getTranslation().setZ(rigidBodyTransformMessage.getZ());
+      rigidBodyTransform.getRotation().setUnsafe(rigidBodyTransformMessage.getM00(),
+                                                 rigidBodyTransformMessage.getM01(),
+                                                 rigidBodyTransformMessage.getM02(),
+                                                 rigidBodyTransformMessage.getM10(),
+                                                 rigidBodyTransformMessage.getM11(),
+                                                 rigidBodyTransformMessage.getM12(),
+                                                 rigidBodyTransformMessage.getM20(),
+                                                 rigidBodyTransformMessage.getM21(),
+                                                 rigidBodyTransformMessage.getM22());
    }
 }

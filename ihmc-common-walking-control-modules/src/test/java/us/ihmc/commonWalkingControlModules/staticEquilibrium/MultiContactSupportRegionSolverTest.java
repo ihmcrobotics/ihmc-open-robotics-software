@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class MultiContactSupportRegionSolverTest
 {
-   private static final boolean VISUALIZE = false; //  Boolean.parseBoolean(System.getProperty("visualize", "true"));
+   private static final boolean VISUALIZE = true; //  Boolean.parseBoolean(System.getProperty("visualize", "true"));
    private static final double marginToTest = 1e-3;
 
    @Test
@@ -84,7 +85,7 @@ public class MultiContactSupportRegionSolverTest
 
       // do timing test
       int iterations = 20;
-      long start = System.currentTimeMillis();
+      long startNano = System.nanoTime();
 
       for (int i = 0; i < iterations; i++)
       {
@@ -95,10 +96,10 @@ public class MultiContactSupportRegionSolverTest
          }
       }
 
-      long stop = System.currentTimeMillis();
+      long stopNano = System.nanoTime();
 
-      long diff = stop - start;
-      System.out.println("Average solve time: " + (diff / (iterations * inputs.length)) + "ms") ;
+      double diffUs = (stopNano - startNano) * 1e-3;
+      System.out.println("Average solve time: " + (diffUs / (iterations * inputs.length)) + " micro-sec") ;
    }
 
    public static void main(String[] args)

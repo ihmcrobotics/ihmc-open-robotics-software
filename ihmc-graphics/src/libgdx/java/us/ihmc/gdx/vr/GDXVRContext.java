@@ -22,6 +22,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -58,6 +59,7 @@ public class GDXVRContext
    private VREvent event;
    private int width;
    private int height;
+   private final ArrayList<Consumer<GDXVRContext>> vrPickCalculators = new ArrayList<>();
    private final ArrayList<Consumer<GDXVRContext>> vrInputProcessors = new ArrayList<>();
 
    // ReferenceFrame.getWorldFrame() is Z-up frame
@@ -90,6 +92,8 @@ public class GDXVRContext
    private final SideDependentList<GDXVRController> controllers = new SideDependentList<>(new GDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new GDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
    private final HashMap<Integer, GDXVRBaseStation> baseStations = new HashMap<>();
+   private final ArrayList<GDXVRPickResult> pickResults = new ArrayList<>();
+   private GDXVRPickResult selectedPick = null;
 
    public void initSystem()
    {
@@ -195,9 +199,31 @@ public class GDXVRContext
          }
       }
 
+      pickResults.clear();
+      for (Consumer<GDXVRContext> vrPickCalculator : vrPickCalculators)
+      {
+         vrPickCalculator.accept(this);
+      }
+      calculateSelectedPick();
       for (Consumer<GDXVRContext> vrInputProcessor : vrInputProcessors)
       {
          vrInputProcessor.accept(this);
+      }
+   }
+
+   private void calculateSelectedPick()
+   {
+      selectedPick = null;
+      for (GDXVRPickResult pickResult : pickResults)
+      {
+         if (selectedPick == null)
+         {
+            selectedPick = pickResult;
+         }
+         else if (pickResult.getDistanceToCamera() < selectedPick.getDistanceToCamera())
+         {
+            selectedPick = pickResult;
+         }
       }
    }
 
@@ -235,6 +261,11 @@ public class GDXVRContext
       teleportFrameIHMCZUp.update();
    }
 
+   public void addVRPickCalculator(Consumer<GDXVRContext> calculateVRPick)
+   {
+      vrPickCalculators.add(calculateVRPick);
+   }
+
    public void addVRInputProcessor(Consumer<GDXVRContext> processVRInput)
    {
       vrInputProcessors.add(processVRInput);
@@ -263,6 +294,7 @@ public class GDXVRContext
             if (modelInstance != null)
             {
                modelInstance.getRenderables(renderables, pool);
+               controller.getSelectionSphere().getRenderables(renderables, pool);
             }
          }
       }
@@ -308,5 +340,20 @@ public class GDXVRContext
    public ReferenceFrame getTeleportFrameIHMCZUp()
    {
       return teleportFrameIHMCZUp;
+   }
+
+   public RigidBodyTransform getTeleportIHMCZUpToIHMCZUpWorld()
+   {
+      return teleportIHMCZUpToIHMCZUpWorld;
+   }
+
+   public void addPickResult(GDXVRPickResult pickResult)
+   {
+      pickResults.add(pickResult);
+   }
+
+   public GDXVRPickResult getSelectedPick()
+   {
+      return selectedPick;
    }
 }

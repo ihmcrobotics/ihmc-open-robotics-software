@@ -242,4 +242,12 @@ public class CommandConsumerWithDelayBuffers
       clearDelayQueue(commandClassToFlush);
       commandInputManager.clearCommands(commandClassToFlush);
    }
+
+   public void clearAllCommands()
+   {
+      for(int i = 0; i < listOfSupportedCommands.size(); i++)
+      {
+         clearDelayQueue(listOfSupportedCommands.get(i));
+      }
+   }
 }

@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.thoughtworks.xstream:xstream:1.4.7")
+   api("com.thoughtworks.xstream:xstream:1.4.19")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.georegression:georegression:0.22")
@@ -25,7 +25,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("us.ihmc:euclid:0.18.1")
-   api("us.ihmc:simulation-construction-set:0.22.5")
+   api("us.ihmc:simulation-construction-set:0.22.8")
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-communication:source")

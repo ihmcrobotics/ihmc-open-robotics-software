@@ -355,9 +355,7 @@ public class EndToEndTestTools
 
       if (expectedDesiredOrientation != null)
       {
-         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(new Quaternion(expectedDesiredOrientation),
-                                                                 statusMessage.getDesiredEndEffectorOrientation(),
-                                                                 epsilon);
+         EuclidCoreTestTools.assertEquals(expectedDesiredOrientation, statusMessage.getDesiredEndEffectorOrientation(), epsilon);
          assertFalse(statusMessage.getActualEndEffectorOrientation().containsNaN());
       }
       else

@@ -430,8 +430,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
       controllerCoreTimer.stopMeasurement();
    }
 

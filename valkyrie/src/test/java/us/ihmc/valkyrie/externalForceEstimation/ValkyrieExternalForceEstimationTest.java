@@ -58,7 +58,7 @@ public class ValkyrieExternalForceEstimationTest
 
    private static final Random random = new Random(3290);
    private static final int iterations = 4;
-   private static final double epsilon = 0.35;
+   private static final double epsilon = 0.45;
    private static final double forceMagnitude = 15.0;
 
    private YoRegistry registry;
@@ -163,10 +163,7 @@ public class ValkyrieExternalForceEstimationTest
          YoGraphicArrow3DDefinition estimatedForceViz = newYoGraphicArrow3DDefinition("estimatedForceVector"
                + i, efp_point, testConfig.estimatedForce, forceGraphicScale, estimatedForceColor);
          YoGraphicPoint3DDefinition simulatedPointViz = newYoGraphicPoint3DDefinition("simulatedForcePoint" + i, efp_point, 0.025, simulatedForceColor);
-         simulationTestHelper.addYoGraphicDefinition(new YoGraphicGroupDefinition("externalForceVectors",
-                                                                                  simulatedFoceViz,
-                                                                                  estimatedForceViz,
-                                                                                  simulatedPointViz));
+         simulationTestHelper.addYoGraphicDefinition(new YoGraphicGroupDefinition("externalForceVectors", simulatedFoceViz, estimatedForceViz, simulatedPointViz));
       }
 
       simulationTestHelper.addYoGraphicsListRegistry(graphicsListRegistry);
@@ -203,10 +200,10 @@ public class ValkyrieExternalForceEstimationTest
          TestConfig testConfig = testConfigs.get(i);
 
          ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
-         configurationMessage.setEstimatorGain(0.8);
+         configurationMessage.setEstimatorGain(0.85);
          configurationMessage.getRigidBodyHashCodes().add(testConfig.endEffector.hashCode());
          configurationMessage.getContactPointPositions().add().set(testConfig.efpOffset);
-         configurationMessage.setSolverAlpha(0.001);
+         configurationMessage.setSolverAlpha(0.0005);
          configurationMessage.setCalculateRootJointWrench(false);
          commandInputManager.submitMessage(configurationMessage);
 
@@ -219,12 +216,10 @@ public class ValkyrieExternalForceEstimationTest
 
             initializeToolbox.set(true);
             updateToolbox.set(true);
-            simulationTestHelper.simulateNow(5.0);
+            simulationTestHelper.simulateNow(7.0);
             Assertions.assertTrue(force.epsilonEquals(testConfig.estimatedForce, epsilon),
                                   "Estimator failed to estimate force applied on " + testConfig.endEffectorName + ", simulated force: " + force
-                                        + ", estimated force: " + testConfig.estimatedForce);
-
-            simulationTestHelper.getSimulationConstructionSet().removeBeforePhysicsCallback(forceUpdater);
+                                  + ", estimated force: " + testConfig.estimatedForce);
          }
 
          testConfigs.get(i).desiredSimulatedForceInWorld.setToZero();

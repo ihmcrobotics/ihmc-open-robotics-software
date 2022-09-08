@@ -23,7 +23,11 @@ public class GDXInteractableHighlightModel implements RenderableProvider
 
    public GDXInteractableHighlightModel(String modelFileName)
    {
-      Model model = GDXModelLoader.load(modelFileName);
+      this(GDXModelLoader.load(modelFileName));
+   }
+
+   public GDXInteractableHighlightModel(Model model)
+   {
       modelInstance = new ModelInstance(model);
       scaledModelInstance = new GDXModelInstanceScaler(modelInstance);
       double scaleFactor = 1.01;

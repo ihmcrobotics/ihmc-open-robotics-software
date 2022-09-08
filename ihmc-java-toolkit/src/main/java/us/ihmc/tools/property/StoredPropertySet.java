@@ -308,6 +308,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
          Path fileForSaving = findFileForSaving();
          LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
+         if (workspaceDirectory.isFileAccessAvailable())
+         {
+            FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
          FileTools.writeAllLines(lines, fileForSaving, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
          convertLineEndingsToUnix(fileForSaving);

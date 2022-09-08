@@ -47,7 +47,7 @@ public class ImGui2DViewInput
       mouseWheelDelta = -ImGui.getIO().getMouseWheel();
 
       for (ImGuiMouseDragData mouseDragDatum : mouseDragData)
-         mouseDragDatum.update(isWindowHovered);
+         mouseDragDatum.update();
    }
 
    /**

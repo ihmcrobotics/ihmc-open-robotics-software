@@ -20,6 +20,7 @@ import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -40,6 +41,7 @@ public class GDXBehaviorActionSequenceEditor
    private final WorkspaceFile workspaceFile;
    private final LinkedList<GDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
+   private GDX3DPanel panel3D;
    private GDXFocusBasedCamera camera3D;
    private DRCRobotModel robotModel;
    private int playbackNextIndex = 0;
@@ -69,13 +71,14 @@ public class GDXBehaviorActionSequenceEditor
       pascalCasedName = FormattingTools.titleToPascalCase(name);
    }
 
-   public void create(GDXFocusBasedCamera camera3D,
+   public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
                       List<ReferenceFrame> referenceFrameLibrary)
    {
-      this.camera3D = camera3D;
+      this.camera3D = panel3D.getCamera3D();
+      this.panel3D = panel3D;
       this.robotModel = robotModel;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       this.syncedRobot = syncedRobot;
@@ -363,7 +366,7 @@ public class GDXBehaviorActionSequenceEditor
    private GDXHandPoseAction addHandPoseAction()
    {
       GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
-      handPoseAction.create(camera3D, robotModel, syncedRobot, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
+      handPoseAction.create(panel3D, robotModel, syncedRobot, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
       insertNewAction(handPoseAction);
       return handPoseAction;
    }
@@ -411,7 +414,7 @@ public class GDXBehaviorActionSequenceEditor
    private GDXWalkAction addWalkAction()
    {
       GDXWalkAction walkAction = new GDXWalkAction();
-      walkAction.create(camera3D, robotModel, footstepPlanner, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
+      walkAction.create(panel3D, robotModel, footstepPlanner, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
       insertNewAction(walkAction);
       return walkAction;
    }
@@ -430,7 +433,7 @@ public class GDXBehaviorActionSequenceEditor
          }
       }
 
-      footstepAction.create(camera3D, robotModel, syncedRobot, ros2ControllerHelper, referenceFrameLibrary, previousAction);
+      footstepAction.create(panel3D, robotModel, syncedRobot, ros2ControllerHelper, referenceFrameLibrary, previousAction);
       insertNewAction(footstepAction);
       return footstepAction;
    }

@@ -5,6 +5,7 @@ import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.internal.ImGuiContext;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -24,9 +25,9 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.lwjgl.opengl.GL41.glClear;
-import static org.lwjgl.opengl.GL41.glClearColor;
-
+/**
+ * Clean up to have lots of different font sizes available by number.
+ */
 public class ImGuiTools
 {
    private static final AtomicInteger GLOBAL_WIDGET_INDEX = new AtomicInteger();
@@ -36,6 +37,7 @@ public class ImGuiTools
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
    private static ImFont consoleFont;
+   private static ImFont smallFont;
    private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
@@ -48,6 +50,35 @@ public class ImGuiTools
    private static int downArrowKey;
    private static int leftArrowKey;
    private static int rightArrowKey;
+   private static ImFontAtlas fontAtlas;
+
+   public static long createContext()
+   {
+      return ImGui.createContext().ptr;
+   }
+
+   public static long createContext(ImFontAtlas fontAtlas)
+   {
+      return ImGui.createContext(fontAtlas).ptr;
+   }
+
+   public static long getCurrentContext()
+   {
+      return ImGui.getCurrentContext().ptr;
+   }
+
+   public static void setCurrentContext(long context)
+   {
+      ImGuiContext contextHolder = ImGui.getCurrentContext();
+      contextHolder.ptr = context;
+      ImGui.setCurrentContext(contextHolder);
+   }
+
+   public static void initializeColorStyle()
+   {
+      if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
+         ImGui.styleColorsLight();
+   }
 
    public static int nextWidgetIndex()
    {
@@ -56,8 +87,8 @@ public class ImGuiTools
 
    public static void glClearDarkGray()
    {
-      glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-      glClear(GL41.GL_COLOR_BUFFER_BIT);
+      GL41.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT);
    }
 
    public static boolean volatileInputInt(String label, ImInt imInt)
@@ -79,6 +110,13 @@ public class ImGuiTools
       return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
    }
 
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputFloat(label, imFloat, step, 0, "%.3f", inputTextFlags);
+   }
+
    public static boolean volatileInputDouble(String label, ImDouble imDouble)
    {
       return volatileInputDouble(label, imDouble, 0, 0);
@@ -86,9 +124,14 @@ public class ImGuiTools
 
    public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast)
    {
+      return volatileInputDouble(label, imDouble, step, stepFast, "%.6f");
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast, String format)
+   {
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
-      return ImGui.inputDouble(label, imDouble, step, stepFast, "%.6f", inputTextFlags);
+      return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
    }
 
    public static boolean inputText(String label, ImString text)
@@ -96,6 +139,14 @@ public class ImGuiTools
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
       return ImGui.inputText(label, text, flags);
+   }
+
+   public static void previousWidgetTooltip(String tooltipText)
+   {
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip(tooltipText);
+      }
    }
 
    public static String uniqueLabel(String label)
@@ -154,7 +205,6 @@ public class ImGuiTools
       bigFontConfig.setFontBuilderFlags(fontsFlags);
       nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
-      ImFont smallFont;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
       String fontDir;
@@ -222,7 +272,8 @@ public class ImGuiTools
 
       nodeFont.setScale(0.5f);
 
-      ImGui.getIO().getFonts().build();
+      fontAtlas = ImGui.getIO().getFonts();
+      fontAtlas.build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
       consoleFontConfig.destroy();
@@ -247,6 +298,11 @@ public class ImGuiTools
       return mediumFont;
    }
 
+   public static ImFont getSmallFont()
+   {
+      return smallFont;
+   }
+
    public static ImFont getNodeFont() {
       return nodeFont;
    }
@@ -254,6 +310,11 @@ public class ImGuiTools
    public static ImFont getConsoleFont()
    {
       return consoleFont;
+   }
+
+   public static ImFontAtlas getFontAtlas()
+   {
+      return fontAtlas;
    }
 
    public static byte[] loadFromResources(final String fileName)

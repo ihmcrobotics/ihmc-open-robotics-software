@@ -78,11 +78,9 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    {
       bulletPhysicsManager.create();
 
-      // TODO: Implement hiding the real environment to emulate real world operation
-      panel3D.getScene().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      panel3D.getScene().addRenderableProvider(this::getRenderables);
 
-      pose3DGizmo.create(panel3D.getCamera3D());
+      pose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
@@ -434,31 +432,33 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       });
    }
 
-   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<GDXSceneLevel> sceneLevels)
    {
-      for (GDXEnvironmentObject object : allObjects)
+      if (sceneLevels.contains(GDXSceneLevel.GROUND_TRUTH))
       {
-         if (!(object instanceof GDXPointLightObject) && !(object instanceof GDXDirectionalLightObject))
+         for (GDXEnvironmentObject object : allObjects)
+         {
+            if (!(object instanceof GDXPointLightObject) && !(object instanceof GDXDirectionalLightObject))
+               object.getRealRenderables(renderables, pool);
+         }
+      }
+      if (sceneLevels.contains(GDXSceneLevel.VIRTUAL))
+      {
+         for (GDXEnvironmentObject object : lightObjects)
+         {
             object.getRealRenderables(renderables, pool);
+         }
+         if (selectedObject != null)
+         {
+            selectedObject.getCollisionMeshRenderables(renderables, pool);
+            pose3DGizmo.getRenderables(renderables, pool);
+         }
+         if (intersectedObject != null && intersectedObject != selectedObject)
+         {
+            intersectedObject.getCollisionMeshRenderables(renderables, pool);
+         }
+         bulletPhysicsManager.getVirtualRenderables(renderables, pool);
       }
-   }
-
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      for (GDXEnvironmentObject object : lightObjects)
-      {
-         object.getRealRenderables(renderables, pool);
-      }
-      if (selectedObject != null)
-      {
-         selectedObject.getCollisionMeshRenderables(renderables, pool);
-         pose3DGizmo.getRenderables(renderables, pool);
-      }
-      if (intersectedObject != null && intersectedObject != selectedObject)
-      {
-         intersectedObject.getCollisionMeshRenderables(renderables, pool);
-      }
-      bulletPhysicsManager.getVirtualRenderables(renderables, pool);
    }
 
    public void destroy()
