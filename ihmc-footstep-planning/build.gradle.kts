@@ -23,7 +23,7 @@ mainDependencies {
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
-   api("us.ihmc:ihmc-pub-sub-serializers-extra:0.16.3")
+   api("us.ihmc:ihmc-pub-sub-serializers-extra:0.16.4")
 }
 
 testDependencies {
