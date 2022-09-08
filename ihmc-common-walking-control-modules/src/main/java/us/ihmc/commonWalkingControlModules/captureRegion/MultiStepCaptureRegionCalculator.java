@@ -5,6 +5,7 @@ import java.awt.Color;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -203,9 +204,9 @@ public class MultiStepCaptureRegionCalculator
       expansionToPack.scaleAdd(oppositeSupportMultiplier, bestStepForSwingSide, expansionToPack);
    }
 
-   private final ConvexPolygon2D reachabilityPolygon = new ConvexPolygon2D();
    private final Point2D stancePosition = new Point2D();
    private final Point2D tempPoint = new Point2D();
+   private final LineSegment2D extrudedEdge = new LineSegment2D();
 
    private final Vector2D translation = new Vector2D();
 
@@ -219,51 +220,50 @@ public class MultiStepCaptureRegionCalculator
                                    FrameVector2DBasics stepToPack)
    {
       stancePosition.setToZero();
-      reachabilityPolygon.set(initialReachabilityRegion);
 
-      // FIXME instead of translating the reachability polygon, we should probably translate the edge, since that consists of two points, as opposed to however
-      // FIXME many points are in the reachability polygon.
-      // move the reachability polygon far away from the edge. that prevents the two from intersecting, which you want to avoid to compute the "best" location.
+      // move the edge far away from the reachability polygon. that prevents the two from intersecting, which you want to avoid to compute the "best" location.
       edgeToExtrude.perpendicular(true, vectorPerpendicularToEdge);
-      vectorPerpendicularToEdge.scale(3.0);
       edgeToExtrude.midpoint(tempPoint);
-      translation.add(tempPoint, vectorPerpendicularToEdge);
+      vectorPerpendicularToEdge.negate();
+      translation.scaleAdd(3.0, vectorPerpendicularToEdge, tempPoint);
 
-      reachabilityPolygon.translate(translation);
-      stancePosition.add(translation);
+      extrudedEdge.set(edgeToExtrude);
+      extrudedEdge.translate(translation);
+//      reachabilityPolygon.translate(translation);
+//      stancePosition.add(translation);
 
       // compute the index of the vertex that is the closest. If the vertex belongs to an edge of the reachability polygon that is parallel to the
       // extrusion edge, that needs to be considered.
       int closestIndex = -1;
-      int altClosestIndex = -1;
+      int equivalentlyCloseIndex = -1;
       double closestDistance = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < reachabilityPolygon.getNumberOfVertices(); i++)
+      for (int i = 0; i < initialReachabilityRegion.getNumberOfVertices(); i++)
       {
-         double distance = edgeToExtrude.distanceSquared(reachabilityPolygon.getVertex(i));
+         double distance = extrudedEdge.distanceSquared(initialReachabilityRegion.getVertex(i));
          // if this vertex is closer than the closest distance, you know it's either the closest vertex, or one of the closest pair that form the parallel edge
          if (distance < closestDistance)
          {
             closestDistance = distance;
             closestIndex = i;
-            altClosestIndex = -1;
+            equivalentlyCloseIndex = -1;
          }
          // you've already had a vertex at this distance, so this one forms a close parallel edge, and store that index.
          else if (MathTools.epsilonEquals(distance, closestDistance, 1e-4))
          {
-            altClosestIndex = i;
+            equivalentlyCloseIndex = i;
          }
       }
 
 
-      if (altClosestIndex == -1)
+      if (equivalentlyCloseIndex == -1)
       { // The vertex isn't on a parallel edge, so it's just that vertex.
-         stepToPack.sub(stancePosition, reachabilityPolygon.getVertex(closestIndex));
+         stepToPack.sub(stancePosition, initialReachabilityRegion.getVertex(closestIndex));
       }
       else
       { // The vertex is on a parallel edge, so compute the closest point along the edge to stance.
          EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(stancePosition,
-                                                                 reachabilityPolygon.getVertex(closestIndex),
-                                                                 reachabilityPolygon.getVertex(altClosestIndex),
+                                                                 initialReachabilityRegion.getVertex(closestIndex),
+                                                                 initialReachabilityRegion.getVertex(equivalentlyCloseIndex),
                                                                  origin);
          stepToPack.sub(stancePosition, origin);
       }
