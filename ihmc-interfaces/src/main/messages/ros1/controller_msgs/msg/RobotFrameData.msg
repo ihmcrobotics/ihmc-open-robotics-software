@@ -12,6 +12,6 @@ int32 frame_name_hash
 geometry_msgs/Pose frame_pose_in_world
 
 # Name of this frame.
-string frame_name
+string[] frame_name
 
 
