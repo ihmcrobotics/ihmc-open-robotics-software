@@ -37,7 +37,7 @@ mainDependencies {
    api("us.ihmc:ihmc-commons:0.31.0")
    api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:ihmc-matrix-library:0.18.8")
-   api("us.ihmc:ihmc-graphics-description:0.19.7")
+   api("us.ihmc:ihmc-graphics-description:0.19.8")
    api("us.ihmc:simulation-construction-set-utilities:0.22.8")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("us.ihmc:scs2-definition:17-0.9.4")
