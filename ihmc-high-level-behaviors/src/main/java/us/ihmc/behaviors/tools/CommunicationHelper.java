@@ -222,6 +222,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   {
+      return ros2Helper.subscribe(topic, messageFilter);
+   }
+
+   @Override
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
    {
       return ros2Helper.subscribeTypeless(topic);

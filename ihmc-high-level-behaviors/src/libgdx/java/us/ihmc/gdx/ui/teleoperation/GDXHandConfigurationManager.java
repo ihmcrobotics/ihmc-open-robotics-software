@@ -79,7 +79,8 @@ public class GDXHandConfigurationManager
       for (RobotSide side : RobotSide.values)
       {
          sakeStatuses.put(side, communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
-                                                                       .withTypeName(HandSakeStatusMessage.class)));
+                                                                       .withTypeName(HandSakeStatusMessage.class),
+                                                              message -> message.getRobotSide() == side.toByte()));
       }
    }
 
