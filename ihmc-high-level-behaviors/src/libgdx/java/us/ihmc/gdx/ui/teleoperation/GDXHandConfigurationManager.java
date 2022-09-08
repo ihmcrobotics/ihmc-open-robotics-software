@@ -1,9 +1,12 @@
 package us.ihmc.gdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandSakeStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.tools.GDXIconTexture;
@@ -22,6 +25,7 @@ public class GDXHandConfigurationManager
    private final SideDependentList<GDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
+   private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
 
    public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper)
    {
@@ -70,6 +74,15 @@ public class GDXHandConfigurationManager
       closeHandButton.setOnPressed(() -> closeCommands.get(toolbarSelectedSide).run());
    }
 
+   public void setupForSakeHands()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         sakeStatuses.put(side, communicationHelper.subscribe(ROS2Tools.getControllerOutputTopic(communicationHelper.getRobotName())
+                                                                       .withTypeName(HandSakeStatusMessage.class)));
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       for (RobotSide side : RobotSide.values)
@@ -100,6 +113,26 @@ public class GDXHandConfigurationManager
             HandDesiredConfigurationMessage message
                   = HumanoidMessageTools.createHandDesiredConfigurationMessage(side, HandConfiguration.values[handConfigurationIndices.get(side).get()]);
             communicationHelper.publish(ROS2Tools::getHandConfigurationTopic, message);
+         }
+      }
+      if (!sakeStatuses.isEmpty())
+         ImGui.text("Sake EZGrippers:");
+      for (RobotSide side : sakeStatuses.sides())
+      {
+         ImGui.text(side.getPascalCaseName() + ":");
+         ImGui.sameLine();
+         IHMCROS2Input<HandSakeStatusMessage> status = sakeStatuses.get(side);
+         if (status.hasReceivedFirstMessage())
+         {
+            ImGui.text("Calibrated: " + status.getLatest().getCalibrated());
+            ImGui.sameLine();
+            ImGui.text("Needs reset: " + status.getLatest().getNeedsReset());
+            ImGui.sameLine();
+            ImGui.text("Temperature: " + FormattingTools.getFormattedDecimal1D(status.getLatest().getTemperature()));
+         }
+         else
+         {
+            ImGui.text("No status received.");
          }
       }
    }

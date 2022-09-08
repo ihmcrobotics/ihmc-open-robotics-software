@@ -642,4 +642,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
       GDXFocusBasedCamera camera = baseUI.getPrimary3DPanel().getCamera3D();
       camera.setFocusPointPose(robotTransform);
    }
+
+   public GDXHandConfigurationManager getHandManager()
+   {
+      return handManager;
+   }
 }
