@@ -21,7 +21,7 @@ mainDependencies {
    api("us.ihmc:euclid:0.19.0")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
    api("us.ihmc:simulation-construction-set:0.22.8")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-communication:source")
