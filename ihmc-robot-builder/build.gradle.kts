@@ -15,7 +15,7 @@ ihmc {
 mainDependencies {
    api("io.javaslang:javaslang:2.0.3")
 
-   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:euclid:0.19.0")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.21.2")
    api("us.ihmc:ihmc-model-file-loader:source")
