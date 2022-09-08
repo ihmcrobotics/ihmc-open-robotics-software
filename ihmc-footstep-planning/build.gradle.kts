@@ -38,7 +38,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
