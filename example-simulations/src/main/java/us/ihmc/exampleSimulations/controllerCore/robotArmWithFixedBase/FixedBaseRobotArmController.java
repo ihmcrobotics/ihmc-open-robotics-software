@@ -221,8 +221,7 @@ public class FixedBaseRobotArmController implements RobotController
       }
       if (USE_PRIVILEGED_CONFIGURATION)
          controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
 
       ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();

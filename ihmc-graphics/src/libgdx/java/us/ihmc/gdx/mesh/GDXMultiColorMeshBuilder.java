@@ -749,6 +749,34 @@ public class GDXMultiColorMeshBuilder
    }
 
    /**
+    * Add an ellipsoid centered to this builder.
+    *
+    * @param xRadius the x radius
+    * @param yRadius the y radius
+    * @param zRadius ths z radius
+    * @param offset the coordinate of the ellipsoid
+    * @param color color of the ellipsoid. Color accuracy depends on the color palette in use.
+    */
+   public void addEllipsoid(double xRadius, double yRadius, double zRadius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.Ellipsoid(xRadius, yRadius, zRadius, DEFAULT_RES, DEFAULT_RES), offset, color);
+   }
+
+   /**
+    * Add an hemi-ellipsoid centered to this builder.
+    *
+    * @param xRadius the x radius
+    * @param yRadius the y radius
+    * @param zRadius ths z radius
+    * @param offset the coordinate of the hemi-ellipsoid
+    * @param color color of the hemi-ellipsoid. Color accuracy depends on the color palette in use.
+    */
+   public void addHemiEllipsoid(double xRadius, double yRadius, double zRadius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(MeshDataGenerator.HemiEllipsoid(xRadius, yRadius, zRadius, DEFAULT_RES, DEFAULT_RES), offset, color);
+   }
+
+   /**
     * Add a regular tetrahedron to this builder.
     *
     * @param edgeLength edge length of the tetrahedron.

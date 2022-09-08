@@ -1,5 +1,7 @@
 package us.ihmc.avatar;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 
@@ -7,6 +9,7 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -41,6 +44,7 @@ public class AvatarEstimatorThread extends ModularRobotController
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 
+   private final List<Runnable> runnables = new ArrayList<>();
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -113,6 +117,11 @@ public class AvatarEstimatorThread extends ModularRobotController
 
          doControl();
 
+         for (int i = 0; i < runnables.size(); i++)
+         {
+            runnables.get(i).run();
+         }
+
          if (forceSensorStateUpdater != null)
          {
             forceSensorStateUpdater.updateForceSensorState();
@@ -148,6 +157,13 @@ public class AvatarEstimatorThread extends ModularRobotController
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+      }
    }
 
    public void setupHighLevelControllerCallback(HighLevelHumanoidControllerFactory controllerFactory,
@@ -163,6 +179,11 @@ public class AvatarEstimatorThread extends ModularRobotController
                mainStateEstimator.requestStateEstimatorMode(requestedMode);
          }
       });
+   }
+
+   public void addEstimatorRunnable(Runnable runnable)
+   {
+      this.runnables.add(runnable);
    }
 
    @Deprecated // TODO: Split up the sensor reader and move the part needed outside out of this class!

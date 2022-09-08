@@ -34,4 +34,9 @@ public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHuma
    {
       return registry;
    }
+
+   public ContinuousStepGenerator getContinuousStepGenerator()
+   {
+      return continuousStepGenerator;
+   }
 }

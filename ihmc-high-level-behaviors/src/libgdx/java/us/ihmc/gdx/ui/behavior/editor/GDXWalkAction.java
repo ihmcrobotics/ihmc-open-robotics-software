@@ -26,9 +26,9 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
@@ -60,7 +60,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private final ImDouble swingDuration = new ImDouble(1.2);
    private final ImDouble transferDuration = new ImDouble(0.8);
 
-   public void create(GDXFocusBasedCamera camera3D,
+   public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       FootstepPlanningModule footstepPlanner,
                       ROS2SyncedRobotModel syncedRobot,
@@ -73,14 +73,14 @@ public class GDXWalkAction implements GDXBehaviorAction
       this.ros2ControllerHelper = ros2ControllerHelper;
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
-      footstepPlannerGoalGizmo.create(camera3D);
+      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       for (RobotSide side : RobotSide.values)
       {
          editGoalFootPoses.put(side, new ImBoolean(false));
          GDXPose3DGizmo footGizmo = new GDXPose3DGizmo(footstepPlannerGoalGizmo.getGizmoFrame());
-         footGizmo.create(camera3D);
+         footGizmo.create(panel3D);
          editGoalFootGizmos.put(side, footGizmo);
 
          GDXFootstepGraphic goalFootGraphic = new GDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(),

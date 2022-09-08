@@ -5,6 +5,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
+import us.ihmc.gdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -16,7 +17,7 @@ public class GDX3DSituatedImGuiPanelsDemo
    private final GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-   private final GDXMultiContext3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDXMultiContext3DSituatedImGuiPanelManager();
+   private GDX3DSituatedImGuiPanel situatedImGuiPanel;
 
    public GDX3DSituatedImGuiPanelsDemo()
    {
@@ -27,18 +28,18 @@ public class GDX3DSituatedImGuiPanelsDemo
          {
             sceneManager.create();
 
-            ImGui.createContext(); // There's usually going to be another context so let's make one.
             imGuiGlfw.init(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), true);
             imGuiGl3.init();
 
-            situatedImGuiPanelManager.create(imGuiGl3, ImGuiTools.setupFonts(ImGui.getIO()));
-            GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", () ->
+            ImGuiTools.setupFonts(ImGui.getIO());
+
+            situatedImGuiPanel = new GDX3DSituatedImGuiPanel("Test Panel", () ->
             {
                ImGui.text("This is a 3D situated panel.");
                ImGui.button("Button");
             });
-            situatedImGuiPanelManager.addPanel(panel);
-            sceneManager.addRenderableProvider(situatedImGuiPanelManager);
+            situatedImGuiPanel.create(imGuiGl3, 0.3, 0.5, 10);
+            sceneManager.addRenderableProvider(situatedImGuiPanel::getRenderables);
 
             sceneManager.addCoordinateFrame(0.3);
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
@@ -47,7 +48,7 @@ public class GDX3DSituatedImGuiPanelsDemo
          @Override
          public void render()
          {
-            situatedImGuiPanelManager.render();
+            situatedImGuiPanel.update();
 
             GDX3DSceneTools.glClearGray();
             sceneManager.setViewportBoundsToWindow();
@@ -58,7 +59,7 @@ public class GDX3DSituatedImGuiPanelsDemo
          public void dispose()
          {
             sceneManager.dispose();
-            situatedImGuiPanelManager.dispose();
+            situatedImGuiPanel.dispose();
             imGuiGl3.dispose();
             imGuiGlfw.dispose();
          }

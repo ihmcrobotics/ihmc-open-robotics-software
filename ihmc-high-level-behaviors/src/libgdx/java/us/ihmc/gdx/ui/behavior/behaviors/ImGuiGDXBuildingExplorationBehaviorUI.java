@@ -14,7 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -29,7 +29,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
    private final BehaviorHelper helper;
    private BuildingExplorationBehaviorParameters parameters;
    private final ImGuiStoredPropertySetTuner parameterTuner = new ImGuiStoredPropertySetTuner("Building Exploration Parameters");
-   private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBallAndArrowPosePlacement goalAffordance = new GDXBallAndArrowPosePlacement();
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
    private final ImGuiGDXDoorBehaviorUI doorUI;
@@ -52,7 +52,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
       helper.subscribeToPlanarRegionsViaCallback(ROS2Tools.LIDAR_REA_REGIONS, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });
@@ -64,7 +63,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
    {
       parameters = new BuildingExplorationBehaviorParameters();
       parameterTuner.create(parameters, BuildingExplorationBehaviorParameters.keys, () -> helper.publish(Parameters, parameters.getAllAsStrings()));
-      goalAffordance.create(baseUI, goalPose ->
+      goalAffordance.create(goalPose ->
       {
          helper.publish(Goal, goalPose);
          lookAndStepUI.setGoal(goalPose);

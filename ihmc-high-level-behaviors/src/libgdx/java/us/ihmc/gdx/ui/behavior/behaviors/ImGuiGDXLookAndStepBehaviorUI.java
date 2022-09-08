@@ -11,7 +11,6 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -24,7 +23,7 @@ import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
@@ -37,7 +36,6 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -79,7 +77,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner = new ImGuiStoredPropertySetTuner("Look and Step Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (for Look and Step)");
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
-   private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBallAndArrowPosePlacement goalAffordance = new GDXBallAndArrowPosePlacement();
    private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
    private final ImBoolean invertShowGraphics = new ImBoolean(false);
    private final ImBoolean showReceivedRegions = new ImBoolean(false);
@@ -91,7 +89,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       helper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions.copy());
@@ -157,7 +154,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       swingPlannerParameterTuner.create(swingPlannerParameters, SwingPlannerParameterKeys.keys,
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
-      goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
+      goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
       subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);
 
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);

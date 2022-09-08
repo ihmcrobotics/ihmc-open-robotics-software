@@ -21,7 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
-import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;

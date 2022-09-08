@@ -4,6 +4,7 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
@@ -12,7 +13,12 @@ import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -22,6 +28,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -29,6 +36,10 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class SCS2AvatarSimulation
 {
+   private static final double CAMERA_PITCH_FROM_ROBOT = Math.toRadians(-15.0);
+   private static final double CAMERA_YAW_FROM_ROBOT = Math.toRadians(15.0);
+   private static final double CAMERA_DISTANCE_FROM_ROBOT = 6.0;
+
    private Robot robot;
    private SimulationConstructionSet2 simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
@@ -38,6 +49,7 @@ public class SCS2AvatarSimulation
    private HumanoidRobotContextData masterContext;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
+   private AvatarStepGeneratorThread stepGeneratorThread;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
@@ -82,6 +94,8 @@ public class SCS2AvatarSimulation
    {
       if (realtimeROS2Node != null)
          realtimeROS2Node.spin();
+      if (simulationConstructionSet.isVisualizerEnabled())
+         simulationConstructionSet.waitUntilVisualizerFullyUp();
    }
 
    public void destroy()
@@ -150,6 +164,7 @@ public class SCS2AvatarSimulation
       SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
       estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
       controllerThread.initialize();
+      stepGeneratorThread.initialize();
       masterContext.set(estimatorThread.getHumanoidRobotContextData());
 
       simulationConstructionSet.reinitializeSimulation();
@@ -157,6 +172,117 @@ public class SCS2AvatarSimulation
 
       if (simulateAfterReset)
          simulationConstructionSet.simulate();
+   }
+
+   private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
+   {
+      Point3D focusPosition = new Point3D(robotPosition);
+      Point3D cameraPosition = new Point3D(10, 0, 0);
+      RotationMatrixTools.applyPitchRotation(CAMERA_PITCH_FROM_ROBOT, cameraPosition, cameraPosition);
+      RotationMatrixTools.applyYawRotation(CAMERA_YAW_FROM_ROBOT, cameraPosition, cameraPosition);
+      RotationMatrixTools.applyYawRotation(robotOrientation.getYaw(), cameraPosition, cameraPosition);
+      cameraPosition.scale(CAMERA_DISTANCE_FROM_ROBOT / cameraPosition.distanceFromOrigin());
+      cameraPosition.add(focusPosition);
+
+      setCamera(focusPosition, cameraPosition);
+   }
+
+   private void checkSimulationSessionAlive()
+   {
+      if (getSimulationConstructionSet().isSessionShutdown())
+         throw new IllegalStateException("Simulation has been shutdown");
+   }
+
+   // GUI controls:
+   public void setCameraDefaultRobotView()
+   {
+      checkSimulationSessionAlive();
+      SixDoFJointStateBasics initialRootJointState = (SixDoFJointStateBasics) getRobotDefinition().getRootJointDefinitions().get(0).getInitialJointState();
+      if (initialRootJointState != null)
+         initializeCamera(initialRootJointState.getOrientation(), initialRootJointState.getPosition());
+   }
+
+   public void setCameraZoom(double distanceFromFocus)
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().setCameraZoom(distanceFromFocus);
+   }
+
+   /**
+    * Sets the new focus point the camera is looking at.
+    * <p>
+    * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    * 
+    * @param focus the new focus position.
+    */
+   public void setCameraFocusPosition(Point3DReadOnly focus)
+   {
+      checkSimulationSessionAlive();
+      setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
+   }
+
+   /**
+    * Sets the new focus point the camera is looking at.
+    * <p>
+    * The camera is rotated during this operation, its position remains unchanged.
+    * </p>
+    *
+    * @param x the x-coordinate of the new focus location.
+    * @param y the y-coordinate of the new focus location.
+    * @param z the z-coordinate of the new focus location.
+    */
+   public void setCameraFocusPosition(double x, double y, double z)
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().setCameraFocusPosition(x, y, z);
+   }
+
+   /**
+    * Sets the new camera position.
+    * <p>
+    * The camera is rotated during this operation such that the focus point remains unchanged.
+    * </p>
+    * 
+    * @param position the new camera position.
+    */
+   public void setCameraPosition(Point3DReadOnly position)
+   {
+      setCameraPosition(position.getX(), position.getY(), position.getZ());
+   }
+
+   /**
+    * Sets the new camera position.
+    * <p>
+    * The camera is rotated during this operation such that the focus point remains unchanged.
+    * </p>
+    * 
+    * @param x the x-coordinate of the new camera location.
+    * @param y the y-coordinate of the new camera location.
+    * @param z the z-coordinate of the new camera location.
+    */
+   public void setCameraPosition(double x, double y, double z)
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().setCameraPosition(x, y, z);
+   }
+
+   /**
+    * Sets the camera configuration.
+    * 
+    * @param cameraFocus    the new focus position (where the camera is looking at).
+    * @param cameraPosition the new camerate position.
+    */
+   public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
+   {
+      setCameraFocusPosition(cameraFocus);
+      setCameraPosition(cameraPosition);
+   }
+
+   public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
    public boolean hasBeenDestroyed()
@@ -255,6 +381,11 @@ public class SCS2AvatarSimulation
    public AvatarControllerThread getControllerThread()
    {
       return controllerThread;
+   }
+
+   public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
+   {
+      this.stepGeneratorThread = stepGeneratorThread;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)

@@ -93,7 +93,7 @@ public class GDXVRDepthSensorDemo
             baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getColorPanel());
             baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getDepthPanel());
 
-            gizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            gizmo.create(baseUI.getPrimary3DPanel());
             gizmo.getTransformToParent().set(initialCameraTransform);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(gizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(gizmo::process3DViewInput);
