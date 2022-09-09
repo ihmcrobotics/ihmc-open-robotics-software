@@ -247,6 +247,7 @@ public class GDXJoystickBasedStepping
                else
                {
                   disableWalking();
+                  footstepPlanGraphic.clear();
                }
 
                continuousStepGenerator.setFootstepTiming(swingDuration.get(), transferDuration.get());
@@ -256,13 +257,9 @@ public class GDXJoystickBasedStepping
                continuousStepGenerator.update(Double.NaN);
             }
          }
-      }
 
-      if (!continuousStepGenerator.isWalking())
-      {
-         footstepPlanGraphic.clear();
+         footstepPlanGraphic.update();
       }
-      footstepPlanGraphic.update();
    }
 
    private void disableWalking()

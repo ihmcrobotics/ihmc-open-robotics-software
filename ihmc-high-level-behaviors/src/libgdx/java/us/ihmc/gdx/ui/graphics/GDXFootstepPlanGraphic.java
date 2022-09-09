@@ -57,6 +57,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
                                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                                 tempTransform);
    private final FramePose3D textFramePose = new FramePose3D();
+   private boolean isEmpty = true;
 
    public GDXFootstepPlanGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints)
    {
@@ -108,11 +109,20 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
 
    public void clear()
    {
+      // this prevents generating empty plans like crazy which is expensive
+      if (isEmpty)
+         return;
+
       generateMeshes(new ArrayList<>());
    }
 
    public void generateMeshes(ArrayList<MinimalFootstep> footsteps)
    {
+      // this prevents generating empty plans like crazy which is expensive
+      if (isEmpty && footsteps.size() == 0)
+         return;
+      isEmpty = footsteps.size() == 0;
+
       meshBuilder.clear();
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
