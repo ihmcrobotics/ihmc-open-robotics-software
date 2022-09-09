@@ -190,4 +190,9 @@ public class GDXVRModeManager
    {
       return showFloatVideoPanelNotification;
    }
+
+   public GDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
+   {
+      return handPlacedFootstepMode;
+   }
 }

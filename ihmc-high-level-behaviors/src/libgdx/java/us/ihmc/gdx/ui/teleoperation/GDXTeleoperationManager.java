@@ -647,4 +647,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       return handManager;
    }
+
+   public GDXTeleoperationParameters getTeleoperationParameters()
+   {
+      return teleoperationParameters;
+   }
 }
