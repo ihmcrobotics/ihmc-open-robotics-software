@@ -137,7 +137,7 @@ public class GDXHandConfigurationManager
             ImGui.text("No status received.");
          }
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Reset")))
+         if (ImGui.button(labels.get("Reset", side.getCamelCaseName())))
          {
             HandSakeDesiredCommandMessage sakeCommand = new HandSakeDesiredCommandMessage();
             sakeCommand.setRobotSide(side.toByte());
