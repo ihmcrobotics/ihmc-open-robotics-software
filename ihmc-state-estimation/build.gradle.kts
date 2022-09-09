@@ -25,7 +25,7 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ekf:0.7.5")
+   api("us.ihmc:ekf:0.7.6")
    api("us.ihmc:ihmc-lord-microstrain-drivers:17-0.0.7")
 }
 
