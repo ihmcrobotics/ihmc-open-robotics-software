@@ -18,6 +18,7 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -40,6 +41,7 @@ public class GDXVRHandPlacedFootstepMode
    private DRCRobotModel robotModel;
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
+   private GDXTeleoperationParameters teleoperationParameters;
 
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
    {
@@ -56,6 +58,11 @@ public class GDXVRHandPlacedFootstepMode
          footModels.put(side, GDXModelLoader.load(modelFileName));
 //         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
       }
+   }
+
+   public void setTeleoperationParameters(GDXTeleoperationParameters teleoperationParameters)
+   {
+      this.teleoperationParameters = teleoperationParameters;
    }
 
    public void processVRInput(GDXVRContext vrContext)
@@ -100,8 +107,16 @@ public class GDXVRHandPlacedFootstepMode
                {
                   // send the placed footsteps
                   FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-                  footstepDataListMessage.setDefaultSwingDuration(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
-                  footstepDataListMessage.setDefaultTransferDuration(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+                  if (teleoperationParameters != null)
+                  {
+                     footstepDataListMessage.setDefaultSwingDuration(teleoperationParameters.getSwingTime());
+                     footstepDataListMessage.setDefaultTransferDuration(teleoperationParameters.getTransferTime());
+                  }
+                  else
+                  {
+                     footstepDataListMessage.setDefaultSwingDuration(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
+                     footstepDataListMessage.setDefaultTransferDuration(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
+                  }
                   footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
                   for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
                   {
