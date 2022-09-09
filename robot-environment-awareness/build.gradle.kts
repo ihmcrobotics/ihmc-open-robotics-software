@@ -28,14 +28,14 @@ val javaCPPVersion = "1.5.7"
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
 
-   api("us.ihmc:euclid-shape:0.18.1")
-   api("us.ihmc:joctomap:1.12.3")
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
+   api("us.ihmc:euclid-shape:0.19.0")
+   api("us.ihmc:joctomap:1.12.4")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:17-0.23.3")
+   api("us.ihmc:ihmc-robot-data-logger:17-0.23.4")
    api("us.ihmc:ihmc-ros-tools:source")
 
    apiBytedecoNatives("javacpp")
