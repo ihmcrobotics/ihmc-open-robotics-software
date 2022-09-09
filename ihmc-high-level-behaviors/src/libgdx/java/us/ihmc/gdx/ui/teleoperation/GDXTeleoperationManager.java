@@ -125,16 +125,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
       for (RobotSide side : RobotSide.values)
       {
          armHomes.put(side,
-                      new double[] {side.negateIfLeftSide(-0.493),
-                                    -0.001,
-                                    -0.498,
-                                    side.negateIfLeftSide(0.996),
-                                    side.negateIfLeftSide(0.003),
+                      new double[] {0.5,
+                                    side.negateIfRightSide(0.0),
+                                    side.negateIfRightSide(-0.5),
+                                    -1.0,
+                                    side.negateIfRightSide(0.0),
                                     0.000,
-                                    side.negateIfLeftSide(0.007)});
+                                    side.negateIfLeftSide(0.0)});
       }
       doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
-      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {0.523, -0.328, -0.586, 2.192, 0.828, 1.009, -0.281});
+      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
 
       syncedRobot = communicationHelper.newSyncedRobot();
 
