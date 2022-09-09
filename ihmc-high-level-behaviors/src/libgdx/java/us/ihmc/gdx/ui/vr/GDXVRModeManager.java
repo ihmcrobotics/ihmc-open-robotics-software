@@ -51,7 +51,6 @@ public class GDXVRModeManager
 
       joystickBasedStepping = new GDXJoystickBasedStepping(syncedRobot.getRobotModel());
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
-      baseUI.getPrimaryScene().addRenderableProvider(joystickBasedStepping::getRenderables, GDXSceneLevel.VIRTUAL);
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
 
@@ -161,6 +160,10 @@ public class GDXVRModeManager
          case WHOLE_BODY_IK_STREAMING ->
          {
             kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
+         }
+         case JOYSTICK_WALKING ->
+         {
+            joystickBasedStepping.getRenderables(renderables, pool);
          }
       }
 
