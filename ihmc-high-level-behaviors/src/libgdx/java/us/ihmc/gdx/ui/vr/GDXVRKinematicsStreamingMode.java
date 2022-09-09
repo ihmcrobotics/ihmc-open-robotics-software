@@ -72,7 +72,7 @@ public class GDXVRKinematicsStreamingMode
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
 
-   private HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
+   private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
    private int rightIndex = -1;
 
