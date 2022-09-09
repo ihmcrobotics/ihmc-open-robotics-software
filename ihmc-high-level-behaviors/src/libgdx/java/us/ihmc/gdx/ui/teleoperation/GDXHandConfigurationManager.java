@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
+import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
 import controller_msgs.msg.dds.HandSakeStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
@@ -20,7 +21,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class GDXHandConfigurationManager
 {
    private CommunicationHelper communicationHelper;
-   private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(6), new ImInt(6));
+   private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(9), new ImInt(9));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
    private final SideDependentList<GDXIconTexture> handIcons = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -134,6 +135,15 @@ public class GDXHandConfigurationManager
          else
          {
             ImGui.text("No status received.");
+         }
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Reset")))
+         {
+            HandSakeDesiredCommandMessage sakeCommand = new HandSakeDesiredCommandMessage();
+            sakeCommand.setRobotSide(side.toByte());
+            sakeCommand.setDesiredHandConfiguration(HandSakeDesiredCommandMessage.HAND_CONFIGURATION_RESET);
+            communicationHelper.publish(ROS2Tools.getControllerInputTopic(communicationHelper.getRobotName()).withTypeName(HandSakeDesiredCommandMessage.class),
+                                        sakeCommand);
          }
       }
    }
