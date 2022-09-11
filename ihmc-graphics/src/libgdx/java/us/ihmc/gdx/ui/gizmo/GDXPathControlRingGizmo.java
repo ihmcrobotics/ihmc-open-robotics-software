@@ -34,8 +34,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXPathControlRingGizmo implements RenderableProvider
 {
-   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.836f);
-   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.95f);
+   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.6f);
+   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.5f);
    public static final Color YELLOW_HIGHLIGHT = new Color().fromHsv(61.5f, 0.783f, 0.892f);
    public static final Color DISC_NORMAL_COLOR = LIGHT_GRAY;
    public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
@@ -44,8 +44,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    static
    {
-      DISC_NORMAL_COLOR.a = 0.4f;
-      ARROW_NORMAL_COLOR.a = 0.4f;
+      DISC_NORMAL_COLOR.a = 0.7f;
+      ARROW_NORMAL_COLOR.a = 0.7f;
       DISC_HIGHLIGHTED_COLOR.a = 0.9f;
       ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
    }
