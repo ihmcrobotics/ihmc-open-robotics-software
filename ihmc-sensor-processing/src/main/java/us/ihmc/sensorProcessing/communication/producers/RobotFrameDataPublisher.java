@@ -25,7 +25,7 @@ public class RobotFrameDataPublisher
    public RobotFrameDataPublisher(ReferenceFrame referenceFrame, RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> outputTopic)
    {
       myReferenceFrame = referenceFrame;
-      robotFrameData.getFrameName().add(referenceFrame.getName());
+      robotFrameData.getFrameName().append(referenceFrame.getName());
 
       ROS2Topic<?> ros2Topic = outputTopic.withSuffix(referenceFrame.getName());
 

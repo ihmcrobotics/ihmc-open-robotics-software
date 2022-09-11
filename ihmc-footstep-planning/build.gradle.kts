@@ -16,14 +16,14 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:euclid:0.19.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.13")
+   api("us.ihmc:ihmc-convex-optimization:0.17.14")
    api("us.ihmc:ihmc-path-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-path-planning-data-sets:source")
-   api("us.ihmc:ihmc-pub-sub-serializers-extra:0.16.3")
+   api("us.ihmc:ihmc-pub-sub-serializers-extra:0.16.4")
 }
 
 testDependencies {
@@ -38,7 +38,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")

@@ -447,6 +447,67 @@ public class SCS2AvatarSimulation
    {
       return showGUI;
    }
+   
+   // Buffer controls:
+   public void cropBuffer()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().cropBuffer();
+   }
+
+   public void setInPoint()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().setBufferInPoint();
+   }
+
+   public void setOutPoint()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().setBufferOutPoint();
+   }
+
+   public void gotoInPoint()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().gotoBufferInPoint();
+   }
+
+   public void gotoOutPoint()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().gotoBufferOutPoint();
+   }
+   
+   public void gotoBufferIndex(int bufferIndex)
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().gotoBufferIndex(bufferIndex);
+   }
+   
+   public int getOutPoint()
+   {
+      checkSimulationSessionAlive();
+      return getSimulationConstructionSet().getBufferOutPoint();
+   }
+
+   public int getInPoint()
+   {
+      checkSimulationSessionAlive();
+      return getSimulationConstructionSet().getBufferInPoint();
+   }
+
+   public void stepBufferIndexForward()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().stepBufferIndexForward();
+   }
+
+   public void stepBufferIndexBackward()
+   {
+      checkSimulationSessionAlive();
+      getSimulationConstructionSet().stepBufferIndexBackward();
+   }
 
    public void setAutomaticallyStartSimulation(boolean automaticallyStartSimulation)
    {

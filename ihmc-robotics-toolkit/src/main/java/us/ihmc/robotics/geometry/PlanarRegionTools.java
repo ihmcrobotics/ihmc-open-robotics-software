@@ -275,7 +275,7 @@ public class PlanarRegionTools
    public static boolean isPointInLocalInsidePlanarRegion(PlanarRegion planarRegion, double pointInLocalToCheckX, double pointInLocalToCheckY, double epsilon)
    {
       ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      BoundingBox2D boundingBox = convexHull.getBoundingBox();
+      BoundingBox2DReadOnly boundingBox = convexHull.getBoundingBox();
 
       if (!boundingBox.isInsideEpsilon(pointInLocalToCheckX, pointInLocalToCheckY, epsilon))
          return false;
