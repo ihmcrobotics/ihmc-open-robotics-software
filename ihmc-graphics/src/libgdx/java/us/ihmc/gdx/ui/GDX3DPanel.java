@@ -59,6 +59,7 @@ public class GDX3DPanel
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere;
    private Runnable backgroundRenderer;
+   private float backgroundShade = GDX3DSceneTools.CLEAR_COLOR;
    private ByteBuffer normalizedDeviceCoordinateDepthDirectByteBuffer;
    private float renderSizeX;
    private float renderSizeY;
@@ -251,7 +252,7 @@ public class GDX3DPanel
       scene.preRender(camera3D);
 
       GL41.glViewport(x, y, width, height);
-      GDX3DSceneTools.glClearGray();
+      GDX3DSceneTools.glClearGray(backgroundShade);
    }
 
    public void dispose()
@@ -397,5 +398,10 @@ public class GDX3DPanel
    public float getWindowDrawMaxY()
    {
       return windowDrawMaxY;
+   }
+
+   public void setBackgroundShade(float backgroundShade)
+   {
+      this.backgroundShade = backgroundShade;
    }
 }

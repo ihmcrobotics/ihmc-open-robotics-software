@@ -14,6 +14,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
+import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXTools;
@@ -59,6 +60,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
+   private final ImFloat backgroundShade = new ImFloat(GDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
@@ -251,6 +253,10 @@ public class GDXImGuiBasedUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
+         if (ImGuiTools.volatileInputFloat(labels.get("Background shade"), backgroundShade))
+         {
+            setBackgroundShade(backgroundShade.get());
+         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
@@ -373,6 +379,16 @@ public class GDXImGuiBasedUI
       for (GDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
+      }
+   }
+
+   public void setBackgroundShade(float backgroundShade)
+   {
+      this.backgroundShade.set(backgroundShade);
+      primary3DPanel.setBackgroundShade(backgroundShade);
+      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      {
+         additional3DPanel.setBackgroundShade(backgroundShade);
       }
    }
 }
