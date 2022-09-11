@@ -218,10 +218,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
                   pelvisInteractable.setOnSpacePressed(() ->
-                                                       {
-                                                          ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                                                            pelvisInteractable.getPose()));
-                                                       });
+                  {
+                     ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                                                                                                       pelvisInteractable.getPose()));
+                  });
                }
                else
                {
@@ -502,6 +502,15 @@ public class GDXTeleoperationManager extends ImGuiPanel
             allAreDeleted &= footInteractables.get(side).isDeleted();
          }
          desiredRobot.setActive(!allAreDeleted);
+
+         if (!allAreDeleted)
+         {
+            desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
+            for (RobotSide side : handInteractables.sides())
+               desiredRobot.setArmShowing(side, !handInteractables.get(side).isDeleted());
+            for (RobotSide side : footInteractables.sides())
+               desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
+         }
 
          ImGui.separator();
 
