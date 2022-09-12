@@ -33,7 +33,9 @@ import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
+import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.gdx.ui.vr.GDXVRModeManager;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -54,9 +56,8 @@ import java.util.List;
  */
 public class GDXTeleoperationManager extends ImGuiPanel
 {
-   GDXImGuiBasedUI baseUI;
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private GDXImGuiBasedUI baseUI;
    private final CommunicationHelper communicationHelper;
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
@@ -69,8 +70,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXFootstepPlanning footstepPlanning;
+   private final GDXVRModeManager vrModeManager;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
+   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final GDXInteractableFootstepPlan interactableFootstepPlan = new GDXInteractableFootstepPlan();
    private final GDXPelvisHeightSlider pelvisHeightSlider;
    private final GDXChestOrientationSlider chestPitchSlider;
@@ -83,14 +86,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
-
+   private GDXLiveRobotPartInteractable pelvisInteractable;
    private final SideDependentList<GDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
-   private GDXLiveRobotPartInteractable pelvisInteractable;
-   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
 
    public GDXTeleoperationManager(String robotRepoName,
@@ -156,6 +157,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new GDXFootstepPlanning(robotModel, syncedRobot);
 
+      vrModeManager = new GDXVRModeManager();
+
       interactableExists = robotSelfCollisionModel != null;
       if (interactableExists)
       {
@@ -171,8 +174,23 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      create(baseUI, null);
+   }
+
+   public void create(GDXImGuiBasedUI baseUI, Class<?> kinematicsStreamingToolboxMainClass)
+   {
       this.baseUI = baseUI;
       desiredRobot.create();
+
+      RestartableJavaProcess kinematicsStreamingToolboxProcess = null;
+      if (kinematicsStreamingToolboxMainClass != null)
+         kinematicsStreamingToolboxProcess = new RestartableJavaProcess(kinematicsStreamingToolboxMainClass,
+                                                                                            new String[] {"-Dstart.ik.yovariable.server=false"});
+      vrModeManager.create(baseUI,
+                           syncedRobot,
+                           ros2Helper,
+                           kinematicsStreamingToolboxProcess,
+                           teleoperationParameters);
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -189,8 +207,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
       manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
 
@@ -283,6 +299,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    public void update()
    {
+      update(false, false);
+   }
+
+   public void update(boolean nativesLoaded, boolean nativesNewlyLoaded)
+   {
       syncedRobot.update();
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
@@ -327,6 +348,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
+
+      vrModeManager.update(nativesLoaded, nativesNewlyLoaded);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -629,6 +652,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       desiredRobot.destroy();
       walkPathControlRing.destroy();
       footstepsSentToControllerGraphic.destroy();
+      vrModeManager.destroy();
    }
 
    public List<ImGuiGDXVisualizer> getVisualizers()
@@ -657,8 +681,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       return handManager;
    }
 
-   public GDXTeleoperationParameters getTeleoperationParameters()
+   public GDXVRModeManager getVRModeManager()
    {
-      return teleoperationParameters;
+      return vrModeManager;
    }
 }
