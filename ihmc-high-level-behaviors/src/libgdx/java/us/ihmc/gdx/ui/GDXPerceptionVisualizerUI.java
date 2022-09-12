@@ -3,6 +3,8 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -38,9 +40,13 @@ import us.ihmc.utilities.ros.RosTools;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import static org.bytedeco.opencv.global.opencv_core.convertScaleAbs;
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
+
 public class GDXPerceptionVisualizerUI
 {
-   private static final String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+   private static final String HDF5_FILENAME = "/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
 
    private PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
    private PlanarRegionsList regionsUpdate = new PlanarRegionsList();
@@ -67,6 +73,7 @@ public class GDXPerceptionVisualizerUI
    private GDXHighLevelDepthSensorSimulator ousterLidar;
 
    private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(200000, Point3D32::new);
+   private Mat depthMap;
 
    private Activator nativesLoadedActivator;
 
@@ -148,8 +155,7 @@ public class GDXPerceptionVisualizerUI
 //            ros1Node.execute();
 
             BytedecoHDF5Tools.loadPointCloud(HDF5_FILENAME, pointsToRender, frameIndex);
-
-            LogTools.info("Points Loaded: {}", pointsToRender.size());
+            depthMap = BytedecoHDF5Tools.loadDepthMap(HDF5_FILENAME, frameIndex);
 
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
@@ -203,6 +209,16 @@ public class GDXPerceptionVisualizerUI
             if((frameIndex % 30) == 0) {
                BytedecoHDF5Tools.loadPointCloud(HDF5_FILENAME, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
+
+               depthMap = BytedecoHDF5Tools.loadDepthMap(HDF5_FILENAME, frameIndex);
+               LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
+
+               Mat image = new Mat(768, 1024, opencv_core.CV_8UC1);
+
+               convertScaleAbs(depthMap, image, 8.0, 40.0);
+               imshow("Loaded Image", depthMap);
+               waitKey(1);
+
             }
 
             pointCloudRenderer.setPointsToRender(pointsToRender, Color.BLUE);
