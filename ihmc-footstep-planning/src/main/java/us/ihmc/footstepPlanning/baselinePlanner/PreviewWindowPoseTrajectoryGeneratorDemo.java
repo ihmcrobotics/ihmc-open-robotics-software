@@ -148,44 +148,13 @@ public class PreviewWindowPoseTrajectoryGeneratorDemo
       scs.setGroundVisible(false); // don't show default ground
 
       // Add a skylight
-      scs.clearDirectionalLights();
-      scs.setAmbientLight(new Color(100, 100, 100, 100));
+//      scs.clearDirectionalLights();
+//      scs.setAmbientLight(new Color(100, 100, 100, 100));
 
-      String skybox_resource = "skybox/dark_skybox.png";
-      scs.setupSky(skybox_resource, skybox_resource, skybox_resource, skybox_resource, skybox_resource, skybox_resource);
+//      String skybox_resource = "skybox/dark_skybox.png";
+//      scs.setupSky(skybox_resource, skybox_resource, skybox_resource, skybox_resource, skybox_resource, skybox_resource);
 
-      Graphics3DSpotLight lightAbove = new Graphics3DSpotLight();
-      lightAbove.setPosition(new Point3D(0, 0, 2));
-      lightAbove.setDirection(new Vector3D(0, 0, -1));
-      lightAbove.setColor(new Color(210, 210, 255, 255));
-      lightAbove.setSpotInnerAngle(Math.PI / (4.0 * 2.0));
-      lightAbove.setSpotOuterAngle(Math.PI / (4.0 * 1.0));
-      YoVariable q_x = scs.findVariable("q_x");
-      YoVariable q_y = scs.findVariable("q_y");
-      scs.addSpotLight(lightAbove);
-      scs.attachPlaybackListener(new PlaybackListener()
-      {
-         @Override
-         public void stop()
-         {
-         }
 
-         @Override
-         public void play(double realTimeRate)
-         {
-         }
-
-         @Override
-         public void indexChanged(int newIndex)
-         {
-            lightAbove.setPosition(new Point3D(q_x.getValueAsDouble(), q_y.getValueAsDouble(), 2.0));
-         }
-      });
-
-      // Set camera pose
-      scs.setCameraPosition(1.5, 1.5, 0.5);
-      scs.setCameraFix(0.0, 0.0, 0.2);
-      scs.setCameraTracking(true, true, true, false);
 
       scs.setSimulateNoFasterThanRealTime(true);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -24,17 +22,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class SamplingPoseTrajectoryVisualizer
 {
    private final PoseTrajectoryGenerator poseTrajectory;
-   private final ReferenceFrame frame;
    private final int sampleCount;
-   private final YoRegistry registry;
-   private final YoGraphicsListRegistry graphicsListRegistry;
 
    private final BagOfBalls sampleViz;
    private final YoFramePoint3D headPosition;
    private final YoFrameYawPitchRoll headOrientation;
-   private final YoGraphicCoordinateSystem headFrameViz;
    private final YoFrameVector3D headVelocity;
-   private final YoGraphicVector headVelocityViz;
 
    private final FramePoint3D tempSamplePosition = new FramePoint3D();
 
@@ -42,10 +35,7 @@ public class SamplingPoseTrajectoryVisualizer
                                            boolean displayVelocityVector, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.poseTrajectory = poseTrajectory;
-      this.frame = frame;
       this.sampleCount = sampleCount;
-      this.registry = registry;
-      this.graphicsListRegistry = graphicsListRegistry;
 
       List<AppearanceDefinition> appearances = new ArrayList<>(sampleCount);
       for (int i = 0; i < sampleCount; i++)
@@ -56,9 +46,10 @@ public class SamplingPoseTrajectoryVisualizer
 
       this.headPosition = new YoFramePoint3D("headPosition", frame, registry);
       this.headOrientation = new YoFrameYawPitchRoll("headOrientation", frame, registry);
-      this.headFrameViz = new YoGraphicCoordinateSystem("headFrameFix", headPosition, headOrientation, drawSize * 10.0);
       this.headVelocity = new YoFrameVector3D("headVelocity", frame, registry);
-      this.headVelocityViz = new YoGraphicVector("headVelocityViz", headPosition, headVelocity, drawSize * 100, YoAppearance.Chartreuse());
+
+      YoGraphicCoordinateSystem headFrameViz = new YoGraphicCoordinateSystem("headFrameFix", headPosition, headOrientation, drawSize * 10.0);
+      YoGraphicVector headVelocityViz = new YoGraphicVector("headVelocityViz", headPosition, headVelocity, drawSize * 100, YoAppearance.Chartreuse());
 
       YoGraphicsList graphicsList = new YoGraphicsList(prefix + "TrajectoryHead");
       graphicsList.add(headFrameViz);

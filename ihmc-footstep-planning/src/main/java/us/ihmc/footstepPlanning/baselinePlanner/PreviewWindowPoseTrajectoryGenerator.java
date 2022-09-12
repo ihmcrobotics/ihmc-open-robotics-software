@@ -1,14 +1,10 @@
 package us.ihmc.footstepPlanning.baselinePlanner;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 
 public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -24,8 +20,6 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final FramePose3D currentPose;
    private final FrameVector3D currentLinearVelocity;
    private final FrameVector3D currentAngularVelocity;
-
-   private final RigidBodyTransform tempPoseTransform = new RigidBodyTransform();
 
    private final FrameVector3DReadOnly zeroVector;
 
@@ -82,9 +76,8 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       headPose.appendTranslation(xdot * dt, ydot * dt, 0.0);
       headPose.appendYawRotation(yawdot * dt);
 
-      headPose.get(tempPoseTransform);
       linearVelocities[headIdx].set(xdot, ydot, 0.0);
-      tempPoseTransform.transform(linearVelocities[headIdx]);
+      headPose.transform(linearVelocities[headIdx]);
       angularVelocities[headIdx].set(0.0, 0.0, yawdot);
    }
 
@@ -120,16 +113,16 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       if (floorIdx != ceilIdx)
          alpha = (time - floorTime) / (ceilTime - floorTime);
 
-      FramePose3D floorPose = poses[floorIdx];
-      FramePose3D ceilPose = poses[ceilIdx];
+      FramePose3DReadOnly floorPose = poses[floorIdx];
+      FramePose3DReadOnly ceilPose = poses[ceilIdx];
       currentPose.interpolate(floorPose, ceilPose, alpha);
 
-      FrameVector3D floorLinearVelocity = linearVelocities[floorIdx];
-      FrameVector3D ceilLinearVelocity = linearVelocities[ceilIdx];
+      FrameVector3DReadOnly floorLinearVelocity = linearVelocities[floorIdx];
+      FrameVector3DReadOnly ceilLinearVelocity = linearVelocities[ceilIdx];
       currentLinearVelocity.interpolate(floorLinearVelocity, ceilLinearVelocity, alpha);
 
-      FrameVector3D floorAngularVelocity = angularVelocities[floorIdx];
-      FrameVector3D ceilAngularVelocity = angularVelocities[ceilIdx];
+      FrameVector3DReadOnly floorAngularVelocity = angularVelocities[floorIdx];
+      FrameVector3DReadOnly ceilAngularVelocity = angularVelocities[ceilIdx];
       currentAngularVelocity.interpolate(floorAngularVelocity, ceilAngularVelocity, alpha);
    }
 
