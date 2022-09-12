@@ -1,11 +1,10 @@
 package us.ihmc.perception;
 
-import java.util.ArrayList;
-
 import org.bytedeco.javacpp.*;
 import org.bytedeco.hdf5.*;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
 import static org.bytedeco.hdf5.global.hdf5.*;
@@ -17,6 +16,9 @@ public class BytedecoHDF5Tools
    static final String DATASET_NAME = "/os_cloud_node/points/0";
    static final int DIM0 = 2048;
    static final int DIM1 = 64;
+
+   static final int IMG_WIDTH = 1024;
+   static final int IMG_HEIGHT = 768;
 
    private static int extractShape(DataSet dataSet, int dim) {
       DataSpace space = dataSet.getSpace();
@@ -52,6 +54,27 @@ public class BytedecoHDF5Tools
       }
 
       file.close();
+   }
+
+   public static Mat loadDepthMap(String filename, int index)
+   {
+      H5File file = new H5File(filename, H5F_ACC_RDONLY);
+      DataSet dataset = file.openDataSet("/chest_l515/depth/image_rect_raw/" + index);
+      byte[] pointsBuffer = new byte[IMG_HEIGHT * IMG_WIDTH * 2];
+
+      DataSpace space = dataset.getSpace();
+      int nbDims = space.getSimpleExtentNdims();
+
+      BytePointer p = new BytePointer(pointsBuffer);
+
+      dataset.read(p, PredType.NATIVE_UINT8());
+      p.get(pointsBuffer);
+
+      Mat depthU16C1Image = new Mat(768, 1024, opencv_core.CV_16UC1, p);
+
+      file.close();
+
+      return depthU16C1Image;
    }
 
    public static void main(String[] args)
