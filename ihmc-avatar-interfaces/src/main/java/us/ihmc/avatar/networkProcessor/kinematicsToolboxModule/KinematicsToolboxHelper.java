@@ -15,6 +15,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -170,7 +171,7 @@ public class KinematicsToolboxHelper
 
       if (rootJoint != null)
       {
-         Vector3D translation = robotConfigurationData.getRootTranslation();
+         Point3D translation = robotConfigurationData.getRootTranslation();
          rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());

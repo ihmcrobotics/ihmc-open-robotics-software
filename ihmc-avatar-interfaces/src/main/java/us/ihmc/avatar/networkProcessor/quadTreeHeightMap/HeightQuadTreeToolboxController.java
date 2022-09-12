@@ -198,7 +198,7 @@ public class HeightQuadTreeToolboxController extends ToolboxController
             oneDoFJoints[i].setQ(newJointAngles.get(i));
          }
 
-         Vector3D translation = robotConfigurationData.getRootTranslation();
+         Point3D translation = robotConfigurationData.getRootTranslation();
          rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
