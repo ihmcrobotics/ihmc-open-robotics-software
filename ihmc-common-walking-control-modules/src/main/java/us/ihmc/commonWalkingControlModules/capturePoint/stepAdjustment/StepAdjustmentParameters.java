@@ -16,6 +16,14 @@ public abstract class StepAdjustmentParameters
    public abstract boolean allowStepAdjustment();
 
    /**
+    * Enabling this boolean enables the use of crossover steps when performing step adjustment.
+    */
+   public boolean allowCrossOverSteps()
+   {
+      return false;
+   }
+
+   /**
     * Deadband on the step adjustment.
     * When the adjustment is within the deadband, it is set to zero.
     * When it is outside the deadband, the deadband is subtracted from it.
@@ -48,5 +56,46 @@ public abstract class StepAdjustmentParameters
    public double getMinimumFootstepMultiplier()
    {
       return 0.33;
+   }
+
+   /**
+    * Specifies the minimum time remaining for the controller to allow step adjustment. Once the time remaining goes below this value, the step position in
+    * the world is frozen.
+    */
+   public double getMinimumTimeForStepAdjustment()
+   {
+      return 0.02;
+   }
+
+   /**
+    * Specifies the distance from the front of the foot that the Cop has to be when computing the capture region. This effectively shrinks the foot.
+    */
+   public double getCoPDistanceFromFrontOfFoot()
+   {
+      return 0.02;
+   }
+
+   /**
+    * Specifies the distance from the back of the foot that the Cop has to be when computing the capture region. This effectively shrinks the foot.
+    */
+   public double getCoPDistanceFromBackOfFoot()
+   {
+      return 0.05;
+   }
+
+   /**
+    * Specifies the distance from the inside of the foot that the Cop has to be when computing the capture region. This effectively shrinks the foot.
+    */
+   public double getCoPDistanceFromInsideOfFoot()
+   {
+      return 0.02;
+   }
+
+   /**
+    * Specifies the distance from the outside of the foot that the Cop has to be when computing the capture region. This effectively shrinks the foot.
+    */
+   public double getCoPDistanceFromOutsideOfFoot()
+   {
+      return 0.035;
    }
 }

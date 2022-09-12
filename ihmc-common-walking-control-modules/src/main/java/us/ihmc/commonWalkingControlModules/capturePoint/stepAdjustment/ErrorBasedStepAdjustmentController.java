@@ -111,11 +111,11 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
-   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.02);
-   private final DoubleParameter supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront", registry, 0.02);
-   private final DoubleParameter supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack", registry, 0.05);
-   private final DoubleParameter supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside", registry, 0.02);
-   private final DoubleParameter supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside", registry, 0.035);
+   private final DoubleProvider minimumTimeForStepAdjustment;
+   private final DoubleParameter supportDistanceFromFront;
+   private final DoubleParameter supportDistanceFromBack;
+   private final DoubleParameter supportDistanceFromInside;
+   private final DoubleParameter supportDistanceFromOutside;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
 
@@ -186,8 +186,14 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                           registry,
                                                           stepAdjustmentParameters.getTransferSplitFraction());
 
+      minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
+      supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront", registry, stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());
+      supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack", registry, stepAdjustmentParameters.getCoPDistanceFromBackOfFoot());
+      supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside", registry, stepAdjustmentParameters.getCoPDistanceFromInsideOfFoot());
+      supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside", registry, stepAdjustmentParameters.getCoPDistanceFromOutsideOfFoot());
+
       footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, stepAdjustmentParameters.getAdjustmentDeadband());
-      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, false);
+      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, stepAdjustmentParameters.allowCrossOverSteps());
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       DoubleProvider lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
