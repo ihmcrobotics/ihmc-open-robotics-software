@@ -24,6 +24,23 @@ public abstract class StepAdjustmentParameters
    }
 
    /**
+    * Sets whether to use the ICP control plane for step adjustment. This projects the center of pressure and step adjustment algorithm into the control plane,
+    * and performs all the math there, when set to try
+    */
+   public boolean useICPControlPlane()
+   {
+      return false;
+   }
+
+   /**
+    * If true, the step adjustment is originally made based on the ICP error. It is then projected into the capture region, and then made reachable.
+    */
+   public boolean considerICPErrorForStepAdjustment()
+   {
+      return false;
+   }
+
+   /**
     * Deadband on the step adjustment.
     * When the adjustment is within the deadband, it is set to zero.
     * When it is outside the deadband, the deadband is subtracted from it.
@@ -97,5 +114,51 @@ public abstract class StepAdjustmentParameters
    public double getCoPDistanceFromOutsideOfFoot()
    {
       return 0.035;
+   }
+
+   /**
+    * Returns the paramters for determining the cross over reachability area. This calculation is coupled with the
+    * {@link us.ihmc.commonWalkingControlModules.configurations.SteppingParameters} to determine where the robot is allowed to step.
+    */
+   public CrossOverReachabilityParameters getCrossOverReachabilityParameters()
+   {
+      return new CrossOverReachabilityParameters();
+   }
+
+   public static class CrossOverReachabilityParameters
+   {
+      /**
+       * This is the maximum distance to the outside of the stance foot that the step adjustment can go if stepping in front of the stance foot.
+       */
+      public double getForwardCrossOverDistance()
+      {
+         return 0.05;
+      }
+
+      /**
+       * This is the cut-off angle for the area that the foot can step in front of the stance foot. The angle is from the "nominal width" position to the
+       * stance foot.
+       */
+      public double getForwardCrossOverClearanceAngle()
+      {
+         return Math.toRadians(25.0);
+      }
+
+      /**
+       * This is the maximum distance to the outside of the stance foot that the step adjustment can go if stepping behind the stance foot.
+       */
+      public double getBackwardCrossOverDistance()
+      {
+         return -0.05;
+      }
+
+      /**
+       * This is the cut-off angle for the area that the foot can step behind the stance foot. The angle is from the "nominal width" position to the
+       * stance foot.
+       */
+      public double getBackwardCrossOverClearanceAngle()
+      {
+         return Math.toRadians(45.0);
+      }
    }
 }
