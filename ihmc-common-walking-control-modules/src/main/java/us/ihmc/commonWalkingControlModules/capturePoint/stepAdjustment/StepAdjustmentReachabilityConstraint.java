@@ -174,10 +174,14 @@ public class StepAdjustmentReachabilityConstraint
       return reachabilityPolygon;
    }
 
+   FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+
    private FrameConvexPolygon2DReadOnly updateReachabilityPolygon(RobotSide supportSide)
    {
       List<YoFramePoint2D> vertices = reachabilityVertices.get(supportSide);
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
+
+      tempPolygon.clear(polygon.getReferenceFrame());
 
       // create an ellipsoid around the center of the forward and backward reachable limits
       double innerRadius = inPlaceWidth.getValue() - innerLimit.getValue();
@@ -209,13 +213,13 @@ public class StepAdjustmentReachabilityConstraint
             y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
          }
 
-         FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
-         vertex.set(x, y);
+         tempPolygon.addVertex(x, y);
       }
 
 
-      polygon.notifyVerticesChanged();
-      polygon.update();
+
+      tempPolygon.update();
+      polygon.set(tempPolygon);
 
       return polygon;
    }
