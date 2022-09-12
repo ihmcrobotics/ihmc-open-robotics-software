@@ -54,7 +54,7 @@ module controller_msgs
         sequence<float, 50> joint_angles;
         sequence<float, 50> joint_velocities;
         sequence<float, 50> joint_torques;
-        geometry_msgs::msg::dds::Point root_translation;
+        geometry_msgs::msg::dds::Point root_position;
         geometry_msgs::msg::dds::Quaternion root_orientation;
         geometry_msgs::msg::dds::Vector3 pelvis_linear_velocity;
         geometry_msgs::msg::dds::Vector3 pelvis_angular_velocity;
