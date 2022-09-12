@@ -326,7 +326,7 @@ public class LookAndStepFootstepPlanningTask
       // calculate impassibility
       if (lookAndStepParameters.getStopForImpassibilities() && lidarREAPlanarRegions != null)
       {
-         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootPosition()), robotConfigurationData.getRootOrientation());
          BodyCollisionData collisionData = PlannerTools.detectCollisionsAlongBodyPath(rootPose,
                                                                                       bodyPathPlan,
                                                                                       lidarREAPlanarRegions,

@@ -179,7 +179,7 @@ public class JavaFXRobotVisualizer
 
       public Configuration(RobotConfigurationData robotConfigurationData)
       {
-         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
          jointAngles = robotConfigurationData.getJointAngles().toArray();
       }
 
