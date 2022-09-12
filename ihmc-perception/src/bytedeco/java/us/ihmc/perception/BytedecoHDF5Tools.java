@@ -11,9 +11,10 @@ import static org.bytedeco.hdf5.global.hdf5.*;
 
 public class BytedecoHDF5Tools
 {
-
    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
    static final String DATASET_NAME = "/os_cloud_node/points/0";
+
+   static final int PCD_POINT_SIZE = 3;
    static final int DIM0 = 2048;
    static final int DIM1 = 64;
 
@@ -32,9 +33,8 @@ public class BytedecoHDF5Tools
       else return 0;
    }
 
-   public static void loadPointCloud(String filename, RecyclingArrayList<Point3D32> points, int index)
+   public static void loadPointCloud(H5File file, RecyclingArrayList<Point3D32> points, int index)
    {
-      H5File file = new H5File(filename, H5F_ACC_RDONLY);
       DataSet dataset = file.openDataSet("/os_cloud_node/points/" + index);
       float[] pointsBuffer = new float[DIM0 * DIM1 * 3];
 
@@ -56,9 +56,8 @@ public class BytedecoHDF5Tools
       file.close();
    }
 
-   public static Mat loadDepthMap(String filename, int index)
+   public static Mat loadDepthMap(H5File file, int index)
    {
-      H5File file = new H5File(filename, H5F_ACC_RDONLY);
       DataSet dataset = file.openDataSet("/chest_l515/depth/image_rect_raw/" + index);
       byte[] pointsBuffer = new byte[IMG_HEIGHT * IMG_WIDTH * 2];
 
@@ -77,6 +76,23 @@ public class BytedecoHDF5Tools
       return depthU16C1Image;
    }
 
+   public void storePointCloud(H5File file, String namespace, RecyclingArrayList<Point3D32> points)
+   {
+      DataSet dataset = file.openDataSet(namespace);
+      float[] buf = new float[points.size() * PCD_POINT_SIZE];
+      for (int i = 0; i <  points.size(); i++)
+         for (int j = 0; j < PCD_POINT_SIZE; j++)
+            buf[i * PCD_POINT_SIZE + j] = i + j;
+
+      dataset.write(new FloatPointer(buf), new DataType(PredType.NATIVE_FLOAT()));
+   }
+
+   public void storeDepthMap(H5File file, String namespace, Mat depthMap)
+   {
+      DataSet dataset = file.openDataSet(namespace);
+      dataset.write(depthMap.data(), PredType.NATIVE_UINT16());
+   }
+
    public static void main(String[] args)
    {
       long[] dims = { DIM0, DIM1 };        // dataset dimensions
@@ -89,7 +105,8 @@ public class BytedecoHDF5Tools
 
          RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(100000, Point3D32::new);
 
-         BytedecoHDF5Tools.loadPointCloud(FILE_NAME, points, 0);
+         H5File file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
+         BytedecoHDF5Tools.loadPointCloud(file, points, 0);
 
          for(Point3D32 point : points)
          {

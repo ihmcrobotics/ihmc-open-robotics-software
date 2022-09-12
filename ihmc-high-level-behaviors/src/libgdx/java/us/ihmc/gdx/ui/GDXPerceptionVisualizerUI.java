@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import org.bytedeco.hdf5.H5File;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
@@ -40,6 +41,7 @@ import us.ihmc.utilities.ros.RosTools;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
 import static org.bytedeco.opencv.global.opencv_core.convertScaleAbs;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
@@ -154,8 +156,11 @@ public class GDXPerceptionVisualizerUI
 
 //            ros1Node.execute();
 
-            BytedecoHDF5Tools.loadPointCloud(HDF5_FILENAME, pointsToRender, frameIndex);
-            depthMap = BytedecoHDF5Tools.loadDepthMap(HDF5_FILENAME, frameIndex);
+
+            H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
+
+            BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
+            depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex);
 
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
@@ -207,10 +212,11 @@ public class GDXPerceptionVisualizerUI
             frameIndex++;
 
             if((frameIndex % 30) == 0) {
-               BytedecoHDF5Tools.loadPointCloud(HDF5_FILENAME, pointsToRender, frameIndex / 30);
+               H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
+               BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
 
-               depthMap = BytedecoHDF5Tools.loadDepthMap(HDF5_FILENAME, frameIndex);
+               depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex);
                LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
 
                Mat image = new Mat(768, 1024, opencv_core.CV_8UC1);
