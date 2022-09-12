@@ -13,14 +13,13 @@ import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 
 public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
-   private final ReferenceFrame frame;
    private final int windowSize;
    private final double dt;
 
    private int headIdx;
-   private FramePose3D[] poses;
-   private FrameVector3D[] linearVelocities;
-   private FrameVector3D[] angularVelocities;
+   private final FramePose3D[] poses;
+   private final FrameVector3D[] linearVelocities;
+   private final FrameVector3D[] angularVelocities;
 
    private final FramePose3D currentPose;
    private final FrameVector3D currentLinearVelocity;
@@ -32,7 +31,6 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
 
    public PreviewWindowPoseTrajectoryGenerator(ReferenceFrame frame, int windowSize, double dt)
    {
-      this.frame = frame;
       this.windowSize = windowSize;
       this.dt = dt;
       this.headIdx = 0;
@@ -60,7 +58,7 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       // do nothing
    }
 
-   public void reset(FramePose3D initialPose)
+   public void reset(FramePose3DReadOnly initialPose)
    {
       for (int i = 0; i < poses.length; i++)
       {
