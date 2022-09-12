@@ -9,6 +9,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.pubsub.DomainFactory;
@@ -127,7 +128,7 @@ public class AtlasROS1MappingTopics
          }
       }
 
-      public void publish(String frameID, Vector3DReadOnly translation, QuaternionReadOnly orientation)
+      public void publish(String frameID, Tuple3DReadOnly translation, QuaternionReadOnly orientation)
       {
          PoseWithCovarianceStamped message = getMessage();
 

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -127,7 +128,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    }
 
    @Override
-   public Vector3D getOffset()
+   public Tuple3DReadOnly getOffset()
    {
       return robotConfigurationData.getRootTranslation();
    }

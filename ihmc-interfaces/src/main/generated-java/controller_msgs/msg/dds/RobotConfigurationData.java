@@ -40,7 +40,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    public us.ihmc.idl.IDLSequence.Float  joint_angles_;
    public us.ihmc.idl.IDLSequence.Float  joint_velocities_;
    public us.ihmc.idl.IDLSequence.Float  joint_torques_;
-   public us.ihmc.euclid.tuple3D.Vector3D root_translation_;
+   public us.ihmc.euclid.tuple3D.Point3D root_translation_;
    public us.ihmc.euclid.tuple4D.Quaternion root_orientation_;
    public us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D pelvis_angular_velocity_;
@@ -60,7 +60,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
       joint_torques_ = new us.ihmc.idl.IDLSequence.Float (50, "type_5");
 
-      root_translation_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      root_translation_ = new us.ihmc.euclid.tuple3D.Point3D();
       root_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       pelvis_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       pelvis_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
@@ -91,7 +91,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       joint_angles_.set(other.joint_angles_);
       joint_velocities_.set(other.joint_velocities_);
       joint_torques_.set(other.joint_torques_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.root_translation_, root_translation_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.root_translation_, root_translation_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.root_orientation_, root_orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.pelvis_linear_velocity_, pelvis_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.pelvis_angular_velocity_, pelvis_angular_velocity_);
@@ -206,7 +206,7 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    }
 
 
-   public us.ihmc.euclid.tuple3D.Vector3D getRootTranslation()
+   public us.ihmc.euclid.tuple3D.Point3D getRootTranslation()
    {
       return root_translation_;
    }
