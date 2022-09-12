@@ -10,7 +10,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -74,7 +73,7 @@ public class AtlasROS1MappingTopics
             RobotConfigurationData robotConfigurationData = robotConfigurationDataHolder.get();
             if (robotConfigurationData != null)
             {
-               poseStampedPublisher.publish(MAP_FRAME, robotConfigurationData.getRootTranslation(), robotConfigurationData.getRootOrientation());
+               poseStampedPublisher.publish(MAP_FRAME, robotConfigurationData.getRootPosition(), robotConfigurationData.getRootOrientation());
             }
 
             RigidBodyTransform transform = new RigidBodyTransform();

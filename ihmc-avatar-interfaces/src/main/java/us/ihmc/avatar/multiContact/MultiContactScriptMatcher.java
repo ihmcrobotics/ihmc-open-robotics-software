@@ -115,7 +115,7 @@ public class MultiContactScriptMatcher
    {
       if (configuration.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Hashes are different.");
-      scriptFullRobotModel.getRootJoint().getJointPose().set(configuration.getRootTranslation(), configuration.getRootOrientation());
+      scriptFullRobotModel.getRootJoint().getJointPose().set(configuration.getRootPosition(), configuration.getRootOrientation());
       for (int i = 0; i < configuration.getJointAngles().size(); i++)
          allScriptJoints[i].setQ(configuration.getJointAngles().get(i));
       scriptFullRobotModel.updateFrames();

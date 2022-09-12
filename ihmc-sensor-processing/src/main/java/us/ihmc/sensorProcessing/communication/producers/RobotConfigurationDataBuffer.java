@@ -185,7 +185,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
          fullRobotModelCache.allJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      Point3D translation = robotConfigurationData.getRootTranslation();
+      Point3D translation = robotConfigurationData.getRootPosition();
       rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
       Quaternion orientation = robotConfigurationData.getRootOrientation();
       rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());

@@ -223,7 +223,7 @@ public class KinematicsToolboxSnapshotDescription
 
    public void applyTransform(Transform transform)
    {
-      controllerConfiguration.getRootTranslation().applyTransform(transform);
+      controllerConfiguration.getRootPosition().applyTransform(transform);
       controllerConfiguration.getRootOrientation().applyTransform(transform);
       ikSolution.getDesiredRootTranslation().applyTransform(transform);
       ikSolution.getDesiredRootOrientation().applyTransform(transform);

@@ -3,8 +3,6 @@ package us.ihmc.avatar.initialSetup;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -31,7 +29,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    @Override
    public void initializeRobot(HumanoidFloatingRootJointRobot robot)
    {
-      robot.getRootJoint().setPosition(robotConfigurationData.getRootTranslation());
+      robot.getRootJoint().setPosition(robotConfigurationData.getRootPosition());
       robot.getRootJoint().setOrientation(robotConfigurationData.getRootOrientation());
 
       TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
@@ -50,7 +48,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    public void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel)
    {
       Pose3DBasics rootJointPose = fullRobotModel.getRootJoint().getJointPose();
-      rootJointPose.getPosition().set(robotConfigurationData.getRootTranslation());
+      rootJointPose.getPosition().set(robotConfigurationData.getRootPosition());
       rootJointPose.getOrientation().set(robotConfigurationData.getRootOrientation());
 
       TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
@@ -69,7 +67,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    public void initializeRobot(RigidBodyBasics rootBody)
    {
       Pose3DBasics rootJointPose = ((FloatingJointBasics) rootBody.getChildrenJoints().get(0)).getJointPose();
-      rootJointPose.getPosition().set(robotConfigurationData.getRootTranslation());
+      rootJointPose.getPosition().set(robotConfigurationData.getRootPosition());
       rootJointPose.getOrientation().set(robotConfigurationData.getRootOrientation());
 
       TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
@@ -87,7 +85,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    @Override
    public void initializeRobotDefinition(RobotDefinition robotDefinition)
    {
-      SixDoFJointState initialRootJointState = new SixDoFJointState(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      SixDoFJointState initialRootJointState = new SixDoFJointState(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
       robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(initialRootJointState);
 
       TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
@@ -119,7 +117,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    @Override
    public double getInitialGroundHeight()
    {
-      return robotConfigurationData.getRootTranslation().getZ();
+      return robotConfigurationData.getRootPosition().getZ();
    }
 
    @Override
@@ -130,6 +128,6 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    @Override
    public Tuple3DReadOnly getOffset()
    {
-      return robotConfigurationData.getRootTranslation();
+      return robotConfigurationData.getRootPosition();
    }
 }
