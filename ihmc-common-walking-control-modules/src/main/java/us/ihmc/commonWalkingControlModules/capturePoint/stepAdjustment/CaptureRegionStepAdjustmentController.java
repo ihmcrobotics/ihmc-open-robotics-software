@@ -111,6 +111,8 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
 
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                walkingControllerParameters.getSteppingParameters(),
+                                                                               walkingControllerParameters.getStepAdjustmentParameters()
+                                                                                                          .getCrossOverReachabilityParameters(),
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
