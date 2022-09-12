@@ -216,8 +216,6 @@ public class StepAdjustmentReachabilityConstraint
          tempPolygon.addVertex(x, y);
       }
 
-
-
       tempPolygon.update();
       polygon.set(tempPolygon);
 
