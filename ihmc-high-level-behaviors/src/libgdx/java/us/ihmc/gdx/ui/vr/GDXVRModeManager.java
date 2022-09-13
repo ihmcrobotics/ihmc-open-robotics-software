@@ -51,6 +51,7 @@ public class GDXVRModeManager
    private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
    private boolean grippedLastTime = false;
    private Supplier<Texture> floatingVideoPanelTextureSupplier;
+   private boolean modeChangedThisUpdate = false;
 
    public void create(GDXImGuiBasedUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -224,6 +225,7 @@ public class GDXVRModeManager
          if (showFloatingVideoPanel.get())
             showFloatVideoPanelNotification.set();
       }
+      GDXVRMode previousMode = mode;
       if (ImGui.radioButton(labels.get("Inputs disabled"), mode == GDXVRMode.INPUTS_DISABLED))
       {
          mode = GDXVRMode.INPUTS_DISABLED;
@@ -235,13 +237,12 @@ public class GDXVRModeManager
       if (kinematicsStreamingMode != null && ImGui.radioButton(labels.get("Whole body IK streaming"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = GDXVRMode.WHOLE_BODY_IK_STREAMING;
-         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == GDXVRMode.JOYSTICK_WALKING))
       {
          mode = GDXVRMode.JOYSTICK_WALKING;
       }
+      modeChangedThisUpdate = mode != previousMode;
 
       switch (mode)
       {
@@ -293,5 +294,15 @@ public class GDXVRModeManager
       leftHandPanel.dispose();
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
+   }
+
+   public GDXVRMode getMode()
+   {
+      return mode;
+   }
+
+   public boolean getModeChangedThisUpdate()
+   {
+      return modeChangedThisUpdate;
    }
 }

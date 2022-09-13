@@ -35,7 +35,10 @@ import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.gdx.ui.vr.GDXVRKinematicsStreamingMode;
+import us.ihmc.gdx.ui.vr.GDXVRMode;
 import us.ihmc.gdx.ui.vr.GDXVRModeManager;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -83,6 +86,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXRobotCollisionModel selfCollisionModel;
    private GDXRobotCollisionModel environmentCollisionModel;
    private GDXWholeBodyDesiredIKManager wholeBodyDesiredIKManager;
+   private GDXVRKinematicsStreamingMode wholeBodyIKStreaming;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -191,6 +195,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
                            ros2Helper,
                            kinematicsStreamingToolboxProcess,
                            teleoperationParameters);
+      if (kinematicsStreamingToolboxProcess != null)
+      {
+         wholeBodyIKStreaming = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
+         wholeBodyIKStreaming.create(baseUI.getVRManager().getContext());
+      }
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -282,6 +291,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
       }
@@ -350,9 +361,31 @@ public class GDXTeleoperationManager extends ImGuiPanel
       }
 
       vrModeManager.update(nativesLoaded, nativesNewlyLoaded);
+      if (wholeBodyIKStreaming != null)
+      {
+         boolean isIKStreamingMode = vrModeManager.getMode() == GDXVRMode.WHOLE_BODY_IK_STREAMING;
+         wholeBodyIKStreaming.update(isIKStreamingMode);
+         if (isIKStreamingMode && vrModeManager.getModeChangedThisUpdate() && !wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().isStarted())
+         {
+            wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().start();
+         }
+      }
    }
 
-   public void calculate3DViewPick(ImGui3DViewInput input)
+   private void calculateVRPick(GDXVRContext vrContext)
+   {
+
+   }
+
+   private void processVRInput(GDXVRContext vrContext)
+   {
+      switch (vrModeManager.getMode())
+      {
+         case WHOLE_BODY_IK_STREAMING -> wholeBodyIKStreaming.processVRInput(vrContext);
+      }
+   }
+
+   private void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
@@ -377,7 +410,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    }
 
    // This happens after update.
-   public void process3DViewInput(ImGui3DViewInput input)
+   private void process3DViewInput(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
