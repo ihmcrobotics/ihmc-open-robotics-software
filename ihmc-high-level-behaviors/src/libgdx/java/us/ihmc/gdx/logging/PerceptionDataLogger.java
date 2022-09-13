@@ -1,12 +1,20 @@
 package us.ihmc.gdx.logging;
 
+import controller_msgs.msg.dds.BigVideoPacket;
+import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import org.bytedeco.hdf5.H5File;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.BytedecoHDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
@@ -16,24 +24,67 @@ public class PerceptionDataLogger {
     static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/HDF5/OusterL515Log.h5";
     private H5File file;
 
-    public PerceptionDataLogger(ROS2Node ros2Node) {
+    private final BigVideoPacket videoPacket = new BigVideoPacket();
+    private final SampleInfo depthSampleInfo = new SampleInfo();
 
-//        new IHMCROS2Callback<>(ros2Node, ROS2Tools.MAPSENSE_REGIONS, this::regionsCallback);
 
+    private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
+    private final SampleInfo ousterSampleInfo = new SampleInfo();
 
+    private final byte[] messageDataHeapArray = new byte[25000000];
+    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
+    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+    private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
+
+    private int depthMessageCounter = 0;
+
+    public PerceptionDataLogger() {
         file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
+        RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_data_logger");
+
+        new IHMCROS2Callback<>(ros2Node,
+                ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class),
+                ROS2QosProfile.BEST_EFFORT(),
+                this::logDepthMap);
+
+        new IHMCROS2Callback<>(ros2Node,
+                ROS2Tools.OUSTER_LIDAR.withType(FusedSensorHeadPointCloudMessage.class),
+                ROS2QosProfile.BEST_EFFORT(),
+                this::logFusedOusterPointCloud);
+
     }
 
-    public void depthCallback()
+    public void logFusedOusterPointCloud(FusedSensorHeadPointCloudMessage message)
     {
-
+        message.
     }
+
+    public void logDepthMap(BigVideoPacket packet)
+    {
+        convertBigVideoPacketToMat(videoPacket, depthMap);
+        BytedecoHDF5Tools.storeDepthMap(file, "/chest_l515/depth/image_rect_raw/" + depthMessageCounter, depthMap);
+        depthMessageCounter += 1;
+    }
+
+    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat) {
+        IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
+        imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+        messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
+        messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
+
+        inputJPEGMat.cols(imageEncodedTByteArrayList.size());
+        inputJPEGMat.data(messageEncodedBytePointer);
+
+        opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+
+//        updateImageDimensions(mat, inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
+        opencv_imgproc.cvtColor(inputYUVI420Mat, mat, opencv_imgproc.COLOR_YUV2RGBA_I420);
+    }
+
 
     public static void main(String[] args) {
-
-        RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
-        ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_data_logger");
-//        PerceptionDataLogger logger = new PerceptionDataLogger(realtimeROS2Node);
+        PerceptionDataLogger logger = new PerceptionDataLogger();
     }
 }
 

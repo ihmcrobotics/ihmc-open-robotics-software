@@ -76,7 +76,7 @@ public class BytedecoHDF5Tools
       return depthU16C1Image;
    }
 
-   public void storePointCloud(H5File file, String namespace, RecyclingArrayList<Point3D32> points)
+   public static void storePointCloud(H5File file, String namespace, RecyclingArrayList<Point3D32> points)
    {
       DataSet dataset = file.openDataSet(namespace);
       float[] buf = new float[points.size() * PCD_POINT_SIZE];
@@ -87,7 +87,7 @@ public class BytedecoHDF5Tools
       dataset.write(new FloatPointer(buf), new DataType(PredType.NATIVE_FLOAT()));
    }
 
-   public void storeDepthMap(H5File file, String namespace, Mat depthMap)
+   public static void storeDepthMap(H5File file, String namespace, Mat depthMap)
    {
       DataSet dataset = file.openDataSet(namespace);
       dataset.write(depthMap.data(), PredType.NATIVE_UINT16());
