@@ -3,6 +3,8 @@ package us.ihmc.footstepPlanning.baselinePlanner;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
@@ -14,7 +16,7 @@ import java.util.List;
 public class BaselineFootstepPlanner
 {
    private final double PLANNER_TIME_RESOLUTION = 0.01;
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final BaselineFootstepPlannerParameters parameters;
    private final FramePose3D lastStepBaselinePose;
    private final FramePose3D midpointBaselinePose;
@@ -23,11 +25,8 @@ public class BaselineFootstepPlanner
    private final FrameVector3D midpointBaselineLinearVelocity;
    private final FrameVector3D midpointBaselineAngularVelocity;
    private final SideDependentList<FramePose3D> stancePose;
-   private final RigidBodyTransform baselineTransform;
    private final SideDependentList<FramePose3D> previousFootholds;
    private final FramePose3D stepGoalPose;
-   private final FramePose3D tempPoseA;
-   private final FramePose3D tempPoseB;
 
    public BaselineFootstepPlanner(BaselineFootstepPlannerParameters parameters)
    {
@@ -43,15 +42,12 @@ public class BaselineFootstepPlanner
       {
          this.stancePose.put(robotSide, new FramePose3D(worldFrame));
       }
-      this.baselineTransform = new RigidBodyTransform();
       this.previousFootholds = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          this.previousFootholds.put(robotSide, new FramePose3D(worldFrame));
       }
       this.stepGoalPose = new FramePose3D(worldFrame);
-      this.tempPoseA = new FramePose3D(worldFrame);
-      this.tempPoseB = new FramePose3D(worldFrame);
       computeStancePose();
    }
 
@@ -98,9 +94,8 @@ public class BaselineFootstepPlanner
          double thisStepBaselineTime = thisStepEndTime;
          while (thisStepBaselineTime < finalTime)
          {
-            thisStepBaselinePose.changeFrame(worldFrame);
             baselinePoseTrajectory.compute(thisStepBaselineTime);
-            thisStepBaselinePose.set(baselinePoseTrajectory.getPose());
+            thisStepBaselinePose.setIncludingFrame(worldFrame, baselinePoseTrajectory.getPose());
             thisStepBaselinePose.changeFrame(midpointBaselineFrame);
             double symmetryCost = computePoseSymmetryCost(lastStepBaselinePose, thisStepBaselinePose);
             if (symmetryCost < minimumSymmetryCost)
@@ -124,7 +119,7 @@ public class BaselineFootstepPlanner
          double lateralVelocity = midpointBaselineLinearVelocity.getY();
          double turningVelocity = midpointBaselineAngularVelocity.getZ();
          double angularVelocityMagnitude = Math.abs(turningVelocity);
-         double linearVelocityMagnitude = Math.sqrt(forwardVelocity * forwardVelocity + lateralVelocity * lateralVelocity);
+         double linearVelocityMagnitude = EuclidCoreTools.norm(forwardVelocity, lateralVelocity);
          double angularVelocityEpsilon = 0.05;
          double linearVelocityEpsilon = 0.01;
 
@@ -146,13 +141,12 @@ public class BaselineFootstepPlanner
          {
             double stancePositionError = 0.0;
             double stanceRotationError = 0.0;
-            midpointBaselinePose.get(baselineTransform);
             for (RobotSide robotSide : RobotSide.values)
             {
                FramePose3D stepPose = previousFootholds.get(robotSide);
                stepPose.changeFrame(worldFrame);
                stepGoalPose.setIncludingFrame(stancePose.get(robotSide));
-               stepGoalPose.applyTransform(baselineTransform);
+               midpointBaselinePose.transform(stepGoalPose);
                double xError = stepPose.getX() - stepGoalPose.getX();
                double yError = stepPose.getY() - stepGoalPose.getY();
                stancePositionError += Math.sqrt(xError * xError + yError * yError) / 2.0;
@@ -187,8 +181,7 @@ public class BaselineFootstepPlanner
 
             // Transform step pose to world frame.
             thisStepBaselinePose.changeFrame(worldFrame);
-            thisStepBaselinePose.get(baselineTransform);
-            stepGoalPose.applyTransform(baselineTransform);
+            thisStepBaselinePose.transform(stepGoalPose);
             step.setSoleFramePose(stepGoalPose);
 
             // Update step parameters
@@ -212,15 +205,13 @@ public class BaselineFootstepPlanner
 
    public void computeBaselinePoseFromFootholdPose(FramePose3D baselinePose, FramePose3D footholdPose, RobotSide robotSide)
    {
-      stancePose.get(robotSide).get(baselineTransform);
       baselinePose.setToZero(worldFrame);
-      baselinePose.applyInverseTransform(baselineTransform);
+      stancePose.get(robotSide).inverseTransform(baselinePose);
       footholdPose.changeFrame(worldFrame);
-      footholdPose.get(baselineTransform);
-      baselinePose.applyTransform(baselineTransform);
+      footholdPose.transform(baselinePose);
    }
 
-   private double computePoseSymmetryCost(FramePose3D poseA, FramePose3D poseB)
+   private double computePoseSymmetryCost(FramePose3DReadOnly poseA, FramePose3DReadOnly poseB)
    {
       double xSum = poseA.getX() + poseB.getX();
       double ySum = poseA.getY() + poseB.getY();
