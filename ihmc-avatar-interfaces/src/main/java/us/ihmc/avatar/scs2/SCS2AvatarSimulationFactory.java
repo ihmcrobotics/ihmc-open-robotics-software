@@ -531,6 +531,12 @@ public class SCS2AvatarSimulationFactory
       robot.getControllerManager().addController(new Controller()
       {
          @Override
+         public void initialize()
+         {
+            robotController.initialize();
+         }
+
+         @Override
          public void doControl()
          {
             robotController.doControl();
