@@ -143,9 +143,12 @@ public class ControllerNaturalPostureManager
    private final YoDouble relativeAngularVelX = new YoDouble("relativeAngularVelX", registry);
    private final YoDouble relativeAngularVelY = new YoDouble("relativeAngularVelY", registry);
    private final YoDouble relativeAngularVelZ = new YoDouble("relativeAngularVelZ", registry);
-   private final YoDouble omega_wc_X = new YoDouble("omega_wc_X", registry);
-   private final YoDouble omega_wc_Y = new YoDouble("omega_wc_Y", registry);
-   private final YoDouble omega_wc_Z = new YoDouble("omega_wc_Z", registry);
+   private final YoDouble omega_bc_X = new YoDouble("omega_bc_X", registry);
+   private final YoDouble omega_bc_Y = new YoDouble("omega_bc_Y", registry);
+   private final YoDouble omega_bc_Z = new YoDouble("omega_bc_Z", registry);
+   private final YoDouble centroidalAngularMomentumApproxByACOMX = new YoDouble("centroidalAngularMomentumApproxByACOMX", registry);
+   private final YoDouble centroidalAngularMomentumApproxByACOMY = new YoDouble("centroidalAngularMomentumApproxByACOMY", registry);
+   private final YoDouble centroidalAngularMomentumApproxByACOMZ = new YoDouble("centroidalAngularMomentumApproxByACOMZ", registry);
    
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
                                           PID3DGainsReadOnly gains,
@@ -459,10 +462,29 @@ public class ControllerNaturalPostureManager
        relativeAngularVelY.set(relativeVel.get(1));
        relativeAngularVelZ.set(relativeVel.get(2));
        
-       DMatrixRMaj omega_wc = MatrixTools.mult(robotNaturalPosture.getNaturalPostureJacobianRtBase(), momentumData.jointVelocity);
-       omega_wc_X.set(omega_wc.get(0));
-       omega_wc_Y.set(omega_wc.get(1));
-       omega_wc_Z.set(omega_wc.get(2));       
+       DMatrixRMaj b_omega_bc = MatrixTools.mult(robotNaturalPosture.getNaturalPostureJacobianRtBaseEwrtBase(), momentumData.jointVelocity);
+       omega_bc_X.set(b_omega_bc.get(0));
+       omega_bc_Y.set(b_omega_bc.get(1));
+       omega_bc_Z.set(b_omega_bc.get(2));       
+
+       DMatrixRMaj b_omega_wb = new DMatrixRMaj(3,1);
+       b_omega_wb.set(0, momentumData.jointVelocityWithFloatingBase.get(0));
+       b_omega_wb.set(1, momentumData.jointVelocityWithFloatingBase.get(1));
+       b_omega_wb.set(2, momentumData.jointVelocityWithFloatingBase.get(2));    		   
+       DMatrixRMaj b_omega_wc = new DMatrixRMaj(3,1);
+       b_omega_wc.set(0, b_omega_wb.get(0) + b_omega_bc.get(0));
+       b_omega_wc.set(1, b_omega_wb.get(1) + b_omega_bc.get(1));
+       b_omega_wc.set(2, b_omega_wb.get(2) + b_omega_bc.get(2));    	
+       
+       DMatrixRMaj centroidalMomentumApproxByACOM = new DMatrixRMaj(6,1);
+       DMatrixRMaj Mbase = new DMatrixRMaj(6, 3);
+       int[] srcColumnsBase = {0, 1, 2};
+       MatrixTools.extractColumns(momentumData.momentumMatrix, srcColumnsBase, Mbase, 0);
+       centroidalMomentumApproxByACOM = MatrixTools.mult(Mbase, b_omega_wc);
+       
+       centroidalAngularMomentumApproxByACOMX.set(centroidalMomentumApproxByACOM.get(0));
+       centroidalAngularMomentumApproxByACOMY.set(centroidalMomentumApproxByACOM.get(1));
+       centroidalAngularMomentumApproxByACOMZ.set(centroidalMomentumApproxByACOM.get(2));
    }
    
    
