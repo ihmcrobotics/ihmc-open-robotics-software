@@ -143,14 +143,14 @@ public class OneStepCaptureRegionCalculator
    // variables for the capture region calculation
    private static final int APPROXIMATION_MULTIPLIER = 1;
    private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
-   final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
+   private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
    private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
    private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
-   FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
+   private FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
    private final FramePoint2D additionalKinematicPoint = new FramePoint2D(worldFrame);
-   final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
+   private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
-   final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
+   private final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
 
    public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2DReadOnly icp, double omega0, FrameConvexPolygon2DReadOnly footPolygon)
    {
