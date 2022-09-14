@@ -1,7 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules.naturalPosture;
 
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRBlock;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.block.linsol.qr.QrHouseHolderSolver_DDRB;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.ops.ConvertDMatrixStruct;
 
 import us.ihmc.commonWalkingControlModules.configurations.HumanoidRobotNaturalPosture;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -12,7 +16,13 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -128,6 +138,15 @@ public class ControllerNaturalPostureManager
    private YoDouble yoTime;
    private final MovingReferenceFrame midFeetZUpFrame;
 
+   // For generating data for the paper
+   boolean generateDataForPaper = false;
+   private final YoDouble relativeAngularVelX = new YoDouble("relativeAngularVelX", registry);
+   private final YoDouble relativeAngularVelY = new YoDouble("relativeAngularVelY", registry);
+   private final YoDouble relativeAngularVelZ = new YoDouble("relativeAngularVelZ", registry);
+   private final YoDouble omega_wc_X = new YoDouble("omega_wc_X", registry);
+   private final YoDouble omega_wc_Y = new YoDouble("omega_wc_Y", registry);
+   private final YoDouble omega_wc_Z = new YoDouble("omega_wc_Z", registry);
+   
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
                                           PID3DGainsReadOnly gains,
                                           HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -306,8 +325,12 @@ public class ControllerNaturalPostureManager
       naturalPostureControlCommand.getJacobian().set(robotNaturalPosture.getNaturalPostureJacobian());
       naturalPostureControlCommand.getSelectionMatrix().set(npQPselectionMatrix);
       naturalPostureControlCommand.getWeightMatrix().set(npQPweightMatrix);
+      
+      // For testing (data for paper)
+      if (generateDataForPaper)
+    	  computeDataForPaper();
    }
-
+   
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
    private void computeProportionalNPFeedback(FrameVector3D feedbackTermToPack)
@@ -417,4 +440,170 @@ public class ControllerNaturalPostureManager
    {
       return pelvisQPObjectiveCommand;
    }
+   
+   ///////////////////// methods for generating data for paper
+
+   private void computeDataForPaper() {
+	   // We would like to compare the relative angular velocity to the angular velocity of the ACOM frame
+	   // We also want to compare the CAM to the one approximated by ACOM
+
+       fullRobotModel.getElevator().updateFramesRecursively();
+       MomentumData momentumData = computeMomentum(fullRobotModel);
+
+       DMatrixRMaj relativeVel = MatrixTools.mult(momentumData.connectionMatrix, momentumData.jointVelocity);
+       
+//       DMatrixRMaj relativeAngularVel = new DMatrixRMaj(3, 1);
+//       int[] srcRow = {0,1,2};
+//       MatrixTools.extractRows(relativeVel, srcRow, relativeVel, 0);
+       relativeAngularVelX.set(relativeVel.get(0));
+       relativeAngularVelY.set(relativeVel.get(1));
+       relativeAngularVelZ.set(relativeVel.get(2));
+       
+       DMatrixRMaj omega_wc = MatrixTools.mult(robotNaturalPosture.getNaturalPostureJacobianRtBase(), momentumData.jointVelocity);
+       omega_wc_X.set(omega_wc.get(0));
+       omega_wc_Y.set(omega_wc.get(1));
+       omega_wc_Z.set(omega_wc.get(2));       
+   }
+   
+   
+	final class MomentumData
+	{
+	   public DMatrixRMaj jointPositionWithFloatingBase;
+	   public DMatrixRMaj jointVelocityWithFloatingBase;
+	   public DMatrixRMaj jointPosition;
+	   public DMatrixRMaj jointVelocity;
+	   public DMatrixRMaj momentumMatrix;
+	   public DMatrixRMaj momentumVector;
+	   public DMatrixRMaj connectionMatrix;
+	
+	   public MomentumData(DMatrixRMaj jointPositionWithFloatingBase,
+	                       DMatrixRMaj jointVelocityWithFloatingBase,
+	                       DMatrixRMaj jointPosition,
+	                       DMatrixRMaj jointVelocity,
+	                       DMatrixRMaj momentumMatrix,
+	                       DMatrixRMaj momentumVector,
+	                       DMatrixRMaj connectionMatrix)
+	   {
+	      this.jointPositionWithFloatingBase = jointPositionWithFloatingBase;
+	      this.jointVelocityWithFloatingBase = jointVelocityWithFloatingBase;
+	      this.jointPosition = jointPosition;
+	      this.jointVelocity = jointVelocity;
+	      this.momentumMatrix = momentumMatrix;
+	      this.momentumVector = momentumVector;
+	      this.connectionMatrix = connectionMatrix;
+	   }
+	}
+
+   private MomentumData computeMomentum(FullHumanoidRobotModel fullRobotModel)
+   {
+      // TODO: double check if the joint ordering is the same as centroidal momentum matirx's.
+      // TODO: also double check if you should use pelvis as root or elevator
+      //       Ans: I believe if we want to get the momentum rt world frame, then we should use elevator, because the floating base vel also contribute to the centroidal angular momentum
+
+      JointBasics[] jointListWithFloatingBase = MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getElevator());
+      DMatrixRMaj jointPositionWithFloatingBase = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointListWithFloatingBase) + 1, 1);
+      MultiBodySystemTools.extractJointsState(jointListWithFloatingBase, JointStateType.CONFIGURATION, jointPositionWithFloatingBase);
+      DMatrixRMaj jointVelocityWithFloatingBase = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointListWithFloatingBase), 1);
+      MultiBodySystemTools.extractJointsState(jointListWithFloatingBase, JointStateType.VELOCITY, jointVelocityWithFloatingBase);
+      System.out.println(jointPositionWithFloatingBase);
+
+      JointBasics[] jointList = MultiBodySystemTools.collectSubtreeJoints(fullRobotModel.getPelvis());
+      DMatrixRMaj jointPosition = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
+      MultiBodySystemTools.extractJointsState(jointList, JointStateType.CONFIGURATION, jointPosition);
+      DMatrixRMaj jointVelocity = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(jointList), 1);
+      MultiBodySystemTools.extractJointsState(jointList, JointStateType.VELOCITY, jointVelocity);
+
+      DMatrixRMaj momentumMatrix = computeMomentumMatrix(fullRobotModel);
+      DMatrixRMaj comMomentum = MatrixTools.mult(momentumMatrix, jointVelocityWithFloatingBase);
+
+      // Get connection matrix
+      DMatrixRMaj Mbase = new DMatrixRMaj(6, 6);
+      DMatrixRMaj Mq = new DMatrixRMaj(6, jointPosition.getNumRows());
+      DMatrixRMaj Mconnection = new DMatrixRMaj(6, jointPosition.getNumRows());
+      DMatrixRBlock MbaseBlock = new DMatrixRBlock(6, 6);
+      DMatrixRBlock MqBlock = new DMatrixRBlock(6, jointPosition.getNumRows());
+      DMatrixRBlock MconnectionBlock = new DMatrixRBlock(6, jointPosition.getNumRows());
+
+      int[] srcColumnsBase = {0, 1, 2, 3, 4, 5};
+      int[] srcColumnsQ = {6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34};
+      MatrixTools.extractColumns(momentumMatrix, srcColumnsBase, Mbase, 0);
+      MatrixTools.extractColumns(momentumMatrix, srcColumnsQ, Mq, 0);
+
+      // Ref:
+      // https://www.tabnine.com/code/java/methods/org.ejml.ops.ConvertDMatrixStruct/convert
+      ConvertDMatrixStruct.convert(Mbase, MbaseBlock);
+      ConvertDMatrixStruct.convert(Mq, MqBlock);
+
+      // Ref:
+      // https://ejml.org/javadoc/org/ejml/dense/block/linsol/qr/QrHouseHolderSolver_DDRB.html
+      QrHouseHolderSolver_DDRB solver = new QrHouseHolderSolver_DDRB();
+      solver.setA(MbaseBlock);
+      solver.solve(MqBlock, MconnectionBlock);
+      ConvertDMatrixStruct.convert(MconnectionBlock, Mconnection);
+
+      //		System.out.println("----------");
+      //		System.out.println(Mq);
+      //		System.out.println(MatrixTools.mult(Mbase, Mconnection));
+
+      //		System.out.println("----------");
+      //		System.out.println(Mbase);
+
+      //		System.out.println("jointListWithFloatingBase");
+      //		for (int i = 0; i < jointListWithFloatingBase.length; i++) {
+      //			System.out.print(jointListWithFloatingBase[i]);
+      //			System.out.println("");
+      //		}
+      //		System.out.println("jointList");
+      //		for (int i = 0; i < jointList.length; i++) {
+      //			System.out.print(jointList[i]);
+      //			System.out.println("");
+      //		}
+
+      //		System.out.println(jointVelocities);
+      //		System.out.println(Mbase);
+      //		System.out.println(Mq);
+      //    System.out.println(comMomentum);
+
+      System.out.println("momentumMatrix = ");
+      System.out.println(momentumMatrix);
+      System.out.println("Mconnection = ");
+      System.out.println(Mconnection);
+
+      //		System.out.println("");
+      //		System.out.println(jointPositionWithFloatingBase.getNumRows());
+      //		System.out.println(jointPositionWithFloatingBase.getNumCols());
+      //		System.out.println(jointVelocityWithFloatingBase.getNumRows());
+      //		System.out.println(jointVelocityWithFloatingBase.getNumCols());
+      //		System.out.println(jointPosition.getNumRows());
+      //		System.out.println(jointPosition.getNumCols());
+      //		System.out.println(jointVelocity.getNumRows());
+      //		System.out.println(jointVelocity.getNumCols());
+      //		System.out.println(momentumMatrix.getNumRows());
+      //		System.out.println(momentumMatrix.getNumCols());
+      //		System.out.println(comMomentum.getNumRows());
+      //		System.out.println(comMomentum.getNumCols());
+
+      return new MomentumData(jointPositionWithFloatingBase,
+                              jointVelocityWithFloatingBase,
+                              jointPosition,
+                              jointVelocity,
+                              momentumMatrix,
+                              comMomentum,
+                              Mconnection);
+   }
+   
+
+   private DMatrixRMaj computeMomentumMatrix(FullHumanoidRobotModel fullRobotModel)
+   {
+      CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
+      centerOfMassFrame.update();
+      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(fullRobotModel.getElevator(), centerOfMassFrame);
+      //      CentroidalMomentumCalculator centroidalMomentumMatrix = new CentroidalMomentumCalculator(fullRobotModel.getPelvis(), centerOfMassFrame);
+      fullRobotModel.getElevator().updateFramesRecursively();
+
+      // System.out.println(centroidalMomentumMatrix.getCentroidalMomentumMatrix());
+
+      return centroidalMomentumMatrix.getCentroidalMomentumMatrix();
+   }
+   
 }
