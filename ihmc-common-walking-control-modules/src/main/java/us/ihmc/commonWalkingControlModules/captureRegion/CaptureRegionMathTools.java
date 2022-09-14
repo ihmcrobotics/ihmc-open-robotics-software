@@ -25,10 +25,10 @@ public class CaptureRegionMathTools
    {
       directionA.checkReferenceFrameMatch(directionB.getReferenceFrame());
       directionA.checkReferenceFrameMatch(centerOfCircle.getReferenceFrame());
-      alpha = MathTools.clamp(alpha, -1.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
-      double angleBetweenDirections = Math.abs(directionA.angle(directionB));
-      double angleBetweenDirectionsToSetLine = -angleBetweenDirections * alpha;
+      double angleBetweenDirections = directionA.angle(directionB);
+      double angleBetweenDirectionsToSetLine = angleBetweenDirections * alpha;
 
       rotatedFromA.setReferenceFrame(directionA.getReferenceFrame());
       RotationMatrixTools.applyYawRotation(angleBetweenDirectionsToSetLine, directionA, rotatedFromA);
