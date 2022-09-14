@@ -31,17 +31,12 @@ public class GDXWholeBodyDesiredIKManager
    private final GDXTeleoperationParameters teleoperationParameters;
 
    private final ArmJointName[] armJointNames;
-   private HandDataType handPoseDataTypeToSend = HandDataType.JOINT_ANGLES;
+   private GDXArmControlMode armControlMode = GDXArmControlMode.JOINT_ANGLES;
 
    private final SideDependentList<GDXArmDesiredIKManager> armManagers = new SideDependentList<>(GDXArmDesiredIKManager::new);
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
-
-   private enum HandDataType
-   {
-      JOINT_ANGLES, POSE_WORLD, POSE_CHEST
-   }
 
    public GDXWholeBodyDesiredIKManager(DRCRobotModel robotModel,
                                        ROS2SyncedRobotModel syncedRobot,
@@ -126,21 +121,25 @@ public class GDXWholeBodyDesiredIKManager
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Arm setpoints:");
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Joint angles"), handPoseDataTypeToSend == HandDataType.JOINT_ANGLES))
+      ImGui.text("Arm & hand control mode:");
+      if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == GDXArmControlMode.JOINT_ANGLES))
       {
-         handPoseDataTypeToSend = HandDataType.JOINT_ANGLES;
+         armControlMode = GDXArmControlMode.JOINT_ANGLES;
+      }
+      ImGui.text("Hand pose only:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World"), armControlMode == GDXArmControlMode.POSE_WORLD))
+      {
+         armControlMode = GDXArmControlMode.POSE_WORLD;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Pose World"), handPoseDataTypeToSend == HandDataType.POSE_WORLD))
+      if (ImGui.radioButton(labels.get("Chest"), armControlMode == GDXArmControlMode.POSE_CHEST))
       {
-         handPoseDataTypeToSend = HandDataType.POSE_WORLD;
+         armControlMode = GDXArmControlMode.POSE_CHEST;
       }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Pose Chest"), handPoseDataTypeToSend == HandDataType.POSE_CHEST))
+      if (ImGui.radioButton(labels.get("IK Streaming"), armControlMode == GDXArmControlMode.STREAMING))
       {
-         handPoseDataTypeToSend = HandDataType.POSE_CHEST;
+         armControlMode = GDXArmControlMode.STREAMING;
       }
    }
 
@@ -148,7 +147,7 @@ public class GDXWholeBodyDesiredIKManager
    {
       Runnable runnable = () ->
       {
-         if (handPoseDataTypeToSend == HandDataType.JOINT_ANGLES)
+         if (armControlMode == GDXArmControlMode.JOINT_ANGLES)
          {
             double[] jointAngles = new double[armJointNames.length];
             int i = -1;
@@ -163,12 +162,12 @@ public class GDXWholeBodyDesiredIKManager
                                                                                                         jointAngles);
             ros2Helper.publishToController(armTrajectoryMessage);
          }
-         else if (handPoseDataTypeToSend == HandDataType.POSE_WORLD || handPoseDataTypeToSend == HandDataType.POSE_CHEST)
+         else if (armControlMode == GDXArmControlMode.POSE_WORLD || armControlMode == GDXArmControlMode.POSE_CHEST)
          {
             FramePose3D desiredControlFramePose = armManagers.get(robotSide).getDesiredControlFramePose();
 
             ReferenceFrame frame;
-            if (handPoseDataTypeToSend == HandDataType.POSE_WORLD)
+            if (armControlMode == GDXArmControlMode.POSE_WORLD)
             {
                frame = ReferenceFrame.getWorldFrame();
             }
@@ -200,5 +199,10 @@ public class GDXWholeBodyDesiredIKManager
       {
          armManagers.get(side).setDesiredToCurrent();
       }
+   }
+
+   public GDXArmControlMode getArmControlMode()
+   {
+      return armControlMode;
    }
 }

@@ -516,11 +516,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
 //      desiredRobot.renderImGuiWidgets();
 //      ImGui.sameLine();
-      if (ImGui.button(labels.get("Set Desired To Current")))
-      {
-         wholeBodyDesiredIKManager.setDesiredToCurrent();
-         desiredRobot.setDesiredToCurrent();
-      }
+//      if (ImGui.button(labels.get("Set Desired To Current")))
+//      {
+//         wholeBodyDesiredIKManager.setDesiredToCurrent();
+//         desiredRobot.setDesiredToCurrent();
+//      }
 
       if (interactableExists)
       {
@@ -567,11 +567,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          if (!allAreDeleted)
          {
-            desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
+//            desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
             for (RobotSide side : handInteractables.sides())
-               desiredRobot.setArmShowing(side, !handInteractables.get(side).isDeleted());
-            for (RobotSide side : footInteractables.sides())
-               desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
+               desiredRobot.setArmShowing(side, !handInteractables.get(side).isDeleted()
+                                                && wholeBodyDesiredIKManager.getArmControlMode() == GDXArmControlMode.JOINT_ANGLES);
+//            for (RobotSide side : footInteractables.sides())
+//               desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
          }
 
          ImGui.separator();
