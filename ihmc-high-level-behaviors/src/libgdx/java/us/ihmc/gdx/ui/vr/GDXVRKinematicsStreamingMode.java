@@ -139,6 +139,40 @@ public class GDXVRKinematicsStreamingMode
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
    }
 
+   public void update(boolean ikStreamingModeEnabled)
+   {
+      // Safety features!
+      if (!ikStreamingModeEnabled)
+         streamToController = false;
+      if (!enabled.get())
+         streamToController = false;
+
+      if (status.getMessageNotification().poll())
+      {
+         KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
+         statusFrequencyPlot.recordEvent();
+         if (latestStatus.getJointNameHash() == -1)
+         {
+            if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD
+                && messageThrottler.run(1.0))
+               LogTools.warn("Status update: Toolbox failed initialization, missing RobotConfigurationData.");
+            else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
+               LogTools.info("Status update: Toolbox initialized successfully.");
+         }
+         else
+         {
+            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
+            ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
+            for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+            {
+               ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+            }
+            ghostFullRobotModel.getElevator().updateFramesRecursively();
+         }
+      }
+      ghostRobotGraphic.update();
+   }
+
    public void processVRInput(GDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
@@ -235,40 +269,6 @@ public class GDXVRKinematicsStreamingMode
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
-   }
-
-   public void update(boolean ikStreamingModeEnabled)
-   {
-      // Safety features!
-      if (!ikStreamingModeEnabled)
-         streamToController = false;
-      if (!enabled.get())
-         streamToController = false;
-
-      if (status.getMessageNotification().poll())
-      {
-         KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
-         statusFrequencyPlot.recordEvent();
-         if (latestStatus.getJointNameHash() == -1)
-         {
-            if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD
-             && messageThrottler.run(1.0))
-               LogTools.warn("Status update: Toolbox failed initialization, missing RobotConfigurationData.");
-            else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
-               LogTools.info("Status update: Toolbox initialized successfully.");
-         }
-         else
-         {
-            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
-            ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
-            for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
-            {
-               ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
-            }
-            ghostFullRobotModel.getElevator().updateFramesRecursively();
-         }
-      }
-      ghostRobotGraphic.update();
    }
 
    public void renderImGuiWidgets()
