@@ -38,6 +38,7 @@ import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.ui.vr.GDXVRKinematicsStreamingMode;
 import us.ihmc.gdx.ui.vr.GDXVRMode;
 import us.ihmc.gdx.ui.vr.GDXVRModeManager;
+import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -97,6 +98,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
    private final boolean interactableExists;
+
+   private final GDXContinuousStepping continuousStepping;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -174,6 +177,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                                                       ros2Helper,
                                                                       teleoperationParameters);
       }
+
+      continuousStepping = new GDXContinuousStepping(robotModel);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -218,7 +223,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters, communicationHelper);
 
       if (interactableExists)
       {
@@ -307,11 +312,14 @@ public class GDXTeleoperationManager extends ImGuiPanel
       handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+
+      continuousStepping.create(baseUI,ros2Helper, robotModel, teleoperationParameters, syncedRobot, communicationHelper, walkPathControlRing);
    }
 
    public void update()
    {
       update(false, false);
+
    }
 
    public void update(boolean nativesLoaded, boolean nativesNewlyLoaded)
@@ -371,6 +379,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
             wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().start();
          }
       }
+      continuousStepping.update(true);
    }
 
    private void calculateVRPick(GDXVRContext vrContext)
@@ -408,6 +417,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
       }
+
+//      continuousStepping.calculate3DViewPick(input);
+
    }
 
    // This happens after update.
@@ -441,6 +453,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
             teleportCameraToRobotPelvis();
          }
       }
+//      continuousStepping.processInput(input);
    }
 
    private void renderExtraWidgetsOnVRPanel()

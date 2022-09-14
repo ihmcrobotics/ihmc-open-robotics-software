@@ -9,8 +9,8 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
+import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -87,10 +87,13 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private GDXWalkPathType walkPathType = GDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
 
+   private boolean isContinuousStepping = false;
+
    public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      GDXTeleoperationParameters teleoperationParameters)
+                      GDXTeleoperationParameters teleoperationParameters,
+                      CommunicationHelper communicationHelper)
    {
       this.panel3D = panel3D;
       this.teleoperationParameters = teleoperationParameters;
@@ -215,18 +218,34 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
             queueFootstepPlan();
          }
       }
-      if (selected && footstepPlannerGoalGizmo.isNewlyModified())
+
+      boolean altHeld = ImGui.getIO().getKeyAlt();
+      if (altHeld && selected)
       {
-         queueFootstepPlan();
+         isContinuousStepping = true;
       }
 
-      if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
       {
-         delete();
+         isContinuousStepping = false;
       }
-      if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
+
+      if (!isContinuousStepping)
       {
-         selected = false;
+
+         if (selected && footstepPlannerGoalGizmo.isNewlyModified())
+         {
+            queueFootstepPlan();
+         }
+
+         if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+         {
+            delete();
+         }
+         if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
+         {
+            selected = false;
+         }
       }
 
       footstepPlannerGoalGizmo.setShowArrows(selected);
@@ -264,7 +283,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       });
    }
 
-   private void updateStuff()
+   public void updateStuff()
    {
       goalFrame.update();
       goalPose.setToZero(goalFrame);
@@ -500,5 +519,25 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    public FootstepPlan getFootstepPlan()
    {
       return footstepPlan;
+   }
+
+   public FramePose3D getGoalPose()
+   {
+      return goalPose;
+   }
+
+   public FramePose3D getLeftGoalFootPose()
+   {
+      return leftGoalFootPose;
+   }
+
+   public FramePose3D getRightGoalFootPose()
+   {
+      return rightGoalFootPose;
+   }
+
+   public boolean isContinuousStepping()
+   {
+      return isContinuousStepping;
    }
 }
