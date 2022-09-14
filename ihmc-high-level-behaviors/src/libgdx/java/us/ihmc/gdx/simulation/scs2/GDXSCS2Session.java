@@ -16,6 +16,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.graphics.live.LogVideoLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
@@ -27,6 +28,7 @@ import us.ihmc.tools.time.DurationCalculator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -58,6 +60,7 @@ public class GDXSCS2Session
    private boolean sessionStartedHandled = false;
    private final GDXRenderableAdapter renderables = new GDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
+   private LogVideoLoader logVideoVisualizer;
 
    public GDXSCS2Session(Session session)
    {
@@ -68,6 +71,10 @@ public class GDXSCS2Session
    public void create(GDXImGuiBasedUI baseUI)
    {
       create(baseUI, controlPanel);
+   }
+
+   public void createVideoVisualizer(String logVideoFilePath, String logVideoTimestampFilePath) throws IOException {
+      logVideoVisualizer = new LogVideoLoader(logVideoFilePath, logVideoTimestampFilePath);
    }
 
    public void create(GDXImGuiBasedUI baseUI, ImGuiPanel panel)
@@ -108,6 +115,7 @@ public class GDXSCS2Session
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
 
       plotManager.create(baseUI.getPerspectiveManager(), yoManager, panel);
+
    }
 
    public void update()
