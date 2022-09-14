@@ -186,26 +186,17 @@ public class GDXTeleoperationManager extends ImGuiPanel
       create(baseUI, null);
    }
 
-   public void create(GDXImGuiBasedUI baseUI, Class<?> kinematicsStreamingToolboxMainClass)
+   public void create(GDXImGuiBasedUI baseUI, RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       this.baseUI = baseUI;
       desiredRobot.create();
 
-      RestartableJavaProcess kinematicsStreamingToolboxProcess = null;
-      if (kinematicsStreamingToolboxMainClass != null)
-         kinematicsStreamingToolboxProcess = new RestartableJavaProcess(kinematicsStreamingToolboxMainClass,
-                                                                                            new String[] {"-Dstart.ik.yovariable.server=false"});
       vrModeManager.create(baseUI,
                            syncedRobot,
                            ros2Helper,
                            kinematicsStreamingToolboxProcess != null,
                            teleoperationParameters,
                            this::renderExtraWidgetsOnVRPanel);
-      if (kinematicsStreamingToolboxProcess != null)
-      {
-         wholeBodyIKStreaming = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
-         wholeBodyIKStreaming.create(baseUI.getVRManager().getContext());
-      }
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -293,6 +284,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
                   }
                }
             }
+         }
+
+         if (kinematicsStreamingToolboxProcess != null)
+         {
+            wholeBodyIKStreaming = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
+            wholeBodyIKStreaming.create(baseUI.getVRManager().getContext(), handInteractables);
          }
 
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
