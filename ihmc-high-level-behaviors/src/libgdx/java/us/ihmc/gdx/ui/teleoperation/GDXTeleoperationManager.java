@@ -193,8 +193,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
       vrModeManager.create(baseUI,
                            syncedRobot,
                            ros2Helper,
-                           kinematicsStreamingToolboxProcess,
-                           teleoperationParameters);
+                           kinematicsStreamingToolboxProcess != null,
+                           teleoperationParameters,
+                           this::renderExtraWidgetsOnVRPanel);
       if (kinematicsStreamingToolboxProcess != null)
       {
          wholeBodyIKStreaming = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
@@ -442,6 +443,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
       }
    }
 
+   private void renderExtraWidgetsOnVRPanel()
+   {
+      renderSharedImGuiWidgets();
+   }
+
    public void renderImGuiWidgets()
    {
       robotLowLevelMessenger.renderImGuiWidgets();
@@ -577,8 +583,21 @@ public class GDXTeleoperationManager extends ImGuiPanel
          ImGui.checkbox("Avoidance", showSelfCollisionMeshes);
       }
 
+      renderSharedImGuiWidgets();
+
       // TODO: Add transparency sliders
       // TODO: Add motion previews
+   }
+
+   private void renderSharedImGuiWidgets()
+   {
+      switch (vrModeManager.getMode())
+      {
+         case WHOLE_BODY_IK_STREAMING ->
+         {
+            wholeBodyIKStreaming.renderImGuiWidgets();
+         }
+      }
    }
 
    private void renderTooltipsAndContextMenus()
@@ -677,6 +696,14 @@ public class GDXTeleoperationManager extends ImGuiPanel
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
+
+         switch (vrModeManager.getMode())
+         {
+            case WHOLE_BODY_IK_STREAMING ->
+            {
+               wholeBodyIKStreaming.getVirtualRenderables(renderables, pool);
+            }
+         }
       }
    }
 
@@ -686,6 +713,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       walkPathControlRing.destroy();
       footstepsSentToControllerGraphic.destroy();
       vrModeManager.destroy();
+      if (wholeBodyIKStreaming != null)
+         wholeBodyIKStreaming.destroy();
    }
 
    public List<ImGuiGDXVisualizer> getVisualizers()

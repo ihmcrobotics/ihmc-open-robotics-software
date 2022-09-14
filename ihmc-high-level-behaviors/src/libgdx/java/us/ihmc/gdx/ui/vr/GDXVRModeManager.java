@@ -20,7 +20,6 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.GDXJoystickBasedStepping;
 import us.ihmc.gdx.ui.graphics.GDX3DSituatedImagePanel;
-import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
@@ -35,8 +34,8 @@ public class GDXVRModeManager
 {
    private GDXImGuiBasedUI baseUI;
    private ROS2SyncedRobotModel syncedRobot;
+   private boolean ikStreamingAvailable;
    private GDXVRHandPlacedFootstepMode handPlacedFootstepMode;
-   private GDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private GDXJoystickBasedStepping joystickBasedStepping;
    private GDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
@@ -52,31 +51,33 @@ public class GDXVRModeManager
    private boolean grippedLastTime = false;
    private Supplier<Texture> floatingVideoPanelTextureSupplier;
    private boolean modeChangedThisUpdate = false;
+   private Runnable vrPanelImGuiExtraWidgets;
 
    public void create(GDXImGuiBasedUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
-                      RestartableJavaProcess kinematicsStreamingToolboxProcess,
-                      GDXTeleoperationParameters teleoperationParameters)
+                      boolean ikStreamingAvailable,
+                      GDXTeleoperationParameters teleoperationParameters,
+                      Runnable vrPanelImGuiExtraWidgets)
    {
       this.baseUI = baseUI;
       this.syncedRobot = syncedRobot;
+      this.ikStreamingAvailable = ikStreamingAvailable;
+      this.vrPanelImGuiExtraWidgets = vrPanelImGuiExtraWidgets;
       handPlacedFootstepMode = new GDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
       handPlacedFootstepMode.setTeleoperationParameters(teleoperationParameters);
-
-      if (kinematicsStreamingToolboxProcess != null)
-      {
-         kinematicsStreamingMode = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), controllerHelper, kinematicsStreamingToolboxProcess);
-         kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
-      }
 
       joystickBasedStepping = new GDXJoystickBasedStepping(syncedRobot.getRobotModel());
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
 
-      leftHandPanel = new GDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
+      leftHandPanel = new GDX3DSituatedImGuiPanel("VR Mode Manager", () ->
+      {
+         renderImGuiWidgets();
+         vrPanelImGuiExtraWidgets.run();
+      });
       leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
       leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
@@ -118,7 +119,6 @@ public class GDXVRModeManager
       switch (mode)
       {
          case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
-         case WHOLE_BODY_IK_STREAMING -> kinematicsStreamingMode.processVRInput(vrContext);
       }
    }
 
@@ -209,8 +209,6 @@ public class GDXVRModeManager
          }
       }
 
-      if (kinematicsStreamingMode != null)
-         kinematicsStreamingMode.update(mode == GDXVRMode.WHOLE_BODY_IK_STREAMING);
       leftHandPanel.update();
       joystickBasedStepping.update(mode == GDXVRMode.JOYSTICK_WALKING);
    }
@@ -234,7 +232,7 @@ public class GDXVRModeManager
       {
          mode = GDXVRMode.FOOTSTEP_PLACEMENT;
       }
-      if (kinematicsStreamingMode != null && ImGui.radioButton(labels.get("Whole body IK streaming"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
+      if (ikStreamingAvailable && ImGui.radioButton(labels.get("Whole body IK streaming"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = GDXVRMode.WHOLE_BODY_IK_STREAMING;
       }
@@ -254,10 +252,6 @@ public class GDXVRModeManager
          {
             handPlacedFootstepMode.renderImGuiWidgets();
          }
-         case WHOLE_BODY_IK_STREAMING ->
-         {
-            kinematicsStreamingMode.renderImGuiWidgets();
-         }
          case JOYSTICK_WALKING ->
          {
             joystickBasedStepping.renderImGuiWidgets();
@@ -272,10 +266,6 @@ public class GDXVRModeManager
          case FOOTSTEP_PLACEMENT ->
          {
             handPlacedFootstepMode.getRenderables(renderables, pool);
-         }
-         case WHOLE_BODY_IK_STREAMING ->
-         {
-            kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
          }
          case JOYSTICK_WALKING ->
          {
@@ -292,8 +282,6 @@ public class GDXVRModeManager
    public void destroy()
    {
       leftHandPanel.dispose();
-      if (kinematicsStreamingMode != null)
-         kinematicsStreamingMode.destroy();
    }
 
    public GDXVRMode getMode()
