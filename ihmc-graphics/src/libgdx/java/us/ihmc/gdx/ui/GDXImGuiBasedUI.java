@@ -31,6 +31,41 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Method call order:
+ *
+ * <pre>
+ * create()
+ *
+ * loop:
+ *     update()
+ *     calculateVRPick(GDXVRContext)
+ *     processVRInput(GDXVRContext)
+ *     calculate3DViewPick(ImGui3DViewInput)
+ *     process3DViewInput(ImGui3DViewInput)
+ *     renderImGuiWidgets()
+ *     renderTooltipsAndContextMenus()
+ *     getRenderables()
+ *
+ * destroy()
+ * </pre>
+ *
+ * It is recommended that in every class, the methods that exist in them mapping to the above are defined in the class in that order.
+ *
+ * Additionally, the update() is only called first if you code according to this in the Lwjgl3ApplicationAdapter provided to GDXImGuiBasedUI:
+ *
+ * <pre>
+ * &#64;Override
+ * public void render()
+ * {
+ *    // call update() methods here
+ *
+ *    baseUI.renderBeforeOnScreenUI();
+ *    baseUI.renderEnd();
+ * }
+ * </pre>
+ *
+ */
 public class GDXImGuiBasedUI
 {
    public static final int ANTI_ALIASING = 2;
