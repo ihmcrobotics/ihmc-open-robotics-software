@@ -41,6 +41,7 @@ import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.JointGainsHandle;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -265,6 +266,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
       HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));
 
+      HashMap<String, JointGainsHandle> jointGainsHandles = new HashMap<>();
       HashMap<String, EffortJointHandle> effortJointHandles = new HashMap<>();
       HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> jointStateHandles = new HashMap<>();
@@ -290,6 +292,17 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
          {
             jointStateHandles.put(joint, createJointStateHandle(joint));
          }
+      }
+      
+      /* Sample code. Replace me! */
+      // Add any joint gains
+      String[] GAIN_JOINTS = { "leftShoulderPitch", "rightShoulderPitch" };
+      for (String joint : GAIN_JOINTS) 
+      {
+          jointGainsHandles.put(joint, createJointGainsHandle(joint));
+          // Set some dummy value so we can see it works
+          jointGainsHandles.get(joint).setDamping(3.14);
+          jointGainsHandles.get(joint).setStiffness(2.71);
       }
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
