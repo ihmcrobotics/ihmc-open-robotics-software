@@ -14,7 +14,7 @@ ihmc {
 
 mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
-   api("us.ihmc:ihmc-realtime:1.5.0")
+   api("us.ihmc:ihmc-realtime:1.5.1")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
    api("org.boofcv:boofcv-geo:0.36")
    api("com.google.guava:guava:18.0")
