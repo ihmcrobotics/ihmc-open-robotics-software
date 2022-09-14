@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointMatrixIndexProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -129,7 +130,8 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    // For internal use:
    private DMatrixRMaj jacobianQuaternionNPrtBase = null;
    private DMatrixRMaj jacobianOmegaNPrtBase = null; // GMN: Would need 2.0* if used externally.
-
+   private DMatrixRMaj jacobianOmegaNPrtBaseEwrtBase = null; // might need 2.0* if used externally.
+   
    private final YoFrameQuaternion yoQuaternionNPrtWorld; //, yoQuaternionNPrtBase;
    private final YoFrameQuaternion yoQuaternionIdent;
    private final YoFramePoint3D originNPpelvis;
@@ -161,6 +163,8 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    // Testing -- track local yaw angle
    // Note that the base (pelvis) has to turn in order for the upper body to turn together
    private Boolean trackingLocalYaw = true;
+   
+   boolean generateDataForPaper = false;
 
    public NadiaNaturalPosture(FullHumanoidRobotModel robotModel,
                               boolean useURDFJointNumbering,
@@ -210,6 +214,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       jacobianNP = new DMatrixRMaj(3, 6 + NumDoFs);
       jacobianQuaternionNPrtBase = new DMatrixRMaj(4, NumDoFs);
       jacobianOmegaNPrtBase = new DMatrixRMaj(4, NumDoFs);
+      jacobianOmegaNPrtBaseEwrtBase = new DMatrixRMaj(3, NumDoFs);
       jointPositionArray = new double[NumDoFs];
 
       // Set joint indices for auto-generated NP function:
@@ -372,17 +377,12 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    {
       return this.jacobianNP;
    }
-   
-   @Override
-   public DMatrixRMaj getNaturalPostureJacobianRtBase() 
-   {
-	  DMatrixRMaj ret = new DMatrixRMaj(3,NumDoFs);
-      for (int i = 0; i < 3; i++)
-         for (int j = 0; j < NumDoFs; j++)
-        	 ret.set(i, j, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
-      return ret;
-   }
 
+   @Override
+   public DMatrixRMaj getNaturalPostureJacobianRtBaseEwrtBase() 
+   {
+      return this.jacobianOmegaNPrtBaseEwrtBase;
+   }
 
    @Override
    public void compute(double[] q, Orientation3DReadOnly Q_world_base)
@@ -512,7 +512,20 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
       //       {
       //          jacobianToPack.set(i, legJointIndicesInVelVectorIncludingFloatingBaseJoint[j], 0.0);
       //       }
-
+      
+      // Testing -- get data for paper
+      if (generateDataForPaper) {
+    	  // b_omega_bc
+          for (int i = 0; i < 3; i++)
+	         for (int j = 0; j < NumDoFs; j++)
+	        	 this.jacobianOmegaNPrtBaseEwrtBase.set(i, j, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
+	      CnpBase.transpose();
+	      DMatrixRMaj R_BC = new DMatrixRMaj(3,3);
+	      for (int i = 0; i < 3; i++)
+	          for (int j = 0; j < 3; j++)
+	        	  R_BC.set(i, j, CnpBase.getElement(i, j));
+	      this.jacobianOmegaNPrtBaseEwrtBase = MatrixTools.mult(R_BC, this.jacobianOmegaNPrtBaseEwrtBase);
+      }
    }
 
    //==== CSV utils ===========================================================================================================================
