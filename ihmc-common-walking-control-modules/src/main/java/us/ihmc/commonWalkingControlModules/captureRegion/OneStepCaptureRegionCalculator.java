@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -144,14 +143,14 @@ public class OneStepCaptureRegionCalculator
    // variables for the capture region calculation
    private static final int APPROXIMATION_MULTIPLIER = 1;
    private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
-   private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
+   final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
    private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
    private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
-   private final FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
+   FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
    private final FramePoint2D additionalKinematicPoint = new FramePoint2D(worldFrame);
-   private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
+   final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
-   private final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
+   final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
 
    public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2DReadOnly icp, double omega0, FrameConvexPolygon2DReadOnly footPolygon)
    {
@@ -181,6 +180,9 @@ public class OneStepCaptureRegionCalculator
       captureRegionPolygon.clear(supportSoleZUp);
       kinematicExtreme.setToZero(supportSoleZUp);
 
+      double distanceRight = 0;
+      double distanceLeft = 0;
+
       // 2. Get extreme CoP positions
       boolean icpOutsideSupport = computeVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
       FrameConvexPolygon2D reachableRegion = reachableRegions.get(swingSide.getOppositeSide());
@@ -204,6 +206,13 @@ public class OneStepCaptureRegionCalculator
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
          int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, copExtreme,
                                                                                       predictedICP, kinematicExtreme, null);
+
+         // When the predicted ICP distance  is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
+         if (predictedICP.distanceFromOriginSquared() > kinematicExtreme.distanceFromOriginSquared())
+         {
+            kinematicExtreme = new FramePoint2D(predictedICP);
+         }
+
          if (intersections > 1)
             throw new RuntimeException("The cop was outside of the reachable range.");
 
@@ -216,17 +225,33 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.addVertexMatchingFrame(kinematicExtreme, false);
 
          if (i == 0)
+         {
+            distanceRight = predictedICP.distanceFromOrigin();
             firstKinematicExtremeDirection.sub(kinematicExtreme, footCentroid);
+         }
          else if (i == lastIndex)
+         {
+            distanceLeft = predictedICP.distanceFromOrigin();
             lastKinematicExtremeDirection.sub(kinematicExtreme, footCentroid);
+         }
       }
 
       // 5. Add additional points to the capture region polygon on the circle between the kinematic extreme points
       for (int i = 0; i < KINEMATIC_LIMIT_POINTS - 1; i++)
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
-         captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
-                                                                              APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+
+         if (distanceRight >= distanceLeft)
+         {
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(lastKinematicExtremeDirection, firstKinematicExtremeDirection, -alphaFromAToB,
+                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+         }
+         else
+         {
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
+                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+         }
+
          rawCaptureRegion.addVertexMatchingFrame(additionalKinematicPoint, false);
       }
 
