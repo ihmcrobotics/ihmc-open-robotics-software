@@ -14,15 +14,13 @@ import java.io.*;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
-public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
+public class LogVideoLoader
 {
    private final MP4VideoDemuxer demuxer;
-
    private final YUVPictureConverter converter = new YUVPictureConverter();
    private String filename;
 
@@ -44,13 +42,12 @@ public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
 
    private int index = 0;
 
-   public GDXLogVideoVisualizer(String file, String timestampFile) throws IOException
+   public LogVideoLoader(String file, String timestampFile) throws IOException
    {
-      super(file, file, false);
       this.filename = file;
       this.timestampFilename = timestampFile;
 
-      executorService.scheduleAtFixedRate(this::loadNextFrame, 10L, 10L, TimeUnit.MILLISECONDS);
+//      executorService.scheduleAtFixedRate(this::loadNextFrame, 10L, 10L, TimeUnit.MILLISECONDS);
 
       videoFile = new File(file);
       if (!videoFile.exists())
@@ -59,21 +56,15 @@ public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
       }
 
       parseTimestampData(new File(timestampFile));
-
       demuxer = new MP4VideoDemuxer(videoFile);
-
       LogTools.info("Demuxer: {}", demuxer);
    }
 
-   public void loadNextFrame()
+   public Mat loadNextFrameAsOpenCVMat()
    {
-
-      if(demuxer == null) return;
-
+      if(demuxer == null) return null;
       long timestamp = robotTimestamps[index];
-
       LogTools.info("Timestamp: {}", timestamp, index);
-
       if(index < robotTimestamps.length) index++;
 //
       long videoTimestamp;
@@ -97,17 +88,16 @@ public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
 
          Mat mat = BytedecoOpenCVTools.convertBufferedImageToMat(bufImage);
 
-         imshow("OpenCV Mat",mat);
-         int code = waitKeyEx(10);
-         if(code == 113) System.exit(0);
-
          LogTools.info("Frame Loaded: {} {} {}", bufImage.getHeight(), bufImage.getWidth(), videoTimestamp);
+
+         return mat;
       }
       catch (IOException e)
       {
          LogTools.info("Frame Loading Exception.");
          e.printStackTrace();
       }
+      return null;
    }
 
    private void parseTimestampData(File timestampFile) throws IOException
@@ -213,13 +203,4 @@ public class GDXLogVideoVisualizer extends GDXOpenCVVideoVisualizer
       return videoTimestamp;
    }
 
-   @Override
-   public void renderImGuiWidgets()
-   {
-      executorService.shutdown();
-//      super.renderImGuiWidgets();
-//      ImGui.text(this.filename);
-//      if (getHasReceivedOne())
-//         getFrequencyPlot().renderImGuiWidgets();
-   }
 }
