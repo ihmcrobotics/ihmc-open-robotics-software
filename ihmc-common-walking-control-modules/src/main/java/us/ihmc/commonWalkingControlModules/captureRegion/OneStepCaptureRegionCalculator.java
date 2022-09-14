@@ -146,7 +146,7 @@ public class OneStepCaptureRegionCalculator
    private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
    private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
    private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
-   private FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
+   private final FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
    private final FramePoint2D additionalKinematicPoint = new FramePoint2D(worldFrame);
    private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
@@ -210,7 +210,7 @@ public class OneStepCaptureRegionCalculator
          // When the predicted ICP distance  is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
          if (predictedICP.distanceFromOriginSquared() > kinematicExtreme.distanceFromOriginSquared())
          {
-            kinematicExtreme = new FramePoint2D(predictedICP);
+            kinematicExtreme.setIncludingFrame(predictedICP);
          }
 
          if (intersections > 1)
@@ -243,7 +243,7 @@ public class OneStepCaptureRegionCalculator
 
          if (distanceRight >= distanceLeft)
          {
-            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(lastKinematicExtremeDirection, firstKinematicExtremeDirection, -alphaFromAToB,
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(lastKinematicExtremeDirection, firstKinematicExtremeDirection, alphaFromAToB,
                                                                                  APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
          }
          else
