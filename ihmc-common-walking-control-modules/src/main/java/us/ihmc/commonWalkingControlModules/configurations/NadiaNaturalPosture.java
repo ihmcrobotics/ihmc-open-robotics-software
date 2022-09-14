@@ -372,6 +372,17 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
    {
       return this.jacobianNP;
    }
+   
+   @Override
+   public DMatrixRMaj getNaturalPostureJacobianRtBase() 
+   {
+	  DMatrixRMaj ret = new DMatrixRMaj(3,NumDoFs);
+      for (int i = 0; i < 3; i++)
+         for (int j = 0; j < NumDoFs; j++)
+        	 ret.set(i, j, 2.0 * this.jacobianOmegaNPrtBase.get(i + 1, j)); // for omega NP rt & ewrt NP-frame
+      return ret;
+   }
+
 
    @Override
    public void compute(double[] q, Orientation3DReadOnly Q_world_base)
