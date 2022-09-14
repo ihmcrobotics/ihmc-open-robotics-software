@@ -27,8 +27,10 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2PlanarRegionsVisualizer;
 import us.ihmc.gdx.ui.tools.GDXTransformTuner;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
+import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoHDF5Tools;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -162,6 +164,8 @@ public class GDXPerceptionVisualizerUI
             BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
             depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex);
 
+//            BytedecoOpenCVTools.printMat(depthMap, "Depth");
+
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
 
@@ -216,13 +220,15 @@ public class GDXPerceptionVisualizerUI
                BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
 
-               depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex);
+               depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex / 30);
                LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
+
+//               BytedecoOpenCVTools.printMat(depthMap, "Depth");
 
                Mat image = new Mat(768, 1024, opencv_core.CV_8UC1);
 
-               convertScaleAbs(depthMap, image, 8.0, 40.0);
-               imshow("Loaded Image", depthMap);
+               depthMap.convertTo(image, opencv_core.CV_8UC1, 256.0f, 0.0f);
+               imshow("Loaded Image", image);
                waitKey(1);
 
             }

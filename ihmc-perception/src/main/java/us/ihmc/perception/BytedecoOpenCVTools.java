@@ -131,4 +131,17 @@ public class BytedecoOpenCVTools
       }
       return "unknown image type";
    }
+
+   public static void printMat(Mat image, String prefix)
+   {
+      System.out.println("Mat: [" + prefix + "]");
+      for(int i = 0; i<image.rows(); i++)
+      {
+         for(int j = 0; j<image.cols(); j++)
+         {
+            System.out.print(image.ptr(i,j).getShort() + "\t");
+         }
+         System.out.println();
+      }
+   }
 }

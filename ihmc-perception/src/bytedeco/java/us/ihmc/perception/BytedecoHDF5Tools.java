@@ -52,8 +52,6 @@ public class BytedecoHDF5Tools
          Point3D32 point = points.add();
          point.set(pointsBuffer[i], pointsBuffer[i+1], pointsBuffer[i+2]);
       }
-
-      file.close();
    }
 
    public static Mat loadDepthMap(H5File file, int index)
@@ -70,8 +68,6 @@ public class BytedecoHDF5Tools
       p.get(pointsBuffer);
 
       Mat depthU16C1Image = new Mat(768, 1024, opencv_core.CV_16UC1, p);
-
-      file.close();
 
       return depthU16C1Image;
    }
