@@ -207,7 +207,7 @@ public class OneStepCaptureRegionCalculator
          int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, copExtreme,
                                                                                       predictedICP, kinematicExtreme, null);
 
-         // When the predicted ICP distance  is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
+         // When the predicted ICP distance is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
          if (predictedICP.distanceFromOriginSquared() > kinematicExtreme.distanceFromOriginSquared())
          {
             kinematicExtreme.setIncludingFrame(predictedICP);
