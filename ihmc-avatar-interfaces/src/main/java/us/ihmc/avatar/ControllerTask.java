@@ -39,6 +39,14 @@ public class ControllerTask extends HumanoidRobotControlTask
    }
 
    @Override
+   protected boolean initialize()
+   {
+      timer.reset();
+      ticksBehindScheduled.set(0);
+      return super.initialize();
+   }
+
+   @Override
    protected void execute()
    {
       timer.start();

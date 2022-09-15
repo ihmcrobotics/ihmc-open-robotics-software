@@ -4,7 +4,9 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
+import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskExceptionHandler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
+import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.Task;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -15,6 +17,7 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
    private final HumanoidRobotContextData masterContext;
 
    private final ThreadTimer timer;
+   private final List<HumanoidRobotControlTask> tasks;
 
    public BarrierScheduledRobotController(String name,
                                           List<HumanoidRobotControlTask> tasks,
@@ -22,9 +25,18 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
                                           TaskOverrunBehavior overrunBehavior,
                                           double schedulerDt)
    {
+      this.tasks = tasks;
       this.masterContext = masterContext;
 
       barrierScheduler = new BarrierScheduler<>(tasks, masterContext, overrunBehavior);
+      barrierScheduler.setTaskExceptionHandler(new TaskExceptionHandler<HumanoidRobotContextData>()
+      {
+         @Override
+         public boolean handleException(Task<HumanoidRobotContextData> task, Exception exception)
+         {
+            return true;
+         }
+      });
       registry = new YoRegistry(name);
 
       timer = new ThreadTimer("Scheduler", schedulerDt, registry);
@@ -33,6 +45,12 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
    @Override
    public void initialize()
    {
+      timer.reset();
+      barrierScheduler.reset();
+      for (int i = 0; i < tasks.size(); i++)
+      {
+         tasks.get(i).initialize();
+      }
       masterContext.setControllerRan(false);
       masterContext.setEstimatorRan(false);
    }
