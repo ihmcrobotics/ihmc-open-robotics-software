@@ -45,6 +45,8 @@ public class ConvexPolygonToolsTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    @AfterEach
    public void tearDown()
    {
@@ -1355,6 +1357,10 @@ public class ConvexPolygonToolsTest
    @Test
    public void testComputeMinimumDistancePointsBug()
    {
+      Point2D polygon1MinPoint = new Point2D();
+      Point2D polygon2MinPoint = new Point2D();
+      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-3, 3, -3, 3);
+
       ConvexPolygon2D polygon1 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(-0.964173902597, 0.063152759605),
                                                                                          new Point2D(1.035825870746, 0.062200589754),
                                                                                          new Point2D(0.742755947614, -0.308890986251),
@@ -1365,7 +1371,19 @@ public class ConvexPolygonToolsTest
                                                                                          new Point2D(-0.542724054207, -0.508121359902 ),
                                                                                          new Point2D(-0.543220683369, -1.558597793958 )));
       double epsilon = 0.01;
-      new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, new Point2D(), new Point2D());
+
+      new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, polygon1MinPoint, polygon2MinPoint);
+
+      FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+      plotter.setDrawPointsLarge();
+
+      plotter.addConvexPolygon(polygon1, Color.black);
+      plotter.addConvexPolygon(polygon2, Color.black);
+
+      plotter.addFramePoint2d(new FramePoint2D(worldFrame, polygon1MinPoint), Color.blue);
+      plotter.addFramePoint2d(new FramePoint2D(worldFrame, polygon2MinPoint), Color.blue);
+
+      waitForButtonOrPause(testFrame);
    }
 
    private void assertEqualsInEitherOrder(double expected0, double expected1, double actual0, double actual1)
