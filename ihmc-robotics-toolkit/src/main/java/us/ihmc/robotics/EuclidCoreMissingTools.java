@@ -97,7 +97,7 @@ public class EuclidCoreMissingTools
    {
       double dotProduct = rotation.getX() * axis.getX() + rotation.getY() * axis.getY() + rotation.getZ() * axis.getZ();
 
-      double scale = dotProduct / axis.lengthSquared();
+      double scale = dotProduct / axis.normSquared();
       double projectedX = scale * axis.getX();
       double projectedY = scale * axis.getY();
       double projectedZ = scale * axis.getZ();
@@ -1088,14 +1088,14 @@ public class EuclidCoreMissingTools
     * Just a more thorough version
     */
    public static boolean intersectionBetweenRay2DAndLine2D(double rayOriginX,
-                                                                  double rayOriginY,
-                                                                  double rayDirectionX,
-                                                                  double rayDirectionY,
-                                                                  double lineOriginX,
-                                                                  double lineOriginY,
-                                                                  double lineDirectionX,
-                                                                  double lineDirectionY,
-                                                                  Point2DBasics intersectionToPack)
+                                                           double rayOriginY,
+                                                           double rayDirectionX,
+                                                           double rayDirectionY,
+                                                           double lineOriginX,
+                                                           double lineOriginY,
+                                                           double lineDirectionX,
+                                                           double lineDirectionY,
+                                                           Point2DBasics intersectionToPack)
    {
       double start1x = rayOriginX;
       double start1y = rayOriginY;
@@ -1138,7 +1138,7 @@ public class EuclidCoreMissingTools
 
       if (Math.abs(determinant) < epsilon)
       { // The lines are parallel
-         // Check if they are collinear
+        // Check if they are collinear
          double dx = start2x - start1x;
          double dy = start2y - start1y;
          double cross = dx * direction1y - dy * direction1x;
@@ -1267,6 +1267,14 @@ public class EuclidCoreMissingTools
       return areIntersecting;
    }
 
+   /**
+    * Calculate the angular velocity by differentiating orientation.
+    * 
+    * @param qStart                the initial orientation at time t.
+    * @param qEnd                  the final orientation at time t + duration.
+    * @param duration              the time interval between the 2 orientations.
+    * @param angularVelocityToPack the angular velocity.
+    */
    public static void differentiateOrientation(QuaternionReadOnly qStart, QuaternionReadOnly qEnd, double duration, Vector3DBasics angularVelocityToPack)
    {
       double q1x = qStart.getX();
