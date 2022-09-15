@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -187,12 +188,12 @@ public class WholeBodyScriptPostProcessor
          System.out.println("waypointTime: " + waypointTime);
          KinematicsToolboxOutputStatus robotConfiguration = desiredRobotConfigurations.get(configurationIndex);
       
-         Vector3D desiredRootTranslation = robotConfiguration.getDesiredRootTranslation();
+         Point3D desiredRootPosition = robotConfiguration.getDesiredRootPosition();
          Quaternion desiredRootOrientation = robotConfiguration.getDesiredRootOrientation();
          Vector3D desiredRootLinearVelocity = robotConfiguration.getDesiredRootLinearVelocity();
          Vector3D desiredRootAngularVelocity = robotConfiguration.getDesiredRootAngularVelocity();
          
-         rootJoint.setJointPosition(desiredRootTranslation);
+         rootJoint.setJointPosition(desiredRootPosition);
          rootJoint.setJointOrientation(desiredRootOrientation);
          rootJoint.setJointLinearVelocity(desiredRootLinearVelocity);
          rootJoint.setJointAngularVelocity(desiredRootAngularVelocity);
