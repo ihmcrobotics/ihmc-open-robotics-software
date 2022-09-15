@@ -45,8 +45,6 @@ public class ConvexPolygonToolsTest
    private static final boolean WAIT_FOR_BUTTON_PUSH = false;
    private static final double epsilon = 1e-7;
 
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    @AfterEach
    public void tearDown()
    {
@@ -1373,17 +1371,6 @@ public class ConvexPolygonToolsTest
       double epsilon = 0.01;
 
       new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, polygon1MinPoint, polygon2MinPoint);
-
-      FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-      plotter.setDrawPointsLarge();
-
-      plotter.addConvexPolygon(polygon1, Color.black);
-      plotter.addConvexPolygon(polygon2, Color.black);
-
-      plotter.addFramePoint2d(new FramePoint2D(worldFrame, polygon1MinPoint), Color.blue);
-      plotter.addFramePoint2d(new FramePoint2D(worldFrame, polygon2MinPoint), Color.blue);
-
-      waitForButtonOrPause(testFrame);
    }
 
    private void assertEqualsInEitherOrder(double expected0, double expected1, double actual0, double actual1)
