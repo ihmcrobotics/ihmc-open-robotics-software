@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
-public class GDXWholeBodyDesiredIKManager
+public class GDXArmManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final DRCRobotModel robotModel;
@@ -32,17 +32,19 @@ public class GDXWholeBodyDesiredIKManager
 
    private final ArmJointName[] armJointNames;
    private GDXArmControlMode armControlMode = GDXArmControlMode.JOINT_ANGLES;
+   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
+   private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
    private final SideDependentList<GDXArmDesiredIKManager> armManagers = new SideDependentList<>(GDXArmDesiredIKManager::new);
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   public GDXWholeBodyDesiredIKManager(DRCRobotModel robotModel,
-                                       ROS2SyncedRobotModel syncedRobot,
-                                       FullHumanoidRobotModel desiredRobot,
-                                       ROS2ControllerHelper ros2Helper,
-                                       GDXTeleoperationParameters teleoperationParameters)
+   public GDXArmManager(DRCRobotModel robotModel,
+                        ROS2SyncedRobotModel syncedRobot,
+                        FullHumanoidRobotModel desiredRobot,
+                        ROS2ControllerHelper ros2Helper,
+                        GDXTeleoperationParameters teleoperationParameters)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -50,6 +52,20 @@ public class GDXWholeBodyDesiredIKManager
       this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
       armJointNames = robotModel.getJointMap().getArmJointNames();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         armHomes.put(side,
+                      new double[] {0.5,
+                                    side.negateIfRightSide(0.0),
+                                    side.negateIfRightSide(-0.5),
+                                    -1.0,
+                                    side.negateIfRightSide(0.0),
+                                    0.000,
+                                    side.negateIfLeftSide(0.0)});
+      }
+      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
+      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
    }
 
    public void create()
@@ -121,6 +137,31 @@ public class GDXWholeBodyDesiredIKManager
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        armHomes.get(side));
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+      }
+      ImGui.text("Door avoidance arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        doorAvoidanceArms.get(side));
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+      }
+
       ImGui.text("Arm & hand control mode:");
       if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == GDXArmControlMode.JOINT_ANGLES))
       {

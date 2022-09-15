@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -21,11 +20,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.ImGuiStoredPropertySetDoubleSlider;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.*;
 import us.ihmc.gdx.ui.collidables.GDXRobotCollisionModel;
@@ -68,8 +69,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final GDXTeleoperationParameters teleoperationParameters;
+   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
+   private ImGuiStoredPropertySetDoubleSlider swingTimeSlider;
+   private ImGuiStoredPropertySetDoubleSlider turnAggressivenessSlider;
+   private ImGuiStoredPropertySetDoubleSlider transferTimeSlider;
    private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
@@ -86,7 +90,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXHandConfigurationManager handManager = new GDXHandConfigurationManager();
    private GDXRobotCollisionModel selfCollisionModel;
    private GDXRobotCollisionModel environmentCollisionModel;
-   private GDXWholeBodyDesiredIKManager wholeBodyDesiredIKManager;
+   private GDXArmManager wholeBodyDesiredIKManager;
    private GDXVRKinematicsStreamingMode wholeBodyIKStreaming;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
@@ -94,11 +98,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final SideDependentList<GDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
-   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
-   private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
-   private final boolean interactableExists;
-
+   private final boolean interactablesAvailable;
    private final GDXContinuousStepping continuousStepping;
 
    public GDXTeleoperationManager(String robotRepoName,
@@ -130,20 +131,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       teleoperationParameters.load();
       teleoperationParameters.save();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         armHomes.put(side,
-                      new double[] {0.5,
-                                    side.negateIfRightSide(0.0),
-                                    side.negateIfRightSide(-0.5),
-                                    -1.0,
-                                    side.negateIfRightSide(0.0),
-                                    0.000,
-                                    side.negateIfLeftSide(0.0)});
-      }
-      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
-      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
-
       syncedRobot = communicationHelper.newSyncedRobot();
 
       robotLowLevelMessenger = new GDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
@@ -166,16 +153,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       vrModeManager = new GDXVRModeManager();
 
-      interactableExists = robotSelfCollisionModel != null;
-      if (interactableExists)
+      interactablesAvailable = robotSelfCollisionModel != null;
+      if (interactablesAvailable)
       {
          selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         wholeBodyDesiredIKManager = new GDXWholeBodyDesiredIKManager(robotModel,
-                                                                      syncedRobot,
-                                                                      desiredRobot.getDesiredFullRobotModel(),
-                                                                      ros2Helper,
-                                                                      teleoperationParameters);
+         wholeBodyDesiredIKManager = new GDXArmManager(robotModel,
+                                                       syncedRobot,
+                                                       desiredRobot.getDesiredFullRobotModel(),
+                                                       ros2Helper,
+                                                       teleoperationParameters);
       }
 
       continuousStepping = new GDXContinuousStepping(robotModel);
@@ -204,9 +191,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                              FootstepPlannerParameterKeys.keys,
                                              footstepPlanning::plan);
       teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
-      teleoperationParametersTuner.registerSlider("Swing time", 0.3f, 2.5f);
-      teleoperationParametersTuner.registerSlider("Transfer time", 0.3f, 2.5f);
-      teleoperationParametersTuner.registerSlider("Turn aggressiveness", 0.0f, 10.0f);
+      swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.swingTime, 0.3, 2.5);
+      transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.transferTime, 0.3, 2.5);
+      turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
@@ -216,7 +203,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters, communicationHelper);
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
@@ -316,7 +303,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public void update()
    {
       update(false, false);
-
    }
 
    public void update(boolean nativesLoaded, boolean nativesNewlyLoaded)
@@ -344,7 +330,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.update(interactableFootstepPlan);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             wholeBodyDesiredIKManager.update(handInteractables);
 
@@ -398,7 +384,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.calculate3DViewPick(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
@@ -426,7 +412,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.process3DViewInput(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             environmentCollisionModel.process3DViewInput(input);
 
@@ -462,43 +448,34 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       robotLowLevelMessenger.renderImGuiWidgets();
 
-      ImGui.text("Arms:");
-      for (RobotSide side : RobotSide.values)
+      if (interactablesAvailable)
       {
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         if (ImGui.button(labels.get("Delete all")))
          {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armHomes.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
+            walkPathControlRing.delete();
+            pelvisInteractable.delete();
+            for (RobotSide side : footInteractables.sides())
+               footInteractables.get(side).delete();
+            for (RobotSide side : handInteractables.sides())
+               handInteractables.get(side).delete();
          }
       }
-      ImGui.text("Door avoidance arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
-         {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        doorAvoidanceArms.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
-         }
-      }
-
-      pelvisHeightSlider.renderImGuiWidgets();
-      chestPitchSlider.renderImGuiWidgets();
-      chestYawSlider.renderImGuiWidgets();
-
-      // TODO: sliders for footstep parameters here . . .
-      // 2nd
-      teleoperationParametersTuner.renderDoublePropertySliders();
-      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
-
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
+      ImGui.separator();
+      pelvisHeightSlider.renderImGuiWidgets();
+      if (interactablesAvailable)
+      {
+         ImGui.text("Pelvis pose:");
+         ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
+         ImGui.sameLine();
+         pelvisInteractable.renderImGuiWidgets();
+      }
+      ImGui.separator();
+      chestPitchSlider.renderImGuiWidgets();
+      chestYawSlider.renderImGuiWidgets();
       ImGui.separator();
 
       manualFootstepPlacement.renderImGuiWidgets();
@@ -518,7 +495,23 @@ public class GDXTeleoperationManager extends ImGuiPanel
          interactableFootstepPlan.clear();
          walkPathControlRing.delete();
       }
+
+      if (interactablesAvailable)
+      {
+         for (RobotSide side : footInteractables.sides())
+         {
+            ImGui.text(side.getPascalCaseName() + " foot:");
+            ImGui.sameLine();
+            footInteractables.get(side).renderImGuiWidgets();
+         }
+      }
+
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
+      swingTimeSlider.render();
+      transferTimeSlider.render();
+      turnAggressivenessSlider.render();
+      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
+      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
 
       ImGui.separator();
 
@@ -532,50 +525,22 @@ public class GDXTeleoperationManager extends ImGuiPanel
 //         desiredRobot.setDesiredToCurrent();
 //      }
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          wholeBodyDesiredIKManager.renderImGuiWidgets();
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
-         {
-            walkPathControlRing.delete();
-            pelvisInteractable.delete();
-            for (RobotSide side : footInteractables.sides())
-               footInteractables.get(side).delete();
-            for (RobotSide side : handInteractables.sides())
-               handInteractables.get(side).delete();
-         }
 
-         ImGui.text("Pelvis:");
-         ImGui.sameLine();
-         pelvisInteractable.renderImGuiWidgets();
-
+         boolean handInteractablesAreDeleted = true;
          for (RobotSide side : handInteractables.sides())
          {
             ImGui.text(side.getPascalCaseName() + " hand:");
             ImGui.sameLine();
             handInteractables.get(side).renderImGuiWidgets();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            ImGui.text(side.getPascalCaseName() + " foot:");
-            ImGui.sameLine();
-            footInteractables.get(side).renderImGuiWidgets();
+            handInteractablesAreDeleted &= handInteractables.get(side).isDeleted();
          }
 
-         boolean allAreDeleted = pelvisInteractable.isDeleted();
-         for (RobotSide side : handInteractables.sides())
-         {
-            allAreDeleted &= handInteractables.get(side).isDeleted();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            allAreDeleted &= footInteractables.get(side).isDeleted();
-         }
-         desiredRobot.setActive(!allAreDeleted);
+         desiredRobot.setActive(!handInteractablesAreDeleted);
 
-         if (!allAreDeleted)
+         if (!handInteractablesAreDeleted)
          {
 //            desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
             for (RobotSide side : handInteractables.sides())
@@ -684,7 +649,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesEnabled.get())
       {
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (showSelfCollisionMeshes.get())
             {
