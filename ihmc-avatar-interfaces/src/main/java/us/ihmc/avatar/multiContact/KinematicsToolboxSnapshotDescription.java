@@ -225,7 +225,7 @@ public class KinematicsToolboxSnapshotDescription
    {
       controllerConfiguration.getRootPosition().applyTransform(transform);
       controllerConfiguration.getRootOrientation().applyTransform(transform);
-      ikSolution.getDesiredRootTranslation().applyTransform(transform);
+      ikSolution.getDesiredRootPosition().applyTransform(transform);
       ikSolution.getDesiredRootOrientation().applyTransform(transform);
       ikPrivilegedConfiguration.getPrivilegedRootJointPosition().applyTransform(transform);
       ikPrivilegedConfiguration.getPrivilegedRootJointOrientation().applyTransform(transform);
