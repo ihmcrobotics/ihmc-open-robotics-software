@@ -192,9 +192,10 @@ public class MultiSpline1DSolverTest
       double xd2 = 0.0;
 
       MultiSpline1DSolver solver = new MultiSpline1DSolver();
-      solver.addWaypoint(t0, x0, xd0).setNumberOfCoefficients(3);
+      solver.addWaypoint(t0, x0, xd0);
       solver.addWaypointPosition(t1, x1);
       solver.addWaypoint(t2, x2, xd2);
+      solver.getSplineSegment(0).setNumberOfCoefficients(3);
       solver.solve();
 
       double xErr0 = Math.abs(x0 - solver.computePosition(t0));
