@@ -145,7 +145,10 @@ public class SCS2AvatarSimulation
    public void resetRobot(boolean simulateAfterReset)
    {
       simulationConstructionSet.pause();
-      simulationConstructionSet.stopSimulationThread();
+
+      boolean wasSimulationThreadRunning = simulationConstructionSet.isSimulationThreadRunning();
+      if (wasSimulationThreadRunning)
+         simulationConstructionSet.stopSimulationThread();
 
       for (SimJointBasics joint : robot.getAllJoints())
       {
@@ -168,10 +171,14 @@ public class SCS2AvatarSimulation
       masterContext.set(estimatorThread.getHumanoidRobotContextData());
 
       simulationConstructionSet.reinitializeSimulation();
-      simulationConstructionSet.startSimulationThread();
 
-      if (simulateAfterReset)
-         simulationConstructionSet.simulate();
+      if (wasSimulationThreadRunning)
+      {
+         simulationConstructionSet.startSimulationThread();
+
+         if (simulateAfterReset)
+            simulationConstructionSet.simulate();
+      }
    }
 
    private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
@@ -447,7 +454,7 @@ public class SCS2AvatarSimulation
    {
       return showGUI;
    }
-   
+
    // Buffer controls:
    public void cropBuffer()
    {
@@ -478,13 +485,13 @@ public class SCS2AvatarSimulation
       checkSimulationSessionAlive();
       getSimulationConstructionSet().gotoBufferOutPoint();
    }
-   
+
    public void gotoBufferIndex(int bufferIndex)
    {
       checkSimulationSessionAlive();
       getSimulationConstructionSet().gotoBufferIndex(bufferIndex);
    }
-   
+
    public int getOutPoint()
    {
       checkSimulationSessionAlive();
