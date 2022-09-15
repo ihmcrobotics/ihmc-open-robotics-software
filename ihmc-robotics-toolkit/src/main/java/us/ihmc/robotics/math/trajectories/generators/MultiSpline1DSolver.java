@@ -10,6 +10,14 @@ import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
 
+/**
+ * Similar to {@link MultiCubicSpline1DSolver}, this solver is more general in a few ways:
+ * <ul>
+ * <li>It can solve for spline segments that can be cubic or other order.
+ * <li>The initial time is not assumed to be 0 and the final time is not assumed to be 1.
+ * <li>Velocity at waypoints can be imposed.
+ * </ul>
+ */
 public class MultiSpline1DSolver
 {
    public static final int defaultCoefficients = 4;
@@ -46,8 +54,6 @@ public class MultiSpline1DSolver
        * </p>
        */
       private double wd;
-      /** The number of coefficients for the spline succeeding this waypoint. */
-      private int numberOfCoefficients;
 
       private WaypointData(int index)
       {
@@ -55,36 +61,70 @@ public class MultiSpline1DSolver
          clear();
       }
 
+      /**
+       * Clears this waypoint internal data, intended for internal use.
+       */
       public void clear()
       {
          t = Double.NaN;
          clearPosition();
          clearVelocity();
-         numberOfCoefficients = defaultCoefficients;
       }
 
+      /**
+       * Clears the position constraint/objective, essentially freeing the position to be reached at this
+       * waypoint's time.
+       */
       public void clearPosition()
       {
          x = Double.NaN;
          w = 0.0;
       }
 
+      /**
+       * Clears the velocity constraint/objective, essentially freeing the velocity to be reached at this
+       * waypoint's time.
+       */
       public void clearVelocity()
       {
          xd = Double.NaN;
          wd = 0.0;
       }
 
+      /**
+       * Sets up this waypoint with time and a position constraint. The velocity is unconstrained.
+       * 
+       * @param time     this waypoint time.
+       * @param position the position to reach for this waypoint. It is considered as a hard constraint.
+       */
       public void set(double time, double position)
       {
          set(time, position, Double.NaN, Double.POSITIVE_INFINITY, 0.0);
       }
 
+      /**
+       * Sets up this waypoint with time, and position and velocity constraints.
+       * 
+       * @param time     this waypoint time.
+       * @param position the position to reach for this waypoint. It is considered as a hard constraint.
+       * @param velocity the velocity to reach for this waypoint. It is considered as a hard constraint.
+       */
       public void set(double time, double position, double velocity)
       {
          set(time, position, velocity, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       }
 
+      /**
+       * Sets up this waypoint with time, and position and velocity objectives/constraints.
+       * 
+       * @param time           this waypoint time.
+       * @param position       the position to reach for this waypoint.
+       * @param velocity       the velocity to reach for this waypoint.
+       * @param positionWeight the weight associated with the position, {@code Double#POSITIVE_INFINITY}
+       *                       to make it a hard constraint, or {@code 0} to free the position.
+       * @param velocityWeight the weight associated with the velocity, {@code Double#POSITIVE_INFINITY}
+       *                       to make it a hard constraint, or {@code 0} to free the velocity.
+       */
       public void set(double time, double position, double velocity, double positionWeight, double velocityWeight)
       {
          t = time;
@@ -94,22 +134,44 @@ public class MultiSpline1DSolver
          setVelocityWeight(velocityWeight);
       }
 
+      /**
+       * Sets the position for this waypoint.
+       * 
+       * @param position the new waypoint position.
+       */
       public void setPosition(double position)
       {
          x = position;
       }
 
+      /**
+       * Sets the weight to use for the position.
+       * 
+       * @param positionWeight the weight associated with the position, {@code Double#POSITIVE_INFINITY}
+       *                       to make it a hard constraint, or {@code 0} to free the position.
+       */
       public void setPositionWeight(double positionWeight)
       {
          checkWeightValue(positionWeight);
          w = positionWeight;
       }
 
+      /**
+       * Sets the velocity for this waypoint.
+       * 
+       * @param velocity the new waypoint velocity.
+       */
       public void setVelocity(double velocity)
       {
          xd = velocity;
       }
 
+      /**
+       * Sets the weight to use for the velocity.
+       * 
+       * @param velocityWeight the weight associated with the velocity, {@code Double#POSITIVE_INFINITY}
+       *                       to make it a hard constraint, or {@code 0} to free the velocity.
+       */
       public void setVelocityWeight(double velocityWeight)
       {
          checkWeightValue(velocityWeight);
@@ -120,11 +182,6 @@ public class MultiSpline1DSolver
       {
          if (weight < 0.0)
             throw new IllegalArgumentException("A weight should be in [0, +Infinity[, was: " + weight);
-      }
-
-      public void setNumberOfCoefficients(int numberOfCoefficients)
-      {
-         this.numberOfCoefficients = numberOfCoefficients;
       }
 
       public int getIndex()
@@ -157,16 +214,21 @@ public class MultiSpline1DSolver
          return wd;
       }
 
-      public int getNumberOfCoefficients()
-      {
-         return numberOfCoefficients;
-      }
-
+      /**
+       * Whether there is a waypoint after this one or this waypoint represents the final conditions.
+       * 
+       * @return {@code true} if there a next.
+       */
       public boolean hasNext()
       {
          return index < waypoints.size() - 1;
       }
 
+      /**
+       * The next waypoint or {@code null} if this is the last.
+       * 
+       * @return the next waypoint.
+       */
       public WaypointData next()
       {
          if (hasNext())
@@ -175,11 +237,21 @@ public class MultiSpline1DSolver
             return null;
       }
 
+      /**
+       * Whether there is a waypoint before this one or this waypoint represents the initial conditions.
+       * 
+       * @return {@code true} if there a previous.
+       */
       public boolean hasPrevious()
       {
          return index > 0;
       }
 
+      /**
+       * The previous waypoint or {@code null} if this is the first.
+       * 
+       * @return the previous waypoint.
+       */
       public WaypointData previous()
       {
          if (hasPrevious())
@@ -188,6 +260,11 @@ public class MultiSpline1DSolver
             return null;
       }
 
+      /**
+       * The spline segment that joins this waypoint to the next waypoint.
+       * 
+       * @return the next spline segment.
+       */
       public Spline1DSegment getNextSpline()
       {
          if (index < splineSegments.size())
@@ -196,6 +273,11 @@ public class MultiSpline1DSolver
             return null;
       }
 
+      /**
+       * The spline segment that joins the previous waypoint to this waypoint.
+       * 
+       * @return the previous spline segment.
+       */
       public Spline1DSegment getPreviousSpline()
       {
          if (hasPrevious())
@@ -209,6 +291,8 @@ public class MultiSpline1DSolver
    {
       private final int index;
       private int indexFirstCoefficient;
+      /** The number of coefficients for the spline succeeding this waypoint. */
+      private int numberOfCoefficients;
 
       public Spline1DSegment(int index)
       {
@@ -216,9 +300,13 @@ public class MultiSpline1DSolver
          clear();
       }
 
+      /**
+       * Rests this spline segment internal data, intended for internal use.
+       */
       private void clear()
       {
          indexFirstCoefficient = -1;
+         numberOfCoefficients = defaultCoefficients;
       }
 
       private void update()
@@ -226,19 +314,56 @@ public class MultiSpline1DSolver
          indexFirstCoefficient = 0;
          Spline1DSegment previous = previous();
          if (previous != null)
+         {
+            previous.update();
             indexFirstCoefficient = previous.getIndexFirstCoefficient() + previous.getNumberOfCoefficients();
+         }
       }
 
+      /**
+       * Sets the order of the polynomial for this spline segment.
+       * 
+       * @param numberOfCoefficients the number of coefficients defining the polynomial order.
+       */
+      public void setNumberOfCoefficients(int numberOfCoefficients)
+      {
+         this.numberOfCoefficients = numberOfCoefficients;
+         splineSegments.getLast().update(); // Update the index offsets of all spline segments.
+      }
+
+      /**
+       * The waypoint from which this spline segment starts.
+       * 
+       * @return the start.
+       */
       public WaypointData getStart()
       {
          return waypoints.get(index);
       }
 
+      /**
+       * The waypoint to which this spline segment ends.
+       * 
+       * @return the end.
+       */
       public WaypointData getEnd()
       {
          return waypoints.get(index + 1);
       }
 
+      /**
+       * [Solver Output] - Gets the value of the i<sup>th</sup> coefficient for this spline segment. The
+       * coefficients for the spline segment are order from highest order to lowest:
+       * 
+       * <pre>
+       * p(x) = a<sup>N</sup> + a<sup>N-1</sup> x + a<sup>N-2</sup> x^2 + ... + a<sup>0</sup> x^N
+       * </pre>
+       * 
+       * N+1 is the number of coefficients for this polynomial.
+       * 
+       * @param i the coefficient index, 0 the highest order, N is the polynomial constant.
+       * @return
+       */
       public double getCoefficient(int i)
       {
          if (i < 0 || i >= getNumberOfCoefficients())
@@ -247,14 +372,25 @@ public class MultiSpline1DSolver
          return solution.get(indexFirstCoefficient + i);
       }
 
+      /**
+       * Index of the first coefficient for this spline segment in
+       * {@link MultiSpline1DSolver#getSolution()}.
+       * 
+       * @return the index of the first coefficient in the solver's solution matrix.
+       */
       public int getIndexFirstCoefficient()
       {
          return indexFirstCoefficient;
       }
 
+      /**
+       * The number of coefficients for this spline segment.
+       * 
+       * @return the number of coefficients.
+       */
       public int getNumberOfCoefficients()
       {
-         return getStart().numberOfCoefficients;
+         return numberOfCoefficients;
       }
 
       public double computePosition(double time)
@@ -466,7 +602,7 @@ public class MultiSpline1DSolver
    public double solveAndComputeCost()
    {
       solve();
-      return computeCost();
+      return integratedAccelerationSquared();
    }
 
    /**
@@ -519,7 +655,7 @@ public class MultiSpline1DSolver
       return solution;
    }
 
-   public double computeCost()
+   public double integratedAccelerationSquared()
    {
       // d = x^T H x
       d.multQuad(nativeSolution, H_minAccel);
@@ -530,9 +666,9 @@ public class MultiSpline1DSolver
    {
       int size = 0;
 
-      for (int i = 0; i < waypoints.size() - 1; i++)
+      for (int i = 0; i < splineSegments.size(); i++)
       {
-         size += waypoints.get(i).getNumberOfCoefficients();
+         size += splineSegments.get(i).getNumberOfCoefficients();
       }
 
       return size;
@@ -782,8 +918,9 @@ public class MultiSpline1DSolver
       {
          WaypointData w0 = waypoints.get(i);
          WaypointData w1 = waypoints.get(i + 1);
-         getMinAccelerationHBlock(w0.t, w1.t, w0.numberOfCoefficients, splineOffset, splineOffset, H);
-         splineOffset += w0.numberOfCoefficients;
+         Spline1DSegment spline = w0.getNextSpline();
+         getMinAccelerationHBlock(w0.t, w1.t, spline.numberOfCoefficients, splineOffset, splineOffset, H);
+         splineOffset += spline.numberOfCoefficients;
       }
    }
 
