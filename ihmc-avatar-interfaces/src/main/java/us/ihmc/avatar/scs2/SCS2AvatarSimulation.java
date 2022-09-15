@@ -150,26 +150,6 @@ public class SCS2AvatarSimulation
       if (wasSimulationThreadRunning)
          simulationConstructionSet.stopSimulationThread();
 
-      for (SimJointBasics joint : robot.getAllJoints())
-      {
-         joint.setJointConfigurationToZero();
-         joint.setJointTwistToZero();
-         joint.setJointAccelerationToZero();
-         joint.setJointTauToZero();
-      }
-
-      robotInitialSetup.initializeRobot(robot.getRootBody());
-      robot.updateFrames();
-      FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
-      RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
-
-      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-      SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
-      estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
-      controllerThread.initialize();
-      stepGeneratorThread.initialize();
-      masterContext.set(estimatorThread.getHumanoidRobotContextData());
-
       simulationConstructionSet.reinitializeSimulation();
 
       if (wasSimulationThreadRunning)
