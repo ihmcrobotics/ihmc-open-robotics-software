@@ -71,7 +71,14 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
+   /**
+    * Whether this command should be treated considering the full robot or not.
+    */
    private boolean considerAllJoints = true;
+   /**
+    * When {@link #considerAllJoints} is {@code true}, this list is used to select the part of the
+    * robot to be considered.
+    */
    private final List<JointReadOnly> jointSelection = new ArrayList<>();
 
    /**
@@ -448,16 +455,34 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightMatrix.setLinearWeights(0.0, 0.0, 0.0);
    }
 
+   /**
+    * Indicates whether this command should be treated considering the full robot or only part of it.
+    * 
+    * @param considerAllJoints {@code true} to consider all the robot, {@code false} to consider only
+    *                          part of it. Default is {@code true}.
+    */
    public void setConsiderAllJoints(boolean considerAllJoints)
    {
       this.considerAllJoints = considerAllJoints;
    }
 
+   /**
+    * Only used when {@link #isConsiderAllJoints()} is {@code false}, adds a joint to consider when
+    * treating this command.
+    * 
+    * @param joint another joint to consider with this command.
+    */
    public void addJointToSelection(JointReadOnly joint)
    {
       jointSelection.add(joint);
    }
 
+   /**
+    * Only used when {@link #isConsiderAllJoints()} is {@code false}, adds joints to consider when
+    * treating this command.
+    * 
+    * @param joints other joints to consider with this command.
+    */
    public void addJointsToSelection(JointReadOnly[] joints)
    {
       for (int i = 0; i < joints.length; i++)
@@ -577,11 +602,24 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       linearPartToPack.setIncludingFrame(worldFrame, 3, momentumRateOfChange);
    }
 
+   /**
+    * Whether the full robot is to be considered when treating this command.
+    * 
+    * @return {@code true} if the full robot is to be considered, {@code false} otherwise in which case
+    *         {@link #getJointSelection()} is used to select the part of the robot that is to be
+    *         considered.
+    */
    public boolean isConsiderAllJoints()
    {
       return considerAllJoints;
    }
 
+   /**
+    * Only used when {@link #isConsiderAllJoints()} is {@code false}, specifies which part of the robot
+    * is to be considered when treating this command.
+    * 
+    * @return the joint selection.
+    */
    public List<JointReadOnly> getJointSelection()
    {
       return jointSelection;
