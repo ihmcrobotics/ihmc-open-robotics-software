@@ -19,7 +19,7 @@ public class IMUDefinition
       this.rigidBody = rigidBody;
       this.transformFromIMUToJoint = new RigidBodyTransform(transformFromIMUToJoint);
 
-      ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
+      ReferenceFrame frameAfterJoint = rigidBody.isRootBody() ? rigidBody.getBodyFixedFrame() : rigidBody.getParentJoint().getFrameAfterJoint();
       imuFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name, frameAfterJoint, transformFromIMUToJoint);
    }
 
