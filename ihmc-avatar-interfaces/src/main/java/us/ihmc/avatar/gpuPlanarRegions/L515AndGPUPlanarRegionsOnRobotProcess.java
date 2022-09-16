@@ -200,16 +200,15 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
             syncedRobot.update();
-            ReferenceFrame cameraFrame =
-                  syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
+            ReferenceFrame cameraFrame = syncedRobot.hasReceivedFirstMessage() ?
+                  syncedRobot.getReferenceFrames().getSteppingCameraFrame() :
+                  ReferenceFrame.getWorldFrame();
             // TODO: Wait for frame at time of data aquisition?
 
             if (parametersNotification.poll())
             {
                int previousPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
-               StoredPropertySetMessageTools.copyToStoredPropertySet(parametersNotification.read(),
-                                                                     gpuPlanarRegionExtraction.getParameters(),
-                                                                     () ->
+               StoredPropertySetMessageTools.copyToStoredPropertySet(parametersNotification.read(), gpuPlanarRegionExtraction.getParameters(), () ->
                {
                   int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
                   LogTools.info("Accepted new parameters.");
