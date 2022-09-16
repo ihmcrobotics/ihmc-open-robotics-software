@@ -1,23 +1,33 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import java.awt.Color;
+
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLineSegment2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.awt.*;
 
 /**
  * This class computes the N-Step capture region, but it does so using the reachability constraint. This is to address the fact that you cannot
@@ -48,23 +58,24 @@ public class MultiStepCaptureRegionCalculator
 
    private MultiStepCaptureRegionVisualizer visualizer = null;
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, BooleanProvider useCrossOverSteps, YoRegistry parentRegistry)
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
+                                           BooleanProvider useCrossOverSteps,
+                                           YoRegistry parentRegistry)
    {
       this(reachabilityConstraint, useCrossOverSteps, parentRegistry, null);
    }
 
-   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint, BooleanProvider useCrossOverSteps, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public MultiStepCaptureRegionCalculator(StepAdjustmentReachabilityConstraint reachabilityConstraint,
+                                           BooleanProvider useCrossOverSteps,
+                                           YoRegistry parentRegistry,
+                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       this.reachabilityConstraint = reachabilityConstraint;
       this.useCrossOverSteps = useCrossOverSteps;
 
       if (graphicsListRegistry != null)
       {
-         YoArtifactPolygon safePolygonArtifact = new YoArtifactPolygon("Multi Step Capture Region",
-                                                                       yoMultiStepRegion,
-                                                                       Color.YELLOW,
-                                                                       false,
-                                                                       false);
+         YoArtifactPolygon safePolygonArtifact = new YoArtifactPolygon("Multi Step Capture Region", yoMultiStepRegion, Color.YELLOW, false, false);
          graphicsListRegistry.registerArtifact(getClass().getSimpleName(), safePolygonArtifact);
       }
 
@@ -81,13 +92,16 @@ public class MultiStepCaptureRegionCalculator
       yoMultiStepRegion.clear();
    }
 
+   private final SideDependentList<ConvexPolygon2D> reachabilityPolygonsWithOrigin = new SideDependentList<>(new ConvexPolygon2D(), new ConvexPolygon2D());
+
    /**
     * Computes the reachability aware NStep capture region
-    * @param currentStanceSide foot side that is currently on the ground
+    *
+    * @param currentStanceSide    foot side that is currently on the ground
     * @param oneStepCaptureRegion one-step capture region to expand
-    * @param stepDuration total step duration. This is the sum of the swing and transfer duration.
-    * @param omega time constant of the LIP
-    * @param stepsInQueue number of steps you are allowed to take
+    * @param stepDuration         total step duration. This is the sum of the swing and transfer duration.
+    * @param omega                time constant of the LIP
+    * @param stepsInQueue         number of steps you are allowed to take
     */
    public void compute(RobotSide currentStanceSide, FrameConvexPolygon2DReadOnly oneStepCaptureRegion, double stepDuration, double omega, int stepsInQueue)
    {
@@ -117,6 +131,19 @@ public class MultiStepCaptureRegionCalculator
       if (!oneStepCaptureRegion.isClockwiseOrdered())
          throw new RuntimeException("Does't work for counter clockwise yet");
 
+      for (RobotSide supportSide : RobotSide.values)
+      { // Pre-compute the reachability region for getBestStepForSide
+         ConvexPolygon2D polygon = reachabilityPolygonsWithOrigin.get(supportSide);
+         // compute the reachability polygon for that side. Make sure to include the stance position, as the CoP can actually be placed in convex
+         // hull of both the reachability region, and the stance position.
+         if (useCrossOverSteps.getValue())
+            polygon.set(reachabilityConstraint.getTotalReachabilityHull(supportSide));
+         else
+            polygon.set(reachabilityConstraint.getReachabilityPolygonInFootFrame(supportSide));
+         polygon.addVertex(0.0, 0.0);
+         polygon.update();
+      }
+
       for (int i = 0; i < oneStepCaptureRegion.getNumberOfVertices(); i++)
       {
          // compute the current edge of the capture region, which will then be extruded in a certain direction.
@@ -124,8 +151,10 @@ public class MultiStepCaptureRegionCalculator
 
          // compute how much additional capturability you get along that edge by considering how additional steps can be taken. These also consider the
          // reachability constraints of the robot during that expansion.
-         computeNStepExpansionAlongStep(currentStanceSide,
-                                        edgeToExtrude, vertexExtrusionVector,
+         computeNStepExpansionAlongStep(reachabilityPolygonsWithOrigin,
+                                        currentStanceSide,
+                                        edgeToExtrude,
+                                        vertexExtrusionVector,
                                         currentSupportMultiplier,
                                         oppositeSupportMultiplier);
 
@@ -153,98 +182,88 @@ public class MultiStepCaptureRegionCalculator
       return yoMultiStepRegion;
    }
 
-   private final FramePoint2D origin = new FramePoint2D();
-   private final FrameVector2D bestStepForStanceSide = new FrameVector2D();
-   private final FrameVector2D bestStepForSwingSide = new FrameVector2D();
+   private final FrameVector2D bestStepDirectionForStanceSide = new FrameVector2D();
+   private final FrameVector2D bestStepDirectionForSwingSide = new FrameVector2D();
 
-   private void computeNStepExpansionAlongStep(RobotSide currentStanceSide,
+   private void computeNStepExpansionAlongStep(SideDependentList<? extends ConvexPolygon2DReadOnly> initialReachabilityRegions,
+                                               RobotSide currentStanceSide,
                                                FrameLineSegment2DReadOnly edgeToExtrude,
                                                FrameVector2DBasics expansionToPack,
                                                double currentSupportMultiplier,
                                                double oppositeSupportMultiplier)
    {
 
-      origin.setToZero(edgeToExtrude.getReferenceFrame());
-      bestStepForStanceSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
-      bestStepForSwingSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
+      bestStepDirectionForStanceSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
+      bestStepDirectionForSwingSide.setReferenceFrame(edgeToExtrude.getReferenceFrame());
 
       // Compute the step for each side that would best help recover from additiional error in that direction.
-      getBestStepForSide(currentStanceSide, edgeToExtrude, bestStepForStanceSide);
-      getBestStepForSide(currentStanceSide.getOppositeSide(), edgeToExtrude, bestStepForSwingSide);
+      getDirectionOfFurthestReachableStepFromEdge(initialReachabilityRegions.get(currentStanceSide), edgeToExtrude, bestStepDirectionForStanceSide);
+      getDirectionOfFurthestReachableStepFromEdge(initialReachabilityRegions.get(currentStanceSide.getOppositeSide()),
+                                                  edgeToExtrude,
+                                                  bestStepDirectionForSwingSide);
 
       // Scale those step lengths based on the exponential time effects of the step durations, which is just up-integrated the LIP dynamics.
-      expansionToPack.setAndScale(currentSupportMultiplier, bestStepForStanceSide);
-      expansionToPack.scaleAdd(oppositeSupportMultiplier, bestStepForSwingSide, expansionToPack);
+      expansionToPack.setAndScale(currentSupportMultiplier, bestStepDirectionForStanceSide);
+      expansionToPack.scaleAdd(oppositeSupportMultiplier, bestStepDirectionForSwingSide, expansionToPack);
    }
 
-   private final ConvexPolygon2D reachabilityPolygon = new ConvexPolygon2D();
-   private final Point2D stancePosition = new Point2D();
+   private final Point2D origin = new Point2D();
+   private final Point2DReadOnly stancePosition = new Point2D();
    private final Point2D tempPoint = new Point2D();
+   private final LineSegment2D extrudedEdge = new LineSegment2D();
 
-   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final Vector2D translation = new Vector2D();
 
    /**
     * Computes the step vector that maximizes the distance away from the capture region the robot can step and still be N-Step capturable. This is the
     * point in the reachability polygon that would first contact the capture region, if it is moved in that direction.
     */
-   private void getBestStepForSide(RobotSide supportSide, FrameLineSegment2DReadOnly edgeToExtrude, FrameVector2DBasics stepToPack)
+   private void getDirectionOfFurthestReachableStepFromEdge(ConvexPolygon2DReadOnly initialReachabilityRegion,
+                                                            FrameLineSegment2DReadOnly edgeToExtrude,
+                                                            FrameVector2DBasics stepToPack)
    {
-      // compute the reachability polygon for that side. Make sure to include the stance position, as the CoP can actually be placed in convex
-      // hull of both the reachability region, and the stance position.
-      stancePosition.setToZero();
-      if (useCrossOverSteps.getValue())
-         reachabilityPolygon.set(reachabilityConstraint.getTotalReachabilityHull(supportSide));
-      else
-         reachabilityPolygon.set(reachabilityConstraint.getReachabilityPolygonInFootFrame(supportSide));
-      reachabilityPolygon.addVertex(stancePosition);
-      reachabilityPolygon.update();
-
-      // FIXME instead of translating the reachability polygon, we should probably translate the edge, since that consists of two points, as opposed to however
-      // FIXME many points are in the reachability polygon.
-      // move the reachability polygon far away from the edge. that prevents the two from intersecting, which you want to avoid to compute the "best" location.
+      // move the edge far away from the reachability polygon. that prevents the two from intersecting, which you want to avoid to compute the "best" location.
       edgeToExtrude.perpendicular(true, vectorPerpendicularToEdge);
-      vectorPerpendicularToEdge.scale(3.0);
       edgeToExtrude.midpoint(tempPoint);
-      transform.getTranslation().set(tempPoint);
-      transform.getTranslation().add(vectorPerpendicularToEdge.getX(), vectorPerpendicularToEdge.getY(), 0.0);
+      vectorPerpendicularToEdge.negate();
+      translation.scaleAdd(3.0, vectorPerpendicularToEdge, tempPoint);
 
-      reachabilityPolygon.applyTransform(transform);
-      stancePosition.applyTransform(transform);
+      extrudedEdge.set(edgeToExtrude);
+      extrudedEdge.translate(translation);
 
       // compute the index of the vertex that is the closest. If the vertex belongs to an edge of the reachability polygon that is parallel to the
       // extrusion edge, that needs to be considered.
       int closestIndex = -1;
-      int altClosestIndex = -1;
-      double closestDistance = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < reachabilityPolygon.getNumberOfVertices(); i++)
+      int equivalentlyCloseIndex = -1;
+      double closestDistanceSquared = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < initialReachabilityRegion.getNumberOfVertices(); i++)
       {
-         double distance = edgeToExtrude.distanceSquared(reachabilityPolygon.getVertex(i));
+         double distanceSquared = extrudedEdge.distanceSquared(initialReachabilityRegion.getVertex(i));
          // if this vertex is closer than the closest distance, you know it's either the closest vertex, or one of the closest pair that form the parallel edge
-         if (distance < closestDistance)
+         if (distanceSquared < closestDistanceSquared)
          {
-            closestDistance = distance;
+            closestDistanceSquared = distanceSquared;
             closestIndex = i;
-            altClosestIndex = -1;
+            equivalentlyCloseIndex = -1;
          }
          // you've already had a vertex at this distance, so this one forms a close parallel edge, and store that index.
-         else if (MathTools.epsilonEquals(distance, closestDistance, 1e-4))
+         else if (MathTools.epsilonEquals(distanceSquared, closestDistanceSquared, 1e-4))
          {
-            altClosestIndex = i;
+            equivalentlyCloseIndex = i;
          }
       }
 
-
-      if (altClosestIndex == -1)
+      if (equivalentlyCloseIndex == -1)
       { // The vertex isn't on a parallel edge, so it's just that vertex.
-         stepToPack.sub(stancePosition, reachabilityPolygon.getVertex(closestIndex));
+         stepToPack.setAndNegate(initialReachabilityRegion.getVertex(closestIndex));
       }
       else
       { // The vertex is on a parallel edge, so compute the closest point along the edge to stance.
          EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(stancePosition,
-                                                                 reachabilityPolygon.getVertex(closestIndex),
-                                                                 reachabilityPolygon.getVertex(altClosestIndex),
+                                                                 initialReachabilityRegion.getVertex(closestIndex),
+                                                                 initialReachabilityRegion.getVertex(equivalentlyCloseIndex),
                                                                  origin);
-         stepToPack.sub(stancePosition, origin);
+         stepToPack.setAndNegate(origin);
       }
    }
 }

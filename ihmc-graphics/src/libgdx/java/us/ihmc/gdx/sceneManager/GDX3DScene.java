@@ -10,23 +10,23 @@ import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.lighting.GDXShadowManager;
+import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 import java.util.*;
 
 public class GDX3DScene
 {
-   public static final Set<GDXSceneLevel> REAL_ENVIRONMENT_ONLY = Collections.singleton(GDXSceneLevel.REAL_ENVIRONMENT);
-
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private final HashMap<GDXSceneLevel, ArrayList<RenderableProvider>> renderables = new HashMap<>();
-   private final HashSet<RenderableProvider> uniqueRenderables = new HashSet<>();
+   private final Set<GDXRenderableAdapter> renderables = new HashSet<>();
 
    private TreeSet<GDXSceneLevel> sceneLevelsToRender;
    private float ambientLight = 0.4f;
@@ -39,7 +39,7 @@ public class GDX3DScene
 
    public void create()
    {
-      create(GDXSceneLevel.REAL_ENVIRONMENT, GDXSceneLevel.VIRTUAL);
+      create(GDXSceneLevel.MODEL, GDXSceneLevel.VIRTUAL);
    }
 
    public void create(GDXSceneLevel... sceneLevelsToRender)
@@ -47,10 +47,10 @@ public class GDX3DScene
       this.sceneLevelsToRender = new TreeSet<>();
       Collections.addAll(this.sceneLevelsToRender, sceneLevelsToRender);
 
-      renderables.put(GDXSceneLevel.REAL_ENVIRONMENT, new ArrayList<>());
-      renderables.put(GDXSceneLevel.VIRTUAL, new ArrayList<>());
-
-      shadowsDisabledModelBatch = new ModelBatch();
+      Pair<String, String> shaderStrings = GDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
+      String vertexShader = shaderStrings.getLeft();
+      String fragmentShader = shaderStrings.getRight();
+      shadowsDisabledModelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
       shadowsDisabledEnvironment = new Environment();
       shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
       shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
@@ -75,7 +75,7 @@ public class GDX3DScene
    {
       if (shadowsEnabled)
       {
-         renderInternal(shadowManager.getShadowSceneBatch(), REAL_ENVIRONMENT_ONLY);
+         renderInternal(shadowManager.getShadowSceneBatch(), GDXSceneLevel.MODEL.SINGLETON_SET);
       }
       else
       {
@@ -83,12 +83,27 @@ public class GDX3DScene
       }
    }
 
+   public void render(GDXSceneLevel exclusiveSceneLevel)
+   {
+      renderInternal(shadowsDisabledModelBatch, exclusiveSceneLevel.SINGLETON_SET);
+   }
+
+   public void render(Set<GDXSceneLevel> sceneLevels)
+   {
+      renderInternal(shadowsDisabledModelBatch, sceneLevels);
+   }
+
    // For testing shadows in particular
    public void renderShadowMap(Camera camera, int x, int y)
    {
       if (shadowsEnabled)
       {
-         shadowManager.renderShadows(camera, renderables.get(GDXSceneLevel.REAL_ENVIRONMENT), x, y);
+         for (GDXRenderableAdapter renderable : renderables)
+         {
+            renderable.setSceneLevelsToRender(GDXSceneLevel.MODEL.SINGLETON_SET);
+         }
+
+         shadowManager.renderShadows(camera, renderables, x, y);
       }
    }
 
@@ -104,33 +119,24 @@ public class GDX3DScene
       if (shadowsEnabled)
       {
          shadowManager.preRender(camera);
-         renderInternal(shadowManager.getShadowSceneBatch(), REAL_ENVIRONMENT_ONLY);
+         renderInternal(shadowManager.getShadowSceneBatch(), GDXSceneLevel.MODEL.SINGLETON_SET);
       }
       else
       {
          shadowsDisabledModelBatch.begin(camera);
          renderInternal(shadowsDisabledModelBatch, sceneLevelsToRender);
       }
-      postRender(camera, GDXSceneLevel.VIRTUAL);
+      postRender(camera, GDXSceneLevel.VIRTUAL.SINGLETON_SET);
    }
 
-   private void renderInternal(ModelBatch modelBatch, Set<GDXSceneLevel> sceneLevels)
+   private void renderInternal(ModelBatch modelBatch, Set<GDXSceneLevel> sceneLevelsToRender)
    {
       // All rendering except modelBatch.begin() and end()
       // Avoid rendering things twice
-      uniqueRenderables.clear();
-      for (GDXSceneLevel sceneLevel : sceneLevels)
+      for (GDXRenderableAdapter renderable : renderables)
       {
-         uniqueRenderables.addAll(renderables.get(sceneLevel));
-      }
+         renderable.setSceneLevelsToRender(sceneLevelsToRender);
 
-      renderInternal(modelBatch, uniqueRenderables);
-   }
-
-   private void renderInternal(ModelBatch modelBatch, Iterable<RenderableProvider> renderables)
-   {
-      for (RenderableProvider renderable : renderables)
-      {
          if (shadowsEnabled)
             modelBatch.render(renderable);
          else
@@ -138,7 +144,7 @@ public class GDX3DScene
       }
    }
 
-   public void postRender(Camera camera, GDXSceneLevel sceneLevel)
+   public void postRender(Camera camera, Set<GDXSceneLevel> sceneLevels)
    {
       if (shadowsEnabled)
       {
@@ -149,11 +155,16 @@ public class GDX3DScene
          shadowsDisabledModelBatch.end();
       }
 
-      if (shadowsEnabled && sceneLevel == GDXSceneLevel.VIRTUAL)
+      if (shadowsEnabled && sceneLevels.contains(GDXSceneLevel.VIRTUAL))
       {
          // Render all virtual objects using the primary model batch
+         // FIXME: This has a problem where the virtual renderables aren't going to be occluded correctly.
          shadowsDisabledModelBatch.begin(camera);
-         shadowsDisabledModelBatch.render(renderables.get(GDXSceneLevel.VIRTUAL));
+         for (GDXRenderableAdapter renderable : renderables)
+         {
+            renderable.setSceneLevelsToRender(GDXSceneLevel.VIRTUAL.SINGLETON_SET);
+            shadowsDisabledModelBatch.render(renderable);
+         }
          shadowsDisabledModelBatch.end();
       }
    }
@@ -169,35 +180,49 @@ public class GDX3DScene
       shadowsDisabledModelBatch.dispose();
    }
 
-   public void addModelInstance(ModelInstance modelInstance)
+   public GDXRenderableAdapter addModelInstance(ModelInstance modelInstance)
    {
-      addModelInstance(modelInstance, GDXSceneLevel.REAL_ENVIRONMENT);
+      return addModelInstance(modelInstance, GDXSceneLevel.MODEL);
    }
 
-   public void addModelInstance(ModelInstance modelInstance, GDXSceneLevel sceneLevel)
+   public GDXRenderableAdapter addModelInstance(ModelInstance modelInstance, GDXSceneLevel sceneLevel)
    {
-      addRenderableProvider(modelInstance, sceneLevel);
       modelInstances.add(modelInstance);
+      return addRenderableProvider(modelInstance, sceneLevel);
    }
 
-   public void addCoordinateFrame(double size)
+   public GDXRenderableAdapter addCoordinateFrame(double size)
    {
-      addModelInstance(GDXModelBuilder.createCoordinateFrameInstance(size), GDXSceneLevel.VIRTUAL);
+      return addModelInstance(GDXModelBuilder.createCoordinateFrameInstance(size), GDXSceneLevel.VIRTUAL);
    }
 
-   public void addRenderableProvider(RenderableProvider renderableProvider)
+   public GDXRenderableAdapter addRenderableProvider(RenderableProvider renderableProvider)
    {
-      addRenderableProvider(renderableProvider, GDXSceneLevel.REAL_ENVIRONMENT);
+      return addRenderableProvider(renderableProvider, GDXSceneLevel.MODEL);
    }
 
-   public void addRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
+   public GDXRenderableAdapter addRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
    {
-      renderables.get(sceneLevel).add(renderableProvider);
+      GDXRenderableAdapter renderableAdapter = new GDXRenderableAdapter(renderableProvider, sceneLevel);
+      renderables.add(renderableAdapter);
+      return renderableAdapter;
    }
 
-   public void removeRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
+   public GDXRenderableAdapter addRenderableProvider(GDXRenderableProvider renderableProvider)
    {
-      renderables.get(sceneLevel).remove(renderableProvider);
+      GDXRenderableAdapter renderableAdapter = new GDXRenderableAdapter(renderableProvider);
+      renderables.add(renderableAdapter);
+      return renderableAdapter;
+   }
+
+   public void addRenderableAdapter(GDXRenderableAdapter renderableAdapter)
+   {
+      renderables.add(renderableAdapter);
+   }
+
+   public void removeRenderableAdapter(GDXRenderableAdapter renderableAdapter)
+   {
+      renderables.remove(renderableAdapter);
    }
 
    public void addDefaultLighting()

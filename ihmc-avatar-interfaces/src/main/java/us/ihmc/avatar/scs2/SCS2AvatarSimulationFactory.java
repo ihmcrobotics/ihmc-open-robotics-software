@@ -13,7 +13,13 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.avatar.*;
+import us.ihmc.avatar.AvatarControllerThread;
+import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
+import us.ihmc.avatar.ControllerTask;
+import us.ihmc.avatar.EstimatorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
@@ -92,7 +98,6 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SCS2AvatarSimulationFactory
@@ -100,8 +105,8 @@ public class SCS2AvatarSimulationFactory
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
-   protected final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
+   protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>("realtimeROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
    protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
@@ -148,6 +153,7 @@ public class SCS2AvatarSimulationFactory
    protected AvatarStepGeneratorThread stepGeneratorThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
+   protected PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
 
    protected final CollidableHelper collidableHelper = new CollidableHelper();
    protected final String robotCollisionName = "robot";
@@ -187,7 +193,11 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setFullHumanoidRobotModel(controllerThread.getFullRobotModel());
       avatarSimulation.setShowGUI(showGUI.get());
       avatarSimulation.setAutomaticallyStartSimulation(automaticallyStartSimulation.get());
-      avatarSimulation.setRealTimeROS2Node(realtimeROS2Node.get());
+      
+      if(realtimeROS2Node.hasBeenSet())
+      {
+         avatarSimulation.setRealTimeROS2Node(realtimeROS2Node.get());
+      }
 
       FactoryTools.disposeFactory(this);
 
@@ -298,7 +308,8 @@ public class SCS2AvatarSimulationFactory
       simulationOutputWriter = outputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
                                                                robot.getControllerManager().getControllerOutput());
    }
-
+   
+   
    private void setupStateEstimationThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
@@ -311,26 +322,39 @@ public class SCS2AvatarSimulationFactory
       else
          sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
 
-      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      
+      ROS2Topic<?> outputTopic = null;
+      ROS2Topic<?> inputTopic = null;
+      
+      if(realtimeROS2Node.hasBeenSet())
+      {
+         outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+         inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      }
 
-      PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
       {
          pelvisPoseCorrectionCommunicator = externalPelvisCorrectorSubscriber.get();
       }
       else
       {
-         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
-                                                       StampedPosePacket.class,
-                                                       inputTopic,
-                                                       s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+         if(realtimeROS2Node.hasBeenSet())
+         {
+            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
+                                                          StampedPosePacket.class,
+                                                          inputTopic,
+                                                          s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+         }
       }
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-      avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
+      
+      if(realtimeROS2Node.hasBeenSet())
+      {
+         avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
+      }
       avatarEstimatorThreadFactory.configureWithDRCRobotModel(robotModel.get(), robotInitialSetup.get());
       avatarEstimatorThreadFactory.setSensorReaderFactory(sensorReaderFactory);
       avatarEstimatorThreadFactory.setHumanoidRobotContextDataFactory(contextDataFactory);
@@ -344,6 +368,13 @@ public class SCS2AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+
+      RealtimeROS2Node ros2Node = null;
+      if(realtimeROS2Node.hasBeenSet())
+      {
+         ros2Node = realtimeROS2Node.get();
+      }
+      
       controllerThread = new AvatarControllerThread(robotName,
                                                     robotModel.get(),
                                                     robotInitialSetup.get(),
@@ -351,7 +382,7 @@ public class SCS2AvatarSimulationFactory
                                                     highLevelHumanoidControllerFactory.get(),
                                                     contextDataFactory,
                                                     null,
-                                                    realtimeROS2Node.get(),
+                                                    ros2Node,
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
       simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getYoGraphicsListRegistry()));
@@ -396,16 +427,21 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, simulationDT.get(), masterFullRobotModel);
 
-      AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
       SimulatedHandControlTask handControlTask = null;
+      AvatarSimulatedHandControlThread handControlThread = null;
 
-      if (handControlThread != null)
+      if(realtimeROS2Node.hasBeenSet())
       {
-         List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
-         SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
-         SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager().getControllerInput(),
-                                                                                        robot.getControllerManager().getControllerOutput());
-         handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, simulationDT.get());
+         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+         
+         if(handControlThread != null)
+         {
+            List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
+            SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
+            SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager().getControllerInput(),
+                                                                                           robot.getControllerManager().getControllerOutput());
+            handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, simulationDT.get());
+         }
       }
 
       // Previously done in estimator thread write
@@ -603,7 +639,8 @@ public class SCS2AvatarSimulationFactory
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
-      controllerFactory.useDefaultPushRecoveryControlState();
+      if (pushRecoveryControllerParameters != null)
+         controllerFactory.useDefaultPushRecoveryControlState();
 
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
       controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
@@ -615,7 +652,11 @@ public class SCS2AvatarSimulationFactory
 
       controllerFactory.setInitialState(HighLevelControllerName.WALKING);
 
-      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
+      
+      if(realtimeROS2Node.hasBeenSet())
+      {
+         controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
+      }
 
       setHighLevelHumanoidControllerFactory(controllerFactory);
       return controllerFactory;

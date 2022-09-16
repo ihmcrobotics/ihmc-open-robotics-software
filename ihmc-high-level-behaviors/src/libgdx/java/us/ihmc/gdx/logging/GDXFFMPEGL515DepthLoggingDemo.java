@@ -60,17 +60,15 @@ public class GDXFFMPEGL515DepthLoggingDemo
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            l515PoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            l515PoseGizmo.create(baseUI.getPrimary3DPanel());
             l515PoseGizmo.setResizeAutomatically(false);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
@@ -114,7 +112,7 @@ public class GDXFFMPEGL515DepthLoggingDemo
                   l515.setPublishColorImageROS1(false);
                   l515.setPublishColorImageROS2(false);
                   CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-                  baseUI.getPrimaryScene().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
 
                   swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());

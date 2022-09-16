@@ -126,6 +126,30 @@ public class GDXMultiBodySystemFactories
    public static GDXRigidBody toGDXRigidBody(RigidBodyBasics rigidBody,
                                              RigidBodyDefinition rigidBodyDefinition,
                                              Executor graphicLoader,
+                                             ClassLoader resourceClassLoader,
+                                             float x,
+                                             float y,
+                                             float z)
+   {
+      GDXRigidBody gdxRigidBody = new GDXRigidBody(rigidBody);
+      List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
+      List<CollisionShapeDefinition> collisionShapeDefinitions = rigidBodyDefinition.getCollisionShapeDefinitions();
+
+      if (graphicLoader != null)
+      {
+         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, gdxRigidBody, resourceClassLoader, x, y, z));
+      }
+      else
+      {
+         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, gdxRigidBody, resourceClassLoader, x, y, z);
+      }
+
+      return gdxRigidBody;
+   }
+
+   public static GDXRigidBody toGDXRigidBody(RigidBodyBasics rigidBody,
+                                             RigidBodyDefinition rigidBodyDefinition,
+                                             Executor graphicLoader,
                                              ClassLoader resourceClassLoader)
    {
       GDXRigidBody gdxRigidBody = new GDXRigidBody(rigidBody);
@@ -142,6 +166,36 @@ public class GDXMultiBodySystemFactories
       }
 
       return gdxRigidBody;
+   }
+
+   private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,
+                                            List<CollisionShapeDefinition> collisionShapeDefinitions,
+                                            GDXRigidBody gdxRigidBody,
+                                            ClassLoader resourceClassLoader,
+                                            float x,
+                                            float y,
+                                            float z)
+   {
+      ReferenceFrame graphicFrame = gdxRigidBody.isRootBody() ? gdxRigidBody.getBodyFixedFrame() : gdxRigidBody.getParentJoint().getFrameAfterJoint();
+      List<DynamicGDXModel> visualModels = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
+      List<DynamicGDXModel> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
+      if (!visualModels.isEmpty() || !collisionModels.isEmpty())
+      {
+         FrameGDXGraphicsNode visualGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
+         int i = 0;
+         for (DynamicGDXModel visualModel : visualModels)
+         {
+            visualGraphicsNode.addModelPart(visualModel, gdxRigidBody.getName() + "Visual" + i, x, y, z);
+         }
+         gdxRigidBody.setVisualGraphics(visualGraphicsNode);
+         FrameGDXGraphicsNode collisionGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
+         i = 0;
+         for (DynamicGDXModel collisionModel : collisionModels)
+         {
+            collisionGraphicsNode.addModelPart(collisionModel, gdxRigidBody.getName() + "Collision" + i, x, y, z);
+         }
+         gdxRigidBody.setCollisionGraphics(collisionGraphicsNode);
+      }
    }
 
    private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,

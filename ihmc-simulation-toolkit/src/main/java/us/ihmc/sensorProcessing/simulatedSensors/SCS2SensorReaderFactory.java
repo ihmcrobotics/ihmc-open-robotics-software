@@ -42,11 +42,14 @@ public class SCS2SensorReaderFactory implements SensorReaderFactory
    }
 
    @Override
-   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
+   public void build(FloatingJointBasics rootJoint,
+                     IMUDefinition[] imuDefinitions,
+                     ForceSensorDefinition[] forceSensorDefinitions,
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder,
+                     YoRegistry parentRegistry)
    {
       if (usePerfectSensors)
-         sensorReader = SCS2SensorReader.newPerfectSensorReader(controllerInput, rootJoint, forceSensorDataHolderToUpdate);
+         sensorReader = SCS2SensorReader.newPerfectSensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolderToUpdate);
       else
          sensorReader = SCS2SensorReader.newSensorReader(controllerInput,
                                                          rootJoint,

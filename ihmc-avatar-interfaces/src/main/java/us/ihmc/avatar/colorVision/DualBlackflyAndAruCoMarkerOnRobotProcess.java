@@ -48,6 +48,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       ros2Helper = new ROS2Helper(ros2Node);
 
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      // Helpful to view relative sensor transforms when robot controller is not running
+      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {

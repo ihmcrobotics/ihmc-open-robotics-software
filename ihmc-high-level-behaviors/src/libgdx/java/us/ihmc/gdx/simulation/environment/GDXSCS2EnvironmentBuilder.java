@@ -71,10 +71,10 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
    public void create(GDXImGuiBasedUI baseUI)
    {
       // TODO: Implement hiding the real environment to emulate real world operation
-      panel3D.getScene().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      panel3D.getScene().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.MODEL);
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      pose3DGizmo.create(panel3D.getCamera3D());
+      pose3DGizmo.create(panel3D);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
    }

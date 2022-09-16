@@ -36,7 +36,7 @@ public class GDXROS1DepthSensorDemo
             baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
             baseUI.getPrimaryScene().addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
 
-            poseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            poseGizmo.create(baseUI.getPrimary3DPanel());
             poseGizmo.setResizeAutomatically(false);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
@@ -80,7 +80,7 @@ public class GDXROS1DepthSensorDemo
             l515.setRenderDepthVideoDirectly(true);
             l515.setPublishColorImageROS1(true);
 
-            baseUI.getPrimaryScene().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(l515::getRenderables);
             globalVisualizersUI.create();
 
             ros1Node.execute();

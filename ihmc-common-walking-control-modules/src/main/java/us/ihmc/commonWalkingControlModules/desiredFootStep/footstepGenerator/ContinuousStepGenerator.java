@@ -31,6 +31,7 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -135,7 +136,9 @@ public class ContinuousStepGenerator implements Updatable
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
+   private DirectionalControlMessenger directionalControlMessenger;
    private StopWalkingMessenger stopWalkingMessenger;
+   private StartWalkingMessenger startWalkingMessenger;
    private List<FootstepAdjustment> footstepAdjustments = new ArrayList<>();
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
@@ -210,6 +213,10 @@ public class ContinuousStepGenerator implements Updatable
 
          walkPreviousValue.set(false);
          return;
+      }
+      else if (startWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
+      {
+         startWalkingMessenger.submitStartWalkingRequest();
       }
 
       if (walk.getValue() != walkPreviousValue.getValue())
@@ -287,6 +294,9 @@ public class ContinuousStepGenerator implements Updatable
          double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
       }
+
+      if (directionalControlMessenger != null)
+         directionalControlMessenger.submitDirectionalControlRequest(desiredVelocityX, desiredVelocityY, turningVelocity);
 
       for (int i = footsteps.size(); i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
@@ -603,6 +613,16 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
+    * Sets the protocol for sending desired velocities to the controller.
+    *
+    * @param footstepMessenger the callback used to send footsteps.
+    */
+   public void setDirectionalControlMessenger(DirectionalControlMessenger directionalControlMessenger)
+   {
+      this.directionalControlMessenger = directionalControlMessenger;
+   }
+
+   /**
     * Sets the protocol for stop walking requests to the controller.
     *
     * @param stopWalkingMessenger the callback used to send requests.
@@ -610,6 +630,16 @@ public class ContinuousStepGenerator implements Updatable
    public void setStopWalkingMessenger(StopWalkingMessenger stopWalkingMessenger)
    {
       this.stopWalkingMessenger = stopWalkingMessenger;
+   }
+
+   /**
+    * Sets the protocol for start walking requests to the controller.
+    *
+    * @param startWalkingMessenger the callback used to send requests.
+    */
+   public void setStartWalkingMessenger(StartWalkingMessenger startWalkingMessenger)
+   {
+      this.startWalkingMessenger = startWalkingMessenger;
    }
 
    /**

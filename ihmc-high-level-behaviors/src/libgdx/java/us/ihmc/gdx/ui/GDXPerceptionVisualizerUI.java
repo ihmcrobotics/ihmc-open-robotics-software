@@ -131,17 +131,15 @@ public class GDXPerceptionVisualizerUI
             //                simulatedDepthSensor.create();
             //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
-            baseUI.getPrimaryScene().addRenderableProvider(ousterLidar, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(ousterLidar::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(ousterLidar);
 
             environmentBuilder.create();
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.getPrimaryScene().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             buildingConstructor.create();
             baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+            baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, GDXSceneLevel.MODEL);
 
             globalVisualizersUI.create();
             //                l515Model = new GDXL515SensorObject();

@@ -27,6 +27,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
+import us.ihmc.gdx.input.ImGuiMouseDragData;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -69,7 +70,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private int closestCollisionSelection = -1;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private boolean isMousePickSelected = false;
+   private boolean isGizmoHovered = false;
    private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
@@ -100,7 +101,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private boolean negativeYArrowIntersects;
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
-   private boolean isBeingDragged;
+   private boolean isNewlyModified;
    private final double translateSpeedFactor = 0.5;
 
    public GDXPathControlRingGizmo()
@@ -191,45 +192,51 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    {
       updateTransforms();
 
-      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
-      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
-      boolean isWindowHovered = ImGui.isWindowHovered();
+      ImGuiMouseDragData tranlateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+      ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
 
-      if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
+      if (!tranlateDragData.isDragging() && !yawDragData.isDragging())
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
       }
 
-      pickResult.setPickIntersects(closestCollisionSelection > -1);
-      pickResult.setDistanceToCamera(closestCollisionDistance);
-      input.addPickResult(pickResult);
+      if (closestCollisionSelection > -1)
+      {
+         pickResult.setDistanceToCamera(closestCollisionDistance);
+         input.addPickResult(pickResult);
+      }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
-      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
-      boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
-      boolean isWindowHovered = ImGui.isWindowHovered();
-      isBeingDragged = false;
-      isMousePickSelected = pickResult == input.getClosestPick();
+      process3DViewInput(input, true);
+   }
 
-      if (isMousePickSelected && isWindowHovered && !rightMouseDragging && !middleMouseDragging)
+   public void process3DViewInput(ImGui3DViewInput input, boolean allowUserInput)
+   {
+      updateTransforms();
+
+      int yawMouseButton = ImGuiMouseButton.Right;
+      ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+      ImGuiMouseDragData yawDragData = input.getMouseDragData(yawMouseButton);
+
+      isNewlyModified = false;
+      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
+      boolean isRingHovered = isGizmoHovered && closestCollisionSelection == 0;
+
+      if (allowUserInput)
       {
-         if (middleMouseDown && closestCollisionSelection > -1)
+         if (isRingHovered && yawDragData.getDragJustStarted())
          {
             clockFaceDragAlgorithm.reset();
          }
-      }
-      if (isMousePickSelected && (rightMouseDragging || middleMouseDragging))
-      {
-         Line3DReadOnly pickRay = input.getPickRayInWorld();
-
-         if (closestCollisionSelection == 0)
+         if (isRingHovered && (translateDragData.isDragging() || yawDragData.isDragging()))
          {
-            isBeingDragged = true;
-            if (rightMouseDragging)
+            isNewlyModified = true;
+            Line3DReadOnly pickRay = input.getPickRayInWorld();
+
+            if (translateDragData.isDragging())
             {
                Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
                tempFramePose3D.setToZero(gizmoFrame);
@@ -239,7 +246,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
                tempFramePose3D.get(transformToParent);
                closestCollision.add(planarMotion);
             }
-            else // middleMouseDragging
+            else // yaw dragging
             {
                if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
                {
@@ -251,33 +258,32 @@ public class GDXPathControlRingGizmo implements RenderableProvider
                }
             }
          }
-      }
 
-      // keyboard based controls
-      boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
-      boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
-      boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
-      boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
-      boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
-      if (anyArrowHeld) // only the arrow keys do the moving
-      {
+         // keyboard based controls
+         boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+         boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+         boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+         boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+         boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+         isNewlyModified |= anyArrowHeld;
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
          boolean altHeld = ImGui.getIO().getKeyAlt();
          boolean shiftHeld = ImGui.getIO().getKeyShift();
          double deltaTime = Gdx.graphics.getDeltaTime();
+
          if (altHeld) // orientation
          {
             double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
-            if (leftArrowHeld && ctrlHeld) // yaw +
+            if (leftArrowHeld) // yaw +
             {
                transformToParent.getRotation().appendYawRotation(amount);
             }
-            if (rightArrowHeld && ctrlHeld) // yaw -
+            if (rightArrowHeld) // yaw -
             {
                transformToParent.getRotation().appendYawRotation(-amount);
             }
          }
-         else // translation
+         else if (anyArrowHeld) // translation (only the arrow keys do the moving)
          {
             transformFromKeyboardTransformationToWorld.setToZero();
             transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
@@ -433,7 +439,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = highlightingEnabled && isMousePickSelected;
+      boolean prior = highlightingEnabled && isGizmoHovered;
       discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
       positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
       positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
@@ -512,38 +518,38 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    public boolean getAnyPartPickSelected()
    {
-      return isMousePickSelected
+      return isGizmoHovered
              && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
    public boolean getAnyArrowPickSelected()
    {
-      return isMousePickSelected && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      return isGizmoHovered && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
    public boolean getHollowCylinderPickSelected()
    {
-      return isMousePickSelected && hollowCylinderIntersects;
+      return isGizmoHovered && hollowCylinderIntersects;
    }
 
    public boolean getPositiveXArrowPickSelected()
    {
-      return isMousePickSelected && positiveXArrowIntersects;
+      return isGizmoHovered && positiveXArrowIntersects;
    }
 
    public boolean getPositiveYArrowPickSelected()
    {
-      return isMousePickSelected && positiveYArrowIntersects;
+      return isGizmoHovered && positiveYArrowIntersects;
    }
 
    public boolean getNegativeXArrowPickSelected()
    {
-      return isMousePickSelected && negativeXArrowIntersects;
+      return isGizmoHovered && negativeXArrowIntersects;
    }
 
    public boolean getNegativeYArrowPickSelected()
    {
-      return isMousePickSelected && negativeYArrowIntersects;
+      return isGizmoHovered && negativeYArrowIntersects;
    }
 
    public void setShowArrows(boolean showArrows)
@@ -561,8 +567,13 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       this.highlightingEnabled = highlightingEnabled;
    }
 
-   public boolean isBeingDragged()
+   public boolean isNewlyModified()
    {
-      return isBeingDragged;
+      return isNewlyModified;
+   }
+
+   public boolean getGizmoHovered()
+   {
+      return isGizmoHovered;
    }
 }

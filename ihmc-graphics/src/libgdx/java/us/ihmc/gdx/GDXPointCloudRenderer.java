@@ -399,4 +399,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       this.pointScale = size;
    }
+
+   public int getFloatsPerVertex()
+   {
+      return floatsPerVertex;
+   }
 }

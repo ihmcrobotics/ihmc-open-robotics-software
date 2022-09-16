@@ -41,12 +41,12 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
             baseUI.create();
 
             robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
-            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel().getCamera3D());
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.getPrimary3DPanel());
             robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
-            l515PoseGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
+            l515PoseGizmo.create(baseUI.getPrimary3DPanel());
             l515PoseGizmo.setResizeAutomatically(false);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(l515PoseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
@@ -82,10 +82,10 @@ public class GDXGPUPlanarRegionExtractionL515HardwareDemo
                      gpuPlanarRegionExtraction.create(l515.getDepthWidth(),
                                                       l515.getDepthHeight(),
                                                       depth32FC1Image.getBackingDirectByteBuffer(),
-                                                      l515.getDepthCameraIntrinsics().fx,
-                                                      l515.getDepthCameraIntrinsics().fy,
-                                                      l515.getDepthCameraIntrinsics().cx,
-                                                      l515.getDepthCameraIntrinsics().cy);
+                                                      l515.getDepthIntrinsicParameters().fx(),
+                                                      l515.getDepthIntrinsicParameters().fy(),
+                                                      l515.getDepthIntrinsicParameters().ppx(),
+                                                      l515.getDepthIntrinsicParameters().ppy());
                      gpuPlanarRegionExtraction.getEnabled().set(true);
                      baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                      baseUI.getPrimaryScene().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);

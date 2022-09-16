@@ -13,7 +13,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("com.thoughtworks.xstream:xstream:1.4.7")
+   api("com.thoughtworks.xstream:xstream:1.4.19")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.georegression:georegression:0.22")
@@ -24,14 +24,14 @@ mainDependencies {
    api("org.postgresql:postgresql:42.2.5")
 
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:euclid:0.18.1")
-   api("us.ihmc:simulation-construction-set:0.22.6")
+   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:simulation-construction-set:0.22.9")
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-robot-data-logger:17-0.23.3")
+   api("us.ihmc:ihmc-robot-data-logger:17-0.23.4")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-java-toolkit:source")

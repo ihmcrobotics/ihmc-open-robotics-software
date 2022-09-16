@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.19.7")
+   api("us.ihmc:ihmc-graphics-description:0.19.8")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 }
 
@@ -27,7 +27,7 @@ testDependencies {
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.2")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.21.3")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
@@ -76,6 +76,8 @@ libgdxDependencies {
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("graphics", javaFXVersion)) // JFX Color
+
+   api("us.ihmc:ihmc-perception-javacv:source")
 }
 
 libgdxTestDependencies {

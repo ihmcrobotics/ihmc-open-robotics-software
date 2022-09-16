@@ -10,6 +10,7 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,6 +84,7 @@ public class ResourceTools
       return ExceptionTools.handle(() -> IOUtils.toString(inputStream, StandardCharsets.UTF_8), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
 
    }
+
    public static String readResourceToString(URL url)
    {
       return ExceptionTools.handle(() -> IOUtils.toString(url, StandardCharsets.UTF_8), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
@@ -91,6 +93,27 @@ public class ResourceTools
    public static String readResourceToString(String path)
    {
       return readResourceToString(getResourceSystem(Paths.get(path)));
+   }
+
+   public static byte[] readResourceToByteArray(String resourceAbsolutePath)
+   {
+      return ExceptionTools.handle(() -> IOUtils.resourceToByteArray(resourceAbsolutePath), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+   }
+
+   public static void readResourceToByteBuffer(String resourceAbsolutePath, ByteBuffer byteBuffer)
+   {
+      try (InputStream inputStream = Object.class.getClassLoader().getResourceAsStream(resourceAbsolutePath))
+      {
+         int zeroTo255;
+         while ((zeroTo255 = inputStream.read()) > -1)
+         {
+            byteBuffer.put((byte) zeroTo255);
+         }
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 
    public static String sanitizeResourcePath(String resourcePath)

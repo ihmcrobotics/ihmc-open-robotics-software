@@ -40,6 +40,7 @@ import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -63,9 +64,10 @@ import us.ihmc.utilities.ros.types.PointType;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.LongSupplier;
 
-public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements RenderableProvider
+public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
 {
    private static final MutableInt INDEX = new MutableInt();
    private final String sensorName;
@@ -526,18 +528,23 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       depthSensorSimulator.dispose();
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<GDXSceneLevel> sceneLevelsToRender)
    {
-      if (renderPointCloudDirectly.get())
-         pointCloudRenderer.getRenderables(renderables, pool);
-      if (debugCoordinateFrame.get())
+      if (sceneLevelsToRender.contains(GDXSceneLevel.MODEL))
       {
-         if (coordinateFrame == null)
-            coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.2);
-         coordinateFrame.getRenderables(renderables, pool);
+         if (renderPointCloudDirectly.get())
+            pointCloudRenderer.getRenderables(renderables, pool);
       }
-      depthSensorSimulator.getVirtualRenderables(renderables, pool);
+      if (sceneLevelsToRender.contains(GDXSceneLevel.VIRTUAL))
+      {
+         if (debugCoordinateFrame.get())
+         {
+            if (coordinateFrame == null)
+               coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.2);
+            coordinateFrame.getRenderables(renderables, pool);
+         }
+         depthSensorSimulator.getVirtualRenderables(renderables, pool);
+      }
    }
 
    public void setSensorEnabled(boolean sensorEnabled)

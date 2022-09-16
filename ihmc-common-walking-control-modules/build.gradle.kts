@@ -20,15 +20,15 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("net.sf.trove4j:trove4j:3.0.3")
 
-   api("us.ihmc:ihmc-realtime:1.5.0")
+   api("us.ihmc:ihmc-realtime:1.5.1")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
-   api("us.ihmc:euclid:0.18.1")
-   api("us.ihmc:euclid-geometry:0.18.1")
+   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:euclid-geometry:0.19.0")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.13")
+   api("us.ihmc:ihmc-convex-optimization:0.17.14")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 //   api("us.ihmc:ihmc-footstep-planning:source")
@@ -41,13 +41,13 @@ testDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.13")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.14")
 }
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.22.6")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.9.3")
+   api("us.ihmc:simulation-construction-set:0.22.9")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.10.0")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

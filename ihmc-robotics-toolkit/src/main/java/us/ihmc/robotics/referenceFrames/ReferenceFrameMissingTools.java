@@ -7,7 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class ReferenceFrameMissingTools
 {
-   public static ThreadLocal<MutableInt> INDEX = ThreadLocal.withInitial(MutableInt::new);
+   private static final ThreadLocal<MutableInt> INDEX = ThreadLocal.withInitial(MutableInt::new);
 
    public static String getCallingClassName()
    {
@@ -17,28 +17,28 @@ public class ReferenceFrameMissingTools
 
    public static ReferenceFrame constructFrameWithUnchangingTransformFromParent(ReferenceFrame parentFrame, RigidBodyTransform transformFromParent)
    {
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(getCallingClassName() + INDEX.get().getAndIncrement(),
                                                                                  parentFrame,
                                                                                  transformFromParent);
    }
 
    public static ReferenceFrame constructFrameWithUnchangingTransformToParent(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getCallingClassName() + INDEX.get().getAndIncrement(),
                                                                                parentFrame,
                                                                                transformToParent);
    }
 
    public static ReferenceFrame constructFrameWithChangingTransformFromParent(ReferenceFrame parentFrame, RigidBodyTransform transformFromParent)
    {
-      return ReferenceFrameTools.constructFrameWithChangingTransformFromParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithChangingTransformFromParent(getCallingClassName() + INDEX.get().getAndIncrement(),
                                                                                parentFrame,
                                                                                transformFromParent);
    }
 
    public static ReferenceFrame constructFrameWithChangingTransformToParent(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
    {
-      return ReferenceFrameTools.constructFrameWithChangingTransformToParent(getCallingClassName() + INDEX.get(),
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent(getCallingClassName() + INDEX.get().getAndIncrement(),
                                                                              parentFrame,
                                                                              transformToParent);
    }

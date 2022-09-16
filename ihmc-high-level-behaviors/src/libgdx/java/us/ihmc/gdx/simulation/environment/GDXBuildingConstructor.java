@@ -72,7 +72,7 @@ public class GDXBuildingConstructor extends ImGuiPanel
    public void create()
    {
       panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-      pose3DGizmo.create(panel3D.getCamera3D());
+      pose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 

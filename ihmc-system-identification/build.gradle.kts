@@ -13,10 +13,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:euclid:0.19.0")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:simulation-construction-set:0.22.6")
+   api("us.ihmc:simulation-construction-set:0.22.9")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

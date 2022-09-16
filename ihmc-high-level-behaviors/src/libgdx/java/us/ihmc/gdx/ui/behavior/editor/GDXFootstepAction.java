@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableHighlightModel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -43,7 +44,7 @@ public class GDXFootstepAction implements GDXBehaviorAction
    private final ImBoolean selected = new ImBoolean();
    private boolean wasInitializedToPreviousStep;
 
-   public void create(GDXFocusBasedCamera camera3D,
+   public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper ros2ControllerHelper,
@@ -54,7 +55,7 @@ public class GDXFootstepAction implements GDXBehaviorAction
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.robotModel = robotModel;
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
-      poseGizmo.create(camera3D);
+      poseGizmo.create(panel3D);
 
       wasInitializedToPreviousStep = possiblyNullPreviousFootstepAction != null;
       if (wasInitializedToPreviousStep)

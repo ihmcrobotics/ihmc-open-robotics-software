@@ -14,7 +14,7 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:euclid:0.19.0")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
@@ -27,7 +27,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-state-estimation:source")
 
-   api("us.ihmc:scs2-simulation:17-0.9.3")
+   api("us.ihmc:scs2-simulation:17-0.10.0")
 }
 
 testDependencies {
