@@ -172,8 +172,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
       controllerCoreTimer.stopMeasurement();
 
       linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());

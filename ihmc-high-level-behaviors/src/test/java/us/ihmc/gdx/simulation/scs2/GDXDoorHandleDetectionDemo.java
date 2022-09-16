@@ -34,30 +34,28 @@ public class GDXDoorHandleDetectionDemo
          {
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-            environmentBuilder.create(baseUI);
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-            baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DoorHandleDetectionDemo.json");
 
-            sensorPoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
             sensorPoseGizmo.setResizeAutomatically(true);
-            baseUI.addImGui3DViewPickCalculator(input ->
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(input ->
             {
                if (cameraGizmoSelected.get())
                {
                   sensorPoseGizmo.calculate3DViewPick(input);
                }
             });
-            baseUI.addImGui3DViewInputProcessor(input ->
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(input ->
             {
                if (cameraGizmoSelected.get())
                {
                   sensorPoseGizmo.process3DViewInput(input);
                }
             });
-            baseUI.get3DSceneManager().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, GDXSceneLevel.VIRTUAL);
             sensorPoseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 1.0);
 
             baseUI.getImGuiPanelManager().addPanel("Door Handle Tracking Demo", this::renderImGuiWidgets);
@@ -76,7 +74,7 @@ public class GDXDoorHandleDetectionDemo
                   cameraSensor.setSensorEnabled(true);
                   cameraSensor.setRenderColorVideoDirectly(true);
                   baseUI.getImGuiPanelManager().addPanel(cameraSensor);
-                  baseUI.get3DSceneManager().addRenderableProvider(cameraSensor, GDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(cameraSensor::getRenderables);
 
                   doorHandleDetectionUI = new GDXOpenCVOpticalFlowTrackingUI();
                   doorHandleDetectionUI.create(cameraSensor.getLowLevelSimulator().getRGBA8888ColorImage());
@@ -85,7 +83,7 @@ public class GDXDoorHandleDetectionDemo
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
 
-               cameraSensor.render(baseUI.get3DSceneManager());
+               cameraSensor.render(baseUI.getPrimaryScene());
 
                doorHandleDetectionUI.update();
             }

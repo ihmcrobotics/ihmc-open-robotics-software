@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -34,7 +35,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicReference;
 
-public abstract class HeightMapUI extends Application
+public abstract class HeightMapUI extends ApplicationNoModule
 {
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(HeightMapMessagerAPI.API);
    private static final boolean useROS2 = false;

@@ -306,7 +306,7 @@ public abstract class AvatarFlatGroundForwardWalkingTest implements MultiRobotTe
 
       LogTools.info("Creating push controller");
 
-      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                         simulationTestHelper.getRobot(),
                                                         fullRobotModel.getChest().getParentJoint().getName(),
                                                         new Vector3D(0, 0, z));

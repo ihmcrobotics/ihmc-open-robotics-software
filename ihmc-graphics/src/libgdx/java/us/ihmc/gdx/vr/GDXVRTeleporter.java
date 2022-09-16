@@ -44,7 +44,7 @@ public class GDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
-   public void create()
+   public void create(GDXVRContext context)
    {
       double ringThickness = 0.005;
       double innerRadius = 0.4;
@@ -64,6 +64,7 @@ public class GDXVRTeleporter
          orientation.setRoll(Math.toRadians(-90.0));
          meshBuilder.addIsoscelesTriangularPrism(0.2, 0.2, ringThickness, offset, orientation, color);
       }, "arrow");
+      context.addVRInputProcessor(this::processVRInput);
    }
 
    private void buildLineMesh(GDXMultiColorMeshBuilder meshBuilder)
@@ -71,7 +72,7 @@ public class GDXVRTeleporter
       meshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color);
    }
 
-   public void processVRInput(GDXVRContext vrContext)
+   private void processVRInput(GDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {

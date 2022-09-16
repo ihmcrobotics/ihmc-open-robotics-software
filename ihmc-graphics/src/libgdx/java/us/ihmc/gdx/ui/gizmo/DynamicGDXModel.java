@@ -107,7 +107,8 @@ public class DynamicGDXModel
 
    public void dispose()
    {
-      mesh.dispose();
+      if (mesh != null)
+         mesh.dispose();
    }
 
    public ModelInstance newModelInstance()
@@ -133,5 +134,10 @@ public class DynamicGDXModel
    public RigidBodyTransform getLocalTransform()
    {
       return localTransform;
+   }
+
+   public ModelInstance getModelInstance()
+   {
+      return modelInstance;
    }
 }

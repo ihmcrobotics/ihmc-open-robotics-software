@@ -14,7 +14,7 @@ public class GDXPhysicsEnvironmentDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
+   private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
 
    public GDXPhysicsEnvironmentDemo()
    {
@@ -27,7 +27,7 @@ public class GDXPhysicsEnvironmentDemo
          {
             baseUI.create();
 
-            environmentBuilder.create(baseUI);
+            environmentBuilder.create();
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder);
 
             GDXLabFloorObject labFloorObject = new GDXLabFloorObject();

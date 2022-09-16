@@ -18,14 +18,15 @@ public class MessagerSyncedRobotModel extends CommunicationsSyncedRobotModel
    private volatile RobotConfigurationData latestRobotConfigurationData;
    private boolean hasReceivedFirstMessage = false;
 
-   private List<Consumer<RobotConfigurationData>> userCallbacks = new ArrayList<>();
+   private final List<Consumer<RobotConfigurationData>> userCallbacks = new ArrayList<>();
 
    public MessagerSyncedRobotModel(Messager messager,
                                    MessagerAPIFactory.Topic<RobotConfigurationData> topic,
+                                   DRCRobotModel robotModel,
                                    FullHumanoidRobotModel fullRobotModel,
                                    HumanoidRobotSensorInformation sensorInformation)
    {
-      super(fullRobotModel, null, sensorInformation);
+      super(robotModel, fullRobotModel, null, sensorInformation);
 
       messager.registerTopicListener(topic, robotConfigurationData ->
       {

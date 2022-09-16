@@ -4,7 +4,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
@@ -18,7 +18,7 @@ public class GDXPointCloudRendererDemo
 
    public GDXPointCloudRendererDemo()
    {
-      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+      GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {

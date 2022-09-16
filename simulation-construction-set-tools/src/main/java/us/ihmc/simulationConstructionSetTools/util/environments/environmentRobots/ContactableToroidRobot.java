@@ -7,6 +7,7 @@ import org.apache.commons.math3.util.FastMath;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameTorus3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,7 +26,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.SpatialInertia;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -42,7 +42,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    private static final double DEFAULT_MASS = 1.0;
 
    private final RigidBodyTransform pinJointTransformToWorld;
-   private final FrameTorus3d wheelTorus;
+   private final FrameTorus3D wheelTorus;
    
    private final PinJoint pinJoint;
    private final Link wheelLink;
@@ -68,7 +68,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    {
       super(name);
       pinJointTransformToWorld = pinJointTransform;
-      wheelTorus = new FrameTorus3d(ReferenceFrame.getWorldFrame(), steeringWheelRadius, steeringWheelThickness);
+      wheelTorus = new FrameTorus3D(ReferenceFrame.getWorldFrame(), steeringWheelRadius, steeringWheelThickness);
       wheelTorus.applyTransform(pinJointTransform);
       
       RotationMatrix rotation = new RotationMatrix();
@@ -88,7 +88,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       wheelLink.setMass(mass);
       wheelLink.setComOffset(new Vector3D());
       
-      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(mass, wheelTorus.getRadius(), wheelTorus.getThickness());
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(mass, wheelTorus.getRadius(), wheelTorus.getTubeRadius());
       
       SpatialInertia rigidBodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), inertia, mass);
       ReferenceFrame jointFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), pinJointTransform);
@@ -109,11 +109,11 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       linkGraphics.registerSelectedListener(this);
    }
    
-   private void createWheelGraphics(FrameTorus3d wheelTorus)
+   private void createWheelGraphics(FrameTorus3D wheelTorus)
    {
       linkGraphics.addCone(0.05, 0.05);
-      linkGraphics.addArcTorus(FastMath.PI / 3, 2 * FastMath.PI / 3, wheelTorus.getRadius(), wheelTorus.getThickness(), YoAppearance.Yellow());
-      wheelGraphic = linkGraphics.addArcTorus(2 * FastMath.PI / 3, 7 * FastMath.PI / 3, wheelTorus.getRadius(), wheelTorus.getThickness(), YoAppearance.Black());
+      linkGraphics.addArcTorus(FastMath.PI / 3, 2 * FastMath.PI / 3, wheelTorus.getRadius(), wheelTorus.getTubeRadius(), YoAppearance.Yellow());
+      wheelGraphic = linkGraphics.addArcTorus(2 * FastMath.PI / 3, 7 * FastMath.PI / 3, wheelTorus.getRadius(), wheelTorus.getTubeRadius(), YoAppearance.Black());
    }
 
    public Link getWheelLink()
@@ -150,7 +150,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return wheelTorus.getTorus3d().isPointInside(pointInWorldToCheck);
+      return wheelTorus.isPointInside(pointInWorldToCheck);
    }
    
    @Override
@@ -162,7 +162,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      wheelTorus.getTorus3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
+      wheelTorus.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 

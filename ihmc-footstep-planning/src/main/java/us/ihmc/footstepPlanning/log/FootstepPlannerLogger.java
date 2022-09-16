@@ -65,11 +65,9 @@ public class FootstepPlannerLogger
 
    // File names
    static final String requestPacketFileName = "RequestPacket.json";
-   static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
-   static final String bodyPathPlanFileName = "BodyPathPlanData.log";
    static final String headerFileName = "Header.txt";
    static final String bodyPathHeaderFileName = "BodyPathHeader.txt";
    static final String dataFileName = "PlannerIterationData.log";
@@ -84,12 +82,10 @@ public class FootstepPlannerLogger
 
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
-   private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersPacketSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
@@ -153,12 +149,12 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      if (!logDirectory.endsWith(File.separator))
-      {
-         logDirectory += File.separator;
-      }
+      String sessionDirectory = generateALogFolderName(logDirectory);
+      return logSessionWithExactFolderName(sessionDirectory);
+   }
 
-      String sessionDirectory = logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
+   public boolean logSessionWithExactFolderName(String sessionDirectory)
+   {
       latestLogDirectory = sessionDirectory;
 
       try
@@ -168,12 +164,6 @@ public class FootstepPlannerLogger
          planner.getRequest().setPacket(requestPacket);
          byte[] serializedRequest = requestPacketSerializer.serializeToBytes(requestPacket);
          writeToFile(requestPacketFile, serializedRequest);
-
-         // log body path parameters packet
-         String bodyPathParametersPacketFile = sessionDirectory + bodyPathParametersFileName;
-         FootstepPlannerMessageTools.copyParametersToPacket(bodyPathParametersPacket, planner.getVisibilityGraphParameters());
-         byte[] serializedBodyPathParameters = bodyPathParametersPacketSerializer.serializeToBytes(bodyPathParametersPacket);
-         writeToFile(bodyPathParametersPacketFile, serializedBodyPathParameters);
 
          // log footstep planner parameters packet
          String footstepParametersPacketFile = sessionDirectory + footstepParametersFileName;
@@ -201,43 +191,7 @@ public class FootstepPlannerLogger
          e.printStackTrace();
          return false;
       }
-
-      // log body path data
-      String bodyPathPlannerDataFileName = sessionDirectory + bodyPathPlanFileName;
-      try
-      {
-         File bodyPathPlannerDataFile = new File(bodyPathPlannerDataFileName);
-         FileTools.ensureFileExists(bodyPathPlannerDataFile.toPath());
-         fileWriter = new FileWriter(bodyPathPlannerDataFile);
-
-         VisibilityGraphHolder visibilityGraphHolder = planner.getVisibilityGraphPlanner().getVisibilityGraphHolder();
-         writeLine(0, "startMapId:" + visibilityGraphHolder.getStartMapId());
-         writeLine(0, "goalMapId:" + visibilityGraphHolder.getGoalMapId());
-         writeLine(0, "interRegionsMapId:" + visibilityGraphHolder.getInterRegionsMapId());
-         writeVisibilityMap("startMap", 0, visibilityGraphHolder.getStartVisibilityMap());
-         writeVisibilityMap("goalMap", 0, visibilityGraphHolder.getGoalVisibilityMap());
-         writeVisibilityMap("interRegionMap", 0, visibilityGraphHolder.getInterRegionsVisibilityMap());
-
-         int numberOfNavigableRegions = visibilityGraphHolder.getNumberOfNavigableRegions();
-         writeLine(0, "navigableRegions:" + numberOfNavigableRegions);
-         for (int i = 0; i < numberOfNavigableRegions; i++)
-         {
-            VisibilityMapWithNavigableRegion navigableRegion = visibilityGraphHolder.getNavigableRegion(i);
-            writeNavigableRegion(1, i, navigableRegion);
-         }
-
-         fileWriter.flush();
-      }
-      catch (Exception e)
-      {
-         LogTools.error("Error logging body path planner data");
-         fileWriter = null;
-         outputStream = null;
-         printStream = null;
-         e.printStackTrace();
-         return false;
-      }
-
+      
       // log planner iteration header file
       try
       {
@@ -634,5 +588,20 @@ public class FootstepPlannerLogger
    public static String getDefaultLogsDirectory()
    {
       return defaultLogsDirectory;
+   }
+
+   public static String generateALogFolderName()
+   {
+      return generateALogFolderName(defaultLogsDirectory);
+   }
+
+   public static String generateALogFolderName(String logDirectory)
+   {
+      if (!logDirectory.endsWith(File.separator))
+      {
+         logDirectory += File.separator;
+      }
+
+      return logDirectory + dateFormat.format(new Date()) + FOOTSTEP_PLANNER_LOG_POSTFIX + File.separator;
    }
 }

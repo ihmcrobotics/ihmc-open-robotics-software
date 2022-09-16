@@ -1,8 +1,16 @@
 package us.ihmc.atlas.sensors;
 
-import javafx.application.Application;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
@@ -10,12 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.tools.io.WorkspacePathTools;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-public class AtlasLidarBasedREAStandaloneLauncher extends Application
+public class AtlasLidarBasedREAStandaloneLauncher extends ApplicationNoModule
 {
    private LIDARBasedEnvironmentAwarenessUI ui;
    private LIDARBasedREAModule module;

@@ -36,6 +36,10 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
             * - when a multi-contact controller is running, any rigid-body of the robot can be in contact.
             */
    public boolean hold_support_rigid_bodies_ = true;
+   /**
+            * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
+            */
+   public boolean enable_multi_contact_support_region_solver_;
 
    public HumanoidKinematicsToolboxConfigurationMessage()
    {
@@ -56,6 +60,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       enable_auto_support_polygon_ = other.enable_auto_support_polygon_;
 
       hold_support_rigid_bodies_ = other.hold_support_rigid_bodies_;
+
+      enable_multi_contact_support_region_solver_ = other.enable_multi_contact_support_region_solver_;
 
    }
 
@@ -133,6 +139,21 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       return hold_support_rigid_bodies_;
    }
 
+   /**
+            * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
+            */
+   public void setEnableMultiContactSupportRegionSolver(boolean enable_multi_contact_support_region_solver)
+   {
+      enable_multi_contact_support_region_solver_ = enable_multi_contact_support_region_solver;
+   }
+   /**
+            * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
+            */
+   public boolean getEnableMultiContactSupportRegionSolver()
+   {
+      return enable_multi_contact_support_region_solver_;
+   }
+
 
    public static Supplier<HumanoidKinematicsToolboxConfigurationMessagePubSubType> getPubSubType()
    {
@@ -159,6 +180,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_support_rigid_bodies_, other.hold_support_rigid_bodies_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_multi_contact_support_region_solver_, other.enable_multi_contact_support_region_solver_, epsilon)) return false;
+
 
       return true;
    }
@@ -180,6 +203,8 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
 
       if(this.hold_support_rigid_bodies_ != otherMyClass.hold_support_rigid_bodies_) return false;
 
+      if(this.enable_multi_contact_support_region_solver_ != otherMyClass.enable_multi_contact_support_region_solver_) return false;
+
 
       return true;
    }
@@ -197,7 +222,9 @@ public class HumanoidKinematicsToolboxConfigurationMessage extends Packet<Humano
       builder.append("enable_auto_support_polygon=");
       builder.append(this.enable_auto_support_polygon_);      builder.append(", ");
       builder.append("hold_support_rigid_bodies=");
-      builder.append(this.hold_support_rigid_bodies_);
+      builder.append(this.hold_support_rigid_bodies_);      builder.append(", ");
+      builder.append("enable_multi_contact_support_region_solver=");
+      builder.append(this.enable_multi_contact_support_region_solver_);
       builder.append("}");
       return builder.toString();
    }

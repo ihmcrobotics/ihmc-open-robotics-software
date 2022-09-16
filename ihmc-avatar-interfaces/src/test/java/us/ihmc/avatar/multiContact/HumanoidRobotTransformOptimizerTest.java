@@ -2,24 +2,28 @@ package us.ihmc.avatar.multiContact;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 
 public abstract class HumanoidRobotTransformOptimizerTest
 {
@@ -59,25 +63,27 @@ public abstract class HumanoidRobotTransformOptimizerTest
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          return;
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robots);
-      scs.startOnAThread();
-      ThreadTools.sleepForever();
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+      scs.setJavaFXThreadImplicitExit(false);
+      scs.addRobots(Arrays.asList(robots));
+      scs.waitUntilVisualizerDown();
    }
 
-   public void runTest(RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupA, RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupB,
+   public void runTest(RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupA,
+                       RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupB,
                        double epsilon)
    {
-      HumanoidFloatingRootJointRobot scsRobotA = robotModelA.createHumanoidFloatingRootJointRobot(false);
-      HumanoidFloatingRootJointRobot scsRobotB = robotModelB.createHumanoidFloatingRootJointRobot(false);
-      HumanoidFloatingRootJointRobot scsRobotBCorrected = robotModelBCorrected.createHumanoidFloatingRootJointRobot(false);
+      Robot scsRobotA = new Robot(robotModelA.getRobotDefinition(), SimulationConstructionSet2.inertialFrame);
+      Robot scsRobotB = new Robot(robotModelB.getRobotDefinition(), SimulationConstructionSet2.inertialFrame);
+      Robot scsRobotBCorrected = new Robot(robotModelBCorrected.getRobotDefinition(), SimulationConstructionSet2.inertialFrame);
 
       FullHumanoidRobotModel idRobotA = robotModelA.createFullRobotModel();
       FullHumanoidRobotModel idRobotB = robotModelB.createFullRobotModel();
       FullHumanoidRobotModel idRobotBCorrected = robotModelBCorrected.createFullRobotModel();
 
-      initialSetupA.initializeRobot(scsRobotA);
-      initialSetupB.initializeRobot(scsRobotB);
-      initialSetupB.initializeRobot(scsRobotBCorrected);
+      initialSetupA.initializeRobot(scsRobotA.getRootBody());
+      initialSetupB.initializeRobot(scsRobotB.getRootBody());
+      initialSetupB.initializeRobot(scsRobotBCorrected.getRootBody());
 
       copyRobotState(scsRobotA, idRobotA);
       copyRobotState(scsRobotB, idRobotB);
@@ -89,10 +95,10 @@ public abstract class HumanoidRobotTransformOptimizerTest
       robotTransformOptimizer.compute();
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      scsRobotBCorrected.getRootJoint().getTransformToWorld(transform);
+      scsRobotBCorrected.getFloatingRootJoint().getJointPose().get(transform);
       transform.preMultiply(robotTransformOptimizer.getTransformFromBToA());
-      scsRobotBCorrected.getRootJoint().setRotationAndTranslation(transform);
-      scsRobotBCorrected.update();
+      scsRobotBCorrected.getFloatingRootJoint().getJointPose().set(transform);
+      scsRobotBCorrected.updateFrames();
       idRobotBCorrected.getRootJoint().getJointPose().set(transform);
       idRobotBCorrected.updateFrames();
 
@@ -115,13 +121,12 @@ public abstract class HumanoidRobotTransformOptimizerTest
       assertTrue(errorMagnitude < epsilon, "Error magnitude is larger than expected: " + errorMagnitude);
    }
 
-   private static void copyRobotState(HumanoidFloatingRootJointRobot source, FullHumanoidRobotModel destination)
+   private static void copyRobotState(Robot source, FullHumanoidRobotModel destination)
    {
-      DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(source, 0);
-      drcPerfectSensorReaderFactory.build(destination.getRootJoint(), null, null, null, null);
-      SensorDataContext sensorDataContext = new SensorDataContext();
-      long timestamp = drcPerfectSensorReaderFactory.getSensorReader().read(sensorDataContext);
-      drcPerfectSensorReaderFactory.getSensorReader().compute(timestamp, sensorDataContext);
+      List<? extends SimJointBasics> allSourceJoints = source.getFloatingRootJoint().subtreeList();
+      List<? extends JointBasics> allDestinationJoints = destination.getRootJoint().subtreeList();
+      for (JointStateType jointStateType : JointStateType.values())
+         MultiBodySystemTools.copyJointsState(allSourceJoints, allDestinationJoints, jointStateType);
       destination.updateFrames();
    }
 }

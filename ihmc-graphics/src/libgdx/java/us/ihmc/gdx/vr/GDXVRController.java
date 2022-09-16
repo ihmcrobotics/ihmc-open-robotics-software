@@ -1,16 +1,21 @@
 package us.ihmc.gdx.vr;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.imgui.ImGuiRigidBodyTransformTuner;
+import us.ihmc.gdx.tools.GDXModelBuilder;
+import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -60,6 +65,10 @@ public class GDXVRController extends GDXVRTrackedDevice
    private final ReferenceFrame xForwardZUpControllerFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
+   private final FramePose3D selectionSphereFramePose = new FramePose3D();
+   private final RigidBodyTransform selectionSphereTransformToControllerFrame = new RigidBodyTransform();
+   private final ImGuiRigidBodyTransformTuner selectionSphereTransformTuner = new ImGuiRigidBodyTransformTuner(selectionSphereTransformToControllerFrame);
+   private GDXModelInstance selectionSphere;
 
    public GDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -70,6 +79,10 @@ public class GDXVRController extends GDXVRTrackedDevice
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
                                                                                 getDeviceYUpZBackFrame(),
                                                                                 controllerYBackZLeftXRightToXForwardZUp);
+
+      selectionSphereTransformToControllerFrame.getTranslation().setX(0.029);
+      selectionSphereTransformToControllerFrame.getTranslation().setY(side.negateIfLeftSide(0.020));
+      selectionSphereTransformToControllerFrame.getTranslation().setZ(-0.017);
    }
 
    public void initSystem()
@@ -112,6 +125,18 @@ public class GDXVRController extends GDXVRTrackedDevice
 
       super.update(trackedDevicePoses);
 
+      if (isConnected())
+      {
+         if (selectionSphere == null)
+         {
+            selectionSphere = new GDXModelInstance(GDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
+         }
+
+         selectionSphereFramePose.setIncludingFrame(xForwardZUpControllerFrame, selectionSphereTransformToControllerFrame);
+         selectionSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         selectionSphere.setPoseInWorldFrame(selectionSphereFramePose);
+      }
+
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(triggerTouchedActionHandle.get(0), triggerTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(triggerActionHandle.get(0), triggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -124,6 +149,16 @@ public class GDXVRController extends GDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
+   }
+
+   public void renderImGuiTunerWidgets()
+   {
+      selectionSphereTransformTuner.renderTunerWithYawPitchRoll(0.001);
+   }
+
+   public GDXModelInstance getSelectionSphere()
+   {
+      return selectionSphere;
    }
 
    public InputDigitalActionData getClickTriggerActionData()
@@ -210,5 +245,10 @@ public class GDXVRController extends GDXVRTrackedDevice
       {
          runIfConnected.accept(this);
       }
+   }
+
+   public FramePose3DReadOnly getSelectionPose()
+   {
+      return selectionSphereFramePose;
    }
 }

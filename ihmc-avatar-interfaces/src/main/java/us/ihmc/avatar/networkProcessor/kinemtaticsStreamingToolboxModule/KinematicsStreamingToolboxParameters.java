@@ -31,6 +31,7 @@ public class KinematicsStreamingToolboxParameters
    private double inputPoseLPFBreakFrequency;
    private double inputWeightDecayDuration;
    private double inputVelocityDecayDuration;
+   private boolean useStreamingPublisher;
 
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
 
@@ -66,6 +67,8 @@ public class KinematicsStreamingToolboxParameters
       inputPoseLPFBreakFrequency = 4.0;
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
+
+      useStreamingPublisher = true;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
@@ -172,6 +175,11 @@ public class KinematicsStreamingToolboxParameters
       return inputVelocityDecayDuration;
    }
 
+   public boolean getUseStreamingPublisher()
+   {
+      return useStreamingPublisher;
+   }
+
    public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
    {
       return defaultConfiguration;
@@ -265,5 +273,10 @@ public class KinematicsStreamingToolboxParameters
    public void setInputVelocityDecayDuration(double inputVelocityDecayDuration)
    {
       this.inputVelocityDecayDuration = inputVelocityDecayDuration;
+   }
+
+   public void setUseStreamingPublisher(boolean useStreamingPublisher)
+   {
+      this.useStreamingPublisher = useStreamingPublisher;
    }
 }

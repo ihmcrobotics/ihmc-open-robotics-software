@@ -200,7 +200,7 @@ public class RigidBodyHashCodeResolver
    public RigidBodyReadOnly getRigidBody(long bodyHashCode)
    {
       if (!hashCodeToRigidBodyMap.containsKey(bodyHashCode))
-         throw new RuntimeException("Unknown rigid-body.");
+         throw new RuntimeException("Unknown rigid-body with hashcode: " + bodyHashCode);
 
       return hashCodeToRigidBodyMap.get(bodyHashCode);
    }

@@ -343,7 +343,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataBeforeSmoothing.getComHeightJerk());
+      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightJerk());
 
       if (feetManager != null)
       {

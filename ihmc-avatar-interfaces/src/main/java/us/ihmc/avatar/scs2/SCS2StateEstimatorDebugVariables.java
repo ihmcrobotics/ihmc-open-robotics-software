@@ -1,11 +1,14 @@
 package us.ihmc.avatar.scs2;
 
+import java.util.concurrent.TimeUnit;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.session.YoTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -14,6 +17,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class SCS2StateEstimatorDebugVariables implements Controller
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final YoTimer timer = new YoTimer(getClass().getSimpleName(), TimeUnit.MILLISECONDS, registry);
+
    private final YoFramePoint3D centerOfMassPosition;
    private final YoFrameVector3D centerOfMassVelocity;
    private final YoFrameVector3D centerOfMassAcceleration;
@@ -56,6 +62,7 @@ public class SCS2StateEstimatorDebugVariables implements Controller
    @Override
    public void doControl()
    {
+      timer.start();
       centerOfMassFrame.update();
       centroidalMomentumRateCalculator.reset();
 
@@ -78,6 +85,7 @@ public class SCS2StateEstimatorDebugVariables implements Controller
       centroidalMomentPivot.scale(-z / normalizedFz);
       centroidalMomentPivot.addX(centerOfMassPosition.getX());
       centroidalMomentPivot.addY(centerOfMassPosition.getY());
+      timer.stop();
    }
 
    @Override

@@ -74,7 +74,7 @@ public class HumanoidKinematicsSolver
       RobotConfigurationData configurationData = new RobotConfigurationData();
       configurationData.setJointNameHash(kinematicsToolboxOutputStatus.getJointNameHash());
       MessageTools.copyData(kinematicsToolboxOutputStatus.getDesiredJointAngles(), configurationData.getJointAngles());
-      configurationData.getRootTranslation().set(new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootTranslation()));
+      configurationData.getRootPosition().set(new Vector3D32(kinematicsToolboxOutputStatus.getDesiredRootPosition()));
       configurationData.getRootOrientation().set(new Quaternion32(kinematicsToolboxOutputStatus.getDesiredRootOrientation()));
       setInitialConfiguration(configurationData);
    }

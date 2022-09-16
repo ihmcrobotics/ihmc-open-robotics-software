@@ -134,7 +134,7 @@ public abstract class AvatarPushRecoveryWalkingTrackTest implements MultiRobotTe
       ((YoBoolean) simulationTestHelper.findVariable("stepsAreAdjustableCSG")).set(true);
       ((YoBoolean) simulationTestHelper.findVariable("shiftUpcomingStepsWithTouchdownCSG")).set(true);
 
-      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                                 simulationTestHelper.getRobot(),
                                                                                 simulationTestHelper.getControllerFullRobotModel());
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
