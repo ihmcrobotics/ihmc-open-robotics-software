@@ -5,7 +5,7 @@ import java.util.function.ToDoubleFunction;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
-import cern.colt.Arrays;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -26,14 +26,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class IMUBasedJointPositionEstimator
 {
+   private static final boolean USE_NULLSPACE_PROJECTOR = false;
+
    private final GeometricJacobianCalculator jacobianCalculator;
    private final IMUSensorReadOnly parentIMU;
    private final IMUSensorReadOnly childIMU;
    private final YoDouble[] jointPositionCorrection;
    private final OneDoFJointBasics[] joints;
 
+   private final YoDouble regularizationWeight;
    private final YoDouble errorGain;
-   private final YoDouble preferredGain;
+   private final YoDouble errorWeight;
+   private final YoDouble preferredWeight;
 
    private final DMatrixRMaj jacobianAngularPart;
    private final DMatrixRMaj primaryJacobian;
@@ -41,8 +45,8 @@ public class IMUBasedJointPositionEstimator
    private final DMatrixRMaj errorEJMLSubspace = new DMatrixRMaj(3, 1);
    private final DampedLeastSquaresSolver solver;
 
-//   private RotationErrorCalculator errorCalculator = new SelectionMatrixBasedCalculatorB();
-      private RotationErrorCalculator errorCalculator = new VectorComparisonBasedCalculator();
+   //   private RotationErrorCalculator errorCalculator = new SelectionMatrixBasedCalculatorB();
+   private RotationErrorCalculator errorCalculator = new VectorComparisonBasedCalculator();
 
    private final Matrix3D selectionMatrix3D = new Matrix3D();
    private final DMatrixRMaj selectionMatrixEJML = new DMatrixRMaj(3, 3);
@@ -56,23 +60,27 @@ public class IMUBasedJointPositionEstimator
    private final NullspaceCalculator nullspaceCalculator;
    private final DMatrixRMaj preferredJacobian;
 
-   private final DMatrixRMaj solverInput_A = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj solverInput_b = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj solverInput_H = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj solverInput_f = new DMatrixRMaj(3, 1);
 
    public IMUBasedJointPositionEstimator(String namePrefix, IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry)
    {
       this.parentIMU = parentIMU;
       this.childIMU = childIMU;
-      
+
       joints = MultiBodySystemTools.createOneDoFJointPath(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink());
       this.jacobianCalculator = new GeometricJacobianCalculator();
       jacobianCalculator.setKinematicChain(joints);
       jacobianCalculator.setJacobianFrame(childIMU.getMeasurementFrame());
 
+      regularizationWeight = new YoDouble(namePrefix + "RegularizationWeight", registry);
+      regularizationWeight.set(1.0e-6);
       errorGain = new YoDouble(namePrefix + "ErrorGain", registry);
-      errorGain.set(0.9);
-      preferredGain = new YoDouble(namePrefix + "PreferredGain", registry);
-      preferredGain.set(0.45);
+      errorGain.set(1);
+      errorWeight = new YoDouble(namePrefix + "ErrorWeight", registry);
+      errorWeight.set(1);
+      preferredWeight = new YoDouble(namePrefix + "PreferredWeight", registry);
+      preferredWeight.set(0.01);
       jointPositionCorrection = new YoDouble[joints.length];
       for (int i = 0; i < joints.length; i++)
       {
@@ -81,12 +89,11 @@ public class IMUBasedJointPositionEstimator
       }
 
       solver = new DampedLeastSquaresSolver(joints.length);
-      solver.setAlpha(1.0e-4);
       jacobianAngularPart = new DMatrixRMaj(3, joints.length);
       primaryJacobian = new DMatrixRMaj(3, joints.length);
       qCorrection = new DMatrixRMaj(joints.length, 1);
       qPreferred = new DMatrixRMaj(joints.length, 1);
-      nullspaceCalculator = new DampedLeastSquaresNullspaceCalculator(joints.length, 1.0e-7);
+      nullspaceCalculator = USE_NULLSPACE_PROJECTOR ? new DampedLeastSquaresNullspaceCalculator(joints.length, 1.0e-5) : null;
       preferredJacobian = new DMatrixRMaj(joints.length, joints.length);
    }
 
@@ -126,36 +133,65 @@ public class IMUBasedJointPositionEstimator
       if (preferredJointPositions == null)
       {
          qPreferred.zero();
+         solver.setAlpha(regularizationWeight.getValue());
          solver.setA(primaryJacobian);
          solver.solve(errorEJMLSubspace, qCorrection);
       }
       else
       {
+         // In this scenario, we want to solve the problem as an unconstrained QP so we can weigh primary vs preferred objectives. 
          for (int i = 0; i < joints.length; i++)
             qPreferred.set(i, 0, preferredJointPositions.applyAsDouble(joints[i]) - joints[i].getQ());
-         CommonOps_DDRM.scale(preferredGain.getValue(), qPreferred);
          CommonOps_DDRM.setIdentity(preferredJacobian);
-         nullspaceCalculator.projectOntoNullspace(preferredJacobian, primaryJacobian);
+         if (USE_NULLSPACE_PROJECTOR)
+            nullspaceCalculator.projectOntoNullspace(preferredJacobian, primaryJacobian);
 
-         solverInput_A.reshape(primaryJacobian.getNumRows() + preferredJacobian.getNumRows(), joints.length);
-         CommonOps_DDRM.insert(primaryJacobian, solverInput_A, 0, 0);
-         CommonOps_DDRM.insert(preferredJacobian, solverInput_A, primaryJacobian.getNumRows(), 0);
-         solverInput_b.reshape(errorEJMLSubspace.getNumRows() + qPreferred.getNumRows(), 1);
-         CommonOps_DDRM.insert(errorEJMLSubspace, solverInput_b, 0, 0);
-         CommonOps_DDRM.insert(qPreferred, solverInput_b, errorEJMLSubspace.getNumRows(), 0);
+         solverInput_H.reshape(joints.length, joints.length);
+         CommonOps_DDRM.setIdentity(solverInput_H);
+         // Squaring the regularizationWeight to be consistent with the DLS solver
+         CommonOps_DDRM.scale(MathTools.square(regularizationWeight.getValue()), solverInput_H);
+         solverInput_f.reshape(joints.length, 1);
+         solverInput_f.zero();
 
-         solver.setA(solverInput_A);
-         solver.solve(solverInput_b, qCorrection);
+         addObjective(errorWeight.getValue(), primaryJacobian, errorEJMLSubspace, solverInput_H, solverInput_f);
+         addObjective(preferredWeight.getValue(), preferredJacobian, qPreferred, solverInput_H, solverInput_f);
 
-//         System.out.println("error: " + error);
-//         System.out.println("qPref : " + Arrays.toString(qPreferred.data));
-//         System.out.println("qCorr : " + Arrays.toString(qCorrection.data));
+         // min(qDot) 0.5 qDot' * H * qDot + f' * qDot
+         // => solve H * qDot = -f
+         CommonOps_DDRM.scale(-1, solverInput_f);
+
+         solver.setAlpha(0.0);
+         solver.setA(solverInput_H);
+         solver.solve(solverInput_f, qCorrection);
       }
 
       for (int i = 0; i < joints.length; i++)
       {
          jointPositionCorrection[i].set(qCorrection.get(i));
       }
+   }
+
+   private final DMatrixRMaj temp_JtW = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj temp_H = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj temp_f = new DMatrixRMaj(3, 1);
+
+   private void addObjective(double weight, DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj H, DMatrixRMaj f)
+   {
+      // We're to to do: min_qDot (J qDot - b)^T W (J qDot - b)
+      // Which becomes: min_qDot 0.5 qDot^T J^T W J qDot - b^T W J qDot = min_qDot 0.5 qDot^T H qDot + f qDot
+      // With: H = J^T W J, & f = -b^T W J
+
+      temp_JtW.reshape(taskJacobian.getNumCols(), taskJacobian.getNumRows());
+      CommonOps_DDRM.transpose(taskJacobian, temp_JtW);
+      CommonOps_DDRM.scale(weight, temp_JtW);
+
+      // Compute: H += J^T W J
+      CommonOps_DDRM.mult(temp_JtW, taskJacobian, temp_H);
+      CommonOps_DDRM.addEquals(H, temp_H);
+
+      // Compute: f += - b^T W J 
+      CommonOps_DDRM.mult(temp_JtW, taskObjective, temp_f);
+      CommonOps_DDRM.subtractEquals(f, temp_f);
    }
 
    public YoDouble[] getJointPositionCorrection()
@@ -210,7 +246,7 @@ public class IMUBasedJointPositionEstimator
 
          selectionMatrix.setToDiagonal(1, 1, 0);
          childOrientationKinematics.inverseTransform(selectionMatrix);
-//         selectionMatrix.transform(errorRotationVector);
+         selectionMatrix.transform(errorRotationVector);
 
          return errorRotationVector;
       }
@@ -234,7 +270,7 @@ public class IMUBasedJointPositionEstimator
 
          selectionMatrix.setToDiagonal(1, 1, 0);
          childOrientationKinematics.inverseTransform(selectionMatrix);
-//         selectionMatrix.transform(errorRotationVector);
+         selectionMatrix.transform(errorRotationVector);
 
          return errorRotationVector;
       }
