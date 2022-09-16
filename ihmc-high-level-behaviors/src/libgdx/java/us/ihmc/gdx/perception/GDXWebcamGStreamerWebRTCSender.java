@@ -23,12 +23,7 @@ import us.ihmc.log.LogTools;
 import java.io.IOException;
 
 /**
- * Requires th following installed on the system:
- * - gstreamer
- * - gst-plugins-bad (includes the required webrtc and webrtcbin)
- * - libsoup
- *
- * Visit https://webrtc.nirbheek.in/ and pass the "Our id " given to this program.
+ * Requires gstreamer and gst-plugins-bad, which includes the required webrtc and webrtcbin
  */
 public class GDXWebcamGStreamerWebRTCSender
 {
@@ -235,11 +230,11 @@ public class GDXWebcamGStreamerWebRTCSender
    {
       if (!pad.hasCurrentCaps())
       {
-         LogTools.info("Pad has no current Capabilities - ignoring");
+         LogTools.info("Pad has no current Caps - ignoring");
          return;
       }
       Caps caps = pad.getCurrentCaps();
-      LogTools.info("Received decoded stream with capabilities: {}", caps.toString());
+      LogTools.info(() -> "Received decoded stream with caps : " + caps.toString());
       if (caps.isAlwaysCompatible(Caps.fromString("video/x-raw")))
       {
          Element q = ElementFactory.make("queue", "videoqueue");
@@ -273,7 +268,7 @@ public class GDXWebcamGStreamerWebRTCSender
 
    private final Element.PAD_ADDED onIncomingStream = (element, pad) ->
    {
-      LogTools.info("Receiving stream! Element: {} Pad: {}", element.getName(), pad.getName());
+      LogTools.info(() -> "Receiving stream! Element : " + element.getName() + " Pad : " + pad.getName());
       if (pad.getDirection() != PadDirection.SRC)
       {
          return;
