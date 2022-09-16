@@ -47,8 +47,6 @@ public class LogVideoLoader
       this.filename = file;
       this.timestampFilename = timestampFile;
 
-//      executorService.scheduleAtFixedRate(this::loadNextFrame, 10L, 10L, TimeUnit.MILLISECONDS);
-
       videoFile = new File(file);
       if (!videoFile.exists())
       {

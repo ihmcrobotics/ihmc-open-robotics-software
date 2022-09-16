@@ -54,10 +54,8 @@ public class GDXPerceptionVisualizerUI
 
    private PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
    private PlanarRegionsList regionsUpdate = new PlanarRegionsList();
-   //    private final GDXHighLevelDepthSensorSimulator simulatedDepthSensor;
 
    private GDXImGuiBasedUI baseUI;
-   private ImGuiMapSenseConfigurationPanel mapsenseConfigurationUI;
    private ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
    private GDXEnvironmentBuilder environmentBuilder;
 
@@ -65,11 +63,7 @@ public class GDXPerceptionVisualizerUI
 
    private RigidBodyTransform depthSensorTransform = new RigidBodyTransform();
    private Matrix4 gdxSensorTransform = new Matrix4();
-   private GDXTransformTuner l515TransformTuner;
 
-   private boolean LOW_RESOLUTION_SENSORS = false;
-   private GDXHighLevelDepthSensorSimulator steppingL515Simulator;
-   private GDXL515SensorObject l515Model;
    private GDXOusterSensorObject ousterModel;
 
    private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
@@ -89,7 +83,7 @@ public class GDXPerceptionVisualizerUI
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
-//      RosMainNode ros1Node = new RosMainNode(NetworkParameters.getROSURI(), "PerceptionVisualizer");
+      //      RosMainNode ros1Node = new RosMainNode(NetworkParameters.getROSURI(), "PerceptionVisualizer");
 
       globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
       baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
@@ -100,37 +94,35 @@ public class GDXPerceptionVisualizerUI
          public void create()
          {
 
-//            mapsenseConfigurationUI = new ImGuiMapSenseConfigurationPanel(ros1Node, ros2Node);
-
-
+            //            mapsenseConfigurationUI = new ImGuiMapSenseConfigurationPanel(ros1Node, ros2Node);
 
             globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
-//            GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
-//                    ros2Node,
-//                    RosTools.MAPSENSE_REGIONS);
-//            globalVisualizersUI.addVisualizer(mapsenseRegionsVisualizer);
+            //            GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
+            //                    ros2Node,
+            //                    RosTools.MAPSENSE_REGIONS);
+            //            globalVisualizersUI.addVisualizer(mapsenseRegionsVisualizer);
 
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
-//
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Compressed Color", RosTools.D435_VIDEO_COMPRESSED));
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Color", RosTools.D435_VIDEO));
-//
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("ZED Left Color", RosTools.ZED2_LEFT_EYE_VIDEO));
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("ZED Right Color", RosTools.ZED2_RIGHT_EYE_VIDEO));
-//
-//            globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Head Ouster", RosTools.OUSTER_POINT_CLOUD));
-//            globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("MultiSense lidar scan", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN));
-//
-//            globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("SLAM Poses", RosTools.SLAM_POSE));
-//            globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Internal Sensor Pose", "/atlas/sensors/chest_l515/pose"));
-//
-//            globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Semantic Target Cloud", RosTools.SEMANTIC_TARGET_CLOUD));
-//            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("Semantic Mask", RosTools.SEMANTIC_MASK));
-//            globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Semantic Target Pose", RosTools.SEMANTIC_TARGET_POSE));
-//
-//            globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Ouster Point Cloud", RosTools.OUSTER_POINT_CLOUD));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
+            //
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Compressed Color", RosTools.D435_VIDEO_COMPRESSED));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Color", RosTools.D435_VIDEO));
+            //
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("ZED Left Color", RosTools.ZED2_LEFT_EYE_VIDEO));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("ZED Right Color", RosTools.ZED2_RIGHT_EYE_VIDEO));
+            //
+            //            globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Head Ouster", RosTools.OUSTER_POINT_CLOUD));
+            //            globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("MultiSense lidar scan", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN));
+            //
+            //            globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("SLAM Poses", RosTools.SLAM_POSE));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Internal Sensor Pose", "/atlas/sensors/chest_l515/pose"));
+            //
+            //            globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Semantic Target Cloud", RosTools.SEMANTIC_TARGET_CLOUD));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("Semantic Mask", RosTools.SEMANTIC_MASK));
+            //            globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Semantic Target Pose", RosTools.SEMANTIC_TARGET_POSE));
+            //
+            //            globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Ouster Point Cloud", RosTools.OUSTER_POINT_CLOUD));
 
             //        simulatedDepthSensor = createSimulatedDepthSensor(ros1Node);
             //        simulatedDepthSensor.setSensorFrameToWorldTransform(depthSensorTransform);
@@ -141,30 +133,29 @@ public class GDXPerceptionVisualizerUI
             buildingConstructor = new GDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-//            baseUI.getImGuiPanelManager().addPanel(mapsenseRegionsVisualizer.getLoggingPanel());
+            //            baseUI.getImGuiPanelManager().addPanel(mapsenseRegionsVisualizer.getLoggingPanel());
             //        baseUI.getImGuiDockingSetup().addWindow(simulatedDepthSensor.getWindowName(), simulatedDepthSensor::renderImGuiWindow);
-//            baseUI.getImGuiPanelManager().addPanel(mapsenseConfigurationUI.getWindowName(), mapsenseConfigurationUI::render);
+            //            baseUI.getImGuiPanelManager().addPanel(mapsenseConfigurationUI.getWindowName(), mapsenseConfigurationUI::render);
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             //        l515TransformTuner = new GDXTransformTuner(robotModel.getSensorInformation().getSteppingCameraTransform());
             //        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
 
-//            ousterLidar = createOusterLidar(ros1Node, ros2Node);
-//            ousterLidar.setupForROS1PointCloud(ros1Node, RosTools.OUSTER_POINT_CLOUD);
-//            ousterLidar.setSensorEnabled(true);
-//            ousterLidar.setRenderPointCloudDirectly(true);
-//            ousterLidar.setSensorFrameToWorldTransform(depthSensorTransform);
+            //            ousterLidar = createOusterLidar(ros1Node, ros2Node);
+            //            ousterLidar.setupForROS1PointCloud(ros1Node, RosTools.OUSTER_POINT_CLOUD);
+            //            ousterLidar.setSensorEnabled(true);
+            //            ousterLidar.setRenderPointCloudDirectly(true);
+            //            ousterLidar.setSensorFrameToWorldTransform(depthSensorTransform);
 
-//            ros1Node.execute();
-
+            //            ros1Node.execute();
 
             H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
 
             BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
             depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex);
 
-//            BytedecoOpenCVTools.printMat(depthMap, "Depth");
+            //            BytedecoOpenCVTools.printMat(depthMap, "Depth");
 
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
@@ -172,8 +163,8 @@ public class GDXPerceptionVisualizerUI
             //                simulatedDepthSensor.create();
             //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
-//            baseUI.getPrimaryScene().addRenderableProvider(ousterLidar);
-//            baseUI.getImGuiPanelManager().addPanel(ousterLidar);
+            //            baseUI.getPrimaryScene().addRenderableProvider(ousterLidar);
+            //            baseUI.getImGuiPanelManager().addPanel(ousterLidar);
 
             environmentBuilder.create();
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
@@ -195,7 +186,6 @@ public class GDXPerceptionVisualizerUI
 
             //                environmentBuilderUI.getModelInput().addInstance(ousterModel);
 
-
          }
 
          @Override
@@ -208,14 +198,14 @@ public class GDXPerceptionVisualizerUI
             gdxSensorTransform.set(ousterModel.getRealisticModelInstance().transform);
             GDXTools.toEuclid(gdxSensorTransform, depthSensorTransform);
 
-//            ousterLidar.render(baseUI.getPrimaryScene());
+            //            ousterLidar.render(baseUI.getPrimaryScene());
 
             globalVisualizersUI.update();
 
-
             frameIndex++;
 
-            if((frameIndex % 30) == 0) {
+            if ((frameIndex % 30) == 0)
+            {
                H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
                BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
@@ -223,14 +213,13 @@ public class GDXPerceptionVisualizerUI
                depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex / 30);
                LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
 
-//               BytedecoOpenCVTools.printMat(depthMap, "Depth");
+               //               BytedecoOpenCVTools.printMat(depthMap, "Depth");
 
                Mat image = new Mat(768, 1024, opencv_core.CV_8UC1);
 
                depthMap.convertTo(image, opencv_core.CV_8UC1, 256.0f, 0.0f);
                imshow("Loaded Image", image);
                waitKey(1);
-
             }
 
             pointCloudRenderer.setPointsToRender(pointsToRender, Color.BLUE);
@@ -251,7 +240,7 @@ public class GDXPerceptionVisualizerUI
             globalVisualizersUI.destroy();
             baseUI.dispose();
             ros2Node.destroy();
-//            ros1Node.shutdown();
+            //            ros1Node.shutdown();
          }
       });
    }
@@ -288,7 +277,5 @@ public class GDXPerceptionVisualizerUI
    {
       new GDXPerceptionVisualizerUI();
    }
-
-
 }
 
