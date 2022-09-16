@@ -39,6 +39,7 @@ import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.ui.vr.GDXVRInputMode;
 import us.ihmc.gdx.ui.vr.GDXWholeBodyIKStreaming;
 import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
+import us.ihmc.gdx.ui.yo.GDXJoystickStepper;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -101,6 +102,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final ImString tempImGuiText = new ImString(1000);
    private final boolean interactablesAvailable;
    private final GDXContinuousStepping continuousStepping;
+   private final ImBoolean joystickOn = new ImBoolean(false);
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -199,7 +201,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters, communicationHelper);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(),
+                                 robotModel,
+                                 syncedRobot,
+                                 teleoperationParameters,
+                                 communicationHelper,
+                                 ros2Helper,
+                                 footstepPlanning.getFootstepPlannerParameters());
 
       if (interactablesAvailable)
       {
@@ -543,6 +551,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       walkPathControlRing.renderImGuiWidgets();
 
       interactableFootstepPlan.renderImGuiWidgets();
+
       ImGui.sameLine();
       if (ImGui.button(labels.get("Delete All")))
       {

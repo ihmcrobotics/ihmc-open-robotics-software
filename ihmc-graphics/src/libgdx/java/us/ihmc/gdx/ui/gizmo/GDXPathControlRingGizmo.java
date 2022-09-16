@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -477,7 +478,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       updateTransforms();
    }
 
-   private void recreateGraphics()
+   public void recreateGraphics()
    {
       updateMaterialHighlighting();
       discModel.invalidateMesh();
@@ -500,7 +501,12 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       }
    }
 
-   public Pose3DReadOnly getPose3D()
+   private Pose3DReadOnly getPose3D()
+   {
+      return framePose3D;
+   }
+
+   private FramePose3D getFramePose3D()
    {
       return framePose3D;
    }

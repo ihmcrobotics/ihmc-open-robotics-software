@@ -9,6 +9,7 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -19,8 +20,10 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -33,6 +36,7 @@ import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
+import us.ihmc.gdx.ui.yo.GDXJoystickStepper;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
@@ -88,13 +92,17 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private GDXWalkPathType walkPathType = GDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
 
-   private boolean isContinuousStepping = false;
+   private GDXJoystickStepper joystickStepper;
+   private final boolean isContinuousStepping = false;
+   private boolean joystickOn = false;
 
    public void create(GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       GDXTeleoperationParameters teleoperationParameters,
-                      CommunicationHelper communicationHelper)
+                      CommunicationHelper communicationHelper,
+                      ROS2ControllerHelper ros2Helper,
+                      FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.panel3D = panel3D;
       this.teleoperationParameters = teleoperationParameters;
@@ -138,6 +146,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
+      joystickStepper = new GDXJoystickStepper(robotModel, syncedRobot, ros2Helper, communicationHelper, footstepPlannerParameters);
    }
 
    public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -157,6 +166,12 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();
+
+      if (joystickOn)
+      {
+         joystickStepper.run();
+         setGoalGizmoFromJoystickPose();
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -220,16 +235,21 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          }
       }
 
+      // TODO: this uses continuous step generator, but we don't know if we'll use this. Also has bug: keeps going under the ground.
+      /*
       boolean altHeld = ImGui.getIO().getKeyAlt();
       if (altHeld && selected)
       {
-         isContinuousStepping = true;
+//         isContinuousStepping = true;
       }
 
       if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
       {
          isContinuousStepping = false;
       }
+
+       */
+
 
       if (!isContinuousStepping)
       {
@@ -285,9 +305,19 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          {
             planFootstepsUsingTurnWalkTurnPlanner();
          }
-         else
+         else if (plannerToUse == 2)
          {
             planFootstepsUsingTurnStraightTurnFootstepGenerator();
+         }
+         else
+         {
+            planJoystick();
+            joystickOn = true;
+         }
+         if (plannerToUse!=3)
+         {
+            joystickStepper.stop();
+            joystickOn = false;
          }
       });
    }
@@ -358,6 +388,18 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
    }
 
+   private void setGoalGizmoFromJoystickPose()
+   {
+      FramePose3DReadOnly joystickPose = joystickStepper.getCurrentPose();
+      footstepPlannerGoalGizmo.getTransformToParent().set(new RigidBodyTransform(joystickPose));
+      footstepPlannerGoalGizmo.updateTransforms();
+   }
+
+   private void planJoystick()
+   {
+      joystickStepper.initiate();
+   }
+
    public void renderImGuiWidgets()
    {
       if (ImGui.radioButton(labels.get("A* Planner"), plannerToUse == 0))
@@ -374,6 +416,11 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       {
          plannerToUse = 2;
       }
+      if (ImGui.radioButton(labels.get("joystick control"), plannerToUse == 3 ))
+      {
+         plannerToUse = 3;
+      }
+      ImGuiTools.previousWidgetTooltip("WARNING!! Do not check this box if you don't have xbox controller connected!");
       ImGui.text("Control ring:");
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Deleted"), !selected && !modified))

@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.baselinePlanner;
-import java.util.ArrayList;
-import java.util.List;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,6 +9,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -17,7 +18,10 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
-public class PreviewWindowFootstepPlanner
+import java.util.ArrayList;
+import java.util.List;
+
+public class JoystickFootstepPlanner
 {
    private final int VIZ_SAMPLE_COUNT = 40;
 
@@ -28,12 +32,12 @@ public class PreviewWindowFootstepPlanner
    private final SamplingPoseTrajectoryVisualizer trajectoryViz;
    private int headFootstepPlanSize;
    private int tailFootstepPlanSize;
-   private final List<SimpleTimedFootstep> activeFootstepQueue;
+   private final List<SimpleTimedFootstep> headFootstepPlan;
    private final List<SimpleTimedFootstep> tailFootstepPlan;
    private final TimedFootstepPlanVisualization footstepPlanViz;
    private final BaselineFootstepPlanner footstepPlanner;
    private final SideDependentList<FramePose3D> headFootholds;
-   private final SideDependentList<FramePose3D> footstepsToEnqueue;
+   private final SideDependentList<FramePose3D> tailFootholds;
    private RobotSide nextFootstepSide;
    private final SimpleTimedFootstep ongoingFootstep;
    private final SideDependentList<YoFramePoseUsingYawPitchRoll> vizHeadFootholds;
@@ -43,8 +47,12 @@ public class PreviewWindowFootstepPlanner
    private final YoBoolean visualizeBaselineTrajectory;
    private final BaselineFootstepPlannerParameters parameters;
 
-   public PreviewWindowFootstepPlanner(BaselineFootstepPlannerParameters parameters, double previewTime, double dt, int maxFootsteps,
-                                       SideDependentList<ConvexPolygon2D> footPolygons, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   private double swingTime = 0.6;
+   private double transferTime = 0.25;
+   private FootstepDataListMessage plannedFootsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+
+   public JoystickFootstepPlanner(BaselineFootstepPlannerParameters parameters, double previewTime, double dt, int maxFootsteps,
+                                  SideDependentList<ConvexPolygon2D> footPolygons, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.parameters = parameters;
       this.previewTime = previewTime;
@@ -59,28 +67,28 @@ public class PreviewWindowFootstepPlanner
       // Initialize footstep plans.
       this.headFootstepPlanSize = 0;
       this.tailFootstepPlanSize = 0;
-      this.activeFootstepQueue = new ArrayList<>();
+      this.headFootstepPlan = new ArrayList<>();
       this.tailFootstepPlan = new ArrayList<>();
       for (int i = 0; i < maxFootsteps; i++)
       {
-         this.activeFootstepQueue.add(new SimpleTimedFootstep());
+         this.headFootstepPlan.add(new SimpleTimedFootstep());
          this.tailFootstepPlan.add(new SimpleTimedFootstep());
       }
 
       // Initialize footholds.
       this.nextFootstepSide = RobotSide.LEFT;
       this.headFootholds = new SideDependentList<>();
-      this.footstepsToEnqueue = new SideDependentList<>();
+      this.tailFootholds = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          this.headFootholds.put(robotSide, new FramePose3D());
-         this.footstepsToEnqueue.put(robotSide, new FramePose3D());
+         this.tailFootholds.put(robotSide, new FramePose3D());
       }
       this.ongoingFootstep = new SimpleTimedFootstep();
 
       // Initialize footstep planner.
       this.footstepPlanner = new BaselineFootstepPlanner(parameters);
-      this.footstepPlanViz = new TimedFootstepPlanVisualization(activeFootstepQueue, headFootstepPlanSize, footPolygons, parentRegistry,
+      this.footstepPlanViz = new TimedFootstepPlanVisualization(headFootstepPlan, headFootstepPlanSize, footPolygons, parentRegistry,
                                                                 graphicsListRegistry);
       this.footstepPlanViz.setPreviewTime(previewTime);
 
@@ -102,7 +110,7 @@ public class PreviewWindowFootstepPlanner
       for (RobotSide robotSide : RobotSide.values)
       {
          this.headFootholds.get(robotSide).setIncludingFrame(initialFootholds.get(robotSide));
-         this.footstepsToEnqueue.get(robotSide).setIncludingFrame(initialFootholds.get(robotSide));
+         this.tailFootholds.get(robotSide).setIncludingFrame(initialFootholds.get(robotSide));
       }
 
       RobotSide lastFootstepSide = nextFootstepSide.getOppositeSide();
@@ -131,8 +139,8 @@ public class PreviewWindowFootstepPlanner
       double plannerStartTime;
       if (headFootstepPlanSize > 0)
       {
-         SimpleTimedFootstep tailFootstep = activeFootstepQueue.get(headFootstepPlanSize - 1);
-         tailFootstep.getSoleFramePose(footstepsToEnqueue.get(tailFootstep.getRobotSide()));
+         SimpleTimedFootstep tailFootstep = headFootstepPlan.get(headFootstepPlanSize - 1);
+         tailFootstep.getSoleFramePose(tailFootholds.get(tailFootstep.getRobotSide()));
          nextFootstepSide = tailFootstep.getRobotSide().getOppositeSide();
          plannerStartTime = tailFootstep.getTimeInterval().getEndTime() - currentTime;
       }
@@ -142,12 +150,12 @@ public class PreviewWindowFootstepPlanner
          plannerStartTime = ongoingFootstep.getTimeInterval().getEndTime() - currentTime;
       }
       plannerStartTime = Math.max(plannerStartTime, previewTime - (parameters.getMinimumTransferDuration() + parameters.getSwingDuration())) - dt;
-      tailFootstepPlanSize = footstepPlanner.compute(tailFootstepPlan, trajectory, footstepsToEnqueue, nextFootstepSide, plannerStartTime, previewTime);
+      tailFootstepPlanSize = footstepPlanner.compute(tailFootstepPlan, trajectory, tailFootholds, nextFootstepSide, plannerStartTime, previewTime);
 
       // Remove footsteps that have already started.
       if (headFootstepPlanSize > 0)
       {
-         SimpleTimedFootstep headFootstep = activeFootstepQueue.get(0);
+         SimpleTimedFootstep headFootstep = headFootstepPlan.get(0);
          if (headFootstep.getTimeInterval().getStartTime() < currentTime)
          {
             ongoingFootstep.set(headFootstep);
@@ -193,7 +201,7 @@ public class PreviewWindowFootstepPlanner
 
    public List<SimpleTimedFootstep> getFootstepPlan()
    {
-      return activeFootstepQueue;
+      return headFootstepPlan;
    }
 
    public int getFootstepPlanSize()
@@ -207,7 +215,7 @@ public class PreviewWindowFootstepPlanner
       {
          for (int i = 0; i < headFootstepPlanSize - 1; i++)
          {
-            activeFootstepQueue.get(i).set(activeFootstepQueue.get(i + 1));
+            headFootstepPlan.get(i).set(headFootstepPlan.get(i + 1));
          }
          headFootstepPlanSize--;
       }
@@ -215,10 +223,15 @@ public class PreviewWindowFootstepPlanner
 
    private void addTailFootstep(SimpleTimedFootstep tailFootstep)
    {
-      if (headFootstepPlanSize < activeFootstepQueue.size())
+      if (headFootstepPlanSize < headFootstepPlan.size())
       {
-         activeFootstepQueue.get(headFootstepPlanSize).set(tailFootstep);
+         headFootstepPlan.get(headFootstepPlanSize).set(tailFootstep);
          headFootstepPlanSize++;
+
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(tailFootstep.getRobotSide(),
+                                                                                           tailFootstep.getSoleFramePose().getPosition(),
+                                                                                           tailFootstep.getSoleFramePose().getOrientation());
+         plannedFootsteps.getFootstepDataList().add().set(footstepData);
       }
    }
 
@@ -249,5 +262,15 @@ public class PreviewWindowFootstepPlanner
          graphicsListRegistry.registerYoGraphic("Foothold",
                                                 new YoGraphicPolygon(robotSide + "Foothold", yoFootPolygon.get(robotSide), vizHeadFootholds.get(robotSide), 1.0, appearance));
       }
+   }
+
+   public FootstepDataListMessage getPlannedFootsteps()
+   {
+      return plannedFootsteps;
+   }
+
+   public void removePublishedFootSteps()
+   {
+      plannedFootsteps.getFootstepDataList().remove(0);
    }
 }

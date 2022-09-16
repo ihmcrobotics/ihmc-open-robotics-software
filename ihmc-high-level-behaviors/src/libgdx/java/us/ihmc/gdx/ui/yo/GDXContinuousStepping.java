@@ -9,7 +9,6 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.internal.ImGui;
 import imgui.type.ImDouble;
-import javafx.geometry.Pos;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -27,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -36,15 +34,11 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXWalkPathControlRing;
-import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
-import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
-import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationManager;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.gdx.vr.GDXVRController;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -112,7 +106,7 @@ public class GDXContinuousStepping
    {
       KEY,VR
    }
-   INPUT_MODE inputMode = INPUT_MODE.KEY;
+   INPUT_MODE inputMode = INPUT_MODE.VR;
 
    public GDXContinuousStepping(DRCRobotModel robotModel)
    {

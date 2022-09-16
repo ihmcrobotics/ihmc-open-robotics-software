@@ -8,6 +8,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 
 public class BaselineFootstepPlannerParameters
 {
@@ -30,6 +31,13 @@ public class BaselineFootstepPlannerParameters
    public BaselineFootstepPlannerParameters()
    {
 
+   }
+
+   public BaselineFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParametersBasics)
+   {
+      this();
+      this.minimumForwardStride = footstepPlannerParametersBasics.getIdealFootstepLength();
+      this.minimumLateralStride = footstepPlannerParametersBasics.getIdealSideStepWidth();
    }
 
    public BaselineFootstepPlannerParameters(BaselineFootstepPlannerParameters other)
