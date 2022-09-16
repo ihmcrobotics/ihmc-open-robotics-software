@@ -1,6 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
+    "3D View" : true,
     "Ouster" : true,
     "Ouster Depth Image" : true,
     "VR Thread Debugger" : false

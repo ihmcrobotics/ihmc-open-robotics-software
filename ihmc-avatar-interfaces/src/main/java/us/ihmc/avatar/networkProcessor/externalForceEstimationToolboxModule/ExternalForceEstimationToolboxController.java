@@ -374,7 +374,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          oneDoFJoints[i].setQd(newJointVelocities.get(i));
       }
 
-      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      rootJoint.setJointConfiguration(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootPosition());
       rootJoint.setJointLinearVelocity(robotConfigurationData.getPelvisLinearVelocity());
       rootJoint.setJointAngularVelocity(robotConfigurationData.getPelvisAngularVelocity());
 

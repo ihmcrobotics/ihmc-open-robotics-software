@@ -26,4 +26,14 @@ int32[] keys
 # List of heights, which correspond to the list of keys
 float32[] heights
 
+# List of variances, which correspond to the list of keys. May be empty.
+float32[] variances
+
+# List of centroids for each cell, which correspond to the list of keys. May be empty
+# Note: The z coordinate of each point is ignored, but should correspond to the height.
+geometry_msgs/Point[] centroids
+
+# List of normals for each cell, which correspond to the list of keys. May be empty.
+geometry_msgs/Vector3[] normals
+
 

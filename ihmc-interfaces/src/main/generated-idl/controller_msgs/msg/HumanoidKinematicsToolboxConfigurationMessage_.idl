@@ -42,6 +42,10 @@ module controller_msgs
          */
         @defaultValue(value=True)
         boolean hold_support_rigid_bodies;
+        /**
+         * If this is true and the solver receives a MultiContactBalanceStatus, it will solve for the multi-contact support region
+         */
+        boolean enable_multi_contact_support_region_solver;
       };
     };
   };

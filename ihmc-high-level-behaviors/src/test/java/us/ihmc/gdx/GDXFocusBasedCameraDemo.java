@@ -28,17 +28,17 @@ public class GDXFocusBasedCameraDemo
          {
             baseUI.create();
 
-            focusBasedCamera = baseUI.get3DSceneManager().getCamera3D();
+            focusBasedCamera = baseUI.getPrimary3DPanel().getCamera3D();
             focusBasedCamera.changeCameraPosition(5.0, 5.0, 5.0);
 
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
+            baseUI.getPrimaryScene().addModelInstance(new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3)));
 
             cameraFrameGraphic = new GDXReferenceFrameGraphic(0.3, Color.SKY);
-            baseUI.get3DSceneManager().addRenderableProvider(cameraFrameGraphic);
+            baseUI.getPrimaryScene().addRenderableProvider(cameraFrameGraphic);
             cameraPoseGraphic = new GDXReferenceFrameGraphic(0.25, Color.OLIVE);
-            baseUI.get3DSceneManager().addRenderableProvider(cameraPoseGraphic);
+            baseUI.getPrimaryScene().addRenderableProvider(cameraPoseGraphic);
             focusPointPoseGraphic = new GDXReferenceFrameGraphic(0.25, Color.SALMON);
-            baseUI.get3DSceneManager().addRenderableProvider(focusPointPoseGraphic);
+            baseUI.getPrimaryScene().addRenderableProvider(focusPointPoseGraphic);
          }
 
          @Override

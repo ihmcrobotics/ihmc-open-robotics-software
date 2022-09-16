@@ -143,4 +143,9 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       if (executorService != null && !executorService.isShutdown())
          executorService.destroy();
    }
+
+   public boolean isStarted()
+   {
+      return started;
+   }
 }

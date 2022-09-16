@@ -20,13 +20,9 @@ public class FootstepPlannerLog
 
    // Packets
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
-   private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
-
-   // Vis graph data
-   private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
 
    // A* body path data
    private final List<VariableDescriptor> bodyPathVariableDescriptors = new ArrayList<>();
@@ -54,11 +50,6 @@ public class FootstepPlannerLog
       return requestPacket;
    }
 
-   public VisibilityGraphsParametersPacket getBodyPathParametersPacket()
-   {
-      return bodyPathParametersPacket;
-   }
-
    public FootstepPlannerParametersPacket getFootstepParametersPacket()
    {
       return footstepParametersPacket;
@@ -72,11 +63,6 @@ public class FootstepPlannerLog
    public FootstepPlanningToolboxOutputStatus getStatusPacket()
    {
       return statusPacket;
-   }
-
-   public VisibilityGraphHolder getVisibilityGraphHolder()
-   {
-      return visibilityGraphHolder;
    }
 
    public List<VariableDescriptor> getBodyPathVariableDescriptors()

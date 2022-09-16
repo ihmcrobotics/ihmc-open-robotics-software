@@ -289,8 +289,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
 
       ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       controllerCoreCommand.addFeedbackControlCommand(feedbackControlCommandList);
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
 
       writeOutput();
    }

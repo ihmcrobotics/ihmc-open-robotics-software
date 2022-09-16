@@ -182,7 +182,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
       }
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
-      Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+      Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootPosition()), robotConfigurationData.getRootOrientation());
 
       BodyCollisionData collisionData = PlannerTools.detectCollisionsAlongBodyPath(rootPose,
                                                                                    bodyPath,
@@ -207,7 +207,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
       if (robotConfigurationData == null)
          return;
 
-      Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+      Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootPosition()), robotConfigurationData.getRootOrientation());
       Pose3D currentPoseAlongBodyPath = new Pose3D();
       Pose3D extrapolatedPoseAlongBodyPath = new Pose3D();
 

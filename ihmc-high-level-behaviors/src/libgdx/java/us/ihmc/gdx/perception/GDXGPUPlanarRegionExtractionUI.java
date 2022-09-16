@@ -9,7 +9,9 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -24,8 +26,11 @@ import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegion;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtraction;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.avatar.gpuPlanarRegions.GPURegionRing;
+import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
+import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -38,6 +43,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
+   private final SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(new SimpleGPUHeightMapParameters());
    private final ImFloat mergeDistanceThreshold = new ImFloat();
    private final ImFloat mergeAngularThreshold = new ImFloat();
    private final ImFloat filterDisparityThreshold = new ImFloat();
@@ -60,6 +66,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
+   private final ImBoolean render3DHeightMap = new ImBoolean(false);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
    private final ImFloat regionGrowthFactor = new ImFloat();
@@ -84,10 +91,12 @@ public class GDXGPUPlanarRegionExtractionUI
    private ImGuiPlot gpuDurationPlot;
    private ImGuiPlot depthFirstSearchDurationPlot;
    private ImGuiPlot planarRegionsSegmentationDurationPlot;
+   private ImGuiPlot gpuHeightMapDurationPlot;
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
    private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
+   private final Stopwatch gpuHeightMapStopwatch = new Stopwatch();
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
@@ -101,11 +110,14 @@ public class GDXGPUPlanarRegionExtractionUI
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
+   private GDXHeightMapGraphic heightMapGraphic;
    private GDXPointCloudRenderer boundaryPointCloud;
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
+//      simpleGPUHeightMapUpdater.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
+      simpleGPUHeightMapUpdater.create(imageWidth, imageHeight, gpuPlanarRegionExtraction.getFilteredDepthImage().getBackingDirectByteBuffer(), fx, fy, cx, cy);
 
       setImGuiWidgetsFromParameters();
 
@@ -140,10 +152,14 @@ public class GDXGPUPlanarRegionExtractionUI
       gpuDurationPlot = new ImGuiPlot(labels.get("GPU processing duration"), 1000, 300, 50);
       depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
       planarRegionsSegmentationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
+      gpuHeightMapDurationPlot = new ImGuiPlot(labels.get("Gpu height map duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+      heightMapGraphic = new GDXHeightMapGraphic();
       boundaryPointCloud = new GDXPointCloudRenderer();
       boundaryPointCloud.create(2000000);
+
+      heightMapGraphic.setRenderGroundPlane(false);
    }
 
    public void extractPlanarRegions(ReferenceFrame cameraFrame)
@@ -154,6 +170,8 @@ public class GDXGPUPlanarRegionExtractionUI
       setParametersFromImGuiWidgets();
 
       wholeAlgorithmDurationStopwatch.start();
+
+
       gpuDurationStopwatch.start();
 
       gpuPlanarRegionExtraction.extractPlanarRegions(cameraFrame, () ->
@@ -218,10 +236,17 @@ public class GDXGPUPlanarRegionExtractionUI
       planarRegionsSegmentationDurationStopwatch.start();
       gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
       planarRegionsSegmentationDurationStopwatch.suspend();
+
+
+      gpuHeightMapStopwatch.start();
+//      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
+      gpuHeightMapStopwatch.suspend();
+
       wholeAlgorithmDurationStopwatch.suspend();
 
       render2DPanels();
       renderPlanarRegions();
+      renderHeightMap();
       renderBoundaryPoints(cameraFrame);
    }
 
@@ -246,6 +271,15 @@ public class GDXGPUPlanarRegionExtractionUI
 
       planarRegionsGraphic.generateMeshes(gpuPlanarRegionExtraction.getPlanarRegionsList());
       planarRegionsGraphic.update();
+   }
+
+   private void renderHeightMap()
+   {
+      if (!render3DHeightMap.get())
+         return;
+
+//      heightMapGraphic.generateMeshes(simpleGPUHeightMapUpdater.getHeightMap().buildMessage());
+      heightMapGraphic.update();
    }
 
    private void renderBoundaryPoints(ReferenceFrame cameraFrame)
@@ -305,6 +339,7 @@ public class GDXGPUPlanarRegionExtractionUI
       gpuDurationPlot.render(gpuDurationStopwatch.totalElapsed());
       depthFirstSearchDurationPlot.render(depthFirstSearchDurationStopwatch.totalElapsed());
       planarRegionsSegmentationDurationPlot.render(planarRegionsSegmentationDurationStopwatch.totalElapsed());
+      gpuHeightMapDurationPlot.render(gpuHeightMapStopwatch.totalElapsed());
       numberOfPlanarRegionsPlot.render((float) gpuPlanarRegionExtraction.getGPUPlanarRegions().size());
       regionMaxSearchDepthPlot.render((float) gpuPlanarRegionExtraction.getRegionMaxSearchDepth());
       numberOfBoundaryVerticesPlot.render((float) gpuPlanarRegionExtraction.getNumberOfBoundaryPatchesInWholeImage());
@@ -328,7 +363,7 @@ public class GDXGPUPlanarRegionExtractionUI
       ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
       ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
       ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
-      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
+      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 4000);
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       ImGui.inputFloat(labels.get("Filter disparity threshold"), filterDisparityThreshold);
       ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
@@ -338,6 +373,7 @@ public class GDXGPUPlanarRegionExtractionUI
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
+      ImGui.checkbox(labels.get("Render 3D height map"), render3DHeightMap);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
       ImGui.sliderFloat(labels.get("Focal length X (px)"), focalLengthXPixels.getData(), -1000.0f, 1000.0f);
@@ -449,11 +485,14 @@ public class GDXGPUPlanarRegionExtractionUI
          planarRegionsGraphic.getRenderables(renderables, pool);
       if (render3DGrownBoundaries.get() || render3DBoundaries.get())
          boundaryPointCloud.getRenderables(renderables, pool);
+      if (render3DHeightMap.get())
+         heightMapGraphic.getRenderables(renderables, pool);
    }
 
    public void destroy()
    {
       gpuPlanarRegionExtraction.destroy();
+      simpleGPUHeightMapUpdater.destroy();
       // TODO: Destroy the rest
    }
 
@@ -485,6 +524,11 @@ public class GDXGPUPlanarRegionExtractionUI
    public ImBoolean getRender3DPlanarRegions()
    {
       return render3DPlanarRegions;
+   }
+
+   public ImBoolean getRender3DHeightMap()
+   {
+      return render3DHeightMap;
    }
 
    public ImBoolean getRender3DBoundaries()

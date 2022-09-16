@@ -46,8 +46,10 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    }
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
+
    private ModelInstance modelInstance;
    private Model lastModel;
+
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ArrayList<GDX3DSituatedText> textRenderables = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -122,7 +124,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
          Color regionColor = footstepColors.get(minimalFootstep.getSide());
 
          minimalFootstep.getSolePoseInWorld().get(transformToWorld);
-         transformToWorld.appendTranslation(0.0, 0.0, 0.001);
+         transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
          {

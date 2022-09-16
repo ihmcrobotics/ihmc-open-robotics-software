@@ -116,6 +116,12 @@ public interface Polynomial3DBasics extends Polynomial3DReadOnly, Transformable
          getAxis(index).setCubic(t0, tFinal, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index), zdFinal.getElement(index));
    }
 
+   default void setCubicDirectly(double duration, Point3DReadOnly z0, Vector3DReadOnly zd0, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
+   {
+      for (int index = 0; index < 3; index++)
+         getAxis(index).setCubicDirectly(duration, z0.getElement(index), zd0.getElement(index), zFinal.getElement(index), zdFinal.getElement(index));
+   }
+
    default void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zFinal, Vector3DReadOnly zdFinal,
                                                            Vector3DReadOnly zddFinal)
    {

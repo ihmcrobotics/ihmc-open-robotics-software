@@ -269,7 +269,7 @@ public class WrenchMatrixCalculator
       if (command.getConstraintType() == ConstraintType.OBJECTIVE)
       {
          weight.setIncludingFrame(command.getWeight());
-         weight.changeFrame(planeFrame);
+         weight.changeFrameAndProjectToXYPlane(planeFrame);
          inputToPack.getTaskWeightMatrix().set(0, 0, command.getWeight().getX());
          inputToPack.getTaskWeightMatrix().set(1, 1, command.getWeight().getY());
       }

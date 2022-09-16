@@ -6,7 +6,10 @@ import org.apache.commons.math3.optim.linear.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -16,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static us.ihmc.commonWalkingControlModules.staticEquilibrium.ContactPoint.basisVectorsPerContactPoint;
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver.mass;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.MultiContactSupportRegionSolver.mg;
 
 /**
  * This class solves for forces given a set of contact points, surface normals, and CoM xy position
@@ -26,7 +29,6 @@ public class MultiContactForceOptimizer
 {
    private static final int maximumNumberOfIterations = 10000;
    private static final double convergenceThreshold = 1e-8;
-   private static final double rhoMax = 10.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -91,9 +93,9 @@ public class MultiContactForceOptimizer
          }
       }
 
-      beq.set(2, 0, mass * input.getGravityMagnitude());
-      beq.set(3, 0, mass * input.getGravityMagnitude() * centerOfMassXY.getY());
-      beq.set(4, 0, - mass * input.getGravityMagnitude() * centerOfMassXY.getX());
+      beq.set(2, 0, mg);
+      beq.set(3, 0, mg * centerOfMassXY.getY());
+      beq.set(4, 0, -mg * centerOfMassXY.getX());
 
       double[] objectiveCoefficients = new double[numberOfDecisionVariables];
       Arrays.fill(objectiveCoefficients, 1.0);
@@ -112,11 +114,28 @@ public class MultiContactForceOptimizer
       }
 
       for (int j = 0; j < numberOfDecisionVariables; j++)
-      {
+      { // positive rho values
          double[] constraintCoefficients = new double[numberOfDecisionVariables];
          constraintCoefficients[j] = 1.0;
          constraints.add(new LinearConstraint(constraintCoefficients, Relationship.GEQ, 0.0));
-         constraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, rhoMax));
+      }
+
+      for (int j = 0; j < input.getNumberOfContacts(); j++)
+      { // actuation constraint
+         double[] constraintCoefficients = new double[numberOfDecisionVariables];
+         FrameVector3D normal = input.getSurfaceNormals().get(j);
+
+         for (int rho_i = 0; rho_i < basisVectorsPerContactPoint; rho_i++)
+         {
+            constraintCoefficients[basisVectorsPerContactPoint * j + rho_i] = contactPoints.get(j).getBasisVector(rho_i).dot(normal);
+         }
+
+         double maxNormalForce = input.getActuationConstraints().get(j).getMaxNormalForce();
+         Point3D constraintPlanePoint = new Point3D();
+         constraintPlanePoint.set(normal);
+         constraintPlanePoint.scale(maxNormalForce);
+
+         constraints.add(new LinearConstraint(constraintCoefficients, Relationship.LEQ, constraintPlanePoint.dot(normal)));
       }
 
       try

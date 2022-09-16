@@ -9,6 +9,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -18,8 +19,8 @@ import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 public class AtlasFlatGroundWalkingTrackSCS2
 {
    private static final boolean USE_FEET_PERTURBER = false;
-   private static final boolean USE_STAND_PREP = true;
-   private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = true;
+   private static final boolean USE_STAND_PREP = false;
+   private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = false;
 
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
@@ -64,13 +65,11 @@ public class AtlasFlatGroundWalkingTrackSCS2
    private static void createOscillateFeetPerturber(SCS2AvatarSimulation avatarSimulation)
    {
       Robot robot = avatarSimulation.getRobot();
-      SimulationSession simulationSession = avatarSimulation.getSimulationSession();
+      SimulationConstructionSet2 scs = avatarSimulation.getSimulationConstructionSet();
       SideDependentList<String> footNames = new SideDependentList<>(side -> avatarSimulation.getRobotModel().getJointMap().getFootName(side));
 
       int ticksPerPerturbation = 10;
-      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot,
-                                                                                 footNames,
-                                                                                 simulationSession.getSessionDTSeconds() * ticksPerPerturbation);
+      OscillateFeetPerturber oscillateFeetPerturber = new OscillateFeetPerturber(robot, footNames, scs.getDT() * ticksPerPerturbation);
       oscillateFeetPerturber.setTranslationMagnitude(new double[] {0.01, 0.015, 0.005});
       oscillateFeetPerturber.setRotationMagnitudeYawPitchRoll(new double[] {0.017, 0.012, 0.011});
 
@@ -80,7 +79,7 @@ public class AtlasFlatGroundWalkingTrackSCS2
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.LEFT, new double[] {0.0, 0, 7.3});
       oscillateFeetPerturber.setRotationFrequencyHzYawPitchRoll(RobotSide.RIGHT, new double[] {0., 0, 1.11});
 
-      robot.addThrottledController(oscillateFeetPerturber, simulationSession.getSessionDTSeconds() * ticksPerPerturbation);
+      robot.addThrottledController(oscillateFeetPerturber, scs.getDT() * ticksPerPerturbation);
    }
 
    public static void main(String[] args)

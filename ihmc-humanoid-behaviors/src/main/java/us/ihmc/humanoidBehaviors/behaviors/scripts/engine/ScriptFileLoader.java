@@ -22,7 +22,7 @@ public class ScriptFileLoader
 {
    private final BufferedReader reader;
    private ObjectInputStream inputStream;
-   
+
    public ScriptFileLoader(Path scriptFilePath) throws IOException, StreamException
    {
       PrintTools.info("Working directory: " + System.getProperty("user.dir"));
@@ -49,44 +49,44 @@ public class ScriptFileLoader
       reader = Files.newBufferedReader(scriptFilePath);
       inputStream = xStream.createObjectInputStream(reader);
    }
-   
-   
+
    public ScriptFileLoader(File file) throws IOException
    {
-	   this(new BufferedInputStream(new FileInputStream(file)));
+      this(new BufferedInputStream(new FileInputStream(file)));
    }
-   
+
    public ScriptFileLoader(InputStream scriptInputStream) throws IOException
    {
-	   XStream xStream = new XStream()
-	      {
-	         @Override
-            protected MapperWrapper wrapMapper(MapperWrapper next)
-	         {
-	            return new MapperWrapper(next)
-	            {
+      XStream xStream = new XStream()
+      {
+         @Override
+         protected MapperWrapper wrapMapper(MapperWrapper next)
+         {
+            return new MapperWrapper(next)
+            {
 
-	               @Override
-                  public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
-	               {
-	                  return definedIn != Object.class ? super.shouldSerializeMember(definedIn, fieldName) : false;
-	               }
-	            };
-	         }
-	      };
-	      
-	      reader = null;
-	      inputStream = xStream.createObjectInputStream(scriptInputStream);
+               @Override
+               public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
+               {
+                  return definedIn != Object.class ? super.shouldSerializeMember(definedIn, fieldName) : false;
+               }
+            };
+         }
+      };
+      xStream.addPermission(type -> true); // => Accept all types.
+
+      reader = null;
+      inputStream = xStream.createObjectInputStream(scriptInputStream);
    }
 
    public void close()
    {
       try
       {
-    	  if(reader != null)
-    	  {
-    		  reader.close();    		  
-    	  }
+         if (reader != null)
+         {
+            reader.close();
+         }
          inputStream.close();
       }
       catch (IOException e)

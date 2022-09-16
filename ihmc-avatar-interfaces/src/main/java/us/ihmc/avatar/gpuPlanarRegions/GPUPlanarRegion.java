@@ -12,6 +12,10 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
+
 public class GPUPlanarRegion
 {
    private final Vector3D32 normalAverage = new Vector3D32();
@@ -33,6 +37,9 @@ public class GPUPlanarRegion
    private final DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
    private final Stopwatch svdStopwatch = new Stopwatch();
    private double svdDuration = Double.NaN;
+   private final TreeSet<GPURegionRing> regionsRingsBySize
+         = new TreeSet<>(Comparator.comparing(gpuRegionRing -> -gpuRegionRing.getConvexPolygon().getArea()));
+   private final ArrayList<GPURegionRing> holeRingsToRemove = new ArrayList<>();
 
    public void reset(int id)
    {
@@ -135,5 +142,15 @@ public class GPUPlanarRegion
    public double getSVDDuration()
    {
       return svdDuration;
+   }
+
+   public TreeSet<GPURegionRing> getRegionsRingsBySize()
+   {
+      return regionsRingsBySize;
+   }
+
+   public ArrayList<GPURegionRing> getHoleRingsToRemove()
+   {
+      return holeRingsToRemove;
    }
 }

@@ -255,7 +255,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
          oneDoFJoints[i].setTau(newJointTorques.get(i));
       }
 
-      pelvisTranslationFromRobotConfigurationData.set(packet.getRootTranslation());
+      pelvisTranslationFromRobotConfigurationData.set(packet.getRootPosition());
       pelvisOrientationFromRobotConfigurationData.set(packet.getRootOrientation());
 
       rootJoint.getJointPose().getPosition().set(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());

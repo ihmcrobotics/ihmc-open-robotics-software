@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
+import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -34,6 +35,7 @@ public class AvatarSimulation
    private DisposableRobotController robotController;
    private AvatarEstimatorThread stateEstimationThread;
    private AvatarControllerThread controllerThread;
+   private AvatarStepGeneratorThread stepGeneratorThread;
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
@@ -121,6 +123,7 @@ public class AvatarSimulation
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot);
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
+      stepGeneratorThread.initialize();
 
       // Otehrwise the master context gets overridden by the estimator and controller contexts.
       masterContext.setControllerRan(false);
@@ -216,6 +219,11 @@ public class AvatarSimulation
       this.controllerThread = controllerThread;
    }
 
+   public void setStepGeneratorThread(AvatarStepGeneratorThread stepGeneratorThread)
+   {
+      this.stepGeneratorThread = stepGeneratorThread;
+   }
+
    public void setHumanoidFloatingRootJointRobot(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot)
    {
       this.humanoidFloatingRootJointRobot = humanoidFloatingRootJointRobot;
@@ -254,6 +262,11 @@ public class AvatarSimulation
    public YoRegistry getControllerThreadRegistry()
    {
       return controllerThread.getYoVariableRegistry();
+   }
+
+   public YoRegistry getStepGeneratorThreadRegistry()
+   {
+      return stepGeneratorThread.getYoVariableRegistry();
    }
 
    public void setMasterContext(HumanoidRobotContextData masterContext)

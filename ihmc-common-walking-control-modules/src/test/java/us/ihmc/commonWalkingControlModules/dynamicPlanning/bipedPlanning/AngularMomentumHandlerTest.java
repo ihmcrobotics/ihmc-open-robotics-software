@@ -1,13 +1,21 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,12 +28,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class AngularMomentumHandlerTest
 {
@@ -187,36 +189,36 @@ public class AngularMomentumHandlerTest
          endCMPExpected.addY(-1.0 / gravityZ * endAMRate.get(i).getX());
 
          String errorMessage = "segment " + i + " failed.";
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, startCMPExpected, cmpTrajectories.get(i).getECMPStartPosition(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, endCMPExpected, cmpTrajectories.get(i).getECMPEndPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, startCMPExpected, cmpTrajectories.get(i).getECMPStartPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, endCMPExpected, cmpTrajectories.get(i).getECMPEndPosition(), epsilon);
 
 
          FrameVector3D startCMPRateExpected = new FrameVector3D();
          FrameVector3D endCMPRateExpected = new FrameVector3D();
 
-         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(0.0);
+         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(0.0);
 
          startCMPRateExpected.set(copTrajectories.get(i).getECMPStartVelocity());
          endCMPRateExpected.set(copTrajectories.get(i).getECMPEndVelocity());
 
-         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
-         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
+         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
 
-         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
       }
 
       int lastIdx = copTrajectories.size() - 1;
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartPosition(), cmpTrajectories.get(lastIdx).getECMPStartPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndPosition(), cmpTrajectories.get(lastIdx).getECMPEndPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartPosition(), cmpTrajectories.get(lastIdx).getECMPStartPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndPosition(), cmpTrajectories.get(lastIdx).getECMPEndPosition(), epsilon);
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartVelocity(), cmpTrajectories.get(lastIdx).getECMPStartVelocity(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndVelocity(), cmpTrajectories.get(lastIdx).getECMPEndVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartVelocity(), cmpTrajectories.get(lastIdx).getECMPStartVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndVelocity(), cmpTrajectories.get(lastIdx).getECMPEndVelocity(), epsilon);
 
       for (int i = 0; i < copTrajectories.size() - 1; i++)
       {
@@ -249,7 +251,7 @@ public class AngularMomentumHandlerTest
             angularMomentumHandler.computeAngularMomentum(globalTime);
 
             angularMomentumHandler.computeCoPPosition(ecmpTrajectory.getPosition(), desiredCoP);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, copTrajectory.getPosition(), desiredCoP, epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, copTrajectory.getPosition(), desiredCoP, epsilon);
          }
       }
 
@@ -382,36 +384,36 @@ public class AngularMomentumHandlerTest
          endCMPExpected.addY(-1.0 / gravityZ * endAMRate.get(i).getX());
 
          String errorMessage = "segment " + i + " failed.";
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, startCMPExpected, cmpTrajectories.get(i).getECMPStartPosition(), epsilon);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, endCMPExpected, cmpTrajectories.get(i).getECMPEndPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, startCMPExpected, cmpTrajectories.get(i).getECMPStartPosition(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, endCMPExpected, cmpTrajectories.get(i).getECMPEndPosition(), epsilon);
 
 
          FrameVector3D startCMPRateExpected = new FrameVector3D();
          FrameVector3D endCMPRateExpected = new FrameVector3D();
 
-         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(0.0);
+         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(0.0);
 
          startCMPRateExpected.set(copTrajectories.get(i).getECMPStartVelocity());
          endCMPRateExpected.set(copTrajectories.get(i).getECMPEndVelocity());
 
-         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
-         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
+         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
 
-         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
       }
 
       int lastIdx = copTrajectories.size() - 1;
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartPosition(), cmpTrajectories.get(lastIdx).getECMPStartPosition(), epsilon);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndPosition(), cmpTrajectories.get(lastIdx).getECMPEndPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartPosition(), cmpTrajectories.get(lastIdx).getECMPStartPosition(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndPosition(), cmpTrajectories.get(lastIdx).getECMPEndPosition(), epsilon);
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartVelocity(), cmpTrajectories.get(lastIdx).getECMPStartVelocity(), epsilon);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndVelocity(), cmpTrajectories.get(lastIdx).getECMPEndVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPStartVelocity(), cmpTrajectories.get(lastIdx).getECMPStartVelocity(), epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals(copTrajectories.get(lastIdx).getECMPEndVelocity(), cmpTrajectories.get(lastIdx).getECMPEndVelocity(), epsilon);
 
 
       comTrajectoryPlanner.solveForTrajectory(cmpTrajectories);
@@ -445,9 +447,9 @@ public class AngularMomentumHandlerTest
             comTrajectoryPlanner.compute(globalTime);
             angularMomentumHandler.computeAngularMomentum(globalTime);
 
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(ecmpTrajectory.getPosition(), comTrajectoryPlanner.getDesiredECMPPosition(), epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(ecmpTrajectory.getPosition(), comTrajectoryPlanner.getDesiredECMPPosition(), epsilon);
             angularMomentumHandler.computeCoPPosition(ecmpTrajectory.getPosition(), desiredCoP);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(errorMessage, copTrajectory.getPosition(), desiredCoP, epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(errorMessage, copTrajectory.getPosition(), desiredCoP, epsilon);
          }
       }
 

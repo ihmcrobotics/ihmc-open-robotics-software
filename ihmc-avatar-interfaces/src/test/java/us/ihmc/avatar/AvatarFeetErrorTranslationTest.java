@@ -71,7 +71,7 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
                                                                           controllerStateEstimatorDetectedTouchdown));
       }
 
-      YoDouble time = simulationTestHelper.getSimulationSession().getTime();
+      YoDouble time = simulationTestHelper.getSimulationConstructionSet().getTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
       EarlyTouchdownController earlyTouchdownController = new EarlyTouchdownController(singleSupportStartConditions, swing, time);
       earlyTouchdownController.setFractionToTriggerTouchdown(0.75);

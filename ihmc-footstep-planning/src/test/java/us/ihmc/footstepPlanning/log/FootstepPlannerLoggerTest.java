@@ -74,7 +74,6 @@ public class FootstepPlannerLoggerTest
 
       Assertions.assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));
       Assertions.assertTrue(expectedFootstepParameters.epsilonEquals(log.getFootstepParametersPacket(), 1e-5));
-      Assertions.assertTrue(expectedBodyPathParameters.epsilonEquals(log.getBodyPathParametersPacket(), 1e-5));
       Assertions.assertTrue(expectedOutputStatusPacket.epsilonEquals(log.getStatusPacket(), 1e-5));
    }
 }

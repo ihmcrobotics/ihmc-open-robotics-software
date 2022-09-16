@@ -12,11 +12,11 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.Assert;
@@ -124,7 +124,7 @@ public class SupportSequenceTest
       TDoubleList supportTimes = supportSequence.getSupportTimes();
       for (int i = 0; i < supportPolygons.size(); i++)
       {
-         EuclidGeometryTestTools.assertConvexPolygon2DGeometricallyEquals(expectedSupportPolygons.get(i), supportPolygons.get(i), 1.0e-1);
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedSupportPolygons.get(i), supportPolygons.get(i), 1.0e-1);
          Assert.assertEquals(expectedSupportTimes.get(i), supportTimes.get(i), 1.0e-10);
       }
    }
