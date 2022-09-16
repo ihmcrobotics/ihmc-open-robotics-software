@@ -164,7 +164,7 @@ public class GDXVRKinematicsStreamingMode
          }
          else
          {
-            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
+            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
             ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
             for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
             {
