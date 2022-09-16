@@ -36,7 +36,7 @@ import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.gdx.ui.vr.GDXVRKinematicsStreamingMode;
+import us.ihmc.gdx.ui.vr.GDXKinematicsStreamingMode;
 import us.ihmc.gdx.ui.vr.GDXVRMode;
 import us.ihmc.gdx.ui.vr.GDXVRModeManager;
 import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
@@ -92,7 +92,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXRobotCollisionModel selfCollisionModel;
    private GDXRobotCollisionModel environmentCollisionModel;
    private GDXArmManager wholeBodyDesiredIKManager;
-   private GDXVRKinematicsStreamingMode wholeBodyIKStreaming;
+   private GDXKinematicsStreamingMode wholeBodyIKStreaming;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -276,7 +276,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          if (kinematicsStreamingToolboxProcess != null)
          {
-            wholeBodyIKStreaming = new GDXVRKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
+            wholeBodyIKStreaming = new GDXKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
             wholeBodyIKStreaming.create(baseUI.getVRManager().getContext(), handInteractables);
          }
 
