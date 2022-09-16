@@ -19,18 +19,14 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXBuildingConstructor;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXOusterSensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2PlanarRegionsVisualizer;
-import us.ihmc.gdx.ui.tools.GDXTransformTuner;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoHDF5Tools;
-import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.HDF5Tools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -41,7 +37,6 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
 import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
 import static org.bytedeco.opencv.global.opencv_core.convertScaleAbs;
@@ -152,8 +147,8 @@ public class GDXPerceptionVisualizerUI
 
             H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
 
-            BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
-            depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex);
+            HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
+            depthMap = HDF5Tools.loadDepthMap(file, frameIndex);
 
             //            BytedecoOpenCVTools.printMat(depthMap, "Depth");
 
@@ -207,10 +202,10 @@ public class GDXPerceptionVisualizerUI
             if ((frameIndex % 30) == 0)
             {
                H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
-               BytedecoHDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
+               HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
 
-               depthMap = BytedecoHDF5Tools.loadDepthMap(file, frameIndex / 30);
+               depthMap = HDF5Tools.loadDepthMap(file, frameIndex / 30);
                LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
 
                //               BytedecoOpenCVTools.printMat(depthMap, "Depth");

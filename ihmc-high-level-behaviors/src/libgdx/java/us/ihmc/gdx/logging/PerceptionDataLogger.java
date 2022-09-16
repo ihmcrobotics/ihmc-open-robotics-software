@@ -4,8 +4,6 @@ import controller_msgs.msg.dds.BigVideoPacket;
 import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import org.bytedeco.hdf5.H5File;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -13,10 +11,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.perception.BytedecoHDF5Tools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLIntBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.HDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -42,29 +37,12 @@ public class PerceptionDataLogger
    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
 
-   private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-   private _cl_kernel unpackPointCloudKernel;
-   private OpenCLFloatBuffer pointCloudVertexBuffer;
-   private OpenCLIntBuffer decompressedOpenCLIntBuffer;
-   private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-
    private int depthMessageCounter = 0;
    private int pointsPerSegment = 786432;
    private int numberOfSegments = 1;
 
    public PerceptionDataLogger()
    {
-
-      openCLManager = new OpenCLManager();
-      openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
-      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
-
-      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
-      parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
-      decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
-      decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
 
       file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
       RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_data_logger");
@@ -85,7 +63,7 @@ public class PerceptionDataLogger
    public void logDepthMap(BigVideoPacket packet)
    {
       convertBigVideoPacketToMat(videoPacket, depthMap);
-      BytedecoHDF5Tools.storeDepthMap(file, "/chest_l515/depth/image_rect_raw/" + depthMessageCounter, depthMap);
+      HDF5Tools.storeDepthMap(file, "/chest_l515/depth/image_rect_raw/" + depthMessageCounter, depthMap);
       depthMessageCounter += 1;
    }
 
