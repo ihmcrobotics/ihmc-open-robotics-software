@@ -90,7 +90,7 @@ public class QuadTreeForGroundTest
          Point3D closestPoint = new Point3D();
          quadTree.getClosestPoint(point.getX(), point.getY(), closestPoint);
          assertFalse(point == closestPoint);
-         EuclidCoreTestTools.assertTuple3DEquals("point = " + point + ", closestPoint = " + closestPoint, point, closestPoint, 1e-7);
+         EuclidCoreTestTools.assertEquals("point = " + point + ", closestPoint = " + closestPoint, point, closestPoint, 1e-7);
       }
    }
 
@@ -271,7 +271,7 @@ public class QuadTreeForGroundTest
       assertEquals(1, allPoints.size());
 
       Point3D firstPoint = allPoints.get(0);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(x, y, z1), firstPoint, 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point3D(x, y, z1), firstPoint, 1e-7);
 
       double z2 = 1.01;
       quadTree.put(x + 0.001, y, z2);
@@ -281,7 +281,7 @@ public class QuadTreeForGroundTest
       quadTree.getStoredPoints(allPoints);
       assertEquals(2, allPoints.size());
       Point3D firstPointAgain = allPoints.get(0);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(x, y, z1), firstPointAgain, 1e-7);
+      EuclidCoreTestTools.assertEquals(new Point3D(x, y, z1), firstPointAgain, 1e-7);
 
       double z3 = 1.02;
       quadTree.put(x, y, z3);

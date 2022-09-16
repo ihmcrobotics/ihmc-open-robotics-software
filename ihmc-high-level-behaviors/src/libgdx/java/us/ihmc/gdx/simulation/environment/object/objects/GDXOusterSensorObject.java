@@ -15,7 +15,7 @@ public class GDXOusterSensorObject extends GDXEnvironmentObject
    public GDXOusterSensorObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.load("environmentObjects/ousterSensor/Ouster_OS0_Collada.dae");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj");
       setRealisticModel(realisticModel);
 
       getRealisticModelOffset().setRotationEulerAndZeroTranslation(EuclidCoreTools.TwoPI / 2.0f, 0.0f, 0.0f);

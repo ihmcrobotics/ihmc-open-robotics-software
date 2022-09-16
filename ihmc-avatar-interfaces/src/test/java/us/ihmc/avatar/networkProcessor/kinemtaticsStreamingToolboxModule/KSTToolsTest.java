@@ -41,7 +41,7 @@ public class KSTToolsTest
          Vector3DBasics expected = new Vector3D();
          calculus.computeAngularVelocityInBodyFixedFrame(currentOrientation, qDot, expected);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expected, actual, EPSILON);
+         EuclidCoreTestTools.assertEquals(expected, actual, EPSILON);
       }
    }
 
@@ -63,7 +63,7 @@ public class KSTToolsTest
          Quaternion expected = new Quaternion();
          new MultiBodySystemStateIntegrator(dt).integrate(angularVelocity, initialOrientation, expected);
 
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expected, actual, EPSILON);
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expected, actual, EPSILON);
       }
    }
 }

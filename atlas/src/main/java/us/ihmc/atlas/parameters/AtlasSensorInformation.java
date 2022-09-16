@@ -487,7 +487,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public RigidBodyTransform getHeadZED2CameraTransform()
+   public RigidBodyTransform getExperimentalCameraTransform()
    {
       return transformChestToZED2;
    }

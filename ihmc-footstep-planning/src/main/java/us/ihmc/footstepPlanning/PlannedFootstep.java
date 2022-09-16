@@ -61,27 +61,27 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       }
    }
 
-   public PlannedFootstep(PlannedFootstep other)
+   public PlannedFootstep(PlannedFootstepReadOnly other)
    {
-      this.sequenceId = other.sequenceId;
-      this.robotSide = other.robotSide;
-      this.footstepPose.set(other.footstepPose);
-      this.foothold.set(other.foothold);
+      this.sequenceId = other.getSequenceId();
+      this.robotSide = other.getRobotSide();
+      other.getFootstepPose(this.footstepPose);
+      this.foothold.set(other.getFoothold());
 
-      this.trajectoryType = other.trajectoryType;
-      this.swingHeight = other.swingHeight;
+      this.trajectoryType = other.getTrajectoryType();
+      this.swingHeight = other.getSwingHeight();
 
-      for (int i = 0; i < other.customWaypointProportions.size(); i++)
+      for (int i = 0; i < other.getCustomWaypointProportions().size(); i++)
       {
-         customWaypointProportions.add(other.customWaypointProportions.get(i));
+         customWaypointProportions.add(other.getCustomWaypointProportions().get(i));
       }
-      for (int i = 0; i < other.customWaypointPositions.size(); i++)
+      for (int i = 0; i < other.getCustomWaypointPositions().size(); i++)
       {
-         customWaypointPositions.add(new Point3D(other.customWaypointPositions.get(i)));
+         customWaypointPositions.add(new Point3D(other.getCustomWaypointPositions().get(i)));
       }
 
-      this.swingDuration = other.swingDuration;
-      this.transferDuration = other.transferDuration;
+      this.swingDuration = other.getSwingDuration();
+      this.transferDuration = other.getTransferDuration();
    }
 
    @Override
@@ -113,31 +113,37 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       return !foothold.isEmpty();
    }
 
+   @Override
    public TrajectoryType getTrajectoryType()
    {
       return trajectoryType;
    }
 
+   @Override
    public double getSwingHeight()
    {
       return swingHeight;
    }
 
+   @Override
    public TDoubleArrayList getCustomWaypointProportions()
    {
       return customWaypointProportions;
    }
 
+   @Override
    public List<Point3D> getCustomWaypointPositions()
    {
       return customWaypointPositions;
    }
 
+   @Override
    public double getSwingDuration()
    {
       return swingDuration;
    }
 
+   @Override
    public double getTransferDuration()
    {
       return transferDuration;
@@ -185,9 +191,16 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       }
    }
 
+   @Override
    public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
    {
       return swingTrajectory;
+   }
+
+   @Override
+   public long getSequenceId()
+   {
+      return sequenceId;
    }
 
    public FootstepDataMessage getAsMessage()

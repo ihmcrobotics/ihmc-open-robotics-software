@@ -111,7 +111,11 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* param
     }
 }
 
-void fill_dead_pixels(read_only image2d_t in, int x, int y, write_only image2d_t out0, global float* params)
+/*
+ * Replace non-reading (0s) pixels with an approximate nearby value, so they don't
+ * upset the rest of the algorithm.
+ */
+void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only image2d_t out0, global float* params)
 {
     uint Z = 0;
     int count = 0;
@@ -128,7 +132,7 @@ void fill_dead_pixels(read_only image2d_t in, int x, int y, write_only image2d_t
             int gy = y * ((int)params[FILTER_KERNEL_SIZE]) + j;
 
             int2 pos = (int2)(gx,gy);
-            Z = read_imageui(in, pos).x;
+            Z = read_imageui(inputImage, pos).x;
 
             /* For every unique non-zero depth value, insert x,y,z into xs,ys and values, respectively. */
             if (Z != 0)
@@ -176,7 +180,7 @@ void fill_dead_pixels(read_only image2d_t in, int x, int y, write_only image2d_t
             int gy = y*(int)params[FILTER_KERNEL_SIZE] + j;
 
             int2 pos = (int2)(gx,gy);
-            Z = read_imageui(in, pos).x;
+            Z = read_imageui(inputImage, pos).x;
 
             if (Z == 0)
             {
@@ -250,30 +254,23 @@ float3 calculateNormal(float3 p1, float3 p2, float3 p3)
    return normalize(cross(v12, v23));
 }
 
-/* ++++++++++++++++++++++++++++++++++++++++++ OPEN_CL KERNELS BEGIN HERE ++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/* OpenCL Kernels Begin Here. All utilities above this point. */
-
-
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- *  GPU Planar Region Kernels Here
- * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+/*
+ * Filters all pixels within a patch on depth map. Removes outliers, flying points, dead pixels and measurement
+ * noise.
  */
+void kernel filterKernel(read_only image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float* parameters)
+{
+   int y = get_global_id(0);
+   int x = get_global_id(1);
+   int filterPatchImageHeight = parameters[12];
+   int filterPatchImageWidth = parameters[13];
 
-/* Filter Kernel: Filters all pixels within a patch on depth map. Removes outliers, flying points, dead pixels and measurement
- * noise. */
-
- void kernel filterKernel(read_only image2d_t in, write_only image2d_t filteredDepth, write_only image2d_t buffer_nx, global float* params)
- {
-    int y = get_global_id(0);
-    int x = get_global_id(1);
-
-//    if(x==0 && y==0) printf("FilterKernel\n");
-    if (y >= 0 && y < (int)params[FILTER_SUB_H] && x >= 0 && x < (int)params[FILTER_SUB_W])
-    {
-        fill_dead_pixels(in, x, y, filteredDepth, params);
-//        mark_boundary_patches(in, x, y, buffer_nx, params);
-//        smooth_non_boundary(in, x, y, filteredDepth, params);
-    }
+   if (y >= 0 && y < filterPatchImageHeight && x >= 0 && x < filterPatchImageWidth)
+   {
+      fillDeadPixels(inputImage, x, y, filteredImage, parameters);
+      // mark_boundary_patches(inputImage, x, y, nxImage, parameters);
+      // smooth_non_boundary(inputImage, x, y, filteredImage, parameters);
+   }
 }
 
 /* Pack Kernel: Generates the patches by packing the centroid, surface normal and metadata related to
@@ -288,7 +285,7 @@ void kernel packKernel(  read_only image2d_t in,
 
  )
 {
-	int y = get_global_id(0);
+   int y = get_global_id(0);
    int x = get_global_id(1);
 
 //    if(x==0 && y==0) printf("PackKernel:(%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
@@ -396,6 +393,6 @@ void kernel segmentKernel(read_only image2d_t color, write_only image2d_t filter
    //    if(x==0 && y==0) printf("SegmentKernel\n");
    if(y >= 0 && y < (int)params[FILTER_SUB_H] && x >= 0 && x < (int)params[FILTER_SUB_W])
    {
-      fill_dead_pixels(color, x, y, filteredImage, params);
+      fillDeadPixels(color, x, y, filteredImage, params);
    }
 }

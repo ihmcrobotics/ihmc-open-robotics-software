@@ -52,6 +52,7 @@ public class StepAdjustmentReachabilityConstraint
 
    public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                                SteppingParameters steppingParameters,
+                                               StepAdjustmentParameters.CrossOverReachabilityParameters crossOverParameters,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -63,6 +64,7 @@ public class StepAdjustmentReachabilityConstraint
            new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth()),
            new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth()),
            new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth()),
+           crossOverParameters,
            yoNamePrefix,
            visualize,
            registry,
@@ -75,6 +77,7 @@ public class StepAdjustmentReachabilityConstraint
                                                DoubleProvider innerLimit,
                                                DoubleProvider outerLimit,
                                                DoubleProvider inPlaceWidth,
+                                               StepAdjustmentParameters.CrossOverReachabilityParameters crossOverParameters,
                                                String yoNamePrefix,
                                                boolean visualize,
                                                YoRegistry registry,
@@ -86,10 +89,14 @@ public class StepAdjustmentReachabilityConstraint
       this.outerLimit = outerLimit;
       this.inPlaceWidth = inPlaceWidth;
 
-      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, 0.05);
-      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, -0.05);
-      this.forwardCrossOverClearanceAngle = new DoubleParameter("forwardCrossOverClearanceAngle", registry, Math.toRadians(25));
-      this.backwardCrossOverClearanceAngle = new DoubleParameter("backwardCrossOverClearanceAngle", registry, Math.toRadians(45));
+      this.forwardCrossOverDistance = new DoubleParameter("forwardCrossOverDistance", registry, crossOverParameters.getForwardCrossOverDistance());
+      this.backwardCrossOverDistance = new DoubleParameter("backwardCrossOverDistance", registry, crossOverParameters.getBackwardCrossOverDistance());
+      this.forwardCrossOverClearanceAngle = new DoubleParameter("forwardCrossOverClearanceAngle",
+                                                                registry,
+                                                                crossOverParameters.getForwardCrossOverClearanceAngle());
+      this.backwardCrossOverClearanceAngle = new DoubleParameter("backwardCrossOverClearanceAngle",
+                                                                 registry,
+                                                                 crossOverParameters.getBackwardCrossOverClearanceAngle());
 
 
       for (RobotSide robotSide : RobotSide.values)
@@ -174,10 +181,14 @@ public class StepAdjustmentReachabilityConstraint
       return reachabilityPolygon;
    }
 
+   FrameConvexPolygon2D tempPolygon = new FrameConvexPolygon2D();
+
    private FrameConvexPolygon2DReadOnly updateReachabilityPolygon(RobotSide supportSide)
    {
       List<YoFramePoint2D> vertices = reachabilityVertices.get(supportSide);
       YoFrameConvexPolygon2D polygon = reachabilityPolygons.get(supportSide);
+
+      tempPolygon.clear(polygon.getReferenceFrame());
 
       // create an ellipsoid around the center of the forward and backward reachable limits
       double innerRadius = inPlaceWidth.getValue() - innerLimit.getValue();
@@ -209,13 +220,11 @@ public class StepAdjustmentReachabilityConstraint
             y = supportSide.negateIfLeftSide(inPlaceWidth.getValue() - outerRadius * Math.sin(angle));
          }
 
-         FixedFramePoint2DBasics vertex = vertices.get(vertexIdx);
-         vertex.set(x, y);
+         tempPolygon.addVertex(x, y);
       }
 
-
-      polygon.notifyVerticesChanged();
-      polygon.update();
+      tempPolygon.update();
+      polygon.set(tempPolygon);
 
       return polygon;
    }

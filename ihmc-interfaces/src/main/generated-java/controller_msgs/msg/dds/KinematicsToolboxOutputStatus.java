@@ -39,7 +39,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public byte current_toolbox_state_;
    public int joint_name_hash_;
    public us.ihmc.idl.IDLSequence.Float  desired_joint_angles_;
-   public us.ihmc.euclid.tuple3D.Vector3D desired_root_translation_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_root_position_;
    public us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
    /**
             * Desired joint velocities might be empty.
@@ -50,18 +50,24 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             */
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_linear_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_velocity_;
+   /**
+            * Support region used by the toolbox
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  support_region_;
    public double solution_quality_ = -1.0;
 
    public KinematicsToolboxOutputStatus()
    {
       desired_joint_angles_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
-      desired_root_translation_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_root_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_root_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       desired_joint_velocities_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
       desired_root_linear_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
       desired_root_angular_velocity_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      support_region_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (16, new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public KinematicsToolboxOutputStatus(KinematicsToolboxOutputStatus other)
@@ -79,11 +85,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       joint_name_hash_ = other.joint_name_hash_;
 
       desired_joint_angles_.set(other.desired_joint_angles_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_translation_, desired_root_translation_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_root_position_, desired_root_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_root_orientation_, desired_root_orientation_);
       desired_joint_velocities_.set(other.desired_joint_velocities_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_angular_velocity_, desired_root_angular_velocity_);
+      support_region_.set(other.support_region_);
       solution_quality_ = other.solution_quality_;
 
    }
@@ -134,9 +141,9 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    }
 
 
-   public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootTranslation()
+   public us.ihmc.euclid.tuple3D.Point3D getDesiredRootPosition()
    {
-      return desired_root_translation_;
+      return desired_root_position_;
    }
 
 
@@ -167,6 +174,15 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootAngularVelocity()
    {
       return desired_root_angular_velocity_;
+   }
+
+
+   /**
+            * Support region used by the toolbox
+            */
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getSupportRegion()
+   {
+      return support_region_;
    }
 
    public void setSolutionQuality(double solution_quality)
@@ -204,12 +220,19 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.desired_joint_angles_, other.desired_joint_angles_, epsilon)) return false;
 
-      if (!this.desired_root_translation_.epsilonEquals(other.desired_root_translation_, epsilon)) return false;
+      if (!this.desired_root_position_.epsilonEquals(other.desired_root_position_, epsilon)) return false;
       if (!this.desired_root_orientation_.epsilonEquals(other.desired_root_orientation_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.desired_joint_velocities_, other.desired_joint_velocities_, epsilon)) return false;
 
       if (!this.desired_root_linear_velocity_.epsilonEquals(other.desired_root_linear_velocity_, epsilon)) return false;
       if (!this.desired_root_angular_velocity_.epsilonEquals(other.desired_root_angular_velocity_, epsilon)) return false;
+      if (this.support_region_.size() != other.support_region_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.support_region_.size(); i++)
+         {  if (!this.support_region_.get(i).epsilonEquals(other.support_region_.get(i), epsilon)) return false; }
+      }
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
 
@@ -232,11 +255,12 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if(this.joint_name_hash_ != otherMyClass.joint_name_hash_) return false;
 
       if (!this.desired_joint_angles_.equals(otherMyClass.desired_joint_angles_)) return false;
-      if (!this.desired_root_translation_.equals(otherMyClass.desired_root_translation_)) return false;
+      if (!this.desired_root_position_.equals(otherMyClass.desired_root_position_)) return false;
       if (!this.desired_root_orientation_.equals(otherMyClass.desired_root_orientation_)) return false;
       if (!this.desired_joint_velocities_.equals(otherMyClass.desired_joint_velocities_)) return false;
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
       if (!this.desired_root_angular_velocity_.equals(otherMyClass.desired_root_angular_velocity_)) return false;
+      if (!this.support_region_.equals(otherMyClass.support_region_)) return false;
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
 
@@ -257,8 +281,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.joint_name_hash_);      builder.append(", ");
       builder.append("desired_joint_angles=");
       builder.append(this.desired_joint_angles_);      builder.append(", ");
-      builder.append("desired_root_translation=");
-      builder.append(this.desired_root_translation_);      builder.append(", ");
+      builder.append("desired_root_position=");
+      builder.append(this.desired_root_position_);      builder.append(", ");
       builder.append("desired_root_orientation=");
       builder.append(this.desired_root_orientation_);      builder.append(", ");
       builder.append("desired_joint_velocities=");
@@ -267,6 +291,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.desired_root_linear_velocity_);      builder.append(", ");
       builder.append("desired_root_angular_velocity=");
       builder.append(this.desired_root_angular_velocity_);      builder.append(", ");
+      builder.append("support_region=");
+      builder.append(this.support_region_);      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
       builder.append("}");

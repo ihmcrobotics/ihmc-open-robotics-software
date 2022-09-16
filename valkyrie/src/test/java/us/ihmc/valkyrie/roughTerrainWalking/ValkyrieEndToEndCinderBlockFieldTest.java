@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.roughTerrainWalking.EndToEndCinderBlockFieldTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
@@ -45,6 +45,12 @@ public class ValkyrieEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFie
    public double getPelvisOffsetHeight()
    {
       return -0.05;
+   }
+
+   @Override
+   public double getSwingHeight()
+   {
+      return 0.15;
    }
 
    @Override

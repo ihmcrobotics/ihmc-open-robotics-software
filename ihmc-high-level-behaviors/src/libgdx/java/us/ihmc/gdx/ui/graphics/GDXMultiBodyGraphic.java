@@ -9,14 +9,17 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.simulation.scs2.GDXMultiBodySystemFactories;
 import us.ihmc.gdx.simulation.scs2.GDXRigidBody;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
 
 public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
-   private GDXRigidBody multiBody;
+   protected GDXRigidBody multiBody;
    private final Activator robotLoadedActivator = new Activator();
 
    public GDXMultiBodyGraphic(String title)
@@ -26,25 +29,65 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
 
    public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody)
    {
+      loadRobotModelAndGraphics(robotDefinition, originalRootBody, false);
+   }
+
+   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody, boolean scale)
+   {
       if (multiBody != null)
          multiBody.destroy();
 
       ThreadTools.startAsDaemon(() ->
       {
-         multiBody = loadRigidBody(originalRootBody, robotDefinition);
+         multiBody = loadRigidBody(originalRootBody, robotDefinition, scale);
          robotLoadedActivator.activate();
       }, getClass().getSimpleName() + "Loading");
    }
 
    private GDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition)
    {
-      GDXRigidBody gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                             robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                             Gdx.app::postRunnable,
-                                                                             robotDefinition.getResourceClassLoader());
+      return loadRigidBody(rigidBody, robotDefinition, false);
+   }
+
+   private GDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, boolean scale)
+   {
+      GDXRigidBody gdxRigidBody;
+      if (scale)
+      {
+         gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                   Gdx.app::postRunnable,
+                                                                   robotDefinition.getResourceClassLoader(),
+                                                                   1.1f, 1.1f, 1.1f);
+      }
+
+      else
+      {
+         gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                   Gdx.app::postRunnable,
+                                                                   robotDefinition.getResourceClassLoader());
+      }
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {
+         if (childrenJoint instanceof CrossFourBarJointReadOnly)
+         {
+            CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
+            CrossFourBarJointDefinition fourBarJointDefinition = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(fourBarJoint.getName());
+
+            fourBarJoint.getJointA().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
+                                                                                             fourBarJointDefinition.getBodyDA(),
+                                                                                             Gdx.app::postRunnable,
+                                                                                             robotDefinition.getResourceClassLoader(),
+                                                                                             1.1f, 1.1f, 1.1f));
+            fourBarJoint.getJointB().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
+                                                                                             fourBarJointDefinition.getBodyBC(),
+                                                                                             Gdx.app::postRunnable,
+                                                                                             robotDefinition.getResourceClassLoader(),
+                                                                                             0.0f, 0.0f, 0.0f));
+         }
+
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition));
       }
 
@@ -85,5 +128,15 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
    public boolean isRobotLoaded()
    {
       return robotLoadedActivator.poll();
+   }
+
+   public Activator getRobotLoadedActivator()
+   {
+      return robotLoadedActivator;
+   }
+
+   public GDXRigidBody getMultiBody()
+   {
+      return multiBody;
    }
 }

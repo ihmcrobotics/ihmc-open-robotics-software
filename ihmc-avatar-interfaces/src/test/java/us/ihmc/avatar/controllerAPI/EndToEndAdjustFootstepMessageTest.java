@@ -71,7 +71,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 
       final AtomicBoolean hasControllerAdjustedFootstep = new AtomicBoolean(false);
 
-      simulationTestHelper.getSimulationSession().addBeforePhysicsCallback(new TimeConsumer()
+      simulationTestHelper.getSimulationConstructionSet().addBeforePhysicsCallback(new TimeConsumer()
       {
          private boolean adjustedFootstep = false;
          private double swingInitialTime = Double.NaN;

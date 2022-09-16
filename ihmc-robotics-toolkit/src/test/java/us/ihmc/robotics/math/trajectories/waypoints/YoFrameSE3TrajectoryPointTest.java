@@ -330,7 +330,7 @@ public class YoFrameSE3TrajectoryPointTest
       assertTrue(expectedPosition.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getPosition(), epsilon));
       Quaternion trajectoryPointQuaternion = new Quaternion(testedYoFrameSE3TrajectoryPoint.getOrientation());
       assertEquals(expectedOrientation.getReferenceFrame(), testedYoFrameSE3TrajectoryPoint.getOrientation().getReferenceFrame());
-      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(expectedOrientation, trajectoryPointQuaternion, epsilon);
+      EuclidCoreTestTools.assertOrientation3DGeometricallyEquals(expectedOrientation, trajectoryPointQuaternion, epsilon);
       assertTrue(expectedLinearVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getLinearVelocity(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedYoFrameSE3TrajectoryPoint.getAngularVelocity(), epsilon));
 

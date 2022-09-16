@@ -48,6 +48,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +75,9 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -87,6 +92,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
 
       cdr.write_type_7(data.getHoldSupportRigidBodies());
 
+      cdr.write_type_7(data.getEnableMultiContactSupportRegionSolver());
+
    }
 
    public static void read(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -99,6 +106,8 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       	
       data.setHoldSupportRigidBodies(cdr.read_type_7());
       	
+      data.setEnableMultiContactSupportRegionSolver(cdr.read_type_7());
+      	
 
    }
 
@@ -109,6 +118,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       ser.write_type_7("hold_current_center_of_mass_xy_position", data.getHoldCurrentCenterOfMassXyPosition());
       ser.write_type_7("enable_auto_support_polygon", data.getEnableAutoSupportPolygon());
       ser.write_type_7("hold_support_rigid_bodies", data.getHoldSupportRigidBodies());
+      ser.write_type_7("enable_multi_contact_support_region_solver", data.getEnableMultiContactSupportRegionSolver());
    }
 
    @Override
@@ -118,6 +128,7 @@ public class HumanoidKinematicsToolboxConfigurationMessagePubSubType implements 
       data.setHoldCurrentCenterOfMassXyPosition(ser.read_type_7("hold_current_center_of_mass_xy_position"));
       data.setEnableAutoSupportPolygon(ser.read_type_7("enable_auto_support_polygon"));
       data.setHoldSupportRigidBodies(ser.read_type_7("hold_support_rigid_bodies"));
+      data.setEnableMultiContactSupportRegionSolver(ser.read_type_7("enable_multi_contact_support_region_solver"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage src, controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage dest)

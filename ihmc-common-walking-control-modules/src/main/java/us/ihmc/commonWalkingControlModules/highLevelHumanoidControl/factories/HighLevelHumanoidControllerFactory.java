@@ -59,6 +59,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -700,6 +701,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
+   }
+
+   public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
+   {
+      humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)

@@ -15,7 +15,7 @@ import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 
@@ -23,7 +23,7 @@ import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
 public class GDX3DImageTextureDemo
 {
-   private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+   private final GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
 
    public GDX3DImageTextureDemo()
    {

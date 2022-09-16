@@ -57,7 +57,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, testingEnvironment, simulationTestingParameters);
       simulationTestHelper.start();
       double totalMass = fullRobotModel.getTotalMass();
-      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
 
       simulationTestHelper.setCameraPosition(0.2, -10.0, 1.0);
       simulationTestHelper.setCameraFocusPosition(0.2, 0.0, 1.0);

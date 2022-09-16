@@ -12,9 +12,9 @@ public class ImGui3DViewInputDebugger
    private ImGuiPlot deltaYPlot;
    private ImGuiPlot scrolledYPlot;
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(GDX3DPanel panel3D)
    {
-      baseUI.addImGui3DViewInputProcessor(input ->
+      panel3D.addImGui3DViewInputProcessor(input ->
       {
          if (input.isWindowHovered())
          {
@@ -22,10 +22,10 @@ public class ImGui3DViewInputDebugger
             screenXPlot.setValue(input.getMousePosX());
             screenYPlot.setValue(input.getMousePosY());
          }
-         if (input.isDragging(ImGuiMouseButton.Left))
+         if (input.getMouseDragData(ImGuiMouseButton.Left).isDragging())
          {
-            deltaXPlot.setValue(input.getMouseDraggedX(ImGuiMouseButton.Left));
-            deltaYPlot.setValue(input.getMouseDraggedY(ImGuiMouseButton.Left));
+            deltaXPlot.setValue(input.getMouseDragData(ImGuiMouseButton.Left).getMouseDraggedX());
+            deltaYPlot.setValue(input.getMouseDragData(ImGuiMouseButton.Left).getMouseDraggedY());
          }
       });
 

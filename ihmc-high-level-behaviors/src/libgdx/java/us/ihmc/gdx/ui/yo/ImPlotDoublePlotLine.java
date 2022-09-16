@@ -2,7 +2,7 @@ package us.ihmc.gdx.ui.yo;
 
 import java.text.DecimalFormat;
 
-public class ImPlotDoublePlotLine extends ImPlotPlotLineBasics
+public class ImPlotDoublePlotLine extends ImPlotWallTimeScrollingPlotLine
 {
    private final DecimalFormat decimalFormatter;
    private final ImPlotPlotLineDoubleSwapBuffer doubleSwapBuffer;

@@ -101,4 +101,7 @@ float64 liftoff_duration
 # Step constraint regions to be used by this footstep
 controller_msgs/StepConstraintsListMessage step_constraints
 
+# If the controller should check and fail if the step is not reachable
+bool should_check_for_reachability
+
 

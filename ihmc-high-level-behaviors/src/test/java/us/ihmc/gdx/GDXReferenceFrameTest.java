@@ -53,7 +53,7 @@ public class GDXReferenceFrameTest
             userReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
             userReferenceFrameGraphic.setToReferenceFrame(userReferenceFrame);
 
-            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Reference Frames", this::renderImGuiWidgets);
          }
 

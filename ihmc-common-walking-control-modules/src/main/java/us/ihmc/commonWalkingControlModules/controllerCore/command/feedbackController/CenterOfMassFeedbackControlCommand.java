@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
@@ -129,7 +129,8 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     *
     * @param desiredPosition           the position that the center of mass should reach. Not modified.
     * @param feedForwardLinearVelocity the feed-forward linear velocity with respect to root frame. Not
-    *                                  modified.
+    *                                  modified. Can be {@code null}, in such case the velocity is
+    *                                  assumed to be zero.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
@@ -137,8 +138,17 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
       ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
       referencePositionInRootFrame.setIncludingFrame(desiredPosition);
       referencePositionInRootFrame.changeFrame(rootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(feedForwardLinearVelocity);
-      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+
+      if (feedForwardLinearVelocity != null)
+      {
+         referenceLinearVelocityInRootFrame.setIncludingFrame(feedForwardLinearVelocity);
+         referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      }
+      else
+      {
+         referenceLinearVelocityInRootFrame.setToZero(rootFrame);
+      }
+
       referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
    }
 
@@ -152,21 +162,40 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * @param desiredPosition               the position that the center of mass should reach. Not
     *                                      modified.
     * @param desiredLinearVelocity         the desired center of mass linear velocity with respect to
-    *                                      root frame. Not modified.
+    *                                      root frame. Not modified. Can be {@code null}, in such case
+    *                                      the velocity is assumed to be zero.
     * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
-    *                                      Not modified.
+    *                                      Not modified. Can be {@code null}, in such case the
+    *                                      acceleration is assumed to be zero.
     */
-   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setInverseDynamics(FramePoint3DReadOnly desiredPosition,
+                                  FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setControlMode(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
       ReferenceFrame rootFrame = desiredPosition.getReferenceFrame().getRootFrame();
       referencePositionInRootFrame.setIncludingFrame(desiredPosition);
       referencePositionInRootFrame.changeFrame(rootFrame);
-      referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
-      referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
-      referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
-      referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
+
+      if (desiredLinearVelocity != null)
+      {
+         referenceLinearVelocityInRootFrame.setIncludingFrame(desiredLinearVelocity);
+         referenceLinearVelocityInRootFrame.changeFrame(rootFrame);
+      }
+      else
+      {
+         referenceLinearVelocityInRootFrame.setToZero(rootFrame);
+      }
+
+      if (feedForwardLinearAcceleration != null)
+      {
+         referenceLinearAccelerationInRootFrame.setIncludingFrame(feedForwardLinearAcceleration);
+         referenceLinearAccelerationInRootFrame.changeFrame(rootFrame);
+      }
+      else
+      {
+         referenceLinearAccelerationInRootFrame.setToZero(rootFrame);
+      }
    }
 
    /**
@@ -179,11 +208,14 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * @param desiredPosition               the position that the center of mass should reach. Not
     *                                      modified.
     * @param desiredLinearVelocity         the desired center of mass linear velocity with respect to
-    *                                      root frame. Not modified.
+    *                                      root frame. Not modified. Can be {@code null}, in such case
+    *                                      the velocity is assumed to be zero.
     * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
-    *                                      Not modified.
+    *                                      Not modified. Can be {@code null}, in such case the
+    *                                      acceleration is assumed to be zero.
     */
-   public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
+   public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition,
+                                      FrameVector3DReadOnly desiredLinearVelocity,
                                       FrameVector3DReadOnly feedForwardLinearAcceleration)
    {
       setInverseDynamics(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
@@ -272,7 +304,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     *
     * @param weight the weight to use for each direction. Not modified.
     */
-   public void setWeightsForSolver(Vector3DReadOnly weight)
+   public void setWeightsForSolver(Tuple3DReadOnly weight)
    {
       momentumRateCommand.setLinearWeights(weight);
       momentumRateCommand.setAngularWeightsToZero();

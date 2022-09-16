@@ -78,7 +78,6 @@ public class FootstepPlannerUI
    private final SwingPlanMeshViewer postProcessingViewer;
    private final GoalOrientationEditor orientationEditor;
    private final BodyPathMeshViewer bodyPathMeshViewer;
-   private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
    private final BodyPathLogRenderer bodyPathLogRenderer;
@@ -250,7 +249,6 @@ public class FootstepPlannerUI
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.postProcessingViewer = new SwingPlanMeshViewer(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
-      this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       this.bodyPathLogRenderer = new BodyPathLogRenderer(messager);
       new UIFootstepPlanManager(messager);
@@ -266,7 +264,6 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
-      view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
       view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
       view3dFactory.addNodeToView(bodyPathLogRenderer.getRoot());
@@ -323,7 +320,6 @@ public class FootstepPlannerUI
       pathViewer.start();
       postProcessingViewer.start();
       bodyPathMeshViewer.start();
-      visibilityGraphsRenderer.start();
       footstepPlannerLogRenderer.start();
       bodyPathLogRenderer.start();
       manualFootstepAdjustmentListener.start();
@@ -464,7 +460,6 @@ public class FootstepPlannerUI
       pathViewer.stop();
       postProcessingViewer.stop();
       bodyPathMeshViewer.stop();
-      visibilityGraphsRenderer.stop();
       heightMapVisualizer.stop();
 
       if (heightMapNavigationUpdater != null)

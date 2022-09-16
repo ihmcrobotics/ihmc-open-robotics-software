@@ -24,7 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -293,7 +293,7 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       if (desiredRootJoint != null)
       {
-         Vector3D translation = robotConfigurationData.getRootTranslation();
+         Point3D translation = robotConfigurationData.getRootPosition();
          desiredRootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());

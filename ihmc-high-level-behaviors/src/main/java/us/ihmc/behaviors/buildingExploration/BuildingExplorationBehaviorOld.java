@@ -321,7 +321,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       }
 
       Point3D doorPosition = doorLocationPacket.getDoorTransformToWorld().getPosition();
-      Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootTranslation());
+      Point3D robotRootJointPosition = new Point3D(robotConfigurationData.getRootPosition());
 
       double xyDistanceToDoor = doorPosition.distanceXY(robotRootJointPosition);
       boolean doorDetected = xyDistanceToDoor <= xyProximityToDoorToStopWalking;

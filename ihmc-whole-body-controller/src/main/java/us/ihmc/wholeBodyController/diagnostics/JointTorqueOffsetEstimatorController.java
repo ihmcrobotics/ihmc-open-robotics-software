@@ -77,7 +77,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
       ditherAmplitude.set(0.3);
       ditherFrequency.set(5.0);
-      maximumTorqueOffset.set(5.0);
+      maximumTorqueOffset.set(15.0);
 
       estimateTorqueOffset.set(false);
       transferTorqueOffsets.set(false);

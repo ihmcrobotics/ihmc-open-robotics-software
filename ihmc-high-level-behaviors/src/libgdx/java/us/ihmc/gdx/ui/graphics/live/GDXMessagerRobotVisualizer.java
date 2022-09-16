@@ -22,7 +22,7 @@ public class GDXMessagerRobotVisualizer extends GDXRobotModelGraphic
    {
       super(robotModel.getSimpleRobotName() + " Robot Visualizer (Messager)");
       loadRobotModelAndGraphics(robotModel.getRobotDefinition(), fullRobotModel.getElevator());
-      syncedRobot = new MessagerSyncedRobotModel(messager, topic, fullRobotModel, robotModel.getSensorInformation());
+      syncedRobot = new MessagerSyncedRobotModel(messager, topic, robotModel, fullRobotModel, robotModel.getSensorInformation());
       scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, 1, true);
    }
 

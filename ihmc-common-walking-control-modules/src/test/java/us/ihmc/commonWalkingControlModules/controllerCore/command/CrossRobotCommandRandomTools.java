@@ -800,7 +800,9 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
+      next.setJointTorqueWeight(random.nextDouble());
       next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
+      next.setComputeJointTorques(nextElementIn(random, ActivationState.values()));
       return next;
    }
 
@@ -1852,6 +1854,7 @@ public class CrossRobotCommandRandomTools
       next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setUsePelvisHeightCommand(random.nextBoolean());
+      next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));

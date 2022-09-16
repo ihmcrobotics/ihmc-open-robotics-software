@@ -259,13 +259,13 @@ public class GeometryToolsTest
    {
       Tuple3DBasics tuple3d = new Point3D(1.0, -1.0, 0.0);
       GeometryTools.clipToBoundingBox(tuple3d, -0.5, 0.5, 0.5, -0.5, 0.0, 0.0);
-      EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
+      EuclidCoreTestTools.assertEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
       tuple3d.set(1.0, -1.0, 0.0);
       GeometryTools.clipToBoundingBox(tuple3d, 0.5, -0.5, -0.5, 0.5, -0.1, 0.1);
-      EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
+      EuclidCoreTestTools.assertEquals("not equal", new Point3D(0.5, -0.5, 0.0), tuple3d, 0.0);
       tuple3d.set(1.0, -1.0, 2.0);
       GeometryTools.clipToBoundingBox(tuple3d, 0.5, -0.5, -0.5, 0.5, -0.1, 1.0);
-      EuclidCoreTestTools.assertTuple3DEquals("not equal", new Point3D(0.5, -0.5, 1.0), tuple3d, 0.0);
+      EuclidCoreTestTools.assertEquals("not equal", new Point3D(0.5, -0.5, 1.0), tuple3d, 0.0);
    }
 
    @Test
@@ -331,17 +331,17 @@ public class GeometryToolsTest
 
          expectedVector.setAndNormalize(actualVector);
          GeometryTools.normalizeSafelyZUp(actualVector);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
 
          actualVector = RandomGeometry.nextVector3D(random, 0.999 * Epsilons.ONE_TRILLIONTH);
          expectedVector.set(0.0, 0.0, 1.0);
          GeometryTools.normalizeSafelyZUp(actualVector);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
 
          actualVector = new Vector3D();
          expectedVector.set(0.0, 0.0, 1.0);
          GeometryTools.normalizeSafelyZUp(actualVector);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertEquals(expectedVector, actualVector, Epsilons.ONE_TRILLIONTH);
       }
    }
 
@@ -409,7 +409,7 @@ public class GeometryToolsTest
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
          ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis3D.Z, randomVector);
 
-         EuclidCoreTestTools.assertRigidBodyTransformEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
+         EuclidCoreTestTools.assertEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
       }
    }
 
