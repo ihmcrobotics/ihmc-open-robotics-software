@@ -9,6 +9,7 @@ import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 //import us.ihmc.robotics.stateMachine.core.StateMachine;
 //import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 //import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 //import us.ihmc.yoVariables.variable.YoDouble;
 //import us.ihmc.yoVariables.variable.YoEnum;
@@ -21,6 +22,7 @@ public class NaturalPostureManager
 //   private final UserNaturalPostureManager userManager;   
    
    private HumanoidRobotNaturalPosture robotNaturalPosture;
+   private final ExecutionTimer naturalPostureTimer;
    
 //   private final StateMachine<NaturalPostureControlMode, NaturalPostureControlState> stateMachine;
 //   private final YoEnum<NaturalPostureControlMode> requestedState;
@@ -43,7 +45,8 @@ public class NaturalPostureManager
       
 //      stateMachine = setupStateMachine(namePrefix, yoTime);
       
-      walkingManager = new ControllerNaturalPostureManager(robotNaturalPosture, gains, controllerToolbox, registry);      
+      walkingManager = new ControllerNaturalPostureManager(robotNaturalPosture, gains, controllerToolbox, registry);
+      naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
    }
    
 //   private StateMachine<NaturalPostureControlMode, NaturalPostureControlState> setupStateMachine(String namePrefix, DoubleProvider timeProvider)
@@ -80,9 +83,11 @@ public class NaturalPostureManager
    
    public void compute()
    {
+      naturalPostureTimer.startMeasurement();
 //      stateMachine.doAction();
 //      stateMachine.doActionAndTransition();
       walkingManager.compute();
+      naturalPostureTimer.stopMeasurement();
    }
    
    public void initialize()
