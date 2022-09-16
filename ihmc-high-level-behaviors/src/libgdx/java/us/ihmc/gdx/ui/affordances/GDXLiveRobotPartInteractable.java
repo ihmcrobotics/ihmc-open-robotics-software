@@ -178,8 +178,9 @@ public class GDXLiveRobotPartInteractable
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
    }
 
-   public void renderImGuiWidgets()
+   public boolean renderImGuiWidgets()
    {
+      boolean becomesModified = false;
       if (ImGui.radioButton(labels.get("Deleted"), isDeleted()))
       {
          delete();
@@ -190,6 +191,7 @@ public class GDXLiveRobotPartInteractable
          selectablePose3DGizmo.getSelected().set(false);
          if (!modified)
          {
+            becomesModified = true;
             onBecomesModified();
          }
       }
@@ -199,9 +201,11 @@ public class GDXLiveRobotPartInteractable
          selectablePose3DGizmo.getSelected().set(true);
          if (!modified)
          {
+            becomesModified = true;
             onBecomesModified();
          }
       }
+      return becomesModified;
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

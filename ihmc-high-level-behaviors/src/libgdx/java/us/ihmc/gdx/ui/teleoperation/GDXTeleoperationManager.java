@@ -79,6 +79,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXFootstepPlanning footstepPlanning;
    private final GDXVRModeManager vrModeManager;
+   private GDXLegControlMode legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
@@ -344,6 +345,34 @@ public class GDXTeleoperationManager extends ImGuiPanel
          }
       }
 
+      if (walkPathControlRing.checkIsNwlyModified())
+      {
+         legControlMode = GDXLegControlMode.PATH_CONTROL_RING;
+      }
+
+      if (legControlMode != GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         for (RobotSide side : footInteractables.sides())
+         {
+            footInteractables.get(side).delete();
+         }
+      }
+
+      if (legControlMode != GDXLegControlMode.PATH_CONTROL_RING)
+      {
+         walkPathControlRing.delete();
+      }
+
+      if (legControlMode == GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         interactableFootstepPlan.clear();
+      }
+
+      if (legControlMode != GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
+      {
+         manualFootstepPlacement.exitPlacement();
+      }
+
       manualFootstepPlacement.update();
       interactableFootstepPlan.update();
       if (interactableFootstepPlan.getFootsteps().size() > 0)
@@ -462,6 +491,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
                handInteractables.get(side).delete();
          }
       }
+      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
       ImGui.separator();
@@ -478,9 +508,31 @@ public class GDXTeleoperationManager extends ImGuiPanel
       chestYawSlider.renderImGuiWidgets();
       ImGui.separator();
 
-      manualFootstepPlacement.renderImGuiWidgets();
+      ImGui.text("Leg control mode: " + legControlMode.name());
+      if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
+      {
+         legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == GDXLegControlMode.PATH_CONTROL_RING))
+      {
+         legControlMode = GDXLegControlMode.PATH_CONTROL_RING;
+      }
+      if (ImGui.radioButton(labels.get("Joystick walking"), legControlMode == GDXLegControlMode.JOYSTICK_WALKING))
+      {
+         legControlMode = GDXLegControlMode.JOYSTICK_WALKING;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
+      {
+         legControlMode = GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+      }
 
-      ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
+      if (manualFootstepPlacement.renderImGuiWidgets())
+         legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+
+      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+         legControlMode = GDXLegControlMode.PATH_CONTROL_RING;
 
       ImGui.text("Walk path control ring planner:");
       walkPathControlRing.renderImGuiWidgets();
@@ -502,7 +554,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
          {
             ImGui.text(side.getPascalCaseName() + " foot:");
             ImGui.sameLine();
-            footInteractables.get(side).renderImGuiWidgets();
+            if (footInteractables.get(side).renderImGuiWidgets())
+            {
+               legControlMode = GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+            }
          }
       }
 
@@ -510,7 +565,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       swingTimeSlider.render();
       transferTimeSlider.render();
       turnAggressivenessSlider.render();
-      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
 
       ImGui.separator();

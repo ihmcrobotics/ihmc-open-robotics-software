@@ -167,20 +167,22 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   public void renderImGuiWidgets()
+   public boolean renderImGuiWidgets()
    {
       //      ImGui.text("Manual footstep placement:");
-
+      boolean modeActivated = false;
       ImGui.image(feetIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
       {
+         modeActivated = true;
          createNewFootStep(RobotSide.LEFT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: R");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
       {
+         modeActivated = true;
          createNewFootStep(RobotSide.RIGHT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
@@ -190,6 +192,7 @@ public class GDXManualFootstepPlacement implements RenderableProvider
          exitPlacement();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      return modeActivated;
    }
 
    @Override
