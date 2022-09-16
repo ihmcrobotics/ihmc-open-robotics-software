@@ -23,9 +23,12 @@ import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.*;
+import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRPickResult;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXRobotCollisionLink implements RenderableProvider
 {
@@ -38,6 +41,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final MovingReferenceFrame frameAfterJoint;
    private String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private final GDXVRPickResult vrPickResult = new GDXVRPickResult();
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private CylinderRayIntersection cylinderRayIntersection;
@@ -48,6 +52,8 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final RigidBodyTransform overrideTransform = new RigidBodyTransform();
    private final ReferenceFrame overrideFrame;
    private final ReferenceFrame overrideMeshFrame;
+   private boolean desktopPickSelected = false;
+   private boolean vrPickSelected = false;
    private boolean pickSelected = false;
 
    public GDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
@@ -172,6 +178,41 @@ public class GDXRobotCollisionLink implements RenderableProvider
       }
    }
 
+   public void calculateVRPick(GDXVRContext vrContext)
+   {
+      vrPickResult.reset();
+      ReferenceFrame frameAfterJointToUse = useOverrideTransform ? overrideMeshFrame : frameAfterJoint;
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            FramePose3D pickPose = controller.getPickPose();
+            pickPose.changeFrame(frameAfterJointToUse);
+            try
+            {
+               if (shape.isPointInside(pickPose.getPosition()))
+               {
+                  vrPickResult.addPickCollision(shape.getCentroid().distance(pickPose.getPosition()));
+               }
+            }
+            catch (UnsupportedOperationException unsupportedOperationException)
+            {
+               unsupportedOperationException.printStackTrace();
+            }
+            pickPose.changeFrame(ReferenceFrame.getWorldFrame());
+         });
+      }
+      if (vrPickResult.getPickCollisionWasAddedSinceReset())
+      {
+         vrContext.addPickResult(vrPickResult);
+      }
+   }
+
+   public void processVRInput(GDXVRContext vrContext)
+   {
+      vrPickSelected = vrContext.getSelectedPick() == vrPickResult;
+   }
+
    public void calculatePick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
@@ -246,11 +287,15 @@ public class GDXRobotCollisionLink implements RenderableProvider
       }
    }
 
-   // Happens after update
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      pickSelected = input.getClosestPick() == pickResult;
-      GDXTools.setTransparency(modelInstance, pickSelected ? 1.0f : 0.4f);
+      desktopPickSelected = input.getClosestPick() == pickResult;
+
+      // TODO: This really needs to be moved to update(), but update really should happen after the inputs
+      boolean newPickSelected = vrPickSelected || desktopPickSelected;
+      if (newPickSelected != pickSelected)
+         GDXTools.setTransparency(modelInstance, pickSelected ? 1.0f : 0.4f);
+      pickSelected = newPickSelected;
    }
 
    @Override

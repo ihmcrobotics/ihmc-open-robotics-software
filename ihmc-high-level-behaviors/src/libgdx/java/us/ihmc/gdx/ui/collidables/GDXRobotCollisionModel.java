@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.affordances.GDXRobotCollisionLink;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
@@ -46,6 +47,22 @@ public class GDXRobotCollisionModel
       for (GDXRobotCollisionLink collisionLink : collisionLinks)
       {
          collisionLink.update();
+      }
+   }
+
+   public void calculateVRPick(GDXVRContext vrContext)
+   {
+      for (GDXRobotCollisionLink collisionLink : collisionLinks)
+      {
+         collisionLink.calculateVRPick(vrContext);
+      }
+   }
+
+   public void processVRInput(GDXVRContext vrContext)
+   {
+      for (GDXRobotCollisionLink collisionLink : collisionLinks)
+      {
+         collisionLink.processVRInput(vrContext);
       }
    }
 

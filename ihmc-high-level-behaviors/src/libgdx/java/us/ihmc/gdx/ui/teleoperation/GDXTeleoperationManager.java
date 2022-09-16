@@ -401,7 +401,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private void calculateVRPick(GDXVRContext vrContext)
    {
-
+      if (interactablesEnabled.get())
+      {
+         if (interactablesAvailable)
+         {
+            environmentCollisionModel.calculateVRPick(vrContext);
+         }
+      }
    }
 
    private void processVRInput(GDXVRContext vrContext)
@@ -414,10 +420,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
          }
       }
 
-//      switch (vrModeManager.getMode())
-//      {
-//         case WHOLE_BODY_IK_STREAMING -> wholeBodyIKStreaming.processVRInput(vrContext);
-//      }
+      if (interactablesEnabled.get())
+      {
+         if (interactablesAvailable)
+         {
+            environmentCollisionModel.processVRInput(vrContext);
+         }
+      }
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)

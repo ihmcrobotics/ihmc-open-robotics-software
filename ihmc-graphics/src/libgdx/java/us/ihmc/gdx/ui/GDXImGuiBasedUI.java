@@ -50,6 +50,8 @@ import java.util.function.Consumer;
  * destroy()
  * </pre>
  *
+ * TODO: Is there a better theoretical order? Potentially doing processInput first, then update, then render.
+ *
  * It is recommended that in every class, the methods that exist in them mapping to the above are defined in the class in that order.
  *
  * Additionally, the update() is only called first if you code according to this in the Lwjgl3ApplicationAdapter provided to GDXImGuiBasedUI:
@@ -95,6 +97,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
+   private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImFloat backgroundShade = new ImFloat(GDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
@@ -283,6 +286,10 @@ public class GDXImGuiBasedUI
             else
                primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.VIRTUAL);
          }
+         if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
+         {
+            setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled.get());
+         }
          ImGui.separator();
          if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
          {
@@ -424,6 +431,16 @@ public class GDXImGuiBasedUI
       for (GDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.setBackgroundShade(backgroundShade);
+      }
+   }
+
+   public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
+   {
+      this.modelSceneMouseCollisionEnabled.set(modelSceneMouseCollisionEnabled);
+      primary3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
+      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      {
+         additional3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
       }
    }
 }
