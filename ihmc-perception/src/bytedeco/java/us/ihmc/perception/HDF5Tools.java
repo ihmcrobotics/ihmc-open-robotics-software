@@ -7,9 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
-import static org.bytedeco.hdf5.global.hdf5.*;
-
-public class BytedecoHDF5Tools
+public class HDF5Tools
 {
    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
    static final String DATASET_NAME = "/os_cloud_node/points/0";
@@ -20,6 +18,10 @@ public class BytedecoHDF5Tools
 
    static final int IMG_WIDTH = 1024;
    static final int IMG_HEIGHT = 768;
+
+   static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
+   static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
+   static final String L515_COLOR = "/chest_l515/color/image_rect_raw";
 
    private static int extractShape(DataSet dataSet, int dim) {
       DataSpace space = dataSet.getSpace();
@@ -54,7 +56,7 @@ public class BytedecoHDF5Tools
       }
    }
 
-   public static Mat loadDepthMap(H5File file, int index)
+   public static void loadDepthMap(H5File file, int index, Mat mat)
    {
       DataSet dataset = file.openDataSet("/chest_l515/depth/image_rect_raw/" + index);
       byte[] pointsBuffer = new byte[IMG_HEIGHT * IMG_WIDTH * 2];
@@ -67,9 +69,8 @@ public class BytedecoHDF5Tools
       dataset.read(p, PredType.NATIVE_UINT8());
       p.get(pointsBuffer);
 
-      Mat depthU16C1Image = new Mat(768, 1024, opencv_core.CV_16UC1, p);
+      mat.data(p);
 
-      return depthU16C1Image;
    }
 
    public static void storePointCloud(H5File file, String namespace, RecyclingArrayList<Point3D32> points)
@@ -89,34 +90,15 @@ public class BytedecoHDF5Tools
       dataset.write(depthMap.data(), PredType.NATIVE_UINT16());
    }
 
-   public static void main(String[] args)
+   public static int getCount(H5File h5File, String namespace)
    {
-      long[] dims = { DIM0, DIM1 };        // dataset dimensions
-      long[] chunk_dims = { 20, 20 };        // chunk dimensions
-      int[] buf = new int[DIM0 * DIM1];
-
-
-      try {
-         org.bytedeco.hdf5.Exception.dontPrint();
-
-         RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(100000, Point3D32::new);
-
-         H5File file = new H5File(FILE_NAME, H5F_ACC_RDONLY);
-         BytedecoHDF5Tools.loadPointCloud(file, points, 0);
-
-         for(Point3D32 point : points)
-         {
-            System.out.println("Point:" + point.getX() + "," + point.getY() + "," + point.getZ());
-         }
-
-      }  // end of try block
-
-      // catch failure caused by the H5File, DataSet, and DataSpace operations
-      catch (RuntimeException error) {
-         System.err.println(error);
-         error.printStackTrace();
-         System.exit(-1);
-      }
+      Group dataset = h5File.openGroup(namespace);
+      return (int) dataset.getNumObjs();
    }
 
+   public static int getTimestamps(H5File h5File, String namespace)
+   {
+      Group dataset = h5File.openGroup(namespace);
+      return (int) dataset.getNumObjs();
+   }
 }
