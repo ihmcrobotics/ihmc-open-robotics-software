@@ -36,6 +36,7 @@ import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.gdx.ui.vr.GDXVRInputMode;
 import us.ihmc.gdx.ui.vr.GDXWholeBodyIKStreaming;
 import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
 import us.ihmc.gdx.vr.GDXVRContext;
@@ -76,6 +77,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXFootstepPlanning footstepPlanning;
+   private final GDXVRInputMode vrInputMode = GDXVRInputMode.ARM_MODE;
    private GDXLegControlMode legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
@@ -396,6 +398,14 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private void processVRInput(GDXVRContext vrContext)
    {
+      if (vrInputMode == GDXVRInputMode.ARM_MODE)
+      {
+         for (RobotSide side : handInteractables.sides())
+         {
+            handInteractables.get(side).processVRInput(vrContext);
+         }
+      }
+
 //      switch (vrModeManager.getMode())
 //      {
 //         case WHOLE_BODY_IK_STREAMING -> wholeBodyIKStreaming.processVRInput(vrContext);
