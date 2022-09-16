@@ -8,13 +8,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.sun.javafx.scene.control.skin.LabeledText;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ListView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -198,6 +197,6 @@ public class DatasetNavigationAccordionController
 
    private static boolean hasListViewCellBeenDoubleClicked(MouseEvent event)
    {
-      return event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && event.getTarget() instanceof LabeledText;
+      return event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && event.getTarget() instanceof Text;
    }
 }

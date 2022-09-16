@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativ
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.net.Vector3DSerializer;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,9 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -28,7 +25,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -37,6 +33,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -125,6 +122,7 @@ public class WorkspaceLimiterControlModule
    private final YoDouble alphaSupportSingularityAvoidance;
 
    private final BooleanParameter useSingularityAvoidanceInSupport;
+   private final BooleanProvider enableSingularityAvoidanceOnSwingFoot;
 
    private final YoBoolean isSupportSingularityAvoidanceUsed;
    private final DoubleProvider percentOfLegLengthMarginToDisableSingularityAvoidance;
@@ -264,6 +262,7 @@ public class WorkspaceLimiterControlModule
       yoDesiredFootLinearVelocity.setToNaN();
       yoCorrectedDesiredFootLinearVelocity.setToNaN();
 
+      enableSingularityAvoidanceOnSwingFoot = workspaceLimiterParameters.getEnableSingularityAvoidanceOnSwingFoot();
       alphaSupportSingularityAvoidance = new YoDouble(namePrefix + "AlphaSupportSingularityAvoidance", registry);
 
       doSmoothTransitionOutOfSingularityAvoidance = new YoBoolean(namePrefix + "DoSmoothTransitionSingularityAvoidance", registry);
@@ -488,6 +487,10 @@ public class WorkspaceLimiterControlModule
          return;
 
       checkVelocityForSwingSingularityAvoidance.set(false);
+
+      if (!enableSingularityAvoidanceOnSwingFoot.getValue())
+         return;
+
       isSwingSingularityAvoidanceUsed.set(true);
 
       updateFractionOfSingularityAvoidanceToUse(alphaSwingSingularityAvoidanceForFoot,

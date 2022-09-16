@@ -1,10 +1,13 @@
 package us.ihmc.avatar.colorVision;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.spinnaker.SpinnakerSystemManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,6 +17,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
+
+import java.util.List;
 
 /** To run this you have to download the Spinnaker SDK, move it to the robot computer, then run
  *  the install script inside of it.
@@ -32,24 +37,30 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
+   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
 
-   public DualBlackflyAndAruCoMarkerOnRobotProcess()
+   public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, List<OpenCVArUcoMarker> arUcoMarkersToTrack)
    {
+      this.arUcoMarkersToTrack = arUcoMarkersToTrack;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
+      ros2Helper = new ROS2Helper(ros2Node);
+
+      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      // Helpful to view relative sensor transforms when robot controller is not running
+      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
       if (!LEFT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly LEFT with serial number: {}", LEFT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER));
+         blackflies.put(RobotSide.LEFT, new DualBlackflyCamera(LEFT_SERIAL_NUMBER, syncedRobot));
       }
       if (!RIGHT_SERIAL_NUMBER.equals("00000000"))
       {
          LogTools.info("Adding Blackfly RIGHT with serial number: {}", RIGHT_SERIAL_NUMBER);
-         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER));
+         blackflies.put(RobotSide.RIGHT, new DualBlackflyCamera(RIGHT_SERIAL_NUMBER, syncedRobot));
       }
-
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
-      ros2Helper = new ROS2Helper(ros2Node);
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
@@ -71,7 +82,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                for (RobotSide side : blackflies.sides())
                {
                   DualBlackflyCamera blackfly = blackflies.get(side);
-                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node);
+                  blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node, arUcoMarkersToTrack);
                }
             }
 
@@ -112,6 +123,5 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    public static void main(String[] args)
    {
 //      SpinnakerTools.printAllConnectedDevicesInformation();
-      new DualBlackflyAndAruCoMarkerOnRobotProcess();
    }
 }

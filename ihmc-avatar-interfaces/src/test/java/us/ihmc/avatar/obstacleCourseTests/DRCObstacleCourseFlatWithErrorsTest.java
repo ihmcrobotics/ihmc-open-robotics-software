@@ -71,7 +71,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       simulationTestHelper.start();
       simulationTestHelper.getQueuedControllerCommands();
       setupCameraForWalkingUpToRamp();
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                                                       simulationTestHelper.getRobot(),
                                                                                                       getFootNames(),
                                                                                                       1002L);
@@ -82,7 +82,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
 
       simulationTestHelper.getRobot().addThrottledController(slipRandomOnEachStepPerturber,
-                                                             10.0 * simulationTestHelper.getSimulationSession().getSessionDTSeconds());
+                                                             10.0 * simulationTestHelper.getSimulationConstructionSet().getDT());
 
       ThreadTools.sleep(1000);
       boolean success = simulationTestHelper.simulateNow(1.0);
@@ -220,7 +220,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
       double simDT = simulationTestHelper.getSimulationDT();
 
       TimeConsumer stateEstimatorDriftator = createStateEstimatorDriftator(simulationTestHelper, fullRobotModel, slidingVelocity, simDT);
-      simulationTestHelper.getSimulationSession().addAfterPhysicsCallback(stateEstimatorDriftator);
+      simulationTestHelper.getSimulationConstructionSet().addAfterPhysicsCallback(stateEstimatorDriftator);
 
       boolean success = simulationTestHelper.simulateNow(10.0);
 
@@ -280,7 +280,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       Robot robot = simulationTestHelper.getRobot();
 
-      SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+      SlipOnNextStepPerturber slipOnEachStepPerturber = new SlipOnNextStepPerturber(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                                     robot,
                                                                                     RobotSide.LEFT,
                                                                                     getFootNames().get(RobotSide.LEFT));
@@ -326,7 +326,7 @@ public abstract class DRCObstacleCourseFlatWithErrorsTest implements MultiRobotT
 
       Robot robot = simulationTestHelper.getRobot();
 
-      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationSession().getTime(),
+      SlipRandomOnNextStepPerturber slipRandomOnEachStepPerturber = new SlipRandomOnNextStepPerturber(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                                                       robot,
                                                                                                       getFootNames(),
                                                                                                       1000L);

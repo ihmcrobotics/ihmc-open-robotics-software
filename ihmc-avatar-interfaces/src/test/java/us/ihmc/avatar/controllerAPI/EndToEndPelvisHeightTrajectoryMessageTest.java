@@ -163,7 +163,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FramePoint3D actualPosition = new FramePoint3D(pelvisBodyFrame);
       actualPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, actualPosition, 2.0e-3);
+      EuclidCoreTestTools.assertEquals(expectedPosition, actualPosition, 2.0e-3);
    }
 
    protected FramePoint3D getRandomPelvisPosition(Random random, RigidBodyBasics pelvis)
@@ -281,7 +281,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       double forceMagnitude = fullRobotModel.getTotalMass() * 2.0;
       String pushJointName = fullRobotModel.getPelvis().getParentJoint().getName();
-      PushRobotControllerSCS2 pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(),
+      PushRobotControllerSCS2 pushController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationConstructionSet().getTime(),
                                                                            simulationTestHelper.getRobot(),
                                                                            pushJointName,
                                                                            new Vector3D(),

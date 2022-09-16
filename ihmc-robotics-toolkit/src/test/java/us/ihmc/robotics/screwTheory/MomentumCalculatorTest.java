@@ -60,8 +60,8 @@ public class MomentumCalculatorTest
       FrameVector3D angularMomentumCheck = new FrameVector3D(world);
 
       double epsilon = 1e-9;
-      EuclidCoreTestTools.assertTuple3DEquals(linearMomentumCheck, linearMomentum, epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(angularMomentumCheck, angularMomentum, epsilon);
+      EuclidCoreTestTools.assertEquals(linearMomentumCheck, linearMomentum, epsilon);
+      EuclidCoreTestTools.assertEquals(angularMomentumCheck, angularMomentum, epsilon);
       assertTrue(linearMomentum.length() > epsilon);
    }
 
@@ -96,8 +96,8 @@ public class MomentumCalculatorTest
       angularMomentumCheck.changeFrame(world);
 
       double epsilon = 1e-9;
-      EuclidCoreTestTools.assertTuple3DEquals(linearMomentumCheck, linearMomentum, epsilon);
-      EuclidCoreTestTools.assertTuple3DEquals(angularMomentumCheck, angularMomentum, epsilon);
+      EuclidCoreTestTools.assertEquals(linearMomentumCheck, linearMomentum, epsilon);
+      EuclidCoreTestTools.assertEquals(angularMomentumCheck, angularMomentum, epsilon);
       assertTrue(angularMomentum.length() > epsilon);
    }
 

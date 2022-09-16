@@ -172,7 +172,6 @@ public class PushRecoveryBalanceManager
 
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
-      registry.addChild(copTrajectoryParameters.getRegistry());
       maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
 
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());

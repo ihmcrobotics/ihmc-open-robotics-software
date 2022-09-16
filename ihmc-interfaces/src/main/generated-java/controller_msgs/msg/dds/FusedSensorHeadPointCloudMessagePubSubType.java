@@ -40,9 +40,17 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (355520 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (7000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -57,6 +65,18 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -70,9 +90,17 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
 
    public static void write(controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_11(data.getAquisitionSecondsSinceEpoch());
+
+      cdr.write_type_11(data.getAquisitionAdditionalNanos());
+
+      cdr.write_type_4(data.getNumberOfSegments());
+
+      cdr.write_type_2(data.getPointsPerSegment());
+
       cdr.write_type_4(data.getSegmentIndex());
 
-      if(data.getScan().size() <= 355520)
+      if(data.getScan().size() <= 7000000)
       cdr.write_type_e(data.getScan());else
           throw new RuntimeException("scan field exceeds the maximum length");
 
@@ -80,6 +108,14 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
 
    public static void read(controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setAquisitionSecondsSinceEpoch(cdr.read_type_11());
+      	
+      data.setAquisitionAdditionalNanos(cdr.read_type_11());
+      	
+      data.setNumberOfSegments(cdr.read_type_4());
+      	
+      data.setPointsPerSegment(cdr.read_type_2());
+      	
       data.setSegmentIndex(cdr.read_type_4());
       	
       cdr.read_type_e(data.getScan());	
@@ -89,6 +125,10 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_11("aquisition_seconds_since_epoch", data.getAquisitionSecondsSinceEpoch());
+      ser.write_type_11("aquisition_additional_nanos", data.getAquisitionAdditionalNanos());
+      ser.write_type_4("number_of_segments", data.getNumberOfSegments());
+      ser.write_type_2("points_per_segment", data.getPointsPerSegment());
       ser.write_type_4("segment_index", data.getSegmentIndex());
       ser.write_type_e("scan", data.getScan());
    }
@@ -96,6 +136,10 @@ public class FusedSensorHeadPointCloudMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage data)
    {
+      data.setAquisitionSecondsSinceEpoch(ser.read_type_11("aquisition_seconds_since_epoch"));
+      data.setAquisitionAdditionalNanos(ser.read_type_11("aquisition_additional_nanos"));
+      data.setNumberOfSegments(ser.read_type_4("number_of_segments"));
+      data.setPointsPerSegment(ser.read_type_2("points_per_segment"));
       data.setSegmentIndex(ser.read_type_4("segment_index"));
       ser.read_type_e("scan", data.getScan());
    }

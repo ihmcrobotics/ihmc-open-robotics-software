@@ -3,7 +3,7 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXLowLevelDepthSensorSimulator;
@@ -14,8 +14,8 @@ public class GDXDepthSensorDemo
 {
    public GDXDepthSensorDemo()
    {
-      GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor", 80.0, 800, 600, 0.05, 5.0);
+      GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
+      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor", 80.0, 800, 600, 0.05, 5.0, 0.03, 0.07, false);
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -43,7 +43,7 @@ public class GDXDepthSensorDemo
          @Override
          public void render()
          {
-            depthSensorSimulator.render(sceneManager, Color.WHITE, 0.01f);
+            depthSensorSimulator.render(sceneManager.getScene(), Color.WHITE, 0.01f);
             pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
 
             GDX3DSceneTools.glClearGray();

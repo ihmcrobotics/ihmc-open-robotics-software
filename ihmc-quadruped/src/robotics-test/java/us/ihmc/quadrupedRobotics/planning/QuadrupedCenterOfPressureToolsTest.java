@@ -470,7 +470,7 @@ public class QuadrupedCenterOfPressureToolsTest
 
          expectedCoPPosition.scale(1.0 / pressure);
 
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedCoPPosition, copPosition, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(expectedCoPPosition, copPosition, epsilon);
       }
    }
 }

@@ -1,6 +1,14 @@
 package us.ihmc.gdx.sceneManager;
 
+import java.util.Set;
+
 public enum GDXSceneLevel
 {
-   REAL_ENVIRONMENT, VIRTUAL
+   GROUND_TRUTH, MODEL, VIRTUAL;
+
+   public final Set<GDXSceneLevel> SINGLETON_SET = Set.of(this);
+
+   GDXSceneLevel()
+   {
+   }
 }

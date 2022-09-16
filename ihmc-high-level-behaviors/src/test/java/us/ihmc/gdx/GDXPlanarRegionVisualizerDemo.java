@@ -1,13 +1,13 @@
 package us.ihmc.gdx;
 
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DBareBonesScene;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 
 public class GDXPlanarRegionVisualizerDemo
 {
-   private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+   private final GDX3DBareBonesScene sceneManager = new GDX3DBareBonesScene();
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
 
    public GDXPlanarRegionVisualizerDemo()

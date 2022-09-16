@@ -142,6 +142,10 @@ module controller_msgs
          * Step constraint regions to be used by this footstep
          */
         controller_msgs::msg::dds::StepConstraintsListMessage step_constraints;
+        /**
+         * If the controller should check and fail if the step is not reachable
+         */
+        boolean should_check_for_reachability;
       };
     };
   };

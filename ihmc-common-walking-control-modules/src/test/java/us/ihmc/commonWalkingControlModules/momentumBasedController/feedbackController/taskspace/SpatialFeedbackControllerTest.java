@@ -21,13 +21,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
@@ -117,7 +117,7 @@ public final class SpatialFeedbackControllerTest
       // Assert pose is close to desired
       FramePose3D pose = new FramePose3D(endEffector.getBodyFixedFrame());
       pose.changeFrame(desiredPose.getReferenceFrame());
-      EuclidGeometryTestTools.assertPose3DGeometricallyEquals(desiredPose, pose, 1.0E-10);
+      EuclidCoreTestTools.assertGeometricallyEquals(desiredPose, pose, 1.0E-10);
    }
 
    @Test

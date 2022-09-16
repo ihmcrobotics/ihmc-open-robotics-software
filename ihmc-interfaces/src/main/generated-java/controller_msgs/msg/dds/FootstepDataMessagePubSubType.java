@@ -77,6 +77,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -145,6 +147,9 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getCdrSerializedSize(data.getStepConstraints(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -190,6 +195,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       cdr.write_type_6(data.getLiftoffDuration());
 
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.write(data.getStepConstraints(), cdr);
+      cdr.write_type_7(data.getShouldCheckForReachability());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepDataMessage data, us.ihmc.idl.CDR cdr)
@@ -221,6 +228,8 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setLiftoffDuration(cdr.read_type_6());
       	
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.read(data.getStepConstraints(), cdr);	
+      data.setShouldCheckForReachability(cdr.read_type_7());
+      	
 
    }
 
@@ -247,6 +256,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_6("liftoff_duration", data.getLiftoffDuration());
       ser.write_type_a("step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getStepConstraints());
 
+      ser.write_type_7("should_check_for_reachability", data.getShouldCheckForReachability());
    }
 
    @Override
@@ -272,6 +282,7 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setLiftoffDuration(ser.read_type_6("liftoff_duration"));
       ser.read_type_a("step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getStepConstraints());
 
+      data.setShouldCheckForReachability(ser.read_type_7("should_check_for_reachability"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepDataMessage src, controller_msgs.msg.dds.FootstepDataMessage dest)

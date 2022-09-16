@@ -38,6 +38,8 @@ public class WalkingCommandConsumer
    private final YoDouble manipulationIgnoreInputsDurationAfterAbort = new YoDouble("manipulationIgnoreInputsDurationAfterAbort", registry);
    private final YoDouble allowManipulationAbortAfterThisTime = new YoDouble("allowManipulationAbortAfterThisTime", registry);
 
+   private final YoBoolean commandConsumerHasFootsteps = new YoBoolean("commandConsumerHasFootsteps", registry);
+
    private final YoDouble yoTime;
    private final WalkingMessageHandler walkingMessageHandler;
 
@@ -140,8 +142,16 @@ public class WalkingCommandConsumer
       allowManipulationAbortAfterThisTime.set(yoTime.getDoubleValue() + durationToAvoidAbort);
    }
 
+   public void clearAllCommands()
+   {
+      commandConsumerWithDelayBuffers.clearAllCommands();
+   }
+
    public void update()
    {
+      // check to see if there are any footsteps available.
+      commandConsumerHasFootsteps.set(commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class));
+
       commandConsumerWithDelayBuffers.update();
    }
 
@@ -483,14 +493,14 @@ public class WalkingCommandConsumer
          walkingMessageHandler.handleFootTrajectoryCommand(commandConsumerWithDelayBuffers.pollNewCommands(FootTrajectoryCommand.class));
       }
 
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
-      {
-         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
-      }
-
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(FootstepDataListCommand.class))
       {
          walkingMessageHandler.handleFootstepDataListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(FootstepDataListCommand.class));
+      }
+
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PauseWalkingCommand.class))
+      {
+         walkingMessageHandler.handlePauseWalkingCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PauseWalkingCommand.class));
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(AdjustFootstepCommand.class))

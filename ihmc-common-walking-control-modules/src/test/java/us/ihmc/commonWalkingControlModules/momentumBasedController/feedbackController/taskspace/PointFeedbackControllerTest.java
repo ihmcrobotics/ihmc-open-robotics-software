@@ -124,7 +124,7 @@ public final class PointFeedbackControllerTest
       // Assert position is close to desired
       FramePoint3D position = new FramePoint3D(endEffector.getBodyFixedFrame());
       position.changeFrame(desiredPosition.getReferenceFrame());
-      EuclidCoreTestTools.assertTuple3DEquals(desiredPosition, position, 1.0E-5);
+      EuclidCoreTestTools.assertEquals(desiredPosition, position, 1.0E-5);
    }
 
    @Test

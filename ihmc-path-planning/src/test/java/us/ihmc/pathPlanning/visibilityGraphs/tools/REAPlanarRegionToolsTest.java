@@ -66,7 +66,7 @@ public class REAPlanarRegionToolsTest
       PlanarRegion truncatedSquare = REAPlanarRegionTools.truncatePlanarRegionIfIntersectingWithPlane(groundOrigin, groundNormal, verticalSquare, 0.05, null);
       RigidBodyTransform truncatedTransform = new RigidBodyTransform();
       truncatedSquare.getTransformToWorld(truncatedTransform);
-      EuclidCoreTestTools.assertRigidBodyTransformGeometricallyEquals(squarePose, truncatedTransform, EPSILON);
+      EuclidCoreTestTools.assertGeometricallyEquals(squarePose, truncatedTransform, EPSILON);
 
       Point3D[] actualVerticesInWorld = truncatedSquare.getConcaveHull().stream().map(p -> toWorld(p, squarePose)).toArray(Point3D[]::new);
 

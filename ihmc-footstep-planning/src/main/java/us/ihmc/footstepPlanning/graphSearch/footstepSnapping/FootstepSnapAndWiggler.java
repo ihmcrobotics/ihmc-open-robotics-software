@@ -244,6 +244,10 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
       ConvexPolygon2D footPolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
+      boolean update0 = footstepToWiggle.getXIndex() == 147 && footstepToWiggle.getYIndex() == 7 && footstepToWiggle.getYawIndex() == 0;
+      boolean update1 = footstepToWiggle.getXIndex() == 146 && footstepToWiggle.getYIndex() == 2 && footstepToWiggle.getYawIndex() == 0;
+      boolean updateSCS = update0 || update1;
+
       RigidBodyTransform wiggleTransformInLocal;
       boolean concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
       if (concaveWigglerRequested)
@@ -255,40 +259,14 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
          if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
          {
+            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
             FootstepSnapData stanceSnapData = snapDataHolder.get(stanceStep);
-            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
-
-            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
-            ConvexPolygon2D stancePolygonInStanceSnapFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, stanceSnapData.getSnapTransform());
-
-            // transform from stance snap frame to region local
             tempTransform.set(stanceSnapData.getSnapTransform());
-
-            int stanceRegionIndex = stanceSnapData.getRegionIndex();
-            if (stanceRegionIndex != -1)
-            {
-               PlanarRegion stanceStepRegion = planarRegionsList.getPlanarRegion(stanceRegionIndex);
-               tempTransform.preMultiply(stanceStepRegion.getTransformToLocal());
+            if (!stanceSnapData.getWiggleTransformInWorld().containsNaN())
                tempTransform.preMultiply(stanceSnapData.getWiggleTransformInWorld());
-               tempTransform.preMultiply(stanceStepRegion.getTransformToWorld());
-            }
-
             tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-
-            Point3D stanceVertex3D = new Point3D();
-            ConvexPolygon2D projectedStanceFoot = new ConvexPolygon2D();
-
-            for (int i = 0; i < stancePolygonInStanceSnapFrame.getNumberOfVertices(); i++)
-            {
-               stanceVertex3D.set(footPolygon.getVertex(i).getX(), footPolygon.getVertex(i).getY(), 0.0);
-               tempTransform.transform(stanceVertex3D);
-
-               // project to xy in region local
-               projectedStanceFoot.addVertex(stanceVertex3D.getX(), stanceVertex3D.getY());
-            }
-
-            projectedStanceFoot.update();
-            gradientDescentStepConstraintInput.setStanceFootPolygon(projectedStanceFoot);
+            ConvexPolygon2D stancePolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+            gradientDescentStepConstraintInput.setStanceFootPolygon(stancePolygonInRegionFrame);
             gradientDescentStepConstraintSolver.setStanceFootClearance(parameters.getMinClearanceFromStance());
          }
 
@@ -345,7 +323,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
 
-      if (!parameters.getEnableConcaveHullWiggler() && stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
       {
          FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
 

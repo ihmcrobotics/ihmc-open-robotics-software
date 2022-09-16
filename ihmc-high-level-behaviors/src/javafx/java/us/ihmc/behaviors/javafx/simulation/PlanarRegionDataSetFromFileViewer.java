@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.javafx.simulation;
 
-import javafx.application.Application;
+import java.io.File;
+
 import javafx.stage.Stage;
-import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.ApplicationNoModule;
+import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
-import java.io.File;
-
-public class PlanarRegionDataSetFromFileViewer extends Application
+public class PlanarRegionDataSetFromFileViewer extends ApplicationNoModule
 {
    @Override
    public void start(Stage primaryStage) throws Exception

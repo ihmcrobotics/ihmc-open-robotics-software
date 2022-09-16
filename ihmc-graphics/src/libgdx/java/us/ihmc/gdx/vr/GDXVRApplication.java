@@ -8,7 +8,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.minimalGDX.MinimalGDXApplication;
 import us.ihmc.gdx.vr.minimalGDX.MinimalGDXGraphics;
@@ -23,7 +23,7 @@ public class GDXVRApplication
    private static GLFWErrorCallback errorCallback;
    private long windowHandle;
    private volatile boolean running = true;
-   private GDX3DSceneBasics sceneBasics;
+   private GDX3DScene scene;
    private GDXVRContext vrContext;
    private int renderNumber = 0;
    private Runnable thingToRunAfter10Frames;
@@ -54,8 +54,8 @@ public class GDXVRApplication
       MinimalGDXApplication app = new MinimalGDXApplication();
       Gdx.app = app;
 
-      sceneBasics = new GDX3DSceneBasics();
-      sceneBasics.create();
+      scene = new GDX3DScene();
+      scene.create();
 
       vrContext = new GDXVRContext();
       vrContext.initSystem();
@@ -83,7 +83,7 @@ public class GDXVRApplication
             }
          }
          applicationAdapter.render();
-         vrContext.renderEyes(sceneBasics);
+         vrContext.renderEyes(scene);
       }
 
       applicationAdapter.dispose();
@@ -99,9 +99,9 @@ public class GDXVRApplication
       this.thingToRunAfter10Frames = thingToRunAfter10Frames;
    }
 
-   public GDX3DSceneBasics getSceneBasics()
+   public GDX3DScene getScene()
    {
-      return sceneBasics;
+      return scene;
    }
 
    public GDXVRContext getVRContext()

@@ -164,8 +164,8 @@ public class KSTStreamingState implements State
 
    public KSTStreamingState(KSTTools tools)
    {
-      useStreamingPublisher.set(true);
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
+      useStreamingPublisher.set(parameters.getUseStreamingPublisher());
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();

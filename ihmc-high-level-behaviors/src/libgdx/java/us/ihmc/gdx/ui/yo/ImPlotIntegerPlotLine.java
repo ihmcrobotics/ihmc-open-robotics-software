@@ -1,6 +1,6 @@
 package us.ihmc.gdx.ui.yo;
 
-public class ImPlotIntegerPlotLine extends ImPlotPlotLineBasics
+public class ImPlotIntegerPlotLine extends ImPlotWallTimeScrollingPlotLine
 {
    private final ImPlotPlotLineIntegerSwapBuffer integerSwapBuffer;
 

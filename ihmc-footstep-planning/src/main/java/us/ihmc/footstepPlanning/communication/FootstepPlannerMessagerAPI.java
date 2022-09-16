@@ -150,10 +150,6 @@ public class FootstepPlannerMessagerAPI
 
    // Body path planner output
    public static final Topic<Pair<List<? extends Pose3DReadOnly>, List<? extends Point3DReadOnly>>> BodyPathData = topic("BodyPathData");
-   public static final Topic<List<VisibilityMapWithNavigableRegion>> VisibilityMapWithNavigableRegionData = topic("VisibilityMapWithNavigableRegionData");
-   public static final Topic<VisibilityMapHolder> StartVisibilityMap = topic("StartVisibilityMap");
-   public static final Topic<VisibilityMapHolder> GoalVisibilityMap = topic("GoalVisibilityMap");
-   public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = topic("InterRegionVisibilityMap");
 
    // Footstep planner output
    public static final Topic<Boolean> SendPlan = topic("SendPlan");

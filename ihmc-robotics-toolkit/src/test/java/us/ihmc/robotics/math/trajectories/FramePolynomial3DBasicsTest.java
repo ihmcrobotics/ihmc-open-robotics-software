@@ -57,12 +57,12 @@ public abstract class FramePolynomial3DBasicsTest extends Polynomial3DBasicsTest
          zdf.changeFrame(frame);
 
          transformedTrajectory.compute(t0);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(z0, transformedTrajectory.getPosition(), SMALL_EPSILON);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zd0, transformedTrajectory.getVelocity(), SMALL_EPSILON);
+         EuclidFrameTestTools.assertGeometricallyEquals(z0, transformedTrajectory.getPosition(), SMALL_EPSILON);
+         EuclidFrameTestTools.assertGeometricallyEquals(zd0, transformedTrajectory.getVelocity(), SMALL_EPSILON);
 
          transformedTrajectory.compute(tf);
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(zf, transformedTrajectory.getPosition(), SMALL_EPSILON);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zdf, transformedTrajectory.getVelocity(), SMALL_EPSILON);
+         EuclidFrameTestTools.assertGeometricallyEquals(zf, transformedTrajectory.getPosition(), SMALL_EPSILON);
+         EuclidFrameTestTools.assertGeometricallyEquals(zdf, transformedTrajectory.getVelocity(), SMALL_EPSILON);
 
          trajectoryWithTransformedInputs.setCubic(t0, tf, z0, zd0, zf, zdf);
 
@@ -73,9 +73,9 @@ public abstract class FramePolynomial3DBasicsTest extends Polynomial3DBasicsTest
             transformedTrajectory.compute(t);
             trajectoryWithTransformedInputs.compute(t);
 
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(trajectoryWithTransformedInputs.getPosition(), transformedTrajectory.getPosition(), SMALL_EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(trajectoryWithTransformedInputs.getVelocity(), transformedTrajectory.getVelocity(), SMALL_EPSILON);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(trajectoryWithTransformedInputs.getAcceleration(), transformedTrajectory.getAcceleration(), SMALL_EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(trajectoryWithTransformedInputs.getPosition(), transformedTrajectory.getPosition(), SMALL_EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(trajectoryWithTransformedInputs.getVelocity(), transformedTrajectory.getVelocity(), SMALL_EPSILON);
+            EuclidFrameTestTools.assertGeometricallyEquals(trajectoryWithTransformedInputs.getAcceleration(), transformedTrajectory.getAcceleration(), SMALL_EPSILON);
 
          }
       }

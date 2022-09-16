@@ -435,7 +435,11 @@ public class AvatarEstimatorThreadFactory
                                                                               getYoGraphicsListRegistry());
 
       avatarEstimatorThread.addRobotController(new RobotJointLimitWatcher(getEstimatorFullRobotModel().getOneDoFJoints(), getRawSensorOutputMap()));
-      avatarEstimatorThread.setRawOutputWriter(getRobotConfigurationDataPublisher());
+      RobotConfigurationDataPublisher robotConfigurationDataPublisher = getRobotConfigurationDataPublisher();
+      if(robotConfigurationDataPublisher != null)
+      {
+         avatarEstimatorThread.setRawOutputWriter(robotConfigurationDataPublisher);
+      }
       ParameterLoaderHelper.loadParameters(this, getControllerParameters(), getEstimatorRegistry());
 
       FactoryTools.disposeFactory(this);

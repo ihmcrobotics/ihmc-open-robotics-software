@@ -53,9 +53,12 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
    private final RecyclingArrayList<JointspaceTrajectoryStatusMessage> combinedStatuses = new RecyclingArrayList<>(JointspaceTrajectoryStatusMessage::new);
 
-   public JointspacePositionControllerState(HighLevelControllerName stateEnum, CommandInputManager commandInputManager,
-                                            StatusMessageOutputManager statusOutputManager, OneDoFJointBasics[] controlledJoints,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControllerParameters highLevelControllerParameters,
+   public JointspacePositionControllerState(HighLevelControllerName stateEnum,
+                                            CommandInputManager commandInputManager,
+                                            StatusMessageOutputManager statusOutputManager,
+                                            OneDoFJointBasics[] controlledJoints,
+                                            DoubleProvider yoTime,
+                                            HighLevelControllerParameters highLevelControllerParameters,
                                             JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
       super(stateEnum, highLevelControllerParameters, controlledJoints);
@@ -70,7 +73,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
          OneDoFJointBasics joint = joints[jointIndex];
-         OneDoFJointManager manager = new OneDoFJointManager(joint, controllerToolbox.getYoTime(), registry);
+         OneDoFJointManager manager = new OneDoFJointManager(joint, yoTime, registry);
          jointManagers[jointIndex] = manager;
          if (joint.hashCode() == hashCodeToJointIndexMap.getNoEntryKey())
             throw new IllegalStateException("Cannot register a joint's hash-code that is equal to the NO_ENTRY key value.");

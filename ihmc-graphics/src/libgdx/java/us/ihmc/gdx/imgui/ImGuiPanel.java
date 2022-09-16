@@ -53,14 +53,11 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    }
    /* package-private */ void renderMenuItem(String indent)
    {
-      if (isTogglable())
-      {
-         ImGui.menuItem(indent + panelName, "", isShowing);
+      ImGui.menuItem(indent + panelName, "", isShowing);
 
-         for (ImGuiPanel child : children)
-         {
-            child.renderMenuItem(indent + "\t");
-         }
+      for (ImGuiPanel child : children)
+      {
+         child.renderMenuItem(indent + "\t");
       }
    }
 
@@ -71,7 +68,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       while (!additionQueue.isEmpty())
          children.add(additionQueue.poll());
 
-      if (isTogglable() && isShowing.get())
+      if (isShowing.get() && render != null)
       {
          handleSizeBeforeBegin();
          int windowFlags = ImGuiWindowFlags.None;
@@ -132,10 +129,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
 
    /* package-private */ void save(ObjectNode anchorJSON)
    {
-      if (isTogglable())
-      {
-         anchorJSON.put(panelName, isShowing.get());
-      }
+      anchorJSON.put(panelName, isShowing.get());
 
       for (ImGuiPanel child : children)
       {
@@ -146,11 +140,6 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    public void setRenderMethod(Runnable render)
    {
       this.render = render;
-   }
-
-   public boolean isTogglable()
-   {
-      return render != null;
    }
 
    public ImBoolean getIsShowing()

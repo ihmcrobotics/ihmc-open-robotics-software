@@ -276,7 +276,7 @@ public class RotationToolsTest
          YawPitchRoll yawPitchRollBack = new YawPitchRoll(q);
 
          double epsilon = 1e-8;
-         EuclidCoreTestTools.assertYawPitchRollEquals(yawPitchRoll, yawPitchRollBack, epsilon);
+         EuclidCoreTestTools.assertEquals(yawPitchRoll, yawPitchRollBack, epsilon);
       }
    }
 
@@ -425,7 +425,7 @@ public class RotationToolsTest
          Vector3D actualAngularVelocity = new Vector3D();
          RotationTools.computeAngularVelocityInBodyFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, actualAngularVelocity);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-7);
+         EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, 1.0e-7);
       }
    }
 
@@ -452,7 +452,7 @@ public class RotationToolsTest
          Vector3D actualAngularVelocity = new Vector3D();
          RotationTools.computeAngularVelocityInWorldFrameFromYawPitchRollAnglesRate(yaw, pitch, roll, yawRate, pitchRate, rollRate, actualAngularVelocity);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON);
+         EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON);
       }
    }
 

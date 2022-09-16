@@ -117,4 +117,9 @@ public class GDXOpenCVVideoVisualizer extends ImGuiGDXVisualizer
    {
       return hasReceivedOne;
    }
+
+   public Texture getTexture()
+   {
+      return texture;
+   }
 }
