@@ -153,7 +153,7 @@ public class GDXLiveRobotPartInteractable
             selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
             for (GDXRobotCollisionLink collisionLink : collisionLinks)
             {
-               collisionLink.setOverrideTransform(true).set(tempTransform);
+               collisionLink.setDetachedTransform(true).set(tempTransform);
             }
             highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
          }
@@ -161,7 +161,7 @@ public class GDXLiveRobotPartInteractable
          {
             for (GDXRobotCollisionLink collisionLink : collisionLinks)
             {
-               collisionLink.setOverrideTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+               collisionLink.setDetachedTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
             }
             highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
          }
@@ -193,7 +193,7 @@ public class GDXLiveRobotPartInteractable
       modified = true;
       for (GDXRobotCollisionLink collisionLink : collisionLinks)
       {
-         collisionLink.setOverrideTransform(true);
+         collisionLink.setDetachedTransform(true);
       }
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
    }
@@ -254,7 +254,7 @@ public class GDXLiveRobotPartInteractable
       selectablePose3DGizmo.getSelected().set(false);
       for (GDXRobotCollisionLink collisionLink : collisionLinks)
       {
-         collisionLink.setOverrideTransform(false);
+         collisionLink.setDetachedTransform(false);
       }
    }
 

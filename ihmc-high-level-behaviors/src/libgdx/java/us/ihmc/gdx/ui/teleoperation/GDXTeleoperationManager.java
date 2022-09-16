@@ -412,12 +412,18 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private void processVRInput(GDXVRContext vrContext)
    {
+      pelvisInteractable.processVRInput(vrContext);
+      for (RobotSide side : footInteractables.sides())
+      {
+         footInteractables.get(side).processVRInput(vrContext);
+      }
+      for (RobotSide side : handInteractables.sides())
+      {
+         handInteractables.get(side).processVRInput(vrContext);
+      }
+
       if (vrInputMode == GDXVRInputMode.ARM_MODE)
       {
-         for (RobotSide side : handInteractables.sides())
-         {
-            handInteractables.get(side).processVRInput(vrContext);
-         }
       }
 
       if (interactablesEnabled.get())
