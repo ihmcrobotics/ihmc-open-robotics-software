@@ -27,7 +27,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.19.0")
    api("us.ihmc:euclid-shape:0.19.0")
    api("us.ihmc:euclid-frame-shape:0.19.0")
-   api("us.ihmc:ihmc-realtime:1.5.0")
+   api("us.ihmc:ihmc-realtime:1.5.1")
    api("us.ihmc:ihmc-ros-control:0.6.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")

@@ -125,7 +125,7 @@ public class GDXWalkingPreviewPlaybackManager
          previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
       }
 
-      previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+      previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootPosition());
       previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
    }
 }

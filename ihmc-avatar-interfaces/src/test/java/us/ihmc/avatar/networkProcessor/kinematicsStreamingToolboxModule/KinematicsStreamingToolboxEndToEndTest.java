@@ -122,7 +122,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       simulationTestHelper.start();
 
-      Point3D cameraFix = new Point3D(initialRobotConfigurationData.getRootTranslation());
+      Point3D cameraFix = new Point3D(initialRobotConfigurationData.getRootPosition());
       Point3D cameraPosition = new Point3D(cameraFix);
       cameraPosition.add(-7.0, -9.0, 4.0);
       simulationTestHelper.setCamera(cameraFix, cameraPosition);

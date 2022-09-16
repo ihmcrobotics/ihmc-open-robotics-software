@@ -22,6 +22,12 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-logger:17-0.23.4")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+
+   var javaFXVersion = "17.0.2"
+   api(ihmc.javaFXModule("base", javaFXVersion))
+   api(ihmc.javaFXModule("controls", javaFXVersion))
+   api(ihmc.javaFXModule("graphics", javaFXVersion))
+   api(ihmc.javaFXModule("fxml", javaFXVersion))
 }
 
 testDependencies {
