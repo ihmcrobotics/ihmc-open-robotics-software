@@ -36,9 +36,7 @@ import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.gdx.ui.vr.GDXKinematicsStreamingMode;
-import us.ihmc.gdx.ui.vr.GDXVRMode;
-import us.ihmc.gdx.ui.vr.GDXVRModeManager;
+import us.ihmc.gdx.ui.vr.GDXWholeBodyIKStreaming;
 import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -78,7 +76,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXFootstepPlanning footstepPlanning;
-   private final GDXVRModeManager vrModeManager;
    private GDXLegControlMode legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
@@ -91,8 +88,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXHandConfigurationManager handManager = new GDXHandConfigurationManager();
    private GDXRobotCollisionModel selfCollisionModel;
    private GDXRobotCollisionModel environmentCollisionModel;
-   private GDXArmManager wholeBodyDesiredIKManager;
-   private GDXKinematicsStreamingMode wholeBodyIKStreaming;
+   private GDXArmManager armManager;
+   private GDXWholeBodyIKStreaming wholeBodyIKStreaming;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -152,18 +149,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new GDXFootstepPlanning(robotModel, syncedRobot);
 
-      vrModeManager = new GDXVRModeManager();
-
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
       {
          selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         wholeBodyDesiredIKManager = new GDXArmManager(robotModel,
-                                                       syncedRobot,
-                                                       desiredRobot.getDesiredFullRobotModel(),
-                                                       ros2Helper,
-                                                       teleoperationParameters);
+         armManager = new GDXArmManager(robotModel,
+                                        syncedRobot,
+                                        desiredRobot.getDesiredFullRobotModel(),
+                                        ros2Helper,
+                                        teleoperationParameters);
       }
 
       continuousStepping = new GDXContinuousStepping(robotModel);
@@ -179,12 +174,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
       this.baseUI = baseUI;
       desiredRobot.create();
 
-      vrModeManager.create(baseUI,
-                           syncedRobot,
-                           ros2Helper,
-                           kinematicsStreamingToolboxProcess != null,
-                           teleoperationParameters,
-                           this::renderExtraWidgetsOnVRPanel);
+//      vrModeManager.create(baseUI,
+//                           syncedRobot,
+//                           ros2Helper,
+//                           kinematicsStreamingToolboxProcess != null,
+//                           teleoperationParameters,
+//                           this::renderExtraWidgetsOnVRPanel);
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -210,7 +205,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
          // create the manager for the desired arm setpoints
-         wholeBodyDesiredIKManager.create();
+         armManager.create();
 
          for (GDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
          {
@@ -264,7 +259,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
                      handInteractables.put(side, handInteractable);
                      // TODO this should probably not handle the space event!
                      // This sends a command to the controller.
-                     handInteractable.setOnSpacePressed(wholeBodyDesiredIKManager.getSubmitDesiredArmSetpointsCallback(side));
+                     handInteractable.setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
                   }
                   else
                   {
@@ -276,7 +271,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          if (kinematicsStreamingToolboxProcess != null)
          {
-            wholeBodyIKStreaming = new GDXKinematicsStreamingMode(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
+            wholeBodyIKStreaming = new GDXWholeBodyIKStreaming(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
             wholeBodyIKStreaming.create(baseUI.getVRManager().getContext(), handInteractables);
          }
 
@@ -333,7 +328,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          if (interactablesAvailable)
          {
-            wholeBodyDesiredIKManager.update(handInteractables);
+            armManager.update(handInteractables);
 
             selfCollisionModel.update();
             environmentCollisionModel.update();
@@ -381,12 +376,12 @@ public class GDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.clear();
       }
 
-      vrModeManager.update(nativesLoaded, nativesNewlyLoaded);
+//      vrModeManager.update(nativesLoaded, nativesNewlyLoaded);
       if (wholeBodyIKStreaming != null)
       {
-         boolean isIKStreamingMode = vrModeManager.getMode() == GDXVRMode.WHOLE_BODY_IK_STREAMING;
+         boolean isIKStreamingMode = armManager.getArmControlMode() == GDXArmControlMode.STREAMING;
          wholeBodyIKStreaming.update(isIKStreamingMode);
-         if (isIKStreamingMode && vrModeManager.getModeChangedThisUpdate() && !wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().isStarted())
+         if (isIKStreamingMode && armManager.getArmControlModeChanged() && !wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().isStarted())
          {
             wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().start();
          }
@@ -401,10 +396,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private void processVRInput(GDXVRContext vrContext)
    {
-      switch (vrModeManager.getMode())
-      {
-         case WHOLE_BODY_IK_STREAMING -> wholeBodyIKStreaming.processVRInput(vrContext);
-      }
+//      switch (vrModeManager.getMode())
+//      {
+//         case WHOLE_BODY_IK_STREAMING -> wholeBodyIKStreaming.processVRInput(vrContext);
+//      }
    }
 
    private void calculate3DViewPick(ImGui3DViewInput input)
@@ -581,7 +576,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesAvailable)
       {
-         wholeBodyDesiredIKManager.renderImGuiWidgets();
+         armManager.renderImGuiWidgets();
 
          boolean handInteractablesAreDeleted = true;
          for (RobotSide side : handInteractables.sides())
@@ -599,7 +594,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 //            desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
             for (RobotSide side : handInteractables.sides())
                desiredRobot.setArmShowing(side, !handInteractables.get(side).isDeleted()
-                                                && wholeBodyDesiredIKManager.getArmControlMode() == GDXArmControlMode.JOINT_ANGLES);
+                                                && armManager.getArmControlMode() == GDXArmControlMode.JOINT_ANGLES);
 //            for (RobotSide side : footInteractables.sides())
 //               desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
          }
@@ -621,12 +616,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
    private void renderSharedImGuiWidgets()
    {
-      switch (vrModeManager.getMode())
+      if (armManager.getArmControlMode() == GDXArmControlMode.STREAMING)
       {
-         case WHOLE_BODY_IK_STREAMING ->
-         {
-            wholeBodyIKStreaming.renderImGuiWidgets();
-         }
+         wholeBodyIKStreaming.renderImGuiWidgets();
       }
    }
 
@@ -727,12 +719,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
 
-         switch (vrModeManager.getMode())
+         if (armManager.getArmControlMode() == GDXArmControlMode.STREAMING)
          {
-            case WHOLE_BODY_IK_STREAMING ->
-            {
-               wholeBodyIKStreaming.getVirtualRenderables(renderables, pool);
-            }
+            wholeBodyIKStreaming.getVirtualRenderables(renderables, pool);
          }
       }
    }
@@ -742,7 +731,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       desiredRobot.destroy();
       walkPathControlRing.destroy();
       footstepsSentToControllerGraphic.destroy();
-      vrModeManager.destroy();
+//      vrModeManager.destroy();
       if (wholeBodyIKStreaming != null)
          wholeBodyIKStreaming.destroy();
    }
@@ -773,8 +762,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       return handManager;
    }
 
-   public GDXVRModeManager getVRModeManager()
-   {
-      return vrModeManager;
-   }
+//   public GDXVRModeManager getVRModeManager()
+//   {
+//      return vrModeManager;
+//   }
 }

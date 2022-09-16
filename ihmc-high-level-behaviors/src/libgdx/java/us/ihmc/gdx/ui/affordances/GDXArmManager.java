@@ -32,6 +32,7 @@ public class GDXArmManager
 
    private final ArmJointName[] armJointNames;
    private GDXArmControlMode armControlMode = GDXArmControlMode.JOINT_ANGLES;
+   private boolean armControlModeChanged = false;
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
@@ -162,24 +163,29 @@ public class GDXArmManager
          }
       }
 
+      armControlModeChanged = false;
       ImGui.text("Arm & hand control mode:");
       if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == GDXArmControlMode.JOINT_ANGLES))
       {
+         armControlModeChanged = true;
          armControlMode = GDXArmControlMode.JOINT_ANGLES;
       }
       ImGui.text("Hand pose only:");
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("World"), armControlMode == GDXArmControlMode.POSE_WORLD))
       {
+         armControlModeChanged = true;
          armControlMode = GDXArmControlMode.POSE_WORLD;
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Chest"), armControlMode == GDXArmControlMode.POSE_CHEST))
       {
+         armControlModeChanged = true;
          armControlMode = GDXArmControlMode.POSE_CHEST;
       }
       if (ImGui.radioButton(labels.get("IK Streaming"), armControlMode == GDXArmControlMode.STREAMING))
       {
+         armControlModeChanged = true;
          armControlMode = GDXArmControlMode.STREAMING;
       }
    }
@@ -245,5 +251,10 @@ public class GDXArmManager
    public GDXArmControlMode getArmControlMode()
    {
       return armControlMode;
+   }
+
+   public boolean getArmControlModeChanged()
+   {
+      return armControlModeChanged;
    }
 }

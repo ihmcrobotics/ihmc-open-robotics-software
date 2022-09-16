@@ -45,7 +45,7 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
-public class GDXKinematicsStreamingMode
+public class GDXWholeBodyIKStreaming
 {
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -78,9 +78,9 @@ public class GDXKinematicsStreamingMode
    private int rightIndex = -1;
    private SideDependentList<GDXHandInteractable> handInteractables;
 
-   public GDXKinematicsStreamingMode(DRCRobotModel robotModel,
-                                     ROS2ControllerHelper ros2ControllerHelper,
-                                     RestartableJavaProcess kinematicsStreamingToolboxProcess)
+   public GDXWholeBodyIKStreaming(DRCRobotModel robotModel,
+                                  ROS2ControllerHelper ros2ControllerHelper,
+                                  RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
