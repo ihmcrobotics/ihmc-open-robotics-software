@@ -67,4 +67,9 @@ public class FrameGDXNodePart
    {
       model.dispose();
    }
+
+   public ModelInstance getModelInstance()
+   {
+      return modelInstance;
+   }
 }

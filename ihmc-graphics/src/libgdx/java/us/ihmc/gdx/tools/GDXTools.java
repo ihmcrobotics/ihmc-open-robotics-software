@@ -427,6 +427,16 @@ public class GDXTools
       }
    }
 
+   public static long countVertices(ModelInstance modelInstance)
+   {
+      long numberOfVertices = 0;
+      for (int i = 0; i < modelInstance.model.meshes.size; i++)
+      {
+         numberOfVertices += modelInstance.model.meshes.get(i).getNumVertices();
+      }
+      return numberOfVertices;
+   }
+
    public static void printShaderLog(String shaderPath, ShaderProgram shaderProgram)
    {
       for (String line : shaderProgram.getLog().split("\n"))

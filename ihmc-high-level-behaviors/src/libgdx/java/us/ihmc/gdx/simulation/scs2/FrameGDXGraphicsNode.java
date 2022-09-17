@@ -72,4 +72,9 @@ public class FrameGDXGraphicsNode
    {
       coordinateFrame.transform.scale(x, y, z);
    }
+
+   public ArrayList<FrameGDXNodePart> getParts()
+   {
+      return parts;
+   }
 }
