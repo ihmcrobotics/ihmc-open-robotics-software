@@ -148,7 +148,9 @@ public class GDXPerceptionVisualizerUI
             H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
 
             HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
-            depthMap = HDF5Tools.loadDepthMap(file, frameIndex);
+
+            depthMap = new Mat(768, 1024, opencv_core.CV_16UC1);
+            HDF5Tools.loadDepthMap(file, frameIndex, depthMap);
 
             //            BytedecoOpenCVTools.printMat(depthMap, "Depth");
 
@@ -205,7 +207,8 @@ public class GDXPerceptionVisualizerUI
                HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
                LogTools.info("Loading Cloud: {}", frameIndex / 30);
 
-               depthMap = HDF5Tools.loadDepthMap(file, frameIndex / 30);
+               depthMap = new Mat(768, 1024, opencv_core.CV_16UC1);
+               HDF5Tools.loadDepthMap(file, frameIndex / 30, depthMap);
                LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
 
                //               BytedecoOpenCVTools.printMat(depthMap, "Depth");

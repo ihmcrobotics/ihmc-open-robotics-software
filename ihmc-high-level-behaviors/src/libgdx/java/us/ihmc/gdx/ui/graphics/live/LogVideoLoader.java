@@ -15,9 +15,6 @@ import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
-
 public class LogVideoLoader
 {
    private final MP4VideoDemuxer demuxer;
@@ -30,17 +27,17 @@ public class LogVideoLoader
    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
    private long currentlyShowingRobottimestamp = 0;
-
+   private long upcomingRobottimestamp = 0;
    private int currentlyShowingIndex = 0;
+
    private File videoFile;
+
    private boolean hasTimebase;
    private long bmdTimeBaseNum;
    private long bmdTimeBaseDen;
    private boolean interlaced;
    private long[] robotTimestamps;
    private long[] videoTimestamps;
-
-   private int index = 0;
 
    public LogVideoLoader(String file, String timestampFile) throws IOException
    {
@@ -58,26 +55,46 @@ public class LogVideoLoader
       LogTools.info("Demuxer: {}", demuxer);
    }
 
-   public Mat loadNextFrameAsOpenCVMat()
+   public Mat loadNextFrameAsOpenCVMat(long timestamp)
    {
-      if(demuxer == null) return null;
-      long timestamp = robotTimestamps[index];
-      LogTools.info("Timestamp: {}", timestamp, index);
-      if(index < robotTimestamps.length) index++;
-//
+      if (timestamp >= currentlyShowingRobottimestamp && timestamp < upcomingRobottimestamp)
+      {
+         return null;
+      }
+
+      long previousTimestamp = videoTimestamps[currentlyShowingIndex];
+
       long videoTimestamp;
-//      if (robotTimestamps.length > currentlyShowingIndex + 1 && robotTimestamps[currentlyShowingIndex + 1] == timestamp)
-//      {
-//         currentlyShowingIndex++;
-//         videoTimestamp = videoTimestamps[currentlyShowingIndex];
-//         currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
-//
-//      }
-//      else
-//      {
+      if (robotTimestamps.length > currentlyShowingIndex + 1 && robotTimestamps[currentlyShowingIndex + 1] == timestamp)
+      {
+         currentlyShowingIndex++;
+         videoTimestamp = videoTimestamps[currentlyShowingIndex];
+         currentlyShowingRobottimestamp = robotTimestamps[currentlyShowingIndex];
+
+      }
+      else
+      {
          videoTimestamp = getVideoTimestamp(timestamp);
-         LogTools.info("Video Timestamps: {}", videoTimestamp);
-//      }
+
+      }
+
+      if (currentlyShowingIndex + 1 < robotTimestamps.length)
+      {
+         upcomingRobottimestamp = robotTimestamps[currentlyShowingIndex + 1];
+      }
+      else
+      {
+         upcomingRobottimestamp = currentlyShowingRobottimestamp;
+      }
+
+      if (previousTimestamp == videoTimestamp)
+      {
+         return null;
+      }
+
+      videoTimestamp = getVideoTimestamp(timestamp);
+      LogTools.info("Video Timestamps: {}", videoTimestamp);
+      //      }
       try
       {
          demuxer.seekToPTS(videoTimestamp);
@@ -144,17 +161,16 @@ public class LogVideoLoader
 
             robotTimestamps.add(robotStamp);
             videoTimestamps.add(videoStamp);
-
          }
 
          this.robotTimestamps = robotTimestamps.toArray();
          this.videoTimestamps = videoTimestamps.toArray();
-
       }
       catch (FileNotFoundException e)
       {
          throw new RuntimeException(e);
-      } finally
+      }
+      finally
       {
          try
          {
@@ -168,6 +184,7 @@ public class LogVideoLoader
          }
       }
    }
+
    private long getVideoTimestamp(long timestamp)
    {
       currentlyShowingIndex = Arrays.binarySearch(robotTimestamps, timestamp);
@@ -200,5 +217,4 @@ public class LogVideoLoader
 
       return videoTimestamp;
    }
-
 }

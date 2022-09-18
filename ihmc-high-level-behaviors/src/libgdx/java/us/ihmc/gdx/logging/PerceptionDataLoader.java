@@ -11,13 +11,12 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
 public class PerceptionDataLoader
 {
    private H5File h5File;
-   static final String FILE_NAME = "/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
 
    private int index = 0;
 
-   public PerceptionDataLoader()
+   public PerceptionDataLoader(String filePath)
    {
-      h5File = new H5File(FILE_NAME, H5F_ACC_RDONLY);
+      h5File = new H5File(filePath, H5F_ACC_RDONLY);
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
@@ -41,7 +40,8 @@ public class PerceptionDataLoader
 
    public static void main(String[] args)
    {
-      PerceptionDataLoader loader = new PerceptionDataLoader();
+      String FILE_NAME = "/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+      PerceptionDataLoader loader = new PerceptionDataLoader(FILE_NAME);
       //      ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(loader.getClass(), ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
       //      executorService.scheduleAtFixedRate(loader::loadNextDataFrame, 0, 100, TimeUnit.MILLISECONDS);
 

@@ -22,6 +22,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.SessionMode;
+import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.time.DurationCalculator;
@@ -60,7 +61,6 @@ public class GDXSCS2Session
    private boolean sessionStartedHandled = false;
    private final GDXRenderableAdapter renderables = new GDXRenderableAdapter(this::getRenderables);
    private final ArrayList<Runnable> onSessionStartedRunnables = new ArrayList<>();
-   private LogVideoLoader logVideoVisualizer;
 
    public GDXSCS2Session(Session session)
    {
@@ -71,10 +71,6 @@ public class GDXSCS2Session
    public void create(GDXImGuiBasedUI baseUI)
    {
       create(baseUI, controlPanel);
-   }
-
-   public void createVideoVisualizer(String logVideoFilePath, String logVideoTimestampFilePath) throws IOException {
-      logVideoVisualizer = new LogVideoLoader(logVideoFilePath, logVideoTimestampFilePath);
    }
 
    public void create(GDXImGuiBasedUI baseUI, ImGuiPanel panel)
@@ -115,7 +111,6 @@ public class GDXSCS2Session
       baseUI.getPrimaryScene().addRenderableAdapter(renderables);
 
       plotManager.create(baseUI.getPerspectiveManager(), yoManager, panel);
-
    }
 
    public void update()
@@ -127,10 +122,6 @@ public class GDXSCS2Session
          sessionStartedHandled = true;
          LogTools.info("Session started.");
          plotManager.initializeLinkedVariables();
-         for (Runnable onSessionStartedRunnable : onSessionStartedRunnables)
-         {
-            onSessionStartedRunnable.run();
-         }
       }
 
       if (session.getActiveMode() != SessionMode.RUNNING)
@@ -197,6 +188,7 @@ public class GDXSCS2Session
          updateDTFromSession();
       }
       ImGui.popItemWidth();
+      ImGui.text("Session Time: " + session.getTime().getValue());
       if (ImGui.radioButton("Run", session.getActiveMode() == SessionMode.RUNNING))
       {
          session.submitBufferIndexRequest(yoManager.getOutPoint());
