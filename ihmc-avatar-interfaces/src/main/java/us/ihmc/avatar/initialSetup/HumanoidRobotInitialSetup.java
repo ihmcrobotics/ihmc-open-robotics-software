@@ -247,6 +247,11 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
       return jointPositions.get(jointName);
    }
 
+   public boolean hasJointPosition(String jointName)
+   {
+      return jointPositions.containsKey(jointName);
+   }
+
    public Map<String, Double> getJointPositions()
    {
       return jointPositions;

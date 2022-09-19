@@ -57,7 +57,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
                                             CommandInputManager commandInputManager,
                                             StatusMessageOutputManager statusOutputManager,
                                             OneDoFJointBasics[] controlledJoints,
-                                            HighLevelHumanoidControllerToolbox controllerToolbox,
+                                            DoubleProvider yoTime,
                                             HighLevelControllerParameters highLevelControllerParameters,
                                             JointDesiredOutputListReadOnly highLevelControllerOutput)
    {
@@ -73,7 +73,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
          OneDoFJointBasics joint = joints[jointIndex];
-         OneDoFJointManager manager = new OneDoFJointManager(joint, controllerToolbox.getYoTime(), registry);
+         OneDoFJointManager manager = new OneDoFJointManager(joint, yoTime, registry);
          jointManagers[jointIndex] = manager;
          if (joint.hashCode() == hashCodeToJointIndexMap.getNoEntryKey())
             throw new IllegalStateException("Cannot register a joint's hash-code that is equal to the NO_ENTRY key value.");

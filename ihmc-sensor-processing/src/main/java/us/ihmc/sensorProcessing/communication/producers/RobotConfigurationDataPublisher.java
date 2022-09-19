@@ -5,7 +5,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.RobotFrameData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -105,7 +104,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       // Write root joint data
       robotConfigurationData.getRootOrientation().set(rootJointSensorData.getPose().getOrientation());
-      robotConfigurationData.getRootTranslation().set(rootJointSensorData.getPose().getPosition());
+      robotConfigurationData.getRootPosition().set(rootJointSensorData.getPose().getPosition());
       robotConfigurationData.getPelvisAngularVelocity().set(rootJointSensorData.getTwist().getAngularPart());
       robotConfigurationData.getPelvisLinearVelocity().set(rootJointSensorData.getTwist().getLinearPart());
       robotConfigurationData.getPelvisLinearAcceleration().set(rootJointSensorData.getAcceleration().getLinearPart());

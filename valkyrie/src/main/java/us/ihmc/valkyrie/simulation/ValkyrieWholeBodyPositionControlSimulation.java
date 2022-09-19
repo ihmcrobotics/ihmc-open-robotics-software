@@ -112,7 +112,7 @@ public class ValkyrieWholeBodyPositionControlSimulation
                                                          commandInputManager,
                                                          statusOutputManager,
                                                          controlledJoints,
-                                                         controllerToolbox,
+                                                         controllerToolbox.getYoTime(),
                                                          highLevelControllerParameters,
                                                          highLevelControllerOutput);
          }

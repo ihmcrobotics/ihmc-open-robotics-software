@@ -39,7 +39,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public byte current_toolbox_state_;
    public int joint_name_hash_;
    public us.ihmc.idl.IDLSequence.Float  desired_joint_angles_;
-   public us.ihmc.euclid.tuple3D.Vector3D desired_root_translation_;
+   public us.ihmc.euclid.tuple3D.Point3D desired_root_position_;
    public us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
    /**
             * Desired joint velocities might be empty.
@@ -60,7 +60,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    {
       desired_joint_angles_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
-      desired_root_translation_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_root_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_root_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       desired_joint_velocities_ = new us.ihmc.idl.IDLSequence.Float (100, "type_5");
 
@@ -85,7 +85,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       joint_name_hash_ = other.joint_name_hash_;
 
       desired_joint_angles_.set(other.desired_joint_angles_);
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_translation_, desired_root_translation_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_root_position_, desired_root_position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_root_orientation_, desired_root_orientation_);
       desired_joint_velocities_.set(other.desired_joint_velocities_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_root_linear_velocity_, desired_root_linear_velocity_);
@@ -141,9 +141,9 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    }
 
 
-   public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootTranslation()
+   public us.ihmc.euclid.tuple3D.Point3D getDesiredRootPosition()
    {
-      return desired_root_translation_;
+      return desired_root_position_;
    }
 
 
@@ -220,7 +220,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.desired_joint_angles_, other.desired_joint_angles_, epsilon)) return false;
 
-      if (!this.desired_root_translation_.epsilonEquals(other.desired_root_translation_, epsilon)) return false;
+      if (!this.desired_root_position_.epsilonEquals(other.desired_root_position_, epsilon)) return false;
       if (!this.desired_root_orientation_.epsilonEquals(other.desired_root_orientation_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.desired_joint_velocities_, other.desired_joint_velocities_, epsilon)) return false;
 
@@ -255,7 +255,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       if(this.joint_name_hash_ != otherMyClass.joint_name_hash_) return false;
 
       if (!this.desired_joint_angles_.equals(otherMyClass.desired_joint_angles_)) return false;
-      if (!this.desired_root_translation_.equals(otherMyClass.desired_root_translation_)) return false;
+      if (!this.desired_root_position_.equals(otherMyClass.desired_root_position_)) return false;
       if (!this.desired_root_orientation_.equals(otherMyClass.desired_root_orientation_)) return false;
       if (!this.desired_joint_velocities_.equals(otherMyClass.desired_joint_velocities_)) return false;
       if (!this.desired_root_linear_velocity_.equals(otherMyClass.desired_root_linear_velocity_)) return false;
@@ -281,8 +281,8 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
       builder.append(this.joint_name_hash_);      builder.append(", ");
       builder.append("desired_joint_angles=");
       builder.append(this.desired_joint_angles_);      builder.append(", ");
-      builder.append("desired_root_translation=");
-      builder.append(this.desired_root_translation_);      builder.append(", ");
+      builder.append("desired_root_position=");
+      builder.append(this.desired_root_position_);      builder.append(", ");
       builder.append("desired_root_orientation=");
       builder.append(this.desired_root_orientation_);      builder.append(", ");
       builder.append("desired_joint_velocities=");

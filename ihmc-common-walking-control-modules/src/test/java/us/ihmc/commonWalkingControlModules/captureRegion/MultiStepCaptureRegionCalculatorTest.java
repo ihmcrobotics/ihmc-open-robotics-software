@@ -11,6 +11,7 @@ import javax.swing.JScrollPane;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -108,6 +109,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              yoInnerLimit,
                                                                                                              yoOuterLimit,
                                                                                                              yoNominalWidth,
+                                                                                                             new StepAdjustmentParameters.CrossOverReachabilityParameters(),
                                                                                                              "name",
                                                                                                              false,
                                                                                                              registry,
@@ -269,6 +271,7 @@ public class MultiStepCaptureRegionCalculatorTest
                                                                                                              yoInnerLimit,
                                                                                                              yoOuterLimit,
                                                                                                              yoNominalWidth,
+                                                                                                             new StepAdjustmentParameters.CrossOverReachabilityParameters(),
                                                                                                              "name",
                                                                                                              false,
                                                                                                              registry,

@@ -754,7 +754,7 @@ public class WholeBodyTrajectoryToolboxController extends ToolboxController
       }
 
       initialConfiguration.getDesiredRootOrientation().set(currentRobotConfiguration.getRootOrientation());
-      initialConfiguration.getDesiredRootTranslation().set(currentRobotConfiguration.getRootTranslation());
+      initialConfiguration.getDesiredRootPosition().set(currentRobotConfiguration.getRootPosition());
 
       initialConfiguration.setJointNameHash(currentRobotConfiguration.getJointNameHash());
       int length = currentRobotConfiguration.getJointAngles().size();
