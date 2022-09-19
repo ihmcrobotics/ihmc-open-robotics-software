@@ -89,10 +89,10 @@ public class GDXSCS2LogSession extends GDXSCS2Session
 
          Mat mat = logVideoLoader.loadNextFrameAsOpenCVMat(session.getLogDataReader().getTimestamp().getValue());
 
-         BytePointer jpegImageBytePointer = new BytePointer();
-         IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
-
-         opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
+//         BytePointer jpegImageBytePointer = new BytePointer();
+//         IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+//
+//         opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
 
          if (mat != null)
          {
