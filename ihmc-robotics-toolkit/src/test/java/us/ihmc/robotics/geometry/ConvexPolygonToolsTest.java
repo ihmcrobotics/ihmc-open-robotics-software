@@ -1371,6 +1371,10 @@ public class ConvexPolygonToolsTest
       double epsilon = 0.01;
 
       new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, polygon1MinPoint, polygon2MinPoint);
+
+      assertTrue(polygon1.pointIsOnPerimeter(polygon1MinPoint));
+      assertTrue(polygon2.pointIsOnPerimeter(polygon2MinPoint));
+      assertTrue(polygon1MinPoint.distance(polygon2MinPoint) < polygon1.getVertex(0).distance(polygon2.getVertex(0)));
    }
 
    private void assertEqualsInEitherOrder(double expected0, double expected1, double actual0, double actual1)
