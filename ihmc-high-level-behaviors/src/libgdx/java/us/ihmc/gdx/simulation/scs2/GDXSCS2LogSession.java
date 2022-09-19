@@ -3,6 +3,9 @@ package us.ihmc.gdx.simulation.scs2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -11,9 +14,8 @@ import us.ihmc.gdx.logging.PerceptionDataLoader;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXMocapVisualizer;
-import us.ihmc.gdx.ui.graphics.live.GDXVideoVisualizer;
+import us.ihmc.gdx.ui.graphics.live.GDXOpenCVVideoVisualizer;
 import us.ihmc.gdx.ui.graphics.live.LogVideoLoader;
-import us.ihmc.log.LogTools;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.log.LogSession;
 import us.ihmc.tools.UnitConversions;
@@ -32,7 +34,7 @@ public class GDXSCS2LogSession extends GDXSCS2Session
 
    private final RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(200000, Point3D32::new);
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
-   private final ArrayList<GDXVideoVisualizer> imagePanels = new ArrayList<>();
+   private final ArrayList<GDXOpenCVVideoVisualizer> imagePanels = new ArrayList<>();
 
    private int cloudIndex = 0;
 
@@ -42,7 +44,8 @@ public class GDXSCS2LogSession extends GDXSCS2Session
       this.session = session;
       dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
 
-      imagePanels.add(new GDXVideoVisualizer("LoggerCameraView", "NadiaNorth", false));
+      imagePanels.add(new GDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaNorth", false));
+      imagePanels.add(new GDXOpenCVVideoVisualizer("LoggerCameraView", "NadiaSouth", false));
    }
 
    public void createLogVideoLoader(String logVideoFilePath, String logVideoTimestampFilePath) throws IOException
@@ -62,7 +65,7 @@ public class GDXSCS2LogSession extends GDXSCS2Session
       baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
       pointCloudRenderer.create(2048 * 64, 1);
 
-      for (GDXVideoVisualizer visualizer : imagePanels)
+      for (GDXOpenCVVideoVisualizer visualizer : imagePanels)
       {
          baseUI.getPrimaryScene().addRenderableProvider(visualizer);
       }
@@ -76,7 +79,6 @@ public class GDXSCS2LogSession extends GDXSCS2Session
       {
          if (cloudIndex % 100 == 0)
          {
-            LogTools.info("Point Cloud Render: {}", cloudIndex / 100);
             loader.loadPointCloud("/os_cloud_node/points", cloudIndex / 100, points);
             pointCloudRenderer.setPointsToRender(points);
             if (!points.isEmpty())
@@ -87,14 +89,14 @@ public class GDXSCS2LogSession extends GDXSCS2Session
 
          Mat mat = logVideoLoader.loadNextFrameAsOpenCVMat(session.getLogDataReader().getTimestamp().getValue());
 
+         BytePointer jpegImageBytePointer = new BytePointer();
+         IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+
+         opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
+
          if (mat != null)
          {
             imagePanels.get(0).setImage(mat);
-            imagePanels.get(0).update();
-         }
-         else
-         {
-            LogTools.warn("Mat is NULL!");
          }
       }
 
@@ -111,7 +113,7 @@ public class GDXSCS2LogSession extends GDXSCS2Session
       renderImGuiWidgetsPartOne();
       renderImGuiWidgetsPartTwo();
 
-      for (GDXVideoVisualizer visualizer : imagePanels)
+      for (GDXOpenCVVideoVisualizer visualizer : imagePanels)
       {
          visualizer.renderImGuiWidgets();
       }
@@ -122,7 +124,7 @@ public class GDXSCS2LogSession extends GDXSCS2Session
       super.renderImGuiWidgetsPartOne();
    }
 
-   public ArrayList<GDXVideoVisualizer> getImagePanels()
+   public ArrayList<GDXOpenCVVideoVisualizer> getImagePanels()
    {
       return imagePanels;
    }
