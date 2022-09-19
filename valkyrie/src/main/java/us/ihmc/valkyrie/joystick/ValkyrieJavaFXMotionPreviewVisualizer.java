@@ -177,7 +177,7 @@ public class ValkyrieJavaFXMotionPreviewVisualizer
          joints[i] = frame.getDesiredJointAngles().get(i);
       }
 
-      newRootJointPoseReference.set(new RigidBodyTransform(frame.getDesiredRootOrientation(), frame.getDesiredRootTranslation()));
+      newRootJointPoseReference.set(new RigidBodyTransform(frame.getDesiredRootOrientation(), frame.getDesiredRootPosition()));
       newJointConfigurationReference.set(joints);
    }
 

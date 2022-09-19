@@ -28,6 +28,7 @@ public class WholeBodyControllerCoreFactory
 
    private LinearMomentumRateControlModule linearMomentumRateControlModule;
    private WholeBodyControllerCore controllerCore;
+   private WholeBodyControlCoreToolbox toolbox;
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
@@ -82,6 +83,32 @@ public class WholeBodyControllerCoreFactory
       this.template = template;
    }
 
+   public WholeBodyControlCoreToolbox getOrCreateWholeBodyControllerCoreToolbox()
+   {
+      if (toolbox != null)
+         return toolbox;
+
+      if (!hasHighLevelHumanoidControllerToolbox(WholeBodyControllerCore.class))
+         return null;
+      if (!hasWalkingControllerParameters(WholeBodyControllerCore.class))
+         return null;
+
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
+      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
+      toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
+                                                controllerToolbox.getGravityZ(),
+                                                rootJoint,
+                                                jointsToOptimizeFor,
+                                                centerOfMassFrame,
+                                                walkingControllerParameters.getMomentumOptimizationSettings(),
+                                                controllerToolbox.getYoGraphicsListRegistry(),
+                                                registry);
+      return toolbox;
+   }
+
    public WholeBodyControllerCore getOrCreateWholeBodyControllerCore()
    {
       if (controllerCore != null)
@@ -94,19 +121,9 @@ public class WholeBodyControllerCoreFactory
       if (!hasFeedbackControllerTemplate(WholeBodyControllerCore.class))
          return null;
 
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+      WholeBodyControlCoreToolbox toolbox = getOrCreateWholeBodyControllerCoreToolbox();
 
-      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
-                                                                            controllerToolbox.getGravityZ(),
-                                                                            rootJoint,
-                                                                            jointsToOptimizeFor,
-                                                                            centerOfMassFrame,
-                                                                            walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                            controllerToolbox.getYoGraphicsListRegistry(),
-                                                                            registry);
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
