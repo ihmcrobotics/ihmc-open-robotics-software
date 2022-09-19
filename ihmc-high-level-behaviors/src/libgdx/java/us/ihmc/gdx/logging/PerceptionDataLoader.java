@@ -14,8 +14,11 @@ public class PerceptionDataLoader
 
    private int index = 0;
 
+   private String filePath;
+
    public PerceptionDataLoader(String filePath)
    {
+      this.filePath = filePath;
       h5File = new H5File(filePath, H5F_ACC_RDONLY);
    }
 
@@ -36,6 +39,18 @@ public class PerceptionDataLoader
    public int getCount(String namespace)
    {
       return HDF5Tools.getCount(h5File, namespace);
+   }
+
+   public String getFilePath() {
+      return filePath;
+   }
+
+   public void setFilePath(String filePath) {
+      this.filePath = filePath;
+   }
+
+   public H5File getH5File() {
+      return h5File;
    }
 
    public static void main(String[] args)
