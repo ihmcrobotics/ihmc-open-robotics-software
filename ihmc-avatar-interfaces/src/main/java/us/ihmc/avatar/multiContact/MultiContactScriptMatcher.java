@@ -10,6 +10,7 @@ import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairAngularE
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairLinearErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairSpatialErrorCalculator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -56,7 +57,7 @@ public class MultiContactScriptMatcher
       updateScriptRobotConfiguration(description.getControllerConfiguration());
 
       optimizer.clearErrorCalculators();
-      optimizer.addDefaultRigidBodyLinearErrorCalculators((scriptBody, controllerBody) -> defaultScriptBodiesToMatch.contains(scriptBody));
+      optimizer.addDefaultRigidBodyLinearErrorCalculators((controllerBody, scriptBody) -> defaultScriptBodiesToMatch.contains(scriptBody));
 
       for (SixDoFMotionControlAnchorDescription anchorDescription : description.getSixDoFAnchors())
       {

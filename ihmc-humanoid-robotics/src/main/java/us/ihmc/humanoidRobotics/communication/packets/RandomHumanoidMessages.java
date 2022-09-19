@@ -801,7 +801,7 @@ public final class RandomHumanoidMessages
       KinematicsToolboxOutputStatus next = new KinematicsToolboxOutputStatus();
       next.setJointNameHash(random.nextInt());
       next.getDesiredJointAngles().add(RandomNumbers.nextFloatArray(random, random.nextInt(100), 1.0f));
-      next.getDesiredRootTranslation().set(EuclidCoreRandomTools.nextVector3D32(random));
+      next.getDesiredRootPosition().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getDesiredRootOrientation().set(EuclidCoreRandomTools.nextQuaternion32(random));
       next.setSolutionQuality(random.nextDouble());
       return next;
