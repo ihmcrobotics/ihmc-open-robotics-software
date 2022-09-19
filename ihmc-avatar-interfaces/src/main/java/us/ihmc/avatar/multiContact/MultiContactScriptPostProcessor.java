@@ -114,7 +114,7 @@ public class MultiContactScriptPostProcessor
       for (KinematicsToolboxSnapshotDescription item : rawScript)
       {
          KinematicsToolboxOutputStatus ikSolution = item.getIkSolution();
-         rootJoint.getJointPose().set(ikSolution.getDesiredRootTranslation(), ikSolution.getDesiredRootOrientation());
+         rootJoint.getJointPose().set(ikSolution.getDesiredRootPosition(), ikSolution.getDesiredRootOrientation());
          for (int i = 0; i < ikSolution.getDesiredJointAngles().size(); i++)
          {
             oneDoFJoints[i].setQ(ikSolution.getDesiredJointAngles().get(i));

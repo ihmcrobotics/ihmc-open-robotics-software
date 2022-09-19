@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.producers.VideoSource;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,7 +23,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -450,7 +448,7 @@ public final class RandomHumanoidMessages
       next.getJointAngles().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
       next.getJointVelocities().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
       next.getJointTorques().add(RandomNumbers.nextFloatArray(random, size, 1.0f));
-      next.getRootTranslation().set(EuclidCoreRandomTools.nextVector3D32(random));
+      next.getRootPosition().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getPelvisLinearVelocity().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getPelvisAngularVelocity().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getRootOrientation().set(EuclidCoreRandomTools.nextQuaternion32(random));
@@ -803,7 +801,7 @@ public final class RandomHumanoidMessages
       KinematicsToolboxOutputStatus next = new KinematicsToolboxOutputStatus();
       next.setJointNameHash(random.nextInt());
       next.getDesiredJointAngles().add(RandomNumbers.nextFloatArray(random, random.nextInt(100), 1.0f));
-      next.getDesiredRootTranslation().set(EuclidCoreRandomTools.nextVector3D32(random));
+      next.getDesiredRootPosition().set(EuclidCoreRandomTools.nextVector3D32(random));
       next.getDesiredRootOrientation().set(EuclidCoreRandomTools.nextQuaternion32(random));
       next.setSolutionQuality(random.nextDouble());
       return next;

@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -21,7 +22,7 @@ class ContactPoint
 {
    public static final double basisVectorGraphicScale = 0.1;
    public static final double forceVectorGraphicScale = 1.7;
-   public static final int basisVectorsPerContactPoint = 5;
+   public static final int basisVectorsPerContactPoint = 4;
 
    private final int contactPointIndex;
 
@@ -114,5 +115,12 @@ class ContactPoint
             return;
          }
       }
+
+      return;
+   }
+
+   public Tuple3DReadOnly getResolvedForce()
+   {
+      return force;
    }
 }
