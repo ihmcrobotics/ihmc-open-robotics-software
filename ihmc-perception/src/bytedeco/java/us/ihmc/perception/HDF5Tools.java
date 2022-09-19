@@ -90,6 +90,12 @@ public class HDF5Tools
       dataset.write(depthMap.data(), PredType.NATIVE_UINT16());
    }
 
+   public static void storeCompressedImage(H5File file, String namespace, IntPointer data)
+   {
+      DataSet dataset = file.openDataSet(namespace);
+      dataset.write(data, PredType.NATIVE_INT());
+   }
+
    public static int getCount(H5File h5File, String namespace)
    {
       Group dataset = h5File.openGroup(namespace);

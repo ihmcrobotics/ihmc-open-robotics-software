@@ -93,7 +93,6 @@ public class LogVideoLoader
       }
 
       videoTimestamp = getVideoTimestamp(timestamp);
-      LogTools.info("Video Timestamps: {}", videoTimestamp);
       //      }
       try
       {
@@ -102,8 +101,6 @@ public class LogVideoLoader
          BufferedImage bufImage = converter.toBufferedImage(nextFrame);
 
          Mat mat = BytedecoOpenCVTools.convertBufferedImageToMat(bufImage);
-
-         LogTools.info("Frame Loaded: {} {} {}", bufImage.getHeight(), bufImage.getWidth(), videoTimestamp);
 
          return mat;
       }
