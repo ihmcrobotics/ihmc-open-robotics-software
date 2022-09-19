@@ -7,6 +7,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 
+import java.util.ArrayList;
+
+import static org.bytedeco.hdf5.global.hdf5.*;
+
 public class HDF5Tools
 {
    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
@@ -102,9 +106,61 @@ public class HDF5Tools
       return (int) dataset.getNumObjs();
    }
 
+   public static int getCount(Group group)
+   {
+      return (int) group.getNumObjs();
+   }
+
    public static int getTimestamps(H5File h5File, String namespace)
    {
       Group dataset = h5File.openGroup(namespace);
       return (int) dataset.getNumObjs();
+   }
+
+   public static ArrayList<String> getTopicNames(H5File file)
+   {
+      ArrayList<String> names = new ArrayList<>();
+
+      for(int i = 0; i<file.getNumObjs(); i++)
+      {
+         String obj = file.getObjnameByIdx(i).getString();
+         Group group = file.openGroup(obj);
+         exploreH5(group, names, obj);
+      }
+
+      return names;
+   }
+
+   public static void exploreH5(Group group, ArrayList<String> names, String prefix)
+   {
+      int count = 0;
+      for (int i = 0; i < group.getNumObjs(); i++) {
+         BytePointer objPtr = group.getObjnameByIdx(i);
+         if (group.childObjType(objPtr) == H5O_TYPE_GROUP) {
+            count++;
+            String grpName = group.getObjnameByIdx(i).getString();
+            Group grp = group.openGroup(grpName);
+            exploreH5(grp, names, prefix + "/" + grpName);
+         }
+//         if (group.childObjType(objPtr) == H5O_TYPE_DATASET) {
+//            String dsName = group.getObjnameByIdx(i).getString();
+//            System.out.println("Dataset: " + dsName + "\t" + "Prefix: " + prefix);
+//         }
+
+//         System.out.println("ExploreH5: " + group.getObjnameByIdx(i).getString());
+      }
+
+      if(count == 0)
+      {
+         System.out.println("Prefix: " + prefix);
+         names.add(prefix);
+      }
+   }
+
+   public static void main(String[] args) {
+      String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+      H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
+
+      ArrayList<String> topicNames = HDF5Tools.getTopicNames(file);
    }
 }
