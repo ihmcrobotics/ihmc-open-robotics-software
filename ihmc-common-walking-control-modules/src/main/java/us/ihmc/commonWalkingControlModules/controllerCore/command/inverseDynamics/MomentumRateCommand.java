@@ -72,7 +72,19 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
    /**
-    * Whether this command should be treated considering the full robot or not.
+    * Whether this command should be treated considering the full robot or not. Default value is
+    * {@code true}.
+    * <p>
+    * Typically, the momentum rate command is used to control the center of mass of the whole robot, in
+    * which case {@code considerAllJoints} should be {@code true}.
+    * </p>
+    * <p>
+    * If the control of only part of the robot's momentum rate is desired, then this should be
+    * {@code false} and {@link #jointSelection} should contain the list of joint of interest. For
+    * instance, this command can be used to regulate the rate of change of angular momentum generated
+    * by only the arms. In such scenario, {@code considerAllJoints} is {@code false} and
+    * {@code jointSelection} contains only the arm joints.
+    * </p>
     */
    private boolean considerAllJoints = true;
    /**
