@@ -429,10 +429,15 @@ public class GDXTools
 
    public static long countVertices(ModelInstance modelInstance)
    {
+      return countVertices(modelInstance.model);
+   }
+
+   public static long countVertices(Model model)
+   {
       long numberOfVertices = 0;
-      for (int i = 0; i < modelInstance.model.meshes.size; i++)
+      for (int i = 0; i < model.meshes.size; i++)
       {
-         numberOfVertices += modelInstance.model.meshes.get(i).getNumVertices();
+         numberOfVertices += model.meshes.get(i).getNumVertices();
       }
       return numberOfVertices;
    }

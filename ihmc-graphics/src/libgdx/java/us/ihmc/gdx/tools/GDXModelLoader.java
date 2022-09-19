@@ -51,10 +51,38 @@ public class GDXModelLoader
          model = loadedModels.get(modelFileName);
          if (model == null)
          {
-            LogTools.debug("Loading {}", modelFileName);
+            LogTools.debug("Loading {}", modelFileName);https://jira.ihmc.us/secure/RapidBoard.jspa?rapidView=68&view=planning&selectedIssue=HS-151&issueLimit=100
             try
             {
-               if (!modelFileName.endsWith(".g3dj"))
+               boolean gltfExists = false;
+               // TODO: Possibly figure out msgx's gltf support
+               //  api("com.github.mgsx-dev.gdx-gltf:gltf:2.0.0-rc.1")
+//               if (!modelFileName.endsWith(".gltf"))
+//               {
+//                  String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+//                  FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".gltf");
+//                  if (potentialFileHandle.exists())
+//                  {
+//                     LogTools.debug("Found glTF 2.0 file as an alternative for {}", modelFileName);
+//                     modelFileName = modelFileNameWithoutExtension + ".gltf";
+//                     gltfExists = true;
+//                  }
+//               }
+
+               boolean g3dbExists = false;
+               if (!gltfExists && !modelFileName.endsWith(".g3db"))
+               {
+                  String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+                  FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3db");
+                  if (potentialFileHandle.exists())
+                  {
+                     LogTools.debug("Found G3DB file as an alternative for {}", modelFileName);
+                     modelFileName = modelFileNameWithoutExtension + ".g3db";
+                     g3dbExists = true;
+                  }
+               }
+
+               if (!gltfExists && !g3dbExists && !modelFileName.endsWith(".g3dj"))
                {
                   String modelFileNameWithoutExtension = modelFileName.substring(0, modelFileName.lastIndexOf("."));
                   FileHandle potentialFileHandle = Gdx.files.internal(modelFileNameWithoutExtension + ".g3dj");
@@ -65,6 +93,12 @@ public class GDXModelLoader
                   }
                }
 
+//               if (modelFileName.endsWith(".gltf"))
+//               {
+//                  FileHandle fileHandle = Gdx.files.internal(modelFileName);
+//                  SceneAsset sceneAsset = new GLTFLoader().load(fileHandle);
+//                  model = sceneAsset.scene.model;
+//               }
                if (modelFileName.endsWith(".g3dj"))
                {
                   FileHandle fileHandle = Gdx.files.internal(modelFileName);
@@ -77,6 +111,7 @@ public class GDXModelLoader
                }
                else
                {
+                  LogTools.warn("Using Assimp to load {}. It is recommended to convert to G3DJ for more reliable and faster loading.", modelFileName);
                   model = new GDXAssimpModelLoader(modelFileName).load();
                }
                for (Material material : model.materials)
@@ -94,6 +129,14 @@ public class GDXModelLoader
 
                      map.dispose();
                   }
+               }
+
+               long numberOfVertices = GDXTools.countVertices(model);
+               LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
+
+               if (numberOfVertices > 10000)
+               {
+                  LogTools.warn("{} has {} vertices, which is a lot! This will begin to affect frame rate.", modelFileName, numberOfVertices);
                }
 
                loadedModels.put(modelFileName, model);
