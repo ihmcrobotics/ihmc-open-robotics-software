@@ -179,6 +179,9 @@ public class FootholdCropper
 
    private RobotSide getSideToCrop(FrameLine2DReadOnly lineOfRotation)
    {
+      if (!doPartialFootholdDetection.getValue())
+         return null;
+
       RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromDrop = footDropCropper.computeSideOfFootholdToCrop(lineOfRotation);

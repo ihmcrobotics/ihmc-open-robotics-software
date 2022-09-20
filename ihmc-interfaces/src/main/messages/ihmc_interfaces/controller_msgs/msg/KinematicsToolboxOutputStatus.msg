@@ -20,7 +20,7 @@ byte current_toolbox_state 0
 int32 joint_name_hash
 float32[] desired_joint_angles
 
-geometry_msgs/Vector3 desired_root_translation
+geometry_msgs/Point desired_root_position
 geometry_msgs/Quaternion desired_root_orientation
 
 # Desired joint velocities might be empty.

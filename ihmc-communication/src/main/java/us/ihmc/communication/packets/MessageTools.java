@@ -776,11 +776,11 @@ public class MessageTools
       for (int i = 0; i < kinematicsToolboxOutputStatus.getDesiredJointVelocities().size(); i++)
          jointsToUpdate[i].setQd(kinematicsToolboxOutputStatus.getDesiredJointVelocities().get(i));
 
-      Vector3D desiredRootTranslation = kinematicsToolboxOutputStatus.getDesiredRootTranslation();
+      Point3D desiredRootPosition = kinematicsToolboxOutputStatus.getDesiredRootPosition();
       Quaternion desiredRootOrientation = kinematicsToolboxOutputStatus.getDesiredRootOrientation();
       Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatus.getDesiredRootLinearVelocity();
       Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatus.getDesiredRootAngularVelocity();
-      rootJointToUpdate.getJointPose().set(desiredRootTranslation, desiredRootOrientation);
+      rootJointToUpdate.getJointPose().set(desiredRootPosition, desiredRootOrientation);
       rootJointToUpdate.getJointTwist().set(desiredRootAngularVelocity, desiredRootLinearVelocity);
    }
 
@@ -815,7 +815,7 @@ public class MessageTools
          kinematicsToolboxOutputStatusToPack.getDesiredJointVelocities().add((float) joint.getQd());
       }
 
-      Vector3D desiredRootTranslation = kinematicsToolboxOutputStatusToPack.getDesiredRootTranslation();
+      Point3D desiredRootTranslation = kinematicsToolboxOutputStatusToPack.getDesiredRootPosition();
       Quaternion desiredRootOrientation = kinematicsToolboxOutputStatusToPack.getDesiredRootOrientation();
       Vector3D desiredRootLinearVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootLinearVelocity();
       Vector3D desiredRootAngularVelocity = kinematicsToolboxOutputStatusToPack.getDesiredRootAngularVelocity();
@@ -867,8 +867,8 @@ public class MessageTools
          interpolatedToPack.getDesiredJointVelocities().add((float) EuclidCoreTools.interpolate(jointVelocities1.get(i), jointVelocities2.get(i), alpha));
       }
 
-      Vector3D rootTranslation1 = outputStatusOne.getDesiredRootTranslation();
-      Vector3D rootTranslation2 = outputStatusTwo.getDesiredRootTranslation();
+      Point3D rootPosition1 = outputStatusOne.getDesiredRootPosition();
+      Point3D rootPosition2 = outputStatusTwo.getDesiredRootPosition();
       Quaternion rootOrientation1 = outputStatusOne.getDesiredRootOrientation();
       Quaternion rootOrientation2 = outputStatusTwo.getDesiredRootOrientation();
       Vector3D rootLinearVelocity1 = outputStatusOne.getDesiredRootLinearVelocity();
@@ -876,7 +876,7 @@ public class MessageTools
       Vector3D rootAngularVelocity1 = outputStatusOne.getDesiredRootAngularVelocity();
       Vector3D rootAngularVelocity2 = outputStatusTwo.getDesiredRootAngularVelocity();
 
-      interpolatedToPack.getDesiredRootTranslation().interpolate(rootTranslation1, rootTranslation2, alpha);
+      interpolatedToPack.getDesiredRootPosition().interpolate(rootPosition1, rootPosition2, alpha);
       interpolatedToPack.getDesiredRootOrientation().interpolate(rootOrientation1, rootOrientation2, alpha);
       interpolatedToPack.getDesiredRootLinearVelocity().interpolate(rootLinearVelocity1, rootLinearVelocity2, alpha);
       interpolatedToPack.getDesiredRootAngularVelocity().interpolate(rootAngularVelocity1, rootAngularVelocity2, alpha);
@@ -949,9 +949,9 @@ public class MessageTools
       Quaternion orientationStart = start.getDesiredRootOrientation();
       Quaternion orientationEnd = end.getDesiredRootOrientation();
       Quaternion orientationInterpolated = interpolatedToPack.getDesiredRootOrientation();
-      Vector3D positionStart = start.getDesiredRootTranslation();
-      Vector3D positionEnd = end.getDesiredRootTranslation();
-      Vector3D positionInterpolated = interpolatedToPack.getDesiredRootTranslation();
+      Point3D positionStart = start.getDesiredRootPosition();
+      Point3D positionEnd = end.getDesiredRootPosition();
+      Point3D positionInterpolated = interpolatedToPack.getDesiredRootPosition();
 
       Vector3D angularVelocityStart = start.getDesiredRootAngularVelocity();
       Vector3D angularVelocityEnd = end.getDesiredRootAngularVelocity();

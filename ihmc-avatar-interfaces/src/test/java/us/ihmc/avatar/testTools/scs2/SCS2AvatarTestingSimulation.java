@@ -47,6 +47,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.session.tools.SCS1GraphicConversionTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerIOTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
+import us.ihmc.scs2.simulation.SimulationTerminalCondition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.RobotInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -183,9 +184,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    /**
     * Adds a terminal condition that will be used in the subsequent simulations to determine when to
     * stop the simulation.
-    * <p>
-    * The condition can be removed with {@link #removeSimulationTerminalCondition(BooleanSupplier)}.
-    * </p>
     * 
     * @param terminalCondition the new condition used to terminate future simulation.
     */
@@ -195,11 +193,25 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    /**
+    * Adds a terminal condition that will be used in the subsequent simulations to determine when to
+    * stop the simulation.
+    * <p>
+    * The condition can be removed with {@link #removeSimulationTerminalCondition(SimulationTerminalCondition)}.
+    * </p>
+    * 
+    * @param terminalCondition the new condition used to terminate future simulation.
+    */
+   public void addSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
+   {
+      getSimulationConstructionSet().addExternalTerminalCondition(terminalCondition);
+   }
+
+   /**
     * Removes a terminal simulation condition that was previously registered.
     * 
     * @param terminalCondition the condition to remove.
     */
-   public void removeSimulationTerminalCondition(BooleanSupplier terminalCondition)
+   public void removeSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
    {
       getSimulationConstructionSet().removeExternalTerminalCondition(terminalCondition);
    }
