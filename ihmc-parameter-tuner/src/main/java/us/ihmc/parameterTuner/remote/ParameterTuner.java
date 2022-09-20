@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import javafx.stage.Stage;
 import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
@@ -44,6 +45,7 @@ public class ParameterTuner extends ParameterTuningApplication
 
    public static void main(String[] args)
    {
+      JavaFXApplicationCreator.createAJavaFXApplication();
       String enableAutoDiscoveryParameter = System.getProperty("enableAutoDiscovery", "true");
       DataServerSelectorGUI selector = new DataServerSelectorGUI(Boolean.parseBoolean(enableAutoDiscoveryParameter));
 

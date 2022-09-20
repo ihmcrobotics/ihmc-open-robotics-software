@@ -239,7 +239,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       assertEquals(Arrays.hashCode(allJoints), ikSolution.getJointNameHash(), "Message incompatible with robot.");
 
       SixDoFJointBasics rootJoint = (SixDoFJointBasics) ghostRobot.getRootBody().getChildrenJoints().get(0);
-      rootJoint.setJointPosition(ikSolution.getDesiredRootTranslation());
+      rootJoint.setJointPosition(ikSolution.getDesiredRootPosition());
       rootJoint.setJointOrientation(ikSolution.getDesiredRootOrientation());
 
       for (int i = 0; i < allJoints.length; i++)
@@ -323,7 +323,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
                                                          commandInputManager,
                                                          statusOutputManager,
                                                          controlledJoints,
-                                                         controllerToolbox,
+                                                         controllerToolbox.getYoTime(),
                                                          highLevelControllerParameters,
                                                          highLevelControllerOutput);
          }
