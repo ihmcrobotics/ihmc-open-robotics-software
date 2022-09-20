@@ -108,19 +108,8 @@ public class FootholdCropper
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygonInWorld, Color.BLUE, false);
          yoShrunkPolygon.setVisible(true);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
-
-//         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP",
-//                                                          measuredCoPOccupancy,
-//                                                          50,
-//                                                          YoAppearance.Red(),
-//                                                          registry,
-//                                                          yoGraphicsListRegistry);
-         measuredVisualizer = null;
       }
-      else
-      {
-         measuredVisualizer = null;
-      }
+      measuredVisualizer = null;
 
       parentRegistry.addChild(registry);
    }
@@ -221,6 +210,11 @@ public class FootholdCropper
 
       shiftedLineToPack.setIncludingFrame(lineToShift);
       shiftedLineToPack.getPoint().add(shiftVector);
+   }
+
+   public boolean getValueOfPartialFootholdDetection()
+   {
+      return doPartialFootholdDetection.getValue();
    }
 
    public boolean shouldApplyShrunkenFoothold()
