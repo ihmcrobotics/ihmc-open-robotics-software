@@ -698,7 +698,7 @@ public final class KinematicsToolboxControllerTest
       FloatingJointBasics rootJoint = initialFullRobotModel.getRootJoint();
       if (rootJoint != null)
       {
-         robotConfigurationData.getRootTranslation().set(rootJoint.getJointPose().getPosition());
+         robotConfigurationData.getRootPosition().set(rootJoint.getJointPose().getPosition());
          robotConfigurationData.getRootOrientation().set(rootJoint.getJointPose().getOrientation());
       }
       return robotConfigurationData;

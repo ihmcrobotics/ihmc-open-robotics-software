@@ -49,6 +49,7 @@ public class FootCoPHullCalculator
 
    public RobotSide computeSideOfFootholdToCrop(FrameLine2DReadOnly lineOfRotation)
    {
+      // FIXME This call can be very time consuming.
       OccupancyGridTools.computeConvexHullOfOccupancyGrid(occupancyGrid, convexHullOfCoPs);
 
       leftSideCut.setIncludingFrame(convexHullOfCoPs);

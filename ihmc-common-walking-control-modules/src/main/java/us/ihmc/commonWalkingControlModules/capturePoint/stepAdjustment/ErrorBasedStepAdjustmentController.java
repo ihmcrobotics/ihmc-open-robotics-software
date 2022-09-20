@@ -110,12 +110,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
-   private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
-   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.02);
-   private final DoubleParameter supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront", registry, 0.02);
-   private final DoubleParameter supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack", registry, 0.05);
-   private final DoubleParameter supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside", registry, 0.02);
-   private final DoubleParameter supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside", registry, 0.035);
+   private final BooleanProvider useICPControlPlaneInStepAdjustment;
+   private final DoubleProvider minimumTimeForStepAdjustment;
+   private final DoubleParameter supportDistanceFromFront;
+   private final DoubleParameter supportDistanceFromBack;
+   private final DoubleParameter supportDistanceFromInside;
+   private final DoubleParameter supportDistanceFromOutside;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
 
@@ -137,8 +137,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D allowableAreaForCoP = new FrameConvexPolygon2D();
-
-   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -186,8 +184,27 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                           registry,
                                                           stepAdjustmentParameters.getTransferSplitFraction());
 
+      useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment",
+                                                                registry,
+                                                                stepAdjustmentParameters.useICPControlPlane());
+      minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment",
+                                                         registry,
+                                                         stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
+      supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront",
+                                                     registry,
+                                                     stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());
+      supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack",
+                                                    registry,
+                                                    stepAdjustmentParameters.getCoPDistanceFromBackOfFoot());
+      supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside",
+                                                      registry,
+                                                      stepAdjustmentParameters.getCoPDistanceFromInsideOfFoot());
+      supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside",
+                                                       registry,
+                                                       stepAdjustmentParameters.getCoPDistanceFromOutsideOfFoot());
+
       footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, stepAdjustmentParameters.getAdjustmentDeadband());
-      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, false);
+      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, stepAdjustmentParameters.allowCrossOverSteps());
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       DoubleProvider lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
@@ -197,13 +214,16 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       DoubleProvider inPlaceWidth = new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth());
 
       useActualErrorInsteadOfResidual = new BooleanParameter("useActualErrorInsteadOfResidual", registry, false);
-      considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment", registry, false);
+      considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment",
+                                                       registry,
+                                                       stepAdjustmentParameters.considerICPErrorForStepAdjustment());
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                lengthLimit,
                                                                                lengthBackLimit,
                                                                                innerLimit,
                                                                                outerLimit,
                                                                                inPlaceWidth,
+                                                                               stepAdjustmentParameters.getCrossOverReachabilityParameters(),
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
