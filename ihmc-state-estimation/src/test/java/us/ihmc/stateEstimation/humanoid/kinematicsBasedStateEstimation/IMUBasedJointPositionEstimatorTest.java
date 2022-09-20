@@ -36,7 +36,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testNoPreferredConfiguration()
    {
-      Random random = new Random(2344332);
+      Random random = new Random();//2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -104,7 +104,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testWithPreferredConfiguration()
    {
-      Random random = new Random(2344332);
+      Random random = new Random();//2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -187,7 +187,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testWithPreferredConfigurationCorruptedKinematics()
    {
-      Random random = new Random(2344332);
+      Random random = new Random();//2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -270,7 +270,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testConvergenceNoPreferredConfiguration()
    {
-      Random random = new Random(2344332);
+      Random random = new Random();//2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -425,7 +425,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testConvergenceWithPreferredConfiguration()
    {
-      Random random = new Random(2344332);
+      Random random = new Random();//2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
