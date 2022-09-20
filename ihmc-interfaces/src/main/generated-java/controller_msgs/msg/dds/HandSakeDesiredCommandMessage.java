@@ -34,9 +34,12 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
             * Specifies the grasp to perform
             */
    public byte desired_hand_configuration_ = (byte) 255;
+   /**
+            * 0.0 is closed, 1.0 is open
+            */
    public double postion_ratio_;
    /**
-            * Specifies desired torque of grasp, if not specified by hand configuration
+            * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
             */
    public double torque_ratio_;
 
@@ -109,24 +112,30 @@ public class HandSakeDesiredCommandMessage extends Packet<HandSakeDesiredCommand
       return desired_hand_configuration_;
    }
 
+   /**
+            * 0.0 is closed, 1.0 is open
+            */
    public void setPostionRatio(double postion_ratio)
    {
       postion_ratio_ = postion_ratio;
    }
+   /**
+            * 0.0 is closed, 1.0 is open
+            */
    public double getPostionRatio()
    {
       return postion_ratio_;
    }
 
    /**
-            * Specifies desired torque of grasp, if not specified by hand configuration
+            * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
             */
    public void setTorqueRatio(double torque_ratio)
    {
       torque_ratio_ = torque_ratio;
    }
    /**
-            * Specifies desired torque of grasp, if not specified by hand configuration
+            * Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
             */
    public double getTorqueRatio()
    {

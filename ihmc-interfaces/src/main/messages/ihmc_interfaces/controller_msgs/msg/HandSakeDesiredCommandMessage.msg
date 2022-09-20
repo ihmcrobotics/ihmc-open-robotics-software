@@ -20,7 +20,8 @@ uint32 sequence_id
 byte robot_side 255
 # Specifies the grasp to perform
 byte desired_hand_configuration 255
+# 0.0 is closed, 1.0 is open
 float64 postion_ratio
 
-# Specifies desired torque of grasp, if not specified by hand configuration
+# Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
 float64 torque_ratio

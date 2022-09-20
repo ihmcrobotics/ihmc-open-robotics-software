@@ -32,9 +32,10 @@ int8 robot_side
 # Field default value 255
 int8 desired_hand_configuration
 
+# 0.0 is closed, 1.0 is open
 float64 postion_ratio
 
-# Specifies desired torque of grasp, if not specified by hand configuration
+# Specifies desired torque of grasp, if not specified by hand configuration. 0.0 min, 1.0 max
 float64 torque_ratio
 
 
