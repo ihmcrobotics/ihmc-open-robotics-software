@@ -179,7 +179,7 @@ public class NadiaNaturalPosture implements HumanoidRobotNaturalPosture
 
       if (yoGraphicsListRegistry != null)
       {
-         doGraphics = true;
+         doGraphics = false;
 
          originNPpelvis = new YoFramePoint3D("NadiaOriginNPpelvis", ReferenceFrame.getWorldFrame(), registry);
          naturalPostureVizPelvis = new YoGraphicCoordinateSystem("NadiaNaturalPostureP", originNPpelvis, yoQuaternionNPrtWorld, 0.5);

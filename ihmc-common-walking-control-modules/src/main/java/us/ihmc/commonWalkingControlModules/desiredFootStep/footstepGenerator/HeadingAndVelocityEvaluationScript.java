@@ -45,11 +45,12 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private final YoEnum<EvaluationEvent> currentScriptEvent = new YoEnum<>("currentScriptEvent", registry, EvaluationEvent.class);
 
    private final Vector2D desiredVelocityDirection = new Vector2D(1.0, 0.0);
-
+   
    public enum EvaluationEvent
    {
       STEP_IN_PLACE(0.0),
       GO_TO_CRUISE_STRAIGHT(12.0), // 300 //(6.0),
+      GO_TO_NEGATIVE_CRUISE_STRAIGHT(12.0), // 300 //(6.0),
       TURN_180_CRUISE(8.0),
       SPEED_UP_TO_MAX_STRAIGHT(4.0),
       SLOW_DOWN_TO_ZERO(4.0),
@@ -61,6 +62,21 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       WAVE_CRUISE(12.0),
       CHANGE_HEADING_WALKING_STRAIGHT(12.0);
 
+//	  // Supplementary video
+//      STEP_IN_PLACE(0.0),
+//      GO_TO_CRUISE_STRAIGHT(6.0), // 300 //(6.0),
+//      GO_TO_NEGATIVE_CRUISE_STRAIGHT(8.0), // 300 //(6.0),
+//      TURN_180_CRUISE(4.0),
+//      SPEED_UP_TO_MAX_STRAIGHT(2.0),
+//      SLOW_DOWN_TO_ZERO(2.0),
+//      SIDE_STEP_LEFT(4.5),
+//      SIDE_STEP_RIGHT(4.5),
+//      TURN_IN_PLACE180(8.0),
+//      DIAGONALLY_RIGHT_45(6.0),
+//      DIAGONALLY_LEFT_45(6.0),
+//      WAVE_CRUISE(12.0),
+//      CHANGE_HEADING_WALKING_STRAIGHT(12.0);
+	   
       private final double minTime;
 
       private EvaluationEvent(double minTime)
@@ -117,6 +133,10 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
                            createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(),
                            createDiagonallyRight45(), createSlowDownToZero(), createDiagonallyLeft45(), createSlowDownToZero(), createWaveCruise(),
                            createSlowDownToZero(), createTurnInPlace180(), createChangeHeadingWalkingStraight(), createSlowDownToZero());
+//	      return Arrays.asList(createStepInPlace(), 
+//                  createGoToCruiseVelocity(),createGoToNegativeCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
+//                  createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(), createSlowDownToZero(),
+//                  createDiagonallyRight45(), createSlowDownToZero(), createSlowDownToZero());
    }
 
    public DesiredVelocityProvider getDesiredVelocityProvider()
@@ -210,13 +230,18 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private EventTask createGoToNegativeCruiseVelocity()
    {
-      return createConstantVelocityEvent(EvaluationEvent.GO_TO_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue(), 0.0);
+      return createConstantVelocityEvent(EvaluationEvent.GO_TO_NEGATIVE_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue(), 0.0);
+
+      //      return createConstantVelocityEvent(EvaluationEvent.GO_TO_NEGATIVE_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue()/2, 0.0);
    }
 
    private EventTask createTurn180Cruise()
    {
       return createConstantVelocityEvent(EvaluationEvent.TURN_180_CRUISE, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(),
                                          0.4 * maxTurningVelocity.getValue());
+
+      //      return createConstantVelocityEvent(EvaluationEvent.TURN_180_CRUISE, new Vector2D(1.0, 0.0), cruiseVelocity.getValue()/2,
+      //              0.25 * maxTurningVelocity.getValue());
    }
 
    private EventTask createSlowDownToZero()
@@ -245,11 +270,13 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
    private EventTask createSidestepLeft()
    {
       return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue(), 0.0);
+//	      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue()/5, 0.0);
    }
 
    private EventTask createSidestepRight()
    {
       return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue(), 0.0);
+//	      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue()/5, 0.0);
    }
 
    private EventTask createTurnInPlace180()
