@@ -46,10 +46,12 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private final Vector2D desiredVelocityDirection = new Vector2D(1.0, 0.0);
    
+   private final boolean useSettingsForSupplementaryVideo = false;
+   
    public enum EvaluationEvent
    {
       STEP_IN_PLACE(0.0),
-      GO_TO_CRUISE_STRAIGHT(12.0), // 300 //(6.0),
+      GO_TO_CRUISE_STRAIGHT(12.0), //12 // 300 //(6.0),
       GO_TO_NEGATIVE_CRUISE_STRAIGHT(12.0), // 300 //(6.0),
       TURN_180_CRUISE(8.0),
       SPEED_UP_TO_MAX_STRAIGHT(4.0),
@@ -128,15 +130,18 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private List<EventTask> createCompleteEventList()
    {
-      return Arrays.asList(createStepInPlace(), 
-                           createGoToCruiseVelocity(),createGoToNegativeCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
-                           createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(),
-                           createDiagonallyRight45(), createSlowDownToZero(), createDiagonallyLeft45(), createSlowDownToZero(), createWaveCruise(),
-                           createSlowDownToZero(), createTurnInPlace180(), createChangeHeadingWalkingStraight(), createSlowDownToZero());
-//	      return Arrays.asList(createStepInPlace(), 
-//                  createGoToCruiseVelocity(),createGoToNegativeCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
-//                  createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(), createSlowDownToZero(),
-//                  createDiagonallyRight45(), createSlowDownToZero(), createSlowDownToZero());
+      if (useSettingsForSupplementaryVideo) {
+	      return Arrays.asList(createStepInPlace(), 
+						        createGoToCruiseVelocity(),createGoToNegativeCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
+						        createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(), createSlowDownToZero(),
+						        createDiagonallyRight45(), createSlowDownToZero(), createSlowDownToZero());
+      } else {
+          return Arrays.asList(createStepInPlace(), 
+                  createGoToCruiseVelocity(),createGoToNegativeCruiseVelocity(), createTurn180Cruise(), createSpeedUpToMaxStraight(), createSlowDownToZero(),
+                  createSidestepLeft(), createSlowDownToZero(), createSidestepRight(), createSlowDownToZero(), createTurnInPlace180(),
+                  createDiagonallyRight45(), createSlowDownToZero(), createDiagonallyLeft45(), createSlowDownToZero(), createWaveCruise(),
+                  createSlowDownToZero(), createTurnInPlace180(), createChangeHeadingWalkingStraight(), createSlowDownToZero());
+      }
    }
 
    public DesiredVelocityProvider getDesiredVelocityProvider()
@@ -220,28 +225,40 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private EventTask createSpeedUpToMaxStraight()
    {
-      return createConstantVelocityEvent(EvaluationEvent.SPEED_UP_TO_MAX_STRAIGHT, new Vector2D(1.0, 0.0), maxVelocity.getValue(), 0.0);
+      if (useSettingsForSupplementaryVideo) {
+          return createConstantVelocityEvent(EvaluationEvent.SPEED_UP_TO_MAX_STRAIGHT, new Vector2D(1.0, 0.0), maxVelocity.getValue() * 0.8, 0.0);
+	  } else {
+	      return createConstantVelocityEvent(EvaluationEvent.SPEED_UP_TO_MAX_STRAIGHT, new Vector2D(1.0, 0.0), maxVelocity.getValue(), 0.0);
+	  }
    }
 
    private EventTask createGoToCruiseVelocity()
    {
-      return createConstantVelocityEvent(EvaluationEvent.GO_TO_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(), 0.0);
+      if (useSettingsForSupplementaryVideo) {
+	      return createConstantVelocityEvent(EvaluationEvent.GO_TO_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(), 0.0);
+	  } else {
+	      return createConstantVelocityEvent(EvaluationEvent.GO_TO_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(), 0.0);
+	  }
    }
 
    private EventTask createGoToNegativeCruiseVelocity()
    {
-      return createConstantVelocityEvent(EvaluationEvent.GO_TO_NEGATIVE_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue(), 0.0);
-
-      //      return createConstantVelocityEvent(EvaluationEvent.GO_TO_NEGATIVE_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue()/2, 0.0);
+      if (useSettingsForSupplementaryVideo) {
+            return createConstantVelocityEvent(EvaluationEvent.GO_TO_NEGATIVE_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue()/2, 0.0);
+	  } else {
+	        return createConstantVelocityEvent(EvaluationEvent.GO_TO_NEGATIVE_CRUISE_STRAIGHT, new Vector2D(1.0, 0.0), -cruiseVelocity.getValue(), 0.0);
+	  }
    }
 
    private EventTask createTurn180Cruise()
    {
-      return createConstantVelocityEvent(EvaluationEvent.TURN_180_CRUISE, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(),
-                                         0.4 * maxTurningVelocity.getValue());
-
-      //      return createConstantVelocityEvent(EvaluationEvent.TURN_180_CRUISE, new Vector2D(1.0, 0.0), cruiseVelocity.getValue()/2,
-      //              0.25 * maxTurningVelocity.getValue());
+      if (useSettingsForSupplementaryVideo) {
+          return createConstantVelocityEvent(EvaluationEvent.TURN_180_CRUISE, new Vector2D(1.0, 0.0), cruiseVelocity.getValue()/2,
+                    0.25 * maxTurningVelocity.getValue());
+      } else {
+          return createConstantVelocityEvent(EvaluationEvent.TURN_180_CRUISE, new Vector2D(1.0, 0.0), cruiseVelocity.getValue(),
+                  0.4 * maxTurningVelocity.getValue());
+      }
    }
 
    private EventTask createSlowDownToZero()
@@ -269,14 +286,20 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
 
    private EventTask createSidestepLeft()
    {
-      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue(), 0.0);
-//	      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue()/5, 0.0);
+      if (useSettingsForSupplementaryVideo) {
+	      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue()/5, 0.0);
+	  } else {
+          return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_LEFT, new Vector2D(0.0, 1.0), cruiseVelocity.getValue(), 0.0);
+      }
    }
 
    private EventTask createSidestepRight()
    {
-      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue(), 0.0);
-//	      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue()/5, 0.0);
+      if (useSettingsForSupplementaryVideo) {
+	      return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue()/5, 0.0);
+      } else {
+          return createConstantVelocityEvent(EvaluationEvent.SIDE_STEP_RIGHT, new Vector2D(0.0, -1.0), cruiseVelocity.getValue(), 0.0);
+      }
    }
 
    private EventTask createTurnInPlace180()
