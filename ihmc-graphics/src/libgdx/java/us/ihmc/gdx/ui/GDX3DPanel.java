@@ -40,6 +40,7 @@ public class GDX3DPanel
    private final int antiAliasing;
    private ImGuiPanel imGuiPanel;
    private GDX3DScene scene;
+   private boolean modelSceneMouseCollisionEnabled = false;
    private GLProfiler glProfiler;
    private SensorFrameBuffer frameBuffer;
    private float windowSizeX;
@@ -158,7 +159,7 @@ public class GDX3DPanel
          int frameBufferHeight = frameBuffer.getHeight();
 
          // We do this render to get the Z buffer from just the model
-         if (scene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL))
+         if (modelSceneMouseCollisionEnabled && scene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL))
          {
             frameBuffer.begin();
             renderScene(GDXSceneLevel.MODEL.SINGLETON_SET);
@@ -397,5 +398,10 @@ public class GDX3DPanel
    public float getWindowDrawMaxY()
    {
       return windowDrawMaxY;
+   }
+
+   public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
+   {
+      this.modelSceneMouseCollisionEnabled = modelSceneMouseCollisionEnabled;
    }
 }
