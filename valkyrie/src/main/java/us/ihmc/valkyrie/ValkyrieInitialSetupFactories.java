@@ -37,7 +37,7 @@ public class ValkyrieInitialSetupFactories
       initialSetup.setLegJointQs(0.0, 0.0, -0.3, 1.9, 0.8, 0.0);
       initialSetup.setArmJointQs(0.7, -1.2, 0.0, -1.7);
       initialSetup.setSpineJointQs(0.0, 0.0, 0.0);
-      initialSetup.setRootJointPose(0.0, 0.0, 0.74, 0.0, 0.0, 0.0);
+      initialSetup.setRootJointPose(0.0, 0.0, 0.76, 0.0, 0.0, 0.0);
 
       return initialSetup;
    }
@@ -916,10 +916,9 @@ public class ValkyrieInitialSetupFactories
       return initialSetup;
    }
 
-   public static ValkyrieMutableInitialSetup newStand(RobotDefinition robotDefinition, HumanoidJointNameMap jointMap)
+   public static ValkyrieMutableInitialSetup newStand(HumanoidJointNameMap jointMap)
    {
       ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
-
       for (RobotSide robotSide : RobotSide.values)
       {
          initialSetup.setJoint(robotSide, LegJointName.HIP_ROLL, 0.0);
@@ -934,7 +933,34 @@ public class ValkyrieInitialSetupFactories
          initialSetup.setJoint(robotSide, ArmJointName.ELBOW_ROLL, 1.3);
       }
 
-      initialSetup.setRootJointHeightSuchThatLowestSoleIsAtZero(robotDefinition);
+      initialSetup.getRootJointPosition().setZ(0.995);
+      return initialSetup;
+   }
+
+
+   public static ValkyrieMutableInitialSetup newLean(HumanoidJointNameMap jointMap)
+   {
+      /* Max 18 degrees */
+      double leanAngle = Math.toRadians(18.0);
+
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         initialSetup.setJoint(robotSide, LegJointName.HIP_ROLL, 0.0);
+         initialSetup.setJoint(robotSide, LegJointName.HIP_PITCH, -0.6 - leanAngle / 2.0);
+         initialSetup.setJoint(robotSide, LegJointName.KNEE_PITCH, 1.3);
+         initialSetup.setJoint(robotSide, LegJointName.ANKLE_PITCH, -0.7 - leanAngle / 2.0);
+         initialSetup.setJoint(robotSide, LegJointName.ANKLE_ROLL, 0.0);
+
+         initialSetup.setJoint(robotSide, ArmJointName.SHOULDER_ROLL, robotSide.negateIfRightSide(-1.2));
+         initialSetup.setJoint(robotSide, ArmJointName.SHOULDER_PITCH, -0.2);
+         initialSetup.setJoint(robotSide, ArmJointName.ELBOW_PITCH, robotSide.negateIfRightSide(-1.7));
+         initialSetup.setJoint(robotSide, ArmJointName.ELBOW_ROLL, 1.3);
+      }
+
+      initialSetup.getRootJointPosition().setZ(0.995 * Math.cos(leanAngle));
+      initialSetup.getRootJointOrientation().setToPitchOrientation(leanAngle);
+
       return initialSetup;
    }
 }

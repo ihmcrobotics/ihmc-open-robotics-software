@@ -48,7 +48,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -89,7 +89,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       current_alignment += (data.getDesiredJointAngles().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootTranslation(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredRootPosition(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredRootOrientation(), current_alignment);
 
@@ -125,7 +125,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getDesiredJointAngles());else
           throw new RuntimeException("desired_joint_angles field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootTranslation(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredRootPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredRootOrientation(), cdr);
       if(data.getDesiredJointVelocities().size() <= 100)
       cdr.write_type_e(data.getDesiredJointVelocities());else
@@ -150,7 +150,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       data.setJointNameHash(cdr.read_type_2());
       	
       cdr.read_type_e(data.getDesiredJointAngles());	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootTranslation(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredRootPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredRootOrientation(), cdr);	
       cdr.read_type_e(data.getDesiredJointVelocities());	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootLinearVelocity(), cdr);	
@@ -168,7 +168,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       ser.write_type_9("current_toolbox_state", data.getCurrentToolboxState());
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
       ser.write_type_e("desired_joint_angles", data.getDesiredJointAngles());
-      ser.write_type_a("desired_root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootTranslation());
+      ser.write_type_a("desired_root_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredRootPosition());
 
       ser.write_type_a("desired_root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredRootOrientation());
 
@@ -188,7 +188,7 @@ public class KinematicsToolboxOutputStatusPubSubType implements us.ihmc.pubsub.T
       data.setCurrentToolboxState(ser.read_type_9("current_toolbox_state"));
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
       ser.read_type_e("desired_joint_angles", data.getDesiredJointAngles());
-      ser.read_type_a("desired_root_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootTranslation());
+      ser.read_type_a("desired_root_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredRootPosition());
 
       ser.read_type_a("desired_root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredRootOrientation());
 
