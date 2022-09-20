@@ -26,6 +26,8 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.awt.Color;
+
 public class AvatarSimulation
 {
    private SimulationConstructionSet simulationConstructionSet;
@@ -53,6 +55,15 @@ public class AvatarSimulation
       {
          yoVariableServer.start();
       }
+
+      // Change color for supplementary video
+//      simulationConstructionSet.setAmbientLight(new Color(255,255,255,0));
+//      simulationConstructionSet.setAmbientLight(new Color(192,192,192,0));
+//      simulationConstructionSet.setAmbientLight(new Color(128,128,128,0));
+      simulationConstructionSet.setAmbientLight(new Color(96,96,96,0));
+//      simulationConstructionSet.addDirectionalLight(new Color(64,64,64,0), new Vector3D(1,-1,0));
+//      simulationConstructionSet.addDirectionalLight(new Color(40,40,40,0), new Vector3D(1,0,0));
+//      simulationConstructionSet.addDirectionalLight(new Color(0,0,0,255), new Vector3D(1,0,0));
 
       simulationConstructionSet.startOnAThread();
    }

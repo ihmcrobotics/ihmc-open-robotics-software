@@ -34,6 +34,7 @@ public class FlatGroundEnvironment implements CommonAvatarEnvironmentInterface
             box.getPosition().setX(i * sizeXY);
             box.getPosition().setY(j * sizeXY);
             box.getPosition().setZ(-0.5);
+//            box.getPosition().setZ(-0.4998);  // hack for ICRA accompanying video
             flatGround.addTerrainObject(new RotatableBoxTerrainObject(box, texture));
          }
       }
