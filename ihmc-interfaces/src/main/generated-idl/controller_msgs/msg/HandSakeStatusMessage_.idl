@@ -15,7 +15,7 @@ module controller_msgs
 
 
       /**
-       * Message used to report the current joint angles for the fingers of a hand.
+       * Message used to report the current joint angles for the fingers of the sake gripper.
        */
       @TypeCode(type="controller_msgs::msg::dds_::HandSakeStatusMessage_")
       struct HandSakeStatusMessage
@@ -27,7 +27,13 @@ module controller_msgs
         @defaultValue(value=255)
         octet robot_side;
         double temperature;
+        /**
+         * 0.0 min, 1.0 max
+         */
         double torque_ratio;
+        /**
+         * 0.0 closed, 1.0 open
+         */
         double postion_ratio;
         boolean calibrated;
         boolean needs_reset;

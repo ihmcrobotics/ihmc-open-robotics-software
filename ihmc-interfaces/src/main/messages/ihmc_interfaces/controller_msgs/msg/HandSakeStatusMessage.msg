@@ -1,4 +1,4 @@
-# Message used to report the current joint angles for the fingers of a hand.
+# Message used to report the current joint angles for the fingers of the sake gripper.
 
 byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
@@ -8,7 +8,9 @@ uint32 sequence_id
 
 byte robot_side 255
 float64 temperature
+# 0.0 min, 1.0 max
 float64 torque_ratio
+# 0.0 closed, 1.0 open
 float64 postion_ratio
 
 bool calibrated
