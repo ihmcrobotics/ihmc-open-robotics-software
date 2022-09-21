@@ -77,7 +77,7 @@ public class PartialFootholdCropperModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      FootholdRotationParameters parameters = new FootholdRotationParameters(registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
@@ -184,7 +184,7 @@ public class PartialFootholdCropperModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      FootholdRotationParameters parameters = new FootholdRotationParameters(registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);

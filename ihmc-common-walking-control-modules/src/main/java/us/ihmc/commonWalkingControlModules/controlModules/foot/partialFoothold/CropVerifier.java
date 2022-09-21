@@ -47,7 +47,7 @@ public class CropVerifier
    public CropVerifier(String namePrefix,
                        ReferenceFrame soleFrame,
                        double resolution,
-                       FootholdRotationParameters rotationParameters,
+                       YoPartialFootholdModuleParameters.FootholdCroppingParameters rotationParameters,
                        YoRegistry parentRegistry,
                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {

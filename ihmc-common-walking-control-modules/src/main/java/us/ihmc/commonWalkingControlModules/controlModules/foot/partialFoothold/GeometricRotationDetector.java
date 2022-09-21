@@ -27,7 +27,7 @@ public class GeometricRotationDetector implements FootRotationDetector
 
    private final ReferenceFrame soleFrame;
 
-   public GeometricRotationDetector(RobotSide side, ReferenceFrame soleFrame, FootholdRotationParameters explorationParameters, YoRegistry parentRegistry)
+   public GeometricRotationDetector(RobotSide side, ReferenceFrame soleFrame, YoPartialFootholdModuleParameters explorationParameters, YoRegistry parentRegistry)
    {
       this.soleFrame = soleFrame;
 
