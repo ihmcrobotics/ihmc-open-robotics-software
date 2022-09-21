@@ -15,6 +15,6 @@ curl -L https://github.com/bytedeco/javacpp/releases/download/$JAVACPP_VERSION/j
 unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 
 # Copy the javacpp InfoMapper into build
-cp ../ihmc_slam_wrapper.java .
+cp ../../java/ihmc_slam_wrapper.java .
 
-java -jar javacpp.jar ihmc_slam_wrapper.java -d ../../../gen
+java -jar javacpp.jar ihmc_slam_wrapper.java -d ../../../generated-java
