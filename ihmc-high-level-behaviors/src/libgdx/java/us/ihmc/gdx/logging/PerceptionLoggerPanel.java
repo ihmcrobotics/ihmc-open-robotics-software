@@ -27,7 +27,7 @@ public class PerceptionLoggerPanel extends ImGuiPanel
       super(panelName);
       loader = new PerceptionDataLoader(PERCEPTION_LOG_FILE);
       topicNames = HDF5Tools.getTopicNames(loader.getH5File());
-      for(String topic : topicNames)
+      for (String topic : topicNames)
       {
          topicObjectCounts.add(HDF5Tools.getCount(loader.getH5File(), topic));
       }
@@ -42,6 +42,4 @@ public class PerceptionLoggerPanel extends ImGuiPanel
       currentTopic = topicNames.get(topicIndex.get());
       ImGui.text("Total Files: " + topicObjectCounts.get(topicIndex.get()));
    }
-
-
 }

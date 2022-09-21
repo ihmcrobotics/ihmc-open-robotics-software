@@ -3,9 +3,6 @@ package us.ihmc.gdx.simulation.scs2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -13,7 +10,6 @@ import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.logging.PerceptionDataLoader;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.graphics.GDXMocapVisualizer;
 import us.ihmc.gdx.ui.graphics.live.GDXOpenCVVideoVisualizer;
 import us.ihmc.gdx.ui.graphics.live.LogVideoLoader;
 import us.ihmc.scs2.session.SessionMode;
@@ -29,7 +25,6 @@ public class GDXSCS2LogSession extends GDXSCS2Session
    private LogSession session;
 
    private LogVideoLoader logVideoLoader;
-   private GDXMocapVisualizer mocapVisualizer;
    private PerceptionDataLoader loader;
 
    private final RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(200000, Point3D32::new);
@@ -88,8 +83,6 @@ public class GDXSCS2LogSession extends GDXSCS2Session
          }
 
          Mat mat = logVideoLoader.loadNextFrameAsOpenCVMat(session.getLogDataReader().getTimestamp().getValue());
-
-
 
          if (mat != null)
          {
