@@ -39,7 +39,6 @@ import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.ui.vr.GDXVRInputMode;
 import us.ihmc.gdx.ui.vr.GDXWholeBodyIKStreaming;
 import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
-import us.ihmc.gdx.ui.yo.GDXJoystickStepper;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -201,7 +200,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(),
+      walkPathControlRing.create(baseUI,
+                                 baseUI.getPrimary3DPanel(),
                                  robotModel,
                                  syncedRobot,
                                  teleoperationParameters,
@@ -489,6 +489,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       if (ctrlHeld)
       {
          if (isPPressed)
+
          {
             teleportCameraToRobotPelvis();
          }
@@ -504,6 +505,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public void renderImGuiWidgets()
    {
       robotLowLevelMessenger.renderImGuiWidgets();
+      ImGui.separator();
+      if(ImGui.button(labels.get("Find My Robot")))
+      {
+         teleportCameraToRobotPelvis();
+      }
 
       if (interactablesAvailable)
       {
@@ -783,8 +789,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       return selfCollisionModel;
    }
-   
-      public void teleportCameraToRobotPelvis()
+
+   public void teleportCameraToRobotPelvis()
    {
       RigidBodyTransform robotTransform = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame();
       GDXFocusBasedCamera camera = baseUI.getPrimary3DPanel().getCamera3D();
