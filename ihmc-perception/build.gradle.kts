@@ -74,6 +74,10 @@ javacvDependencies {
    apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
+slamWrapperDependencies {
+   apiBytedecoNatives("javacpp")
+}
+
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
