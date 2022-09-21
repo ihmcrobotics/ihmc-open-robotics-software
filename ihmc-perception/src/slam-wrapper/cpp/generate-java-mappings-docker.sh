@@ -9,6 +9,6 @@ fi
 
 sudo -u root docker run \
     --rm \
-    --network host \
-    --dns=1.1.1.1
-    ihmcrobotics/slam-wrapper:0.1
+    --volume $(pwd):/root/dev/slam-wrapper \
+    --workdir /root/dev/slam-wrapper \
+    ihmcrobotics/slam-wrapper:0.1 bash /root/dev/slam-wrapper/generate-java-mappings.sh
