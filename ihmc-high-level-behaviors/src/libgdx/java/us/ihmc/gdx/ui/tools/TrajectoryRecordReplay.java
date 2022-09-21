@@ -15,7 +15,7 @@ public class TrajectoryRecordReplay<T extends Number>
    private String filePath;
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
-   private boolean savedRecording = false;
+   private boolean savedRecording = true;
 
    public TrajectoryRecordReplay(String filePath)
    {
@@ -39,8 +39,9 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public void record(T[] values)
    {
-      savedRecording = false;
+      savedRecording=false;
       dataMatrix.add(values);
+      System.out.println("" + values[2]);
    }
 
    public void saveRecording(){
@@ -116,7 +117,6 @@ public class TrajectoryRecordReplay<T extends Number>
    public boolean hasSavedRecording(){
       return savedRecording;
    }
-
 
    public String getPath()
    {
