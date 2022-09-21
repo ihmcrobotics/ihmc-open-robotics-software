@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.interactable.GDXModelInstanceScaler;
+import us.ihmc.gdx.tools.GDXModelInstanceScaler;
 
 /**
  * This class creates a model that's slightly larger and half transparent

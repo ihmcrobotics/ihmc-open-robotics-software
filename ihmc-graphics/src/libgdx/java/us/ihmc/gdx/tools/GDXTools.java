@@ -3,11 +3,14 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
@@ -440,6 +443,28 @@ public class GDXTools
          numberOfVertices += model.meshes.get(i).getNumVertices();
       }
       return numberOfVertices;
+   }
+
+   public static long countVertices(ModelData modelData)
+   {
+      long numberOfVertices = 0;
+      for (int i = 0; i < modelData.meshes.size; i++)
+      {
+         ModelMesh modelMesh = modelData.meshes.get(i);
+         long floatsPerVertex = calculateFloatsPerVertex(modelMesh);
+         numberOfVertices += modelMesh.vertices.length / floatsPerVertex;
+      }
+      return numberOfVertices;
+   }
+
+   public static int calculateFloatsPerVertex(ModelMesh modelMesh)
+   {
+      int vertexSize = 0;
+      for (int j = 0; j < modelMesh.attributes.length; j++) {
+         VertexAttribute attribute = modelMesh.attributes[j];
+         vertexSize += attribute.getSizeInBytes();
+      }
+      return vertexSize / Float.BYTES;
    }
 
    public static void printShaderLog(String shaderPath, ShaderProgram shaderProgram)

@@ -13,7 +13,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.collidables.GDXCoordinateFrameIntersection;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
-import us.ihmc.gdx.ui.interactable.GDXModelInstanceScaler;
+import us.ihmc.gdx.tools.GDXModelInstanceScaler;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXInteractableReferenceFrame
