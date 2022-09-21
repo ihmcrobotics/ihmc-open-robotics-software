@@ -31,7 +31,7 @@ public class FootholdCropper
    private static final double defaultThresholdForMeasuredCellActivation = 1.0;
    private static final double defaultMeasuredDecayRatePerSecond = 0.0;// 0.2;
 
-   private final FootholdRotationParameters rotationParameters;
+   private final YoPartialFootholdModuleParameters.FootholdCroppingParameters rotationParameters;
 
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
@@ -62,7 +62,7 @@ public class FootholdCropper
    public FootholdCropper(String namePrefix,
                           ReferenceFrame soleFrame,
                           List<? extends FramePoint2DReadOnly> defaultContactPoints,
-                          FootholdRotationParameters rotationParameters,
+                          YoPartialFootholdModuleParameters.FootholdCroppingParameters rotationParameters,
                           double dt,
                           YoRegistry parentRegistry,
                           YoGraphicsListRegistry yoGraphicsListRegistry)

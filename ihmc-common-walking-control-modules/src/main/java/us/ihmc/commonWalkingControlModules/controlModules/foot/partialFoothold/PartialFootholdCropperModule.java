@@ -19,13 +19,14 @@ public class PartialFootholdCropperModule
 
    private final YoBoolean shouldShrinkFoothold;
 
+   private final boolean createPartialFootholdModule;
    private final FootRotationDetector rotationDetector;
    private final RotationEdgeCalculator edgeCalculator;
 
    public PartialFootholdCropperModule(RobotSide side,
                                        MovingReferenceFrame soleFrame,
                                        List<? extends FramePoint2DReadOnly> defaultContactPoints,
-                                       FootholdRotationParameters rotationParameters,
+                                       YoPartialFootholdModuleParameters rotationParameters,
                                        double dt,
                                        YoRegistry parentRegistry,
                                        YoGraphicsListRegistry graphicsRegistry)
@@ -38,8 +39,23 @@ public class PartialFootholdCropperModule
       rotationDetector = new CombinedFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       edgeCalculator = new CombinedRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
 
-      cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, null);
-      footholdCropper = new FootholdCropper(side.getLowerCaseName(), soleFrame, defaultContactPoints, rotationParameters, dt, registry, graphicsRegistry);
+      createPartialFootholdModule = rotationParameters.createParitalFootholdModule();
+      if (rotationParameters.createParitalFootholdModule())
+      {
+         cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters.getFootholdCroppingParameters(), registry, null);
+         footholdCropper = new FootholdCropper(side.getLowerCaseName(),
+                                               soleFrame,
+                                               defaultContactPoints,
+                                               rotationParameters.getFootholdCroppingParameters(),
+                                               dt,
+                                               registry,
+                                               graphicsRegistry);
+      }
+      else
+      {
+         cropVerifier = null;
+         footholdCropper = null;
+      }
 
       reset();
    }
@@ -49,8 +65,11 @@ public class PartialFootholdCropperModule
       boolean isRotating = rotationDetector.compute();
       shouldShrinkFoothold.set(false);
 
-      cropVerifier.update(desiredCoP);
-      footholdCropper.update(measuredCoP);
+      if (createPartialFootholdModule)
+      {
+         cropVerifier.update(desiredCoP);
+         footholdCropper.update(measuredCoP);
+      }
 
       if (!isRotating)
       {
@@ -60,14 +79,17 @@ public class PartialFootholdCropperModule
 
       boolean isEdgeTrusted = edgeCalculator.compute(measuredCoP);
 
-      FrameLine2DReadOnly lineOfRotation = edgeCalculator.getLineOfRotation();
-      RobotSide sideToCrop = footholdCropper.computeSideToCrop(lineOfRotation);
-      
-      if (isEdgeTrusted && sideToCrop != null)
+      if (createPartialFootholdModule)
       {
-         shouldShrinkFoothold.set(cropVerifier.verifyFootholdCrop(desiredCoP, sideToCrop, lineOfRotation));
-         if (shouldShrinkFoothold.getBooleanValue())
-            footholdCropper.computeShrunkenFoothold(lineOfRotation, sideToCrop);
+         FrameLine2DReadOnly lineOfRotation = edgeCalculator.getLineOfRotation();
+         RobotSide sideToCrop = footholdCropper.computeSideToCrop(lineOfRotation);
+
+         if (isEdgeTrusted && sideToCrop != null)
+         {
+            shouldShrinkFoothold.set(cropVerifier.verifyFootholdCrop(desiredCoP, sideToCrop, lineOfRotation));
+            if (shouldShrinkFoothold.getBooleanValue())
+               footholdCropper.computeShrunkenFoothold(lineOfRotation, sideToCrop);
+         }
       }
    }
 
@@ -109,15 +131,21 @@ public class PartialFootholdCropperModule
 
    public void initialize(FrameConvexPolygon2DReadOnly footPolygon)
    {
-      cropVerifier.initialize();
-      footholdCropper.reset(footPolygon);
+      if (createPartialFootholdModule)
+      {
+         cropVerifier.initialize();
+         footholdCropper.reset(footPolygon);
+      }
    }
 
    public void reset()
    {
       rotationDetector.reset();
       edgeCalculator.reset();
-      cropVerifier.reset();
-      footholdCropper.reset();
+      if (createPartialFootholdModule)
+      {
+         cropVerifier.reset();
+         footholdCropper.reset();
+      }
    }
 }

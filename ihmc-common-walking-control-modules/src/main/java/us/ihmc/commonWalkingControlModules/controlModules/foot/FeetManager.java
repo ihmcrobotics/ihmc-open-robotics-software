@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.util.EnumMap;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.PartialFootholdModuleParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -109,7 +108,8 @@ public class FeetManager
       {
          explorationParameters = new ExplorationParameters(registry);
       }
-      FootholdRotationParameters footholdRotationParameters = new FootholdRotationParameters(registry);
+      // FIXME pass these parameters in from the robot, rather than creating here.
+      YoPartialFootholdModuleParameters footholdRotationParameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(), registry);
       SupportStateParameters supportStateParameters = new SupportStateParameters(walkingControllerParameters, registry);
 
       boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();

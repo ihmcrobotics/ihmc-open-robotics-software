@@ -30,7 +30,7 @@ public class CoPAndVelocityRotationEdgeCalculator implements RotationEdgeCalcula
 
    public CoPAndVelocityRotationEdgeCalculator(RobotSide side,
                                                MovingReferenceFrame soleFrame,
-                                               FootholdRotationParameters rotationParameters,
+                                               YoPartialFootholdModuleParameters rotationParameters,
                                                double dt,
                                                YoRegistry parentRegistry,
                                                Color color,
