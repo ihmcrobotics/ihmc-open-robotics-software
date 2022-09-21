@@ -113,4 +113,10 @@ visualizersDependencies {
    api("us.ihmc:simulation-construction-set-tools-test:source")
 }
 
+tasks.create("generateMappings", Exec::class)
+{
+   workingDir = file("src/slam-wrapper/cpp")
+   commandLine = listOf("./generate-java-mappings-docker.sh")
+}
+
 
