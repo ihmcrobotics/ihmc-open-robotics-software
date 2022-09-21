@@ -30,14 +30,12 @@ public abstract class WalkingControllerParameters
 {
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
-   private final LeapOfFaithParameters leapOfFaithParameters;
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    public WalkingControllerParameters()
    {
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
       pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
-      leapOfFaithParameters = new LeapOfFaithParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(40.0);
@@ -660,16 +658,6 @@ public abstract class WalkingControllerParameters
    public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
    {
       return pelvisOffsetWhileWalkingParameters;
-   }
-
-   /**
-    * Parameters for the 'Leap of Faith' Behavior. This caused the robot to activly fall onto an
-    * upcoming foothold when necessary to reach an upcoming foothold. This method returns the robot
-    * specific implementation of the {@link LeapOfFaithParameters};
-    */
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
    }
 
    /**
