@@ -87,20 +87,11 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
-      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates,
-                                                                                             feet,
-                                                                                             walkingControllerParameters.getToeOffParameters(),
-                                                                                             registry,
-                                                                                             graphicsListRegistry);
-      ToeOffCalculator icpPlanCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
-      ToeOffCalculator simpleCalculator = new SimpleToeOffCalculator(feet, registry);
-
-      EnumMap<ToeOffEnum, ToeOffCalculator> toeOffCalculators = new EnumMap<>(ToeOffEnum.class);
-      toeOffCalculators.put(centroidProjectionCalculator.getEnum(), centroidProjectionCalculator);
-      toeOffCalculators.put(icpPlanCalculator.getEnum(), icpPlanCalculator);
-      toeOffCalculators.put(simpleCalculator.getEnum(), simpleCalculator);
-
-      toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
+      toeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates,
+                                                                feet,
+                                                                walkingControllerParameters.getToeOffParameters(),
+                                                                registry,
+                                                                graphicsListRegistry);
 
       toeOffManager = new GeometricToeOffManager(controllerToolbox,
                                                  walkingControllerParameters,
