@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.BigVideoPacket;
 import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import org.bytedeco.hdf5.H5File;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -38,6 +39,8 @@ public class PerceptionDataLogger
    private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
 
    private int depthMessageCounter = 0;
+   private int compressedImageCounter = 0;
+
    private int pointsPerSegment = 786432;
    private int numberOfSegments = 1;
 
@@ -81,6 +84,16 @@ public class PerceptionDataLogger
 
       //        updateImageDimensions(mat, inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
       opencv_imgproc.cvtColor(inputYUVI420Mat, mat, opencv_imgproc.COLOR_YUV2RGBA_I420);
+   }
+
+   public void logImage(Mat mat)
+   {
+      BytePointer jpegImageBytePointer = new BytePointer();
+      IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+
+      opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
+
+      HDF5Tools.storeCompressedImage(file, "/ihmc/logger/camera/" + compressedImageCounter, jpegImageBytePointer);
    }
 
    public static void main(String[] args)

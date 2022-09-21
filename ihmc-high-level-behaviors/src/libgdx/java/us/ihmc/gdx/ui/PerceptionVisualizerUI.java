@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.hdf5.H5File;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -23,13 +24,14 @@ import us.ihmc.gdx.simulation.environment.object.objects.GDXOusterSensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.graphics.live.GDXROS2PlanarRegionsVisualizer;
+import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.HDF5Tools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.Activator;
@@ -43,7 +45,7 @@ import static org.bytedeco.opencv.global.opencv_core.convertScaleAbs;
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
-public class GDXPerceptionVisualizerUI
+public class PerceptionVisualizerUI
 {
    private static final String HDF5_FILENAME = "/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
 
@@ -62,6 +64,8 @@ public class GDXPerceptionVisualizerUI
    private GDXOusterSensorObject ousterModel;
 
    private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private GDXROS2VideoVisualizer videoVisualizer;
+   private GDXROS2BigVideoVisualizer blackflyRightVisualizer;
 
    private GDXHighLevelDepthSensorSimulator ousterLidar;
 
@@ -72,7 +76,7 @@ public class GDXPerceptionVisualizerUI
 
    private int frameIndex = 0;
 
-   public GDXPerceptionVisualizerUI()
+   public PerceptionVisualizerUI()
    {
 
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
@@ -92,6 +96,44 @@ public class GDXPerceptionVisualizerUI
             //            mapsenseConfigurationUI = new ImGuiMapSenseConfigurationPanel(ros1Node, ros2Node);
 
             globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
+
+            globalVisualizersUI.addVisualizer(new GDXROS2BigDepthVideoVisualizer("L515 Depth",
+                                                                                 DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                                 ROS2Tools.L515_DEPTH));
+            blackflyRightVisualizer = new GDXROS2BigVideoVisualizer("IHMC Blackfly Right",
+                                                                    DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                    ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
+            globalVisualizersUI.addVisualizer(blackflyRightVisualizer);
+            globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("L515 Point Cloud",
+                                                                              ros2Node,
+                                                                              ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class),
+                                                                              1024 * 768,
+                                                                              1));
+            int pointsPerSegment = 786432;
+            int numberOfSegments = 1;
+            globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
+                                                                              ros2Node,
+                                                                              ROS2Tools.FUSED_SENSOR_HEAD_POINT_CLOUD,
+                                                                              pointsPerSegment,
+                                                                              numberOfSegments));
+            pointsPerSegment = 407040;
+            numberOfSegments = 1;
+            globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("D435 Colored Point Cloud",
+                                                                              ros2Node,
+                                                                              ROS2Tools.D435_COLORED_POINT_CLOUD,
+                                                                              pointsPerSegment,
+                                                                              numberOfSegments));
+            int os0128Multiplier = 2;
+            pointsPerSegment = 131072 * os0128Multiplier;
+            numberOfSegments = 1;
+            globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("Ouster Point Cloud",
+                                                                              ros2Node,
+                                                                              ROS2Tools.OUSTER_POINT_CLOUD,
+                                                                              pointsPerSegment,
+                                                                              numberOfSegments));
+            videoVisualizer = new GDXROS2VideoVisualizer("Primary Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
+            globalVisualizersUI.addVisualizer(videoVisualizer);
+
             //            GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
             //                    ros2Node,
             //                    RosTools.MAPSENSE_REGIONS);
@@ -273,7 +315,7 @@ public class GDXPerceptionVisualizerUI
 
    public static void main(String[] args) throws URISyntaxException
    {
-      new GDXPerceptionVisualizerUI();
+      new PerceptionVisualizerUI();
    }
 }
 
