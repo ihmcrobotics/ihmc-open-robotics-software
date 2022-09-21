@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(factor_graph_node)
+project(ihmc-slam-wrapper)
 
 add_compile_options(-std=c++17)
 
