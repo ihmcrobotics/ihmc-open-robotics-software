@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -25,6 +26,7 @@ import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
+import us.ihmc.gdx.ui.tools.TrajectoryRecordReplay;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -71,6 +73,11 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
+   private TrajectoryRecordReplay<Double> trajRecorder = new TrajectoryRecordReplay<>("");
+   private final ImString recordPath = new ImString();
+   private ImBoolean enablerRecording = new ImBoolean(false);
+   private boolean isRecording = false;
+//   private final ImString replayPath = new ImString();
 
    private HandConfiguration leftHandConfiguration = HandConfiguration.CLOSE;
    private HandConfiguration rightHandConfiguration = HandConfiguration.CLOSE;
@@ -155,6 +162,12 @@ public class GDXVRKinematicsStreamingMode
             sendHandCommand(RobotSide.LEFT, leftHandConfiguration);
             leftHandConfiguration = negateHandConfiguration(leftHandConfiguration);
          }
+
+         InputDigitalActionData bButton = controller.getBButtonActionData();
+         if (bButton.bChanged() && !bButton.bState())
+         {
+            isRecording = !isRecording;
+         }
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -206,8 +219,24 @@ public class GDXVRKinematicsStreamingMode
                                                                                  side.negateIfLeftSide(Math.PI / 2.0),
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
+
+               if (enablerRecording.get()){
+                  if (!(trajRecorder.getPath()==recordPath.get()))
+                     trajRecorder.setPath(recordPath.get());
+                  if(isRecording){
+                     Double[] dataTrajectories = new Double[] {tempFramePose.getPosition().getX(),
+                                          tempFramePose.getPosition().getY(),tempFramePose.getPosition().getZ(),
+                                          tempFramePose.getOrientation().getX(),tempFramePose.getOrientation().getY(),
+                                          tempFramePose.getOrientation().getZ(),tempFramePose.getOrientation().getS()};
+                     trajRecorder.record(dataTrajectories);
+                  }
+                  else if(!trajRecorder.hasSavedRecording()){
+                     trajRecorder.saveRecording();
+                  }
+               }
             });
          }
+
 //         vrContext.getHeadset().runIfConnected(headset ->
 //         {
 //            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
@@ -290,6 +319,24 @@ public class GDXVRKinematicsStreamingMode
       {
          sleepToolbox();
       }
+      ImGui.text("Start/Stop recording: Press Right B button");
+      if (ImGui.checkbox(labels.get("Record motion"), enablerRecording))
+      {
+         setRecording(enablerRecording.get());
+      }
+      ImGui.sameLine();
+      ImGui.inputText(labels.get("filePath record"), recordPath);
+//      if (ImGui.checkbox(labels.get("Replay motion"), enabled))
+//      {
+//         sleepToolbox();
+//      }
+//      ImGui.sameLine();
+//      if (ImGui.button(labels.get("Play")))
+//      {
+//         wakeUpToolbox();
+//      }
+//      ImGui.sameLine();
+//      ImGui.inputText(labels.get("filePath replay"), replayPath);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
@@ -315,6 +362,12 @@ public class GDXVRKinematicsStreamingMode
          this.enabled.set(enabled);
       if (enabled)
          wakeUpToolbox();
+   }
+
+   private void setRecording(boolean enablerRecording)
+   {
+      if (enablerRecording != this.enablerRecording.get())
+         this.enablerRecording.set(enablerRecording);
    }
 
    private void reinitializeToolbox()
