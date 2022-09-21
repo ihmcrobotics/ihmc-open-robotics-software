@@ -28,6 +28,12 @@ public class ParameterVector2D implements Vector2DReadOnly
       }
    }
 
+   public ParameterVector2D(String prefix, double defaultX, double defaultY, YoRegistry registry)
+   {
+      x = new DoubleParameter(prefix + "X", registry, defaultX);
+      y = new DoubleParameter(prefix + "Y", registry, defaultY);
+   }
+
    @Override
    public double getX()
    {
