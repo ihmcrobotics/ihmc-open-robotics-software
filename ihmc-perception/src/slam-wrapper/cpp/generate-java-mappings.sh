@@ -15,6 +15,7 @@ curl -L https://github.com/bytedeco/javacpp/releases/download/$JAVACPP_VERSION/j
 unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 
 # Copy the javacpp InfoMapper into build
-cp ../../java/ihmc_slam_wrapper.java .
+mkdir -p us/ihmc/perception/slamWrapper
+cp ../../java/us/ihmc/perception/slamWrapper/ihmc_slam_wrapper.java us/ihmc/perception/slamWrapper/ihmc_slam_wrapper.java
 
-java -jar javacpp.jar ihmc_slam_wrapper.java -d ../../../generated-java
+java -jar javacpp.jar us/ihmc/perception/slamWrapper/ihmc_slam_wrapper.java -d ../../generated-java/us/ihmc/perception/slamWrapper
