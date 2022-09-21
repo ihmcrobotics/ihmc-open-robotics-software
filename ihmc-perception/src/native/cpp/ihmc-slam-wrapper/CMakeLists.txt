@@ -21,14 +21,14 @@ set(FG_SOURCES
     launcher/application.cpp
 )
 
+add_library(ihmc-slam-wrapper SHARED ${FG_SOURCES})
 
-add_executable(FactorGraphNodeHeadless ${FG_SOURCES})
-target_link_libraries(FactorGraphNodeHeadless
+target_link_libraries(ihmc-slam-wrapper
     gtsam
  #   eigen
 
 )
-target_include_directories(FactorGraphNodeHeadless PUBLIC
+target_include_directories(ihmc-slam-wrapper PUBLIC
     factor_graph/
     external/
 )
