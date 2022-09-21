@@ -354,13 +354,10 @@ public class WalkingSingleSupportState extends SingleSupportState
       if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
          nextNextFootstep = this.nextNextFootstep;
       feetManager.updateToeOffStatusSingleSupport(nextFootstep,
-                                                  nextNextFootstep,
                                                   supportFootExitCMP,
                                                   balanceManager.getDesiredCMP(),
-                                                  desiredCoP,
                                                   balanceManager.getDesiredICP(),
-                                                  currentICP,
-                                                  balanceManager.getFinalDesiredICP());
+                                                  currentICP);
 
       if (feetManager.okForPointToeOff(true))
          feetManager.requestPointToeOff(supportSide, supportFootExitCMP, desiredCoP);

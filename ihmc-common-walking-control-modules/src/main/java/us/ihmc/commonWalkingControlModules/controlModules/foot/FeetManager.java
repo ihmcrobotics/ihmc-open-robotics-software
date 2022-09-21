@@ -55,7 +55,7 @@ public class FeetManager
 
    private final ToeOffParameters toeOffParameters;
    private final ToeOffCalculator toeOffCalculator;
-   private final GeometricToeOffManager overhauledToeOffManager;
+   private final GeometricToeOffManager toeOffManager;
 
    private final SideDependentList<ContactableFoot> feet;
 
@@ -102,11 +102,11 @@ public class FeetManager
 
       toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
 
-      overhauledToeOffManager = new GeometricToeOffManager(controllerToolbox,
-                                                           walkingControllerParameters,
-                                                           new DynamicStateInspectorParameters(registry),
-                                                           toeOffCalculator,
-                                                           registry);
+      toeOffManager = new GeometricToeOffManager(controllerToolbox,
+                                                 walkingControllerParameters,
+                                                 new DynamicStateInspectorParameters(registry),
+                                                 toeOffCalculator,
+                                                 registry);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -416,25 +416,24 @@ public class FeetManager
 
    public boolean isSteppingUp()
    {
-      return overhauledToeOffManager.isSteppingUp();
+      return toeOffManager.isSteppingUp();
    }
 
    /**
     * Checks whether the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(FramePose3DReadOnly, RobotSide)}.
+    * Calls {@link GeometricToeOffManager#areFeetWellPositionedForToeOff(RobotSide, FramePose3DReadOnly)}.
     *
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
    public boolean canDoDoubleSupportToeOff(RobotSide transferToSide)
    {
-      return overhauledToeOffManager.areFeetWellPositionedForToeOff(transferToSide.getOppositeSide());
-//      return toeOffManager.canDoDoubleSupportToeOff(nextFootstep, transferToSide);
+      return toeOffManager.areFeetWellPositionedForToeOff(transferToSide.getOppositeSide());
    }
 
    /**
     * Checks whether the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(FramePose3DReadOnly, RobotSide)}.
+    * Calls {@link GeometricToeOffManager#areFeetWellPositionedForToeOff(RobotSide, FramePose3DReadOnly)}.
     *
     * @param nextFootstepPose footstep to consider.
     * @param swingSide upcoming support side.
@@ -442,15 +441,13 @@ public class FeetManager
     */
    public boolean canDoSingleSupportToeOff(FramePose3DReadOnly nextFootstepPose, RobotSide swingSide)
    {
-      return overhauledToeOffManager.areFeetWellPositionedForToeOff(swingSide.getOppositeSide(), nextFootstepPose);
-
-//      return toeOffManager.canDoSingleSupportToeOff(nextFootstep, transferToSide);
+      return toeOffManager.areFeetWellPositionedForToeOff(swingSide.getOppositeSide(), nextFootstepPose);
    }
 
    /**
     * <p>
     * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
-    * {@link ToeOffManager#doLineToeOff()} variable accordingly.
+    * {@link GeometricToeOffManager#doToeOff()} variable accordingly.
     * </p>
     * <p>
     * These checks include:
@@ -474,33 +471,26 @@ public class FeetManager
     * @param desiredECMP     current desired ECMP from ICP feedback.
     * @param desiredICP      current desired ICP from the reference trajectory.
     * @param currentICP      current ICP based on the robot state.
-    * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
    public void updateToeOffStatusSingleSupport(Footstep nextFootstep,
-                                               Footstep nextNextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
-                                               FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP,
-                                               FramePoint2DReadOnly finalDesiredICP)
+                                               FramePoint2DReadOnly currentICP)
    {
-//      toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
-//      toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
-
-      overhauledToeOffManager.updateToeOffStatusSingleSupport(nextFootstep.getRobotSide(),
-                                                              nextFootstep.getFootstepPose(),
-                                                              nextFootstep.getPredictedContactPoints(),
-                                                              exitCMP,
-                                                              desiredECMP,
-                                                              desiredICP,
-                                                              currentICP);
+      toeOffManager.updateToeOffStatusSingleSupport(nextFootstep.getRobotSide(),
+                                                    nextFootstep.getFootstepPose(),
+                                                    nextFootstep.getPredictedContactPoints(),
+                                                    exitCMP,
+                                                    desiredECMP,
+                                                    desiredICP,
+                                                    currentICP);
    }
 
    /**
     * <p>
     * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
-    * {@link ToeOffManager#doLineToeOff()} variable accordingly.
+    * {@link GeometricToeOffManager#doToeOff()} ()} variable accordingly.
     * </p>
     * <p>
     * These checks include:
@@ -523,40 +513,29 @@ public class FeetManager
     * @param desiredECMP     current desired ECMP from ICP feedback.
     * @param desiredICP      current desired ICP from the reference trajectory.
     * @param currentICP      current ICP based on the robot state.
-    * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
-                                               Footstep nextFootstep,
-                                               Footstep nextNextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
-                                               FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
-                                               FramePoint2DReadOnly currentICP,
-                                               FramePoint2DReadOnly finalDesiredICP,
-                                               FramePoint2DReadOnly perfectCoP)
+                                               FramePoint2DReadOnly currentICP)
    {
-//      toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
-//      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP, perfectCoP);
-
-      overhauledToeOffManager.updateToeOffStatusDoubleSupport(trailingLeg,
-                                                              exitCMP,
-                                                              desiredECMP,
-                                                              desiredICP,
-                                                              currentICP);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg,
+                                                    exitCMP,
+                                                    desiredECMP,
+                                                    desiredICP,
+                                                    currentICP);
    }
 
    /**
     * Returns whether the current robot state is ok toe-off using a point toe contact.
-    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, Footstep, Footstep, FramePoint3DReadOnly,
-    * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or
-    * {@link #updateToeOffStatusSingleSupport(Footstep, Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly,
-    * FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or
+    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
     * Calls {@link GeometricToeOffManager#doToeOff()}}.
     */
    public boolean okForPointToeOff(boolean isInSingleSupport)
    {
-      if (!overhauledToeOffManager.doToeOff())
+      if (!toeOffManager.doToeOff())
          return false;
 
       if (isInSingleSupport)
@@ -567,15 +546,13 @@ public class FeetManager
 
    /**
     * Returns whether the current robot state is ok toe-off using a line toe contact.
-    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, Footstep, Footstep, FramePoint3DReadOnly,
-    * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or
-    * {@link #updateToeOffStatusSingleSupport(Footstep, Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly,
-    * FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or
+    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
     * Calls {@link GeometricToeOffManager#doToeOff()}}.
     */
    public boolean okForLineToeOff(boolean isInSingleSupport)
    {
-      if (!overhauledToeOffManager.doToeOff())
+      if (!toeOffManager.doToeOff())
          return false;
 
       if (isInSingleSupport)
@@ -635,7 +612,7 @@ public class FeetManager
 
    public void reset()
    {
-      overhauledToeOffManager.reset();
+      toeOffManager.reset();
    }
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()
