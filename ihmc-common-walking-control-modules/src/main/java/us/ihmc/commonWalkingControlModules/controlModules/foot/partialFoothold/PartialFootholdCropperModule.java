@@ -76,6 +76,11 @@ public class PartialFootholdCropperModule
       return rotationDetector.compute();
    }
 
+   public boolean checkIfCroppingIsEnabled()
+   {
+      return footholdCropper.getValueOfPartialFootholdDetection();
+   }
+
    public boolean applyShrunkenFoothold(YoPlaneContactState contactStateToModify)
    {
       if (!shouldApplyShrunkenFoothold())
