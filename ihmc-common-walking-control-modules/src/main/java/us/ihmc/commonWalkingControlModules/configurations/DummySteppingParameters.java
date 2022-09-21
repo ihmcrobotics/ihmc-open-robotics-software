@@ -60,12 +60,6 @@ public class DummySteppingParameters implements SteppingParameters
    }
 
    @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
    public double getInPlaceWidth()
    {
       return 0.25;
