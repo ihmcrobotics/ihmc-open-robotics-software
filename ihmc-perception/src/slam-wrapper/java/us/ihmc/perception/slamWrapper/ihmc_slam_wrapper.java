@@ -1,4 +1,5 @@
-import org.bytedeco.javacpp.*;
+package us.ihmc.perception.slamWrapper;
+
 import org.bytedeco.javacpp.annotation.*;
 import org.bytedeco.javacpp.tools.*;
 

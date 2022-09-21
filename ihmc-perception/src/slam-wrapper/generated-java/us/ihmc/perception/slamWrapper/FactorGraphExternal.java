@@ -4,7 +4,7 @@ import java.nio.*;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.javacpp.annotation.*;
 
-public class FactorGraphExternal extends ihmc_slam_wrapper {
+public class FactorGraphExternal extends us.ihmc.perception.slamWrapper.ihmc_slam_wrapper {
     static { Loader.load(); }
 
 // Parsed from include/factor_graph_external.h
