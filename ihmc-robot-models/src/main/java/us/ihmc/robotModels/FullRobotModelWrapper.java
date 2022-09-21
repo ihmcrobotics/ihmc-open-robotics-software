@@ -216,8 +216,6 @@ public class FullRobotModelWrapper implements FullRobotModel
       {
          JointBasics joint = MultiBodySystemTools.findJoint(elevator, jointDefinition.getName());
 
-         LogTools.info("JOINT: ({})", jointDefinition.getName());
-
          for (SensorDefinition sensorDefinition : jointDefinition.getSensorDefinitions())
          {
             if (sensorDefinition instanceof IMUSensorDefinition)
