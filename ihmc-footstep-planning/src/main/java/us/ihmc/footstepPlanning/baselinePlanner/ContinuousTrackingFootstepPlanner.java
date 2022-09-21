@@ -18,16 +18,17 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JoystickFootstepPlanner
+public class ContinuousTrackingFootstepPlanner
 {
    private final int VIZ_SAMPLE_COUNT = 40;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final double previewTime;
-   private final double dt;
+   private double dt;
    private final PreviewWindowPoseTrajectoryGenerator trajectory;
    private final SamplingPoseTrajectoryVisualizer trajectoryViz;
    private int headFootstepPlanSize;
@@ -47,12 +48,19 @@ public class JoystickFootstepPlanner
    private final YoBoolean visualizeBaselineTrajectory;
    private final BaselineFootstepPlannerParameters parameters;
 
+   private final ArrayDeque<FramePose3D> waypoints = new ArrayDeque<>();
+
    private double swingTime = 0.6;
    private double transferTime = 0.25;
    private FootstepDataListMessage plannedFootsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
-   public JoystickFootstepPlanner(BaselineFootstepPlannerParameters parameters, double previewTime, double dt, int maxFootsteps,
-                                  SideDependentList<ConvexPolygon2D> footPolygons, YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public ContinuousTrackingFootstepPlanner(BaselineFootstepPlannerParameters parameters, double previewTime, double dt, int maxFootsteps,
+                                            SideDependentList<ConvexPolygon2D> footPolygons,
+                                            YoRegistry parentRegistry,
+                                            YoGraphicsListRegistry graphicsListRegistry,
+                                            double maxVelocityX,
+                                            double maxVelocityY,
+                                            double maxVelocityYaw)
    {
       this.parameters = parameters;
       this.previewTime = previewTime;
@@ -93,7 +101,7 @@ public class JoystickFootstepPlanner
       this.footstepPlanViz.setPreviewTime(previewTime);
 
       // Initialize baseline trajectory.
-      this.trajectory = new PreviewWindowPoseTrajectoryGenerator(ReferenceFrame.getWorldFrame(), (int) Math.ceil(previewTime / dt), dt);
+      this.trajectory = new PreviewWindowPoseTrajectoryGenerator(ReferenceFrame.getWorldFrame(), (int) Math.ceil(previewTime / dt), dt, maxVelocityX, maxVelocityY, maxVelocityYaw);
       this.trajectoryViz = new SamplingPoseTrajectoryVisualizer("footstep", trajectory, ReferenceFrame.getWorldFrame(), VIZ_SAMPLE_COUNT, 0.014, false, registry,
                                                                 graphicsListRegistry);
 
@@ -128,8 +136,28 @@ public class JoystickFootstepPlanner
 
    public void update(double currentTime, double forwardVelocity, double lateralVelocity, double turningVelocity)
    {
-      // Update baseline trajectory.
       trajectory.append(forwardVelocity, lateralVelocity, turningVelocity);
+      planAndVisualize(currentTime);
+   }
+
+
+   public void update(double currentTime, double deltaTime, FramePose3D framePose3D)
+   {
+//      trajectory.append(deltaTime, framePose3D);
+      trajectory.appendTest(deltaTime, framePose3D);
+      planAndVisualize(currentTime);
+
+   }
+
+   public void update(double currentTime, double deltaTime, double forwardVelocity, double lateralVelocity, double turningVelocity)
+   {
+      // Update baseline trajectory.
+      trajectory.append(deltaTime, forwardVelocity, lateralVelocity, turningVelocity);
+      planAndVisualize(currentTime);
+   }
+
+   public void planAndVisualize(double currentTime)
+   {
       if (visualizeBaselineTrajectory.getBooleanValue())
          trajectoryViz.redraw(0, previewTime);
       else

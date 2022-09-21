@@ -1,10 +1,16 @@
 package us.ihmc.footstepPlanning.baselinePlanner;
 
+import boofcv.concurrency.IntOperatorTask;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 
 public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGenerator
@@ -22,6 +28,20 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final FrameVector3D currentAngularVelocity;
 
    private final FrameVector3DReadOnly zeroVector;
+
+   private double MAX_X_VELOCITY;
+   private double MAX_Y_VELOCITY;
+   private double MAX_YAW_VELOCITY;
+
+   private final double epsilion = 1e-5;
+
+   public PreviewWindowPoseTrajectoryGenerator(ReferenceFrame frame, int windowSize, double dt, double maxVelocityX, double maxVelocityY, double maxVelocityYaw)
+   {
+      this(frame,windowSize,dt);
+      MAX_X_VELOCITY = maxVelocityX;
+      MAX_Y_VELOCITY = maxVelocityY;
+      MAX_YAW_VELOCITY = maxVelocityYaw;
+   }
 
    public PreviewWindowPoseTrajectoryGenerator(ReferenceFrame frame, int windowSize, double dt)
    {
@@ -64,6 +84,84 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       currentPose.setToZero();
       currentLinearVelocity.setToZero();
       currentAngularVelocity.setToZero();
+   }
+
+   public void appendTest(double dt, FramePose3D framePose3D)
+   {
+      int prevIdx = headIdx;
+      headIdx = (headIdx + 1) % windowSize;
+      FramePose3D prevPose = poses[prevIdx];
+      double yaw = framePose3D.getYaw() - prevPose.getYaw();
+      double yawdot = yaw / dt;
+
+      FramePose3D headPose = poses[headIdx];
+      if (Math.abs(yawdot) > MAX_YAW_VELOCITY) yawdot = Math.signum(yawdot) * MAX_YAW_VELOCITY;
+
+      double MAX_VELOCITY = Math.sqrt(Math.pow(MAX_X_VELOCITY, 2) + Math.pow(MAX_Y_VELOCITY, 2));
+
+      // translation
+      FrameVector3D tempVector = new FrameVector3D();
+      // rotation
+      FrameQuaternion tempQuaternion = new FrameQuaternion();
+
+      // holds position of gizmo
+      tempVector.set(framePose3D.getPosition());
+      tempVector.sub(prevPose.getPosition());
+      double tempVectorLength = Math.sqrt(Math.pow(tempVector.getX(), 2) + Math.pow(tempVector.getY(), 2));
+      if (tempVectorLength > MAX_VELOCITY)
+      {
+         tempVector.normalize();
+         tempVector.scale(MAX_VELOCITY);
+      }
+
+      headPose.set(poses[prevIdx]);
+      tempVector.scale(dt);
+      headPose.getPosition().add(tempVector);
+      headPose.appendYawRotation(yawdot * dt);
+
+   }
+
+   public void append(double deltaTime, FramePose3D framePose3D)
+   {
+
+      int prevIdx = headIdx;
+      headIdx = (headIdx + 1) % windowSize;
+      FramePose3D prevPose = poses[prevIdx];
+
+      double forwardDistance = framePose3D.getX() - prevPose.getX();
+      double lateralDistance = framePose3D.getY() - prevPose.getY();
+      double yawDistance = framePose3D.getYaw() - prevPose.getYaw();
+
+      double xdot = forwardDistance / deltaTime;
+      double ydot = lateralDistance / deltaTime;
+      double yawdot = yawDistance / deltaTime;
+
+      LogTools.info("{} | {} | {}", forwardDistance, lateralDistance, yawDistance);
+
+      FramePose3D headPose = poses[headIdx];
+      if (Math.abs(xdot) > MAX_X_VELOCITY) xdot = Math.signum(xdot) * MAX_X_VELOCITY;
+      if (Math.abs(ydot) > MAX_Y_VELOCITY) ydot = Math.signum(ydot) * MAX_Y_VELOCITY;
+      if (Math.abs(yawdot) > MAX_YAW_VELOCITY) yawdot = Math.signum(yawdot) * MAX_YAW_VELOCITY;
+
+      headPose.set(poses[prevIdx]);
+      headPose.appendTranslation(xdot * deltaTime, ydot * deltaTime, 0.0);
+      headPose.appendYawRotation(yawdot * deltaTime);
+   }
+
+   // Note: appends velocity vector
+   public void append(double deltaTime, double xdot, double ydot, double yawdot)
+   {
+      int prevIdx = headIdx;
+      headIdx = (headIdx + 1) % windowSize;
+
+      FramePose3D headPose = poses[headIdx];
+      headPose.set(poses[prevIdx]); // copy pose from prev step
+      headPose.appendTranslation(xdot * deltaTime, ydot * deltaTime, 0.0);
+      headPose.appendYawRotation(yawdot * deltaTime);
+
+//      linearVelocities[headIdx].set(xdot, ydot, 0.0);
+//      headPose.transform(linearVelocities[headIdx]);
+//      angularVelocities[headIdx].set(0.0, 0.0, yawdot);
    }
 
    public void append(double xdot, double ydot, double yawdot)
@@ -171,4 +269,11 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    {
       return false;
    }
+
+   public FramePose3D[] getPoses()
+   {
+      return poses;
+   }
+
+//   public FramePose3D getCurrent
 }

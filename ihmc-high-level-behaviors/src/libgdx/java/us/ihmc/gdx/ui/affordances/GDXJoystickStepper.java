@@ -1,5 +1,10 @@
-package us.ihmc.gdx.ui.yo;
+package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -17,10 +22,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.baselinePlanner.BaselineFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.baselinePlanner.JoystickFootstepPlanner;
+import us.ihmc.footstepPlanning.baselinePlanner.ContinuousTrackingFootstepPlanner;
 import us.ihmc.footstepPlanning.baselinePlanner.SimpleTimedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
+import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -38,21 +46,32 @@ import java.util.List;
 public class GDXJoystickStepper
 {
    private static final double dt = 0.05;
+   private static final double MAX_X_VELOCITY = 0.3;  // 0.3 m/s
+   private static final double MAX_Y_VELOCITY = 0.1;  // 0.1 m/s
+   private static final double MAX_YAW_VELOCITY = Math.PI / 6.0;  // 30 deg / s
+   private static double deltaTime;
+   private GDXImGuiBasedUI baseUI;
 
+   private GDXReferenceFrameGraphic goalFrameGraphic = null;
+   private GDXSphereAndArrowGraphic sphereAndArrowGraphic = null;
+//   private ModelInstance sphere;
+   private enum MODE
+   {
+      joystick, other
+   };
+   MODE mode = MODE.joystick;
    private class Controller implements us.ihmc.scs2.definition.controller.interfaces.Controller
    {
       private final int TRAJECTORY_WINDOW_SIZE = 100;
       private final int VIZ_SAMPLE_COUNT = 20;
-      private final double MAX_X_VELOCITY = 1.0;
-      private final double MAX_Y_VELOCITY = 0.5;
-      private final double MAX_YAW_VELOCITY = Math.PI / 2.0;
+
 
       // Compute timed footstep plan.
       int maxSteps = 30;
 
       private final YoRegistry registry = new YoRegistry("visualization");
       private final DoubleProvider timeProvider;
-      private final JoystickFootstepPlanner planner;
+      private final ContinuousTrackingFootstepPlanner planner;
 
       private final List<SimpleTimedFootstep> plannedSteps = new ArrayList<>();
 
@@ -62,6 +81,8 @@ public class GDXJoystickStepper
       private final double dt;
 
       private final SideDependentList<FramePose3D> previousFootholds = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
+
 
       public Controller(Joystick joystick,
                         SideDependentList<ConvexPolygon2D> footPolygons,
@@ -83,27 +104,41 @@ public class GDXJoystickStepper
             previousFootholds.get(robotSide).set(initialFootholds.get(robotSide));
          }
 
-         planner = new JoystickFootstepPlanner(plannerParameters, 5.0, dt, 10, footPolygons, registry, graphicsListRegistry);
+         planner = new ContinuousTrackingFootstepPlanner(plannerParameters, 5.0, dt, 10, footPolygons, registry, graphicsListRegistry, MAX_X_VELOCITY, MAX_Y_VELOCITY, MAX_YAW_VELOCITY);
 
-
-         joystick.addJoystickEventListener(event ->
-                                           {
-                                              if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
-                                                 xdot.set(MAX_X_VELOCITY * event.getValue());
-                                              else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
-                                                 ydot.set(MAX_Y_VELOCITY * event.getValue());
-                                              else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
-                                                 yawdot.set(MAX_YAW_VELOCITY * event.getValue());
-                                           });
-
+         if (joystick!=null)
+         {
+            joystick.addJoystickEventListener(event ->
+                                              {
+                                                 if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
+                                                    xdot.set(MAX_X_VELOCITY * event.getValue());
+                                                 else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
+                                                    ydot.set(MAX_Y_VELOCITY * event.getValue());
+                                                 else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
+                                                    yawdot.set(MAX_YAW_VELOCITY * event.getValue());
+                                              });
+         }
       }
+
 
       @Override
       public void doControl()
       {
          double time = timeProvider.getValue();
-         // Update baseline graphics.
          planner.update(time, xdot.get(), ydot.get(), yawdot.get());
+      }
+
+      public void doControl(double deltaTime)
+      {
+         double time = timeProvider.getValue();
+         // Update baseline graphics.
+         planner.update(time, deltaTime, xdot.get(), ydot.get(), yawdot.get());
+      }
+
+      public void doControl(double deltaTime, FramePose3D framePose3D)
+      {
+         double time = timeProvider.getValue();
+         planner.update(time, deltaTime, framePose3D);
       }
 
       @Override
@@ -124,6 +159,10 @@ public class GDXJoystickStepper
          return getClass().getSimpleName();
       }
 
+      public MODE getTestMode()
+      {
+         return mode;
+      }
    }
 
    DRCRobotModel robotModel;
@@ -134,18 +173,25 @@ public class GDXJoystickStepper
    private boolean activated = false;
    Controller controller;
    FootstepPlannerParametersBasics footstepPlannerParameters;
+   private FramePose3D framePose3D;
 
-   public GDXJoystickStepper(DRCRobotModel robotModel,
+   public GDXJoystickStepper(GDXImGuiBasedUI baseUI,
+                             DRCRobotModel robotModel,
                              ROS2SyncedRobotModel syncedRobot,
                              ROS2ControllerHelper controllerHelper,
                              CommunicationHelper communicationHelper,
                              FootstepPlannerParametersBasics footstepPlannerParameters)
    {
+      this.baseUI = baseUI;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.controllerHelper = controllerHelper;
       this.communicationHelper = communicationHelper;
       this.footstepPlannerParameters = footstepPlannerParameters;
+//      goalFrameGraphic = new GDXReferenceFrameGraphic(0.4, Color.ORANGE);
+      sphereAndArrowGraphic = new GDXSphereAndArrowGraphic();
+      sphereAndArrowGraphic.create(0.1f, 0.4f, Color.PURPLE);
+//      baseUI.getPrimaryScene().addRenderableProvider(goalFrameGraphic);
    }
 
    public void initiate()
@@ -169,7 +215,6 @@ public class GDXJoystickStepper
          initialFootholds.put(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(initialLeftPosition), new Quaternion(initialLeftRotation)));
          initialFootholds.put(RobotSide.RIGHT, new FramePose3D(worldFrame, new Point3D(initialRightPosition), new Quaternion(initialRightRotation)));
 
-
          Joystick joystick;
 
          BaselineFootstepPlannerParameters plannerParameters = new BaselineFootstepPlannerParameters(footstepPlannerParameters);
@@ -182,20 +227,21 @@ public class GDXJoystickStepper
             joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1));
             joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1));
 
-            controller = new Controller(joystick, PlannerTools.createDefaultFootPolygons(), initialFootholds, plannerParameters, new DoubleProvider()
-            {
-               @Override
-               public double getValue()
-               {
-                  return Conversions.nanosecondsToSeconds(System.nanoTime());
-               }
-            }, dt, graphicsListRegistry);
+            controller = new Controller(joystick, PlannerTools.createDefaultFootPolygons(), initialFootholds, plannerParameters,
+                                        () -> Conversions.nanosecondsToSeconds(System.nanoTime()), dt, graphicsListRegistry);
          }
          catch (IOException e)
          {
-            throw new RuntimeException("error opening joystick: " + e);
+            controller = new Controller(null, PlannerTools.createDefaultFootPolygons(), initialFootholds, plannerParameters,
+                                        () -> Conversions.nanosecondsToSeconds(System.nanoTime()), dt, graphicsListRegistry);
+//            throw new RuntimeException("error opening joystick: " + e);
+
          }
+
          controller.initialize();
+//         goalFrameGraphic = new GDXReferenceFrameGraphic(0.2, Color.ORANGE);
+//         baseUI.getPrimaryScene().addRenderableProvider(goalFrameGraphic);
+
          activated = true;
       }
 
@@ -204,6 +250,8 @@ public class GDXJoystickStepper
    public void stop()
    {
       activated = false;
+//      if (goalFrameGraphic != null)
+//         goalFrameGraphic.dispose();
    }
 
    public FramePose3DReadOnly getCurrentPose()
@@ -211,12 +259,25 @@ public class GDXJoystickStepper
       return (FramePose3DReadOnly) controller.planner.getPreviewTrajectory().getPose();
    }
 
-   public void run()
+   public void run(FramePose3D framePose3D)
    {
       if (activated)
       {
-         controller.doControl();
+         deltaTime = Gdx.graphics.getDeltaTime();
+         if (controller.getTestMode() == MODE.joystick)
+            controller.doControl(deltaTime);
+         else
+         {
+            controller.doControl(deltaTime,framePose3D);
+         }
          FootstepDataListMessage footstepDataListMessage = controller.planner.getPlannedFootsteps();
+//         sphere = GDXModelBuilder.createSphere(5.0f,Color.ORANGE);
+         FramePose3D currentGoalPose = (FramePose3D) getCurrentPose();
+         currentGoalPose.appendTranslation(0.0f,0.0f,0.1f);
+//         goalFrameGraphic.setPoseInWorldFrame(currentGoalPose);
+         sphereAndArrowGraphic.setToPose(currentGoalPose);
+//         baseUI.getPrimaryScene().addModelInstance(sphere);
+//         baseUI.getPrimaryScene().addModelInstance(goalFrameGraphic);
 
          int j = footstepDataListMessage.getFootstepDataList().size();
          if (j>0)
@@ -226,6 +287,39 @@ public class GDXJoystickStepper
          {
             controller.planner.removePublishedFootSteps();
          }
+      }
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+//      sphere.getRenderables(renderables,pool);
+      sphereAndArrowGraphic.getRenderables(renderables, pool);
+//      goalFrameGraphic.getRenderables(renderables,pool);
+   }
+
+   public boolean isJoystickMode()
+   {
+      return this.mode == MODE.joystick;
+   }
+
+   public MODE getMode()
+   {
+      return mode;
+   }
+
+   public void setMode(boolean incoming)
+   {
+      if(incoming && mode == MODE.other)
+      {
+         mode = MODE.joystick;
+         stop();
+         initiate();
+      }
+      else if(!incoming && mode == MODE.joystick)
+      {
+         mode = MODE.other;
+         stop();
+         initiate();
       }
    }
 }

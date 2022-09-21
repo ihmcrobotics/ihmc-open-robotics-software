@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -32,11 +33,11 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDX3DPanel;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
-import us.ihmc.gdx.ui.yo.GDXJoystickStepper;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
@@ -95,8 +96,10 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private GDXJoystickStepper joystickStepper;
    private final boolean isContinuousStepping = false;
    private boolean joystickOn = false;
+   private ImBoolean joystickMode = new ImBoolean(false);
 
-   public void create(GDX3DPanel panel3D,
+   public void create(GDXImGuiBasedUI baseUI,
+                      GDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       GDXTeleoperationParameters teleoperationParameters,
@@ -146,7 +149,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
-      joystickStepper = new GDXJoystickStepper(robotModel, syncedRobot, ros2Helper, communicationHelper, footstepPlannerParameters);
+      joystickStepper = new GDXJoystickStepper(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, footstepPlannerParameters);
    }
 
    public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -169,8 +172,12 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 
       if (joystickOn)
       {
-         joystickStepper.run();
-         setGoalGizmoFromJoystickPose();
+//         getGoalPose()
+//         joystickStepper.run(footstepPlannerGoalGizmo.getFramePose3D());
+         joystickStepper.setMode(joystickMode.get());
+         joystickStepper.run(goalPose);
+         if (joystickStepper.isJoystickMode())
+            setGoalGizmoFromJoystickPose();
       }
    }
 
@@ -233,6 +240,12 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
             updateStuff();
             queueFootstepPlan();
          }
+
+      }
+
+      if (selected && joystickOn)
+      {
+         joystickStepper.run(footstepPlannerGoalGizmo.getFramePose3D());
       }
 
       // TODO: this uses continuous step generator, but we don't know if we'll use this. Also has bug: keeps going under the ground.
@@ -313,11 +326,13 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          {
             planJoystick();
             joystickOn = true;
+            footstepPlannerGoalGizmo.setJoystickMode(true);
          }
          if (plannerToUse!=3)
          {
             joystickStepper.stop();
             joystickOn = false;
+            footstepPlannerGoalGizmo.setJoystickMode(false);
          }
       });
    }
@@ -416,10 +431,12 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       {
          plannerToUse = 2;
       }
-      if (ImGui.radioButton(labels.get("joystick control"), plannerToUse == 3 ))
+      if (ImGui.radioButton(labels.get("Continuous Tracking"), plannerToUse == 3 ))
       {
          plannerToUse = 3;
       }
+      ImGui.checkbox(labels.get("joystick"), joystickMode);
+
       ImGuiTools.previousWidgetTooltip("WARNING!! Do not check this box if you don't have xbox controller connected!");
       ImGui.text("Control ring:");
       ImGui.sameLine();
@@ -491,12 +508,17 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       }
+      if (joystickOn)
+      {
+         joystickStepper.getRenderables(renderables,pool);
+      }
    }
 
    public void delete()
    {
       selected = false;
       modified = false;
+      joystickStepper.stop();
       clearGraphics();
    }
 
