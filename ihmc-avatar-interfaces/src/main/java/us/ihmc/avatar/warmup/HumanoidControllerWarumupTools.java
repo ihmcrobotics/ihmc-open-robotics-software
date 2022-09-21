@@ -61,10 +61,11 @@ public class HumanoidControllerWarumupTools
          footPose.setZ(z);
          step.getLocation().set(footPose.getPosition());
          step.getOrientation().set(footPose.getOrientation());
-         step.setSwingDuration(0.2);
+         step.setSwingDuration(0.4);
          step.setTransferDuration(0.2);
       }
       message.setFinalTransferDuration(0.2);
+      message.setAreFootstepsAdjustable(true);
       return message;
    }
 
