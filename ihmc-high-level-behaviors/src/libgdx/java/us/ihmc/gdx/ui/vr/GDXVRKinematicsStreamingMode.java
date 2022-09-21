@@ -73,9 +73,9 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
-   private TrajectoryRecordReplay<Double> trajRecorder = new TrajectoryRecordReplay<>("");
-   private final ImString recordPath = new ImString();
-   private ImBoolean enablerRecording = new ImBoolean(false);
+   private final TrajectoryRecordReplay<Double> trajRecorder = new TrajectoryRecordReplay<>("");
+   private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\1.csv");
+   private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
 //   private final ImString replayPath = new ImString();
 
@@ -164,9 +164,11 @@ public class GDXVRKinematicsStreamingMode
          }
 
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         if (bButton.bChanged() && !bButton.bState())
+         if (enabled.get() && enablerRecording.get() && bButton.bChanged() && !bButton.bState())
          {
             isRecording = !isRecording;
+            if (trajRecorder.hasSavedRecording() && !(trajRecorder.getPath().equals(recordPath.get())))
+               trajRecorder.setPath(recordPath.get());
          }
       });
 
@@ -220,22 +222,19 @@ public class GDXVRKinematicsStreamingMode
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
 
-               if (enablerRecording.get()){
-                  if (!(trajRecorder.getPath()==recordPath.get()))
-                     trajRecorder.setPath(recordPath.get());
-                  if(isRecording){
-                     Double[] dataTrajectories = new Double[] {tempFramePose.getPosition().getX(),
-                                          tempFramePose.getPosition().getY(),tempFramePose.getPosition().getZ(),
-                                          tempFramePose.getOrientation().getX(),tempFramePose.getOrientation().getY(),
-                                          tempFramePose.getOrientation().getZ(),tempFramePose.getOrientation().getS()};
-                     trajRecorder.record(dataTrajectories);
-                  }
-                  else if(!trajRecorder.hasSavedRecording()){
-                     trajRecorder.saveRecording();
-                  }
+               if(isRecording){
+                  Double[] dataTrajectories = new Double[] {tempFramePose.getPosition().getX(),
+                                       tempFramePose.getPosition().getY(),tempFramePose.getPosition().getZ(),
+                                       tempFramePose.getOrientation().getX(),tempFramePose.getOrientation().getY(),
+                                       tempFramePose.getOrientation().getZ(),tempFramePose.getOrientation().getS()};
+                  trajRecorder.record(dataTrajectories);
+               }
+               else if(!(trajRecorder.hasSavedRecording())){
+                  trajRecorder.saveRecording();
                }
             });
          }
+
 
 //         vrContext.getHeadset().runIfConnected(headset ->
 //         {
