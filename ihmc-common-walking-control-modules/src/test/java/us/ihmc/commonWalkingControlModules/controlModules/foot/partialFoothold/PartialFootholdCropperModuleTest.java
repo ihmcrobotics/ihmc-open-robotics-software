@@ -165,11 +165,15 @@ public class PartialFootholdCropperModuleTest
       convexPolygonTools.cutPolygonWithLine(expectedLine, croppedFootPolygon, RobotSide.RIGHT);
 
       EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
-      assertTrue(partialFootholdModule.shouldApplyShrunkenFoothold());
-      EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
 
-      for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
-         assertTrue(partialFootholdModule.getShrunkenFootPolygon().signedDistance(measuredCoP) < 1e-3);
+      if(partialFootholdModule.checkIfCroppingIsEnabled())
+      {
+         assertTrue(partialFootholdModule.shouldApplyShrunkenFoothold());
+         EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
+
+         for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
+            assertTrue(partialFootholdModule.getShrunkenFootPolygon().signedDistance(measuredCoP) < 1e-3);
+      }
    }
 
    @Disabled
@@ -367,7 +371,7 @@ public class PartialFootholdCropperModuleTest
          assertTrue(partialFootholdModule.getShrunkenFootPolygon().isPointInside(measuredCoP));
    }
 
-   private class TestSoleFrame extends MovingReferenceFrame
+   private static class TestSoleFrame extends MovingReferenceFrame
    {
       private final Twist twistRelativeToParent;
       private final Pose3DReadOnly poseRelativeToParent;
