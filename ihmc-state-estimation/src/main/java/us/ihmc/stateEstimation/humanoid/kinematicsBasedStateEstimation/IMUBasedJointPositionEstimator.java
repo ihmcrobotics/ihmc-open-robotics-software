@@ -311,7 +311,7 @@ public class IMUBasedJointPositionEstimator
 
    public void setPrimaryQWeightPerAxis(Axis3D axis, double desiredWeight)
    {
-      preferredWeight[axis.ordinal()].set(desiredWeight);
+      errorWeight[axis.ordinal()].set(desiredWeight);
    }
 
    interface RotationErrorCalculator
