@@ -25,11 +25,16 @@ RUN apt-get --quiet 2 --yes update  \
     libboost-all-dev \
     cmake \
     libtbb-dev \
+    openjdk-17-jdk \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
+# Clone and checkout gtsam to a specific commit; using the develop branch of gtsam
+# Should periodically update the commit as needed
 WORKDIR /root/dev
-RUN git clone --depth 1 --branch 4.1.1 https://github.com/borglab/gtsam.git
+RUN git clone --depth 1 --branch develop https://github.com/borglab/gtsam.git gtsam
+WORKDIR /root/dev/gtsam
+RUN git checkout 0909c46339e0c604b0f26c8a67c7144c1358db4c
 
 WORKDIR /root/dev/gtsam/build
 RUN cmake \

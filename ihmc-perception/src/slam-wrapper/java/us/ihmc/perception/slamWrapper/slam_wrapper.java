@@ -5,10 +5,13 @@ import org.bytedeco.javacpp.tools.*;
 
 @Properties(value =
 @Platform(
+      includepath = "../",
+      resourcepath = "../",
+      linkpath = "../",
       include = {"include/factor_graph_external.h"},
-      link = {"libihmc-slam-wrapper"}),
-      target = "FactorGraphExternal")
-public class ihmc_slam_wrapper implements InfoMapper
+      link = {"libslam-wrapper"}),
+      target = "us.ihmc.perception.slamWrapper.FactorGraphExternal")
+public class slam_wrapper implements InfoMapper
 {
    public void map(InfoMap infoMap)
    {
