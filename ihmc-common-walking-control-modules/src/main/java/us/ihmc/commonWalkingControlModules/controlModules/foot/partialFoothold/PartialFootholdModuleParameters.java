@@ -40,6 +40,11 @@ public class PartialFootholdModuleParameters
 
    public PartialFootholdModuleParameters()
    {
+      this(false);
+   }
+
+   public PartialFootholdModuleParameters(boolean createPartialFootholdModule)
+   {
       geometricDetectionAngleThreshold = Math.toRadians(10.0);
 
       copHistoryBreakFrequency = 100.0;
@@ -72,7 +77,7 @@ public class PartialFootholdModuleParameters
       useCoPOccupancyGridForCropping = true;
       footDropThresholdForCrop = 0.01;
 
-      createPartialFootholdModule = false;
+      this.createPartialFootholdModule = createPartialFootholdModule;
       doPartialFootholdDetection = false;
       applyPartialFootholds = false;
    }
