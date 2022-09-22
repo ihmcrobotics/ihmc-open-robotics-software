@@ -54,6 +54,7 @@ public class DualBlackflyCamera
    private int imageHeight;
    private final FrequencyCalculator imagePublishRateCalculator = new FrequencyCalculator();
    private BytedecoImage blackflySourceImage;
+   private Mat colorConvertedRGBBlackflySourceImage;
    private Mat cameraMatrix;
    private Mat distortionCoefficients;
    private CameraPinholeBrown cameraPinholeBrown;
@@ -97,7 +98,7 @@ public class DualBlackflyCamera
       }
 
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
-      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
+      blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
       blackfly.startAcquiringImages();
 
       markersToTrack.add(new OpenCVArUcoMarker(0,0.2032));
@@ -119,7 +120,8 @@ public class DualBlackflyCamera
             numberOfBytesInFrame = imageWidth * imageHeight * 4;
             spinImageDataPointer = new BytePointer((long) numberOfBytesInFrame);
 
-            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC3);
+            blackflySourceImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1); // Bayer RG 8
+            colorConvertedRGBBlackflySourceImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
 
             // From OpenCV calibrateCamera with Blackfly serial number 17372478 with FE185C086HA-1 fisheye lens
             // Procedure conducted by Bhavyansh Mishra on 12/14/2021
@@ -159,10 +161,12 @@ public class DualBlackflyCamera
             blackflySourceImage.rewind();
             blackflySourceImage.changeAddress(spinImageDataPointer.address());
 
-//            opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
+            opencv_imgproc.cvtColor(blackflySourceImage.getBytedecoOpenCVMat(), colorConvertedRGBBlackflySourceImage, opencv_imgproc.COLOR_BayerRG2RGB);
 
-//            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
-            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
+//            opencv_core.flip(colorConvertedRGBBlackflySourceImage, colorConvertedRGBBlackflySourceImage, BytedecoOpenCVTools.FLIP_BOTH);
+
+//            opencv_calib3d.undistort(colorConvertedRGBBlackflySourceImage, undistortedImageMat, cameraMatrix, distortionCoefficients);
+            Mat postDistortionMat = colorConvertedRGBBlackflySourceImage;
 
             if (side == RobotSide.RIGHT)
             {
