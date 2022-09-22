@@ -102,7 +102,7 @@ public class RecoveryTransferState extends PushRecoveryState
 
 //      pelvisOrientationManager.setUpcomingFootstep(footsteps);
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      pelvisOrientationManager.initializeTransfer(transferToSide, stepTiming.getTransferTime(), stepTiming.getSwingTime());
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
