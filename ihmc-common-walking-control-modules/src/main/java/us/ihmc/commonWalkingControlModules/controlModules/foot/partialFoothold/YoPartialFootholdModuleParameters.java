@@ -136,7 +136,7 @@ public class YoPartialFootholdModuleParameters
       return transverseCoPHistoryStdDev;
    }
 
-   public boolean createParitalFootholdModule()
+   public boolean createPartialFootholdModule()
    {
       return createPartialFootholdModule;
    }
