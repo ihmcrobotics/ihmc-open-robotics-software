@@ -39,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class PartialFootholdCropperModuleTest
+public class FootholdCroppingModuleTest
 {
    protected RobotSide side;
    protected YoRegistry registry;
@@ -77,18 +77,18 @@ public class PartialFootholdCropperModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      FootholdRotationParameters parameters = new FootholdRotationParameters(registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(true), registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
       FrameConvexPolygon2DBasics croppedFootPolygon = createFootPolygon(soleFrame, footLength, footWidth, footWidth);
-      PartialFootholdCropperModule partialFootholdModule = new PartialFootholdCropperModule(side,
-                                                                                            soleFrame,
-                                                                                            defaultFootPolygons,
-                                                                                            parameters,
-                                                                                            dt,
-                                                                                            registry,
-                                                                                            null);
+      FootholdCroppingModule partialFootholdModule = new FootholdCroppingModule(side,
+                                                                                soleFrame,
+                                                                                defaultFootPolygons,
+                                                                                parameters,
+                                                                                dt,
+                                                                                registry,
+                                                                                null);
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
@@ -184,18 +184,18 @@ public class PartialFootholdCropperModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      FootholdRotationParameters parameters = new FootholdRotationParameters(registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(true), registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
       FrameConvexPolygon2DBasics croppedFootPolygon = createFootPolygon(soleFrame, footLength, footWidth, footWidth);
-      PartialFootholdCropperModule partialFootholdModule = new PartialFootholdCropperModule(side,
-                                                                                            soleFrame,
-                                                                                            defaultFootPolygons,
-                                                                                            parameters,
-                                                                                            dt,
-                                                                                            registry,
-                                                                                            null);
+      FootholdCroppingModule partialFootholdModule = new FootholdCroppingModule(side,
+                                                                                soleFrame,
+                                                                                defaultFootPolygons,
+                                                                                parameters,
+                                                                                dt,
+                                                                                registry,
+                                                                                null);
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);

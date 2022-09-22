@@ -40,7 +40,7 @@ public class VelocityRotationEdgeCalculator implements RotationEdgeCalculator
 
    public VelocityRotationEdgeCalculator(RobotSide side,
                                          MovingReferenceFrame soleFrame,
-                                         FootholdRotationParameters rotationParameters,
+                                         YoPartialFootholdModuleParameters rotationParameters,
                                          double dt,
                                          YoRegistry parentRegistry,
                                          YoGraphicsListRegistry graphicsListRegistry)
