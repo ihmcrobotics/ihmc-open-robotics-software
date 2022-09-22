@@ -12,7 +12,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.List;
 
-public class PartialFootholdCropperModule
+public class FootholdCroppingModule
 {
    private final FootholdCropper footholdCropper;
    private final CropVerifier cropVerifier;
@@ -23,13 +23,13 @@ public class PartialFootholdCropperModule
    private final FootRotationDetector rotationDetector;
    private final RotationEdgeCalculator edgeCalculator;
 
-   public PartialFootholdCropperModule(RobotSide side,
-                                       MovingReferenceFrame soleFrame,
-                                       List<? extends FramePoint2DReadOnly> defaultContactPoints,
-                                       YoPartialFootholdModuleParameters rotationParameters,
-                                       double dt,
-                                       YoRegistry parentRegistry,
-                                       YoGraphicsListRegistry graphicsRegistry)
+   public FootholdCroppingModule(RobotSide side,
+                                 MovingReferenceFrame soleFrame,
+                                 List<? extends FramePoint2DReadOnly> defaultContactPoints,
+                                 YoPartialFootholdModuleParameters rotationParameters,
+                                 double dt,
+                                 YoRegistry parentRegistry,
+                                 YoGraphicsListRegistry graphicsRegistry)
    {
       YoRegistry registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       parentRegistry.addChild(registry);
@@ -39,8 +39,8 @@ public class PartialFootholdCropperModule
       rotationDetector = new CombinedFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       edgeCalculator = new CombinedRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
 
-      createPartialFootholdModule = rotationParameters.createParitalFootholdModule();
-      if (rotationParameters.createParitalFootholdModule())
+      createPartialFootholdModule = rotationParameters.createPartialFootholdModule();
+      if (rotationParameters.createPartialFootholdModule())
       {
          cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters.getFootholdCroppingParameters(), registry, null);
          footholdCropper = new FootholdCropper(side.getLowerCaseName(),
