@@ -22,12 +22,13 @@ cd java
 curl -L https://github.com/bytedeco/javacpp/releases/download/$JAVACPP_VERSION/javacpp-platform-$JAVACPP_VERSION-bin.zip -o javacpp-platform-$JAVACPP_VERSION-bin.zip
 unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 
-java -jar javacpp.jar us/ihmc/perception/slamWrapper/SlamWrapperInfoMapper.java
+java -jar javacpp.jar org/bytedeco/slamWrapper/presets/SlamWrapperInfoMapper.java
 # This will generate the jni shared library and place it into the classpath resources dir
-java -jar javacpp.jar SlamWrapper.java -d ../../../resources
+java -jar javacpp.jar org/bytedeco/slamWrapper/SlamWrapper.java -d ../../../resources
 
 # Clean old generated Java code
 rm -rf ../../../generated-java/*
 
 # Copy newly generated Java into generated-java
-cp *.java ../../../generated-java
+mkdir -p ../../../generated-java/org/bytedeco/slamWrapper
+cp -r org/bytedeco/slamWrapper/SlamWrapper.java ../../../generated-java/org/bytedeco/slamWrapper
