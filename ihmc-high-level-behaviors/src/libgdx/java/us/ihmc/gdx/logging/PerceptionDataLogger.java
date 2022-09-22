@@ -2,6 +2,7 @@ package us.ihmc.gdx.logging;
 
 import controller_msgs.msg.dds.BigVideoPacket;
 import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.bytedeco.hdf5.H5File;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -15,7 +16,9 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.HDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
@@ -51,16 +54,30 @@ public class PerceptionDataLogger
       RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_data_logger");
 
       new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), ROS2QosProfile.BEST_EFFORT(), this::logDepthMap);
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
 
       new IHMCROS2Callback<>(ros2Node,
                              ROS2Tools.OUSTER_LIDAR.withType(FusedSensorHeadPointCloudMessage.class),
                              ROS2QosProfile.BEST_EFFORT(),
                              this::logFusedOusterPointCloud);
+
+      ROS2Topic<BigVideoPacket> blackflyTopicRight = ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT);
+      new IHMCROS2Callback<>(ros2Node, blackflyTopicRight, ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
+
+      ROS2Topic<BigVideoPacket> blackflyTopicLeft = ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT);
+      new IHMCROS2Callback<>(ros2Node, blackflyTopicLeft, ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
+
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
+   }
+
+   public void logRobotConfigurationData(RobotConfigurationData data)
+   {
+
    }
 
    public void logFusedOusterPointCloud(FusedSensorHeadPointCloudMessage message)
    {
-      //        message.
+
    }
 
    public void logDepthMap(BigVideoPacket packet)
@@ -72,7 +89,7 @@ public class PerceptionDataLogger
 
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
    {
-      IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
+      IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
       imageEncodedTByteArrayList.toArray(messageDataHeapArray);
       messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
       messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
@@ -84,6 +101,13 @@ public class PerceptionDataLogger
 
       //        updateImageDimensions(mat, inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
       opencv_imgproc.cvtColor(inputYUVI420Mat, mat, opencv_imgproc.COLOR_YUV2RGBA_I420);
+   }
+
+   public void logBigVideoPacket(BigVideoPacket packet)
+   {
+      Mat mat = new Mat(packet.getImageHeight(), packet.getImageHeight(), opencv_core.CV_8UC3);
+      convertBigVideoPacketToMat(packet, mat);
+      logImage(mat);
    }
 
    public void logImage(Mat mat)
