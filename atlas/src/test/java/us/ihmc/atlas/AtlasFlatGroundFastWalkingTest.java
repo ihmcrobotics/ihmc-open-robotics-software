@@ -106,21 +106,9 @@ public class AtlasFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalkingT
                      }
 
                      @Override
-                     public double getECMPProximityForToeOff()
-                     {
-                        return 0.02;
-                     }
-
-                     @Override
                      public double getICPProximityForToeOff()
                      {
                         return 0.02;
-                     }
-
-                     @Override
-                     public double getICPPercentOfStanceForSSToeOff()
-                     {
-                        return 0.20;
                      }
                   };
                }
