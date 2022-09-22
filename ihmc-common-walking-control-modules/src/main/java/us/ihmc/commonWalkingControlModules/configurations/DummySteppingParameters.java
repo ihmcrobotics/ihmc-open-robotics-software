@@ -60,21 +60,9 @@ public class DummySteppingParameters implements SteppingParameters
    }
 
    @Override
-   public double getFootstepArea()
-   {
-      return (getToeWidth() + getFootWidth()) * getFootLength() / 2.0;
-   }
-
-   @Override
    public double getInPlaceWidth()
    {
       return 0.25;
-   }
-
-   @Override
-   public double getDesiredStepForward()
-   {
-      return 0.5; //0.35;
    }
 
    @Override
@@ -120,18 +108,6 @@ public class DummySteppingParameters implements SteppingParameters
    }
 
    @Override
-   public double getMinAreaPercentForValidFootstep()
-   {
-      return 0.5;
-   }
-
-   @Override
-   public double getDangerAreaPercentForValidFootstep()
-   {
-      return 0.75;
-   }
-
-   @Override
    public double getMinStepWidth()
    {
       return 0.15;
@@ -141,12 +117,6 @@ public class DummySteppingParameters implements SteppingParameters
    public double getMaxStepWidth()
    {
       return 0.6; //0.4;
-   }
-
-   @Override
-   public double getStepPitch()
-   {
-      return 0.0;
    }
 
    @Override
