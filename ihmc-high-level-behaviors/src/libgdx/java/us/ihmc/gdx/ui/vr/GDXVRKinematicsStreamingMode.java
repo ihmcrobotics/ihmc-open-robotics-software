@@ -74,7 +74,7 @@ public class GDXVRKinematicsStreamingMode
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
    private final TrajectoryRecordReplay<Double> trajRecorder = new TrajectoryRecordReplay<>("");
-   private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\1.csv");
+   private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadia");
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
 //   private final ImString replayPath = new ImString();
@@ -324,18 +324,14 @@ public class GDXVRKinematicsStreamingMode
          setRecording(enablerRecording.get());
       }
       ImGui.sameLine();
-      ImGui.inputText(labels.get("filePath record"), recordPath);
-//      if (ImGui.checkbox(labels.get("Replay motion"), enabled))
+      ImGui.inputText(labels.get("Record folder"), recordPath);
+//      ImGui.text("Start/Stop playing: Press Right B button");
+//      if (ImGui.checkbox(labels.get("Replay motion"), enablerReplay))
 //      {
-//         sleepToolbox();
+//         setReplay(enablerReplay.get());
 //      }
 //      ImGui.sameLine();
-//      if (ImGui.button(labels.get("Play")))
-//      {
-//         wakeUpToolbox();
-//      }
-//      ImGui.sameLine();
-//      ImGui.inputText(labels.get("filePath replay"), replayPath);
+//      ImGui.inputText(labels.get("Replay file"), replayPath);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
