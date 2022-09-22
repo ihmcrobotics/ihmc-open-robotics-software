@@ -1,11 +1,15 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.type.ImFloat;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXModelInstanceScaler;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.log.LogTools;
 
 public class GDXModelScalingDemo
 {
@@ -27,8 +31,13 @@ public class GDXModelScalingDemo
          {
             baseUI.create();
 
-            scaledCouchModel = new GDXModelInstanceScaler("Couch/Couch.g3dj", 1.0);
+            scaledCouchModel = new GDXModelInstanceScaler("right_wrist_roll_gripper.g3dj", 1.0);
             baseUI.getPrimaryScene().addRenderableProvider(scaledCouchModel::getRenderables);
+
+            ModelInstance sphere = GDXModelBuilder.createSphere(0.015f, Color.RED);
+            GDXTools.toGDX(scaledCouchModel.getWholeModelCentroid(), sphere.transform);
+            LogTools.info(scaledCouchModel.getWholeModelCentroid());
+            baseUI.getPrimaryScene().addModelInstance(sphere);
 
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-5.0, 5.0, 3.0);
 
