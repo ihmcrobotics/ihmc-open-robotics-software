@@ -69,8 +69,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final ReferenceFrame nextSoleZUpFrame;
    private final ReferenceFrame nextSoleFrame;
 
-   private final PelvisOffsetTrajectoryWhileWalking offsetTrajectoryWhileWalking;
-
    private final BooleanProvider useManualRotations = new BooleanParameter("UseManualPelvisRotation", registry, false);
    private final DoubleProvider desiredYawOffset = new DoubleParameter("UserDesiredYawOffset", registry, 0.0);
    private final DoubleProvider desiredPitchOffset = new DoubleParameter("UserDesiredPitchOffset", registry, 0.0);
@@ -104,11 +102,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
             transformToParent.getRotation().set(desiredPelvisOrientation);
          }
       };
-
-      if (pelvisOffsetWhileWalkingParameters != null)
-         offsetTrajectoryWhileWalking = new PelvisOffsetTrajectoryWhileWalking(controllerToolbox, pelvisOffsetWhileWalkingParameters, registry);
-      else
-         offsetTrajectoryWhileWalking = null;
 
       nextSoleFrame = new ReferenceFrame("nextSoleFrame", worldFrame)
       {
@@ -191,12 +184,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
       tempAngularAcceleration.changeFrame(worldFrame);
-
-      if (offsetTrajectoryWhileWalking != null)
-      {
-         offsetTrajectoryWhileWalking.update();
-         offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
-      }
 
       desiredPelvisOrientationWithOffset.setIncludingFrame(tempOrientation);
       desiredPelvisAngularVelocity.add(tempAngularVelocity);
@@ -336,9 +323,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
 
       nextSoleFrame.update();
       nextSoleZUpFrame.update();
-
-      if (offsetTrajectoryWhileWalking != null)
-         offsetTrajectoryWhileWalking.setUpcomingFootstep(upcomingFootstep);
    }
 
    public void setTrajectoryFromFootstep()
@@ -372,22 +356,16 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    public void initializeStanding()
    {
       setToHoldCurrentDesiredInMidFeetZUpFrame();
-      if (offsetTrajectoryWhileWalking != null)
-         offsetTrajectoryWhileWalking.initializeStanding();
    }
 
    public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
    {
       initializeTiming();
-      if (offsetTrajectoryWhileWalking != null)
-         offsetTrajectoryWhileWalking.initializeTransfer(transferToSide, transferDuration, swingDuration);
    }
 
    public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
    {
       initializeTiming();
-      if (offsetTrajectoryWhileWalking != null)
-         offsetTrajectoryWhileWalking.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
    }
 
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
