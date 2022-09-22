@@ -26,10 +26,10 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    {
       super(panelName);
       loader = new PerceptionDataLoader(PERCEPTION_LOG_FILE);
-      topicNames = HDF5Tools.getTopicNames(loader.getH5File());
+      topicNames = HDF5Tools.getTopicNames(loader.getH5().getFile());
       for (String topic : topicNames)
       {
-         topicObjectCounts.add(HDF5Tools.getCount(loader.getH5File(), topic));
+         topicObjectCounts.add((int) loader.getH5().getCount(topic));
       }
       setRenderMethod(this::renderImguiWidgets);
    }

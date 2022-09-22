@@ -4,13 +4,14 @@ import org.bytedeco.hdf5.H5File;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.perception.HDF5Manager;
 import us.ihmc.perception.HDF5Tools;
 
 import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
 
 public class PerceptionDataLoader
 {
-   private H5File h5File;
+   private HDF5Manager h5;
 
    private int index = 0;
 
@@ -19,38 +20,25 @@ public class PerceptionDataLoader
    public PerceptionDataLoader(String filePath)
    {
       this.filePath = filePath;
-      h5File = new H5File(filePath, H5F_ACC_RDONLY);
+      h5 = new HDF5Manager(filePath, H5F_ACC_RDONLY);
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
    {
-      HDF5Tools.loadPointCloud(h5File, points, index);
+      HDF5Tools.loadPointCloud(h5.getGroup(namespace), index, points);
    }
 
-   public void loadImageRGB8(String namespace, int index, Mat mat)
+   public void loadImage(String namespace, int index, Mat mat)
    {
-      HDF5Tools.loadDepthMap(h5File, index, mat);
-   }
-
-   public void loadImageR16(String namespace, int index, Mat mat)
-   {
-   }
-
-   public int getCount(String namespace)
-   {
-      return HDF5Tools.getCount(h5File, namespace);
+      HDF5Tools.loadImage(h5.getGroup(namespace), index, mat);
    }
 
    public String getFilePath() {
       return filePath;
    }
 
-   public void setFilePath(String filePath) {
-      this.filePath = filePath;
-   }
-
-   public H5File getH5File() {
-      return h5File;
+   public HDF5Manager getH5() {
+      return h5;
    }
 
    public static void main(String[] args)
@@ -61,7 +49,7 @@ public class PerceptionDataLoader
       //      executorService.scheduleAtFixedRate(loader::loadNextDataFrame, 0, 100, TimeUnit.MILLISECONDS);
 
       RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(200000, Point3D32::new);
-      for (int i = 0; i < loader.getCount("/os_cloud_node/points"); i++)
+      for (int i = 0; i < loader.getH5().getCount("/os_cloud_node/points"); i++)
       {
          loader.loadPointCloud("os_cloud_node/points", i, points);
       }
