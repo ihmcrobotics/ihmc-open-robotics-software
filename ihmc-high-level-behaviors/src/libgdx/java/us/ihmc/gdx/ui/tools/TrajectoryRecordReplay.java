@@ -3,8 +3,10 @@ package us.ihmc.gdx.ui.tools;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -24,7 +26,7 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public MutablePair<Boolean, T[]> play(){
       if (timeStepReplay<1)
-         dataMatrix = this.readCSV();
+         this.readCSV();
       MutablePair<Boolean, T[]> values = new MutablePair<>(true, dataMatrix.get(timeStepReplay));
       if (timeStepReplay>=dataMatrix.size()-2)
       {
@@ -40,8 +42,9 @@ public class TrajectoryRecordReplay<T extends Number>
    public void record(T[] values)
    {
       savedRecording=false;
-      dataMatrix.add(values);
-      System.out.println("" + values[2]);
+      T[] localValues = (T[]) new Double[values.length];
+      System.arraycopy(values, 0, localValues, 0, localValues.length);
+      dataMatrix.add(localValues);
    }
 
    public void saveRecording(){
@@ -50,7 +53,7 @@ public class TrajectoryRecordReplay<T extends Number>
       savedRecording = true;
    }
 
-   private ArrayList<T[]> readCSV()
+   private void readCSV()
    {
       try {
          BufferedReader fileReader = new BufferedReader(new FileReader(filePath));
@@ -66,7 +69,6 @@ public class TrajectoryRecordReplay<T extends Number>
       catch (IOException e) {
          e.printStackTrace();
       }
-      return dataMatrix;
    }
 
    private void reset(){
@@ -77,14 +79,15 @@ public class TrajectoryRecordReplay<T extends Number>
    private void writeCSV(ArrayList<T[]> dataMatrix)
    {
       List<String[]> dataLines = new ArrayList<>();
-      String[] sVals = new String[dataMatrix.get(0).length];
       for (T[] d : dataMatrix)
       {
+         String[] sVals = new String[dataMatrix.get(0).length];
          Arrays.setAll(sVals, j -> "" + d[j]);
          dataLines.add(sVals);
       }
 
-      File csvFile = new File(filePath);
+      String fileName = new SimpleDateFormat("yyyyMMddHHmm'.csv'").format(new Date());
+      File csvFile = new File(filePath+fileName);
       try (PrintWriter pw = new PrintWriter(csvFile)) {
          dataLines.stream()
                   .map(this::convertToCSV)
