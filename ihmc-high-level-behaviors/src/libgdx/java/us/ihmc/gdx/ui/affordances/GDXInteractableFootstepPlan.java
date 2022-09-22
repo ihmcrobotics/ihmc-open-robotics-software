@@ -185,7 +185,7 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
       for (GDXInteractableFootstep step : footsteps)
       {
          generateFootStepDataMessage(messageList, step);
-         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+         messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
          messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
       communicationHelper.publishToController(messageList);

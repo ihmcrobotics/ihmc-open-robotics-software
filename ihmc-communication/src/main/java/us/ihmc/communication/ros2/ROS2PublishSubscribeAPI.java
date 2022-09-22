@@ -16,6 +16,8 @@ public interface ROS2PublishSubscribeAPI
 
    public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic);
 
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter);
+
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic);
 
    public Notification subscribeViaNotification(ROS2Topic<Empty> topic);
