@@ -68,11 +68,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final ReferenceFrame nextSoleZUpFrame;
    private final ReferenceFrame nextSoleFrame;
 
-   private final BooleanProvider useManualRotations = new BooleanParameter("UseManualPelvisRotation", registry, false);
-   private final DoubleProvider desiredYawOffset = new DoubleParameter("UserDesiredYawOffset", registry, 0.0);
-   private final DoubleProvider desiredPitchOffset = new DoubleParameter("UserDesiredPitchOffset", registry, 0.0);
-   private final DoubleProvider desiredRollOffset = new DoubleParameter("UserDesiredRollOffset", registry, 0.0);
-
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains,
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              YoRegistry parentRegistry)
@@ -172,13 +167,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
       pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
       pelvisOrientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
-
-      if (useManualRotations.getValue())
-      {
-         tempOrientation.prependRollRotation(desiredRollOffset.getValue());
-         tempOrientation.prependPitchRotation(desiredPitchOffset.getValue());
-         tempOrientation.prependYawRotation(desiredYawOffset.getValue());
-      }
 
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
