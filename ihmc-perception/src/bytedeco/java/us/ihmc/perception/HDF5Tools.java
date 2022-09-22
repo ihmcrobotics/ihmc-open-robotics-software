@@ -5,7 +5,9 @@ import org.bytedeco.hdf5.*;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 import java.util.ArrayList;
 
@@ -102,8 +104,8 @@ public class HDF5Tools
 
    public static int getCount(H5File h5File, String namespace)
    {
-      Group dataset = h5File.openGroup(namespace);
-      return (int) dataset.getNumObjs();
+      Group group = h5File.openGroup(namespace);
+      return (int) group.getNumObjs();
    }
 
    public static int getCount(Group group)
@@ -131,6 +133,21 @@ public class HDF5Tools
       return names;
    }
 
+   public static void storeFloatArray(H5File file, String namespace, float[] array)
+   {
+
+   }
+
+   public static void storePoint3D(H5File file, String namespace, Point3D point)
+   {
+
+   }
+
+   public static void storeQuaternion(H5File file, String namespace, Quaternion orientation)
+   {
+
+   }
+
    public static void exploreH5(Group group, ArrayList<String> names, String prefix)
    {
       int count = 0;
@@ -142,12 +159,12 @@ public class HDF5Tools
             Group grp = group.openGroup(grpName);
             exploreH5(grp, names, prefix + "/" + grpName);
          }
-//         if (group.childObjType(objPtr) == H5O_TYPE_DATASET) {
-//            String dsName = group.getObjnameByIdx(i).getString();
-//            System.out.println("Dataset: " + dsName + "\t" + "Prefix: " + prefix);
-//         }
+         //         if (group.childObjType(objPtr) == H5O_TYPE_DATASET) {
+         //            String dsName = group.getObjnameByIdx(i).getString();
+         //            System.out.println("Dataset: " + dsName + "\t" + "Prefix: " + prefix);
+         //         }
 
-//         System.out.println("ExploreH5: " + group.getObjnameByIdx(i).getString());
+         //         System.out.println("ExploreH5: " + group.getObjnameByIdx(i).getString());
       }
 
       if(count == 0)
