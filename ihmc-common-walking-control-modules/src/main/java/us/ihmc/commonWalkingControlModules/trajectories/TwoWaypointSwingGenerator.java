@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,8 +26,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static us.ihmc.humanoidRobotics.footstep.Footstep.maxNumberOfSwingWaypoints;
 
 public class TwoWaypointSwingGenerator implements SwingGenerator
 {
@@ -87,6 +86,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoBoolean needToAdjustedSwingForSelfCollision;
    private final YoBoolean crossOverStep;
 
+   private final int maxNumberOfSwingWaypoints;
    private boolean visualize = true;
 
    public TwoWaypointSwingGenerator(String namePrefix,
@@ -105,10 +105,45 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
                                     double maxSwingHeight,
                                     double defaultSwingHeight,
                                     double customWaypointAngleThreshold,
+                                    int maxNumberOfSwingWaypoints,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, maxNumberOfSwingWaypoints, worldFrame, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public TwoWaypointSwingGenerator(String namePrefix,
+                                    double minSwingHeight,
+                                    double maxSwingHeight,
+                                    double defaultSwingHeight,
+                                    double customWaypointAngleThreshold,
                                     ReferenceFrame trajectoryFrame,
                                     YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(namePrefix,
+           minSwingHeight,
+           maxSwingHeight,
+           defaultSwingHeight,
+           customWaypointAngleThreshold,
+           Footstep.maxNumberOfSwingWaypoints,
+           trajectoryFrame,
+           parentRegistry,
+           yoGraphicsListRegistry);
+   }
+
+   public TwoWaypointSwingGenerator(String namePrefix,
+                                    double minSwingHeight,
+                                    double maxSwingHeight,
+                                    double defaultSwingHeight,
+                                    double customWaypointAngleThreshold,
+                                    int maxNumberOfSwingWaypoints,
+                                    ReferenceFrame trajectoryFrame,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.maxNumberOfSwingWaypoints = maxNumberOfSwingWaypoints;
+
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
