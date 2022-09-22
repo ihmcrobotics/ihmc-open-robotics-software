@@ -21,6 +21,8 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+import java.util.Set;
+
 public class GDXInteractableFrameModel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -64,8 +66,7 @@ public class GDXInteractableFrameModel
       selectablePose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);
       panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
-      panel3D.getScene().addRenderableProvider(this::getModelRenderables, GDXSceneLevel.MODEL);
-      panel3D.getScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      panel3D.getScene().addRenderableProvider(this::getRenderables);
       panel3D.addImGuiOverlayAddition(this::renderTooltipsAndContextMenu);
    }
 
@@ -120,18 +121,20 @@ public class GDXInteractableFrameModel
       }
    }
 
-   private void getModelRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<GDXSceneLevel> sceneLevels)
    {
-      modelInstance.getRenderables(renderables, pool);
-   }
-
-   private void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (isMouseHovering || selectablePose3DGizmo.isSelected())
+      if (sceneLevels.contains(GDXSceneLevel.MODEL) || sceneLevels.contains(GDXSceneLevel.VIRTUAL))
       {
-         highlightModelInstance.getRenderables(renderables, pool);
+         modelInstance.getRenderables(renderables, pool);
       }
-      selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      if (sceneLevels.contains(GDXSceneLevel.VIRTUAL))
+      {
+         if (isMouseHovering || selectablePose3DGizmo.isSelected())
+         {
+            highlightModelInstance.getRenderables(renderables, pool);
+         }
+         selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      }
    }
 
    public ReferenceFrame getReferenceFrame()

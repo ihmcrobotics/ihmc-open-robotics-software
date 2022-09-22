@@ -92,7 +92,7 @@ public class NettyOuster
 
                if (dataOkay)
                {
-                  for (int k = 0; k < 64; k++)
+                  for (int k = 0; k < pixelsPerColumn; k++)
                   {
                      float rangeScaled = range[k] / 1000.0F;
                      if (rangeScaled > 30.0)
@@ -159,6 +159,8 @@ public class NettyOuster
          columnsPerFrame = root.get("columns_per_frame").asInt();
          columnsPerPacket = root.get("columns_per_packet").asInt();
          pixelShift = new int[pixelsPerColumn];
+
+         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, Columns Per Packet: {}", pixelsPerColumn, columnsPerFrame, columnsPerPacket);
 
          JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
          for (int i = 0; i < pixelsPerColumn; i++)

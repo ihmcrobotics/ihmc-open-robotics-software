@@ -161,14 +161,15 @@ public class DualBlackflyCamera
 
 //            opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
 
-            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
+//            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
+            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
 
             if (side == RobotSide.RIGHT)
             {
                ReferenceFrame cameraFrame = syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame();
                if (arUcoMarkerDetection == null)
                {
-                  undistortedImage = new BytedecoImage(undistortedImageMat);
+                  undistortedImage = new BytedecoImage(postDistortionMat);
 
                   arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
                   arUcoMarkerDetection.create(undistortedImage, cameraPinholeBrown, cameraFrame);
@@ -178,8 +179,8 @@ public class DualBlackflyCamera
 
                arUcoMarkerDetection.update();
 
-               arUcoMarkerDetection.drawDetectedMarkers(undistortedImageMat);
-               arUcoMarkerDetection.drawRejectedPoints(undistortedImageMat);
+               arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
+               arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
 
                SwapReference<Mat> ids = arUcoMarkerDetection.getIds();
                arUcoMarkerPoses.getMarkerId().clear();
@@ -205,7 +206,7 @@ public class DualBlackflyCamera
             }
 
             convertColorDuration.start();
-            opencv_imgproc.cvtColor(undistortedImageMat, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            opencv_imgproc.cvtColor(postDistortionMat, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
             convertColorDuration.suspend();
 
             encodingDuration.start();
