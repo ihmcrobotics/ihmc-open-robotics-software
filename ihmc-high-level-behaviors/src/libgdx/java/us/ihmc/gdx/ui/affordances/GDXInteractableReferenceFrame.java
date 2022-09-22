@@ -13,7 +13,6 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.collidables.GDXCoordinateFrameIntersection;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
-import us.ihmc.gdx.tools.GDXModelInstanceScaler;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXInteractableReferenceFrame
@@ -25,7 +24,6 @@ public class GDXInteractableReferenceFrame
    private GDXReferenceFrameGraphic referenceFrameGraphic;
    private GDXReferenceFrameGraphic highlightReferenceFrameGraphic;
    private GDXCoordinateFrameIntersection coordinateFrameIntersection;
-   private GDXModelInstanceScaler highlightReferenceFrameGraphicScaler;
    private boolean isCoordinateFramePickSelected;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
@@ -42,10 +40,8 @@ public class GDXInteractableReferenceFrame
       representativeReferenceFrame = referenceFrameToRepresent;
       transformToParent = transformToParentToModify;
       referenceFrameGraphic = new GDXReferenceFrameGraphic(length);
-      highlightReferenceFrameGraphic = new GDXReferenceFrameGraphic(length);
+      highlightReferenceFrameGraphic = new GDXReferenceFrameGraphic(length + 0.001);
       coordinateFrameIntersection = new GDXCoordinateFrameIntersection(length);
-      highlightReferenceFrameGraphicScaler = new GDXModelInstanceScaler(highlightReferenceFrameGraphic);
-      highlightReferenceFrameGraphicScaler.scale(1.01);
       GDXTools.setTransparency(highlightReferenceFrameGraphic, 0.5f);
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
