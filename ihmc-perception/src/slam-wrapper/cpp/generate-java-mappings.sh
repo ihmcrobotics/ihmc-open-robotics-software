@@ -12,9 +12,13 @@ make install
 # https://github.com/bytedeco/javacpp/releases
 JAVACPP_VERSION=1.5.7
 
+# Copy all Java code from the root of slam-wrapper into the build directory
 cp -r ../../java/ .
+
+# Move into the Java directory; javacpp.jar needs to reside here
 cd java
 
+# Download and unzip javacpp into the java source directory
 curl -L https://github.com/bytedeco/javacpp/releases/download/$JAVACPP_VERSION/javacpp-platform-$JAVACPP_VERSION-bin.zip -o javacpp-platform-$JAVACPP_VERSION-bin.zip
 unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 
