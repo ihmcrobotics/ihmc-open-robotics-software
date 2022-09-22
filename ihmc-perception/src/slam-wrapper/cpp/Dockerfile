@@ -53,6 +53,6 @@ RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:LD_LIBRARY_PATH' >> /root/.bashr
 
 # Ensure eigen is available at /usr/include/Eigen
 # Ubuntu installs the headers at /usr/include/eigen3/Eigen
-RUN ln -s /usr/include/eigen3/ /usr/include/Eigen
+RUN ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 
 WORKDIR /root/dev
