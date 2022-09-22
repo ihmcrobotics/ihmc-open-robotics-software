@@ -25,7 +25,7 @@ mainDependencies {
 
    api("us.ihmc:ihmc-native-library-loader:1.3.1")
    api("us.ihmc:euclid:0.19.0")
-   api("us.ihmc:simulation-construction-set:0.22.9")
+   api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-communication:source")
