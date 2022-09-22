@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testNoPreferredConfiguration()
    {
-      Random random = new Random();//2344332);
+      Random random = new Random(2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -104,7 +105,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testWithPreferredConfiguration()
    {
-      Random random = new Random();//2344332);
+      Random random = new Random(2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -183,11 +184,95 @@ public class IMUBasedJointPositionEstimatorTest
          }
       }
    }
+   
+   @Test
+   public void testWithPreferredConfigurationWeighted()
+   {
+      Random random = new Random(2344332);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         List<OneDoFJointBasics> joints = nextRevoluteChain(random, Axis3D.Z, Axis3D.Y, Axis3D.X);
+         RigidBodyBasics base = joints.get(0).getPredecessor();
+         RigidBodyBasics endEffector = joints.get(joints.size() - 1).getSuccessor();
+
+         IMUSensor parentIMU = nextIMU(random, base, false);
+         parentIMU.setOrientationMeasurement(new YawPitchRoll(EuclidCoreRandomTools.nextDouble(random, Math.PI), 0, 0));
+         IMUSensor childIMU = nextIMU(random, endEffector, true);
+         IMUBasedJointPositionEstimator estimator = new IMUBasedJointPositionEstimator("IMUEstimator", parentIMU, childIMU, null);
+         IMUBasedJointPositionEstimator estimatorWeighted = new IMUBasedJointPositionEstimator("IMUEstimator", parentIMU, childIMU, null);
+         estimatorWeighted.setPreferredQWeightPerJoint(joints.get(2), 0.0);
+         
+         MultiBodySystemRandomTools.nextState(random, JointStateType.CONFIGURATION, joints);
+         base.updateFramesRecursively();
+
+         ReferenceFrame childIMUFrame = childIMU.getMeasurementFrame();
+         ReferenceFrame parentIMUFrame = parentIMU.getMeasurementFrame();
+         Quaternion childIMUOrientation = new Quaternion(childIMUFrame.getTransformToDesiredFrame(parentIMUFrame).getRotation());
+         childIMUOrientation.preMultiply(parentIMU.getOrientationMeasurement());
+         // We introduce misalignment between the 2 IMUs
+         childIMUOrientation.prependYawRotation(EuclidCoreRandomTools.nextDouble(random, Math.PI));
+         childIMU.setOrientationMeasurement(childIMUOrientation);
+
+         double[] qTarget = joints.stream().mapToDouble(OneDoFJointReadOnly::getQ).toArray();
+         double[] qError = {EuclidCoreRandomTools.nextDouble(random, 0.05),
+                            EuclidCoreRandomTools.nextDouble(random, 0.05),
+                            EuclidCoreRandomTools.nextDouble(random, 0.05)};
+         double[] qPerturbed = new double[joints.size()];
+
+         for (int j = 0; j < joints.size(); j++)
+         {
+            qPerturbed[j] = qTarget[j] + qError[j];
+            joints.get(j).setQ(qPerturbed[j]);
+         }
+         base.updateFramesRecursively();
+         estimatorWeighted.setPreferredJointPositions(joint -> qTarget[joints.indexOf(joint)]);
+         estimator.compute();
+         estimatorWeighted.compute();
+
+         double[] qCorrection = estimator.getQCorrection().data;
+         double[] qCorrectionWeighted = estimatorWeighted.getQCorrection().data;
+         double[] qEst = new double[qCorrection.length];
+         double[] qEstWeighted = new double[qCorrection.length];
+         for (int j = 0; j < joints.size(); j++)
+         {
+            qEst[j] = qPerturbed[j] + qCorrection[j];
+            qEstWeighted[j] = qPerturbed[j] + qCorrectionWeighted[j];
+         }
+
+         try
+         {
+            assertNotEquals(qCorrection[0], qCorrectionWeighted[0], 1.0e-5, "Diff Not Present");
+            assertEquals(qCorrection[2], qCorrectionWeighted[2], 2.0e-3, "Diff: " + Math.abs(qTarget[1] - (qPerturbed[1] + qCorrection[1]))); 
+         }
+         catch (AssertionFailedError e)
+         {
+            System.out.println("Iteration: " + i);
+            System.out.println("qTarget: " + Arrays.toString(qTarget));
+            System.out.println("qError : " + Arrays.toString(qError));
+            System.out.println("qCorr  : " + Arrays.toString(qCorrection));
+            System.out.println("qEst   : " + Arrays.toString(qEst));
+            System.out.println("parent : " + parentIMU.getOrientationMeasurement().toStringAsYawPitchRoll());
+            System.out.println("child  : " + childIMU.getOrientationMeasurement().toStringAsYawPitchRoll());
+            System.out.println("primary   Jacobian: " + estimator.getPrimaryJacobian());
+            System.out.println("preferred Jacobian: " + estimator.getPreferredJacobian());
+            System.out.println("preferred Correction: " + estimator.getQPreferred());
+            
+            System.out.println("qCorrWeighted  : " + Arrays.toString(qCorrectionWeighted));
+            System.out.println("qEstWeighted   : " + Arrays.toString(qEstWeighted));
+            System.out.println("primary   JacobianWeighted: " + estimatorWeighted.getPrimaryJacobian());
+            System.out.println("preferred JacobianWeighted: " + estimatorWeighted.getPreferredJacobian());
+            System.out.println("preferred Weights: " + estimatorWeighted.getPreferredWeightMatrix());
+            System.out.println("preferred CorrectionWeighted: " + estimatorWeighted.getQPreferred());
+            throw e;
+         }
+      }
+   }
 
    @Test
    public void testWithPreferredConfigurationCorruptedKinematics()
    {
-      Random random = new Random();//2344332);
+      Random random = new Random(2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -270,7 +355,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testConvergenceNoPreferredConfiguration()
    {
-      Random random = new Random();//2344332);
+      Random random = new Random(2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -425,7 +510,7 @@ public class IMUBasedJointPositionEstimatorTest
    @Test
    public void testConvergenceWithPreferredConfiguration()
    {
-      Random random = new Random();//2344332);
+      Random random = new Random(2344332);
 
       for (int i = 0; i < ITERATIONS; i++)
       {

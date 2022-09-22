@@ -195,7 +195,7 @@ public class IMUBasedJointPositionEstimator
          preferredWeightMatrix.zero();
          for (int i = 0; i < joints.length; i++)
          {
-            primaryWeightMatrix.set(i, i, preferredWeight[i].getDoubleValue());
+            preferredWeightMatrix.set(i, i, preferredWeight[i].getDoubleValue());
          }
 
          addObjective(primaryWeightMatrix, primaryJacobian, errorEJMLSubspace, solverInput_H, solverInput_f);
@@ -232,11 +232,11 @@ public class IMUBasedJointPositionEstimator
       CommonOps_DDRM.mult(temp_Jt, weight, temp_JtW);
 
       // Compute: H += J^T W J
-      CommonOps_DDRM.mult(temp_Jt, taskJacobian, temp_H);
+      CommonOps_DDRM.mult(temp_JtW, taskJacobian, temp_H);
       CommonOps_DDRM.addEquals(H, temp_H);
 
       // Compute: f += - b^T W J 
-      CommonOps_DDRM.mult(temp_Jt, taskObjective, temp_f);
+      CommonOps_DDRM.mult(temp_JtW, taskObjective, temp_f);
       CommonOps_DDRM.subtractEquals(f, temp_f);
    }
 
@@ -290,6 +290,11 @@ public class IMUBasedJointPositionEstimator
    public DMatrixRMaj getPreferredJacobian()
    {
       return preferredJacobian;
+   }
+
+   public DMatrixRMaj getPreferredWeightMatrix()
+   {
+      return preferredWeightMatrix;
    }
 
    public void setPreferredQWeightPerJoint(OneDoFJointBasics joint, double desiredWeight)
