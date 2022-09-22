@@ -39,6 +39,15 @@ public class ControllerTask extends HumanoidRobotControlTask
    }
 
    @Override
+   protected boolean initialize()
+   {
+      // For when the task gets reset, so we can observe when it gets triggered.
+      timer.reset();
+      ticksBehindScheduled.set(0);
+      return super.initialize();
+   }
+
+   @Override
    protected void execute()
    {
       timer.start();

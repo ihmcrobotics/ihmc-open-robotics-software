@@ -107,21 +107,9 @@ public class AtlasToeOffTest extends AvatarToeOffTest
                             }
 
                             @Override
-                            public double getECMPProximityForToeOff()
-                            {
-                                return 0.04;
-                            }
-
-                            @Override
                             public double getICPProximityForToeOff()
                             {
                                 return 0.0;
-                            }
-
-                            @Override
-                            public double getICPPercentOfStanceForSSToeOff()
-                            {
-                                return 0.25;
                             }
                         };
                     }

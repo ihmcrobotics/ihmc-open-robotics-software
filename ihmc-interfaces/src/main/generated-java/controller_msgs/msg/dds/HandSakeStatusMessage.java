@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message used to report the current joint angles for the fingers of a hand.
+       * Message used to report the current joint angles for the fingers of the sake gripper.
        */
 public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> implements Settable<HandSakeStatusMessage>, EpsilonComparable<HandSakeStatusMessage>
 {
@@ -19,7 +19,13 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
    public long sequence_id_;
    public byte robot_side_ = (byte) 255;
    public double temperature_;
+   /**
+            * 0.0 min, 1.0 max
+            */
    public double torque_ratio_;
+   /**
+            * 0.0 closed, 1.0 open
+            */
    public double postion_ratio_;
    public boolean calibrated_;
    public boolean needs_reset_;
@@ -85,19 +91,31 @@ public class HandSakeStatusMessage extends Packet<HandSakeStatusMessage> impleme
       return temperature_;
    }
 
+   /**
+            * 0.0 min, 1.0 max
+            */
    public void setTorqueRatio(double torque_ratio)
    {
       torque_ratio_ = torque_ratio;
    }
+   /**
+            * 0.0 min, 1.0 max
+            */
    public double getTorqueRatio()
    {
       return torque_ratio_;
    }
 
+   /**
+            * 0.0 closed, 1.0 open
+            */
    public void setPostionRatio(double postion_ratio)
    {
       postion_ratio_ = postion_ratio;
    }
+   /**
+            * 0.0 closed, 1.0 open
+            */
    public double getPostionRatio()
    {
       return postion_ratio_;
