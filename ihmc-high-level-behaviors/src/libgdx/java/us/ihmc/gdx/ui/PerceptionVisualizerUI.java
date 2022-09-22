@@ -187,12 +187,6 @@ public class PerceptionVisualizerUI
 
             //            ros1Node.execute();
 
-            H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
-
-            HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex);
-
-            depthMap = new Mat(768, 1024, opencv_core.CV_16UC1);
-            HDF5Tools.loadDepthMap(file, frameIndex, depthMap);
 
             //            BytedecoOpenCVTools.printMat(depthMap, "Depth");
 
@@ -243,24 +237,24 @@ public class PerceptionVisualizerUI
 
             frameIndex++;
 
-            if ((frameIndex % 30) == 0)
-            {
-               H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
-               HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
-               LogTools.info("Loading Cloud: {}", frameIndex / 30);
-
-               depthMap = new Mat(768, 1024, opencv_core.CV_16UC1);
-               HDF5Tools.loadDepthMap(file, frameIndex / 30, depthMap);
-               LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
-
-               //               BytedecoOpenCVTools.printMat(depthMap, "Depth");
-
-               Mat image = new Mat(768, 1024, opencv_core.CV_8UC1);
-
-               depthMap.convertTo(image, opencv_core.CV_8UC1, 256.0f, 0.0f);
-               imshow("Loaded Image", image);
-               waitKey(1);
-            }
+//            if ((frameIndex % 30) == 0)
+//            {
+//               H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
+//               HDF5Tools.loadPointCloud(file, pointsToRender, frameIndex / 30);
+//               LogTools.info("Loading Cloud: {}", frameIndex / 30);
+//
+//               depthMap = new Mat(768, 1024, opencv_core.CV_16UC1);
+//               HDF5Tools.loadDepthMap(file, frameIndex / 30, depthMap);
+//               LogTools.info("Image Loaded: {} {}", depthMap.arrayWidth(), depthMap.arrayHeight());
+//
+//               //               BytedecoOpenCVTools.printMat(depthMap, "Depth");
+//
+//               Mat image = new Mat(768, 1024, opencv_core.CV_8UC1);
+//
+//               depthMap.convertTo(image, opencv_core.CV_8UC1, 256.0f, 0.0f);
+//               imshow("Loaded Image", image);
+//               waitKey(1);
+//            }
 
             pointCloudRenderer.setPointsToRender(pointsToRender, Color.BLUE);
             if (!pointsToRender.isEmpty())

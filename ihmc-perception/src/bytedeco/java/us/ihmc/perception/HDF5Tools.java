@@ -41,16 +41,11 @@ public class HDF5Tools
       else return 0;
    }
 
-   public static void loadPointCloud(H5File file, RecyclingArrayList<Point3D32> points, int index)
+   public static void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> points)
    {
-      DataSet dataset = file.openDataSet("/os_cloud_node/points/" + index);
+      DataSet dataset = group.openDataSet(String.valueOf(index));
       float[] pointsBuffer = new float[DIM0 * DIM1 * 3];
-
-      DataSpace space = dataset.getSpace();
-      int nbDims = space.getSimpleExtentNdims();
-
       FloatPointer p = new FloatPointer(pointsBuffer);
-
       dataset.read(p, PredType.NATIVE_FLOAT());
       p.get(pointsBuffer);
 
@@ -62,26 +57,19 @@ public class HDF5Tools
       }
    }
 
-   public static void loadDepthMap(H5File file, int index, Mat mat)
+   public static void loadImage(Group group, int index, Mat mat)
    {
-      DataSet dataset = file.openDataSet("/chest_l515/depth/image_rect_raw/" + index);
-      byte[] pointsBuffer = new byte[IMG_HEIGHT * IMG_WIDTH * 2];
-
-      DataSpace space = dataset.getSpace();
-      int nbDims = space.getSimpleExtentNdims();
-
+      DataSet dataset = group.openDataSet(String.valueOf(index));
+      byte[] pointsBuffer = new byte[mat.rows() * mat.cols() * mat.channels()];
       BytePointer p = new BytePointer(pointsBuffer);
-
       dataset.read(p, PredType.NATIVE_UINT8());
       p.get(pointsBuffer);
-
       mat.data(p);
-
    }
 
-   public static void storePointCloud(H5File file, String namespace, RecyclingArrayList<Point3D32> points)
+   public static void storePointCloud(Group group, int index, RecyclingArrayList<Point3D32> points)
    {
-      DataSet dataset = file.openDataSet(namespace);
+      DataSet dataset = group.openDataSet(String.valueOf(index));
       float[] buf = new float[points.size() * PCD_POINT_SIZE];
       for (int i = 0; i <  points.size(); i++)
          for (int j = 0; j < PCD_POINT_SIZE; j++)
@@ -90,33 +78,22 @@ public class HDF5Tools
       dataset.write(new FloatPointer(buf), new DataType(PredType.NATIVE_FLOAT()));
    }
 
-   public static void storeDepthMap(H5File file, String namespace, Mat depthMap)
+   public static void storeDepthMap(Group group, int index, Mat depthMap)
    {
-      DataSet dataset = file.openDataSet(namespace);
+      DataSet dataset = group.openDataSet(String.valueOf(index));
       dataset.write(depthMap.data(), PredType.NATIVE_UINT16());
    }
 
-   public static void storeCompressedImage(H5File file, String namespace, BytePointer data)
+   public static void storeCompressedImage(Group group, int index, BytePointer data)
    {
-      DataSet dataset = file.openDataSet(namespace);
+      DataSet dataset = group.openDataSet(String.valueOf(index));
       dataset.write(data, PredType.NATIVE_UINT8());
    }
 
-   public static int getCount(H5File h5File, String namespace)
+   public static ArrayList<Float> getTimestamps(Group group)
    {
-      Group group = h5File.openGroup(namespace);
-      return (int) group.getNumObjs();
-   }
-
-   public static int getCount(Group group)
-   {
-      return (int) group.getNumObjs();
-   }
-
-   public static int getTimestamps(H5File h5File, String namespace)
-   {
-      Group dataset = h5File.openGroup(namespace);
-      return (int) dataset.getNumObjs();
+      ArrayList<Float> timestamps = new ArrayList<>();
+      return timestamps;
    }
 
    public static ArrayList<String> getTopicNames(H5File file)
@@ -133,20 +110,7 @@ public class HDF5Tools
       return names;
    }
 
-   public static void storeFloatArray(H5File file, String namespace, float[] array)
-   {
 
-   }
-
-   public static void storePoint3D(H5File file, String namespace, Point3D point)
-   {
-
-   }
-
-   public static void storeQuaternion(H5File file, String namespace, Quaternion orientation)
-   {
-
-   }
 
    public static void exploreH5(Group group, ArrayList<String> names, String prefix)
    {
@@ -172,6 +136,12 @@ public class HDF5Tools
          System.out.println("Prefix: " + prefix);
          names.add(prefix);
       }
+   }
+
+   public static void storeMatrix(Group group, double[] data)
+   {
+      DataSet dataset = group.openDataSet(String.valueOf(0));
+      dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
    }
 
    public static void main(String[] args) {
