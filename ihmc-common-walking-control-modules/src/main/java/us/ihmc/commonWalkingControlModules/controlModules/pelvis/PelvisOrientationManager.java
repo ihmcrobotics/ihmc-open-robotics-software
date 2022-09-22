@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -34,7 +33,7 @@ public class PelvisOrientationManager
    private final ControllerPelvisOrientationManager walkingManager;
    private final UserPelvisOrientationManager userManager;
 
-   public PelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
+   public PelvisOrientationManager(PID3DGainsReadOnly gains,
                                    HighLevelHumanoidControllerToolbox controllerToolbox,
                                    YoRegistry parentRegistry)
    {
@@ -43,7 +42,7 @@ public class PelvisOrientationManager
       String namePrefix = getClass().getSimpleName();
       requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisOrientationControlMode.class, true);
 
-      walkingManager = new ControllerPelvisOrientationManager(gains, pelvisOffsetWhileWalkingParameters, controllerToolbox, registry);
+      walkingManager = new ControllerPelvisOrientationManager(gains, controllerToolbox, registry);
       userManager = new UserPelvisOrientationManager(gains, controllerToolbox, registry);
 
       stateMachine = setupStateMachine(namePrefix, yoTime);
@@ -176,9 +175,9 @@ public class PelvisOrientationManager
       walkingManager.initializeStanding();
    }
 
-   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
+   public void initializeSwing()
    {
-      walkingManager.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+      walkingManager.initializeTiming();
    }
 
    public void setUpcomingFootstep(Footstep upcomingFootstep)
@@ -186,9 +185,9 @@ public class PelvisOrientationManager
       walkingManager.setUpcomingFootstep(upcomingFootstep);
    }
 
-   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
+   public void initializeTransfer()
    {
-      walkingManager.initializeTransfer(transferToSide, transferDuration, swingDuration);
+      walkingManager.initializeTiming();
    }
 
    public void initializeTrajectory()

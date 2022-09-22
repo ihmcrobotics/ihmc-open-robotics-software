@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -307,10 +306,8 @@ public class HighLevelControlManagerFactory
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       Vector3DReadOnly pelvisAngularWeight = taskspaceAngularWeightMap.get(pelvisName);
-      PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
 
       pelvisOrientationManager = new PelvisOrientationManager(pelvisGains,
-                                                              pelvisOffsetWhileWalkingParameters,
                                                               controllerToolbox,
                                                               registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);

@@ -33,7 +33,7 @@ public class SimplePelvisOrientationManager
       parentRegistry.addChild(registry);
       time = controllerToolbox.getYoTime();
 
-      walkingManager = new ControllerPelvisOrientationManager(gains, null, null, controllerToolbox, registry);
+      walkingManager = new ControllerPelvisOrientationManager(gains, controllerToolbox, registry);
 
       enableUserPelvisControlDuringWalking.set(false);
    }
@@ -122,9 +122,9 @@ public class SimplePelvisOrientationManager
       walkingManager.initializeStanding();
    }
 
-   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
+   public void initializeSwing()
    {
-      walkingManager.initializeSwing(supportSide, swingDuration, nextTransferDuration, nextSwingDuration);
+      walkingManager.initializeTiming();
    }
 
    public void setUpcomingFootstep(Footstep upcomingFootstep)
@@ -132,9 +132,9 @@ public class SimplePelvisOrientationManager
       walkingManager.setUpcomingFootstep(upcomingFootstep);
    }
 
-   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
+   public void initializeTransfer()
    {
-      walkingManager.initializeTransfer(transferToSide, transferDuration, swingDuration);
+      walkingManager.initializeTiming();
    }
 
    public void initializeTrajectory()
