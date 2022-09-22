@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
-import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -74,7 +73,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final DoubleProvider desiredPitchOffset = new DoubleParameter("UserDesiredPitchOffset", registry, 0.0);
    private final DoubleProvider desiredRollOffset = new DoubleParameter("UserDesiredRollOffset", registry, 0.0);
 
-   public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters,
+   public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains,
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              YoRegistry parentRegistry)
    {
@@ -153,7 +152,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       desiredPelvisFrame.update();
    }
 
-   private void initializeTiming()
+   public void initializeTiming()
    {
       initialPelvisOrientationTime.set(yoTime.getDoubleValue());
    }
@@ -356,16 +355,6 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    public void initializeStanding()
    {
       setToHoldCurrentDesiredInMidFeetZUpFrame();
-   }
-
-   public void initializeTransfer(RobotSide transferToSide, double transferDuration, double swingDuration)
-   {
-      initializeTiming();
-   }
-
-   public void initializeSwing(RobotSide supportSide, double swingDuration, double nextTransferDuration, double nextSwingDuration)
-   {
-      initializeTiming();
    }
 
    public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)

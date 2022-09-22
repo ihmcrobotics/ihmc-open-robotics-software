@@ -186,15 +186,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
       }
 
-      if (isLastStep)
-      {
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, 0.0);
-      }
-      else
-      {
-         FootstepTiming nextTiming = footstepTimings[0];
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
-      }
+      pelvisOrientationManager.initializeSwing();
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);

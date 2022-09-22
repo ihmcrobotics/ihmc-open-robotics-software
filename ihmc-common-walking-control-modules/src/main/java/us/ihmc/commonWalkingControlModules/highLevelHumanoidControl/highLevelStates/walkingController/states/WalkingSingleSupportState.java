@@ -243,7 +243,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
-      boolean isLastStep = stepsToAdd == 0;
       for (int i = 0; i < stepsToAdd; i++)
       {
          walkingMessageHandler.peekFootstep(i, footsteps[i]);
@@ -272,15 +271,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
 
-      if (isLastStep)
-      {
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, 0.0);
-      }
-      else
-      {
-         FootstepTiming nextTiming = footstepTimings[0];
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
-      }
+      pelvisOrientationManager.initializeSwing();
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);

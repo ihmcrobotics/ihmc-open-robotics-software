@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
@@ -29,13 +27,11 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 public abstract class WalkingControllerParameters
 {
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
-   private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
    public WalkingControllerParameters()
    {
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
 
       kneePrivilegedConfigurationParameters = new OneDoFJointPrivilegedConfigurationParameters();
       kneePrivilegedConfigurationParameters.setConfigurationGain(40.0);
@@ -648,16 +644,6 @@ public abstract class WalkingControllerParameters
    public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
-   }
-
-   /**
-    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}. These parameters can be used to
-    * shape the pelvis orientation trajectory while walking to create a more natural motion and improve
-    * foot reachability.
-    */
-   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
-   {
-      return pelvisOffsetWhileWalkingParameters;
    }
 
    /**
