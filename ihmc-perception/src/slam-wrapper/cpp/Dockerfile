@@ -26,6 +26,7 @@ RUN apt-get --quiet 2 --yes update  \
     cmake \
     libtbb-dev \
     openjdk-17-jdk \
+    libeigen3-dev \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
@@ -49,5 +50,9 @@ RUN make -j4 install && make clean
 
 # Needed to link with GTSAM
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:LD_LIBRARY_PATH' >> /root/.bashrc
+
+# Ensure eigen is available at /usr/include/Eigen
+# Ubuntu installs the headers at /usr/include/eigen3/Eigen
+RUN ln -s /usr/include/eigen3/ /usr/include/Eigen
 
 WORKDIR /root/dev

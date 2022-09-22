@@ -9,9 +9,9 @@ import org.bytedeco.javacpp.tools.*;
       resourcepath = "../",
       linkpath = "../",
       include = {"include/factor_graph_external.h"},
-      link = {"libslam-wrapper"}),
-      target = "us.ihmc.perception.slamWrapper.FactorGraphExternal")
-public class slam_wrapper implements InfoMapper
+      link = {"slam-wrapper"}),
+      target = "SlamWrapper")
+public class SlamWrapperInfoMapper implements InfoMapper
 {
    public void map(InfoMap infoMap)
    {
