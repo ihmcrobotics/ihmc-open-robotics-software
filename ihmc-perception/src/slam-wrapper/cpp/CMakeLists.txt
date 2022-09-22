@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.4)
-project(ihmc-slam-wrapper C CXX)
+project(slam-wrapper C CXX)
 
 add_compile_options(-std=c++17)
 
@@ -16,7 +16,7 @@ find_package(GTSAM REQUIRED)
 #include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${GTSAM_INCLUDE_DIR})
 
-set(ISW_SOURCES
+set(SW_SOURCES
     factor_graph/factor_graph_handler.cpp
     factor_graph/factor_graph_handler.h
     external/factor_graph_external.cpp
@@ -24,19 +24,19 @@ set(ISW_SOURCES
     launcher/application.cpp
 )
 
-add_library(ihmc-slam-wrapper SHARED ${ISW_SOURCES})
+add_library(slam-wrapper SHARED ${SW_SOURCES})
 
-target_link_libraries(ihmc-slam-wrapper
+target_link_libraries(slam-wrapper
     gtsam
  #   eigen
 )
 
-target_include_directories(ihmc-slam-wrapper PUBLIC
+target_include_directories(slam-wrapper PUBLIC
     factor_graph/
     external/
 )
 
-install(TARGETS ihmc-slam-wrapper
+install(TARGETS slam-wrapper
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-install(FILES ${ISW_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+install(FILES ${SW_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
