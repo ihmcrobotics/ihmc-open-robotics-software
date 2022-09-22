@@ -77,7 +77,7 @@ public class FootholdCroppingModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(), registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(true), registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
@@ -184,7 +184,7 @@ public class FootholdCroppingModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(), registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(true), registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
