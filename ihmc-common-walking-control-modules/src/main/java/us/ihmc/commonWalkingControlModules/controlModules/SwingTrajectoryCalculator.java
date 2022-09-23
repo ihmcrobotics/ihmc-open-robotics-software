@@ -59,7 +59,6 @@ public class SwingTrajectoryCalculator
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameVector3D pelvisVelocity = new FrameVector3D();
-   private final FrameVector3D footCurrentVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
 
@@ -108,11 +107,13 @@ public class SwingTrajectoryCalculator
 
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
+      // Setting the number of waypoints to two, since we only use the swing trajectory generator when there's two waypoints
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix,
                                                                minSwingHeightFromStanceFoot,
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
                                                                customWaypointAngleThreshold,
+                                                               2,
                                                                registry,
                                                                controllerToolbox.getYoGraphicsListRegistry());
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
