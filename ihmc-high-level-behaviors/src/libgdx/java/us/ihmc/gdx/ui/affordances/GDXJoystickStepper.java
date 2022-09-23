@@ -47,9 +47,6 @@ public class GDXJoystickStepper
 {
    private class Controller implements us.ihmc.scs2.definition.controller.interfaces.Controller
    {
-      private final int TRAJECTORY_WINDOW_SIZE = 100;
-      private final int VIZ_SAMPLE_COUNT = 20;
-
       // Compute timed footstep plan.
       int maxSteps = 30;
 
@@ -98,7 +95,6 @@ public class GDXJoystickStepper
          }
       }
 
-
       @Override
       public void doControl()
       {
@@ -145,10 +141,9 @@ public class GDXJoystickStepper
 
    // NOTE: GDXJoystickStepper stuff starts here
    private static final double dt = 0.05;
-   private static final double MAX_X_VELOCITY = 0.3;  // 0.3 m/s
-   private static final double MAX_Y_VELOCITY = 0.1;  // 0.07 m/s
-//   private static final double MAX_Y_VELOCITY_JOYSTICK = 0.12;
-   private static final double MAX_YAW_VELOCITY = Math.PI / 6.0;  // 30 deg / s
+   private static final double MAX_X_VELOCITY = 0.3;  // m/s
+   private static final double MAX_Y_VELOCITY = 0.15;  // m/s
+   private static final double MAX_YAW_VELOCITY = Math.PI / 6.0;  // rad/s
    private GDXImGuiBasedUI baseUI;
 
    private final GDXSphereAndArrowGraphic sphereAndArrowGraphic;
@@ -188,8 +183,6 @@ public class GDXJoystickStepper
    {
       if (!activated)
       {
-         YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-
          // Initialize sole frames.
          ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -199,7 +192,7 @@ public class GDXJoystickStepper
          Vector3DBasics initialLeftPosition = leftFootTransform.getTranslation();
          Vector3DBasics initialRightPosition = rightFootTransform.getTranslation();
          RotationMatrixBasics initialLeftRotation = leftFootTransform.getRotation();
-         RotationMatrixBasics initialRightRotation = leftFootTransform.getRotation();
+         RotationMatrixBasics initialRightRotation = rightFootTransform.getRotation();
 
          SideDependentList<FramePose3D> initialFootholds = new SideDependentList<>();
          initialFootholds.put(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(initialLeftPosition), new Quaternion(initialLeftRotation)));

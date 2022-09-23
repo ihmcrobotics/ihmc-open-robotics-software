@@ -15,7 +15,7 @@ public class BaselineFootstepPlannerParameters
 
    protected double stanceWidth = 0.24; // m
    protected double stanceSplay = 0.00; // rad
-   protected double lateralVelocityStanceScaling = 0.3; // m / (m / s)
+   protected double lateralVelocityStanceScaling = 0.5; // m / (m / s)
    protected double turningVelocityStanceScaling = 0.4; // rad / (rad / s)
    protected double swingDuration = 0.6; // s
    protected double minimumTransferDuration = 0.2; // s

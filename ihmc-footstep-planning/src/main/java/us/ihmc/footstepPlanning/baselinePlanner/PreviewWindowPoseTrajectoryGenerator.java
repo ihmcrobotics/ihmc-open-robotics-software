@@ -37,8 +37,6 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    private double MAX_Y_VELOCITY;
    private double MAX_YAW_VELOCITY;
 
-   private final double epsilion = 1e-5;
-
    public PreviewWindowPoseTrajectoryGenerator(ReferenceFrame frame, int windowSize, double dt, double maxVelocityX, double maxVelocityY, double maxVelocityYaw)
    {
       this(frame, windowSize, dt);
@@ -98,16 +96,13 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       FramePose3D prevPose = poses[prevIdx];
       FramePose3D headPose = poses[headIdx];
 
-      // translation
+      // NOTE: translation: holds position of gizmo
       Vector3D distanceVector = new Vector3D();
-
-      // holds position of gizmo
-      FramePose3D tempFramePose = new FramePose3D();
       distanceVector.set(framePose3D.getPosition());
       distanceVector.sub(prevPose.getPosition());
 
-      Vector3D distanceVectorInPrevReferenceFrame = new Vector3D();
-      prevPose.inverseTransform(distanceVector, distanceVector);
+      // NOTE: bring vector to local frame of prevPose
+      prevPose.inverseTransform(distanceVector);
 
       // z-rotation
       double yaw = EuclidCoreTools.angleDifferenceMinusPiToPi(framePose3D.getYaw(), prevPose.getYaw());
@@ -126,10 +121,14 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
          distanceVector.setY(Math.signum(distanceVector.getY()) * MAX_Y_VELOCITY * dt);
       }
 
+      linearVelocities[headIdx].set(distanceVector.getX()/dt, distanceVector.getY()/dt, 0.0);
+      angularVelocities[headIdx].set(0.0, 0.0, yawdot);
       headPose.set(poses[prevIdx]);
-      //      distanceVector.scale(dt);
+      // NOTE: change distanceVector back to world frame before appending to poses.
+      prevPose.transform(distanceVector);
       headPose.getPosition().add(distanceVector);
       headPose.appendYawRotation(yawdot * dt);
+      headPose.transform(linearVelocities[headIdx]);
    }
 
    // Note: appends velocity vector
@@ -142,6 +141,10 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       headPose.set(poses[prevIdx]); // copy pose from prev step
       headPose.appendTranslation(xdot * deltaTime, ydot * deltaTime, 0.0);
       headPose.appendYawRotation(yawdot * deltaTime);
+
+      linearVelocities[headIdx].set(xdot, ydot, 0.0);
+      headPose.transform(linearVelocities[headIdx]);
+      angularVelocities[headIdx].set(0.0, 0.0, yawdot);
    }
 
    // Note: (original) appends velocity vector
