@@ -31,22 +31,4 @@ public class AtlasLiftOffAndTouchDownTest
 
       Assert.assertTrue("A check failed. See console output.", success);
    }
-
-   @Tag("humanoid-flat-ground")
-   @Test
-   public void testForwardStepWithAdjustment() throws SimulationExceededMaximumTimeException
-   {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
-      SCS2AvatarTestingSimulation testHelper = AvatarLiftOffAndTouchDownTest.setupTest(robotModel);
-
-      double stepLength = 0.4;
-      double startPitch = Math.toRadians(20.0);
-      double finalPitch = Math.toRadians(-20.0);
-
-      boolean success = AvatarLiftOffAndTouchDownTest.doStep(robotModel, testHelper, stepLength, startPitch, finalPitch, footLength, 0.1);
-
-      testHelper.finishTest();
-
-      Assert.assertTrue("A check failed. See console output.", success);
-   }
 }
