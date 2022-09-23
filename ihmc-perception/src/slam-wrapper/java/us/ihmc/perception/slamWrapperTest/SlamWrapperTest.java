@@ -26,13 +26,13 @@ public class SlamWrapperTest
       List<String> libraryFiles = new ArrayList<>();
       libraryFiles.add("libmetis-gtsam.so");
       libraryFiles.add("libgtsam.so");
-      libraryFiles.add("libgtsam.so.4");
-      libraryFiles.add("libgtsam.so.4.2.0");
-      libraryFiles.add("libgtsam_unstable.so");
-      libraryFiles.add("libgtsam_unstable.so.4");
-      libraryFiles.add("libgtsam_unstable.so.4.2.0");
+//      libraryFiles.add("libgtsam.so.4");
+//      libraryFiles.add("libgtsam.so.4.2.0");
+//      libraryFiles.add("libgtsam_unstable.so");
+//      libraryFiles.add("libgtsam_unstable.so.4");
+//      libraryFiles.add("libgtsam_unstable.so.4.2.0");
       libraryFiles.add("libjniSlamWrapper.so");
-      libraryFiles.add("libslam-wrapper.so");
+//      libraryFiles.add("libslam-wrapper.so");
 
       for (String libraryFile : libraryFiles)
       {
