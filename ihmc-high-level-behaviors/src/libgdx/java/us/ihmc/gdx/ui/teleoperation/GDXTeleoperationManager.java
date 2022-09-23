@@ -92,6 +92,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
+   private final GDXContinuousStepping continuousStepping;
+   private final ImBoolean joystickOn = new ImBoolean(false);
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -167,6 +169,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                                                       ros2Helper,
                                                                       teleoperationParameters);
       }
+      
+      continuousStepping = new GDXContinuousStepping(robotModel);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -279,6 +283,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+
+      continuousStepping.create(baseUI,ros2Helper, robotModel, teleoperationParameters, syncedRobot, communicationHelper, walkPathControlRing);
    }
 
    public void update()
@@ -327,6 +333,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
+      continuousStepping.update(true);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -351,6 +358,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
       }
+
+//      continuousStepping.calculate3DViewPick(input);
    }
 
    // This happens after update.
@@ -384,6 +393,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
             teleportCameraToRobotPelvis();
          }
       }
+//      continuousStepping.processInput(input);
    }
 
    public void renderImGuiWidgets()

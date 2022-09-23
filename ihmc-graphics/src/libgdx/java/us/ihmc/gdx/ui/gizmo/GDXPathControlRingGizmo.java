@@ -13,11 +13,13 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
+import javafx.scene.effect.Blend;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -34,20 +36,24 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXPathControlRingGizmo implements RenderableProvider
 {
-   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.836f);
-   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.95f);
+   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.6f);
+   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.5f);
    public static final Color YELLOW_HIGHLIGHT = new Color().fromHsv(61.5f, 0.783f, 0.892f);
+   public static final Color ORANGE = Color.ORANGE;
    public static final Color DISC_NORMAL_COLOR = LIGHT_GRAY;
    public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
    public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY;
    public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
+   public static final Color FORWARD_DIRECTION_HIGHLIGHTED_COLOR = ORANGE;
 
    static
    {
-      DISC_NORMAL_COLOR.a = 0.4f;
-      ARROW_NORMAL_COLOR.a = 0.4f;
+      DISC_NORMAL_COLOR.a = 0.7f;
+      ARROW_NORMAL_COLOR.a = 0.7f;
+//      FORWARD_DIRECTION_NORMAL_COLOR.a = 0.7f;
       DISC_HIGHLIGHTED_COLOR.a = 0.9f;
       ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
+      FORWARD_DIRECTION_HIGHLIGHTED_COLOR.a = 0.9f;
    }
 
    private final double QUARTER_TURN = Math.PI / 2.0;
@@ -61,6 +67,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private Material normalArrowMaterial;
    private Material highlightedDiscMaterial;
    private Material highlightedArrowMaterial;
+   private Material joystickForwardArrowMaterial;
    private DynamicGDXModel discModel = new DynamicGDXModel();
    private DynamicGDXModel positiveXArrowModel = new DynamicGDXModel();
    private DynamicGDXModel positiveYArrowModel = new DynamicGDXModel();
@@ -103,6 +110,9 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private boolean highlightingEnabled = true;
    private boolean isNewlyModified;
    private final double translateSpeedFactor = 0.5;
+   private final double gizmoZHeight = 0.05;
+
+   private boolean joystickMode = false;
 
    public GDXPathControlRingGizmo()
    {
@@ -140,12 +150,17 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       highlightedArrowMaterial = new Material();
       highlightedArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
       highlightedArrowMaterial.set(new BlendingAttribute(true, ARROW_HIGHLIGHTED_COLOR.a));
+
+//      joystickForwardArrowMaterial = new Material();
+//      joystickForwardArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
+//      joystickForwardArrowMaterial.set(new BlendingAttribute(true, a))
+
       discModel.setMesh(meshBuilder ->
       {
          meshBuilder.addHollowCylinder(discThickness.get(),
                                        discOuterRadius.get(),
                                        discInnerRadius.get(),
-                                       new Point3D(0.0, 0.0, -discThickness.get() / 2.0),
+                                       new Point3D(0.0, 0.0, gizmoZHeight-discThickness.get() / 2.0),
                                        DISC_NORMAL_COLOR);
       });
       positiveXArrowModel.setMesh(meshBuilder ->
@@ -153,7 +168,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
+                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, gizmoZHeight),
                                                  new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
@@ -162,7 +177,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
+                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), gizmoZHeight),
                                                  new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
@@ -171,7 +186,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, 0.0),
+                                                 new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, gizmoZHeight),
                                                  new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
@@ -180,12 +195,26 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), 0.0),
+                                                 new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), gizmoZHeight),
                                                  new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
 
       recreateGraphics();
+   }
+
+   public void changeForwardArrowColor(Color color)
+   {
+      positiveXArrowModel.invalidateMesh();
+      positiveXArrowModel.setMesh(meshBuilder ->
+                                  {
+                                     meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
+                                                                             arrowHeight.get(),
+                                                                             discThickness.get(),
+                                                                             new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, gizmoZHeight),
+                                                                             new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
+                                                                             color);
+                                  });
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -445,6 +474,15 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
       negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
       negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
+
+      if (joystickMode)
+      {
+         changeForwardArrowColor(FORWARD_DIRECTION_HIGHLIGHTED_COLOR);
+      }
+      else
+      {
+         changeForwardArrowColor(ARROW_NORMAL_COLOR);
+      }
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -477,7 +515,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       updateTransforms();
    }
 
-   private void recreateGraphics()
+   public void recreateGraphics()
    {
       updateMaterialHighlighting();
       discModel.invalidateMesh();
@@ -500,7 +538,12 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       }
    }
 
-   public Pose3DReadOnly getPose3D()
+   private Pose3DReadOnly getPose3D()
+   {
+      return framePose3D;
+   }
+
+   public FramePose3D getFramePose3D()
    {
       return framePose3D;
    }
@@ -575,5 +618,15 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    public boolean getGizmoHovered()
    {
       return isGizmoHovered;
+   }
+
+   public boolean isJoystickMode()
+   {
+      return joystickMode;
+   }
+
+   public void setJoystickMode(boolean joystickMode)
+   {
+      this.joystickMode = joystickMode;
    }
 }
