@@ -17,6 +17,8 @@ import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
 
+import java.util.concurrent.Executor;
+
 public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
    protected GDXRigidBody multiBody;
@@ -52,11 +54,12 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
    private GDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, boolean scale)
    {
       GDXRigidBody gdxRigidBody;
+      Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
       if (scale)
       {
          gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
                                                                    robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                   Gdx.app::postRunnable,
+                                                                   executorToRunLaterOnThreadWithGraphicsContext,
                                                                    robotDefinition.getResourceClassLoader(),
                                                                    1.1f, 1.1f, 1.1f);
       }
@@ -65,7 +68,7 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
       {
          gdxRigidBody = GDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
                                                                    robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                   Gdx.app::postRunnable,
+                                                                   executorToRunLaterOnThreadWithGraphicsContext,
                                                                    robotDefinition.getResourceClassLoader());
       }
 
@@ -78,12 +81,12 @@ public class GDXMultiBodyGraphic extends ImGuiGDXVisualizer implements Renderabl
 
             fourBarJoint.getJointA().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyDA(),
                                                                                              fourBarJointDefinition.getBodyDA(),
-                                                                                             Gdx.app::postRunnable,
+                                                                                             executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              robotDefinition.getResourceClassLoader(),
                                                                                              1.1f, 1.1f, 1.1f));
             fourBarJoint.getJointB().setSuccessor(GDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
-                                                                                             Gdx.app::postRunnable,
+                                                                                             executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              robotDefinition.getResourceClassLoader(),
                                                                                              0.0f, 0.0f, 0.0f));
          }
