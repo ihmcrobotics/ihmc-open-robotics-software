@@ -20,7 +20,7 @@ public class BaselineFootstepPlannerParameters
    protected double swingDuration = 0.6; // s
    protected double minimumTransferDuration = 0.2; // s
    protected double minimumForwardStride = 0.025; // m
-   protected double minimumLateralStride = 0.4; // m
+   protected double minimumLateralStride = 0.025; // m
    protected double minimumTurningStride = 0.2; // rad
    protected double forwardSymmetryWeight = 1.0;
    protected double lateralSymmetryWeight = 1.0;
@@ -36,7 +36,7 @@ public class BaselineFootstepPlannerParameters
    public BaselineFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParametersBasics)
    {
       this();
-      this.minimumForwardStride = footstepPlannerParametersBasics.getIdealFootstepLength();
+//      this.minimumForwardStride = footstepPlannerParametersBasics.getIdealFootstepLength();
 //      this.minimumLateralStride = footstepPlannerParametersBasics.getIdealSideStepWidth();
    }
 

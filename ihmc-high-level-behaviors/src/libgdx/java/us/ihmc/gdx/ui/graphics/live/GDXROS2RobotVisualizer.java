@@ -4,8 +4,10 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXFocusBasedCamera;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -100,6 +102,12 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    {
       super.renderImGuiWidgets();
       frequencyPlot.renderImGuiWidgets();
+      if (ImGui.button(labels.get("Find My Robot")))
+      {
+         teleportCameraToRobotPelvis();
+      }
+      ImGuiTools.previousWidgetTooltip("Brings camera focus to robot's pelvis");
+      ImGui.sameLine();
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
       {
          if (!trackRobot.get())
@@ -122,5 +130,11 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    public ImBoolean getHideChest()
    {
       return hideChest;
+   }
+
+   public void teleportCameraToRobotPelvis()
+   {
+      RigidBodyTransform robotPelvisTransform = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame();
+      cameraForTracking.setFocusPointPose(robotPelvisTransform);
    }
 }

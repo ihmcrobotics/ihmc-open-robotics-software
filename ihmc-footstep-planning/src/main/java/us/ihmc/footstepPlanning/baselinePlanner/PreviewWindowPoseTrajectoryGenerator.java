@@ -8,8 +8,12 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 
@@ -37,7 +41,7 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
 
    public PreviewWindowPoseTrajectoryGenerator(ReferenceFrame frame, int windowSize, double dt, double maxVelocityX, double maxVelocityY, double maxVelocityYaw)
    {
-      this(frame,windowSize,dt);
+      this(frame, windowSize, dt);
       MAX_X_VELOCITY = maxVelocityX;
       MAX_Y_VELOCITY = maxVelocityY;
       MAX_YAW_VELOCITY = maxVelocityYaw;
@@ -86,66 +90,46 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       currentAngularVelocity.setToZero();
    }
 
-   public void appendTest(double dt, FramePose3D framePose3D)
+   // Note: append to trajectory from desired pose
+   public void append(double dt, FramePose3D framePose3D)
    {
       int prevIdx = headIdx;
       headIdx = (headIdx + 1) % windowSize;
       FramePose3D prevPose = poses[prevIdx];
-      double yaw = framePose3D.getYaw() - prevPose.getYaw();
-      double yawdot = yaw / dt;
-
       FramePose3D headPose = poses[headIdx];
-      if (Math.abs(yawdot) > MAX_YAW_VELOCITY) yawdot = Math.signum(yawdot) * MAX_YAW_VELOCITY;
-
-      double MAX_VELOCITY = Math.sqrt(Math.pow(MAX_X_VELOCITY, 2) + Math.pow(MAX_Y_VELOCITY, 2));
 
       // translation
-      FrameVector3D tempVector = new FrameVector3D();
-      // rotation
-      FrameQuaternion tempQuaternion = new FrameQuaternion();
+      Vector3D distanceVector = new Vector3D();
 
       // holds position of gizmo
-      tempVector.set(framePose3D.getPosition());
-      tempVector.sub(prevPose.getPosition());
-      double tempVectorLength = Math.sqrt(Math.pow(tempVector.getX(), 2) + Math.pow(tempVector.getY(), 2));
-      if (tempVectorLength > MAX_VELOCITY)
+      FramePose3D tempFramePose = new FramePose3D();
+      distanceVector.set(framePose3D.getPosition());
+      distanceVector.sub(prevPose.getPosition());
+
+      Vector3D distanceVectorInPrevReferenceFrame = new Vector3D();
+      prevPose.inverseTransform(distanceVector, distanceVector);
+
+      // z-rotation
+      double yaw = EuclidCoreTools.angleDifferenceMinusPiToPi(framePose3D.getYaw(), prevPose.getYaw());
+      double yawdot = yaw / dt;
+
+      if (Math.abs(yawdot) > MAX_YAW_VELOCITY)
       {
-         tempVector.normalize();
-         tempVector.scale(MAX_VELOCITY);
+         yawdot = Math.signum(yawdot) * MAX_YAW_VELOCITY;
+      }
+      if (Math.abs(distanceVector.getX() / dt) > MAX_X_VELOCITY)
+      {
+         distanceVector.setX(Math.signum(distanceVector.getX()) * MAX_X_VELOCITY * dt);
+      }
+      if (Math.abs(distanceVector.getY() / dt) > MAX_Y_VELOCITY)
+      {
+         distanceVector.setY(Math.signum(distanceVector.getY()) * MAX_Y_VELOCITY * dt);
       }
 
       headPose.set(poses[prevIdx]);
-      tempVector.scale(dt);
-      headPose.getPosition().add(tempVector);
+      //      distanceVector.scale(dt);
+      headPose.getPosition().add(distanceVector);
       headPose.appendYawRotation(yawdot * dt);
-
-   }
-
-   public void append(double deltaTime, FramePose3D framePose3D)
-   {
-
-      int prevIdx = headIdx;
-      headIdx = (headIdx + 1) % windowSize;
-      FramePose3D prevPose = poses[prevIdx];
-
-      double forwardDistance = framePose3D.getX() - prevPose.getX();
-      double lateralDistance = framePose3D.getY() - prevPose.getY();
-      double yawDistance = framePose3D.getYaw() - prevPose.getYaw();
-
-      double xdot = forwardDistance / deltaTime;
-      double ydot = lateralDistance / deltaTime;
-      double yawdot = yawDistance / deltaTime;
-
-      LogTools.info("{} | {} | {}", forwardDistance, lateralDistance, yawDistance);
-
-      FramePose3D headPose = poses[headIdx];
-      if (Math.abs(xdot) > MAX_X_VELOCITY) xdot = Math.signum(xdot) * MAX_X_VELOCITY;
-      if (Math.abs(ydot) > MAX_Y_VELOCITY) ydot = Math.signum(ydot) * MAX_Y_VELOCITY;
-      if (Math.abs(yawdot) > MAX_YAW_VELOCITY) yawdot = Math.signum(yawdot) * MAX_YAW_VELOCITY;
-
-      headPose.set(poses[prevIdx]);
-      headPose.appendTranslation(xdot * deltaTime, ydot * deltaTime, 0.0);
-      headPose.appendYawRotation(yawdot * deltaTime);
    }
 
    // Note: appends velocity vector
@@ -158,12 +142,9 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
       headPose.set(poses[prevIdx]); // copy pose from prev step
       headPose.appendTranslation(xdot * deltaTime, ydot * deltaTime, 0.0);
       headPose.appendYawRotation(yawdot * deltaTime);
-
-//      linearVelocities[headIdx].set(xdot, ydot, 0.0);
-//      headPose.transform(linearVelocities[headIdx]);
-//      angularVelocities[headIdx].set(0.0, 0.0, yawdot);
    }
 
+   // Note: (original) appends velocity vector
    public void append(double xdot, double ydot, double yawdot)
    {
       int prevIdx = headIdx;
@@ -274,6 +255,4 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    {
       return poses;
    }
-
-//   public FramePose3D getCurrent
 }

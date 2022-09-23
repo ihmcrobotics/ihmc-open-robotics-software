@@ -5,59 +5,42 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContinuousTrackingFootstepPlanner
 {
-   private final int VIZ_SAMPLE_COUNT = 40;
+   private final int numberOfTrajectoryPoints = 40;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final double previewTime;
    private double dt;
    private final PreviewWindowPoseTrajectoryGenerator trajectory;
-   private final SamplingPoseTrajectoryVisualizer trajectoryViz;
    private int headFootstepPlanSize;
    private int tailFootstepPlanSize;
    private final List<SimpleTimedFootstep> headFootstepPlan;
    private final List<SimpleTimedFootstep> tailFootstepPlan;
-   private final TimedFootstepPlanVisualization footstepPlanViz;
    private final BaselineFootstepPlanner footstepPlanner;
    private final SideDependentList<FramePose3D> headFootholds;
    private final SideDependentList<FramePose3D> tailFootholds;
    private RobotSide nextFootstepSide;
    private final SimpleTimedFootstep ongoingFootstep;
-   private final SideDependentList<YoFramePoseUsingYawPitchRoll> vizHeadFootholds;
-   private final SideDependentList<YoFramePoseUsingYawPitchRoll> vizHeadFootholdsPreviewDuringSwing;
-   private final YoBoolean visualizeFootstepPlan;
-   private final YoBoolean visualizeCurrentFootholds;
-   private final YoBoolean visualizeBaselineTrajectory;
    private final BaselineFootstepPlannerParameters parameters;
-
-   private final ArrayDeque<FramePose3D> waypoints = new ArrayDeque<>();
 
    private double swingTime = 0.6;
    private double transferTime = 0.25;
    private FootstepDataListMessage plannedFootsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
 
-   public ContinuousTrackingFootstepPlanner(BaselineFootstepPlannerParameters parameters, double previewTime, double dt, int maxFootsteps,
-                                            SideDependentList<ConvexPolygon2D> footPolygons,
-                                            YoRegistry parentRegistry,
-                                            YoGraphicsListRegistry graphicsListRegistry,
+   public ContinuousTrackingFootstepPlanner(BaselineFootstepPlannerParameters parameters,
+                                            double previewTime,
+                                            double dt,
+                                            int maxFootsteps,
                                             double maxVelocityX,
                                             double maxVelocityY,
                                             double maxVelocityYaw)
@@ -65,12 +48,6 @@ public class ContinuousTrackingFootstepPlanner
       this.parameters = parameters;
       this.previewTime = previewTime;
       this.dt = dt;
-      this.visualizeFootstepPlan = new YoBoolean("visualizeFootstepPlan", registry);
-      this.visualizeFootstepPlan.set(true);
-      this.visualizeCurrentFootholds = new YoBoolean("visualizeCurrentFootholds", registry);
-      this.visualizeCurrentFootholds.set(true);
-      this.visualizeBaselineTrajectory = new YoBoolean("visualizeBaselineTrajectory", registry);
-      this.visualizeBaselineTrajectory.set(true);
 
       // Initialize footstep plans.
       this.headFootstepPlanSize = 0;
@@ -96,21 +73,14 @@ public class ContinuousTrackingFootstepPlanner
 
       // Initialize footstep planner.
       this.footstepPlanner = new BaselineFootstepPlanner(parameters);
-      this.footstepPlanViz = new TimedFootstepPlanVisualization(headFootstepPlan, headFootstepPlanSize, footPolygons, parentRegistry,
-                                                                graphicsListRegistry);
-      this.footstepPlanViz.setPreviewTime(previewTime);
 
       // Initialize baseline trajectory.
-      this.trajectory = new PreviewWindowPoseTrajectoryGenerator(ReferenceFrame.getWorldFrame(), (int) Math.ceil(previewTime / dt), dt, maxVelocityX, maxVelocityY, maxVelocityYaw);
-      this.trajectoryViz = new SamplingPoseTrajectoryVisualizer("footstep", trajectory, ReferenceFrame.getWorldFrame(), VIZ_SAMPLE_COUNT, 0.014, false, registry,
-                                                                graphicsListRegistry);
-
-      // Create foothold graphics.
-      this.vizHeadFootholds = new SideDependentList<>();
-      this.vizHeadFootholdsPreviewDuringSwing = new SideDependentList<>();
-      initializeFootholdGraphics(footPolygons, graphicsListRegistry);
-
-      parentRegistry.addChild(registry);
+      this.trajectory = new PreviewWindowPoseTrajectoryGenerator(ReferenceFrame.getWorldFrame(),
+                                                                 (int) Math.ceil(previewTime / dt),
+                                                                 dt,
+                                                                 maxVelocityX,
+                                                                 maxVelocityY,
+                                                                 maxVelocityYaw);
    }
 
    public void initialize(SideDependentList<FramePose3D> initialFootholds)
@@ -137,31 +107,25 @@ public class ContinuousTrackingFootstepPlanner
    public void update(double currentTime, double forwardVelocity, double lateralVelocity, double turningVelocity)
    {
       trajectory.append(forwardVelocity, lateralVelocity, turningVelocity);
-      planAndVisualize(currentTime);
+      planAndVisualize(currentTime, dt);
    }
-
 
    public void update(double currentTime, double deltaTime, FramePose3D framePose3D)
    {
-//      trajectory.append(deltaTime, framePose3D);
-      trajectory.appendTest(deltaTime, framePose3D);
-      planAndVisualize(currentTime);
-
+      trajectory.append(deltaTime, framePose3D);
+      planAndVisualize(currentTime, deltaTime);
    }
 
    public void update(double currentTime, double deltaTime, double forwardVelocity, double lateralVelocity, double turningVelocity)
    {
       // Update baseline trajectory.
       trajectory.append(deltaTime, forwardVelocity, lateralVelocity, turningVelocity);
-      planAndVisualize(currentTime);
+      planAndVisualize(currentTime, deltaTime);
    }
 
-   public void planAndVisualize(double currentTime)
+   public void planAndVisualize(double currentTime, double deltaTime)
    {
-      if (visualizeBaselineTrajectory.getBooleanValue())
-         trajectoryViz.redraw(0, previewTime);
-      else
-         trajectoryViz.hide();
+      compute(0, previewTime);
 
       // Plan new footsteps.
       double plannerStartTime;
@@ -177,7 +141,7 @@ public class ContinuousTrackingFootstepPlanner
          nextFootstepSide = ongoingFootstep.getRobotSide().getOppositeSide();
          plannerStartTime = ongoingFootstep.getTimeInterval().getEndTime() - currentTime;
       }
-      plannerStartTime = Math.max(plannerStartTime, previewTime - (parameters.getMinimumTransferDuration() + parameters.getSwingDuration())) - dt;
+      plannerStartTime = Math.max(plannerStartTime, previewTime - (parameters.getMinimumTransferDuration() + parameters.getSwingDuration())) - deltaTime;
       tailFootstepPlanSize = footstepPlanner.compute(tailFootstepPlan, trajectory, tailFootholds, nextFootstepSide, plannerStartTime, previewTime);
 
       // Remove footsteps that have already started.
@@ -197,24 +161,6 @@ public class ContinuousTrackingFootstepPlanner
          tailFootstepPlan.get(i).getTimeInterval().shiftInterval(currentTime);
          addTailFootstep(tailFootstepPlan.get(i));
       }
-
-      // Update footstep visualization.
-      if (visualizeFootstepPlan.getBooleanValue())
-      {
-         footstepPlanViz.setNumberOfValidSteps(headFootstepPlanSize);
-         footstepPlanViz.update(currentTime);
-      }
-
-      // Update foothold visualization.
-      RobotSide robotSide = ongoingFootstep.getRobotSide();
-      ongoingFootstep.getSoleFramePose(headFootholds.get(robotSide));
-      vizHeadFootholds.get(robotSide).setZ(-100.0); // hide polygon
-      vizHeadFootholdsPreviewDuringSwing.get(robotSide).setZ(-100.0); // hide polygon
-      double endTime = ongoingFootstep.getTimeInterval().getEndTime();
-      if (visualizeCurrentFootholds.getBooleanValue() && endTime < currentTime)
-         vizHeadFootholds.get(robotSide).setMatchingFrame(headFootholds.get(robotSide));
-      if (visualizeFootstepPlan.getBooleanValue() && endTime > currentTime)
-         vizHeadFootholdsPreviewDuringSwing.get(robotSide).setMatchingFrame(headFootholds.get(robotSide));
    }
 
    public PoseTrajectoryGenerator getPreviewTrajectory()
@@ -263,35 +209,6 @@ public class ContinuousTrackingFootstepPlanner
       }
    }
 
-   private void initializeFootholdGraphics(SideDependentList<ConvexPolygon2D> footPolygons, YoGraphicsListRegistry graphicsListRegistry)
-   {
-      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-      // Create yo footstep polygons.
-      SideDependentList<YoFrameConvexPolygon2D> yoFootPolygon = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         yoFootPolygon.put(robotSide, new YoFrameConvexPolygon2D(robotSide.getLowerCaseName() + "FootPolygon", "", worldFrame, 6, registry));
-         yoFootPolygon.get(robotSide).set(footPolygons.get(robotSide));
-      }
-
-      // Create foothold graphics.
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         vizHeadFootholdsPreviewDuringSwing.put(robotSide, new YoFramePoseUsingYawPitchRoll(robotSide + "FootholdPoseEarly", worldFrame, registry));
-         vizHeadFootholdsPreviewDuringSwing.get(robotSide).setZ(-100); // hide the graphic
-         vizHeadFootholds.put(robotSide, new YoFramePoseUsingYawPitchRoll(robotSide + "FootholdPose", worldFrame, registry));
-         vizHeadFootholds.get(robotSide).setMatchingFrame(headFootholds.get(robotSide));
-         AppearanceDefinition appearancePreviewDuringSwing = (robotSide == RobotSide.LEFT) ? YoAppearance.Magenta() : YoAppearance.Gold();
-         AppearanceDefinition appearance = (robotSide == RobotSide.LEFT) ? YoAppearance.DarkTurquoise() : YoAppearance.LawnGreen();
-         graphicsListRegistry.registerYoGraphic("FootholdPreviewDuringSwing",
-                                                new YoGraphicPolygon(robotSide + "FootholdPreviewDuringSwing", yoFootPolygon.get(robotSide), vizHeadFootholdsPreviewDuringSwing.get(robotSide),
-                                                                     1.0, appearancePreviewDuringSwing));
-         graphicsListRegistry.registerYoGraphic("Foothold",
-                                                new YoGraphicPolygon(robotSide + "Foothold", yoFootPolygon.get(robotSide), vizHeadFootholds.get(robotSide), 1.0, appearance));
-      }
-   }
-
    public FootstepDataListMessage getPlannedFootsteps()
    {
       return plannedFootsteps;
@@ -300,5 +217,14 @@ public class ContinuousTrackingFootstepPlanner
    public void removePublishedFootSteps()
    {
       plannedFootsteps.getFootstepDataList().remove(0);
+   }
+
+   public void compute(double t0, double tf)
+   {
+      double dt = (tf - t0) / (numberOfTrajectoryPoints - 1);
+      for (int sampleIdx = 0; sampleIdx < numberOfTrajectoryPoints; sampleIdx++)
+      {
+         trajectory.compute(t0 + sampleIdx * dt);
+      }
    }
 }
