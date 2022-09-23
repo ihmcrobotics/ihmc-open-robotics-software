@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e -o xtrace
 
-rm -rf build
-mkdir build
+# Clean and create build directory
+rm -rf build && mkdir build
 cd build
+
 cmake -DCMAKE_INSTALL_PREFIX=. ..
-make -j 4
+make -j$(nproc)
 make install
 
 # Use the latest release on GitHub
