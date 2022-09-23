@@ -18,30 +18,31 @@ public class TrajectoryRecordReplay<T extends Number>
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
+   private boolean doneReplay= true;
 
    public TrajectoryRecordReplay(String filePath)
    {
       this.filePath = filePath;
    }
 
-   public MutablePair<Boolean, T[]> play(){
+   public T[] play(){
       if (timeStepReplay<1)
          this.readCSV();
-      MutablePair<Boolean, T[]> values = new MutablePair<>(true, dataMatrix.get(timeStepReplay));
-      if (timeStepReplay>=dataMatrix.size()-2)
-      {
-         values.setLeft(false);
+      T[] values = dataMatrix.get(timeStepReplay);
+      if (timeStepReplay>=dataMatrix.size()-2){
+         doneReplay=true;
          return values;
       }
-      else
-         values.setRight(dataMatrix.get(timeStepReplay));
-      timeStepReplay++;
-      return values;
+      else{
+         timeStepReplay++;
+         return values;
+      }
    }
 
    public void record(T[] values)
    {
-      savedRecording=false;
+      if (savedRecording)
+         savedRecording=false;
       T[] localValues = (T[]) new Double[values.length];
       System.arraycopy(values, 0, localValues, 0, localValues.length);
       dataMatrix.add(localValues);
@@ -55,6 +56,7 @@ public class TrajectoryRecordReplay<T extends Number>
 
    private void readCSV()
    {
+      doneReplay=false;
       try {
          BufferedReader fileReader = new BufferedReader(new FileReader(filePath));
          String line = "";
@@ -99,7 +101,6 @@ public class TrajectoryRecordReplay<T extends Number>
       }
    }
 
-   /* create a method for formatting a single line of data represented as an array of Strings */
    private String convertToCSV(String[] data)
    {
       return Stream.of(data)
@@ -119,6 +120,10 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public boolean hasSavedRecording(){
       return savedRecording;
+   }
+
+   public boolean hasDoneReplay(){
+      return doneReplay;
    }
 
    public String getPath()

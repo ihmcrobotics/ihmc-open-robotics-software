@@ -17,9 +17,12 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
@@ -77,7 +80,10 @@ public class GDXVRKinematicsStreamingMode
    private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadia");
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
-//   private final ImString replayPath = new ImString();
+   private final ImString replayPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadiaDab.csv");
+   private final ImBoolean enablerReplay = new ImBoolean(false);
+   private boolean isReplaying = false;
+
 
    private HandConfiguration leftHandConfiguration = HandConfiguration.CLOSE;
    private HandConfiguration rightHandConfiguration = HandConfiguration.CLOSE;
@@ -170,6 +176,11 @@ public class GDXVRKinematicsStreamingMode
             if (trajRecorder.hasSavedRecording() && !(trajRecorder.getPath().equals(recordPath.get())))
                trajRecorder.setPath(recordPath.get());
          }
+         if (enablerReplay.get() && bButton.bChanged() && !bButton.bState()){
+            isReplaying = !isReplaying;
+            if (trajRecorder.hasDoneReplay() && !(trajRecorder.getPath().equals(replayPath.get())))
+               trajRecorder.setPath(replayPath.get());
+         }
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -202,7 +213,7 @@ public class GDXVRKinematicsStreamingMode
          });
       }
 
-      if (enabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod))
+      if ((enabled.get() || isReplaying) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
@@ -215,6 +226,12 @@ public class GDXVRKinematicsStreamingMode
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
+               if(isReplaying && !trajRecorder.hasDoneReplay())
+               {
+                  Double[] dataPoint= trajRecorder.play();
+                  tempFramePose.getPosition().set(dataPoint[0],dataPoint[1],dataPoint[2]);
+                  tempFramePose.getOrientation().set(dataPoint[3],dataPoint[4],dataPoint[5],dataPoint[6]);
+               }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
@@ -256,8 +273,10 @@ public class GDXVRKinematicsStreamingMode
 //                                                                                               ReferenceFrame.getWorldFrame()));
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
-
-         toolboxInputMessage.setStreamToController(streamToController);
+         if(enabled.get())
+            toolboxInputMessage.setStreamToController(streamToController);
+         else
+            toolboxInputMessage.setStreamToController(isReplaying);
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
@@ -325,13 +344,13 @@ public class GDXVRKinematicsStreamingMode
       }
       ImGui.sameLine();
       ImGui.inputText(labels.get("Record folder"), recordPath);
-//      ImGui.text("Start/Stop playing: Press Right B button");
-//      if (ImGui.checkbox(labels.get("Replay motion"), enablerReplay))
-//      {
-//         setReplay(enablerReplay.get());
-//      }
-//      ImGui.sameLine();
-//      ImGui.inputText(labels.get("Replay file"), replayPath);
+      ImGui.text("Start/Stop replay: Press Right B button (cannot stream/record if replay)");
+      if (ImGui.checkbox(labels.get("Replay motion"), enablerReplay))
+      {
+         setReplay(enablerReplay.get());
+      }
+      ImGui.sameLine();
+      ImGui.inputText(labels.get("Replay file"), replayPath);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
@@ -356,13 +375,27 @@ public class GDXVRKinematicsStreamingMode
       if (enabled != this.enabled.get())
          this.enabled.set(enabled);
       if (enabled)
+      {
          wakeUpToolbox();
+         this.enablerReplay.set(false); //check no concurrency replay and streaming
+      }
    }
 
    private void setRecording(boolean enablerRecording)
    {
       if (enablerRecording != this.enablerRecording.get())
          this.enablerRecording.set(enablerRecording);
+      if(enablerRecording)
+         this.enablerReplay.set(false); //check no concurrency replay and record
+
+   }
+
+   private void setReplay(boolean enablerReplay)
+   {
+      if (enablerReplay != this.enablerReplay.get())
+         this.enablerReplay.set(enablerReplay);
+      if(enablerReplay && (enablerRecording.get()||enabled.get()))
+         this.enablerReplay.set(false); //check no concurrency replay and record/streaming
    }
 
    private void reinitializeToolbox()
