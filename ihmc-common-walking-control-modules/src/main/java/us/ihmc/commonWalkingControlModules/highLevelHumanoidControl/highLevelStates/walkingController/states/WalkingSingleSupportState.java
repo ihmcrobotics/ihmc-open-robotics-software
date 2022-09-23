@@ -331,9 +331,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}.
-    * It is clamped w.r.t. to
+    * Request the swing trajectory. It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
     * @return the current swing time remaining for the swing foot trajectory
