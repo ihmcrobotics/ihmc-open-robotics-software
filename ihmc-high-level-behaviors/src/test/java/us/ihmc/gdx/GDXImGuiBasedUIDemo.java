@@ -83,6 +83,8 @@ public class GDXImGuiBasedUIDemo
          @Override
          public void render()
          {
+            // call update() methods here
+
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
