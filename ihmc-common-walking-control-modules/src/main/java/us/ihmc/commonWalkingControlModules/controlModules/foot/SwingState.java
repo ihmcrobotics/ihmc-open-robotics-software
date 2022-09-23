@@ -150,16 +150,10 @@ public class SwingState extends AbstractFootControlState
 
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
-   private final ExecutionTimer onEntryTimer;
-   private final ExecutionTimer doActionTimer;
-
    public SwingState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
       this.gains = gains;
-
-      onEntryTimer = new ExecutionTimer(footControlHelper.getRobotSide() + "OnEntryTimer", registry);
-      doActionTimer = new ExecutionTimer(footControlHelper.getRobotSide() + "DoActionTimer", registry);
 
       this.workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
@@ -306,7 +300,6 @@ public class SwingState extends AbstractFootControlState
    @Override
    public void onEntry()
    {
-      onEntryTimer.startMeasurement();
       super.onEntry();
       swingTrajectoryCalculator.setShouldVisualize(true);
       currentTime.set(0.0);
@@ -326,7 +319,6 @@ public class SwingState extends AbstractFootControlState
 
       // reset this counter so that certain operations aren't duplicated
       firstTickInState = true;
-      onEntryTimer.stopMeasurement();
    }
 
    @Override
@@ -363,7 +355,6 @@ public class SwingState extends AbstractFootControlState
    @Override
    public void doSpecificAction(double timeInState)
    {
-      doActionTimer.startMeasurement();
       updateRadialFrame();
 
       computeAndPackTrajectory(timeInState);
@@ -406,7 +397,6 @@ public class SwingState extends AbstractFootControlState
 
       yoDesiredPosition.setMatchingFrame(desiredPosition);
       yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
-      doActionTimer.stopMeasurement();
    }
 
    private void updateLiftOffKneeAcceleration()
