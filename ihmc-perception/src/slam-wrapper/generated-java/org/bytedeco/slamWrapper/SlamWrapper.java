@@ -72,6 +72,8 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(FloatPointer lmVariances);
         public native void createOrientedPlaneNoiseModel(FloatBuffer lmVariances);
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
+
+        public native void helloWorldTest();
 }
 
 }
