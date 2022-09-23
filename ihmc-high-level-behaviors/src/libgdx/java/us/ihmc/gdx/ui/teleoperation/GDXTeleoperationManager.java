@@ -26,6 +26,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.ImGuiStoredPropertySetDoubleSlider;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.*;
 import us.ihmc.gdx.ui.collidables.GDXRobotCollisionModel;
@@ -63,8 +64,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
    private final GDXTeleoperationParameters teleoperationParameters;
+   private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
+   private ImGuiStoredPropertySetDoubleSlider swingTimeSlider;
+   private ImGuiStoredPropertySetDoubleSlider turnAggressivenessSlider;
+   private ImGuiStoredPropertySetDoubleSlider transferTimeSlider;
    private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
@@ -180,9 +184,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                              FootstepPlannerParameterKeys.keys,
                                              footstepPlanning::plan);
       teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
-      teleoperationParametersTuner.registerSlider("Swing time", 0.3f, 2.5f);
-      teleoperationParametersTuner.registerSlider("Transfer time", 0.3f, 2.5f);
-      teleoperationParametersTuner.registerSlider("Turn aggressiveness", 0.0f, 10.0f);
+      swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.swingTime, 0.3, 2.5);
+      transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.transferTime, 0.3, 2.5);
+      turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
@@ -419,9 +423,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
       chestPitchSlider.renderImGuiWidgets();
       chestYawSlider.renderImGuiWidgets();
 
-      // TODO: sliders for footstep parameters here . . .
-      // 2nd
-      teleoperationParametersTuner.renderDoublePropertySliders();
+      swingTimeSlider.render();
+      transferTimeSlider.render();
+      turnAggressivenessSlider.render();
       teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
