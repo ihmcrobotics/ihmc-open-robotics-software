@@ -192,12 +192,13 @@ public class SplinedHeightTrajectory
                        FixedFramePoint3DBasics queryPointToPack,
                        Point2DBasics pointOnSplineToPack)
    {
-      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(pointOnSplineToPack.getX(),
-                                                                                    pointOnSplineToPack.getY(),
+      double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment2D(queryPointToPack.getX(),
+                                                                                    queryPointToPack.getY(),
                                                                                     contactFrameZeroPosition.getX(),
                                                                                     contactFrameZeroPosition.getY(),
                                                                                     contactFrameOnePosition.getX(),
                                                                                     contactFrameOnePosition.getY());
+      percentAlongSegment = MathTools.clamp(percentAlongSegment, 0.0, 1.0);
       queryPointToPack.interpolate(contactFrameZeroPosition, contactFrameOnePosition, percentAlongSegment);
 
       CoMHeightTrajectoryWaypoint startWaypoint = waypoints.get(0);
