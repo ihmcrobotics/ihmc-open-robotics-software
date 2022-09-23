@@ -126,8 +126,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
 
-      super.doAction(timeInState);
-
       boolean requestSwingSpeedUp = balanceManager.shouldAjudstTimeFromTrackingError();
 
       boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
@@ -146,6 +144,7 @@ public class WalkingSingleSupportState extends SingleSupportState
                                            swingTime);
 
          balanceManager.adjustFootstep(nextFootstep);
+         // FIXME I don't need to be computing this again
          balanceManager.computeICPPlan();
 
          updateHeightManager();
