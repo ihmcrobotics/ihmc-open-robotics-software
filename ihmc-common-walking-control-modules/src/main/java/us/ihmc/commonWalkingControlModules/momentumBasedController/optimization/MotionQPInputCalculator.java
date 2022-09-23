@@ -20,6 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQPSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -656,17 +657,51 @@ public class MotionQPInputCalculator
 
       // Compute the task Jacobian: J = S * A
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
-      CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
+
+      if (commandToConvert.isConsiderAllJoints())
+      {
+         CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
+      }
+      else
+      {
+         tempTaskJacobian.reshape(taskSize, numberOfDoFs);
+         CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempTaskJacobian);
+         qpInputToPack.taskJacobian.zero();
+         List<JointReadOnly> jointSelection = commandToConvert.getJointSelection();
+
+         for (int i = 0; i < jointSelection.size(); i++)
+         {
+            int[] jointIndices = jointIndexHandler.getJointIndices(jointSelection.get(i));
+            int jointFirstIndex = jointIndices[0];
+            int jointLastIndex = jointIndices[jointIndices.length - 1];
+            CommonOps_DDRM.extract(tempTaskJacobian, 0, taskSize, jointFirstIndex, jointLastIndex + 1, qpInputToPack.taskJacobian, 0, jointFirstIndex);
+         }
+      }
 
       commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
       angularMomentum.changeFrame(centerOfMassFrame);
       linearMomentum.changeFrame(centerOfMassFrame);
-      angularMomentum.get(0, tempTaskObjective);
-      linearMomentum.get(3, tempTaskObjective);
-      DMatrixRMaj convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
 
-      // Compute the task objective: p = S * ( hDot - ADot qDot )
-      CommonOps_DDRM.subtractEquals(tempTaskObjective, convectiveTerm);
+      if (commandToConvert.isConsiderAllJoints())
+      {
+         angularMomentum.get(0, tempTaskObjective);
+         linearMomentum.get(3, tempTaskObjective);
+         DMatrixRMaj convectiveTerm = centroidalMomentumRateCalculator.getBiasSpatialForceMatrix();
+
+         // Compute the task objective: p = S * ( hDot - ADot qDot )
+         CommonOps_DDRM.subtractEquals(tempTaskObjective, convectiveTerm);
+      }
+      else
+      {
+         centroidalMomentumRateCalculator.getBiasSpatialForceMatrix(commandToConvert.getJointSelection(), tempTaskObjective);
+
+         // Compute the task objective: p = S * ( hDot - ADot qDot )
+         for (Axis3D axis : Axis3D.values)
+         {
+            tempTaskObjective.set(0 + axis.ordinal(), angularMomentum.getElement(axis) - tempTaskObjective.get(0 + axis.ordinal()));
+            tempTaskObjective.set(3 + axis.ordinal(), linearMomentum.getElement(axis) - tempTaskObjective.get(3 + axis.ordinal()));
+         }
+      }
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
       recordTaskJacobian(qpInputToPack.taskJacobian);

@@ -39,7 +39,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class PartialFootholdCropperModuleTest
+public class FootholdCroppingModuleTest
 {
    protected RobotSide side;
    protected YoRegistry registry;
@@ -77,18 +77,18 @@ public class PartialFootholdCropperModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      FootholdRotationParameters parameters = new FootholdRotationParameters(registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(true), registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
       FrameConvexPolygon2DBasics croppedFootPolygon = createFootPolygon(soleFrame, footLength, footWidth, footWidth);
-      PartialFootholdCropperModule partialFootholdModule = new PartialFootholdCropperModule(side,
-                                                                                            soleFrame,
-                                                                                            defaultFootPolygons,
-                                                                                            parameters,
-                                                                                            dt,
-                                                                                            registry,
-                                                                                            null);
+      FootholdCroppingModule partialFootholdModule = new FootholdCroppingModule(side,
+                                                                                soleFrame,
+                                                                                defaultFootPolygons,
+                                                                                parameters,
+                                                                                dt,
+                                                                                registry,
+                                                                                null);
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
@@ -165,11 +165,15 @@ public class PartialFootholdCropperModuleTest
       convexPolygonTools.cutPolygonWithLine(expectedLine, croppedFootPolygon, RobotSide.RIGHT);
 
       EuclidCoreTestTools.assertGeometricallyEquals(expectedLine, lineEstimate, 1.0e-5);
-      assertTrue(partialFootholdModule.shouldApplyShrunkenFoothold());
-      EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
 
-      for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
-         assertTrue(partialFootholdModule.getShrunkenFootPolygon().signedDistance(measuredCoP) < 1e-3);
+      if(partialFootholdModule.checkIfCroppingIsEnabled())
+      {
+         assertTrue(partialFootholdModule.shouldApplyShrunkenFoothold());
+         EuclidCoreTestTools.assertEquals(croppedFootPolygon, partialFootholdModule.getShrunkenFootPolygon(), 1.0e-5);
+
+         for (FramePoint2DReadOnly measuredCoP : measuredCoPs)
+            assertTrue(partialFootholdModule.getShrunkenFootPolygon().signedDistance(measuredCoP) < 1e-3);
+      }
    }
 
    @Disabled
@@ -180,18 +184,18 @@ public class PartialFootholdCropperModuleTest
 
       double footLength = 0.22;
       double footWidth = 0.11;
-      FootholdRotationParameters parameters = new FootholdRotationParameters(registry);
+      YoPartialFootholdModuleParameters parameters = new YoPartialFootholdModuleParameters(new PartialFootholdModuleParameters(true), registry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       List<? extends FramePoint2DReadOnly> defaultFootPolygons = createFootPolygonPoints(soleFrame, footLength, footWidth, footWidth);
       FrameConvexPolygon2DBasics croppedFootPolygon = createFootPolygon(soleFrame, footLength, footWidth, footWidth);
-      PartialFootholdCropperModule partialFootholdModule = new PartialFootholdCropperModule(side,
-                                                                                            soleFrame,
-                                                                                            defaultFootPolygons,
-                                                                                            parameters,
-                                                                                            dt,
-                                                                                            registry,
-                                                                                            null);
+      FootholdCroppingModule partialFootholdModule = new FootholdCroppingModule(side,
+                                                                                soleFrame,
+                                                                                defaultFootPolygons,
+                                                                                parameters,
+                                                                                dt,
+                                                                                registry,
+                                                                                null);
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.findVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
@@ -367,7 +371,7 @@ public class PartialFootholdCropperModuleTest
          assertTrue(partialFootholdModule.getShrunkenFootPolygon().isPointInside(measuredCoP));
    }
 
-   private class TestSoleFrame extends MovingReferenceFrame
+   private static class TestSoleFrame extends MovingReferenceFrame
    {
       private final Twist twistRelativeToParent;
       private final Pose3DReadOnly poseRelativeToParent;

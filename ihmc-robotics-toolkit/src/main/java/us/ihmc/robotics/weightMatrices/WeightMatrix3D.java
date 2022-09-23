@@ -137,6 +137,19 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
     * </p>
     * 
+    * @param weights 3D tuple holding the weight values along each axis. Not modified.
+    */
+   public void setWeights(Tuple3DReadOnly weights)
+   {
+      setWeights(weights.getX(), weights.getY(), weights.getZ());
+   }
+
+   /**
+    * Sets the weights.
+    * <p>
+    * Note that it is preferable to also set weight frame to which this weight matrix is referring to.
+    * </p>
+    * 
     * @param xWeight the weight of the x Axis.
     * @param yWeight the weight of the y Axis.
     * @param zWeight the weight of the z Axis.

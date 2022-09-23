@@ -77,6 +77,7 @@ public class GDXModelLoader
                }
                else
                {
+                  LogTools.warn("Using Assimp to load {}. It is recommended to convert to G3DJ for more reliable and faster loading.", modelFileName);
                   model = new GDXAssimpModelLoader(modelFileName).load();
                }
                for (Material material : model.materials)
@@ -94,6 +95,14 @@ public class GDXModelLoader
 
                      map.dispose();
                   }
+               }
+
+               long numberOfVertices = GDXTools.countVertices(model);
+               LogTools.debug("Loaded {} ({} vertices)", modelFileName, numberOfVertices);
+
+               if (numberOfVertices > 15000)
+               {
+                  LogTools.warn("{} has {} vertices, which is a lot! This will begin to affect frame rate.", modelFileName, numberOfVertices);
                }
 
                loadedModels.put(modelFileName, model);

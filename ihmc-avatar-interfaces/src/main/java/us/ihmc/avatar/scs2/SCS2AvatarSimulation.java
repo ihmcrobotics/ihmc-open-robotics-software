@@ -145,33 +145,20 @@ public class SCS2AvatarSimulation
    public void resetRobot(boolean simulateAfterReset)
    {
       simulationConstructionSet.pause();
-      simulationConstructionSet.stopSimulationThread();
 
-      for (SimJointBasics joint : robot.getAllJoints())
-      {
-         joint.setJointConfigurationToZero();
-         joint.setJointTwistToZero();
-         joint.setJointAccelerationToZero();
-         joint.setJointTauToZero();
-      }
-
-      robotInitialSetup.initializeRobot(robot.getRootBody());
-      robot.updateFrames();
-      FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
-      RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
-
-      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-      SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
-      estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
-      controllerThread.initialize();
-      stepGeneratorThread.initialize();
-      masterContext.set(estimatorThread.getHumanoidRobotContextData());
+      boolean wasSimulationThreadRunning = simulationConstructionSet.isSimulationThreadRunning();
+      if (wasSimulationThreadRunning)
+         simulationConstructionSet.stopSimulationThread();
 
       simulationConstructionSet.reinitializeSimulation();
-      simulationConstructionSet.startSimulationThread();
 
-      if (simulateAfterReset)
-         simulationConstructionSet.simulate();
+      if (wasSimulationThreadRunning)
+      {
+         simulationConstructionSet.startSimulationThread();
+
+         if (simulateAfterReset)
+            simulationConstructionSet.simulate();
+      }
    }
 
    private void initializeCamera(Orientation3DReadOnly robotOrientation, Tuple3DReadOnly robotPosition)
@@ -447,7 +434,7 @@ public class SCS2AvatarSimulation
    {
       return showGUI;
    }
-   
+
    // Buffer controls:
    public void cropBuffer()
    {
@@ -478,13 +465,13 @@ public class SCS2AvatarSimulation
       checkSimulationSessionAlive();
       getSimulationConstructionSet().gotoBufferOutPoint();
    }
-   
+
    public void gotoBufferIndex(int bufferIndex)
    {
       checkSimulationSessionAlive();
       getSimulationConstructionSet().gotoBufferIndex(bufferIndex);
    }
-   
+
    public int getOutPoint()
    {
       checkSimulationSessionAlive();

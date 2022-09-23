@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -67,7 +66,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private ICPControllerParameters icpOptimizationParameters;
    private StepAdjustmentParameters stepAdjustmentParameters;
    private AtlasSteppingParameters steppingParameters;
-   private LeapOfFaithParameters leapOfFaithParameters;
 
    private final OneDoFJointPrivilegedConfigurationParameters kneePrivilegedConfigurationParameters;
 
@@ -93,7 +91,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       toeOffParameters = new AtlasToeOffParameters(jointMap);
       swingTrajectoryParameters = new AtlasSwingTrajectoryParameters(target, jointMap.getModelScale());
       steppingParameters = new AtlasSteppingParameters(jointMap);
-      leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
       icpOptimizationParameters = new AtlasICPControllerParameters(runningOnRealRobot);
       stepAdjustmentParameters = new AtlasStepAdjustmentParameters();
@@ -590,13 +587,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return steppingParameters;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
-   }
-
    @Override
    public double getMinSwingTrajectoryClearanceFromStanceFoot()
    {
@@ -628,11 +618,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setSteppingParameters(AtlasSteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
-   }
-
-   public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
-   {
-      this.leapOfFaithParameters = leapOfFaithParameters;
    }
 
    /**

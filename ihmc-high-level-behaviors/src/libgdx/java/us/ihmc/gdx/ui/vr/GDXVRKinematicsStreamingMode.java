@@ -72,8 +72,9 @@ public class GDXVRKinematicsStreamingMode
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
 
-   private HandConfiguration leftHandConfiguration = HandConfiguration.CLOSE;
-   private HandConfiguration rightHandConfiguration = HandConfiguration.CLOSE;
+   private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
+   private int leftIndex = -1;
+   private int rightIndex = -1;
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -152,8 +153,8 @@ public class GDXVRKinematicsStreamingMode
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
-            sendHandCommand(RobotSide.LEFT, leftHandConfiguration);
-            leftHandConfiguration = negateHandConfiguration(leftHandConfiguration);
+            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
+            sendHandCommand(RobotSide.LEFT, handConfiguration);
          }
       });
 
@@ -169,8 +170,8 @@ public class GDXVRKinematicsStreamingMode
          InputDigitalActionData clickTriggerButton = controller.getClickTriggerActionData();
          if (clickTriggerButton.bChanged() && !clickTriggerButton.bState())
          {
-            sendHandCommand(RobotSide.RIGHT, rightHandConfiguration);
-            rightHandConfiguration = negateHandConfiguration(rightHandConfiguration);
+            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
+            sendHandCommand(RobotSide.RIGHT, handConfiguration);
          }
       });
 
@@ -236,8 +237,14 @@ public class GDXVRKinematicsStreamingMode
       }
    }
 
-   public void update()
+   public void update(boolean ikStreamingModeEnabled)
    {
+      // Safety features!
+      if (!ikStreamingModeEnabled)
+         streamToController = false;
+      if (!enabled.get())
+         streamToController = false;
+
       if (status.getMessageNotification().poll())
       {
          KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
@@ -369,9 +376,15 @@ public class GDXVRKinematicsStreamingMode
                                    HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, desiredHandConfiguration));
    }
 
-   public HandConfiguration negateHandConfiguration(HandConfiguration handConfiguration)
+   public HandConfiguration nextHandConfiguration(RobotSide robotSide)
    {
-      return handConfiguration == HandConfiguration.CLOSE ? HandConfiguration.OPEN : HandConfiguration.CLOSE;
+      if (robotSide == RobotSide.LEFT)
+      {
+         leftIndex++;
+         return handConfigurations[leftIndex % handConfigurations.length];
+      }
+      rightIndex++;
+      return handConfigurations[rightIndex % handConfigurations.length];
    }
 
    public RestartableMissionControlProcess getKinematicsStreamingToolboxProcess()

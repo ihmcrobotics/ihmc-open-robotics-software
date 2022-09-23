@@ -170,15 +170,10 @@ public abstract class TransferState extends WalkingState
 
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
-                                                     nextFootstep,
-                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
-                                                     desiredCoP,
                                                      balanceManager.getDesiredICP(),
-                                                     capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP(),
-                                                     balanceManager.getPerfectCoP());
+                                                     capturePoint2d);
 
          if (feetManager.okForPointToeOff(false))
          {
