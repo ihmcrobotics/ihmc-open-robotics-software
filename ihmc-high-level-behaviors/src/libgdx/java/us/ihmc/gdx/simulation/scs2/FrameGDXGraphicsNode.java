@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
+import us.ihmc.gdx.ui.gizmo.GDXVisualModelInstance;
 
 import java.util.ArrayList;
 
@@ -28,12 +28,12 @@ public class FrameGDXGraphicsNode
          coordinateFrame = GDXModelBuilder.createCoordinateFrameInstance(0.15);
    }
 
-   public void addModelPart(DynamicGDXModel model, String name, float x, float y, float z)
+   public void addModelPart(GDXVisualModelInstance model, String name, float x, float y, float z)
    {
       parts.add(new FrameGDXNodePart(referenceFrame, model, name, x, y, z));
    }
 
-   public void addModelPart(DynamicGDXModel model, String name)
+   public void addModelPart(GDXVisualModelInstance model, String name)
    {
       parts.add(new FrameGDXNodePart(referenceFrame, model, name));
    }

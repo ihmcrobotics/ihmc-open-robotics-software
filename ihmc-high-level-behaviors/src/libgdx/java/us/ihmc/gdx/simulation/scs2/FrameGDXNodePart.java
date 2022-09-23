@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
+import us.ihmc.gdx.ui.gizmo.GDXVisualModelInstance;
 import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,25 +18,23 @@ public class FrameGDXNodePart
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   private DynamicGDXModel model;
-   private ModelInstance modelInstance;
+   private GDXVisualModelInstance modelInstance;
    private final String name;
    private ReferenceFrame modelFrame;
 
-   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name, float x, float y, float z)
+   public FrameGDXNodePart(ReferenceFrame referenceFrame, GDXVisualModelInstance modelInstance, String name, float x, float y, float z)
    {
-      this(referenceFrame, model, name);
+      this(referenceFrame, modelInstance, name);
       scale(x, y, z);
    }
 
-   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name)
+   public FrameGDXNodePart(ReferenceFrame referenceFrame, GDXVisualModelInstance modelInstance, String name)
    {
-      this.model = model;
-      modelInstance = model.getOrCreateModelInstance();
+      this.modelInstance = modelInstance;
       this.name = name;
       modelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("modelFrame" + INDEX.getAndIncrement(),
                                                                                      referenceFrame,
-                                                                                     model.getLocalTransform());
+                                                                                     modelInstance.getLocalTransform());
    }
 
    public void update()
@@ -55,7 +53,6 @@ public class FrameGDXNodePart
    public void scale(float x, float y, float z)
    {
       modelInstance.transform.scale(x, y, z);
-      model.getModelInstance().transform.scale(x, y, z);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -65,7 +62,7 @@ public class FrameGDXNodePart
 
    public void dispose()
    {
-      model.dispose();
+
    }
 
    public ModelInstance getModelInstance()

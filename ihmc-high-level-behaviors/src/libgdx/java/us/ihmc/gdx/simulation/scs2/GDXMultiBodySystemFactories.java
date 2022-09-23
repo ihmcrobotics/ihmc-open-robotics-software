@@ -6,7 +6,7 @@ import java.util.concurrent.Executor;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
+import us.ihmc.gdx.ui.gizmo.GDXVisualModelInstance;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -177,20 +177,20 @@ public class GDXMultiBodySystemFactories
                                             float z)
    {
       ReferenceFrame graphicFrame = gdxRigidBody.isRootBody() ? gdxRigidBody.getBodyFixedFrame() : gdxRigidBody.getParentJoint().getFrameAfterJoint();
-      List<DynamicGDXModel> visualModels = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
-      List<DynamicGDXModel> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
+      List<GDXVisualModelInstance> visualModels = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
+      List<GDXVisualModelInstance> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
       if (!visualModels.isEmpty() || !collisionModels.isEmpty())
       {
          FrameGDXGraphicsNode visualGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
          int i = 0;
-         for (DynamicGDXModel visualModel : visualModels)
+         for (GDXVisualModelInstance visualModel : visualModels)
          {
             visualGraphicsNode.addModelPart(visualModel, gdxRigidBody.getName() + "Visual" + i, x, y, z);
          }
          gdxRigidBody.setVisualGraphics(visualGraphicsNode);
          FrameGDXGraphicsNode collisionGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
          i = 0;
-         for (DynamicGDXModel collisionModel : collisionModels)
+         for (GDXVisualModelInstance collisionModel : collisionModels)
          {
             collisionGraphicsNode.addModelPart(collisionModel, gdxRigidBody.getName() + "Collision" + i, x, y, z);
          }
@@ -204,20 +204,20 @@ public class GDXMultiBodySystemFactories
                                             ClassLoader resourceClassLoader)
    {
       ReferenceFrame graphicFrame = gdxRigidBody.isRootBody() ? gdxRigidBody.getBodyFixedFrame() : gdxRigidBody.getParentJoint().getFrameAfterJoint();
-      List<DynamicGDXModel> visualModels = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
-      List<DynamicGDXModel> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
+      List<GDXVisualModelInstance> visualModels = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
+      List<GDXVisualModelInstance> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
       if (!visualModels.isEmpty() || !collisionModels.isEmpty())
       {
          FrameGDXGraphicsNode visualGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
          int i = 0;
-         for (DynamicGDXModel visualModel : visualModels)
+         for (GDXVisualModelInstance visualModel : visualModels)
          {
             visualGraphicsNode.addModelPart(visualModel, gdxRigidBody.getName() + "Visual" + i);
          }
          gdxRigidBody.setVisualGraphics(visualGraphicsNode);
          FrameGDXGraphicsNode collisionGraphicsNode = new FrameGDXGraphicsNode(graphicFrame);
          i = 0;
-         for (DynamicGDXModel collisionModel : collisionModels)
+         for (GDXVisualModelInstance collisionModel : collisionModels)
          {
             collisionGraphicsNode.addModelPart(collisionModel, gdxRigidBody.getName() + "Collision" + i);
          }
