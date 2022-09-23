@@ -178,10 +178,6 @@ public class GDXVRKinematicsStreamingMode
          }
          if (enablerReplay.get() && bButton.bChanged() && !bButton.bState()){
             isReplaying = !isReplaying;
-            if (isReplaying)
-               LogTools.info("Replay active");
-            else
-               LogTools.info("Replay deactived");
             if (trajRecorder.hasDoneReplay() && !(trajRecorder.getPath().equals(replayPath.get())))
                trajRecorder.setPath(replayPath.get());
          }
@@ -220,13 +216,11 @@ public class GDXVRKinematicsStreamingMode
 
       if ((enabled.get() || isReplaying) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
-         LogTools.info("Inside toolbox");
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
             {
-               LogTools.info("Inside controller " + trajRecorder.hasDoneReplay());
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
@@ -235,7 +229,6 @@ public class GDXVRKinematicsStreamingMode
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                if(isReplaying)
                {
-                  LogTools.info("Is replaying now");
                   Double[] dataPoint= trajRecorder.play();
                   if(!trajRecorder.hasDoneReplay())
                   {
