@@ -209,7 +209,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), emptyEnvironment, simulationTestingParameters);
       simulationTestHelper.start();
 
-      ((YoBoolean) simulationTestHelper.findVariable("doPartialFootholdDetection")).set(false);
+//      ((YoBoolean) simulationTestHelper.findVariable("doPartialFootholdDetection")).set(false);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionTimeOnFootIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfOtherFootHasNoWidth")).set(0.7);

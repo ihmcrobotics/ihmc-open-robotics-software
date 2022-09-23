@@ -33,7 +33,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * this command.
     * 
     * @param controllerCoreMode desired controller core mode. Choose between Inverse Dynamics, Inverse
-    *           Kinematics, or Virtual Model Control.
+    *                           Kinematics, or Virtual Model Control.
     */
    public ControllerCoreCommand(WholeBodyControllerCoreMode controllerCoreMode)
    {
@@ -142,7 +142,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
     * Used to set the desired controller core mode.
     * 
     * @param controllerCoreMode Desired controller core mode. Choose from Inverse Dynamics, Inverse
-    *           Kinematics, and Virtual Model Control.
+    *                           Kinematics, and Virtual Model Control.
     */
    public void setControllerCoreMode(WholeBodyControllerCoreMode controllerCoreMode)
    {
@@ -202,6 +202,16 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    public LowLevelOneDoFJointDesiredDataHolder getLowLevelOneDoFJointDesiredDataHolder()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
+   }
+
+   /**
+    * Set the controller core command data from an existing command.
+    * 
+    * @param other other controller core command to overwrite the current command.
+    */
+   public void set(ControllerCoreCommand other)
+   {
+      set((ControllerCoreCommandInterface) other);
    }
 
    /**
