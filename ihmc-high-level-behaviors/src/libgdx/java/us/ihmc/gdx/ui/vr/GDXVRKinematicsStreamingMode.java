@@ -178,10 +178,15 @@ public class GDXVRKinematicsStreamingMode
          }
          if (enablerReplay.get() && bButton.bChanged() && !bButton.bState()){
             isReplaying = !isReplaying;
+            if (isReplaying)
+               LogTools.info("Replay active");
+            else
+               LogTools.info("Replay deactived");
             if (trajRecorder.hasDoneReplay() && !(trajRecorder.getPath().equals(replayPath.get())))
                trajRecorder.setPath(replayPath.get());
          }
       });
+
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
@@ -215,6 +220,7 @@ public class GDXVRKinematicsStreamingMode
 
       if ((enabled.get() || isReplaying) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
+         LogTools.info("Inside");
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
@@ -228,6 +234,7 @@ public class GDXVRKinematicsStreamingMode
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                if(isReplaying && !trajRecorder.hasDoneReplay())
                {
+                  LogTools.info("Is replaying now");
                   Double[] dataPoint= trajRecorder.play();
                   tempFramePose.getPosition().set(dataPoint[0],dataPoint[1],dataPoint[2]);
                   tempFramePose.getOrientation().set(dataPoint[3],dataPoint[4],dataPoint[5],dataPoint[6]);
@@ -394,8 +401,12 @@ public class GDXVRKinematicsStreamingMode
    {
       if (enablerReplay != this.enablerReplay.get())
          this.enablerReplay.set(enablerReplay);
-      if(enablerReplay && (enablerRecording.get()||enabled.get()))
-         this.enablerReplay.set(false); //check no concurrency replay and record/streaming
+      if (enablerReplay)
+      {
+         wakeUpToolbox();
+         if(enablerRecording.get()||enabled.get())
+            this.enablerReplay.set(false); //check no concurrency replay and record/streaming
+      }
    }
 
    private void reinitializeToolbox()
