@@ -12,6 +12,12 @@ public class SlamWrapperTest
 {
    static
    {
+      // We need to disable javacpp from trying to automatically load libraries.
+      // Otherwise, it will try to load them by name when they aren't in the library path
+      // (LD_LIBRARY_PATH on Linux).
+      //
+      // The approach taken here is to use System.load to load each library by explicit
+      // absolute path on disk.
       System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
    }
 
@@ -28,7 +34,8 @@ public class SlamWrapperTest
       libraryFiles.add("libjniSlamWrapper.so");
       libraryFiles.add("libslam-wrapper.so");
 
-      for (String libraryFile : libraryFiles) {
+      for (String libraryFile : libraryFiles)
+      {
          try
          {
             Loader.cacheResource(libraryFile);
