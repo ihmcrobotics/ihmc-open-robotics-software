@@ -407,7 +407,7 @@ public class BalanceManager
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionHandler.pollHasNewStepConstraintRegions());
 
-      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, residualICPErrorForStepAdjustment, omega0);
+      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, omega0);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
       return footstepWasAdjusted;
