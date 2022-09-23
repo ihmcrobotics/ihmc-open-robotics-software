@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
