@@ -42,6 +42,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3Tr
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -54,6 +55,9 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class SwingState extends AbstractFootControlState
 {
    private static final boolean visualizeAdjustedSwing = false;
+
+   // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
+   private boolean firstTickInState = true;
 
    private final YoBoolean replanTrajectory;
    private final YoBoolean footstepWasAdjusted;
@@ -146,10 +150,16 @@ public class SwingState extends AbstractFootControlState
 
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
+   private final ExecutionTimer onEntryTimer;
+   private final ExecutionTimer doActionTimer;
+
    public SwingState(FootControlHelper footControlHelper, PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
       this.gains = gains;
+
+      onEntryTimer = new ExecutionTimer(footControlHelper.getRobotSide() + "OnEntryTimer", registry);
+      doActionTimer = new ExecutionTimer(footControlHelper.getRobotSide() + "DoActionTimer", registry);
 
       this.workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
@@ -296,6 +306,7 @@ public class SwingState extends AbstractFootControlState
    @Override
    public void onEntry()
    {
+      onEntryTimer.startMeasurement();
       super.onEntry();
       swingTrajectoryCalculator.setShouldVisualize(true);
       currentTime.set(0.0);
@@ -312,11 +323,17 @@ public class SwingState extends AbstractFootControlState
       spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 
       initializeTrajectory();
+
+      // reset this counter so that certain operations aren't duplicated
+      firstTickInState = true;
+      onEntryTimer.stopMeasurement();
    }
 
    @Override
    public void onExit(double timeInState)
    {
+      firstTickInState = true;
+
       super.onExit(timeInState);
       currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(Double.NaN);
@@ -346,6 +363,7 @@ public class SwingState extends AbstractFootControlState
    @Override
    public void doSpecificAction(double timeInState)
    {
+      doActionTimer.startMeasurement();
       updateRadialFrame();
 
       computeAndPackTrajectory(timeInState);
@@ -388,6 +406,7 @@ public class SwingState extends AbstractFootControlState
 
       yoDesiredPosition.setMatchingFrame(desiredPosition);
       yoDesiredLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      doActionTimer.stopMeasurement();
    }
 
    private void updateLiftOffKneeAcceleration()
@@ -437,10 +456,9 @@ public class SwingState extends AbstractFootControlState
       else
          activeTrajectory = blendedSwingTrajectory;
 
-      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && swingTrajectoryCalculator.doOptimizationUpdate())
+      if (swingTrajectoryCalculator.getActiveTrajectoryType() != TrajectoryType.WAYPOINTS && (firstTickInState || swingTrajectoryCalculator.doOptimizationUpdate()))
       { // haven't finished original planning
          fillAndInitializeTrajectories(false);
-
       }
       else if (replanTrajectory.getBooleanValue()) // need to update the swing trajectory to account for the end position moving
          fillAndInitializeBlendedTrajectories();
@@ -481,6 +499,7 @@ public class SwingState extends AbstractFootControlState
       transformDesiredsFromSoleFrameToControlFrame();
       secondaryJointWeightScale.set(computeSecondaryJointWeightScale(time));
 
+      firstTickInState = false;
       if (swingVisualizer != null)
          swingVisualizer.visualize();
    }
