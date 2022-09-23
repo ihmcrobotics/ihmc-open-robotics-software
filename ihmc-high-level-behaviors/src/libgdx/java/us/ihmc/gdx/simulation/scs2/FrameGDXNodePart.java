@@ -23,6 +23,12 @@ public class FrameGDXNodePart
    private final String name;
    private ReferenceFrame modelFrame;
 
+   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name, float x, float y, float z)
+   {
+      this(referenceFrame, model, name);
+      scale(x, y, z);
+   }
+
    public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name)
    {
       this.model = model;
@@ -31,12 +37,6 @@ public class FrameGDXNodePart
       modelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("modelFrame" + INDEX.getAndIncrement(),
                                                                                      referenceFrame,
                                                                                      model.getLocalTransform());
-   }
-
-   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name, float x, float y, float z)
-   {
-      this(referenceFrame,model,name);
-      scale(x, y, z);
    }
 
    public void update()
