@@ -201,7 +201,6 @@ public class BalanceManager
    private RobotSide supportSide;
    private final YoFrameVector2D residualICPErrorForStepAdjustment = new YoFrameVector2D("residualICPErrorForStepAdjustment", worldFrame, registry);
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
-   private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
    private final SimpleFootstep nextFootstep = new SimpleFootstep();
    private final FootstepTiming nextFootstepTiming = new FootstepTiming();
@@ -1002,12 +1001,6 @@ public class BalanceManager
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
    {
       swingSpeedUpForStepAdjustment.set(contactStateManager.getTimeRemainingInCurrentSupportSequence() - timeRemainingInSwing);
-   }
-
-   @Deprecated
-   public FrameVector3DReadOnly getEffectiveICPAdjustment()
-   {
-      return effectiveICPAdjustment;
    }
 
    public FramePoint3DReadOnly getCapturePoint()

@@ -113,7 +113,6 @@ public class WalkingMessageHandler
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
 
    private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
-   private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
    private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
@@ -1031,29 +1030,6 @@ public class WalkingMessageHandler
 
    private final FrameVector3D footstepOffsetVector = new FrameVector3D();
 
-   private final SideDependentList<FramePoint3DReadOnly> desiredFootstepPositions = new SideDependentList<>();
-   private final SideDependentList<FramePoint3DReadOnly> actualFootstepPositions = new SideDependentList<>();
-
-   public void registerDesiredFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly desiredFootstepPosition)
-   {
-      desiredFootstepPositions.put(robotSide, desiredFootstepPosition);
-   }
-
-   public void registerActualFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly actualFootstepPosition)
-   {
-      actualFootstepPositions.put(robotSide, actualFootstepPosition);
-   }
-
-
-   private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
-
-   public void addOffsetVectorFromTouchdownError(RobotSide robotSide)
-   {
-      touchdownErrorVector.sub(actualFootstepPositions.get(robotSide), desiredFootstepPositions.get(robotSide));
-
-      addOffsetVectorOnTouchdown(touchdownErrorVector);
-   }
-
    public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
       if (!offsettingXYPlanWithFootstepError.getValue() && !offsettingHeightPlanWithFootstepError.getValue())
@@ -1082,18 +1058,7 @@ public class WalkingMessageHandler
       this.planOffsetInWorld.add(footstepOffsetVector);
       setPlanOffsetInternal(planOffsetInWorld);
 
-      planOffsetFromAdjustment.setToZero();
-
       updateVisualization();
-   }
-
-   private final FrameVector3D totalOffset = new FrameVector3D();
-
-   public void setPlanOffsetFromAdjustment(FrameVector3DReadOnly planOffsetFromAdjustment)
-   {
-      this.planOffsetFromAdjustment.set(planOffsetFromAdjustment);
-      totalOffset.add(planOffsetInWorld, planOffsetFromAdjustment);
-      setPlanOffsetInternal(totalOffset);
    }
 
    private void setPlanOffsetInternal(FrameVector3DReadOnly planOffset)

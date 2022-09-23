@@ -151,9 +151,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          updateHeightManager();
       }
 
-      // if the footstep was adjusted, shift the CoM plan, if there is one.
-      walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
-
       if (requestSwingSpeedUp)
       {
          double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
