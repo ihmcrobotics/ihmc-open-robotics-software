@@ -118,14 +118,14 @@ public class IMUBasedJointPositionEstimator
    }
 
 
-   public void setQPreferredPerJoint(OneDoFJointBasics joint, double desiredWeight)
+   public void setQPreferredPerJoint(OneDoFJointBasics joint, double desiredPosition)
    {
       usePreferredPositions = true;
       for (int i = 0; i < joints.length; i++)
       {
          if (joints[i].equals(joint))
          {
-            qPreferred.set(i, desiredWeight);
+            qPreferred.set(i, desiredPosition - joints[i].getQ());
             break;
          }
       }
