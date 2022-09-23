@@ -130,54 +130,29 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       boolean requestSwingSpeedUp = balanceManager.shouldAjudstTimeFromTrackingError();
 
-      if (walkingMessageHandler.hasRequestedFootstepAdjustment())
+      boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
+
+      if (footstepIsBeingAdjusted)
       {
-         boolean footstepHasBeenAdjusted = walkingMessageHandler.pollRequestedFootstepAdjustment(nextFootstep);
+         requestSwingSpeedUp = true;
+         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
+         failureDetectionControlModule.setNextFootstep(nextFootstep);
+         updateFootstepParameters();
 
-         if (footstepHasBeenAdjusted)
-         {
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
+         feetManager.adjustSwingTrajectory(swingSide,
+                                           nextFootstep,
+                                           balanceManager.getFinalDesiredCoMVelocity(),
+                                           balanceManager.getFinalDesiredCoMAcceleration(),
+                                           swingTime);
 
-            feetManager.adjustSwingTrajectory(swingSide,
-                                              nextFootstep,
-                                              balanceManager.getFinalDesiredCoMVelocity(),
-                                              balanceManager.getFinalDesiredCoMAcceleration(),
-                                              swingTime);
+         balanceManager.adjustFootstep(nextFootstep);
+         balanceManager.computeICPPlan();
 
-            balanceManager.adjustFootstep(nextFootstep);
-            balanceManager.computeICPPlan();
-
-            updateHeightManager();
-         }
+         updateHeightManager();
       }
-      else
-      {
-         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
-         if (footstepIsBeingAdjusted)
-         {
-            requestSwingSpeedUp = true;
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide,
-                                              nextFootstep,
-                                              balanceManager.getFinalDesiredCoMVelocity(),
-                                              balanceManager.getFinalDesiredCoMAcceleration(),
-                                              swingTime);
-
-            balanceManager.adjustFootstep(nextFootstep);
-            balanceManager.computeICPPlan();
-
-            updateHeightManager();
-         }
-
-         // if the footstep was adjusted, shift the CoM plan, if there is one.
-         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
-      }
+      // if the footstep was adjusted, shift the CoM plan, if there is one.
+      walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
 
       if (requestSwingSpeedUp)
       {
