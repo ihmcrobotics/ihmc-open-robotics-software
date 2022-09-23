@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 public class GDXVisualTools
 {
    private static final Color DEFAULT_COLOR = Color.BLUE;
-   private static final Material DEFAULT_MATERIAL = new Material(ColorAttribute.createDiffuse(DEFAULT_COLOR));
 
    public static List<DynamicGDXModel> collectNodes(List<VisualDefinition> visualDefinitions)
    {
@@ -87,10 +86,11 @@ public class GDXVisualTools
             return null;
 
          gdxModel.setModel(GDXModelLoader.load(modelFileName));
+         gdxModel.getOrCreateModelInstance();
 
          if (materialDefinition != null && materialDefinition.getDiffuseColor() != null)
          {
-            for (Material material : gdxModel.getModel().materials)
+            for (Material material : gdxModel.getModelInstance().materials)
             {
                Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
                material.set(ColorAttribute.createDiffuse(color));
@@ -113,7 +113,7 @@ public class GDXVisualTools
    public static Material toMaterial(MaterialDefinition materialDefinition)
    {
       if (materialDefinition == null)
-         return DEFAULT_MATERIAL;
+         return new Material(ColorAttribute.createDiffuse(DEFAULT_COLOR));
 
       Color color = toColor(materialDefinition.getDiffuseColor(), Color.WHITE);
 
