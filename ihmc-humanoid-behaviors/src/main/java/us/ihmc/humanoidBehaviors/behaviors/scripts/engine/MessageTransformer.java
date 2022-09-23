@@ -100,16 +100,6 @@ public final class MessageTransformer
    {
       Map<Class, CustomTransformer> customTransformers = new HashMap<>();
 
-      customTransformers.put(AdjustFootstepMessage.class, new CustomTransformer<AdjustFootstepMessage>()
-      {
-         @Override
-         public void transform(AdjustFootstepMessage object, RigidBodyTransform rigidBodyTransformToApply)
-         {
-            object.getLocation().applyTransform(rigidBodyTransformToApply);
-            object.getOrientation().applyTransform(rigidBodyTransformToApply);
-         }
-      });
-
       customTransformers.put(FootstepDataMessage.class, new CustomTransformer<FootstepDataMessage>()
       {
          @Override
