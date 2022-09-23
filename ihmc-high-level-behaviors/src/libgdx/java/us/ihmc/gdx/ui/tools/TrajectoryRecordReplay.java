@@ -31,6 +31,7 @@ public class TrajectoryRecordReplay<T extends Number>
       T[] values = dataMatrix.get(timeStepReplay);
       if (timeStepReplay>=dataMatrix.size()-2){
          doneReplay=true;
+         this.reset();
          return values;
       }
       else{
@@ -134,5 +135,6 @@ public class TrajectoryRecordReplay<T extends Number>
    public void setPath(String filePath)
    {
       this.filePath = filePath;
+      this.reset();
    }
 }

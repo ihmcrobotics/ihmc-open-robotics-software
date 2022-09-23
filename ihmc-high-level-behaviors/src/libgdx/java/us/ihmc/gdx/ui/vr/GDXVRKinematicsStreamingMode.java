@@ -220,24 +220,33 @@ public class GDXVRKinematicsStreamingMode
 
       if ((enabled.get() || isReplaying) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
-         LogTools.info("Inside");
+         LogTools.info("Inside toolbox");
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
             {
+               LogTools.info("Inside controller " + trajRecorder.hasDoneReplay());
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
-               if(isReplaying && !trajRecorder.hasDoneReplay())
+               if(isReplaying)
                {
                   LogTools.info("Is replaying now");
                   Double[] dataPoint= trajRecorder.play();
-                  tempFramePose.getPosition().set(dataPoint[0],dataPoint[1],dataPoint[2]);
-                  tempFramePose.getOrientation().set(dataPoint[3],dataPoint[4],dataPoint[5],dataPoint[6]);
+                  if(!trajRecorder.hasDoneReplay())
+                  {
+                     tempFramePose.getPosition().set(dataPoint[0],dataPoint[1],dataPoint[2]);
+                     tempFramePose.getOrientation().set(dataPoint[3],dataPoint[4],dataPoint[5],dataPoint[6]);
+                  }
+                  else
+                  {
+                     isReplaying = false;
+                     enablerReplay.set(isReplaying);
+                  }
                }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
