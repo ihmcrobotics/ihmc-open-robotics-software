@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.AtlasDesiredPumpPSIPacket;
@@ -709,60 +708,6 @@ public class HumanoidMessageTools
       message.setResidualError(residualError);
       message.setTotalError(totalError);
       message.setHasMapBeenReset(hasMapBeenReset);
-      return message;
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide,
-                                                                   Point3D location,
-                                                                   Quaternion orientation,
-                                                                   List<Point2D> predictedContactPoints,
-                                                                   TrajectoryType trajectoryType,
-                                                                   double swingHeight)
-   {
-      AdjustFootstepMessage message = new AdjustFootstepMessage();
-      message.setRobotSide(robotSide.toByte());
-      message.getLocation().set(location);
-      message.getOrientation().set(orientation);
-      if (predictedContactPoints != null)
-         MessageTools.copyData(predictedContactPoints.stream().map(Point3D::new).collect(Collectors.toList()), message.getPredictedContactPoints2d());
-      return message;
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide,
-                                                                   Point3D location,
-                                                                   Quaternion orientation,
-                                                                   TrajectoryType trajectoryType,
-                                                                   double swingHeight)
-   {
-      return createAdjustFootstepMessage(robotSide, location, orientation, null, trajectoryType, swingHeight);
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide,
-                                                                   Point3D location,
-                                                                   Quaternion orientation,
-                                                                   List<Point2D> predictedContactPoints)
-   {
-      return createAdjustFootstepMessage(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
-   {
-      return createAdjustFootstepMessage(robotSide, location, orientation, null);
-   }
-
-   public static AdjustFootstepMessage createAdjustFootstepMessage(Footstep footstep)
-   {
-      AdjustFootstepMessage message = new AdjustFootstepMessage();
-      message.setRobotSide(footstep.getRobotSide().toByte());
-
-      FramePoint3D location = new FramePoint3D();
-      FrameQuaternion orientation = new FrameQuaternion();
-      footstep.getPose(location, orientation);
-      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      message.getLocation().set(location);
-      message.getOrientation().set(orientation);
-      MessageTools.copyData(footstep.getPredictedContactPoints().stream().map(Point3D::new).collect(Collectors.toList()),
-                            message.getPredictedContactPoints2d());
       return message;
    }
 

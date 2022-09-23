@@ -680,7 +680,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
-      registerPacketClass(AdjustFootstepMessage.class);
       registerPacketField(ArrayList.class);
       registerPacketField(List.class);
 
