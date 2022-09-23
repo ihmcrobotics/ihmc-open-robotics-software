@@ -39,3 +39,8 @@ void FactorGraphExternal::createOdometryNoiseModel(float *odomVariance)
 void FactorGraphExternal::createOrientedPlaneNoiseModel(float *lmVariances)
 {
 }
+
+void FactorGraphExternal::helloWorldTest()
+{
+    std::cout << "Hello from native code" << std::endl;
+}
