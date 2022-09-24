@@ -907,17 +907,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static AdjustFootstepMessage nextAdjustFootstepMessage(Random random)
-   {
-      AdjustFootstepMessage next = new AdjustFootstepMessage();
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      next.getLocation().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      IntStream.range(0, random.nextInt(10)).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getPredictedContactPoints2d().add()::set);
-      next.setExecutionDelayTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
-      return next;
-   }
-
    public static FootstepStatusMessage nextFootstepStatusMessage(Random random)
    {
       FootstepStatusMessage next = new FootstepStatusMessage();

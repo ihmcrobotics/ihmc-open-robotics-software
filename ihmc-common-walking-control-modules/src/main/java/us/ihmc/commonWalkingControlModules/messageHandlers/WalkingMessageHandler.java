@@ -69,8 +69,6 @@ public class WalkingMessageHandler
    private final YoDouble timeToContinueWalking = new YoDouble("TimeToContinueWalking", registry);
    private final DoubleProvider minimumPauseTime = new DoubleParameter("MinimumPauseTime", registry, 0.0);
 
-   private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
-   private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -316,20 +314,6 @@ public class WalkingMessageHandler
       return stepConstraintRegionHandler;
    }
 
-   public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
-   {
-      if (isWalkingPaused.getBooleanValue())
-      {
-         LogTools.warn("Received " + AdjustFootstepCommand.class.getSimpleName() + " but walking is currently paused. Command ignored.");
-         requestedFootstepAdjustment.clear();
-         hasNewFootstepAdjustment.set(false);
-         return;
-      }
-
-      requestedFootstepAdjustment.set(command);
-      hasNewFootstepAdjustment.set(true);
-   }
-
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
    {
       if (!command.isPauseRequested() && isWalkingPaused.getValue())
@@ -486,38 +470,6 @@ public class WalkingMessageHandler
       return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
-   public boolean pollRequestedFootstepAdjustment(Footstep footstepToAdjust)
-   {
-      if (!hasNewFootstepAdjustment.getBooleanValue())
-         return false;
-
-      if (footstepToAdjust.getRobotSide() != requestedFootstepAdjustment.getRobotSide())
-      {
-         LogTools.warn("RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: "
-               + requestedFootstepAdjustment.getRobotSide());
-         hasNewFootstepAdjustment.set(false);
-         requestedFootstepAdjustment.clear();
-         return false;
-      }
-
-      FramePoint3D adjustedPosition = requestedFootstepAdjustment.getPosition();
-      FrameQuaternion adjustedOrientation = requestedFootstepAdjustment.getOrientation();
-      footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
-
-      if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
-      {
-         List<Point2D> contactPoints = new ArrayList<>();
-         for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
-            contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
-         footstepToAdjust.setPredictedContactPoints(contactPoints);
-      }
-
-      hasNewFootstepAdjustment.set(false);
-      requestedFootstepAdjustment.clear();
-
-      return true;
-   }
-
    public boolean hasUpcomingFootsteps()
    {
       return getStepsBeforePause() > 0 && !isWalkingPaused.getBooleanValue();
@@ -558,16 +510,6 @@ public class WalkingMessageHandler
       }
 
       return stepIndex;
-   }
-
-   public boolean hasRequestedFootstepAdjustment()
-   {
-      if (isWalkingPaused.getBooleanValue())
-      {
-         hasNewFootstepAdjustment.set(false);
-         requestedFootstepAdjustment.clear();
-      }
-      return hasNewFootstepAdjustment.getBooleanValue();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
