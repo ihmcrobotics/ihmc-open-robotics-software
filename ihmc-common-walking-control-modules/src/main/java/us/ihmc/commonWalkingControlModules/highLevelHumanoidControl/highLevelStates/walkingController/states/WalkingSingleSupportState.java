@@ -126,8 +126,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
 
-      super.doAction(timeInState);
-
       boolean requestSwingSpeedUp = balanceManager.shouldAjudstTimeFromTrackingError();
 
       boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
@@ -146,13 +144,11 @@ public class WalkingSingleSupportState extends SingleSupportState
                                            swingTime);
 
          balanceManager.adjustFootstep(nextFootstep);
+         // FIXME I don't need to be computing this again
          balanceManager.computeICPPlan();
 
          updateHeightManager();
       }
-
-      // if the footstep was adjusted, shift the CoM plan, if there is one.
-      walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
 
       if (requestSwingSpeedUp)
       {
@@ -334,9 +330,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}.
-    * It is clamped w.r.t. to
+    * Request the swing trajectory. It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
     * @return the current swing time remaining for the swing foot trajectory
