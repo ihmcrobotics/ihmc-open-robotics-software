@@ -140,8 +140,16 @@ public class HDF5Tools
 
    public static void storeMatrix(Group group, double[] data)
    {
-      DataSet dataset = group.openDataSet(String.valueOf(0));
-      dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
+      long[] dims = { 5, 5 };
+      if(group.nameExists(String.valueOf(0)))
+      {
+         DataSet dataset = group.openDataSet(String.valueOf(0));
+         dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
+      }
+      else
+      {
+         DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dims));
+      }
    }
 
    public static void main(String[] args) {

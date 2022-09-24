@@ -18,6 +18,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.HDF5Manager;
 import us.ihmc.perception.HDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
@@ -27,11 +28,12 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
-import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
-import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
+import java.io.File;
+
+import static org.bytedeco.hdf5.global.hdf5.*;
 
 public class PerceptionDataLogger {
-    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+    static final String FILE_NAME = "/home/quantum/Workspace/Data/Sensor_Logs/experimental.h5";
     private final HDF5Manager h5;
 
     private final BigVideoPacket videoPacket = new BigVideoPacket();
@@ -50,7 +52,20 @@ public class PerceptionDataLogger {
     private int compressedImageCounter = 0;
 
     public PerceptionDataLogger() {
-        h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
+
+        File f = new File(FILE_NAME);
+        if(!f.exists() && !f.isDirectory()) {
+
+            LogTools.info("Creating HDF5 File: " + FILE_NAME);
+            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
+            h5.getFile().close();
+            h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
+        }
+        else
+        {
+            LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
+            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
+        }
 
         RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_data_logger");
 
@@ -132,8 +147,22 @@ public class PerceptionDataLogger {
     }
 
     public static void main(String[] args) {
+        HDF5Manager h5;
+        File f = new File(FILE_NAME);
+        if(!f.exists() && !f.isDirectory()) {
 
-        HDF5Manager h5 = new HDF5Manager(PerceptionDataLogger.FILE_NAME, H5F_ACC_TRUNC);
+            LogTools.info("Creating HDF5 File: " + FILE_NAME);
+            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
+            h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
+        }
+        else
+        {
+            LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
+            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
+        }
+
+//        h5.getFile().createGroup("g1/");
+//        h5.getFile().createGroup("g1/g2/");
 
         DMatrixRMaj a = new DMatrixRMaj(5,5);
 
@@ -151,7 +180,7 @@ public class PerceptionDataLogger {
 
         a.print();
 
-        HDF5Tools.storeMatrix(h5.getGroup("/test/matrix"), a.data);
+        HDF5Tools.storeMatrix(h5.getGroup("/test/ejml/matrix"), a.data);
     }
 }
 
