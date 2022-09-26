@@ -16,8 +16,11 @@ import us.ihmc.log.LogTools;
 public class NetworkParameters
 {
    public static final String defaultParameterFile = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "IHMCNetworkParameters.ini";
-   private static final String helpText = "Please set all appropriate environment variables or use NetworkParametersCreator to create a properties file and save it in "
-         + defaultParameterFile + ", or pass in -Dus.ihmc.networkParameterFile=[path].";
+   private static final String helpText = """
+                           Please set all appropriate environment variables or use \
+                           NetworkParametersCreator to create a properties file and \
+                           save it in %s, or pass in -Dus.ihmc.networkParameterFile=[path].
+                           """.formatted(defaultParameterFile);
 
    private static NetworkParameters instance = null;
 
@@ -110,14 +113,20 @@ public class NetworkParameters
          }
          if (key != NetworkParameterKeys.rosURI)
          {
-            throw new RuntimeException("Could not find " + key.toString() + "! Please check you ini for a " + key.toString()
-                  + " and check that the key and value are seperated by a colon. You can use the NetworkParametersCreator to create this file for you. (if using Env. Variables it would be named: "
-                  + envVarString + ") . Exiting.\n" + helpText);
+            String message = """
+                  Could not find %s! Please check you ini for a %s and check that the key and value are seperated by a colon.
+                  You can use the NetworkParametersCreator to create this file for you. (if using Env. Variables it would be named: %s). Exiting.
+                  %s
+                  """.formatted(key.toString(), key.toString(), envVarString, helpText);
+            throw new RuntimeException(message);
          }
          else
          {
-            throw new RuntimeException("Could not establish the ROS Master URI. Check your environment variables for ROS_MASTER_URI or set the IHMC Network key "
-                  + key.toString() + " in your ini file. Exiting.\n" + helpText);
+            throw new RuntimeException("""
+                  Could not establish the ROS Master URI. Check your environment variables for ROS_MASTER_URI \
+                  or set the IHMC Network key %s in your ini file. Exiting.
+                  %s
+                  """.formatted(key.toString(), helpText));
          }
 
          //         System.exit(-1);
@@ -158,7 +167,12 @@ public class NetworkParameters
             }
          }
       }
-      LogTools.error("Tried to load the RTPS Domain ID from the Network Parameter file, but either the key didn't exist or after parsing the string it returned a negative number. Please check the rtps domain ID and try again. It should look like RTPSDomainID:15 Returning a domain ID of 1");
+      LogTools.error("""
+                     Tried to load the RTPS Domain ID from %s, \
+                     but either the key didn't exist or after parsing the string it \
+                     returned a negative number. Please check the rtps domain ID and \
+                     try again. It should look like RTPSDomainID=15, if your registered domain ID is 15.
+                     """.formatted(defaultParameterFile));
       return 1;
    }
 

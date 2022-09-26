@@ -4,9 +4,12 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Stroke;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
@@ -49,6 +52,11 @@ public class MatlabChart
 
    public void displayInJFrame()
    {
+      displayInJFrame(false);
+   }
+
+   public void displayInJFrame(boolean waitUntilDone)
+   {
       JFrame jFrame = new JFrame();
 
       ChartPanel chartPanel = new ChartPanel(chart);
@@ -58,6 +66,29 @@ public class MatlabChart
 
       jFrame.pack();
       jFrame.setVisible(true);
+      jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      if (waitUntilDone)
+      {
+         CountDownLatch latch = new CountDownLatch(1);
+
+         jFrame.addWindowListener(new WindowAdapter()
+         {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+               latch.countDown();
+            }
+         });
+
+         try
+         {
+            latch.await();
+         }
+         catch (InterruptedException e1)
+         {
+            e1.printStackTrace();
+         }
+      }
    }
 
    public void plot(double[] x, double[] y, String spec, float lineWidth, String title)

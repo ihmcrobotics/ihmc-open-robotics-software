@@ -347,12 +347,6 @@ public class WrapperForMultipleToeOffCalculatorsTest
                {
                   return false;
                }
-
-               @Override
-               public double getMaximumToeOffAngle()
-               {
-                  return 0;
-               }
             };
          }
 

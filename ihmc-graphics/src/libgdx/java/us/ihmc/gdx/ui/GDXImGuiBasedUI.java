@@ -30,6 +30,43 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Method call order:
+ *
+ * <pre>
+ * create()
+ *
+ * loop:
+ *     update()
+ *     calculateVRPick(GDXVRContext)
+ *     processVRInput(GDXVRContext)
+ *     calculate3DViewPick(ImGui3DViewInput)
+ *     process3DViewInput(ImGui3DViewInput)
+ *     renderImGuiWidgets()
+ *     renderTooltipsAndContextMenus()
+ *     getRenderables()
+ *
+ * destroy()
+ * </pre>
+ *
+ * TODO: Is there a better theoretical order? Potentially doing processInput first, then update, then render.
+ *
+ * It is recommended that in every class, the methods that exist in them mapping to the above are defined in the class in that order.
+ *
+ * Additionally, the update() is only called first if you code according to this in the Lwjgl3ApplicationAdapter provided to GDXImGuiBasedUI:
+ *
+ * <pre>
+ * &#64;Override
+ * public void render()
+ * {
+ *    // call update() methods here
+ *
+ *    baseUI.renderBeforeOnScreenUI();
+ *    baseUI.renderEnd();
+ * }
+ * </pre>
+ *
+ */
 public class GDXImGuiBasedUI
 {
    public static final int ANTI_ALIASING = 2;
@@ -59,6 +96,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
+   private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(true);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final GDXImGuiPerspectiveManager perspectiveManager;
@@ -246,6 +284,10 @@ public class GDXImGuiBasedUI
             else
                primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.VIRTUAL);
          }
+         if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
+         {
+            setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled.get());
+         }
          ImGui.separator();
          if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
          {
@@ -373,6 +415,16 @@ public class GDXImGuiBasedUI
       for (GDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
+      }
+   }
+
+   public void setModelSceneMouseCollisionEnabled(boolean modelSceneMouseCollisionEnabled)
+   {
+      this.modelSceneMouseCollisionEnabled.set(modelSceneMouseCollisionEnabled);
+      primary3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
+      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      {
+         additional3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
       }
    }
 }

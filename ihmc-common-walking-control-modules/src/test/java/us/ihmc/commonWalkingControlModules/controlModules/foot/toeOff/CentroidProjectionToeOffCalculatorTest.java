@@ -343,12 +343,6 @@ public class CentroidProjectionToeOffCalculatorTest
                {
                   return false;
                }
-
-               @Override
-               public double getMaximumToeOffAngle()
-               {
-                  return 0;
-               }
             };
          }
 
@@ -424,13 +418,6 @@ public class CentroidProjectionToeOffCalculatorTest
          {
             return false;
          }
-
-         @Override
-         public double getMaximumToeOffAngle()
-         {
-            return 0;
-         }
-
       };
 
    }

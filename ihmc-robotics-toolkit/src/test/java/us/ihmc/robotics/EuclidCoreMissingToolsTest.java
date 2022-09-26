@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
@@ -389,7 +390,6 @@ public class EuclidCoreMissingToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(intersectionExpected, intersectionToPac, 1e-5);
    }
 
-
    @Test
    public void testSetNormalPart()
    {
@@ -447,6 +447,31 @@ public class EuclidCoreMissingToolsTest
          normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
          EuclidCoreMissingTools.setNormalPart(input, normalAxis, tupleToModify);
          EuclidCoreTestTools.assertEquals(expected, tupleToModify, EPSILON);
+      }
+   }
+
+   @Test
+   public void testDifferentiateOrientation()
+   {
+      Random random = new Random(23423);
+
+      for (int i = 0; i < iters; i++)
+      {
+         Quaternion qStart = EuclidCoreRandomTools.nextQuaternion(random);
+         double duration = EuclidCoreRandomTools.nextDouble(random, 0.0, 1.0e-2);
+         double angle = EuclidCoreRandomTools.nextDouble(random, 0.0, Math.PI);
+         UnitVector3D velocityAxis = EuclidCoreRandomTools.nextUnitVector3D(random);
+         Vector3D expectedAngularVelocity = new Vector3D();
+         expectedAngularVelocity.setAndScale(angle / duration, velocityAxis);
+
+         Quaternion qEnd = new Quaternion();
+         qEnd.setRotationVector(velocityAxis.getX() * angle, velocityAxis.getY() * angle, velocityAxis.getZ() * angle);
+         qEnd.prepend(qStart);
+
+         Vector3D actualAngularVelocity = new Vector3D();
+         EuclidCoreMissingTools.differentiateOrientation(qStart, qEnd, duration, actualAngularVelocity);
+
+         EuclidCoreTestTools.assertEquals(expectedAngularVelocity, actualAngularVelocity, EPSILON * Math.max(1.0, expectedAngularVelocity.norm()));
       }
    }
 

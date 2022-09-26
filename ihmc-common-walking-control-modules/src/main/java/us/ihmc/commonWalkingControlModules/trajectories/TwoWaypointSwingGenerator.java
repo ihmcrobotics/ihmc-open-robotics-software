@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,8 +26,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import static us.ihmc.humanoidRobotics.footstep.Footstep.maxNumberOfSwingWaypoints;
 
 public class TwoWaypointSwingGenerator implements SwingGenerator
 {
@@ -87,17 +86,64 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoBoolean needToAdjustedSwingForSelfCollision;
    private final YoBoolean crossOverStep;
 
+   private final int maxNumberOfSwingWaypoints;
    private boolean visualize = true;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double customWaypointAngleThreshold,
-                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix,
+                                    double minSwingHeight,
+                                    double maxSwingHeight,
+                                    double defaultSwingHeight,
+                                    double customWaypointAngleThreshold,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, worldFrame, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double customWaypointAngleThreshold,
-                                    ReferenceFrame trajectoryFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix,
+                                    double minSwingHeight,
+                                    double maxSwingHeight,
+                                    double defaultSwingHeight,
+                                    double customWaypointAngleThreshold,
+                                    int maxNumberOfSwingWaypoints,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, maxNumberOfSwingWaypoints, worldFrame, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public TwoWaypointSwingGenerator(String namePrefix,
+                                    double minSwingHeight,
+                                    double maxSwingHeight,
+                                    double defaultSwingHeight,
+                                    double customWaypointAngleThreshold,
+                                    ReferenceFrame trajectoryFrame,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(namePrefix,
+           minSwingHeight,
+           maxSwingHeight,
+           defaultSwingHeight,
+           customWaypointAngleThreshold,
+           Footstep.maxNumberOfSwingWaypoints,
+           trajectoryFrame,
+           parentRegistry,
+           yoGraphicsListRegistry);
+   }
+
+   public TwoWaypointSwingGenerator(String namePrefix,
+                                    double minSwingHeight,
+                                    double maxSwingHeight,
+                                    double defaultSwingHeight,
+                                    double customWaypointAngleThreshold,
+                                    int maxNumberOfSwingWaypoints,
+                                    ReferenceFrame trajectoryFrame,
+                                    YoRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.maxNumberOfSwingWaypoints = maxNumberOfSwingWaypoints;
+
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
@@ -261,7 +307,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    {
       boolean useDefaultSwing = Double.isNaN(swingHeight) || swingHeight <= 0.0;
 
-      if(useDefaultSwing)
+      if (useDefaultSwing)
          this.swingHeight.set(defaultSwingHeight.getDoubleValue());
       else
          this.swingHeight.set(MathTools.clamp(swingHeight, minSwingHeight.getDoubleValue(), maxSwingHeight.getDoubleValue()));
@@ -305,37 +351,37 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       double maxStepZ = Math.max(initialPosition.getZ(), finalPosition.getZ());
       switch (trajectoryType)
       {
-      case OBSTACLE_CLEARANCE:
-         waypointPositions.clear();
-         for (int i = 0; i < defaultNumberOfWaypoints; i++)
-         {
-            waypointPositions.add();
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-            waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
+         case OBSTACLE_CLEARANCE:
+            waypointPositions.clear();
+            for (int i = 0; i < defaultNumberOfWaypoints; i++)
+            {
+               waypointPositions.add();
+               waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
+               waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
 
-            if (needToAdjustedSwingForSelfCollision.getBooleanValue())
-            {
-               waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
+               if (needToAdjustedSwingForSelfCollision.getBooleanValue())
+               {
+                  waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
+               }
             }
-         }
-         break;
-      case DEFAULT:
-         waypointPositions.clear();
-         for (int i = 0; i < defaultNumberOfWaypoints; i++)
-         {
-            waypointPositions.add();
-            waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
-            waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
-            if (needToAdjustedSwingForSelfCollision.getBooleanValue())
+            break;
+         case DEFAULT:
+            waypointPositions.clear();
+            for (int i = 0; i < defaultNumberOfWaypoints; i++)
             {
-               waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
+               waypointPositions.add();
+               waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
+               waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
+               if (needToAdjustedSwingForSelfCollision.getBooleanValue())
+               {
+                  waypointPositions.get(i).add(swingOffset.getX(), swingOffset.getY(), 0.0);
+               }
             }
-         }
-         break;
-      case CUSTOM:
-         break;
-      default:
-         throw new RuntimeException("Trajectory type not implemented");
+            break;
+         case CUSTOM:
+            break;
+         default:
+            throw new RuntimeException("Trajectory type not implemented");
       }
 
       double maxWaypointZ;
@@ -409,9 +455,15 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       pointBInStance.setIncludingFrame(trajectoryFrame, pointB2D);
       pointAInStance.changeFrame(stanceZUpFrame);
       pointBInStance.changeFrame(stanceZUpFrame);
-      boolean trajectoryIntersectsY = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(0.0, 0.0, 0.0, 1.0, pointAInStance.getX(),
-                                                                                                    pointAInStance.getY(), pointBInStance.getX(),
-                                                                                                    pointBInStance.getY(), tempPoint);
+      boolean trajectoryIntersectsY = EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(0.0,
+                                                                                                    0.0,
+                                                                                                    0.0,
+                                                                                                    1.0,
+                                                                                                    pointAInStance.getX(),
+                                                                                                    pointAInStance.getY(),
+                                                                                                    pointBInStance.getX(),
+                                                                                                    pointBInStance.getY(),
+                                                                                                    tempPoint);
 
       boolean crossOver = trajectoryIntersectsY && swingSide.negateIfRightSide(tempPoint.getY()) < 0.0;
       crossOverStep.set(crossOver);
@@ -452,8 +504,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
     * from the start to the end of the swing is too close to the stance position the trajectory waypoints will be adjusted. To activate
     * this, additional information has to be provided as arguments to this method.
     *
-    * @param swingSide the side of the robot that this swing trajectory will be executed on
-    * @param stanceZUpFrame the zup frame located at the stance foot sole
+    * @param swingSide           the side of the robot that this swing trajectory will be executed on
+    * @param stanceZUpFrame      the zup frame located at the stance foot sole
     * @param minDistanceToStance the minimum clearance that the swing should have from the stance foot sole point in the xy plane
     */
    public void enableStanceCollisionAvoidance(RobotSide swingSide, ReferenceFrame stanceZUpFrame, double minDistanceToStance)

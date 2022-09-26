@@ -36,12 +36,6 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    }
 
    @Override
-   public double getECMPProximityForToeOff()
-   {
-      return ((target == RobotTarget.REAL_ROBOT) ? 0.02 : 0.04) * physicalProperties.getModelSizeScale();
-   }
-
-   @Override
    public double getCoPProximityForToeOff()
    {
       return super.getCoPProximityForToeOff() * physicalProperties.getModelSizeScale();
@@ -73,25 +67,4 @@ public class ValkyrieToeOffParameters extends ToeOffParameters
    {
       return true;
    }
-
-   @Override
-   public boolean lookAtTwoStepCapturabilityForToeOff()
-   {
-      switch (target)
-      {
-         case SCS:
-            return true;
-         case GAZEBO:
-         case REAL_ROBOT:
-         default:
-            return false;
-      }
-   }
-
-   @Override
-   public double getMaximumToeOffAngle()
-   {
-      return Math.toRadians(30.0);
-   }
-
 }

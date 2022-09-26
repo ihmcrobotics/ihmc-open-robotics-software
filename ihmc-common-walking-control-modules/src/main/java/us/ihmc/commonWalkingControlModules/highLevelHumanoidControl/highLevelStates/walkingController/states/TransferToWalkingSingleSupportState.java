@@ -140,7 +140,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       balanceManager.initializeICPPlanForTransfer();
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
-      pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override

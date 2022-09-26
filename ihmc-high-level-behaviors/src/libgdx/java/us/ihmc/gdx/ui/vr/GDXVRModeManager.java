@@ -51,7 +51,6 @@ public class GDXVRModeManager
 
       joystickBasedStepping = new GDXJoystickBasedStepping(syncedRobot.getRobotModel());
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
-      baseUI.getPrimaryScene().addRenderableProvider(joystickBasedStepping::getRenderables, GDXSceneLevel.VIRTUAL);
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
 
@@ -95,7 +94,7 @@ public class GDXVRModeManager
 
    public void update()
    {
-      kinematicsStreamingMode.update();
+      kinematicsStreamingMode.update(mode == GDXVRMode.WHOLE_BODY_IK_STREAMING);
       leftHandPanel.update();
       joystickBasedStepping.update(mode == GDXVRMode.JOYSTICK_WALKING);
    }
@@ -121,8 +120,8 @@ public class GDXVRModeManager
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == GDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = GDXVRMode.WHOLE_BODY_IK_STREAMING;
-         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
-            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
+//         if (!kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().isStarted())
+//            kinematicsStreamingMode.getKinematicsStreamingToolboxProcess().start();
       }
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == GDXVRMode.JOYSTICK_WALKING))
       {
@@ -162,6 +161,10 @@ public class GDXVRModeManager
          {
             kinematicsStreamingMode.getVirtualRenderables(renderables, pool);
          }
+         case JOYSTICK_WALKING ->
+         {
+            joystickBasedStepping.getRenderables(renderables, pool);
+         }
       }
 
       if (renderPanel)
@@ -189,5 +192,10 @@ public class GDXVRModeManager
    public Notification getShowFloatVideoPanelNotification()
    {
       return showFloatVideoPanelNotification;
+   }
+
+   public GDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
+   {
+      return handPlacedFootstepMode;
    }
 }

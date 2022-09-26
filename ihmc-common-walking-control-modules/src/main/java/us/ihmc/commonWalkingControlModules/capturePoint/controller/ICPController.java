@@ -73,16 +73,11 @@ public class ICPController implements ICPControllerInterface
 
    final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
-   private final DMatrixRMaj feedbackCMPDeltaMatrix = new DMatrixRMaj(2, 1);
 
    private final YoDouble feedbackAlpha = new YoDouble(yoNamePrefix + "FeedbackAlpha", registry);
    private final YoDouble feedForwardAlpha = new YoDouble(yoNamePrefix + "FeedForwardAlpha", registry);
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
-   private final YoFrameVector2D residualDynamicsErrorConservative = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsErrorConservative",
-                                                                                         worldFrame,
-                                                                                         registry);
-   private final DMatrixRMaj residualDynamicsErrorConservativeMatrix = new DMatrixRMaj(2, 1);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
@@ -434,11 +429,6 @@ public class ICPController implements ICPControllerInterface
          solver.getCoPFeedbackDifference(feedbackCoPDelta);
          solver.getCMPFeedbackDifference(feedbackCMPDelta);
          solver.getResidualDynamicsError(residualDynamicsError);
-
-         feedbackCoPDelta.get(feedbackCMPDeltaMatrix);
-         CommonOps_DDRM.mult(-1.0, inverseTransformedGains, feedbackCMPDeltaMatrix, residualDynamicsErrorConservativeMatrix);
-         residualDynamicsErrorConservative.set(residualDynamicsErrorConservativeMatrix);
-         residualDynamicsErrorConservative.add(icpError);
       }
 
       integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
@@ -499,11 +489,5 @@ public class ICPController implements ICPControllerInterface
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
-   }
-
-   @Override
-   public FrameVector2DReadOnly getResidualError()
-   {
-      return residualDynamicsErrorConservative;
    }
 }
