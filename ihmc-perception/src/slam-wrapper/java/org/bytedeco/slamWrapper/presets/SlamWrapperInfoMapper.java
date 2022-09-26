@@ -9,7 +9,7 @@ import org.bytedeco.javacpp.tools.*;
             includepath = "../",
             resourcepath = "../",
             linkpath = "../",
-            include = {"include/factor_graph_external.h"},
+            include = {"include/FactorGraphExternal.h"},
             link = {"slam-wrapper"}
          ),
       target = "org.bytedeco.slamWrapper.SlamWrapper"

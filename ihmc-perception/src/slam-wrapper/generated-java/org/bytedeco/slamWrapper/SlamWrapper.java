@@ -9,11 +9,11 @@ import org.bytedeco.javacpp.annotation.*;
 public class SlamWrapper extends org.bytedeco.slamWrapper.presets.SlamWrapperInfoMapper {
     static { Loader.load(); }
 
-// Parsed from include/factor_graph_external.h
+// Parsed from include/FactorGraphExternal.h
 
 // #pragma once
 
-// #include "factor_graph_handler.h"
+// #include "FactorGraphHandler.h"
 
 public static class FactorGraphExternal extends Pointer {
     static { Loader.load(); }
