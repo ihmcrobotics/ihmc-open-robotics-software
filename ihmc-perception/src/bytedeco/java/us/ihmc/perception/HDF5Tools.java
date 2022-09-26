@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.opencv.global.opencv_core;
@@ -135,6 +136,21 @@ public class HDF5Tools
       {
          System.out.println("Prefix: " + prefix);
          names.add(prefix);
+      }
+   }
+
+   public static void storeFloatArray2D(Group group, long index, ArrayList<Float> data, int cols)
+   {
+      long[] dims = { HDF5Manager.MAX_BUFFER_SIZE, cols };
+      if(group.nameExists(String.valueOf(index)))
+      {
+         DataSet dataset = group.openDataSet(String.valueOf(index));
+         float[] dataObject = (float[]) ArrayUtils.toPrimitive(data.toArray());
+         dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
+      }
+      else
+      {
+         DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
       }
    }
 
