@@ -33,47 +33,11 @@ public abstract class StepAdjustmentParameters
    }
 
    /**
-    * If true, the step adjustment is originally made based on the ICP error. It is then projected into the capture region, and then made reachable.
-    */
-   public boolean considerICPErrorForStepAdjustment()
-   {
-      return false;
-   }
-
-   /**
     * Deadband on the step adjustment.
     * When the adjustment is within the deadband, it is set to zero.
     * When it is outside the deadband, the deadband is subtracted from it.
     */
    public abstract double getAdjustmentDeadband();
-
-   /**
-    * Specifies the transfer split fraction to use for the ICP value recursion multiplier. This value is added to the time remaining
-    * to compute the recursion multiplier. Increasing this value effectively causes more step adjustment to occur.
-    */
-   public double getTransferSplitFraction()
-   {
-      return 0.1;
-   }
-
-   /**
-    * Specifies the maximum duration that can be included in the footstep multiplier by the {@link #getTransferSplitFraction()}.
-    * This is useful when the robot by default has long split fractions.
-    */
-   public double maximumTimeFromTransferInFootstepMultiplier()
-   {
-      return 0.1;
-   }
-
-   /**
-    * Specifies the minimum footstep multiplier that the robot will use to compute the desired step adjustment. This is
-    * particularly useful when walking slowly or when recovering early in the, to avoid extremely large
-    * footstep adjustment magnitudes.
-    */
-   public double getMinimumFootstepMultiplier()
-   {
-      return 0.33;
-   }
 
    /**
     * Specifies the minimum time remaining for the controller to allow step adjustment. Once the time remaining goes below this value, the step position in
