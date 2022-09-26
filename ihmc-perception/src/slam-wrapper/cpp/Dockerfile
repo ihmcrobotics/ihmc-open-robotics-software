@@ -47,7 +47,6 @@ RUN cmake \
     -DGTSAM_BUILD_TIMING_ALWAYS=OFF \
     -DGTSAM_BUILD_TESTS=OFF \
     -DGTSAM_WITH_EIGEN_MKL=OFF \
-    -DBUILD_SHARED_LIBS=OFF \
     ..
 RUN make -j$(nproc) install
 
