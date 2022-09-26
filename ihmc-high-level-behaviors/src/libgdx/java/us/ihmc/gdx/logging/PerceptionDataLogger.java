@@ -11,11 +11,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.ejml.data.DMatrix3x3;
-import org.ejml.data.DMatrixRMaj;
-import org.ejml.simple.SimpleMatrix;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -23,20 +19,20 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.HDF5Manager;
 import us.ihmc.perception.HDF5Tools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.scs2.sessionVisualizer.jfx.managers.BackgroundExecutorManager;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.bytedeco.hdf5.global.hdf5.*;
+import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDWR;
+import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 
 public class PerceptionDataLogger {
-    static final String FILE_NAME = "/home/quantum/Workspace/Data/Sensor_Logs/experimental.h5";
+    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
     private final HDF5Manager h5;
 
     private final BigVideoPacket videoPacket = new BigVideoPacket();
@@ -63,14 +59,12 @@ public class PerceptionDataLogger {
     public PerceptionDataLogger() {
 
         File f = new File(FILE_NAME);
-        if(!f.exists() && !f.isDirectory()) {
+        if (!f.exists() && !f.isDirectory()) {
 
             LogTools.info("Creating HDF5 File: " + FILE_NAME);
             h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
             h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
-        }
-        else
-        {
+        } else {
             LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
             h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
         }
@@ -93,7 +87,7 @@ public class PerceptionDataLogger {
 
         robotConfigurationCallback = new ROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
 
-        while(true)
+        while (true)
         {
 
         }
@@ -103,11 +97,11 @@ public class PerceptionDataLogger {
 
         LogTools.info("Message Received: {}", data.getMonotonicTime());
 
+        storeFloatArray("/robot/root/position", data.getRootPosition());
+        storeFloatArray("/robot/root/orientation", data.getRootOrientation());
         storeFloatArray("/robot/joint_angles/", data.getJointAngles().toArray());
-//        storeFloatArray("/robot/joint_velocities/", data.getJointVelocities().toArray());
-//        storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
-//        storePoint3D("/robot/root/position", data.getRootPosition());
-//        storeQuaternion("/robot/root/orientation", data.getRootOrientation());
+        storeFloatArray("/robot/joint_velocities/", data.getJointVelocities().toArray());
+        storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
     }
 
     public void logFusedOusterPointCloud(FusedSensorHeadPointCloudMessage message) {
@@ -150,7 +144,7 @@ public class PerceptionDataLogger {
         HDF5Tools.storeCompressedImage(h5.getGroup("/ihmc/logger/camera/"), compressedImageCounter, jpegImageBytePointer);
     }
 
-//    HDF5Tools.storeMatrix(h5.getGroup(namespace), h5.getBuffer(namespace, array.length).data);
+    //    HDF5Tools.storeMatrix(h5.getGroup(namespace), h5.getBuffer(namespace, array.length).data);
     public void storeFloatArray(String namespace, float[] array) {
         Group group = h5.getGroup(namespace);
         Float[] objectArray = ArrayUtils.toObject(array);
@@ -159,8 +153,7 @@ public class PerceptionDataLogger {
 
         int bufferSize = h5.getBufferIndex(namespace) / array.length;
         LogTools.info("Buffer Index: {} {}", bufferSize, HDF5Manager.MAX_BUFFER_SIZE - 1);
-        if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
-        {
+        if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1)) {
             LogTools.info("Thread Store Triggered");
             ArrayList<Float> data = new ArrayList<>(buffer);
             h5.resetBuffer(namespace);
@@ -174,32 +167,33 @@ public class PerceptionDataLogger {
         }
     }
 
-    public void storePoint3D(String namespace, Point3D point) {
-
+    public void storeFloatArray(String namespace, Point3D point) {
+        float[] pointArray = new float[3];
+        point.get(pointArray);
+        storeFloatArray(namespace, pointArray);
     }
 
-    public void storeQuaternion(String namespace, Quaternion orientation) {
-
+    public void storeFloatArray(String namespace, Quaternion orientation) {
+        float[] pointArray = new float[4];
+        orientation.get(pointArray);
+        storeFloatArray(namespace, pointArray);
     }
 
     public static void main(String[] args) {
 
         PerceptionDataLogger logger = new PerceptionDataLogger();
 
-        HDF5Manager h5;
-        File f = new File(FILE_NAME);
-        if(!f.exists() && !f.isDirectory()) {
-
-            LogTools.info("Creating HDF5 File: " + FILE_NAME);
-            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
-            h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
-        }
-        else
-        {
-            LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
-            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
-        }
-
+//        HDF5Manager h5;
+//        File f = new File(FILE_NAME);
+//        if (!f.exists() && !f.isDirectory()) {
+//
+//            LogTools.info("Creating HDF5 File: " + FILE_NAME);
+//            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
+//            h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
+//        } else {
+//            LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
+//            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
+//        }
 
 
 //
