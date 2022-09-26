@@ -1357,7 +1357,6 @@ public class ConvexPolygonToolsTest
    {
       Point2D polygon1MinPoint = new Point2D();
       Point2D polygon2MinPoint = new Point2D();
-      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-3, 3, -3, 3);
 
       ConvexPolygon2D polygon1 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(-0.964173902597, 0.063152759605),
                                                                                          new Point2D(1.035825870746, 0.062200589754),
