@@ -28,7 +28,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public boolean hasFootHitGround()
+   public boolean hasFootHitGroundSensitive()
    {
       return hasFootHitGround.getBooleanValue();
    }
@@ -49,7 +49,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    public WrenchReadOnly getMeasuredWrench()
    {
       footWrench.setToZero(getMeasurementFrame(), getMeasurementFrame());
-      if (hasFootHitGround())
+      if (hasFootHitGroundFiltered())
          footWrench.setLinearPartZ(totalRobotWeight / totalNumberOfFeet);
       return footWrench;
    }
@@ -64,12 +64,6 @@ public class SettableFootSwitch implements FootSwitchInterface
    public void reset()
    {
       hasFootHitGround.set(false);
-   }
-
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      return false;
    }
 
    public void setFootContactState(boolean hasFootHitGround)

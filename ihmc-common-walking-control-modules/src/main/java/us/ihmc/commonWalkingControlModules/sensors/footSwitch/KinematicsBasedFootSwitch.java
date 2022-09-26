@@ -133,7 +133,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
 
       footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
-      if (hasFootHitGround())
+      if (hasFootHitGroundFiltered())
       {
          footForce.set(0.0, 0.0, totalRobotWeight);
          footWrench.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), footForce);
@@ -154,11 +154,17 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       return lowestZ;
    }
 
+   @Override
+   public boolean hasFootHitGroundSensitive()
+   {
+      return fixedOnGround.getBooleanValue();
+   }
+
    /**
     * is the foot in question within the switchZThreshold of the lowest foot
     */
    @Override
-   public boolean hasFootHitGround()
+   public boolean hasFootHitGroundFiltered()
    {
       return hitGround.getBooleanValue();
    }
@@ -190,11 +196,5 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void reset()
    {
-   }
-
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      return fixedOnGround.getBooleanValue();
    }
 }

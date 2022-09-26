@@ -25,7 +25,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -163,7 +162,7 @@ public class LogDataProcessorHelper
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
          String namespaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FilteredFootHitGround");
-         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "ForcePastThresh");
+         final YoBoolean forceMagnitudePastThreshold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "ForcePastThresh");
          final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()
@@ -175,7 +174,13 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public boolean hasFootHitGround()
+            public boolean hasFootHitGroundSensitive()
+            {
+               return forceMagnitudePastThreshold.getBooleanValue();
+            }
+
+            @Override
+            public boolean hasFootHitGroundFiltered()
             {
                return hasFootHitGround.getBooleanValue();
             }
@@ -184,12 +189,6 @@ public class LogDataProcessorHelper
             public ReferenceFrame getMeasurementFrame()
             {
                return null;
-            }
-
-            @Override
-            public boolean getForceMagnitudePastThreshhold()
-            {
-               return forceMagnitudePastThreshhold.getBooleanValue();
             }
 
             @Override
