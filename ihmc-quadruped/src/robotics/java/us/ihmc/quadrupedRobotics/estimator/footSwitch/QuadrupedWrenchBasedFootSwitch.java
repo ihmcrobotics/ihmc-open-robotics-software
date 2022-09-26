@@ -36,7 +36,7 @@ public class QuadrupedWrenchBasedFootSwitch implements QuadrupedFootSwitchInterf
    }
 
    @Override
-   public void updateMeasurement()
+   public void update()
    {
       wrenchCalculator.calculate();
       yoMeasuredForceWorld.setMatchingFrame(wrenchCalculator.getWrench().getLinearPart());
