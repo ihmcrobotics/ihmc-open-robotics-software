@@ -168,7 +168,6 @@ public class PerceptionDataLogger {
             executor.executeInBackground(() -> {
                 long count = h5.getCount(namespace);
                 LogTools.info("Storing Buffer: {}", count);
-                System.out.println(Arrays.toString(array));
                 HDF5Tools.storeFloatArray2D(group, count, data, array.length);
                 LogTools.info("Done Storing Buffer: {}", count);
             });

@@ -9,6 +9,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
@@ -141,17 +142,12 @@ public class HDF5Tools
 
    public static void storeFloatArray2D(Group group, long index, ArrayList<Float> data, int cols)
    {
+      System.out.println(data);
       long[] dims = { HDF5Manager.MAX_BUFFER_SIZE, cols };
-      if(group.nameExists(String.valueOf(index)))
-      {
-         DataSet dataset = group.openDataSet(String.valueOf(index));
-         float[] dataObject = (float[]) ArrayUtils.toPrimitive(data.toArray());
-         dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
-      }
-      else
-      {
-         DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
-      }
+
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
+      float[] dataObject = ArrayUtils.toPrimitive(data.toArray(new Float[0]), 0.0F);
+      dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
    }
 
    public static void storeMatrix(Group group, double[] data)
