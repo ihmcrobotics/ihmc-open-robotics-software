@@ -24,8 +24,39 @@ public class SlamWrapperTest
    public static void main(String[] args)
    {
       List<String> libraryFiles = new ArrayList<>();
+      libraryFiles.add("libboost_thread.so");
+      libraryFiles.add("libboost_stacktrace_addr2line.so");
+      libraryFiles.add("libboost_filesystem.so");
+      libraryFiles.add("libboost_stacktrace_basic.so");
+      libraryFiles.add("libboost_date_time.so");
+      libraryFiles.add("libboost_context.so");
+      libraryFiles.add("libboost_math_c99l.so");
+      libraryFiles.add("libboost_program_options.so");
+      libraryFiles.add("libboost_serialization.so");
+      libraryFiles.add("libboost_stacktrace_noop.so");
+      libraryFiles.add("libboost_prg_exec_monitor.so");
+      libraryFiles.add("libboost_coroutine.so");
+      libraryFiles.add("libboost_chrono.so");
+      libraryFiles.add("libboost_timer.so");
+      libraryFiles.add("libboost_stacktrace_backtrace.so");
+      libraryFiles.add("libboost_math_c99f.so");
+      libraryFiles.add("libboost_system.so");
+      libraryFiles.add("libboost_wserialization.so");
+      libraryFiles.add("libboost_atomic.so");
+      libraryFiles.add("libboost_math_c99.so");
+      libraryFiles.add("libboost_fiber.so");
+      libraryFiles.add("libboost_unit_test_framework.so");
+      libraryFiles.add("libboost_math_tr1.so");
+      libraryFiles.add("libboost_container.so");
+      libraryFiles.add("libboost_random.so");
+      libraryFiles.add("libboost_type_erasure.so");
+      libraryFiles.add("libboost_math_tr1f.so");
+      libraryFiles.add("libboost_math_tr1l.so");
+      libraryFiles.add("libboost_wave.so");
+
       libraryFiles.add("libmetis-gtsam.so");
       libraryFiles.add("libgtsam.so");
+      libraryFiles.add("libslam-wrapper.so");
       libraryFiles.add("libjniSlamWrapper.so");
 
       for (String libraryFile : libraryFiles)
