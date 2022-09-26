@@ -451,7 +451,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
                boolean isCoPInsideFoot = footPolygon.isPointInside(tempCoP2d);
                if (!isCoPInsideFoot)
                {
-                  if (footSwitch.computeFootLoadPercentage() > 0.2)
+                  if (footSwitch.getFootLoadPercentage() > 0.2)
                   {
                      footCenterCoPLineSegment.set(soleFrame, 0.0, 0.0, tempCoP2d.getX(), tempCoP2d.getY());
                      int intersections = footPolygon.intersectionWith(footCenterCoPLineSegment, intersectionPoints[0], intersectionPoints[1]);

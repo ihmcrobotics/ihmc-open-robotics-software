@@ -191,7 +191,7 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public double computeFootLoadPercentage()
+            public double getFootLoadPercentage()
             {
                return footLoadPercentage.getDoubleValue();
             }

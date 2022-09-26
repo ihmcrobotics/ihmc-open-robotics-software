@@ -31,7 +31,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public double computeFootLoadPercentage()
+   public double getFootLoadPercentage()
    {
       return Double.NaN;
    }

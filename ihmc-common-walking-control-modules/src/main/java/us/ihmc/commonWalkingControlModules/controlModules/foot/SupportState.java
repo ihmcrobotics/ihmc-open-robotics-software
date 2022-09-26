@@ -277,7 +277,7 @@ public class SupportState extends AbstractFootControlState
 
       // determine foot state
       copOnEdge.set(footControlHelper.isCoPOnEdge() && !isInLiftOffOrTouchDown());
-      footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < supportStateParameters.getFootLoadThreshold());
+      footBarelyLoaded.set(footSwitch.getFootLoadPercentage() < supportStateParameters.getFootLoadThreshold());
 
       if (supportStateParameters.assumeCopOnEdge())
          copOnEdge.set(true);
