@@ -39,8 +39,8 @@ cp ../lib/libslam-wrapper.so ../../../resources
 # Temp hack
 # This really assumes we are building within the docker container OR we have gtsam installed at this exact location
 # We need to copy these gtsam related library files into our classpath resources dir
-cp /usr/local/lib/libgtsam.a ../../../resources
-cp /usr/local/lib/libmetis-gtsam.a ../../../resources
+cp /usr/local/lib/libgtsam.so ../../../resources
+cp /usr/local/lib/libmetis-gtsam.so ../../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_thread.so ../../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_addr2line.so ../../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_filesystem.so ../../../resources
