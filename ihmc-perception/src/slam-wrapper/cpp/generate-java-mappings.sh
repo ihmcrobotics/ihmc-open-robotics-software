@@ -33,3 +33,41 @@ rm -rf ../../../generated-java/*
 # Copy newly generated Java into generated-java
 mkdir -p ../../../generated-java/org/bytedeco/slamWrapper
 cp -r org/bytedeco/slamWrapper/SlamWrapper.java ../../../generated-java/org/bytedeco/slamWrapper
+
+cp ../lib/libslam-wrapper.so ../../../resources
+
+# Temp hack
+# This really assumes we are building within the docker container OR we have gtsam installed at this exact location
+# We need to copy these gtsam related library files into our classpath resources dir
+cp /usr/local/lib/libgtsam.a ../../../resources
+cp /usr/local/lib/libmetis-gtsam.a ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_thread.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_addr2line.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_filesystem.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_basic.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_date_time.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_context.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_math_c99l.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_program_options.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_serialization.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_noop.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_prg_exec_monitor.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_coroutine.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_timer.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_chrono.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_backtrace.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_math_c99f.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_system.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_wserialization.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_atomic.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_math_c99.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_fiber.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_math_tr1.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_container.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_mpi.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_random.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_type_erasure.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_math_tr1f.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_math_tr1l.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libboost_wave.so ../../../resources
