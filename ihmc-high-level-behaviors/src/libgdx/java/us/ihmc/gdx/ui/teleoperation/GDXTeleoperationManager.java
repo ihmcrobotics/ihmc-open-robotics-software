@@ -381,12 +381,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
       }
       boolean ctrlHeld = imgui.internal.ImGui.getIO().getKeyCtrl();
       boolean isPPressed = input.isWindowHovered() && ImGui.isKeyDown('P');
-      if (ctrlHeld)
+      if (ctrlHeld && isPPressed)
       {
-         if (isPPressed)
-         {
-            teleportCameraToRobotPelvis();
-         }
+         teleportCameraToRobotPelvis();
       }
    }
 
