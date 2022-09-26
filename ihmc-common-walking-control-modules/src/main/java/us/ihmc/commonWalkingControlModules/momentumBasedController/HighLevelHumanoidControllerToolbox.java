@@ -420,7 +420,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          footSwitches.get(robotSide).getCenterOfPressure(tempFootCop2d);
          if (tempFootCop2d.containsNaN())
             continue;
-         footSwitches.get(robotSide).computeAndPackFootWrench(tempFootWrench);
+         footSwitches.get(robotSide).getMeasuredWrench(tempFootWrench);
          double footForce = tempFootWrench.getLinearPartZ();
          force += footForce;
          tempFootCop.setIncludingFrame(tempFootCop2d.getReferenceFrame(), tempFootCop2d.getX(), tempFootCop2d.getY(), 0.0);
@@ -538,7 +538,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          yoCoPError.get(robotSide).set(copError);
          yoCoPErrorMagnitude.get(robotSide).set(copError.length());
 
-         footSwitch.computeAndPackFootWrench(footWrench);
+         footSwitch.getMeasuredWrench(footWrench);
          footForceVector.setIncludingFrame(footWrench.getLinearPart());
          footForceVector.changeFrame(ReferenceFrame.getWorldFrame());
 

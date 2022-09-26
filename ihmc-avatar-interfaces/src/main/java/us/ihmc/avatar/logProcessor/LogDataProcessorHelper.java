@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -198,8 +199,9 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public void computeAndPackFootWrench(Wrench footWrenchToPack)
+            public WrenchReadOnly getMeasuredWrench()
             {
+               return null;
             }
 
             @Override

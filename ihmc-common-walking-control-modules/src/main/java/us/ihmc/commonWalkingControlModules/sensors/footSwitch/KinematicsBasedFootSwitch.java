@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -28,6 +29,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final double totalRobotWeight;
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
+
+   private final Wrench footWrench = new Wrench();
 
    public KinematicsBasedFootSwitch(String footName,
                                     SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet,
@@ -115,6 +118,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       return tmpFramePoint;
    }
 
+   private final Vector3D footForce = new Vector3D();
+
    @Override
    public void update()
    {
@@ -126,6 +131,13 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       ankleZ.set(getPointInWorld(foot.getFrameAfterParentJoint()).getZ());
 
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
+
+      footWrench.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
+      if (hasFootHitGround())
+      {
+         footForce.set(0.0, 0.0, totalRobotWeight);
+         footWrench.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), footForce);
+      }
    }
 
    private double getLowestFootZInWorld()
@@ -163,17 +175,10 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       return null;
    }
 
-   private final Vector3D footForce = new Vector3D();
-
    @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
+   public WrenchReadOnly getMeasuredWrench()
    {
-      footWrenchToPack.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
-      if (hasFootHitGround())
-      {
-         footForce.set(0.0, 0.0, totalRobotWeight);
-         footWrenchToPack.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), footForce);
-      }
+      return footWrench;
    }
 
    @Override

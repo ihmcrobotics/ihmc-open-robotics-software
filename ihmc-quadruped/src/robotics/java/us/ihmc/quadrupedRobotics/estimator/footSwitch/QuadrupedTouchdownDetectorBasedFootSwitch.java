@@ -123,14 +123,17 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       return null;
    }
 
+   private final Wrench footWrench = new Wrench();
+
    @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
+   public WrenchReadOnly getMeasuredWrench()
    {
       WrenchReadOnly wrench = wrenchCalculator.getWrench();
       if (hasFootHitGround())
-         footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
+         footWrench.setIncludingFrame(wrenchCalculator.getWrench());
       else
-         footWrenchToPack.setToZero(wrench.getReferenceFrame());
+         footWrench.setToZero(wrench.getReferenceFrame());
+      return footWrench;
    }
 
    @Override

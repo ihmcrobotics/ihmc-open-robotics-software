@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -14,6 +15,8 @@ public class SettableFootSwitch implements FootSwitchInterface
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
    private final int totalNumberOfFeet;
+
+   private final Wrench footWrench = new Wrench();
 
    public SettableFootSwitch(ContactablePlaneBody foot, double totalRobotWeight, int totalNumberOfFeet, YoRegistry registry)
    {
@@ -43,11 +46,12 @@ public class SettableFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
+   public WrenchReadOnly getMeasuredWrench()
    {
-      footWrenchToPack.setToZero();
+      footWrench.setToZero(getMeasurementFrame(), getMeasurementFrame());
       if (hasFootHitGround())
-         footWrenchToPack.setLinearPartZ(totalRobotWeight / totalNumberOfFeet);
+         footWrench.setLinearPartZ(totalRobotWeight / totalNumberOfFeet);
+      return footWrench;
    }
 
    @Override

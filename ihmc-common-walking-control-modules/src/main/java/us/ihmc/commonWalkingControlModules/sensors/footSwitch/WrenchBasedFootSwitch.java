@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -220,9 +221,9 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
+   public WrenchReadOnly getMeasuredWrench()
    {
-      footWrenchToPack.setIncludingFrame(footWrench);
+      return footWrench;
    }
 
    @Override

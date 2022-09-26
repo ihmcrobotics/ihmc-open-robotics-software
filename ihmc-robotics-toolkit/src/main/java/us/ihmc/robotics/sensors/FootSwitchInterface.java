@@ -3,7 +3,8 @@ package us.ihmc.robotics.sensors;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
 // TODO Nuke that interface
 public interface FootSwitchInterface
@@ -57,7 +58,27 @@ public interface FootSwitchInterface
       centerOfPressureToPack.setIncludingFrame(cop);
    }
 
-   void computeAndPackFootWrench(Wrench footWrenchToPack);
+   /**
+    * Gets the wrench measured at the foot or {@code null} if this foot switch does not have this
+    * information.
+    */
+   WrenchReadOnly getMeasuredWrench();
+
+   /**
+    * Gets the wrench measured at the foot.
+    * <p>
+    * If this foot switch does not have the wrench information, {@code measuredWrenchToPack} is filled
+    * with {@value Double#NaN}.
+    * </p>
+    */
+   default void getMeasuredWrench(WrenchBasics measuredWrenchToPack)
+   {
+      WrenchReadOnly measuredWrench = getMeasuredWrench();
+      if (measuredWrench == null)
+         measuredWrenchToPack.setToNaN(getMeasurementFrame(), getMeasurementFrame());
+      else
+         measuredWrenchToPack.setIncludingFrame(measuredWrenchToPack);
+   }
 
    ReferenceFrame getMeasurementFrame();
 
