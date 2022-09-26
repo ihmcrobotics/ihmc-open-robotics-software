@@ -2,7 +2,7 @@ package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -65,9 +65,9 @@ public class QuadrupedWrenchBasedFootSwitch implements QuadrupedFootSwitchInterf
    }
 
    @Override
-   public void computeAndPackFootWrench(Wrench footWrenchToPack)
+   public WrenchReadOnly getMeasuredWrench()
    {
-      footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());
+      return wrenchCalculator.getWrench();
    }
 
    @Override

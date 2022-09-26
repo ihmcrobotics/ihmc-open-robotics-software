@@ -553,7 +553,7 @@ public class PelvisLinearStateUpdater
          if (!areFeetTrusted.get(foot).getBooleanValue())
             continue;
          Wrench footWrench = footWrenches.get(foot);
-         footSwitches.get(foot).computeAndPackFootWrench(footWrench);
+         footSwitches.get(foot).getMeasuredWrench(footWrench);
          FixedFrameVector3DBasics footForce = footForces.get(foot);
          footForce.setMatchingFrame(footWrench.getLinearPart());
          totalForceZ += footForce.getZ();

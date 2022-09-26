@@ -65,7 +65,7 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
          YoDouble prepFootFz = prepFootFzs.get(robotQuadrant);
          SimpleMovingAverageFilteredYoVariable prepFootFzAverage = prepFootFzAverages.get(robotQuadrant);
 
-         footSwitches.get(robotQuadrant).computeAndPackFootWrench(temporaryFootWrench);
+         footSwitches.get(robotQuadrant).getMeasuredWrench(temporaryFootWrench);
 
          temporaryFootWrench.changeFrame(ReferenceFrame.getWorldFrame());
 

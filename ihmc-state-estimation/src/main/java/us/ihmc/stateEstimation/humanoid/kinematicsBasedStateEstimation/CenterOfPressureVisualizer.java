@@ -89,7 +89,7 @@ public class CenterOfPressureVisualizer
             tempRawCoP.changeFrame(worldFrame);
             footRawCoPPositionsInWorld.get(rigidBody).set(tempRawCoP);
 
-            footSwitches.get(rigidBody).computeAndPackFootWrench(tempWrench);
+            footSwitches.get(rigidBody).getMeasuredWrench(tempWrench);
             double singleFootForce = tempWrench.getLinearPartZ();
             totalFootForce += singleFootForce;
             tempRawCoP.scale(singleFootForce);
