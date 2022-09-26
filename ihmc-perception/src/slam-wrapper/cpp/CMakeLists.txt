@@ -21,7 +21,6 @@ set(SW_SOURCES
     factor_graph/factor_graph_handler.h
     external/factor_graph_external.cpp
     external/factor_graph_external.h
-    launcher/application.cpp
 )
 
 add_library(slam-wrapper SHARED ${SW_SOURCES})
@@ -40,3 +39,21 @@ install(TARGETS slam-wrapper
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
 install(FILES ${SW_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+
+
+# +++++++++++++++++++++++++++++++++++++++ C++ Tester +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+add_executable(FactorGraphHeadless 
+    ${SW_SOURCES}
+    launcher/application.cpp
+)
+
+target_link_libraries(FactorGraphHeadless
+    gtsam
+ #   eigen
+)
+
+target_include_directories(FactorGraphHeadless PUBLIC
+    factor_graph/
+    external/
+)
