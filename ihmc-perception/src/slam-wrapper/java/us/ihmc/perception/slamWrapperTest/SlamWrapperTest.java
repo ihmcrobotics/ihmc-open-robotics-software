@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SlamWrapperTest
 {
-   static
+   private static void loadLibraries()
    {
       // We need to disable javacpp from trying to automatically load libraries.
       // Otherwise, it will try to load them by name when they aren't in the library path
@@ -19,10 +19,7 @@ public class SlamWrapperTest
       // The approach taken here is to use System.load to load each library by explicit
       // absolute path on disk.
       System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
-   }
 
-   public static void main(String[] args)
-   {
       List<String> libraryFiles = new ArrayList<>();
       libraryFiles.add("libboost_thread.so");
       libraryFiles.add("libboost_stacktrace_addr2line.so");
@@ -72,6 +69,11 @@ public class SlamWrapperTest
             throw new RuntimeException(e);
          }
       }
+   }
+
+   public static void main(String[] args)
+   {
+      loadLibraries();
 
       SlamWrapper.FactorGraphExternal factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
