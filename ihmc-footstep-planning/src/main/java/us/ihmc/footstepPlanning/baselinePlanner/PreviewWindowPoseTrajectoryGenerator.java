@@ -121,7 +121,7 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
          distanceVector.setY(Math.signum(distanceVector.getY()) * MAX_Y_VELOCITY * dt);
       }
 
-      linearVelocities[headIdx].set(distanceVector.getX()/dt, distanceVector.getY()/dt, 0.0);
+      linearVelocities[headIdx].set(distanceVector.getX() / dt, distanceVector.getY() / dt, 0.0);
       angularVelocities[headIdx].set(0.0, 0.0, yawdot);
       headPose.set(poses[prevIdx]);
       // NOTE: change distanceVector back to world frame before appending to poses.

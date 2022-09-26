@@ -93,7 +93,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private GDXWalkPathType walkPathType = GDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
 
-   private GDXJoystickStepper joystickStepper;
+   private GDXPoseTracking poseTracking;
    private final boolean isContinuousStepping = false;
    private boolean joystickOn = false;
    private ImBoolean joystickMode = new ImBoolean(false);
@@ -149,7 +149,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
-      joystickStepper = new GDXJoystickStepper(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, footstepPlannerParameters);
+      poseTracking = new GDXPoseTracking(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, footstepPlannerParameters);
    }
 
    public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -172,11 +172,9 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 
       if (joystickOn)
       {
-//         getGoalPose()
-//         joystickStepper.run(footstepPlannerGoalGizmo.getFramePose3D());
-         joystickStepper.setMode(joystickMode.get());
-         joystickStepper.run(goalPose);
-         if (joystickStepper.isJoystickMode())
+         poseTracking.setMode(joystickMode.get());
+         poseTracking.run(goalPose);
+         if (poseTracking.isJoystickMode())
             setGoalGizmoFromJoystickPose();
       }
    }
@@ -240,46 +238,25 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
             updateStuff();
             queueFootstepPlan();
          }
-
       }
 
       if (selected && joystickOn)
       {
-         joystickStepper.run(footstepPlannerGoalGizmo.getFramePose3D());
+         poseTracking.run(footstepPlannerGoalGizmo.getFramePose3D());
       }
 
-      // TODO: this uses continuous step generator, but we don't know if we'll use this. Also has bug: keeps going under the ground.
-      /*
-      boolean altHeld = ImGui.getIO().getKeyAlt();
-      if (altHeld && selected)
+      if (selected && footstepPlannerGoalGizmo.isNewlyModified())
       {
-//         isContinuousStepping = true;
+         queueFootstepPlan();
       }
 
-      if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+      if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
-         isContinuousStepping = false;
+         delete();
       }
-
-       */
-
-
-      if (!isContinuousStepping)
+      if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
-
-         if (selected && footstepPlannerGoalGizmo.isNewlyModified())
-         {
-            queueFootstepPlan();
-         }
-
-         if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
-         {
-            delete();
-         }
-         if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
-         {
-            selected = false;
-         }
+         selected = false;
       }
 
       footstepPlannerGoalGizmo.setShowArrows(selected);
@@ -326,13 +303,13 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          {
             planJoystick();
             joystickOn = true;
-            footstepPlannerGoalGizmo.setJoystickMode(true);
+//            footstepPlannerGoalGizmo.setJoystickMode(true);
          }
          if (plannerToUse!=3)
          {
-            joystickStepper.stop();
+            poseTracking.stop();
             joystickOn = false;
-            footstepPlannerGoalGizmo.setJoystickMode(false);
+//            footstepPlannerGoalGizmo.setJoystickMode(false);
          }
       });
    }
@@ -405,14 +382,14 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 
    private void setGoalGizmoFromJoystickPose()
    {
-      FramePose3DReadOnly joystickPose = joystickStepper.getCurrentPose();
+      FramePose3DReadOnly joystickPose = poseTracking.getCurrentPose();
       footstepPlannerGoalGizmo.getTransformToParent().set(new RigidBodyTransform(joystickPose));
       footstepPlannerGoalGizmo.updateTransforms();
    }
 
    private void planJoystick()
    {
-      joystickStepper.initiate();
+      poseTracking.initiate();
    }
 
    public void renderImGuiWidgets()
@@ -510,7 +487,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       }
       if (joystickOn)
       {
-         joystickStepper.getRenderables(renderables,pool);
+         poseTracking.getRenderables(renderables, pool);
       }
    }
 
@@ -518,7 +495,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    {
       selected = false;
       modified = false;
-      joystickStepper.stop();
+      poseTracking.stop();
       clearGraphics();
    }
 
@@ -612,10 +589,5 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    public FramePose3D getRightGoalFootPose()
    {
       return rightGoalFootPose;
-   }
-
-   public boolean isContinuousStepping()
-   {
-      return isContinuousStepping;
    }
 }

@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.Conversions;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -25,11 +24,8 @@ import us.ihmc.footstepPlanning.baselinePlanner.BaselineFootstepPlannerParameter
 import us.ihmc.footstepPlanning.baselinePlanner.ContinuousTrackingFootstepPlanner;
 import us.ihmc.footstepPlanning.baselinePlanner.SimpleTimedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
@@ -43,7 +39,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GDXJoystickStepper
+public class GDXPoseTracking
 {
    private class Controller implements us.ihmc.scs2.definition.controller.interfaces.Controller
    {
@@ -162,12 +158,12 @@ public class GDXJoystickStepper
    FootstepPlannerParametersBasics footstepPlannerParameters;
    private FramePose3D goalPoseWithZOffset = new FramePose3D();
 
-   public GDXJoystickStepper(GDXImGuiBasedUI baseUI,
-                             DRCRobotModel robotModel,
-                             ROS2SyncedRobotModel syncedRobot,
-                             ROS2ControllerHelper controllerHelper,
-                             CommunicationHelper communicationHelper,
-                             FootstepPlannerParametersBasics footstepPlannerParameters)
+   public GDXPoseTracking(GDXImGuiBasedUI baseUI,
+                          DRCRobotModel robotModel,
+                          ROS2SyncedRobotModel syncedRobot,
+                          ROS2ControllerHelper controllerHelper,
+                          CommunicationHelper communicationHelper,
+                          FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.baseUI = baseUI;
       this.robotModel = robotModel;
@@ -176,7 +172,7 @@ public class GDXJoystickStepper
       this.communicationHelper = communicationHelper;
       this.footstepPlannerParameters = footstepPlannerParameters;
       sphereAndArrowGraphic = new GDXSphereAndArrowGraphic();
-      sphereAndArrowGraphic.create(0.05f, 0.5f, Color.PURPLE);
+      sphereAndArrowGraphic.create(0.05f, 0.4f, Color.PURPLE);
    }
 
    public void initiate()
@@ -189,10 +185,11 @@ public class GDXJoystickStepper
          RigidBodyTransform leftFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
          RigidBodyTransform rightFootTransform = syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
 
-         Vector3DBasics initialLeftPosition = leftFootTransform.getTranslation();
-         Vector3DBasics initialRightPosition = rightFootTransform.getTranslation();
-         RotationMatrixBasics initialLeftRotation = leftFootTransform.getRotation();
-         RotationMatrixBasics initialRightRotation = rightFootTransform.getRotation();
+         // INITIAL
+         Vector3DBasics initialLeftPosition = leftFootTransform.getTranslation();         // LEFT FOOT X,Y,Z
+         Vector3DBasics initialRightPosition = rightFootTransform.getTranslation();       // RIGHT FOOT X,Y,Z
+         RotationMatrixBasics initialLeftRotation = leftFootTransform.getRotation();      // LEFT FOOT ORIENTATION
+         RotationMatrixBasics initialRightRotation = rightFootTransform.getRotation();    // RIGHT FOOT ORIENTATION
 
          SideDependentList<FramePose3D> initialFootholds = new SideDependentList<>();
          initialFootholds.put(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(initialLeftPosition), new Quaternion(initialLeftRotation)));
