@@ -21,6 +21,8 @@ public class SlamWrapperTest
       System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
 
       List<String> libraryFiles = new ArrayList<>();
+      libraryFiles.add("libtbb.so");
+
       libraryFiles.add("libboost_thread.so");
       libraryFiles.add("libboost_stacktrace_addr2line.so");
       libraryFiles.add("libboost_filesystem.so");
