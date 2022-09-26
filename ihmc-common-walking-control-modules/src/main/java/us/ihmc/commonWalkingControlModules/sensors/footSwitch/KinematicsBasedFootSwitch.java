@@ -14,7 +14,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,8 +28,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private final double totalRobotWeight;
    private final ContactablePlaneBody foot;
    private final ContactablePlaneBody[] otherFeet;
-
-   private final YoFramePoint2D yoResolvedCoP;
 
    public KinematicsBasedFootSwitch(String footName,
                                     SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet,
@@ -49,8 +46,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       soleZ = new YoDouble(footName + "soleZ", registry);
       ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
-
-      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -71,8 +66,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       soleZ = new YoDouble(footName + "soleZ", registry);
       ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
-
-      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
 
       parentRegistry.addChild(registry);
    }
@@ -110,8 +103,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       ankleZ = new YoDouble(footName + "ankleZ", registry);
       this.switchZThreshold = switchZThreshold;
 
-      yoResolvedCoP = new YoFramePoint2D(footName + "ResolvedCoP", "", foot.getSoleFrame(), registry);
-
       parentRegistry.addChild(registry);
    }
 
@@ -124,11 +115,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       return tmpFramePoint;
    }
 
-   /**
-    * is the foot in question within the switchZThreshold of the lowest foot
-    */
    @Override
-   public boolean hasFootHitGround()
+   public void update()
    {
       double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
       double lowestFootZ = getLowestFootZInWorld();
@@ -136,7 +124,8 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       hitGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue());
       soleZ.set(thisFootZ);
       ankleZ.set(getPointInWorld(foot.getFrameAfterParentJoint()).getZ());
-      return hitGround.getBooleanValue();
+
+      fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
    }
 
    private double getLowestFootZInWorld()
@@ -153,6 +142,15 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       return lowestZ;
    }
 
+   /**
+    * is the foot in question within the switchZThreshold of the lowest foot
+    */
+   @Override
+   public boolean hasFootHitGround()
+   {
+      return hitGround.getBooleanValue();
+   }
+
    @Override
    public double computeFootLoadPercentage()
    {
@@ -163,12 +161,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    public void computeAndPackCoP(FramePoint2D copToPack)
    {
       copToPack.setToNaN(getMeasurementFrame());
-   }
-
-   @Override
-   public void updateCoP()
-   {
-      yoResolvedCoP.setToZero();
    }
 
    private final Vector3D footForce = new Vector3D();
@@ -198,10 +190,6 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean getForceMagnitudePastThreshhold()
    {
-      //a more liberal version of hasFootHitGround
-      double thisFootZ = getPointInWorld(foot.getSoleFrame()).getZ();
-      double lowestFootZ = getLowestFootZInWorld();
-      fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
       return fixedOnGround.getBooleanValue();
    }
 }

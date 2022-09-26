@@ -62,11 +62,6 @@ public class QuadrupedWrenchBasedFootSwitch implements QuadrupedFootSwitchInterf
    }
 
    @Override
-   public void updateCoP()
-   {
-   }
-
-   @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
       footWrenchToPack.setIncludingFrame(wrenchCalculator.getWrench());

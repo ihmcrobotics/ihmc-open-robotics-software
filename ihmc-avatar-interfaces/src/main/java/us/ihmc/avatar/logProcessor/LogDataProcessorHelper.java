@@ -206,11 +206,6 @@ public class LogDataProcessorHelper
             {
                copToPack.setIncludingFrame(cops.get(robotSide));
             }
-
-            @Override
-            public void updateCoP()
-            {
-            }
          };
 
          footSwitches.put(robotSide, footSwitch);
