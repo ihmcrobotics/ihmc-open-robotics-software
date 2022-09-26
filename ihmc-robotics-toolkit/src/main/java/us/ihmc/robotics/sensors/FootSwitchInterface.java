@@ -68,13 +68,13 @@ public interface FootSwitchInterface
     */
    default void getCenterOfPressure(FramePoint2DBasics centerOfPressureToPack)
    {
-      FramePoint2DReadOnly cop = getCenterOfPressure();
-      if (cop == null)
+      FramePoint2DReadOnly thisCoP = getCenterOfPressure();
+      if (thisCoP == null)
       {
          centerOfPressureToPack.setToNaN(getMeasurementFrame());
       }
 
-      centerOfPressureToPack.setIncludingFrame(cop);
+      centerOfPressureToPack.setIncludingFrame(thisCoP);
    }
 
    /**
@@ -92,11 +92,11 @@ public interface FootSwitchInterface
     */
    default void getMeasuredWrench(WrenchBasics measuredWrenchToPack)
    {
-      WrenchReadOnly measuredWrench = getMeasuredWrench();
-      if (measuredWrench == null)
+      WrenchReadOnly thisMeasuredWrench = getMeasuredWrench();
+      if (thisMeasuredWrench == null)
          measuredWrenchToPack.setToNaN(getMeasurementFrame(), getMeasurementFrame());
       else
-         measuredWrenchToPack.setIncludingFrame(measuredWrenchToPack);
+         measuredWrenchToPack.setIncludingFrame(thisMeasuredWrench);
    }
 
    /**
