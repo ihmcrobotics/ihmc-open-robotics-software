@@ -56,13 +56,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BooleanProvider allowStepAdjustment;
    private final DoubleProvider footstepDeadband;
-   private final DoubleProvider transferDurationSplitFraction;
 
-   private final DoubleProvider minimumFootstepMultiplier;
    private final DoubleProvider minICPErrorForStepAdjustment;
-   private final DoubleProvider maximumTimeFromTransfer;
-   private final BooleanProvider useActualErrorInsteadOfResidual;
-   private final BooleanProvider considerErrorInAdjustment;
    private final BooleanProvider allowCrossOverSteps;
 
    private SimpleFootstep nextFootstep;
@@ -75,7 +70,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
    private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
-   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "TotalFootstepMultiplier", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
@@ -84,9 +78,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final FramePoint3D referencePositionInControlPlane = new FramePoint3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   private final YoFrameVector2D footstepAdjustmentFromErrorInControlPlane = new YoFrameVector2D(yoNamePrefix + "footstepAdjustmentFromErrorInControlPlane",
-                                                                                                 worldFrame,
-                                                                                                 registry);
    private final YoFrameVector2D footstepAdjustmentInControlPlane = new YoFrameVector2D(yoNamePrefix + "footstepAdjustmentInControlPlane",
                                                                                                  worldFrame,
                                                                                                  registry);
@@ -170,19 +161,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
-      minimumFootstepMultiplier = new DoubleParameter(yoNamePrefix + "MinimumFootstepMultiplier",
-                                                      registry,
-                                                      stepAdjustmentParameters.getMinimumFootstepMultiplier());
-      maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer",
-                                                    registry,
-                                                    stepAdjustmentParameters.maximumTimeFromTransferInFootstepMultiplier());
       minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment",
                                                          registry,
                                                          stepAdjustmentParameters.getMinICPErrorForStepAdjustment());
-
-      transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
-                                                          registry,
-                                                          stepAdjustmentParameters.getTransferSplitFraction());
 
       useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment",
                                                                 registry,
@@ -213,10 +194,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       DoubleProvider outerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
       DoubleProvider inPlaceWidth = new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth());
 
-      useActualErrorInsteadOfResidual = new BooleanParameter("useActualErrorInsteadOfResidual", registry, false);
-      considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment",
-                                                       registry,
-                                                       stepAdjustmentParameters.considerICPErrorForStepAdjustment());
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                lengthLimit,
                                                                                lengthBackLimit,
@@ -360,7 +337,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    public void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
                        double omega0)
    {
       if (!isInSwing.getBooleanValue())
@@ -421,11 +397,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstep.getPosition(), referencePositionInControlPlane);
       else
          referencePositionInControlPlane.set(upcomingFootstep.getPosition());
-
-      if (errorAboveThreshold && considerErrorInAdjustment.getValue())
-         computeStepAdjustmentFromError(residualICPError, omega0);
-      else
-         footstepAdjustmentFromErrorInControlPlane.setToZero();
 
       projectAdjustedStepIntoCaptureRegion();
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
@@ -500,25 +471,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       }
    }
 
-   private void computeStepAdjustmentFromError(FrameVector2DReadOnly residualICPError, double omega0)
-   {
-      footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
-      if (useActualErrorInsteadOfResidual.getValue())
-      {
-         footstepAdjustmentFromErrorInControlPlane.set(icpError);
-         footstepAdjustmentFromErrorInControlPlane.negate();
-      }
-      else
-      {
-         footstepAdjustmentFromErrorInControlPlane.set(residualICPError);
-      }
-      footstepAdjustmentFromErrorInControlPlane.scale(1.0 / footstepMultiplier.getDoubleValue());
-   }
-
    private void projectAdjustedStepIntoCaptureRegion()
    {
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
-      adjustedSolutionInControlPlane.add(footstepAdjustmentFromErrorInControlPlane);
 
       captureRegionInWorld.setIncludingFrame(multiStepCaptureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
@@ -683,20 +638,5 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private void computeTimeRemainingInState()
    {
       timeRemainingInState.set(swingDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
-   }
-
-   private double computeFootstepAdjustmentMultiplier(double omega0)
-   {
-      double timeInTransferForShifting = Math.min(maximumTimeFromTransfer.getValue(),
-                                                  transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue());
-      recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
-      recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
-
-      // This is the maximum possible multiplier
-      double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
-
-      // The recursion multiplier is guaranteed to be between the max and min values. This forces it to interpolate between those two.
-      double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
-      return minimumFootstepMultiplier + (1.0 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
 }

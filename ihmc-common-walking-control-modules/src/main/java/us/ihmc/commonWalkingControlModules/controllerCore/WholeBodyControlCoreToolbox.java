@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -547,7 +545,10 @@ public class WholeBodyControlCoreToolbox
       if (yoGraphicsListRegistry == null)
          return null;
       if (wrenchVisualizer == null)
-         wrenchVisualizer = createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+      {
+         wrenchVisualizer = new WrenchVisualizer("DesiredExternalWrench", 1.0, yoGraphicsListRegistry, registry);
+         wrenchVisualizer.registerContactablePlaneBodies(contactablePlaneBodies);
+      }
       return wrenchVisualizer;
    }
 

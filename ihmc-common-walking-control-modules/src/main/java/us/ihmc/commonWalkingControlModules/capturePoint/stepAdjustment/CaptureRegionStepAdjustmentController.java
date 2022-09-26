@@ -149,8 +149,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    @Override
    public void reset()
    {
-      nextFootstep = null;
-      nextFootstepTiming = null;
       reachabilityConstraintHandler.reset();
       isInSwing.set(false);
       upcomingFootstep.setToNaN();
@@ -159,13 +157,9 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       captureRegionCalculator.hideCaptureRegion();
    }
 
-   private SimpleFootstep nextFootstep;
-   private FootstepTiming nextFootstepTiming;
-
+   @Override
    public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
    {
-      this.nextFootstep = nextFootstep;
-      this.nextFootstepTiming = nextFootstepTiming;
    }
 
    @Override
@@ -226,7 +220,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    public void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
                        double omega0)
    {
       if (!isInSwing.getBooleanValue())

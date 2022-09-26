@@ -40,6 +40,4 @@ public interface ICPControllerInterface
 
    public abstract boolean useAngularMomentum();
 
-   public abstract FrameVector2DReadOnly getResidualError();
-
 }

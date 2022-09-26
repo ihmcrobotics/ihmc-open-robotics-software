@@ -27,7 +27,6 @@ public interface StepAdjustmentController
    void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
                        double omega0);
 
    FramePose3DReadOnly getFootstepSolution();

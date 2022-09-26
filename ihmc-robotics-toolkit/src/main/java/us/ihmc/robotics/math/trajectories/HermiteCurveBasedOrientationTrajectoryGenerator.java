@@ -112,8 +112,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       currentOrientation = new YoMutableFrameQuaternion(name + currentOrientationName, "", registry, trajectoryFrame);
       currentAngularVelocity = new YoMutableFrameVector3D(name + currentAngularVelocityName, "", registry, trajectoryFrame);
-      currentAngularAcceleration = new YoMutableFrameVector3D(name + currentAngularAccelerationName, "", registry,
-                                                                                                   trajectoryFrame);
+      currentAngularAcceleration = new YoMutableFrameVector3D(name + currentAngularAccelerationName, "", registry, trajectoryFrame);
 
       registerFrameChangeables(initialOrientation, initialAngularVelocity);
       registerFrameChangeables(finalOrientation, finalAngularVelocity);
@@ -126,6 +125,27 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void clear()
+   {
+      currentTime.setToNaN();
+      trajectoryTime.setToNaN();
+      for (int i = 1; i <= 3; i++)
+      {
+         cumulativeBeziers[i].setToNaN();
+         cumulativeBeziersDot[i].setToNaN();
+         cumulativeBeziersDDot[i].setToNaN();
+      }
+
+      initialOrientation.setToNaN();
+      initialAngularVelocity.setToNaN();
+      finalOrientation.setToNaN();
+      finalAngularVelocity.setToNaN();
+
+      currentOrientation.setToNaN();
+      currentAngularVelocity.setToNaN();
+      currentAngularAcceleration.setToNaN();
    }
 
    public void setTrajectoryTime(double duration)
@@ -223,8 +243,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    }
 
    /**
-    * Before Initializing the isSolvable() method should be called to confirm that the limit
-    * conditions are within the bounds
+    * Before Initializing the isSolvable() method should be called to confirm that the limit conditions
+    * are within the bounds
     */
    @Override
    public void initialize()
@@ -535,7 +555,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    {
       return currentAngularAcceleration;
    }
-
 
    @Override
    public String toString()

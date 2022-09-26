@@ -5,6 +5,7 @@ import java.util.Map;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -194,6 +195,8 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
          Quaternion orientation = new Quaternion(rootJointOrientation);
          orientation.prependYawRotation(initialYaw);
          SixDoFJointState rootJointState = new SixDoFJointState(orientation, position);
+         rootJointState.setVelocity(EuclidCoreTools.zeroVector3D, EuclidCoreTools.zeroVector3D);
+         rootJointState.setAcceleration(EuclidCoreTools.zeroVector3D, EuclidCoreTools.zeroVector3D);
          rootJoint.setInitialJointState(rootJointState);
       }
 
@@ -202,7 +205,9 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
          Double jointPosition = getJointPosition(jointDefinition.getName());
 
          if (jointPosition != null)
-            jointDefinition.setInitialJointState(new OneDoFJointState(jointPosition));
+            jointDefinition.setInitialJointState(new OneDoFJointState(jointPosition, 0.0, 0.0));
+         else
+            jointDefinition.setInitialJointState(new OneDoFJointState(0.0, 0.0, 0.0));
       });
    }
 

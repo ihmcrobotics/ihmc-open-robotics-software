@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.SCS2DefinitionMissingTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
@@ -48,7 +49,7 @@ public class GDXDesiredRobot extends GDXMultiBodyGraphic
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       ColorDefinition ghostColor = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
       MaterialDefinition material = new MaterialDefinition(ghostColor);
-      RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRootBodyDefinition(),
+      SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
       // NOTE: kneeJoint (CrossFourBarJoint) separate from robotDefinition. We iterate through the kneeJoints separately below.
