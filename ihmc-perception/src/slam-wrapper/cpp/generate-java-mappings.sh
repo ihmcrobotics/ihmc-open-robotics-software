@@ -41,6 +41,7 @@ cp ../lib/libslam-wrapper.so ../../../resources
 # We need to copy these gtsam related library files into our classpath resources dir
 cp /usr/local/lib/libgtsam.so ../../../resources
 cp /usr/local/lib/libmetis-gtsam.so ../../../resources
+cp /usr/lib/x86_64-linux-gnu/libtbb.so ../../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_thread.so ../../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_addr2line.so ../../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_filesystem.so ../../../resources
