@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff
-public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
+public class WrenchBasedFootSwitch implements ToeSwitch
 {
    private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
 
@@ -52,10 +52,8 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    private final Wrench footWrench;
    private final BagOfBalls footswitchCOPBagOfBalls;
    private final YoBoolean pastThreshold;
-   private final YoBoolean heelHitGround;
    private final YoBoolean toeHitGround;
    private final GlitchFilteredYoBoolean pastThresholdFilter;
-   private final GlitchFilteredYoBoolean heelHitGroundFilter;
    private final GlitchFilteredYoBoolean toeHitGroundFilter;
 
    private final YoFramePoint2D yoResolvedCoP;
@@ -141,13 +139,11 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       this.footswitchCOPBagOfBalls = new BagOfBalls(1, copVisualizerSize, namePrefix + "FootswitchCOP", registry, yoGraphicsListRegistry);
 
       this.pastThreshold = new YoBoolean(namePrefix + "PastFootswitchThreshold", registry);
-      this.heelHitGround = new YoBoolean(namePrefix + "HeelHitGround", registry);
       this.toeHitGround = new YoBoolean(namePrefix + "ToeHitGround", registry);
 
       int filterWindowSize = 3;
 
       this.pastThresholdFilter = new GlitchFilteredYoBoolean(namePrefix + "PastFootswitchThresholdFilter", registry, pastThreshold, filterWindowSize);
-      this.heelHitGroundFilter = new GlitchFilteredYoBoolean(namePrefix + "HeelHitGroundFilter", registry, heelHitGround, filterWindowSize);
       this.toeHitGroundFilter = new GlitchFilteredYoBoolean(namePrefix + "ToeHitGroundFilter", registry, toeHitGround, filterWindowSize);
 
       this.contactablePlaneBody = contactablePlaneBody;
@@ -200,29 +196,14 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    public void reset()
    {
       pastThresholdFilter.set(false);
-      heelHitGroundFilter.set(false);
       toeHitGroundFilter.set(false);
       controllerDetectedTouchdown.set(false);
-   }
-
-   @Override
-   public void resetHeelSwitch()
-   {
-      heelHitGroundFilter.set(false);
    }
 
    @Override
    public void resetToeSwitch()
    {
       toeHitGroundFilter.set(false);
-   }
-
-   @Override
-   public boolean hasHeelHitGround()
-   {
-      heelHitGround.set(isForceMagnitudePastThreshold());
-      heelHitGroundFilter.update();
-      return heelHitGroundFilter.getBooleanValue();
    }
 
    @Override
@@ -242,7 +223,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       footForce.clipToMinMax(0.0, Double.MAX_VALUE);
 
-      footForceMagnitude.set(footForce.length());
+      footForceMagnitude.set(footForce.norm());
 
       footLoadPercentage.update(footForce.getZ() / robotTotalWeight);
 
@@ -273,8 +254,6 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
 
       if (toeHitGroundFilter.getBooleanValue())
          pastThreshold.set(resolvedCoP.getX() <= maxThresholdX);
-      else if (heelHitGroundFilter.getBooleanValue())
-         pastThreshold.set(resolvedCoP.getX() >= minThresholdX);
       else
          pastThreshold.set(resolvedCoP.getX() >= minThresholdX && resolvedCoP.getX() <= maxThresholdX);
 
@@ -332,7 +311,7 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
       yoFootTorque.set(footTorque);
 
       // magnitude of force part is independent of frame
-      footForceMagnitude.set(footForce.length());
+      footForceMagnitude.set(footForce.norm());
 
       // Now change to frame after the parent joint (ankle or wrist for example):
       footWrenchInBodyFixedFrame.setIncludingFrame(footWrenchToPack);
