@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class HDF5Manager
 {
 
-   public static int MAX_BUFFER_SIZE = 50;
+   public static int MAX_BUFFER_SIZE = 500;
 
    private HashMap<String, Group> groups;
    private HashMap<String, ArrayList<Float>> buffers;
@@ -37,7 +37,7 @@ public class HDF5Manager
    {
       if (buffers.containsKey(namespace))
       {
-         LogTools.info("Get Index: {}", buffers.get(namespace).size());
+         LogTools.info("Get Index: {} {}", namespace, buffers.get(namespace).size());
          return buffers.get(namespace).size();
       }
       else

@@ -142,7 +142,6 @@ public class HDF5Tools
 
    public static void storeFloatArray2D(Group group, long index, ArrayList<Float> data, int cols)
    {
-      System.out.println(data);
       long[] dims = { HDF5Manager.MAX_BUFFER_SIZE, cols };
 
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
