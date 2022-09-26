@@ -27,12 +27,6 @@ public abstract class TouchdownDetectorBasedFootSwitch implements FootSwitchInte
       controllerThinksHasTouchedDown.set(false);
    }
 
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      return false;
-   }
-
    public void setFootContactState(boolean hasFootHitGround)
    {
       controllerThinksHasTouchedDown.set(hasFootHitGround);

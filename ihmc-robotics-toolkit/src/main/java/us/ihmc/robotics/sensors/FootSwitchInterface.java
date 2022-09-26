@@ -6,10 +6,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 
-// TODO Nuke that interface
 public interface FootSwitchInterface
 {
-   public void reset();
+   /**
+    * Resets internal flags, depends on the implementation.
+    */
+   void reset();
 
    /**
     * This method is intended to be called once per control tick and should update the internal state
@@ -25,8 +27,25 @@ public interface FootSwitchInterface
     * It typically relies on force measurement at the foot (either from a force/torque sensor or
     * estimate from joint torques) in addition to some filtering to prune out false positives.
     * </p>
+    * <p>
+    * Similar to {@link #hasFootHitGroundSensitive()} except that the implementation of this method is
+    * expected to use additional filters and/or conditions to prune outliers.
+    * </p>
     */
-   boolean hasFootHitGround();
+   default boolean hasFootHitGroundFiltered()
+   {
+      return hasFootHitGroundSensitive();
+   }
+
+   /**
+    * Returns whether this foot switch estimates that the foot has made contact with the ground.
+    * <p>
+    * Similar to {@link #hasFootHitGroundFiltered()} except that the implementation of this method is
+    * expected to be more sensitive and more responsive. Note that this method can return false
+    * positives.
+    * </p>
+    */
+   boolean hasFootHitGroundSensitive();
 
    /**
     * @return a value in [0, 1] representing the force magnitude on the foot in terms of robot weight.
@@ -80,7 +99,8 @@ public interface FootSwitchInterface
          measuredWrenchToPack.setIncludingFrame(measuredWrenchToPack);
    }
 
+   /**
+    * Gets the reference frame in which the wrench in measured.
+    */
    ReferenceFrame getMeasurementFrame();
-
-   boolean getForceMagnitudePastThreshhold();
 }

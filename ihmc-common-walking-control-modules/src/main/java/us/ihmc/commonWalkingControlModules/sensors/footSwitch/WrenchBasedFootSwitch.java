@@ -199,11 +199,16 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
       hasFootHitGround.set((isPastForceThreshold1Filtered.getValue() && isPastCoPThresholdFiltered.getValue()) || isPastForceThreshold2.getValue());
       hasFootHitGroundFiltered.update();
-
    }
 
    @Override
-   public boolean hasFootHitGround()
+   public boolean hasFootHitGroundSensitive()
+   {
+      return isPastForceThreshold1.getBooleanValue();
+   }
+
+   @Override
+   public boolean hasFootHitGroundFiltered()
    {
       return hasFootHitGroundFiltered.getValue();
    }
@@ -263,12 +268,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       List<FramePoint3D> maxFront = DesiredFootstepCalculatorTools.computeMaximumPointsInDirection(contactablePlaneBody.getContactPointsCopy(), front, 1);
 
       return maxFront.get(0).getX();
-   }
-
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      return isPastForceThreshold1.getBooleanValue();
    }
 
    public ContactablePlaneBody getContactablePlaneBody()

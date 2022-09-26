@@ -100,7 +100,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    }
 
    @Override
-   public boolean hasFootHitGround()
+   public boolean hasFootHitGroundSensitive()
    {
       boolean thinksInSupport = controllerThinksHasTouchedDown.getBooleanValue();
       if (thinksInSupport && trustTouchdownDetectorsInSupport.getBooleanValue())
@@ -129,7 +129,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public WrenchReadOnly getMeasuredWrench()
    {
       WrenchReadOnly wrench = wrenchCalculator.getWrench();
-      if (hasFootHitGround())
+      if (hasFootHitGroundFiltered())
          footWrench.setIncludingFrame(wrenchCalculator.getWrench());
       else
          footWrench.setToZero(wrench.getReferenceFrame());
