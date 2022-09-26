@@ -214,7 +214,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public double computeFootLoadPercentage()
+   public double getFootLoadPercentage()
    {
       return footLoadPercentage.getDoubleValue();
    }

@@ -442,7 +442,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         if (footSwitches.get(robotQuadrant).computeFootLoadPercentage() > loadPercentageForGroundPlane.getValue())
+         if (footSwitches.get(robotQuadrant).getFootLoadPercentage() > loadPercentageForGroundPlane.getValue())
          {
             groundPlanePositions.get(robotQuadrant).setFromReferenceFrame(controllerToolbox.getSoleReferenceFrame(robotQuadrant));
             upcomingGroundPlanePositions.get(robotQuadrant).setFromReferenceFrame(controllerToolbox.getSoleReferenceFrame(robotQuadrant));

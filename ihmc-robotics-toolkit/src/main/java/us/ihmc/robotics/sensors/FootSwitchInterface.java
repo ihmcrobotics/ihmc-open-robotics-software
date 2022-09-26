@@ -17,9 +17,19 @@ public interface FootSwitchInterface
    {
    }
 
+   /**
+    * Returns whether this foot switch estimates that the foot has made contact with the ground.
+    * <p>
+    * It typically relies on force measurement at the foot (either from a force/torque sensor or
+    * estimate from joint torques) in addition to some filtering to prune out false positives.
+    * </p>
+    */
    boolean hasFootHitGround();
 
-   double computeFootLoadPercentage();
+   /**
+    * @return a value in [0, 1] representing the force magnitude on the foot in terms of robot weight.
+    */
+   double getFootLoadPercentage();
 
    void computeAndPackCoP(FramePoint2D copToPack);
 
