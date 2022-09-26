@@ -440,7 +440,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             if (useControllerDesiredCoP)
                centerOfPressureDataHolderFromController.getCenterOfPressure(tempCoP2d, foot);
             else
-               footSwitch.computeAndPackCoP(tempCoP2d);
+               footSwitch.getCenterOfPressure(tempCoP2d);
 
             if (tempCoP2d.containsNaN())
             {
