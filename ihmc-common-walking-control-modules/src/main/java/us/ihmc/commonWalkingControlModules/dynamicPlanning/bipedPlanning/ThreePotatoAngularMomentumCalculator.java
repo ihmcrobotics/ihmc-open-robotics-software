@@ -119,7 +119,7 @@ public class ThreePotatoAngularMomentumCalculator
       this.potatoMassFraction = potatoMassFraction;
 
       angularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("angularMomentum",
-                                                                                   50,
+                                                                                   30,
                                                                                    worldFrame,
                                                                                    () -> new FixedFramePolynomialEstimator3D(worldFrame),
                                                                                    registry);

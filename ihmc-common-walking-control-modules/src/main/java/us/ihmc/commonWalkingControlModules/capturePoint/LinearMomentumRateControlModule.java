@@ -514,7 +514,6 @@ public class LinearMomentumRateControlModule
       }
 
       output.setDesiredCMP(desiredCMP);
-      output.setResidualICPErrorForStepAdjustment(icpController.getResidualError());
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()

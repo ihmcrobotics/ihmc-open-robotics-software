@@ -302,11 +302,4 @@ public class HeuristicICPController implements ICPControllerInterface
    {
       return false;
    }
-
-   @Override
-   public FrameVector2DReadOnly getResidualError()
-   {
-      return residualError;
-   }
-
 }
