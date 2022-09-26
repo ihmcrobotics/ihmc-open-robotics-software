@@ -42,6 +42,14 @@ if (( EUID == 0 )); then
 fi
 ```
 
+We are experimenting with no longer running docker with root. To do this, 
+follow the [official instructions](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user):
+```
+# groupadd docker
+# usermod -aG docker $USER
+$ newgrp docker
+```
+
 Sometimes volume mount permissions can be wrong. To debug this, use `ls -hanp` to list files with the group and owner codes as numbers. You should use the same codes for the user inside the Docker container as the user on the host system. Usually, this is 1000.
 
 To run these on Windows, install WSL 2 and follow the NVIDIA guide.
