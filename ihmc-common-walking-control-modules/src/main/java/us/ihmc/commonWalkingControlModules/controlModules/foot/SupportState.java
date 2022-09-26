@@ -241,7 +241,7 @@ public class SupportState extends AbstractFootControlState
       computeFootPolygon();
       controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
-      footSwitch.computeAndPackCoP(cop2d);
+      footSwitch.getCenterOfPressure(cop2d);
       if (cop2d.containsNaN())
          cop2d.setToZero(contactableFoot.getSoleFrame());
 

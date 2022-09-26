@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -23,7 +23,7 @@ public class SettableFootSwitch implements FootSwitchInterface
       this.foot = foot;
       hasFootHitGround.set(false);
    }
-   
+
    @Override
    public boolean hasFootHitGround()
    {
@@ -37,9 +37,9 @@ public class SettableFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2D copToPack)
+   public FramePoint2DReadOnly getCenterOfPressure()
    {
-      copToPack.setToNaN(getMeasurementFrame());
+      return null;
    }
 
    @Override
@@ -67,7 +67,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    {
       return false;
    }
-   
+
    public void setFootContactState(boolean hasFootHitGround)
    {
       this.hasFootHitGround.set(hasFootHitGround);

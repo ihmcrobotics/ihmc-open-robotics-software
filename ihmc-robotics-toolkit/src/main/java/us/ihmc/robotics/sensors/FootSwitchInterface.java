@@ -1,7 +1,8 @@
 package us.ihmc.robotics.sensors;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 
 // TODO Nuke that interface
@@ -31,7 +32,30 @@ public interface FootSwitchInterface
     */
    double getFootLoadPercentage();
 
-   void computeAndPackCoP(FramePoint2D copToPack);
+   /**
+    * Gets the estimated center of pressure coordinates in the foot, or {@code null} if this foot
+    * switch cannot estimate the center of pressure.
+    */
+   FramePoint2DReadOnly getCenterOfPressure();
+
+   /**
+    * Gets the estimated center of pressure coordinates in the foot, or {@code null} if this foot
+    * switch cannot estimate the center of pressure.
+    * <p>
+    * If this foot switch cannot compute the center of pressure, {@code centerOfPressureToPack} is
+    * filled with {@value Double#NaN}.
+    * </p>
+    */
+   default void getCenterOfPressure(FramePoint2DBasics centerOfPressureToPack)
+   {
+      FramePoint2DReadOnly cop = getCenterOfPressure();
+      if (cop == null)
+      {
+         centerOfPressureToPack.setToNaN(getMeasurementFrame());
+      }
+
+      centerOfPressureToPack.setIncludingFrame(cop);
+   }
 
    void computeAndPackFootWrench(Wrench footWrenchToPack);
 

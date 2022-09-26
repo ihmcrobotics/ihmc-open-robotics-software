@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedRobotics.estimator.footSwitch;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -23,7 +23,10 @@ public class QuadrupedWrenchBasedFootSwitch implements QuadrupedFootSwitchInterf
 
    private final double totalRobotWeight;
 
-   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator, ContactablePlaneBody contactablePlaneBody, double totalRobotWeight, YoRegistry registry)
+   public QuadrupedWrenchBasedFootSwitch(WrenchCalculatorWrapper wrenchCalculator,
+                                         ContactablePlaneBody contactablePlaneBody,
+                                         double totalRobotWeight,
+                                         YoRegistry registry)
    {
       this.wrenchCalculator = wrenchCalculator;
       this.totalRobotWeight = totalRobotWeight;
@@ -50,15 +53,15 @@ public class QuadrupedWrenchBasedFootSwitch implements QuadrupedFootSwitchInterf
    }
 
    @Override
-   public double computeFootLoadPercentage()
+   public double getFootLoadPercentage()
    {
       return Math.abs(yoMeasuredForceWorld.getZ()) / totalRobotWeight;
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2D copToPack)
+   public FramePoint2DReadOnly getCenterOfPressure()
    {
-      copToPack.setToNaN(getMeasurementFrame());
+      return null;
    }
 
    @Override

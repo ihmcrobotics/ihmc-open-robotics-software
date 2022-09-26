@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
@@ -202,9 +203,9 @@ public class LogDataProcessorHelper
             }
 
             @Override
-            public void computeAndPackCoP(FramePoint2D copToPack)
+            public FramePoint2DReadOnly getCenterOfPressure()
             {
-               copToPack.setIncludingFrame(cops.get(robotSide));
+               return cops.get(robotSide);
             }
          };
 

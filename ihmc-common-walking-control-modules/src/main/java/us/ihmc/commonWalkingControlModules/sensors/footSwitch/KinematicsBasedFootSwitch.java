@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
 import java.util.Collection;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
@@ -158,9 +158,9 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    }
 
    @Override
-   public void computeAndPackCoP(FramePoint2D copToPack)
+   public FramePoint2DReadOnly getCenterOfPressure()
    {
-      copToPack.setToNaN(getMeasurementFrame());
+      return null;
    }
 
    private final Vector3D footForce = new Vector3D();
