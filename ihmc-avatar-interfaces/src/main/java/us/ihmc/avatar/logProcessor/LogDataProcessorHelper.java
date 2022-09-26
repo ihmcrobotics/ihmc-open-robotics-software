@@ -211,22 +211,6 @@ public class LogDataProcessorHelper
             public void updateCoP()
             {
             }
-
-            @Override
-            @Deprecated
-            public void setFootContactState(boolean hasFootHitGround)
-            {
-            }
-
-            @Override
-            public void trustFootSwitchInSwing(boolean trustFootSwitch)
-            {
-            }
-
-            @Override
-            public void trustFootSwitchInSupport(boolean trustFootSwitch)
-            {
-            }
          };
 
          footSwitches.put(robotSide, footSwitch);

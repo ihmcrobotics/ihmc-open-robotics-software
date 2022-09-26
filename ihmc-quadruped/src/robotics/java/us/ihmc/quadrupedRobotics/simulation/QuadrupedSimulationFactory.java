@@ -22,6 +22,7 @@ import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerManager;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchFactory;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorReaderWrapper;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedStateEstimatorFactory;
@@ -132,8 +133,8 @@ public class QuadrupedSimulationFactory
    private RobotMotionStatusHolder robotMotionStatusFromController;
    private QuadrantDependentList<ContactablePlaneBody> contactableFeet;
    private List<ContactablePlaneBody> contactablePlaneBodies;
-   private QuadrantDependentList<FootSwitchInterface> controllerFootSwitches;
-   private QuadrantDependentList<FootSwitchInterface> stateEstimatorFootSwitches;
+   private QuadrantDependentList<QuadrupedFootSwitchInterface> controllerFootSwitches;
+   private QuadrantDependentList<QuadrupedFootSwitchInterface> stateEstimatorFootSwitches;
    private StateEstimatorController stateEstimator;
    private CenterOfMassDataHolder centerOfMassDataHolder = null;
    private RealtimeROS2Node realtimeROS2Node;

@@ -11,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -76,8 +75,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
    private double minThresholdX;
    private double maxThresholdX;
-   private final boolean showForceSensorFrames = false;
-   private final YoGraphicReferenceFrame yoGraphicForceSensorMeasurementFrame, yoGraphicForceSensorFootFrame;
 
    private final AppearanceDefinition redAppearance = YoAppearance.Red();
    private final AppearanceDefinition blueAppearance = YoAppearance.Blue();
@@ -104,28 +101,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       yoFootTorqueInFoot = new YoFrameVector3D(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
       yoFootForceInWorld = new YoFrameVector3D(namePrefix + "ForceWorldFrame", ReferenceFrame.getWorldFrame(), registry);
       yoFootTorqueInWorld = new YoFrameVector3D(namePrefix + "TorqueWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-
-      if (showForceSensorFrames && yoGraphicsListRegistry != null)
-      {
-         final double scale = 1.0;
-         yoGraphicForceSensorMeasurementFrame = new YoGraphicReferenceFrame(forceSensorData.getMeasurementFrame(),
-                                                                            registry,
-                                                                            false,
-                                                                            .6 * scale,
-                                                                            YoAppearance.Yellow());
-         yoGraphicForceSensorFootFrame = new YoGraphicReferenceFrame(contactablePlaneBody.getFrameAfterParentJoint(),
-                                                                     registry,
-                                                                     false,
-                                                                     scale,
-                                                                     YoAppearance.AliceBlue());
-         yoGraphicsListRegistry.registerYoGraphic(namePrefix + "MeasFrame", yoGraphicForceSensorMeasurementFrame);
-         yoGraphicsListRegistry.registerYoGraphic(namePrefix + "FootFrame", yoGraphicForceSensorFootFrame);
-      }
-      else
-      {
-         yoGraphicForceSensorMeasurementFrame = null;
-         yoGraphicForceSensorFootFrame = null;
-      }
 
       footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
       isForceMagnitudePastThreshold = new YoBoolean(namePrefix + "ForcePastThreshold", registry);
@@ -322,16 +297,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
       yoFootForceInWorld.set(footForce);
       yoFootTorqueInWorld.set(footTorque);
-
-      updateSensorVisualizer();
-   }
-
-   private void updateSensorVisualizer()
-   {
-      if (yoGraphicForceSensorMeasurementFrame != null)
-         yoGraphicForceSensorMeasurementFrame.update();
-      if (yoGraphicForceSensorFootFrame != null)
-         yoGraphicForceSensorFootFrame.update();
    }
 
    private boolean isForceMagnitudePastThreshold()
@@ -383,29 +348,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    public ContactablePlaneBody getContactablePlaneBody()
    {
       return contactablePlaneBody;
-   }
-
-   @Override
-   @Deprecated
-   public void setFootContactState(boolean hasFootHitGround)
-   {
-      controllerDetectedTouchdown.set(hasFootHitGround);
-   }
-
-   @Override
-   public void trustFootSwitchInSwing(boolean trustFootSwitch)
-   {
-      this.trustFootSwitch.set(trustFootSwitch);
-   }
-
-   /**
-    * Should use {@link #trustFootSwitchInSwing}.
-    */
-   @Deprecated
-   @Override
-   public void trustFootSwitchInSupport(boolean trustFootSwitch)
-   {
-      throw new RuntimeException("This is not a different implementation by default.");
    }
 
    public YoRegistry getRegistry()
