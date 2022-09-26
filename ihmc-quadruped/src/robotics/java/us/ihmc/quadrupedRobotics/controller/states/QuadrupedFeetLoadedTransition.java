@@ -1,11 +1,11 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
+package us.ihmc.quadrupedRobotics.controller.states;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoVariable;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -18,7 +18,7 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
    private static final double MINIMUM_WEIGHT_FRACTION = 1.0 / 12.0;
    private static final double TIME_WINDOW = 3.0;
 
-   private final QuadrantDependentList<FootSwitchInterface> footSwitches;
+   private final QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches;
 
    private final YoBoolean areFeetLoaded;
    private final YoDouble weightPerFootForLoaded;
@@ -26,7 +26,10 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
    private final QuadrantDependentList<YoDouble> prepFootFzs = new QuadrantDependentList<>();
    private final QuadrantDependentList<SimpleMovingAverageFilteredYoVariable> prepFootFzAverages = new QuadrantDependentList<>();
 
-   public QuadrupedFeetLoadedTransition(QuadrantDependentList<FootSwitchInterface> footSwitches, double controlDT, double gravityZ, double totalMass,
+   public QuadrupedFeetLoadedTransition(QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches,
+                                        double controlDT,
+                                        double gravityZ,
+                                        double totalMass,
                                         YoRegistry parentRegistry)
    {
       this.footSwitches = footSwitches;
@@ -40,8 +43,8 @@ public class QuadrupedFeetLoadedTransition implements StateTransitionCondition
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          YoDouble prepFootFz = new YoDouble("prep" + robotQuadrant.getCamelCaseName() + "FootFz", registry);
-         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = new SimpleMovingAverageFilteredYoVariable(
-               "prep" + robotQuadrant.getCamelCaseName() + "FootFzAverage", windowSize, prepFootFz, registry);
+         SimpleMovingAverageFilteredYoVariable prepFootFzAverage = new SimpleMovingAverageFilteredYoVariable("prep" + robotQuadrant.getCamelCaseName()
+               + "FootFzAverage", windowSize, prepFootFz, registry);
 
          prepFootFzs.put(robotQuadrant, prepFootFz);
          prepFootFzAverages.put(robotQuadrant, prepFootFzAverage);

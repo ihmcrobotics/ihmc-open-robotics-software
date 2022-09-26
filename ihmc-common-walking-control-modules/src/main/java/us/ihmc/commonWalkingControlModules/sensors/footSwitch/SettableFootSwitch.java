@@ -77,21 +77,8 @@ public class SettableFootSwitch implements FootSwitchInterface
       return false;
    }
    
-   @Override
    public void setFootContactState(boolean hasFootHitGround)
    {
       this.hasFootHitGround.set(hasFootHitGround);
-   }
-
-   @Override
-   public void trustFootSwitchInSwing(boolean trustFootSwitch)
-   {
-
-   }
-
-   @Override
-   public void trustFootSwitchInSupport(boolean trustFootSwitch)
-   {
-
    }
 }

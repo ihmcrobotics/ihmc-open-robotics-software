@@ -204,22 +204,4 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       fixedOnGround.set((thisFootZ - lowestFootZ) < switchZThreshold.getValue() * 2);
       return fixedOnGround.getBooleanValue();
    }
-
-   @Override
-   @Deprecated
-   public void setFootContactState(boolean hasFootHitGround)
-   {
-   }
-
-   @Override
-   public void trustFootSwitchInSwing(boolean trustFootSwitch)
-   {
-
-   }
-
-   @Override
-   public void trustFootSwitchInSupport(boolean trustFootSwitch)
-   {
-
-   }
 }

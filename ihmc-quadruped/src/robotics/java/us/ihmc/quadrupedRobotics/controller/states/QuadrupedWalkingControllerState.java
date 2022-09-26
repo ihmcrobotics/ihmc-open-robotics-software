@@ -40,6 +40,7 @@ import us.ihmc.quadrupedRobotics.controlModules.foot.QuadrupedFeetManager;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControllerToolbox;
 import us.ihmc.quadrupedRobotics.controller.toolbox.QuadrupedStepTransitionCallback;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepCommandConsumer;
 import us.ihmc.quadrupedRobotics.messageHandling.QuadrupedStepMessageHandler;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
@@ -47,7 +48,6 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EventState;
@@ -439,7 +439,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
       // update ground plane estimate
       groundPlaneEstimator.clearContactPoints();
       upcomingGroundPlaneEstimator.clearContactPoints();
-      QuadrantDependentList<FootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
+      QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          if (footSwitches.get(robotQuadrant).computeFootLoadPercentage() > loadPercentageForGroundPlane.getValue())

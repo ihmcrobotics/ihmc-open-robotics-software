@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch
+public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetectorBasedFootSwitch implements QuadrupedFootSwitchInterface
 {
 
    private static final int defaultGlitchWindow = 10;
@@ -166,6 +166,4 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
 
       touchdownDetected.set(false);
    }
-
-
 }
