@@ -76,7 +76,7 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
-   private final TrajectoryRecordReplay<Double> trajRecorder = new TrajectoryRecordReplay<>("");
+   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class,"");
    private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadia");
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
@@ -174,13 +174,13 @@ public class GDXVRKinematicsStreamingMode
          if (enabled.get() && enablerRecording.get() && bButton.bChanged() && !bButton.bState())
          {
             isRecording = !isRecording;
-            if (trajRecorder.hasSavedRecording() && !(trajRecorder.getPath().equals(recordPath.get())))
-               trajRecorder.setPath(recordPath.get());
+            if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
+               trajectoryRecorder.setPath(recordPath.get());
          }
          if (enablerReplay.get() && bButton.bChanged() && !bButton.bState()){
             isReplaying = !isReplaying;
-            if (trajRecorder.hasDoneReplay() && !(trajRecorder.getPath().equals(replayPath.get())))
-               trajRecorder.setPath(replayPath.get());
+            if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
+               trajectoryRecorder.setPath(replayPath.get());
          }
       });
 
@@ -228,11 +228,13 @@ public class GDXVRKinematicsStreamingMode
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
-               if(isReplaying)
+               if(isReplaying) // if replay box in VR Mode manager is checked and B left button triggered
                {
-                  Double[] dataPoint= trajRecorder.play();
-                  if(!trajRecorder.hasDoneReplay())
+                  // Read file with stored trajectories: read setpoint per timestep until file is over
+                  Double[] dataPoint= trajectoryRecorder.play();
+                  if(!trajectoryRecorder.hasDoneReplay())
                   {
+                     // [0,1,2] position of body segment; [3,4,5,6] quaternion of body segment
                      tempFramePose.getPosition().set(dataPoint[0],dataPoint[1],dataPoint[2]);
                      tempFramePose.getOrientation().set(dataPoint[3],dataPoint[4],dataPoint[5],dataPoint[6]);
                   }
@@ -249,15 +251,17 @@ public class GDXVRKinematicsStreamingMode
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
 
-               if(isRecording){
+               if(isRecording){ // if record box in VR Mode manager is checked (together with Kinematics streaming) and B left button triggered
+                  // Store trajectories in file: store a setpoint per timestep until B left button is pressed again
+                  // [0,1,2] position of body segment; [3,4,5,6] quaternion of body segment
                   Double[] dataTrajectories = new Double[] {tempFramePose.getPosition().getX(),
                                        tempFramePose.getPosition().getY(),tempFramePose.getPosition().getZ(),
                                        tempFramePose.getOrientation().getX(),tempFramePose.getOrientation().getY(),
                                        tempFramePose.getOrientation().getZ(),tempFramePose.getOrientation().getS()};
-                  trajRecorder.record(dataTrajectories);
+                  trajectoryRecorder.record(dataTrajectories);
                }
-               else if(!(trajRecorder.hasSavedRecording())){
-                  trajRecorder.saveRecording();
+               else if(!(trajectoryRecorder.hasSavedRecording())){
+                  trajectoryRecorder.saveRecording();
                }
             });
          }

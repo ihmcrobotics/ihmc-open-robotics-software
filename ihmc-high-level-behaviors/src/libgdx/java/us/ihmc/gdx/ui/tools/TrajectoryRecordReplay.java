@@ -15,13 +15,16 @@ import java.util.stream.Stream;
 public class TrajectoryRecordReplay<T extends Number>
 {
    private String filePath;
+   private final Class<T> clazz;
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
    private boolean doneReplay= true;
 
-   public TrajectoryRecordReplay(String filePath)
+   public TrajectoryRecordReplay(Class<T> clazz,String filePath)
    {
+      super();
+      this.clazz = clazz;
       this.filePath = filePath;
    }
 
@@ -44,7 +47,7 @@ public class TrajectoryRecordReplay<T extends Number>
    {
       if (savedRecording)
          savedRecording=false;
-      T[] localValues = (T[]) new Double[values.length];
+      T[] localValues = newNumberArray(values.length);
       System.arraycopy(values, 0, localValues, 0, localValues.length);
       dataMatrix.add(localValues);
    }
@@ -63,8 +66,8 @@ public class TrajectoryRecordReplay<T extends Number>
          String line = "";
          while((line = fileReader.readLine()) != null) {
             String[] stringValues = line.split(",");
-            T[] dataValues = (T[]) new Double[stringValues.length];
-            IntStream.range(0, stringValues.length).forEach(i -> dataValues[i] = (T) Double.valueOf(stringValues[i]));
+            T[] dataValues = newNumberArray(stringValues.length);
+            IntStream.range(0, stringValues.length).forEach(i -> dataValues[i] = setValue(stringValues[i]));
             dataMatrix.add(dataValues);
          }
          fileReader.close();
@@ -72,11 +75,6 @@ public class TrajectoryRecordReplay<T extends Number>
       catch (IOException e) {
          e.printStackTrace();
       }
-   }
-
-   private void reset(){
-      timeStepReplay = 0;
-      dataMatrix.clear();
    }
 
    private void writeCSV(ArrayList<T[]> dataMatrix)
@@ -117,6 +115,49 @@ public class TrajectoryRecordReplay<T extends Number>
          escapedData = "\"" + data + "\"";
       }
       return escapedData;
+   }
+
+   private void reset(){
+      timeStepReplay = 0;
+      dataMatrix.clear();
+   }
+
+   @SuppressWarnings("unchecked")
+   private T[] newNumberArray(int size) {
+      T[] value;
+      if (clazz.isAssignableFrom(Integer.class)) {
+         value = (T[]) new Integer[size];
+      } else if (clazz.isAssignableFrom(Short.class)) {
+         value = (T[]) new Short[size];
+      } else if (clazz.isAssignableFrom(Long.class)) {
+         value = (T[]) new Long[size];
+      } else if (clazz.isAssignableFrom(Double.class)) {
+         value = (T[]) new Double[size];
+      } else if (clazz.isAssignableFrom(Float.class)) {
+         value = (T[]) new Float[size];
+      } else {
+         throw new IllegalArgumentException("Invalid type for TrajectoryRecordReplay. It only accepts primitive Number types.");
+      }
+      return value;
+   }
+
+   @SuppressWarnings("unchecked")
+   private T setValue(String input) {
+      T value;
+      if (clazz.isAssignableFrom(Integer.class)) {
+         value = (T) Integer.valueOf(input);
+      } else if (clazz.isAssignableFrom(Short.class)) {
+         value = (T) Short.valueOf(input);
+      } else if (clazz.isAssignableFrom(Long.class)) {
+         value = (T) Long.valueOf(input);
+      } else if (clazz.isAssignableFrom(Double.class)) {
+         value = (T) Double.valueOf(input);
+      } else if (clazz.isAssignableFrom(Float.class)) {
+         value = (T) Float.valueOf(input);
+      } else {
+         throw new IllegalArgumentException("Invalid type for TrajectoryRecordReplay. It only accepts primitive Number types.");
+      }
+      return value;
    }
 
    public boolean hasSavedRecording(){
