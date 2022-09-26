@@ -10,22 +10,22 @@ public interface FootSwitchInterface
    public void reset();
 
    /**
-    * This method is intended to be called once per control tick and should update the internal state of this foot switch. The other methods should avoid any extra computation.
+    * This method is intended to be called once per control tick and should update the internal state
+    * of this foot switch. The other methods should avoid any extra computation.
     */
    default void update()
-   {}
+   {
+   }
 
-   public abstract boolean hasFootHitGround();
-   
-   public abstract double computeFootLoadPercentage();
+   boolean hasFootHitGround();
 
-   public abstract void computeAndPackCoP(FramePoint2D copToPack);
+   double computeFootLoadPercentage();
 
-   public abstract void updateCoP();
+   void computeAndPackCoP(FramePoint2D copToPack);
 
-   public abstract void computeAndPackFootWrench(Wrench footWrenchToPack);
+   void computeAndPackFootWrench(Wrench footWrenchToPack);
 
-   public abstract ReferenceFrame getMeasurementFrame();
+   ReferenceFrame getMeasurementFrame();
 
-   public abstract boolean getForceMagnitudePastThreshhold();
+   boolean getForceMagnitudePastThreshhold();
 }

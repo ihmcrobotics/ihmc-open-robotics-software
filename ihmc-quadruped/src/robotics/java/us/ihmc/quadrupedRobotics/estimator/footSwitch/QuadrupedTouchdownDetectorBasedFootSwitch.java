@@ -10,7 +10,6 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -25,7 +24,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    private final IntegerProvider glitchWindowSize;
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
-   private final YoFramePoint2D yoResolvedCoP;
    private final GlitchFilteredYoBoolean touchdownDetected;
    private final YoBoolean trustTouchdownDetectorsInSwing;
    private final YoBoolean trustTouchdownDetectorsInSupport;
@@ -44,7 +42,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
       this.wrenchCalculator = wrenchCalculator;
       this.glitchWindowSize = glitchWindowSize;
       this.totalRobotWeight = totalRobotWeight;
-      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", variableSuffix, foot.getSoleFrame(), registry);
       touchdownDetected = new GlitchFilteredYoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetected" + variableSuffix, registry, defaultGlitchWindow);
       trustTouchdownDetectorsInSwing = new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSwing" + variableSuffix, registry);
       trustTouchdownDetectorsInSupport= new YoBoolean(robotQuadrant.getCamelCaseName() + "TouchdownDetectorsTrustedInSupport" + variableSuffix, registry);
@@ -122,12 +119,6 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    public void computeAndPackCoP(FramePoint2D copToPack)
    {
       copToPack.setToZero(getMeasurementFrame());
-   }
-
-   @Override
-   public void updateCoP()
-   {
-      yoResolvedCoP.setToZero();
    }
 
    @Override

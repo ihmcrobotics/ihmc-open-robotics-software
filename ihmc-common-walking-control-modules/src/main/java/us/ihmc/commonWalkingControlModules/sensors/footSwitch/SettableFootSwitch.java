@@ -5,7 +5,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -14,7 +13,6 @@ public class SettableFootSwitch implements FootSwitchInterface
    YoBoolean hasFootHitGround;
    private final ContactablePlaneBody foot;
    private final double totalRobotWeight;
-   private final YoFramePoint2D yoResolvedCoP;
    private final int totalNumberOfFeet;
 
    public SettableFootSwitch(ContactablePlaneBody foot, double totalRobotWeight, int totalNumberOfFeet, YoRegistry registry)
@@ -24,7 +22,6 @@ public class SettableFootSwitch implements FootSwitchInterface
       this.totalRobotWeight = totalRobotWeight;
       this.foot = foot;
       hasFootHitGround.set(false);
-      yoResolvedCoP = new YoFramePoint2D(foot.getName() + "ResolvedCoP", "", foot.getSoleFrame(), registry);
    }
    
    @Override
@@ -43,12 +40,6 @@ public class SettableFootSwitch implements FootSwitchInterface
    public void computeAndPackCoP(FramePoint2D copToPack)
    {
       copToPack.setToNaN(getMeasurementFrame());
-   }
-
-   @Override
-   public void updateCoP()
-   {
-      yoResolvedCoP.setToZero();
    }
 
    @Override

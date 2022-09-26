@@ -237,11 +237,6 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       copToPack.setIncludingFrame(centerOfPressure);
    }
 
-   @Override
-   public void updateCoP()
-   {
-   }
-
    private static double computeLength(ContactablePlaneBody contactablePlaneBody)
    {
       FrameVector3D forward = new FrameVector3D(contactablePlaneBody.getSoleFrame(), 1.0, 0.0, 0.0);
