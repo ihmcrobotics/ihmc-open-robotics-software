@@ -3,6 +3,7 @@ package us.ihmc.gdx.logging;
 import controller_msgs.msg.dds.BigVideoPacket;
 import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.apache.commons.lang.ArrayUtils;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -13,6 +14,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.simple.SimpleMatrix;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,11 +26,12 @@ import us.ihmc.perception.HDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.*;
+import us.ihmc.scs2.sessionVisualizer.jfx.managers.BackgroundExecutorManager;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.bytedeco.hdf5.global.hdf5.*;
 
@@ -42,11 +45,17 @@ public class PerceptionDataLogger {
     private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
     private final SampleInfo ousterSampleInfo = new SampleInfo();
 
+    private final ROS2Node ros2Node;
+
     private final byte[] messageDataHeapArray = new byte[25000000];
     private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
     private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
     private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
     private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
+
+    private ROS2Callback<RobotConfigurationData> robotConfigurationCallback;
+
+    private final BackgroundExecutorManager executor = new BackgroundExecutorManager(4);
 
     private int depthMessageCounter = 0;
     private int compressedImageCounter = 0;
@@ -58,7 +67,6 @@ public class PerceptionDataLogger {
 
             LogTools.info("Creating HDF5 File: " + FILE_NAME);
             h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
-            h5.getFile().close();
             h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
         }
         else
@@ -67,31 +75,39 @@ public class PerceptionDataLogger {
             h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
         }
 
-        RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_data_logger");
+        ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "logger");
 
-        new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), ROS2QosProfile.BEST_EFFORT(), this::logDepthMap);
-        new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
+//        new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), ROS2QosProfile.BEST_EFFORT(), this::logDepthMap);
+//        new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
+//
+//        new IHMCROS2Callback<>(ros2Node,
+//                ROS2Tools.OUSTER_LIDAR.withType(FusedSensorHeadPointCloudMessage.class),
+//                ROS2QosProfile.BEST_EFFORT(),
+//                this::logFusedOusterPointCloud);
+//
+//        ROS2Topic<BigVideoPacket> blackflyTopicRight = ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT);
+//        new IHMCROS2Callback<>(ros2Node, blackflyTopicRight, ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
+//
+//        ROS2Topic<BigVideoPacket> blackflyTopicLeft = ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT);
+//        new IHMCROS2Callback<>(ros2Node, blackflyTopicLeft, ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
 
-        new IHMCROS2Callback<>(ros2Node,
-                ROS2Tools.OUSTER_LIDAR.withType(FusedSensorHeadPointCloudMessage.class),
-                ROS2QosProfile.BEST_EFFORT(),
-                this::logFusedOusterPointCloud);
+        robotConfigurationCallback = new ROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
 
-        ROS2Topic<BigVideoPacket> blackflyTopicRight = ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT);
-        new IHMCROS2Callback<>(ros2Node, blackflyTopicRight, ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
+        while(true)
+        {
 
-        ROS2Topic<BigVideoPacket> blackflyTopicLeft = ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT);
-        new IHMCROS2Callback<>(ros2Node, blackflyTopicLeft, ROS2QosProfile.BEST_EFFORT(), this::logBigVideoPacket);
-
-        new IHMCROS2Callback<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
+        }
     }
 
     public void logRobotConfigurationData(RobotConfigurationData data) {
-        storeFloatArray(h5.getGroup("/robot/joint_angles/"), data.getJointAngles().toArray());
-        storeFloatArray(h5.getGroup("/robot/joint_velocities/"), data.getJointVelocities().toArray());
-        storeFloatArray(h5.getGroup("/robot/joint_torques/"), data.getJointTorques().toArray());
-        storePoint3D(h5.getGroup("/robot/root/position"), data.getRootPosition());
-        storeQuaternion(h5.getGroup("/robot/root/orientation"), data.getRootOrientation());
+
+        LogTools.info("Message Received: {}", data.getMonotonicTime());
+
+        storeFloatArray("/robot/joint_angles/", data.getJointAngles().toArray());
+//        storeFloatArray("/robot/joint_velocities/", data.getJointVelocities().toArray());
+//        storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
+//        storePoint3D("/robot/root/position", data.getRootPosition());
+//        storeQuaternion("/robot/root/orientation", data.getRootOrientation());
     }
 
     public void logFusedOusterPointCloud(FusedSensorHeadPointCloudMessage message) {
@@ -134,19 +150,43 @@ public class PerceptionDataLogger {
         HDF5Tools.storeCompressedImage(h5.getGroup("/ihmc/logger/camera/"), compressedImageCounter, jpegImageBytePointer);
     }
 
-    public static void storeFloatArray(Group group, float[] array) {
+//    HDF5Tools.storeMatrix(h5.getGroup(namespace), h5.getBuffer(namespace, array.length).data);
+    public void storeFloatArray(String namespace, float[] array) {
+        Group group = h5.getGroup(namespace);
+        Float[] objectArray = ArrayUtils.toObject(array);
+        ArrayList<Float> buffer = h5.getBuffer(namespace);
+        buffer.addAll(Arrays.asList(objectArray));
+
+        int bufferSize = h5.getBufferIndex(namespace) / array.length;
+        LogTools.info("Buffer Index: {} {}", bufferSize, HDF5Manager.MAX_BUFFER_SIZE - 1);
+        if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
+        {
+            LogTools.info("Thread Store Triggered");
+            ArrayList<Float> data = new ArrayList<>(buffer);
+            h5.resetBuffer(namespace);
+
+            executor.executeInBackground(() -> {
+                long count = h5.getCount(namespace);
+                LogTools.info("Storing Buffer: {}", count);
+                System.out.println(Arrays.toString(array));
+                HDF5Tools.storeFloatArray2D(group, count, data, array.length);
+                LogTools.info("Done Storing Buffer: {}", count);
+            });
+        }
+    }
+
+    public void storePoint3D(String namespace, Point3D point) {
 
     }
 
-    public static void storePoint3D(Group group, Point3D point) {
-
-    }
-
-    public static void storeQuaternion(Group group, Quaternion orientation) {
+    public void storeQuaternion(String namespace, Quaternion orientation) {
 
     }
 
     public static void main(String[] args) {
+
+        PerceptionDataLogger logger = new PerceptionDataLogger();
+
         HDF5Manager h5;
         File f = new File(FILE_NAME);
         if(!f.exists() && !f.isDirectory()) {
@@ -161,26 +201,29 @@ public class PerceptionDataLogger {
             h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
         }
 
-//        h5.getFile().createGroup("g1/");
-//        h5.getFile().createGroup("g1/g2/");
 
-        DMatrixRMaj a = new DMatrixRMaj(5,5);
 
-        // Can assign values the usual way
-        for(int i = 0; i< 3;i++)
-        {
-            for (int j = 0; j < 3; j++) {
-                a.set(i, j, i + j + 1);
-            }
-        }
-
-        // Direct manipulation of each value is the fastest way to assign/read values
-        a.set(1,1, 12);
-        a.set(2,3,64);
-
-        a.print();
-
-        HDF5Tools.storeMatrix(h5.getGroup("/test/ejml/matrix"), a.data);
+//
+////        h5.getFile().createGroup("g1/");
+////        h5.getFile().createGroup("g1/g2/");
+//
+//        DMatrixRMaj a = new DMatrixRMaj(5,5);
+//
+//        // Can assign values the usual way
+//        for(int i = 0; i< 3;i++)
+//        {
+//            for (int j = 0; j < 3; j++) {
+//                a.set(i, j, i + j + 1);
+//            }
+//        }
+//
+//        // Direct manipulation of each value is the fastest way to assign/read values
+//        a.set(1,1, 12);
+//        a.set(2,3,64);
+//
+//        a.print();
+//
+//        HDF5Tools.storeMatrix(h5.getGroup("/test/ejml/matrix"), a.data);
     }
 }
 

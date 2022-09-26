@@ -2,22 +2,63 @@ package us.ihmc.perception;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.H5File;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class HDF5Manager
 {
 
+   public static int MAX_BUFFER_SIZE = 50;
+
    private HashMap<String, Group> groups;
+   private HashMap<String, ArrayList<Float>> buffers;
    private H5File file;
 
    public HDF5Manager(String filePath, int flag)
    {
       file = new H5File(filePath, flag);
       groups = new HashMap<>();
+      buffers = new HashMap<>();
+   }
+
+   public void resetBuffer(String namespace)
+   {
+      ArrayList<Float> list = new ArrayList<>();
+      buffers.put(namespace, list);
+   }
+
+   public int getBufferIndex(String namespace)
+   {
+      if (buffers.containsKey(namespace))
+      {
+         LogTools.info("Get Index: {}", buffers.get(namespace).size());
+         return buffers.get(namespace).size();
+      }
+      else
+      {
+         LogTools.info("Index Not Found");
+         return 0;
+      }
+   }
+
+   public ArrayList<Float> getBuffer(String namespace)
+   {
+      if (buffers.containsKey(namespace))
+      {
+         return buffers.get(namespace);
+      }
+      else
+      {
+         ArrayList<Float> list = new ArrayList<>();
+         buffers.put(namespace, list);
+         return list;
+      }
    }
 
    public Group getGroup(String namespace)
@@ -55,10 +96,10 @@ public class HDF5Manager
 //            LogTools.info("Creating Group: {}", name);
             group = file.createGroup(name);
          }
-         else
-         {
-//            LogTools.warn("Not Creating, Exists: /{}", name);
-         }
+//         else
+//         {
+////            LogTools.warn("Not Creating, Exists: /{}", name);
+//         }
       }
 
       if (group == null)
