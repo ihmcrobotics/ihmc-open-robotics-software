@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SlamWrapperTest
 {
-   private static void loadLibraries()
+   private static void loadLibraries() throws IOException
    {
       // We need to disable javacpp from trying to automatically load libraries.
       // Otherwise, it will try to load them by name when they aren't in the library path
@@ -58,22 +58,22 @@ public class SlamWrapperTest
 
       for (String libraryFile : libraryFiles)
       {
-         try
-         {
-            Loader.cacheResource(libraryFile);
-            File cacheDir = Loader.getCacheDir();
-            System.load(cacheDir.getAbsolutePath() + "/main/" + libraryFile);
-         }
-         catch (IOException e)
-         {
-            throw new RuntimeException(e);
-         }
+         Loader.cacheResource(libraryFile);
+         File cacheDir = Loader.getCacheDir();
+         System.load(cacheDir.getAbsolutePath() + "/main/" + libraryFile);
       }
    }
 
    public static void main(String[] args)
    {
-      loadLibraries();
+      try
+      {
+         loadLibraries();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
 
       SlamWrapper.FactorGraphExternal factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
