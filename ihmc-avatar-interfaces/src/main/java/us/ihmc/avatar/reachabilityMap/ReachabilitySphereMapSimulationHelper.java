@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -136,44 +135,36 @@ public class ReachabilitySphereMapSimulationHelper
       }
 
       calculator.setVoxelUnreachableListener(voxel ->
-      {
-         voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
-      });
+                                             {
+                                                voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
+                                             });
 
       calculator.setVoxelCompletedListener(voxel ->
-      {
-         voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
+                                           {
+                                              voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
 
-         if (voxel.getR() > 1e-3)
-         {
-//            voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR()));
-            voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR2()));
-            System.out.println(voxel.getR2());
-         }
-         else
-         {
-            voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
-         }
-
-      });
+                                              if (voxel.getR() > 1e-3)
+                                              {
+                                                 voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR()));
+                                                 voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR2()));
+                                              }
+                                              else
+                                              {
+                                                 voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
+                                              }
+                                           });
 
       currentVisualizationType.addListener(v ->
-      {
-         guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.get()));
-         guiControls.addStaticVisuals(voxelVisualization.get(currentVisualizationType.getValue()));
-         previousVisualizationType.set(currentVisualizationType.getValue());
-      });
+                                           {
+                                              guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.get()));
+                                              guiControls.addStaticVisuals(voxelVisualization.get(currentVisualizationType.getValue()));
+                                              previousVisualizationType.set(currentVisualizationType.getValue());
+                                           });
    }
 
    public void exportDataToMatlabFile(Class<?> classForFilePath) throws IOException
    {
       ReachabilityMapMatlabExporter exporter = new ReachabilityMapMatlabExporter();
-      exporter.write(classForFilePath, robotInformation, calculator.getVoxel3DGrid());
-   }
-
-   public void exportDataToCSVFile(Class<?> classForFilePath) throws IOException
-   {
-      ReachabilityMapCSVExporter exporter = new ReachabilityMapCSVExporter();
       exporter.write(classForFilePath, robotInformation, calculator.getVoxel3DGrid());
    }
 
