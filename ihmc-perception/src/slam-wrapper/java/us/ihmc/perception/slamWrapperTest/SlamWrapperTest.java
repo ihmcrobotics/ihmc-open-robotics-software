@@ -1,9 +1,9 @@
 package us.ihmc.perception.slamWrapperTest;
 
-import org.bytedeco.javacpp.Loader;
 import org.bytedeco.slamWrapper.SlamWrapper;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,11 +56,10 @@ public class SlamWrapperTest
       libraryFiles.add("libslam-wrapper.so");
       libraryFiles.add("libjniSlamWrapper.so");
 
+      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/slam-wrapper/resources");
       for (String libraryFile : libraryFiles)
       {
-         Loader.cacheResource(libraryFile);
-         File cacheDir = Loader.getCacheDir();
-         System.load(cacheDir.getAbsolutePath() + "/main/" + libraryFile);
+         System.load(new WorkspaceFile(resourcesDirectory, libraryFile).getFilePath().toAbsolutePath().normalize().toString());
       }
    }
 

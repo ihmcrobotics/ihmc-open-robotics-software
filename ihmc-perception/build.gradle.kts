@@ -77,6 +77,7 @@ javacvDependencies {
 
 slamWrapperDependencies {
    apiBytedecoNatives("javacpp")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
