@@ -21,7 +21,7 @@ class FactorGraphExternal
         void clearISAM2();
 
         // Expects packed Pose3
-        void setPoseInitialValue_Pose3(int index, float* value);
+        void setPoseInitialValue(int index, float* value);
 
         // Expects packed OrientedPlane3
         void setOrientedPlaneInitialValue(int landmarkId, float* value);
@@ -31,6 +31,8 @@ class FactorGraphExternal
 
         // Expects packed Vector3
         void createOrientedPlaneNoiseModel(float* lmVariances);
+
+        void printResults();
 
         void helloWorldTest();
 
