@@ -60,7 +60,7 @@ public class QuadrupedTouchdownDetectorBasedFootSwitch extends TouchdownDetector
    }
 
    @Override
-   public void updateMeasurement()
+   public void update()
    {
       touchdownDetected.setWindowSize(glitchWindowSize.getValue());
 

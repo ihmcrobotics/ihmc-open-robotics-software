@@ -4,15 +4,15 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
@@ -28,180 +28,201 @@ import us.ihmc.yoVariables.variable.YoDouble;
 //TODO Probably make an EdgeSwitch interface that has all the HeelSwitch and ToeSwitch stuff
 public class WrenchBasedFootSwitch implements FootSwitchInterface
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
 
-   private final DoubleProvider contactThresholdForce;
-   private final DoubleProvider secondContactThresholdForce;
-   private final DoubleProvider footSwitchCoPThresholdFraction;
+   private final DoubleProvider contactForceThreshold1;
+   private final DoubleProvider contactForceThreshold2;
+   private final DoubleProvider contactCoPThreshold;
 
    private final YoRegistry registry;
 
    private final ForceSensorDataReadOnly forceSensorData;
 
-   private final YoBoolean isForceMagnitudePastThreshold;
-   private final GlitchFilteredYoBoolean filteredIsForceMagnitudePastThreshold;
-   private final YoBoolean isForceMagnitudePastSecondThreshold;
-   private final YoBoolean hasFootHitGround, isCoPPastThreshold;
-   private final YoBoolean trustFootSwitch, controllerDetectedTouchdown;
-   private final GlitchFilteredYoBoolean filteredHasFootHitGround;
+   private final YoBoolean isPastForceThreshold1;
+   private final GlitchFilteredYoBoolean isPastForceThreshold1Filtered;
+   private final YoBoolean isPastForceThreshold2;
+   private final YoBoolean hasFootHitGround, isPastCoPThreshold;
+   private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
+   private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
 
    private final YoDouble footForceMagnitude;
    private final YoDouble alphaFootLoadFiltering;
    private final AlphaFilteredYoVariable footLoadPercentage;
 
    private final Wrench footWrench;
-   private final BagOfBalls footswitchCOPBagOfBalls;
-   private final YoBoolean pastThreshold;
-   private final GlitchFilteredYoBoolean pastThresholdFilter;
 
-   private final YoFramePoint2D yoResolvedCoP;
-   private final FramePoint2D resolvedCoP;
-   private final FramePoint3D resolvedCoP3d = new FramePoint3D();
+   private final YoFramePoint2D centerOfPressure;
    private final CenterOfPressureResolver copResolver = new CenterOfPressureResolver();
    private final ContactablePlaneBody contactablePlaneBody;
    private final double footLength;
    private final double footMinX;
    private final double footMaxX;
-   private final FrameVector3D footForce = new FrameVector3D();
-   private final FrameVector3D footTorque = new FrameVector3D();
-   private final YoFrameVector3D yoFootForce;
-   private final YoFrameVector3D yoFootTorque;
-   private final YoFrameVector3D yoFootForceInFoot;
-   private final YoFrameVector3D yoFootTorqueInFoot;
-   private final YoFrameVector3D yoFootForceInWorld;
-   private final YoFrameVector3D yoFootTorqueInWorld;
+
+   private final YoFixedFrameSpatialVector yoFootForceTorque;
+   private final YoFixedFrameSpatialVector yoFootForceTorqueInFoot;
+   private final YoFixedFrameSpatialVector yoFootForceTorqueInWorld;
 
    private final double robotTotalWeight;
 
-   private double minThresholdX;
-   private double maxThresholdX;
-
-   private final AppearanceDefinition redAppearance = YoAppearance.Red();
-   private final AppearanceDefinition blueAppearance = YoAppearance.Blue();
-
+   /**
+    * @param namePrefix             prefix to use for naming the internal {@code YoVariable}s.
+    * @param forceSensorData        the port to reading the sensor measurement.
+    * @param robotTotalWeight       the robot weight used to compute the load distribution on this
+    *                               foot.
+    * @param contactablePlaneBody   the contactable plane body of this foot, use to get the foot length
+    *                               and sole frame.
+    * @param contactForceThreshold1 the first force threshold. The foot is considered to have hit the
+    *                               ground if this threshold is met <b>and</b> the CoP threshold is
+    *                               met.
+    * @param contactForceThreshold2 the second force threshold. The foot is considered to have hit the
+    *                               ground if this threshold is met.
+    * @param contactCoPThreshold    the center of pressure threshold. Expressed in percentage of foot
+    *                               length, this represents the margin away from the toe/heel line that
+    *                               the CoP needs to pass in order to consider that the foot has hit
+    *                               the ground.
+    * @param yoGraphicsListRegistry
+    * @param parentRegistry
+    */
    public WrenchBasedFootSwitch(String namePrefix,
                                 ForceSensorDataReadOnly forceSensorData,
                                 double robotTotalWeight,
                                 ContactablePlaneBody contactablePlaneBody,
-                                DoubleProvider contactThresholdForce,
-                                DoubleProvider secondContactThresholdForce,
-                                DoubleProvider footSwitchCoPThresholdFraction,
+                                DoubleProvider contactForceThreshold1,
+                                DoubleProvider contactForceThreshold2,
+                                DoubleProvider contactCoPThreshold,
                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
+      this.forceSensorData = forceSensorData;
+      this.robotTotalWeight = robotTotalWeight;
+      this.contactablePlaneBody = contactablePlaneBody;
+      this.contactForceThreshold1 = contactForceThreshold1;
+      this.contactForceThreshold2 = contactForceThreshold2;
+      this.contactCoPThreshold = contactCoPThreshold;
+
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
-      this.contactThresholdForce = contactThresholdForce;
-      this.secondContactThresholdForce = secondContactThresholdForce;
-      this.footSwitchCoPThresholdFraction = footSwitchCoPThresholdFraction;
-
-      yoFootForce = new YoFrameVector3D(namePrefix + "Force", forceSensorData.getMeasurementFrame(), registry);
-      yoFootTorque = new YoFrameVector3D(namePrefix + "Torque", forceSensorData.getMeasurementFrame(), registry);
-      yoFootForceInFoot = new YoFrameVector3D(namePrefix + "ForceFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
-      yoFootTorqueInFoot = new YoFrameVector3D(namePrefix + "TorqueFootFrame", contactablePlaneBody.getFrameAfterParentJoint(), registry);
-      yoFootForceInWorld = new YoFrameVector3D(namePrefix + "ForceWorldFrame", ReferenceFrame.getWorldFrame(), registry);
-      yoFootTorqueInWorld = new YoFrameVector3D(namePrefix + "TorqueWorldFrame", ReferenceFrame.getWorldFrame(), registry);
+      ReferenceFrame measurementFrame = forceSensorData.getMeasurementFrame();
+      MovingReferenceFrame parentFrame = contactablePlaneBody.getFrameAfterParentJoint();
+      yoFootForceTorque = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "Torque", measurementFrame, registry),
+                                                        new YoFrameVector3D(namePrefix + "Force", measurementFrame, registry));
+      yoFootForceTorqueInFoot = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "TorqueFootFrame", parentFrame, registry),
+                                                              new YoFrameVector3D(namePrefix + "ForceFootFrame", parentFrame, registry));
+      yoFootForceTorqueInWorld = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "TorqueWorldFrame", worldFrame, registry),
+                                                               new YoFrameVector3D(namePrefix + "ForceWorldFrame", worldFrame, registry));
 
       footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
-      isForceMagnitudePastThreshold = new YoBoolean(namePrefix + "ForcePastThreshold", registry);
+
+      isPastForceThreshold1 = new YoBoolean(namePrefix + "IsPastForceThreshold1", registry);
+      isPastForceThreshold1Filtered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThreshold1Filtered", registry, isPastForceThreshold1, 2);
+      isPastForceThreshold2 = new YoBoolean(namePrefix + "IsPastForceThreshold2", registry);
+      isPastCoPThreshold = new YoBoolean(namePrefix + "IsPastCoPThreshold", registry);
+      isPastCoPThresholdFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastCoPThresholdFiltered", registry, isPastCoPThreshold, 3);
+
       hasFootHitGround = new YoBoolean(namePrefix + "FootHitGround", registry);
+      // Final variable to identify if the foot has hit the ground
+      hasFootHitGroundFiltered = new GlitchFilteredYoBoolean(namePrefix + "HasFootHitGroundFiltered", registry, hasFootHitGround, 2);
 
-      trustFootSwitch = new YoBoolean(namePrefix + "TrustFootSwitch", registry);
-      controllerDetectedTouchdown = new YoBoolean(namePrefix + "ControllerDetectedTouchdown", registry);
-      trustFootSwitch.set(true);
-
-      //TODO: Tune and triple check glitch filtering and timing of the virtual switches.
-      filteredHasFootHitGround = new GlitchFilteredYoBoolean(namePrefix + "FilteredFootHitGround", registry, hasFootHitGround, 2);
-      filteredIsForceMagnitudePastThreshold = new GlitchFilteredYoBoolean(namePrefix + "FilteredForcePastThresh", registry, isForceMagnitudePastThreshold, 2);
-      isForceMagnitudePastSecondThreshold = new YoBoolean(namePrefix + "ForcePastSecondThresh", registry);
-      isCoPPastThreshold = new YoBoolean(namePrefix + "CoPPastThresh", registry);
-
-      this.robotTotalWeight = robotTotalWeight;
-      this.alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
+      alphaFootLoadFiltering = new YoDouble(namePrefix + "AlphaFootLoadFiltering", registry);
       alphaFootLoadFiltering.set(0.1);
-      this.footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
+      footLoadPercentage = new AlphaFilteredYoVariable(namePrefix + "FootLoadPercentage", registry, alphaFootLoadFiltering);
 
-      double copVisualizerSize = 0.025;
-      this.footswitchCOPBagOfBalls = new BagOfBalls(1, copVisualizerSize, namePrefix + "FootswitchCOP", registry, yoGraphicsListRegistry);
+      centerOfPressure = new YoFramePoint2D(namePrefix + "CenterOfPressure", "", contactablePlaneBody.getSoleFrame(), registry);
 
-      this.pastThreshold = new YoBoolean(namePrefix + "PastFootswitchThreshold", registry);
+      footWrench = new Wrench(measurementFrame, (ReferenceFrame) null);
 
-      int filterWindowSize = 3;
-
-      this.pastThresholdFilter = new GlitchFilteredYoBoolean(namePrefix + "PastFootswitchThresholdFilter", registry, pastThreshold, filterWindowSize);
-
-      this.contactablePlaneBody = contactablePlaneBody;
-
-      yoResolvedCoP = new YoFramePoint2D(namePrefix + "ResolvedCoP", "", contactablePlaneBody.getSoleFrame(), registry);
-      resolvedCoP = new FramePoint2D(contactablePlaneBody.getSoleFrame());
-
-      this.forceSensorData = forceSensorData;
-
-      this.footWrench = new Wrench(forceSensorData.getMeasurementFrame(), (ReferenceFrame) null);
-
-      this.footMinX = computeMinX(contactablePlaneBody);
-
-      this.footMaxX = computeMaxX(contactablePlaneBody);
-      this.footLength = computeLength(contactablePlaneBody);
+      footMinX = computeMinX(contactablePlaneBody);
+      footMaxX = computeMaxX(contactablePlaneBody);
+      footLength = computeLength(contactablePlaneBody);
 
       parentRegistry.addChild(registry);
    }
 
    @Override
+   public void update()
+   {
+      forceSensorData.getWrench(footWrench);
+
+      yoFootForceTorque.set(footWrench);
+      yoFootForceTorqueInFoot.setMatchingFrame(footWrench);
+      yoFootForceTorqueInWorld.setMatchingFrame(footWrench);
+
+      footForceMagnitude.set(footWrench.getLinearPart().norm());
+
+      // Using the force in foot frame to ensure z is up when the foot is flat.
+      // Sometimes the sensor can be mounted such that z is down.
+      double forceZUp = yoFootForceTorqueInFoot.getLinearPartZ();
+
+      double fZPlus = MathTools.clamp(forceZUp, 0.0, Double.POSITIVE_INFINITY);
+      footLoadPercentage.update(fZPlus / robotTotalWeight);
+
+      isPastForceThreshold1.set(forceZUp > contactForceThreshold1.getValue());
+      isPastForceThreshold1Filtered.update();
+
+      if (contactForceThreshold2 != null)
+      {
+         isPastForceThreshold2.set(forceZUp > contactForceThreshold2.getValue());
+      }
+      else
+      {
+         isPastForceThreshold2.set(false);
+      }
+
+      // Computing Center of Pressure
+      if (fZPlus < MIN_FORCE_TO_COMPUTE_COP)
+         centerOfPressure.setToNaN();
+      else
+         copResolver.resolveCenterOfPressureAndNormalTorque(centerOfPressure, footWrench, contactablePlaneBody.getSoleFrame());
+
+      // Testing CoP threshold
+      if (Double.isNaN(contactCoPThreshold.getValue()))
+      {
+         isPastCoPThreshold.set(true);
+         isPastCoPThresholdFiltered.set(true);
+      }
+      else
+      {
+         /*
+          * FIXME If we wanted to do the CoP filter properly, we should use make a ConvexPolygon2D from the
+          * ContactablePlaneBody points and assert that the CoP is inside the polygon at a min distance from
+          * the perimeter.
+          */
+         double copThreshold = contactCoPThreshold.getValue() * footLength;
+         double minThresholdX = (footMinX + copThreshold);
+         double maxThresholdX = (footMaxX - copThreshold);
+         isPastCoPThreshold.set(centerOfPressure.getX() >= minThresholdX && centerOfPressure.getX() <= maxThresholdX);
+         isPastCoPThresholdFiltered.update();
+      }
+
+      hasFootHitGround.set((isPastForceThreshold1Filtered.getValue() && isPastCoPThresholdFiltered.getValue()) || isPastForceThreshold2.getValue());
+      hasFootHitGroundFiltered.update();
+
+   }
+
+   @Override
    public boolean hasFootHitGround()
    {
-      isForceMagnitudePastThreshold.set(isForceMagnitudePastThreshold());
-      filteredIsForceMagnitudePastThreshold.update();
-
-      if (secondContactThresholdForce != null)
-      {
-         isForceMagnitudePastSecondThreshold.set(yoFootForceInFoot.getZ() > secondContactThresholdForce.getValue());
-      }
-      else
-      {
-         isForceMagnitudePastSecondThreshold.set(false);
-      }
-
-      isCoPPastThreshold.set(isCoPPastThreshold());
-
-      hasFootHitGround.set((filteredIsForceMagnitudePastThreshold.getBooleanValue() && isCoPPastThreshold.getBooleanValue())
-            || isForceMagnitudePastSecondThreshold.getBooleanValue());
-      //      hasFootHitGround.set(isForceMagnitudePastThreshold.getBooleanValue());
-      filteredHasFootHitGround.update();
-
-      if (trustFootSwitch.getBooleanValue())
-         return filteredHasFootHitGround.getBooleanValue();
-      else
-         return controllerDetectedTouchdown.getBooleanValue();
+      return hasFootHitGroundFiltered.getValue();
    }
 
    @Override
    public void reset()
    {
-      pastThresholdFilter.set(false);
-      controllerDetectedTouchdown.set(false);
+      isPastCoPThresholdFiltered.set(false);
    }
 
    @Override
    public double computeFootLoadPercentage()
    {
-      readSensorData(footWrench);
-
-      footForce.setIncludingFrame(yoFootForceInFoot);
-
-      footForce.clipToMinMax(0.0, Double.MAX_VALUE);
-
-      footForceMagnitude.set(footForce.norm());
-
-      footLoadPercentage.update(footForce.getZ() / robotTotalWeight);
-
       return footLoadPercentage.getDoubleValue();
    }
 
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      readSensorData(footWrenchToPack);
+      footWrenchToPack.setIncludingFrame(footWrench);
    }
 
    @Override
@@ -210,106 +231,15 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       return forceSensorData.getMeasurementFrame();
    }
 
-   private boolean isCoPPastThreshold()
-   {
-      if (Double.isNaN(footSwitchCoPThresholdFraction.getValue()))
-         return true;
-
-      updateCoP();
-
-      minThresholdX = (footMinX + footSwitchCoPThresholdFraction.getValue() * footLength);
-      maxThresholdX = (footMaxX - footSwitchCoPThresholdFraction.getValue() * footLength);
-
-      pastThreshold.set(resolvedCoP.getX() >= minThresholdX && resolvedCoP.getX() <= maxThresholdX);
-      pastThresholdFilter.update();
-
-      AppearanceDefinition appearanceDefinition = pastThresholdFilter.getBooleanValue() ? redAppearance : blueAppearance;
-
-      footswitchCOPBagOfBalls.setBall(resolvedCoP3d, appearanceDefinition, 0);
-
-      return pastThresholdFilter.getBooleanValue();
-   }
-
    @Override
    public void computeAndPackCoP(FramePoint2D copToPack)
    {
-      updateCoP();
-      copToPack.setIncludingFrame(resolvedCoP);
+      copToPack.setIncludingFrame(centerOfPressure);
    }
 
    @Override
    public void updateCoP()
    {
-      readSensorData(footWrench);
-
-      if (Math.abs(footWrench.getLinearPartZ()) < MIN_FORCE_TO_COMPUTE_COP)
-      {
-         yoResolvedCoP.setToNaN();
-         resolvedCoP3d.setToNaN(ReferenceFrame.getWorldFrame());
-         resolvedCoP.setToNaN();
-      }
-      else
-      {
-         copResolver.resolveCenterOfPressureAndNormalTorque(resolvedCoP, footWrench, contactablePlaneBody.getSoleFrame());
-         yoResolvedCoP.set(resolvedCoP);
-
-         resolvedCoP3d.setToZero(resolvedCoP.getReferenceFrame());
-         resolvedCoP3d.set(resolvedCoP);
-         resolvedCoP3d.changeFrame(ReferenceFrame.getWorldFrame());
-      }
-   }
-
-   private Wrench footWrenchInBodyFixedFrame = new Wrench();
-
-   private void readSensorData(Wrench footWrenchToPack)
-   {
-      forceSensorData.getWrench(footWrenchToPack);
-
-      // First in measurement frame for all the frames...
-      footForce.setToZero(footWrenchToPack.getReferenceFrame());
-      footForce.set(footWrenchToPack.getLinearPart());
-      yoFootForce.set(footForce);
-
-      footTorque.setToZero(footWrenchToPack.getReferenceFrame());
-      footTorque.set(footWrenchToPack.getAngularPart());
-      yoFootTorque.set(footTorque);
-
-      // magnitude of force part is independent of frame
-      footForceMagnitude.set(footForce.norm());
-
-      // Now change to frame after the parent joint (ankle or wrist for example):
-      footWrenchInBodyFixedFrame.setIncludingFrame(footWrenchToPack);
-      footWrenchInBodyFixedFrame.changeFrame(contactablePlaneBody.getRigidBody().getBodyFixedFrame());
-
-      footForce.setToZero(footWrenchInBodyFixedFrame.getReferenceFrame());
-      footForce.set(footWrenchInBodyFixedFrame.getLinearPart());
-      footTorque.setToZero(footWrenchInBodyFixedFrame.getReferenceFrame());
-      footTorque.set(footWrenchInBodyFixedFrame.getAngularPart());
-
-      footForce.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
-      yoFootForceInFoot.set(footForce);
-
-      footTorque.changeFrame(contactablePlaneBody.getFrameAfterParentJoint());
-      yoFootTorqueInFoot.set(footTorque);
-
-      footForce.changeFrame(ReferenceFrame.getWorldFrame());
-      footTorque.changeFrame(ReferenceFrame.getWorldFrame());
-
-      yoFootForceInWorld.set(footForce);
-      yoFootTorqueInWorld.set(footTorque);
-   }
-
-   private boolean isForceMagnitudePastThreshold()
-   {
-      readSensorData(footWrench);
-
-      //TODO: We switched to just z and made sure it was positive.
-      //TODO: Check which reference frames all this stuff is in.
-      //TODO: Make SCS and Gazebo consistent if possible.
-      return (yoFootForceInFoot.getZ() > contactThresholdForce.getValue());
-
-      //      return (footFootMagnitude.getDoubleValue() > contactTresholdForce);
-      //      return (footFootMagnitude.getDoubleValue() > MathTools.square(contactTresholdForce));
    }
 
    private static double computeLength(ContactablePlaneBody contactablePlaneBody)
@@ -342,7 +272,7 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    @Override
    public boolean getForceMagnitudePastThreshhold()
    {
-      return isForceMagnitudePastThreshold.getBooleanValue();
+      return isPastForceThreshold1.getBooleanValue();
    }
 
    public ContactablePlaneBody getContactablePlaneBody()

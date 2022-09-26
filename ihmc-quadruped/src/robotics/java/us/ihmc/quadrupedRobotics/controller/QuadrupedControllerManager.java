@@ -187,7 +187,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
    {
       QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches = controllerToolbox.getRuntimeEnvironment().getFootSwitches();
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         footSwitches.get(robotQuadrant).updateMeasurement();
+         footSwitches.get(robotQuadrant).update();
 
       if (commandInputManager.isNewCommandAvailable(HighLevelControllerStateCommand.class))
       {
