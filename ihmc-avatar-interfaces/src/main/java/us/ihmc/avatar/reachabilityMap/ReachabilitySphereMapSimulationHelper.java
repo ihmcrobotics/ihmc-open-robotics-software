@@ -135,24 +135,24 @@ public class ReachabilitySphereMapSimulationHelper
       }
 
       calculator.setVoxelUnreachableListener(voxel ->
-                                             {
-                                                voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
-                                             });
+      {
+         voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
+      });
 
       calculator.setVoxelCompletedListener(voxel ->
-                                           {
-                                              voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
+      {
+       voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
 
-                                              if (voxel.getR() > 1e-3)
-                                              {
-                                                 voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR()));
-                                                 voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR2()));
-                                              }
-                                              else
-                                              {
-                                                 voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
-                                              }
-                                           });
+       if (voxel.getR() > 1e-3)
+       {
+          voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR()));
+          voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR2()));
+       }
+       else
+       {
+          voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
+       }
+      });
 
       currentVisualizationType.addListener(v ->
                                            {
