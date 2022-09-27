@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.badlogic.gdx.utils.Array;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -104,6 +105,9 @@ public class GDXImGuiBasedUI
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
+   // FOR THEMES
+   private int themeLabelIndex = 0;
+   private final String[] themeLabels = {"Light", "Dark", "ImGui Classic"};
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -299,6 +303,21 @@ public class GDXImGuiBasedUI
          {
             setBackgroundShade(backgroundShade.get());
          }
+
+         ImGui.separator();
+         ImGui.text("UI Theme:");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(themeLabels[themeLabelIndex % 3])))
+         {
+            themeLabelIndex++;
+            switch (themeLabelIndex % 3)
+            {
+               case 0 -> ImGui.styleColorsLight();
+               case 1 -> ImGui.styleColorsDark();
+               case 2 -> ImGui.styleColorsClassic();
+            }
+         }
+
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
