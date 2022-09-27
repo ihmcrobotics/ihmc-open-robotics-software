@@ -25,6 +25,7 @@ import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
+import us.ihmc.gdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -71,7 +72,7 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
-   private final KinematicsRecordingReplaying kinematicsRecorder = new KinematicsRecordingReplaying(enabled);
+   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
