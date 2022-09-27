@@ -17,9 +17,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -379,12 +377,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
       }
-      boolean ctrlHeld = imgui.internal.ImGui.getIO().getKeyCtrl();
-      boolean isPPressed = input.isWindowHovered() && ImGui.isKeyDown('P');
-      if (ctrlHeld && isPPressed)
-      {
-         teleportCameraToRobotPelvis();
-      }
    }
 
    public void renderImGuiWidgets()
@@ -635,13 +627,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public GDXRobotCollisionModel getSelfCollisionModel()
    {
       return selfCollisionModel;
-   }
-   
-      public void teleportCameraToRobotPelvis()
-   {
-      RigidBodyTransform robotTransform = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame();
-      GDXFocusBasedCamera camera = baseUI.getPrimary3DPanel().getCamera3D();
-      camera.setFocusPointPose(robotTransform);
    }
 
    public GDXHandConfigurationManager getHandManager()
