@@ -69,13 +69,17 @@ public class HDF5Tools
       mat.data(p);
    }
 
-   public static void storePointCloud(Group group, int index, RecyclingArrayList<Point3D32> points)
+   public static void storePointCloud(Group group, long index, ArrayList<Point3D> points)
    {
-      DataSet dataset = group.openDataSet(String.valueOf(index));
+      long[] dims = {points.size(), PCD_POINT_SIZE};
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
       float[] buf = new float[points.size() * PCD_POINT_SIZE];
       for (int i = 0; i <  points.size(); i++)
-         for (int j = 0; j < PCD_POINT_SIZE; j++)
-            buf[i * PCD_POINT_SIZE + j] = i + j;
+      {
+         buf[i * PCD_POINT_SIZE] = points.get(i).getX32();
+         buf[i * PCD_POINT_SIZE + 1] = points.get(i).getY32();
+         buf[i * PCD_POINT_SIZE + 2] = points.get(i).getZ32();
+      }
 
       dataset.write(new FloatPointer(buf), new DataType(PredType.NATIVE_FLOAT()));
    }
@@ -140,9 +144,9 @@ public class HDF5Tools
       }
    }
 
-   public static void storeFloatArray2D(Group group, long index, ArrayList<Float> data, int cols)
+   public static void storeFloatArray2D(Group group, long index, ArrayList<Float> data, int rows, int cols)
    {
-      long[] dims = { HDF5Manager.MAX_BUFFER_SIZE, cols };
+      long[] dims = { rows, cols };
 
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
       float[] dataObject = ArrayUtils.toPrimitive(data.toArray(new Float[0]), 0.0F);
