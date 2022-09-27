@@ -27,7 +27,7 @@ int32 NO_PLAN_ID = -1
 int32 plan_id -1
 
 # Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
-FootstepDataListMessage footstep_data_list
+controller_msgs/FootstepDataListMessage footstep_data_list
 
 # Body path plan result. Null if no result is available
 byte body_path_planning_result 255
@@ -36,7 +36,7 @@ byte body_path_planning_result 255
 byte footstep_planning_result 255
 
 # (deprecated) Regions that correspond to the request message. Originally used for debugging networking
-PlanarRegionsListMessage planar_regions_list
+controller_msgs/PlanarRegionsListMessage planar_regions_list
 
 # Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path

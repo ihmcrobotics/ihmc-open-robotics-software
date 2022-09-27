@@ -1,6 +1,9 @@
 package us.ihmc.behaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.*;
+import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Publisher;

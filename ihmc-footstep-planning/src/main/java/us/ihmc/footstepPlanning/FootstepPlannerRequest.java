@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

@@ -8,8 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.BodyPathPlanMessage;
-import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
+import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.PawStepPlannerParametersPacket;
 import controller_msgs.msg.dds.PawStepPlanningRequestPacket;

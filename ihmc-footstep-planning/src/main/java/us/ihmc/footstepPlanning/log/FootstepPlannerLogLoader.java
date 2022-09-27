@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.log;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
+import footstep_plan_msgs.msg.dds.*;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;

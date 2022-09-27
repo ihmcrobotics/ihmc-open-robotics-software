@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
+import footstep_plan_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -30,8 +31,6 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
-import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
