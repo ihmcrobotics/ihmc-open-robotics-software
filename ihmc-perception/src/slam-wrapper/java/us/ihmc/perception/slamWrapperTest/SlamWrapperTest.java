@@ -80,13 +80,13 @@ public class SlamWrapperTest
 
 //      factorGraphExternal.helloWorldTest();
 
-      float[] pose_initial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+      float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
       float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
 
-      factorGraphExternal.addPriorPoseFactor(1, pose_initial);
+      factorGraphExternal.addPriorPoseFactor(1, poseInitial);
       factorGraphExternal.addOdometryFactor(odometry, 2);
 
-      factorGraphExternal.setPoseInitialValue(1, pose_initial);
+      factorGraphExternal.setPoseInitialValue(1, poseInitial);
       factorGraphExternal.setPoseInitialValue(2, odometry);
 
       factorGraphExternal.optimize();
