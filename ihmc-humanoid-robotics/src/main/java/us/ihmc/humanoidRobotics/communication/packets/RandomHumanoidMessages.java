@@ -5,7 +5,10 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import perception_msgs.msg.dds.*;
 import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;

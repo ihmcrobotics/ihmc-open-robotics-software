@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;

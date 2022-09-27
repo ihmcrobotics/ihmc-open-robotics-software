@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

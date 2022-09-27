@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.HeightMapMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;

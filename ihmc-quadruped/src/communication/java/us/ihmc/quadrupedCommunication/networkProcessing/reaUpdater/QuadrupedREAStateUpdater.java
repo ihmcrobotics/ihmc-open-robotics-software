@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

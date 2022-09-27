@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.polygonWiggling;
 import java.util.List;
 import java.util.Random;
 
-import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import javafx.scene.paint.Color;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;

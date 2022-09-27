@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.tools;
 
-import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;

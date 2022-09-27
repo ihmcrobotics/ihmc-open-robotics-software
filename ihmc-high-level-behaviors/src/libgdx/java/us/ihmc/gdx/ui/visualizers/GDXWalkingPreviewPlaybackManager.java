@@ -1,7 +1,7 @@
 package us.ihmc.gdx.ui.visualizers;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Input;

@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.commons.thread.ThreadTools;

@@ -5,8 +5,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.SimulatedLidarScanPacket;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;

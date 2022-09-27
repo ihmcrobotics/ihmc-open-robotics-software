@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import java.util.Objects;
 
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;

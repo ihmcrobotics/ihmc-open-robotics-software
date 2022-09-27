@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI;
 
 import java.util.Map;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.WeightMatrix3DMessage;
 import gnu.trove.list.array.TDoubleArrayList;

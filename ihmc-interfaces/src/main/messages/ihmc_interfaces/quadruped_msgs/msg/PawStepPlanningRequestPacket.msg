@@ -32,5 +32,5 @@ byte requested_paw_planner_type 255
 float64 timeout
 float64 best_effort_timeout
 float64 horizon_length
-controller_msgs/PlanarRegionsListMessage planar_regions_list_message
+perception_msgs/PlanarRegionsListMessage planar_regions_list_message
 bool assume_flat_ground

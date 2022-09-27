@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import imgui.internal.ImGui;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

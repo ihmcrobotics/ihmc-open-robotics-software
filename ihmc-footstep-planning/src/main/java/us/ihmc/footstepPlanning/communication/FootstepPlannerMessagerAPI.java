@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
-import footstep_plan_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -46,7 +48,7 @@ public class FootstepPlannerMessagerAPI
    private static final CategoryTheme FootstepPlanner = apiFactory.createCategoryTheme("FootstepPlanner");
 
    // Robot state
-   public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
+   public static final Topic<controller_msgs.msg.dds.RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
    public static final Topic<DataSetName> DataSetSelected = topic("DataSetSelected");
    public static final Topic<HeightMapDataSetName> HeightMapDataSetSelected = topic("HeightMapDataSetSelected");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");

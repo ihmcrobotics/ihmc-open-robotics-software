@@ -1,6 +1,6 @@
 package us.ihmc.gdx.perception;
 
-import controller_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 

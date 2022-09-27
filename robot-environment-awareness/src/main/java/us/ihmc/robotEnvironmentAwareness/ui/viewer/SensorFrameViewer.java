@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;

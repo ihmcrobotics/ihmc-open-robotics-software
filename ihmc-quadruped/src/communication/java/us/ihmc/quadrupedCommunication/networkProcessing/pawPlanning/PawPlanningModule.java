@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import controller_msgs.msg.dds.BodyPathPlanMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
+import toolbox_msgs.msg.dds.BodyPathPlanMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import quadruped_msgs.msg.dds.PawStepPlannerParametersPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;

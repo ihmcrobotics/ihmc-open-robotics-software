@@ -17,9 +17,9 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
-import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
-import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import javafx.application.Application;
 import javafx.application.Platform;

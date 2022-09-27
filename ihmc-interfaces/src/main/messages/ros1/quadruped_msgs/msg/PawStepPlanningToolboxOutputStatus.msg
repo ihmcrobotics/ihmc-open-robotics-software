@@ -28,7 +28,7 @@ int32 plan_id
 # Field default value -1.0
 float64 time_taken
 
-controller_msgs/PlanarRegionsListMessage planar_regions_list
+perception_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Pose[] body_path
 

@@ -50,7 +50,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
@@ -84,7 +84,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
+      current_alignment += perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getPlanarRegionsList(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBodyPath().size(); ++i0)
@@ -108,7 +108,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
 
       cdr.write_type_6(data.getTimeTaken());
 
-      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.write(data.getPlanarRegionsList(), cdr);
       if(data.getBodyPath().size() <= 100)
       cdr.write_type_e(data.getBodyPath());else
           throw new RuntimeException("body_path field exceeds the maximum length");
@@ -127,7 +127,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
       	
       data.setTimeTaken(cdr.read_type_6());
       	
-      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getLowLevelPlannerGoal(), cdr);	
 
@@ -142,7 +142,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
       ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_6("time_taken", data.getTimeTaken());
-      ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
+      ser.write_type_a("planar_regions_list", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.write_type_e("body_path", data.getBodyPath());
       ser.write_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());
@@ -158,7 +158,7 @@ public class PawStepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pub
       data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
       data.setPlanId(ser.read_type_2("plan_id"));
       data.setTimeTaken(ser.read_type_6("time_taken"));
-      ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
+      ser.read_type_a("planar_regions_list", new perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.read_type_e("body_path", data.getBodyPath());
       ser.read_type_a("low_level_planner_goal", new geometry_msgs.msg.dds.PosePubSubType(), data.getLowLevelPlannerGoal());

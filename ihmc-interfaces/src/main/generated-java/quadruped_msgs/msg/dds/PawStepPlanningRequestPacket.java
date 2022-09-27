@@ -40,7 +40,7 @@ public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestP
    public double timeout_;
    public double best_effort_timeout_;
    public double horizon_length_;
-   public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
+   public perception_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
    public boolean assume_flat_ground_;
 
    public PawStepPlanningRequestPacket()
@@ -53,7 +53,7 @@ public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestP
       hind_right_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       goal_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+      planar_regions_list_message_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
    }
 
    public PawStepPlanningRequestPacket(PawStepPlanningRequestPacket other)
@@ -88,7 +88,7 @@ public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestP
 
       horizon_length_ = other.horizon_length_;
 
-      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_message_, planar_regions_list_message_);
       assume_flat_ground_ = other.assume_flat_ground_;
 
    }
@@ -220,7 +220,7 @@ public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestP
    }
 
 
-   public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsListMessage()
+   public perception_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsListMessage()
    {
       return planar_regions_list_message_;
    }
