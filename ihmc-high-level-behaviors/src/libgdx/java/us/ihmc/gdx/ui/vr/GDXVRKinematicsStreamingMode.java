@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -17,19 +16,15 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
-import us.ihmc.gdx.ui.tools.TrajectoryRecordReplay;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -76,14 +71,7 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private boolean streamToController;
    private final Throttler messageThrottler = new Throttler();
-   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class,"");
-   private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadia");
-   private final ImBoolean enablerRecording = new ImBoolean(false);
-   private boolean isRecording = false;
-   private final ImString replayPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadiaDab.csv");
-   private final ImBoolean enablerReplay = new ImBoolean(false);
-   private boolean isReplaying = false;
-
+   private final KinematicsRecordingReplaying kinematicsRecorder = new KinematicsRecordingReplaying(enabled);
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -170,18 +158,9 @@ public class GDXVRKinematicsStreamingMode
             sendHandCommand(RobotSide.LEFT, handConfiguration);
          }
 
+         // Check if left B button is pressed in order to trigger recording or replay of motion
          InputDigitalActionData bButton = controller.getBButtonActionData();
-         if (enabled.get() && enablerRecording.get() && bButton.bChanged() && !bButton.bState())
-         {
-            isRecording = !isRecording;
-            if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
-               trajectoryRecorder.setPath(recordPath.get());
-         }
-         if (enablerReplay.get() && bButton.bChanged() && !bButton.bState()){
-            isReplaying = !isReplaying;
-            if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
-               trajectoryRecorder.setPath(replayPath.get());
-         }
+         kinematicsRecorder.processRecordReplayInput(bButton);
       });
 
 
@@ -215,7 +194,7 @@ public class GDXVRKinematicsStreamingMode
          });
       }
 
-      if ((enabled.get() || isReplaying) && toolboxInputStreamRateLimiter.run(streamPeriod))
+      if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
@@ -228,41 +207,15 @@ public class GDXVRKinematicsStreamingMode
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
-               if(isReplaying) // if replay box in VR Mode manager is checked and B left button triggered
-               {
-                  // Read file with stored trajectories: read setpoint per timestep until file is over
-                  Double[] dataPoint= trajectoryRecorder.play();
-                  if(!trajectoryRecorder.hasDoneReplay())
-                  {
-                     // [0,1,2] position of body segment; [3,4,5,6] quaternion of body segment
-                     tempFramePose.getPosition().set(dataPoint[0],dataPoint[1],dataPoint[2]);
-                     tempFramePose.getOrientation().set(dataPoint[3],dataPoint[4],dataPoint[5],dataPoint[6]);
-                  }
-                  else
-                  {
-                     isReplaying = false;
-                     enablerReplay.set(isReplaying);
-                  }
-               }
+               if (kinematicsRecorder.isReplaying())
+                  kinematicsRecorder.replay(tempFramePose); //get values of tempFramePose from replay
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
                                                                                  side.negateIfLeftSide(Math.PI / 2.0),
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
-
-               if(isRecording){ // if record box in VR Mode manager is checked (together with Kinematics streaming) and B left button triggered
-                  // Store trajectories in file: store a setpoint per timestep until B left button is pressed again
-                  // [0,1,2] position of body segment; [3,4,5,6] quaternion of body segment
-                  Double[] dataTrajectories = new Double[] {tempFramePose.getPosition().getX(),
-                                       tempFramePose.getPosition().getY(),tempFramePose.getPosition().getZ(),
-                                       tempFramePose.getOrientation().getX(),tempFramePose.getOrientation().getY(),
-                                       tempFramePose.getOrientation().getZ(),tempFramePose.getOrientation().getS()};
-                  trajectoryRecorder.record(dataTrajectories);
-               }
-               else if(!(trajectoryRecorder.hasSavedRecording())){
-                  trajectoryRecorder.saveRecording();
-               }
+               kinematicsRecorder.record(tempFramePose);
             });
          }
 
@@ -290,7 +243,7 @@ public class GDXVRKinematicsStreamingMode
          if(enabled.get())
             toolboxInputMessage.setStreamToController(streamToController);
          else
-            toolboxInputMessage.setStreamToController(isReplaying);
+            toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
@@ -357,20 +310,11 @@ public class GDXVRKinematicsStreamingMode
       {
          sleepToolbox();
       }
+      // add widgets for recording/replaying motion in VR
       ImGui.text("Start/Stop recording: Press Right B button");
-      if (ImGui.checkbox(labels.get("Record motion"), enablerRecording))
-      {
-         setRecording(enablerRecording.get());
-      }
-      ImGui.sameLine();
-      ImGui.inputText(labels.get("Record folder"), recordPath);
+      kinematicsRecorder.renderRecordWidgets(labels);
       ImGui.text("Start/Stop replay: Press Right B button (cannot stream/record if replay)");
-      if (ImGui.checkbox(labels.get("Replay motion"), enablerReplay))
-      {
-         setReplay(enablerReplay.get());
-      }
-      ImGui.sameLine();
-      ImGui.inputText(labels.get("Replay file"), replayPath);
+      kinematicsRecorder.renderReplayWidgets(labels);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
@@ -397,28 +341,7 @@ public class GDXVRKinematicsStreamingMode
       if (enabled)
       {
          wakeUpToolbox();
-         this.enablerReplay.set(false); //check no concurrency replay and streaming
-      }
-   }
-
-   private void setRecording(boolean enablerRecording)
-   {
-      if (enablerRecording != this.enablerRecording.get())
-         this.enablerRecording.set(enablerRecording);
-      if(enablerRecording)
-         this.enablerReplay.set(false); //check no concurrency replay and record
-
-   }
-
-   private void setReplay(boolean enablerReplay)
-   {
-      if (enablerReplay != this.enablerReplay.get())
-         this.enablerReplay.set(enablerReplay);
-      if (enablerReplay)
-      {
-         wakeUpToolbox();
-         if(enablerRecording.get()||enabled.get())
-            this.enablerReplay.set(false); //check no concurrency replay and record/streaming
+         kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
       }
    }
 
