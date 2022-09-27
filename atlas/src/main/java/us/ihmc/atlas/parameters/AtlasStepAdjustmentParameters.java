@@ -19,18 +19,4 @@ public class AtlasStepAdjustmentParameters extends StepAdjustmentParameters
    {
       return 0.02;
    }
-
-
-   @Override
-   public double getTransferSplitFraction()
-   {
-      return 0.2;
-   }
-
-   @Override
-   public double getMinimumFootstepMultiplier()
-   {
-      return 0.25;
-   }
-
 }

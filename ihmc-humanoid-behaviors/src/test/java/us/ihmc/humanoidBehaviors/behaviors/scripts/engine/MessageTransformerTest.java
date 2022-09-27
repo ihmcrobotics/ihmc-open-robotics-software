@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -94,25 +93,6 @@ public class MessageTransformerTest
 
       QuadrupedBodyHeightMessage actual = new QuadrupedBodyHeightMessage(original);
 
-      MessageTransformer.transform(actual, transform);
-
-      assertTrue(expected.epsilonEquals(actual, 1.0e-5));
-   }
-
-   @Test
-   public void testAdjustFootstepMessage()
-   {
-      Random random = new Random(6543);
-
-      AdjustFootstepMessage original = RandomHumanoidMessages.nextAdjustFootstepMessage(random);
-
-      RigidBodyTransform transform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-
-      AdjustFootstepMessage expected = new AdjustFootstepMessage(original);
-      expected.getLocation().applyTransform(transform);
-      expected.getOrientation().applyTransform(transform);
-
-      AdjustFootstepMessage actual = new AdjustFootstepMessage(original);
       MessageTransformer.transform(actual, transform);
 
       assertTrue(expected.epsilonEquals(actual, 1.0e-5));

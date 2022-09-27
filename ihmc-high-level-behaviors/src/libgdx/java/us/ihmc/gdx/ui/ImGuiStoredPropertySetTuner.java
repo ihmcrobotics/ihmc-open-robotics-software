@@ -32,8 +32,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
    private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
    private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
-   private final HashMap<DoubleStoredPropertyKey, float[]> sliderValues = new HashMap<>();
-   private final HashMap<DoubleStoredPropertyKey, ValueRange> sliderMinMaxMap = new HashMap<>();
 
    public ImGuiStoredPropertySetTuner(String name)
    {
@@ -92,19 +90,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          else
          {
             throw new RuntimeException("Please implement spinner for type: " + propertyKey.getType());
-         }
-      }
-   }
-
-   public void registerSlider(String titleCasedName, float min, float max)
-   {
-      for (StoredPropertyKey<?> key : getKeyList().keys())
-      {
-         if (Objects.equals(key.getTitleCasedName(), titleCasedName))
-         {
-            sliderValues.put( (DoubleStoredPropertyKey) key, new float[] {(float) getDoubleValueFromKey(key)} );
-            sliderMinMaxMap.put((DoubleStoredPropertyKey) key, new ValueRange(min, max));
-            break;
          }
       }
    }
@@ -213,6 +198,11 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       }
    }
 
+   public ImGuiStoredPropertySetDoubleSlider createDoubleSlider(DoubleStoredPropertyKey key, double min, double max)
+   {
+      return new ImGuiStoredPropertySetDoubleSlider(key, storedPropertySet, min, max, onParametersUpdatedCallback);
+   }
+
    private void load()
    {
       storedPropertySet.load();
@@ -238,77 +228,5 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       // TODO: experimental . . .
       doubleValues.get((DoubleStoredPropertyKey) key).set((double)value);
       onParametersUpdatedCallback.run();
-   }
-
-   public StoredPropertySetReadOnly getParameters()
-   {
-      return storedPropertySet;
-   }
-
-   public StoredPropertyKeyList getKeyList() {return keys;}
-
-   public StoredPropertyKey<?> getKeyFromName(String titleCasedName)
-   {
-      for (StoredPropertyKey<?> key : getKeyList().keys())
-      {
-         if (Objects.equals(key.getTitleCasedName(), titleCasedName))
-         {
-            return key;
-         }
-      }
-      return null;
-   }
-
-   public double getDoubleValueFromKey(StoredPropertyKey<?> inputKey)
-   {
-      DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) inputKey;
-      return doubleValues.get(key).get();
-   }
-
-   public void renderDoublePropertySliders()
-   {
-      for (DoubleStoredPropertyKey key : sliderValues.keySet())
-      {
-         renderADoublePropertySlider(key,
-                                    0.01,
-                                    0.5,
-                                    sliderMinMaxMap.get(key).min,
-                                    sliderMinMaxMap.get(key).max,
-                                    false,
-                                    key.getTitleCasedName(),
-                                    "%.6f");
-      }
-   }
-
-   // TODO: Fix this up
-   public void renderADoublePropertySlider(StoredPropertyKey<?> propertyKey,
-                                          double step,
-                                          double stepFast,
-                                          double min,
-                                          double max,
-                                          boolean fancyLabel,
-                                          String titleCasedName,
-                                          String format)
-   {
-      String label = fancyLabel ? labels.get(titleCasedName, propertyKey.getTitleCasedName()) : propertyKey.getTitleCasedName();
-      if (fancyLabel)
-      {
-         ImGui.text(propertyKey.getTitleCasedName() + ":");
-         ImGui.sameLine();
-         ImGui.pushItemWidth(100.0f);
-      }
-      DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
-      if (ImGui.sliderFloat(labels.get(label), sliderValues.get(key), (float) min, (float) max))
-      {
-         doubleValues.get(key).set(sliderValues.get(key)[0]);
-         if (!Double.isNaN(min))
-            doubleValues.get(key).set(MathTools.clamp(doubleValues.get(key).get(), min, max));
-         storedPropertySet.set(key, sliderValues.get(key)[0]);
-         onParametersUpdatedCallback.run();
-      }
-      if (fancyLabel)
-      {
-         ImGui.popItemWidth();
-      }
    }
 }

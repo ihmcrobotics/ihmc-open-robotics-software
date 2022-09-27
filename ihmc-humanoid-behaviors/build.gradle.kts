@@ -23,7 +23,7 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.postgresql:postgresql:42.2.5")
 
-   api("us.ihmc:ihmc-native-library-loader:1.3.1")
+   api("us.ihmc:ihmc-native-library-loader:2.0.1")
    api("us.ihmc:euclid:0.19.0")
    api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:ihmc-manipulation-planning:source")
@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-robot-data-logger:17-0.23.4")
+   api("us.ihmc:ihmc-robot-data-logger:0.24.0")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
    api("us.ihmc:ihmc-java-toolkit:source")
