@@ -5,7 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.Image32;
+import perception_msgs.msg.dds.Image32;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;

@@ -19,7 +19,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import quadruped_msgs.msg.dds.PawStepPlannerParametersPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.QuadrupedContinuousPlanningRequestPacket;
 import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;

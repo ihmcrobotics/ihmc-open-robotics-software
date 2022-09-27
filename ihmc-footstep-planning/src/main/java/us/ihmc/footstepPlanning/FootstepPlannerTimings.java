@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning;
 
-import footstep_plan_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 
 public class FootstepPlannerTimings
 {

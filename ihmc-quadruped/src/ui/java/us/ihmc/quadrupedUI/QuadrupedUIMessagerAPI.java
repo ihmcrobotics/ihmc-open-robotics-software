@@ -3,6 +3,7 @@ package us.ihmc.quadrupedUI;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import quadruped_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
 import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
@@ -69,7 +70,7 @@ public class QuadrupedUIMessagerAPI
    private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
-   private static final TypedTopicTheme<RobotConfigurationData> RobotConfigurationData = apiFactory.createTypedTopicTheme("RobotConfigurationData");
+   private static final TypedTopicTheme<controller_msgs.msg.dds.RobotConfigurationData> RobotConfigurationData = apiFactory.createTypedTopicTheme("RobotConfigurationData");
    private static final TypedTopicTheme<FullQuadrupedRobotModel> RobotModel = apiFactory.createTypedTopicTheme("RobotModel");
    private static final TypedTopicTheme<HighLevelControllerName> ControllerState = apiFactory.createTypedTopicTheme("ControllerState");
    private static final TypedTopicTheme<QuadrupedSteppingStateEnum> SteppingState = apiFactory.createTypedTopicTheme("SteppingState");

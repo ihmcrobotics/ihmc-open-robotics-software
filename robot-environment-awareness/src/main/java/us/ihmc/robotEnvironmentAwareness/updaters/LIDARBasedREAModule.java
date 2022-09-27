@@ -8,11 +8,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

@@ -26,14 +26,14 @@ public class PawStepPlanningToolboxOutputStatus extends Packet<PawStepPlanningTo
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
    public double time_taken_ = -1.0;
-   public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
+   public perception_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
    public us.ihmc.euclid.geometry.Pose3D low_level_planner_goal_;
 
    public PawStepPlanningToolboxOutputStatus()
    {
       footstep_data_list_ = new quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage();
-      planar_regions_list_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+      planar_regions_list_ = new perception_msgs.msg.dds.PlanarRegionsListMessage();
       body_path_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
       low_level_planner_goal_ = new us.ihmc.euclid.geometry.Pose3D();
 
@@ -56,7 +56,7 @@ public class PawStepPlanningToolboxOutputStatus extends Packet<PawStepPlanningTo
 
       time_taken_ = other.time_taken_;
 
-      controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
+      perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType.staticCopy(other.planar_regions_list_, planar_regions_list_);
       body_path_.set(other.body_path_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.low_level_planner_goal_, low_level_planner_goal_);
    }
@@ -110,7 +110,7 @@ public class PawStepPlanningToolboxOutputStatus extends Packet<PawStepPlanningTo
    }
 
 
-   public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsList()
+   public perception_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsList()
    {
       return planar_regions_list_;
    }

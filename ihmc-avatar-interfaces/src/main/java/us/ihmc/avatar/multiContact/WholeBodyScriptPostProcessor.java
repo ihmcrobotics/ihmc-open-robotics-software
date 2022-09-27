@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;

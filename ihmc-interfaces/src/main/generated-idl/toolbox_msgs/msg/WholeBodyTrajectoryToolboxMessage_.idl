@@ -1,0 +1,35 @@
+#ifndef __toolbox_msgs__msg__WholeBodyTrajectoryToolboxMessage__idl__
+#define __toolbox_msgs__msg__WholeBodyTrajectoryToolboxMessage__idl__
+
+#include "toolbox_msgs/msg/./ReachingManifoldMessage_.idl"
+#include "toolbox_msgs/msg/./RigidBodyExplorationConfigurationMessage_.idl"
+#include "toolbox_msgs/msg/./WaypointBasedTrajectoryMessage_.idl"
+#include "toolbox_msgs/msg/./WholeBodyTrajectoryToolboxConfigurationMessage_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message that carries all the information required to configure the IHMC whole-body trajectory planner.
+       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::WholeBodyTrajectoryToolboxMessage_")
+      struct WholeBodyTrajectoryToolboxMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        toolbox_msgs::msg::dds::WholeBodyTrajectoryToolboxConfigurationMessage configuration;
+        sequence<toolbox_msgs::msg::dds::WaypointBasedTrajectoryMessage, 10> end_effector_trajectories;
+        sequence<toolbox_msgs::msg::dds::RigidBodyExplorationConfigurationMessage, 10> exploration_configurations;
+        sequence<toolbox_msgs::msg::dds::ReachingManifoldMessage, 10> reaching_manifolds;
+      };
+    };
+  };
+};
+
+#endif

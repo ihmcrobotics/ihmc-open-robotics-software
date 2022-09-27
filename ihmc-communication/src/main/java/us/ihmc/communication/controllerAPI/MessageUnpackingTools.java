@@ -24,7 +24,7 @@ import controller_msgs.msg.dds.SpineTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;

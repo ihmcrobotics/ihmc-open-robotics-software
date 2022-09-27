@@ -11,7 +11,7 @@ byte STEP_TYPE_SLOPES = 3
 uint32 sequence_id
 
 # Defines the list of footstep to perform.
-controller_msgs/ExoStepDataMessage[<=50] step_data_list
+ExoStepDataMessage[<=50] step_data_list
 # The swing_duration is the time a foot is not in ground contact during a step.
 # Each step in a list of footsteps might have a different swing duration.
 # The value specified here is a default value, used if a footstep in this list was created without a swing_duration.

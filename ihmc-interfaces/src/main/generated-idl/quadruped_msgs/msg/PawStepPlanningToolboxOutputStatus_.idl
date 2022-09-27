@@ -1,8 +1,8 @@
 #ifndef __quadruped_msgs__msg__PawStepPlanningToolboxOutputStatus__idl__
 #define __quadruped_msgs__msg__PawStepPlanningToolboxOutputStatus__idl__
 
-#include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "perception_msgs/msg/./PlanarRegionsListMessage_.idl"
 #include "quadruped_msgs/msg/./QuadrupedTimedStepListMessage_.idl"
 module quadruped_msgs
 {
@@ -49,7 +49,7 @@ module quadruped_msgs
         long plan_id;
         @defaultValue(value=-1.0)
         double time_taken;
-        controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
+        perception_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list;
         sequence<geometry_msgs::msg::dds::Pose> body_path;
         geometry_msgs::msg::dds::Pose low_level_planner_goal;
       };

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;

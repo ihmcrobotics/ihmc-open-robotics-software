@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;

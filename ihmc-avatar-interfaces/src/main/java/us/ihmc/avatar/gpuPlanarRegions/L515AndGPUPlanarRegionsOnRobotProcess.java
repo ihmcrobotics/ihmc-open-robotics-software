@@ -1,7 +1,7 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.BigVideoPacket;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;

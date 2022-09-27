@@ -7,14 +7,14 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.BodyPathPlanMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.BodyPathPlanMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import quadruped_msgs.msg.dds.PawStepPlannerParametersPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;

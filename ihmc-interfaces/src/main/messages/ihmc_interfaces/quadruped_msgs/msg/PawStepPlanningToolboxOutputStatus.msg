@@ -17,7 +17,7 @@ byte footstep_planning_result 255
 int32 plan_id -1
 float64 time_taken -1
 
-controller_msgs/PlanarRegionsListMessage planar_regions_list
+perception_msgs/PlanarRegionsListMessage planar_regions_list
 
 geometry_msgs/Pose[] body_path
 geometry_msgs/Pose low_level_planner_goal

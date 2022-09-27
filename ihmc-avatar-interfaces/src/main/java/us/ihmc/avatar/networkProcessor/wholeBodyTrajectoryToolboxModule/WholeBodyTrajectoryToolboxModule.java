@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Set;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;

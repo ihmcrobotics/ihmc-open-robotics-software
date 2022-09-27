@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;

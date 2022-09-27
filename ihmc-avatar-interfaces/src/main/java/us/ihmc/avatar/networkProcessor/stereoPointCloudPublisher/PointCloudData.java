@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packets.LidarPointCloudCompression;

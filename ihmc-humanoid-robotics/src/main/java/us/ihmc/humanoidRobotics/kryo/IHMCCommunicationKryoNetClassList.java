@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacketPubSubType;
+import exoskeleton_msgs.msg.dds.PilotAlarmPacketPubSubType;
+import exoskeleton_msgs.msg.dds.PilotInterfaceActionPacketPubSubType;
+import exoskeleton_msgs.msg.dds.PilotInterfacePacketPubSubType;
 import footstep_plan_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import org.ejml.data.DMatrixRMaj;
 
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
@@ -62,6 +67,7 @@ import nav_msgs.msg.dds.MapMetaDataPubSubType;
 import nav_msgs.msg.dds.OccupancyGridPubSubType;
 import nav_msgs.msg.dds.OdometryPubSubType;
 import nav_msgs.msg.dds.PathPubSubType;
+import perception_msgs.msg.dds.*;
 import rcl_interfaces.msg.dds.IntraProcessMessagePubSubType;
 import rcl_interfaces.msg.dds.ListParametersResultPubSubType;
 import rcl_interfaces.msg.dds.ParameterDescriptorPubSubType;
@@ -135,6 +141,7 @@ import std_msgs.msg.dds.UInt8PubSubType;
 import stereo_msgs.msg.dds.DisparityImagePubSubType;
 import tf2_msgs.msg.dds.TF2ErrorPubSubType;
 import tf2_msgs.msg.dds.TFMessagePubSubType;
+import toolbox_msgs.msg.dds.*;
 import trajectory_msgs.msg.dds.JointTrajectoryPointPubSubType;
 import trajectory_msgs.msg.dds.JointTrajectoryPubSubType;
 import trajectory_msgs.msg.dds.MultiDOFJointTrajectoryPointPubSubType;

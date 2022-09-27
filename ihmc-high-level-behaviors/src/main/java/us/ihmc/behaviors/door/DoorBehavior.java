@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.door;
 
-import controller_msgs.msg.dds.DetectedFiducialPacket;
+import perception_msgs.msg.dds.DetectedFiducialPacket;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;

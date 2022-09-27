@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.Pose3D;

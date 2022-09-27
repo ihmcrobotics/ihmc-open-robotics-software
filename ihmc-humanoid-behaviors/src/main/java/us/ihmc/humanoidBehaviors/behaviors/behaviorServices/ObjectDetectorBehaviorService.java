@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.imageio.ImageIO;
 
 import controller_msgs.msg.dds.BoundingBoxesPacket;
-import controller_msgs.msg.dds.HeatMapPacket;
-import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import perception_msgs.msg.dds.HeatMapPacket;
+import perception_msgs.msg.dds.ObjectDetectorResultPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.PrintTools;

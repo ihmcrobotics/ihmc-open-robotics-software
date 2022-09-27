@@ -1,10 +1,11 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
-import footstep_plan_msgs.msg.dds.FootstepPlannerActionMessage;
-import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
-import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
-import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

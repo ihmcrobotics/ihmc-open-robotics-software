@@ -1,8 +1,13 @@
 package us.ihmc.quadrupedFootstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
-import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.BodyPathPlanMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import quadruped_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

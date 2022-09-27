@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

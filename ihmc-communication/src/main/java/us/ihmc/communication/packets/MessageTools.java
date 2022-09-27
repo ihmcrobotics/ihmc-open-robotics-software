@@ -2,6 +2,9 @@ package us.ihmc.communication.packets;
 
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import perception_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

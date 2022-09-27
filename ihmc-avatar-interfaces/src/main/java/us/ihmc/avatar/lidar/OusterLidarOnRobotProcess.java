@@ -1,6 +1,6 @@
 package us.ihmc.avatar.lidar;
 
-import controller_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import quadruped_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;

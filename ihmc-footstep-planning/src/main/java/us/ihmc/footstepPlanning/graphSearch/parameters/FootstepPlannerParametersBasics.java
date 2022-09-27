@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;

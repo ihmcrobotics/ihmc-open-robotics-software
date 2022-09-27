@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
