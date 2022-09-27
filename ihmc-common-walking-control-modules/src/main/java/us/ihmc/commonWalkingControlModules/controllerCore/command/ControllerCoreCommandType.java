@@ -72,6 +72,11 @@ public enum ControllerCoreCommandType
     */
    MOMENTUM,
 
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} given for momentum rate of change. This
+    * allows the user to set custom quadratic cost functions that related to the momentum rate of change
+    * for the {@link WholeBodyInverseDynamicsSolver}.
+    */
    MOMENTUM_COST,
 
    /**
@@ -185,6 +190,12 @@ public enum ControllerCoreCommandType
     * changing some of the optimization settings such as bounds on rhos online using the command API.
     */
    OPTIMIZATION_SETTINGS,
+
+   /**
+    * Represents a command for the {@link WholeBodyControllerCore} for a custom cost term. This
+    * cost must be quadratic, and can be added directly to the {@link WholeBodyInverseDynamicsSolver}
+    * or {@link WholeBodyVirtualModelControlSolver}.
+    */
    QP_INPUT;
 
    private static final ControllerCoreCommandType[] inverseKinematicsCommands = {TASKSPACE, JOINTSPACE, MOMENTUM, MOMENTUM_CONVEX_CONSTRAINT,
