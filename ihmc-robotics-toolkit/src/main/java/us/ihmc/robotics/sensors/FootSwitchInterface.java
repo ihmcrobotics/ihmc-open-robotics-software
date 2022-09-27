@@ -70,11 +70,9 @@ public interface FootSwitchInterface
    {
       FramePoint2DReadOnly thisCoP = getCenterOfPressure();
       if (thisCoP == null)
-      {
          centerOfPressureToPack.setToNaN(getMeasurementFrame());
-      }
-
-      centerOfPressureToPack.setIncludingFrame(thisCoP);
+      else
+         centerOfPressureToPack.setIncludingFrame(thisCoP);
    }
 
    /**
