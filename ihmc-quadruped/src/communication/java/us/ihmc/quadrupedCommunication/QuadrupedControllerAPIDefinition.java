@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
 import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;

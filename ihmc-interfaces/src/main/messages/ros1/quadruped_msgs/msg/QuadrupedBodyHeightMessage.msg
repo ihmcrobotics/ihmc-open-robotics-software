@@ -12,6 +12,6 @@ bool is_expressed_in_absolute_time
 bool control_body_height
 
 # The orientation trajectory information.
-controller_msgs/EuclideanTrajectoryMessage euclidean_trajectory
+ihmc_common_msgs/EuclideanTrajectoryMessage euclidean_trajectory
 
 

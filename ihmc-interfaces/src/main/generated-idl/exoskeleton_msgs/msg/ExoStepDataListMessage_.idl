@@ -1,8 +1,8 @@
 #ifndef __exoskeleton_msgs__msg__ExoStepDataListMessage__idl__
 #define __exoskeleton_msgs__msg__ExoStepDataListMessage__idl__
 
-#include "controller_msgs/msg/./QueueableMessage_.idl"
 #include "exoskeleton_msgs/msg/./ExoStepDataMessage_.idl"
+#include "ihmc_common_msgs/msg/./QueueableMessage_.idl"
 module exoskeleton_msgs
 {
   module msg
@@ -57,7 +57,7 @@ module exoskeleton_msgs
         /**
          * Properties for queueing footstep lists.
          */
-        controller_msgs::msg::dds::QueueableMessage queueing_properties;
+        ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;
         octet step_type;
       };
     };

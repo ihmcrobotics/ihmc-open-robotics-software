@@ -9,7 +9,7 @@ import java.util.Map;
 
 import toolbox_msgs.msg.dds.BodyPathPlanMessage;
 import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import quadruped_msgs.msg.dds.PawStepPlannerParametersPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
@@ -17,7 +17,7 @@ import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;

@@ -24,6 +24,6 @@ geometry_msgs/Point desired_touchdown_position_in_world
 # Specifies the position of where the foot actually landed, only valid when the status is FOOTSTEP_STATUS_COMPLETED
 geometry_msgs/Point actual_touchdown_position_in_world
 # Specifies the desired timing of the step
-controller_msgs/TimeIntervalMessage desired_step_interval
+ihmc_common_msgs/TimeIntervalMessage desired_step_interval
 # Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
-controller_msgs/TimeIntervalMessage actual_step_interval
+ihmc_common_msgs/TimeIntervalMessage actual_step_interval

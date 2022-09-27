@@ -30,11 +30,11 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public QuadrupedBodyOrientationMessage()
    {
-      so3_trajectory_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
+      so3_trajectory_ = new ihmc_common_msgs.msg.dds.SO3TrajectoryMessage();
    }
 
    public QuadrupedBodyOrientationMessage(QuadrupedBodyOrientationMessage other)
@@ -51,7 +51,7 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
 
       is_an_offset_orientation_ = other.is_an_offset_orientation_;
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
    }
 
    /**
@@ -103,7 +103,7 @@ public class QuadrupedBodyOrientationMessage extends Packet<QuadrupedBodyOrienta
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3_trajectory_;
    }

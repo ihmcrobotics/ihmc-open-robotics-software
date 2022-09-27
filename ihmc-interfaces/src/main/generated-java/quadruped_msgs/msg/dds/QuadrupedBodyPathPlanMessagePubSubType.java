@@ -46,7 +46,7 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -69,7 +69,7 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBodyPathPoints().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getBodyPathPoints().get(i0), current_alignment);}
+          current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getBodyPathPoints().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;

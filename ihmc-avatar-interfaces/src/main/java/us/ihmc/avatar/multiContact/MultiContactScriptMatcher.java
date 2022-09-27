@@ -5,7 +5,7 @@ import java.util.Set;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.SelectionMatrix3DMessage;
+import ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairAngularErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairLinearErrorCalculator;
 import us.ihmc.avatar.multiContact.RobotTransformOptimizer.RigidBodyPairSpatialErrorCalculator;

@@ -47,9 +47,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -76,9 +76,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredWayPointPositionsInWorld().get(i0), current_alignment);}
 
-      current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getWeights(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getWeights(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -96,8 +96,8 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
       cdr.write_type_e(data.getDesiredWayPointPositionsInWorld());else
           throw new RuntimeException("desired_way_point_positions_in_world field exceeds the maximum length");
 
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeights(), cdr);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
+      ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeights(), cdr);
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
@@ -106,8 +106,8 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
       	
       cdr.read_type_e(data.getWayPointTimes());	
       cdr.read_type_e(data.getDesiredWayPointPositionsInWorld());	
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);	
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getWeights(), cdr);	
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);	
+      ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getWeights(), cdr);	
 
    }
 
@@ -117,9 +117,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_e("way_point_times", data.getWayPointTimes());
       ser.write_type_e("desired_way_point_positions_in_world", data.getDesiredWayPointPositionsInWorld());
-      ser.write_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
+      ser.write_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
-      ser.write_type_a("weights", new controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
+      ser.write_type_a("weights", new ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
 
    }
 
@@ -129,9 +129,9 @@ public class KinematicsPlanningToolboxCenterOfMassMessagePubSubType implements u
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_e("way_point_times", data.getWayPointTimes());
       ser.read_type_e("desired_way_point_positions_in_world", data.getDesiredWayPointPositionsInWorld());
-      ser.read_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
+      ser.read_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
-      ser.read_type_a("weights", new controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
+      ser.read_type_a("weights", new ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
 
    }
 

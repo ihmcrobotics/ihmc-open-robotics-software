@@ -3,7 +3,7 @@ package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import quadruped_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;

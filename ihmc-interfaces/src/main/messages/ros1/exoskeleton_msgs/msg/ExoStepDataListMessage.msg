@@ -31,7 +31,7 @@ float64 default_swing_duration
 float64 default_transfer_duration
 
 # Properties for queueing footstep lists.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 int8 step_type
 

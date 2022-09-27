@@ -23,7 +23,7 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
    /**
             * Defines if the step list is adjustable
             */
@@ -36,7 +36,7 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
    public QuadrupedTimedStepListMessage()
    {
       quadruped_step_list_ = new us.ihmc.idl.IDLSequence.Object<quadruped_msgs.msg.dds.QuadrupedTimedStepMessage> (100, new quadruped_msgs.msg.dds.QuadrupedTimedStepMessagePubSubType());
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
 
    }
 
@@ -53,7 +53,7 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
       quadruped_step_list_.set(other.quadruped_step_list_);
       is_expressed_in_absolute_time_ = other.is_expressed_in_absolute_time_;
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
       are_steps_adjustable_ = other.are_steps_adjustable_;
 
       offset_steps_height_with_execution_error_ = other.offset_steps_height_with_execution_error_;
@@ -103,7 +103,7 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }

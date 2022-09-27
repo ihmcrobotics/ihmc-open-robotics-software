@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import perception_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.TextToSpeechPacket;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;

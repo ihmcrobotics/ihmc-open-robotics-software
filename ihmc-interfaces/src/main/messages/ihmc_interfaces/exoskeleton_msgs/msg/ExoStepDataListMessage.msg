@@ -23,5 +23,5 @@ float64 default_swing_duration -1.0
 # When set to zero or a negative value, the controller will its own default value.
 float64 default_transfer_duration -1.0
 # Properties for queueing footstep lists.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 byte step_type

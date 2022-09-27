@@ -1,7 +1,7 @@
 #ifndef __quadruped_msgs__msg__QuadrupedBodyTrajectoryMessage__idl__
 #define __quadruped_msgs__msg__QuadrupedBodyTrajectoryMessage__idl__
 
-#include "controller_msgs/msg/./SE3TrajectoryMessage_.idl"
+#include "ihmc_common_msgs/msg/./SE3TrajectoryMessage_.idl"
 module quadruped_msgs
 {
   module msg
@@ -31,7 +31,7 @@ module quadruped_msgs
         /**
          * The position/orientation trajectory information.
          */
-        controller_msgs::msg::dds::SE3TrajectoryMessage se3_trajectory;
+        ihmc_common_msgs::msg::dds::SE3TrajectoryMessage se3_trajectory;
       };
     };
   };

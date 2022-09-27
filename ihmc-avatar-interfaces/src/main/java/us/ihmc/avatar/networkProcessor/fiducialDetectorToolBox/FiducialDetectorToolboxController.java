@@ -20,7 +20,7 @@ import boofcv.struct.calib.CameraPinhole;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import perception_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
 import georegression.struct.shapes.Polygon2D_F64;
 import us.ihmc.avatar.drcRobot.RobotTarget;

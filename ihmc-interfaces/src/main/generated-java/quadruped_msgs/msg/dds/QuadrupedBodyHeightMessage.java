@@ -28,11 +28,11 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public QuadrupedBodyHeightMessage()
    {
-      euclidean_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
+      euclidean_trajectory_ = new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public QuadrupedBodyHeightMessage(QuadrupedBodyHeightMessage other)
@@ -49,7 +49,7 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
 
       control_body_height_ = other.control_body_height_;
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
    }
 
    /**
@@ -101,7 +101,7 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclidean_trajectory_;
    }

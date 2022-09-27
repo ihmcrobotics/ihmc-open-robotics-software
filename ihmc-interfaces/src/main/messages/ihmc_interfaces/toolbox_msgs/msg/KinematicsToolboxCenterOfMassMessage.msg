@@ -15,8 +15,8 @@ geometry_msgs/Point desired_position_in_world
 # selected and the reference frame should world frame. When no reference frame is provided with
 # the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
 # if not defined otherwise.
-controller_msgs/SelectionMatrix3DMessage selection_matrix
+ihmc_common_msgs/SelectionMatrix3DMessage selection_matrix
 # Specifies the priority of controller the position along each axis independently.
 # If no frame is provided, the weight matrix will be applied in the center of mass frame which is
 # aligned with the world axes.
-controller_msgs/WeightMatrix3DMessage weights
+ihmc_common_msgs/WeightMatrix3DMessage weights

@@ -31,19 +31,19 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
             * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
             * if not defined otherwise.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
    /**
             * Specifies the priority of controller the position along each axis independently.
             * If no frame is provided, the weight matrix will be applied in the center of mass frame which is
             * aligned with the world axes.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage weights_;
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage weights_;
 
    public KinematicsToolboxCenterOfMassMessage()
    {
       desired_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-      selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-      weights_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();
+      selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
+      weights_ = new ihmc_common_msgs.msg.dds.WeightMatrix3DMessage();
    }
 
    public KinematicsToolboxCenterOfMassMessage(KinematicsToolboxCenterOfMassMessage other)
@@ -57,8 +57,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       sequence_id_ = other.sequence_id_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
+      ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
    }
 
    /**
@@ -97,7 +97,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
             * the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed frame
             * if not defined otherwise.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getSelectionMatrix()
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage getSelectionMatrix()
    {
       return selection_matrix_;
    }
@@ -108,7 +108,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
             * If no frame is provided, the weight matrix will be applied in the center of mass frame which is
             * aligned with the world axes.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage getWeights()
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage getWeights()
    {
       return weights_;
    }

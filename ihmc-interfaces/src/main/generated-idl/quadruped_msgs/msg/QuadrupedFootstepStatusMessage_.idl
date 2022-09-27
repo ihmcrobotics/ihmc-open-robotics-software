@@ -1,8 +1,8 @@
 #ifndef __quadruped_msgs__msg__QuadrupedFootstepStatusMessage__idl__
 #define __quadruped_msgs__msg__QuadrupedFootstepStatusMessage__idl__
 
-#include "controller_msgs/msg/./TimeIntervalMessage_.idl"
 #include "geometry_msgs/msg/./Point_.idl"
+#include "ihmc_common_msgs/msg/./TimeIntervalMessage_.idl"
 module quadruped_msgs
 {
   module msg
@@ -64,11 +64,11 @@ module quadruped_msgs
         /**
          * Specifies the desired timing of the step
          */
-        controller_msgs::msg::dds::TimeIntervalMessage desired_step_interval;
+        ihmc_common_msgs::msg::dds::TimeIntervalMessage desired_step_interval;
         /**
          * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
          */
-        controller_msgs::msg::dds::TimeIntervalMessage actual_step_interval;
+        ihmc_common_msgs::msg::dds::TimeIntervalMessage actual_step_interval;
       };
     };
   };

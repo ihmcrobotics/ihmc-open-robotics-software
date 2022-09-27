@@ -46,7 +46,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -70,7 +70,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEuclideanTrajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -84,7 +84,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
 
       cdr.write_type_7(data.getControlBodyHeight());
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getEuclideanTrajectory(), cdr);
    }
 
    public static void read(quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage data, us.ihmc.idl.CDR cdr)
@@ -95,7 +95,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
       	
       data.setControlBodyHeight(cdr.read_type_7());
       	
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getEuclideanTrajectory(), cdr);	
 
    }
 
@@ -105,7 +105,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("is_expressed_in_absolute_time", data.getIsExpressedInAbsoluteTime());
       ser.write_type_7("control_body_height", data.getControlBodyHeight());
-      ser.write_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+      ser.write_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
 
    }
 
@@ -115,7 +115,7 @@ public class QuadrupedBodyHeightMessagePubSubType implements us.ihmc.pubsub.Topi
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setIsExpressedInAbsoluteTime(ser.read_type_7("is_expressed_in_absolute_time"));
       data.setControlBodyHeight(ser.read_type_7("control_body_height"));
-      ser.read_type_a("euclidean_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
+      ser.read_type_a("euclidean_trajectory", new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getEuclideanTrajectory());
 
    }
 
