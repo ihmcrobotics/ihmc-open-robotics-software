@@ -35,12 +35,11 @@ public class TrajectoryRecordReplay<T extends Number>
       if (timeStepReplay>=dataMatrix.size()-2){
          doneReplay=true;
          this.reset();
-         return values;
       }
       else{
          timeStepReplay++;
-         return values;
       }
+      return values;
    }
 
    public void record(T[] values)
