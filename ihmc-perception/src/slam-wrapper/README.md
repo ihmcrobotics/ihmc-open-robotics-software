@@ -1,4 +1,4 @@
-# slam-wrapper
+# slam-wrapper with Java bindings
 
 ## Overview
 
