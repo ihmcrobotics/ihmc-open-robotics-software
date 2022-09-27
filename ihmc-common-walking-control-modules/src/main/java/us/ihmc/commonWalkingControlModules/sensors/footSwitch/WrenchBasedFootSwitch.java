@@ -33,17 +33,17 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
    private static final double MIN_FORCE_TO_COMPUTE_COP = 5.0;
 
-   private final DoubleProvider contactForceThreshold1;
-   private final DoubleProvider contactForceThreshold2;
+   private final DoubleProvider contactForceThresholdLow;
+   private final DoubleProvider contactForceThresholdHigh;
    private final DoubleProvider contactCoPThreshold;
 
    private final YoRegistry registry;
 
    private final ForceSensorDataReadOnly forceSensorData;
 
-   private final YoBoolean isPastForceThreshold1;
-   private final GlitchFilteredYoBoolean isPastForceThreshold1Filtered;
-   private final YoBoolean isPastForceThreshold2;
+   private final YoBoolean isPastForceThresholdLow;
+   private final GlitchFilteredYoBoolean isPastForceThresholdLowFiltered;
+   private final YoBoolean isPastForceThresholdHigh;
    private final YoBoolean hasFootHitGround, isPastCoPThreshold;
    private final GlitchFilteredYoBoolean hasFootHitGroundFiltered;
    private final GlitchFilteredYoBoolean isPastCoPThresholdFiltered;
@@ -68,21 +68,21 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
    private final double robotTotalWeight;
 
    /**
-    * @param namePrefix             prefix to use for naming the internal {@code YoVariable}s.
-    * @param forceSensorData        the port to reading the sensor measurement.
-    * @param robotTotalWeight       the robot weight used to compute the load distribution on this
-    *                               foot.
-    * @param contactablePlaneBody   the contactable plane body of this foot, use to get the foot length
-    *                               and sole frame.
-    * @param contactForceThreshold1 the first force threshold. The foot is considered to have hit the
-    *                               ground if this threshold is met <b>and</b> the CoP threshold is
-    *                               met.
-    * @param contactForceThreshold2 the second force threshold. The foot is considered to have hit the
-    *                               ground if this threshold is met.
-    * @param contactCoPThreshold    the center of pressure threshold. Expressed in percentage of foot
-    *                               length, this represents the margin away from the toe/heel line that
-    *                               the CoP needs to pass in order to consider that the foot has hit
-    *                               the ground.
+    * @param namePrefix                prefix to use for naming the internal {@code YoVariable}s.
+    * @param forceSensorData           the port to reading the sensor measurement.
+    * @param robotTotalWeight          the robot weight used to compute the load distribution on this
+    *                                  foot.
+    * @param contactablePlaneBody      the contactable plane body of this foot, use to get the foot
+    *                                  length and sole frame.
+    * @param contactForceThresholdLow  the first force threshold. The foot is considered to have hit
+    *                                  the ground if this threshold is met <b>and</b> the CoP threshold
+    *                                  is met.
+    * @param contactForceThresholdHigh the second force threshold. The foot is considered to have hit
+    *                                  the ground if this threshold is met.
+    * @param contactCoPThreshold       the center of pressure threshold. Expressed in percentage of
+    *                                  foot length, this represents the margin away from the toe/heel
+    *                                  line that the CoP needs to pass in order to consider that the
+    *                                  foot has hit the ground.
     * @param yoGraphicsListRegistry
     * @param parentRegistry
     */
@@ -90,8 +90,8 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
                                 ForceSensorDataReadOnly forceSensorData,
                                 double robotTotalWeight,
                                 ContactablePlaneBody contactablePlaneBody,
-                                DoubleProvider contactForceThreshold1,
-                                DoubleProvider contactForceThreshold2,
+                                DoubleProvider contactForceThresholdLow,
+                                DoubleProvider contactForceThresholdHigh,
                                 DoubleProvider contactCoPThreshold,
                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
@@ -99,8 +99,8 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       this.forceSensorData = forceSensorData;
       this.robotTotalWeight = robotTotalWeight;
       this.contactablePlaneBody = contactablePlaneBody;
-      this.contactForceThreshold1 = contactForceThreshold1;
-      this.contactForceThreshold2 = contactForceThreshold2;
+      this.contactForceThresholdLow = contactForceThresholdLow;
+      this.contactForceThresholdHigh = contactForceThresholdHigh;
       this.contactCoPThreshold = contactCoPThreshold;
 
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -116,9 +116,9 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
 
       footForceMagnitude = new YoDouble(namePrefix + "FootForceMag", registry);
 
-      isPastForceThreshold1 = new YoBoolean(namePrefix + "IsPastForceThreshold1", registry);
-      isPastForceThreshold1Filtered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThreshold1Filtered", registry, isPastForceThreshold1, 2);
-      isPastForceThreshold2 = new YoBoolean(namePrefix + "IsPastForceThreshold2", registry);
+      isPastForceThresholdLow = new YoBoolean(namePrefix + "IsPastForceThresholdLow", registry);
+      isPastForceThresholdLowFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastForceThresholdLowFiltered", registry, isPastForceThresholdLow, 2);
+      isPastForceThresholdHigh = new YoBoolean(namePrefix + "IsPastForceThresholdHigh", registry);
       isPastCoPThreshold = new YoBoolean(namePrefix + "IsPastCoPThreshold", registry);
       isPastCoPThresholdFiltered = new GlitchFilteredYoBoolean(namePrefix + "IsPastCoPThresholdFiltered", registry, isPastCoPThreshold, 3);
 
@@ -159,16 +159,16 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
       double fZPlus = MathTools.clamp(forceZUp, 0.0, Double.POSITIVE_INFINITY);
       footLoadPercentage.update(fZPlus / robotTotalWeight);
 
-      isPastForceThreshold1.set(forceZUp > contactForceThreshold1.getValue());
-      isPastForceThreshold1Filtered.update();
+      isPastForceThresholdLow.set(forceZUp > contactForceThresholdLow.getValue());
+      isPastForceThresholdLowFiltered.update();
 
-      if (contactForceThreshold2 != null)
+      if (contactForceThresholdHigh != null)
       {
-         isPastForceThreshold2.set(forceZUp > contactForceThreshold2.getValue());
+         isPastForceThresholdHigh.set(forceZUp > contactForceThresholdHigh.getValue());
       }
       else
       {
-         isPastForceThreshold2.set(false);
+         isPastForceThresholdHigh.set(false);
       }
 
       // Computing Center of Pressure
@@ -197,14 +197,14 @@ public class WrenchBasedFootSwitch implements FootSwitchInterface
          isPastCoPThresholdFiltered.update();
       }
 
-      hasFootHitGround.set((isPastForceThreshold1Filtered.getValue() && isPastCoPThresholdFiltered.getValue()) || isPastForceThreshold2.getValue());
+      hasFootHitGround.set((isPastForceThresholdLowFiltered.getValue() && isPastCoPThresholdFiltered.getValue()) || isPastForceThresholdHigh.getValue());
       hasFootHitGroundFiltered.update();
    }
 
    @Override
    public boolean hasFootHitGroundSensitive()
    {
-      return isPastForceThreshold1.getBooleanValue();
+      return isPastForceThresholdLow.getBooleanValue();
    }
 
    @Override
