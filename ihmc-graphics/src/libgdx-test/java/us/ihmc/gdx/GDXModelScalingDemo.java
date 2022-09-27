@@ -20,7 +20,7 @@ public class GDXModelScalingDemo
    private final ImFloat scale = new ImFloat(1.0f);
    private boolean changed = false;
    private GDXPose3DGizmo gizmo;
-   private GDXModelInstanceScaler scaledCouchModel;
+   private GDXModelInstanceScaler scaledModel;
 
    public GDXModelScalingDemo()
    {
@@ -31,12 +31,12 @@ public class GDXModelScalingDemo
          {
             baseUI.create();
 
-            scaledCouchModel = new GDXModelInstanceScaler("right_wrist_roll_gripper.g3dj", 1.0);
-            baseUI.getPrimaryScene().addRenderableProvider(scaledCouchModel::getRenderables);
+            scaledModel = new GDXModelInstanceScaler("right_wrist_roll_gripper.g3dj", 1.0);
+            baseUI.getPrimaryScene().addRenderableProvider(scaledModel::getRenderables);
 
             ModelInstance sphere = GDXModelBuilder.createSphere(0.015f, Color.RED);
-            GDXTools.toGDX(scaledCouchModel.getWholeModelCentroid(), sphere.transform);
-            LogTools.info(scaledCouchModel.getWholeModelCentroid());
+            GDXTools.toGDX(scaledModel.getWholeModelCentroid(), sphere.transform);
+            LogTools.info(scaledModel.getWholeModelCentroid());
             baseUI.getPrimaryScene().addModelInstance(sphere);
 
             baseUI.getPrimary3DPanel().getCamera3D().changeCameraPosition(-5.0, 5.0, 3.0);
@@ -52,10 +52,10 @@ public class GDXModelScalingDemo
          {
             if (changed)
             {
-               scaledCouchModel.scale(scale.get());
+               scaledModel.scale(scale.get());
             }
 
-            GDXTools.toGDX(gizmo.getTransformToParent(), scaledCouchModel.getPoseTransform());
+            GDXTools.toGDX(gizmo.getTransformToParent(), scaledModel.getPoseTransform());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
