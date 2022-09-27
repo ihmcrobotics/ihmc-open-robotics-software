@@ -1,6 +1,9 @@
 package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
+import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

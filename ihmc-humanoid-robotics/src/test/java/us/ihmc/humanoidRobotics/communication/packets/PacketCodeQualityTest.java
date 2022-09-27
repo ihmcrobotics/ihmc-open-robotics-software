@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;

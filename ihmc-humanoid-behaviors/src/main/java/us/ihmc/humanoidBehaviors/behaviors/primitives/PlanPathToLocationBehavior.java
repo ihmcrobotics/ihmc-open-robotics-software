@@ -3,9 +3,9 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.IHMCROS2Publisher;

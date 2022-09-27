@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;

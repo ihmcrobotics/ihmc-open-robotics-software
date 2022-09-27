@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.tools;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlannerParametersPacket;
+import footstep_plan_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

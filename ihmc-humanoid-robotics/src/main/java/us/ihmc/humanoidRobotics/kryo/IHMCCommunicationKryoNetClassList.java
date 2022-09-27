@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 import java.util.List;
 
+import footstep_plan_msgs.msg.dds.*;
 import org.ejml.data.DMatrixRMaj;
 
 import actionlib_msgs.msg.dds.GoalIDPubSubType;

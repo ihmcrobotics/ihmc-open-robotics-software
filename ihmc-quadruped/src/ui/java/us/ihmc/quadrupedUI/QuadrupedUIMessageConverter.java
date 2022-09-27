@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedUI;
 
 import controller_msgs.msg.dds.*;
+import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

@@ -16,7 +16,7 @@ import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.DrillDetectionPacket;
 import controller_msgs.msg.dds.FisheyePacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import footstep_plan_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
