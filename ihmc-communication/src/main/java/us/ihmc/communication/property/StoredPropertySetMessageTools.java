@@ -1,6 +1,6 @@
 package us.ihmc.communication.property;
 
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import us.ihmc.tools.property.StoredPropertySet;
 
 import java.util.Arrays;

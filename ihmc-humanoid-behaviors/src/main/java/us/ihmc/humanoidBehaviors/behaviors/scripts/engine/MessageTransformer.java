@@ -4,10 +4,10 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import geometry_msgs.msg.dds.Wrench;
 import us.ihmc.commons.lists.PreallocatedList;

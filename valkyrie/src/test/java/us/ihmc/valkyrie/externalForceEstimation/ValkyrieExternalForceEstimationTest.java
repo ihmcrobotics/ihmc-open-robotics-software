@@ -13,8 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
-import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
+import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
+import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
