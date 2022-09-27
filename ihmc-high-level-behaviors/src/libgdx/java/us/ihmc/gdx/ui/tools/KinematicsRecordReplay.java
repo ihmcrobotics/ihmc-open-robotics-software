@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.vr;
+package us.ihmc.gdx.ui.tools;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -6,9 +6,8 @@ import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.ui.tools.TrajectoryRecordReplay;
 
-public class KinematicsRecordingReplaying
+public class KinematicsRecordReplay
 {
    private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "");
    private final ImString recordPath = new ImString("C:\\Users\\shadylady\\Documents\\LocalLogs\\nadia");
@@ -19,7 +18,7 @@ public class KinematicsRecordingReplaying
    private boolean isReplaying = false;
    private ImBoolean enabledKinematicsStreaming;
 
-   public KinematicsRecordingReplaying(ImBoolean enabledKinematicsStreaming)
+   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming)
    {
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
    }
