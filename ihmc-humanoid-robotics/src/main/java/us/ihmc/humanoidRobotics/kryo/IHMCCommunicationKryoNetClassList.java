@@ -472,7 +472,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PlanarRegionMessagePubSubType.class);
       registerPacketField(PauseWalkingMessagePubSubType.class);
       registerPacketField(TextToSpeechPacketPubSubType.class);
-      registerPacketField(AdjustFootstepMessagePubSubType.class);
       registerPacketField(AccelPubSubType.class);
       registerPacketField(ParameterEventPubSubType.class);
       registerPacketField(TwistStampedPubSubType.class);
@@ -680,7 +679,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
-      registerPacketClass(AdjustFootstepMessage.class);
       registerPacketField(ArrayList.class);
       registerPacketField(List.class);
 

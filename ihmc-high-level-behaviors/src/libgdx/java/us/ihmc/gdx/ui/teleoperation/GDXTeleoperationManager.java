@@ -505,11 +505,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public void renderImGuiWidgets()
    {
       robotLowLevelMessenger.renderImGuiWidgets();
-      ImGui.separator();
-      if(ImGui.button(labels.get("Find My Robot")))
-      {
-         teleportCameraToRobotPelvis();
-      }
 
       if (interactablesAvailable)
       {
