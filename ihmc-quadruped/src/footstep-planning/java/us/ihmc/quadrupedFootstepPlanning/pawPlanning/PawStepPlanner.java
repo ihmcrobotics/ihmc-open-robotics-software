@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning;
 
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public interface PawStepPlanner

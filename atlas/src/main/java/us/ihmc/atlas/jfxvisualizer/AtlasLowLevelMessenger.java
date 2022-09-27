@@ -1,8 +1,8 @@
 package us.ihmc.atlas.jfxvisualizer;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
-import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
-import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
+import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
+import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

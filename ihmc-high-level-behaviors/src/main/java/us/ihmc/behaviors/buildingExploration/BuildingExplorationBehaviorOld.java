@@ -2,7 +2,7 @@ package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;

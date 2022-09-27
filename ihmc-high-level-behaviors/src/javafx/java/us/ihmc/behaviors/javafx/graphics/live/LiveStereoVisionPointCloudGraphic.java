@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx.graphics.live;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;

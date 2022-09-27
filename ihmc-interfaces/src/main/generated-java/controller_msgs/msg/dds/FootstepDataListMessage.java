@@ -72,7 +72,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
    /**
             * Default step constraints regions
             */
@@ -85,7 +85,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    public FootstepDataListMessage()
    {
       footstep_data_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> (50, new controller_msgs.msg.dds.FootstepDataMessagePubSubType());
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
       default_step_constraints_ = new controller_msgs.msg.dds.StepConstraintsListMessage();
 
    }
@@ -117,7 +117,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
 
       offset_footsteps_height_with_execution_error_ = other.offset_footsteps_height_with_execution_error_;
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.staticCopy(other.default_step_constraints_, default_step_constraints_);
       should_check_for_reachability_ = other.should_check_for_reachability_;
 
@@ -299,7 +299,7 @@ public class FootstepDataListMessage extends Packet<FootstepDataListMessage> imp
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }

@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment.StartingLocation;

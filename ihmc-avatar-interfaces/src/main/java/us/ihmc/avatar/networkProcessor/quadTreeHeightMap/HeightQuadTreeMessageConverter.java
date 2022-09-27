@@ -3,8 +3,8 @@ package us.ihmc.avatar.networkProcessor.quadTreeHeightMap;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.HeightQuadTreeLeafMessage;
-import controller_msgs.msg.dds.HeightQuadTreeMessage;
+import perception_msgs.msg.dds.HeightQuadTreeLeafMessage;
+import perception_msgs.msg.dds.HeightQuadTreeMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple2D.Point2D;

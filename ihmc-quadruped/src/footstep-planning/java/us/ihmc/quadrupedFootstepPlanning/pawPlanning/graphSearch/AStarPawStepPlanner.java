@@ -8,7 +8,7 @@ import java.util.PriorityQueue;
 
 import org.apache.commons.math3.util.Precision;
 
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;

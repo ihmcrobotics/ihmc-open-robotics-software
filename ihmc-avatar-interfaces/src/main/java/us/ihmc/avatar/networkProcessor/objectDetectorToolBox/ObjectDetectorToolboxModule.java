@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DetectedFiducialPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;

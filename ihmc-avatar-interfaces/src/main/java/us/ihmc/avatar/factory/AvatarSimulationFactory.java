@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.*;
@@ -79,7 +79,6 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AvatarSimulationFactory
