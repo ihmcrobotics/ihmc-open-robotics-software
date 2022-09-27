@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import org.apache.commons.lang3.tuple.Pair;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.BehaviorStatusPacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;

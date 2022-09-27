@@ -18,7 +18,7 @@ import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.CameraPinhole;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import georegression.geometry.ConvertRotation3D_F64;
 import georegression.struct.EulerType;
 import georegression.struct.se.Se3_F64;

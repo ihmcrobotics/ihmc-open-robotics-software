@@ -10,7 +10,7 @@ quadruped_msgs/QuadrupedTimedStepMessage[] quadruped_step_list
 bool is_expressed_in_absolute_time
 
 # Properties for queueing footstep lists.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 # Defines if the step list is adjustable
 # Field default value True

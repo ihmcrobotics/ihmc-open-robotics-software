@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;

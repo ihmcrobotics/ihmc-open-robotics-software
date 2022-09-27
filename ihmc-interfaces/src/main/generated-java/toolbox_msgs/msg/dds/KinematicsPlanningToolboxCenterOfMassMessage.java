@@ -34,21 +34,21 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
             * selected and the reference frame should world frame. When no reference frame is provided with
             * the selection matrix, it will be used as it is in the center of mass frame which is aligned with the world axes.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
    /**
             * Specifies the priority of controller the position along each axis independently.
             * If no frame is provided, the weight matrix will be applied in the center of mass frame which is
             * aligned with the world axes.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage weights_;
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage weights_;
 
    public KinematicsPlanningToolboxCenterOfMassMessage()
    {
       way_point_times_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
       desired_way_point_positions_in_world_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
-      selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-      weights_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();
+      selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
+      weights_ = new ihmc_common_msgs.msg.dds.WeightMatrix3DMessage();
 
    }
 
@@ -64,8 +64,8 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
 
       way_point_times_.set(other.way_point_times_);
       desired_way_point_positions_in_world_.set(other.desired_way_point_positions_in_world_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
+      ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
    }
 
    /**
@@ -112,7 +112,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
             * selected and the reference frame should world frame. When no reference frame is provided with
             * the selection matrix, it will be used as it is in the center of mass frame which is aligned with the world axes.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getSelectionMatrix()
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage getSelectionMatrix()
    {
       return selection_matrix_;
    }
@@ -123,7 +123,7 @@ public class KinematicsPlanningToolboxCenterOfMassMessage extends Packet<Kinemat
             * If no frame is provided, the weight matrix will be applied in the center of mass frame which is
             * aligned with the world axes.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage getWeights()
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage getWeights()
    {
       return weights_;
    }

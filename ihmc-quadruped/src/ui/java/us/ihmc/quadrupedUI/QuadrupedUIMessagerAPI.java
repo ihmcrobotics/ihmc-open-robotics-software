@@ -4,6 +4,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import perception_msgs.msg.dds.VideoPacket;
 import quadruped_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
 import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;

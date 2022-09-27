@@ -16,6 +16,6 @@ uint32 sequence_id
 
 int8 planar_regions_request_type
 
-controller_msgs/BoundingBox3DMessage bounding_box_in_world_for_request
+ihmc_common_msgs/BoundingBox3DMessage bounding_box_in_world_for_request
 
 

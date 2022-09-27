@@ -3,13 +3,14 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 import java.util.List;
 
+import atlas_msgs.msg.dds.*;
 import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacketPubSubType;
 import exoskeleton_msgs.msg.dds.PilotAlarmPacketPubSubType;
 import exoskeleton_msgs.msg.dds.PilotInterfaceActionPacketPubSubType;
 import exoskeleton_msgs.msg.dds.PilotInterfacePacketPubSubType;
-import footstep_plan_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import ihmc_common_msgs.msg.dds.*;
 import org.ejml.data.DMatrixRMaj;
 
 import actionlib_msgs.msg.dds.GoalIDPubSubType;

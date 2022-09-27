@@ -26,11 +26,11 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
    /**
             * The position/orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
 
    public QuadrupedBodyTrajectoryMessage()
    {
-      se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
+      se3_trajectory_ = new ihmc_common_msgs.msg.dds.SE3TrajectoryMessage();
    }
 
    public QuadrupedBodyTrajectoryMessage(QuadrupedBodyTrajectoryMessage other)
@@ -45,7 +45,7 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
       is_expressed_in_absolute_time_ = other.is_expressed_in_absolute_time_;
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
 
    /**
@@ -82,7 +82,7 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
    /**
             * The position/orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
+   public ihmc_common_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3_trajectory_;
    }

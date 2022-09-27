@@ -16,6 +16,6 @@ bool is_expressed_in_absolute_time
 bool is_an_offset_orientation
 
 # The orientation trajectory information.
-controller_msgs/SO3TrajectoryMessage so3_trajectory
+ihmc_common_msgs/SO3TrajectoryMessage so3_trajectory
 
 

@@ -12,12 +12,12 @@ public class QuadrupedTimedStepMessage extends Packet<QuadrupedTimedStepMessage>
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
-   public controller_msgs.msg.dds.TimeIntervalMessage time_interval_;
+   public ihmc_common_msgs.msg.dds.TimeIntervalMessage time_interval_;
    public quadruped_msgs.msg.dds.QuadrupedStepMessage quadruped_step_message_;
 
    public QuadrupedTimedStepMessage()
    {
-      time_interval_ = new controller_msgs.msg.dds.TimeIntervalMessage();
+      time_interval_ = new ihmc_common_msgs.msg.dds.TimeIntervalMessage();
       quadruped_step_message_ = new quadruped_msgs.msg.dds.QuadrupedStepMessage();
    }
 
@@ -31,7 +31,7 @@ public class QuadrupedTimedStepMessage extends Packet<QuadrupedTimedStepMessage>
    {
       sequence_id_ = other.sequence_id_;
 
-      controller_msgs.msg.dds.TimeIntervalMessagePubSubType.staticCopy(other.time_interval_, time_interval_);
+      ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.staticCopy(other.time_interval_, time_interval_);
       quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType.staticCopy(other.quadruped_step_message_, quadruped_step_message_);
    }
 
@@ -51,7 +51,7 @@ public class QuadrupedTimedStepMessage extends Packet<QuadrupedTimedStepMessage>
    }
 
 
-   public controller_msgs.msg.dds.TimeIntervalMessage getTimeInterval()
+   public ihmc_common_msgs.msg.dds.TimeIntervalMessage getTimeInterval()
    {
       return time_interval_;
    }

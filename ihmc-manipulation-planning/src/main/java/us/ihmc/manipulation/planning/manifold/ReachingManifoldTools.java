@@ -5,9 +5,9 @@ import java.util.List;
 
 import javax.vecmath.MismatchedSizeException;
 
-import controller_msgs.msg.dds.ReachingManifoldMessage;
-import controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
-import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.msg.dds.RigidBodyExplorationConfigurationMessage;
+import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
 import gnu.trove.list.array.TDoubleArrayList;

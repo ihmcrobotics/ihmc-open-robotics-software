@@ -1,7 +1,7 @@
 #ifndef __quadruped_msgs__msg__QuadrupedBodyPathPlanMessage__idl__
 #define __quadruped_msgs__msg__QuadrupedBodyPathPlanMessage__idl__
 
-#include "controller_msgs/msg/./EuclideanTrajectoryPointMessage_.idl"
+#include "ihmc_common_msgs/msg/./EuclideanTrajectoryPointMessage_.idl"
 module quadruped_msgs
 {
   module msg
@@ -30,7 +30,7 @@ module quadruped_msgs
         /**
          * List of body path waypoint
          */
-        sequence<controller_msgs::msg::dds::EuclideanTrajectoryPointMessage, 50> body_path_points;
+        sequence<ihmc_common_msgs::msg::dds::EuclideanTrajectoryPointMessage, 50> body_path_points;
       };
     };
   };

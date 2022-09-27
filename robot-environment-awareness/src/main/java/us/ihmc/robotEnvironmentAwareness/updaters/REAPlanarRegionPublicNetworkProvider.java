@@ -14,7 +14,7 @@ import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

@@ -13,7 +13,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;

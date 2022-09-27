@@ -56,7 +56,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
             * frame if not defined otherwise.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
    /**
             * The selection matrix is used to determinate which degree of freedom of the end-effector should
             * be controlled.
@@ -67,15 +67,15 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
             * frame if not defined otherwise.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
    /**
             * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
    /**
             * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
 
    public KinematicsToolboxRigidBodyMessage()
    {
@@ -83,10 +83,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       desired_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
       control_frame_position_in_end_effector_ = new us.ihmc.euclid.tuple3D.Point3D();
       control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-      linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-      angular_weight_matrix_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();
-      linear_weight_matrix_ = new controller_msgs.msg.dds.WeightMatrix3DMessage();
+      angular_selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
+      linear_selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
+      angular_weight_matrix_ = new ihmc_common_msgs.msg.dds.WeightMatrix3DMessage();
+      linear_weight_matrix_ = new ihmc_common_msgs.msg.dds.WeightMatrix3DMessage();
    }
 
    public KinematicsToolboxRigidBodyMessage(KinematicsToolboxRigidBodyMessage other)
@@ -105,10 +105,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_orientation_in_world_, desired_orientation_in_world_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.control_frame_position_in_end_effector_, control_frame_position_in_end_effector_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.control_frame_orientation_in_end_effector_, control_frame_orientation_in_end_effector_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.angular_weight_matrix_, angular_weight_matrix_);
-      controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.linear_weight_matrix_, linear_weight_matrix_);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
+      ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.angular_weight_matrix_, angular_weight_matrix_);
+      ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.linear_weight_matrix_, linear_weight_matrix_);
    }
 
    /**
@@ -199,7 +199,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
             * frame if not defined otherwise.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getAngularSelectionMatrix()
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage getAngularSelectionMatrix()
    {
       return angular_selection_matrix_;
    }
@@ -215,7 +215,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
             * frame if not defined otherwise.
             */
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getLinearSelectionMatrix()
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage getLinearSelectionMatrix()
    {
       return linear_selection_matrix_;
    }
@@ -224,7 +224,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage getAngularWeightMatrix()
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage getAngularWeightMatrix()
    {
       return angular_weight_matrix_;
    }
@@ -233,7 +233,7 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
             */
-   public controller_msgs.msg.dds.WeightMatrix3DMessage getLinearWeightMatrix()
+   public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage getLinearWeightMatrix()
    {
       return linear_weight_matrix_;
    }

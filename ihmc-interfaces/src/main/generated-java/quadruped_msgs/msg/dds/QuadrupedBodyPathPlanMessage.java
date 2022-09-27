@@ -25,11 +25,11 @@ public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMe
    /**
             * List of body path waypoint
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>  body_path_points_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage>  body_path_points_;
 
    public QuadrupedBodyPathPlanMessage()
    {
-      body_path_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage> (50, new controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
+      body_path_points_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType());
 
    }
 
@@ -82,7 +82,7 @@ public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMe
    /**
             * List of body path waypoint
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>  getBodyPathPoints()
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage>  getBodyPathPoints()
    {
       return body_path_points_;
    }

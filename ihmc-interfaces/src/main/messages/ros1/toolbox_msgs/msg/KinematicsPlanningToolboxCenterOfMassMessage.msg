@@ -18,11 +18,11 @@ geometry_msgs/Point[] desired_way_point_positions_in_world
 # world should be controlled only the linear z component of the selection matrix should be
 # selected and the reference frame should world frame. When no reference frame is provided with
 # the selection matrix, it will be used as it is in the center of mass frame which is aligned with the world axes.
-controller_msgs/SelectionMatrix3DMessage selection_matrix
+ihmc_common_msgs/SelectionMatrix3DMessage selection_matrix
 
 # Specifies the priority of controller the position along each axis independently.
 # If no frame is provided, the weight matrix will be applied in the center of mass frame which is
 # aligned with the world axes.
-controller_msgs/WeightMatrix3DMessage weights
+ihmc_common_msgs/WeightMatrix3DMessage weights
 
 

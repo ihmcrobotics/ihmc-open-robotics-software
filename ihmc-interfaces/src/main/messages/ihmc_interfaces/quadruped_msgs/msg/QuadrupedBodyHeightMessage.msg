@@ -10,4 +10,4 @@ bool is_expressed_in_absolute_time false
 # If true, the body height is controlled, rather than the center of mass height
 bool control_body_height false
 # The orientation trajectory information.
-controller_msgs/EuclideanTrajectoryMessage euclidean_trajectory
+ihmc_common_msgs/EuclideanTrajectoryMessage euclidean_trajectory

@@ -1,7 +1,7 @@
 #ifndef __quadruped_msgs__msg__QuadrupedBodyHeightMessage__idl__
 #define __quadruped_msgs__msg__QuadrupedBodyHeightMessage__idl__
 
-#include "controller_msgs/msg/./EuclideanTrajectoryMessage_.idl"
+#include "ihmc_common_msgs/msg/./EuclideanTrajectoryMessage_.idl"
 module quadruped_msgs
 {
   module msg
@@ -32,7 +32,7 @@ module quadruped_msgs
         /**
          * The orientation trajectory information.
          */
-        controller_msgs::msg::dds::EuclideanTrajectoryMessage euclidean_trajectory;
+        ihmc_common_msgs::msg::dds::EuclideanTrajectoryMessage euclidean_trajectory;
       };
     };
   };

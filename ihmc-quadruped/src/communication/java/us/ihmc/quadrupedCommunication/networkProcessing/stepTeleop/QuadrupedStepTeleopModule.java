@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;

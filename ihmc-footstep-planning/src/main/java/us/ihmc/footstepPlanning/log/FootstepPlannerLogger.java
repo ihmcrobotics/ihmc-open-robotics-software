@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.log;
 
-import footstep_plan_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.ContinuousIntegrationTools;

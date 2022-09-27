@@ -2,11 +2,12 @@ package us.ihmc.communication;
 
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
-import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;

@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning;
 
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -49,7 +49,7 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -80,7 +80,7 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -101,7 +101,7 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_6(data.getDefaultTransferDuration());
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
       cdr.write_type_9(data.getStepType());
 
    }
@@ -115,7 +115,7 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setDefaultTransferDuration(cdr.read_type_6());
       	
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
       data.setStepType(cdr.read_type_9());
       	
 
@@ -128,7 +128,7 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_e("step_data_list", data.getStepDataList());
       ser.write_type_6("default_swing_duration", data.getDefaultSwingDuration());
       ser.write_type_6("default_transfer_duration", data.getDefaultTransferDuration());
-      ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
       ser.write_type_9("step_type", data.getStepType());
    }
@@ -140,7 +140,7 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_e("step_data_list", data.getStepDataList());
       data.setDefaultSwingDuration(ser.read_type_6("default_swing_duration"));
       data.setDefaultTransferDuration(ser.read_type_6("default_transfer_duration"));
-      ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
       data.setStepType(ser.read_type_9("step_type"));
    }

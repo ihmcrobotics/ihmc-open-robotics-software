@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__RequestPlanarRegionsListMessage__idl__
 #define __perception_msgs__msg__RequestPlanarRegionsListMessage__idl__
 
-#include "controller_msgs/msg/./BoundingBox3DMessage_.idl"
+#include "ihmc_common_msgs/msg/./BoundingBox3DMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -35,7 +35,7 @@ module perception_msgs
          */
         unsigned long sequence_id;
         octet planar_regions_request_type;
-        controller_msgs::msg::dds::BoundingBox3DMessage bounding_box_in_world_for_request;
+        ihmc_common_msgs::msg::dds::BoundingBox3DMessage bounding_box_in_world_for_request;
       };
     };
   };

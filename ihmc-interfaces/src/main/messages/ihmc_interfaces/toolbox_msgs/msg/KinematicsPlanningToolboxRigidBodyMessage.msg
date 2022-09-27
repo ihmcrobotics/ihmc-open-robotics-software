@@ -14,7 +14,7 @@ geometry_msgs/Pose[] key_frame_poses
 # selected and the reference frame should be world frame. When no reference frame is provided
 # with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
 # frame if not defined otherwise.
-controller_msgs/SelectionMatrix3DMessage angular_selection_matrix
+ihmc_common_msgs/SelectionMatrix3DMessage angular_selection_matrix
 # The selection matrix is used to determinate which degree of freedom of the end-effector should
 # be controlled.
 # The selection frames coming along with the given selection matrix are used to determine to
@@ -23,12 +23,12 @@ controller_msgs/SelectionMatrix3DMessage angular_selection_matrix
 # selected and the reference frame should be world frame. When no reference frame is provided
 # with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
 # frame if not defined otherwise.
-controller_msgs/SelectionMatrix3DMessage linear_selection_matrix
+ihmc_common_msgs/SelectionMatrix3DMessage linear_selection_matrix
 
 # Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
-controller_msgs/WeightMatrix3DMessage angular_weight_matrix
+ihmc_common_msgs/WeightMatrix3DMessage angular_weight_matrix
 # Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
-controller_msgs/WeightMatrix3DMessage linear_weight_matrix
+ihmc_common_msgs/WeightMatrix3DMessage linear_weight_matrix
 
 # This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
 # By default, the control frame is coincident to endEffector.getBodyFixedFrame().

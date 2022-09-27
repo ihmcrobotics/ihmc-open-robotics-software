@@ -44,7 +44,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.BoundingBox3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -65,7 +65,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.BoundingBox3DMessagePubSubType.getCdrSerializedSize(data.getBoundingBoxInWorldForRequest(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType.getCdrSerializedSize(data.getBoundingBoxInWorldForRequest(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -77,7 +77,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_9(data.getPlanarRegionsRequestType());
 
-      controller_msgs.msg.dds.BoundingBox3DMessagePubSubType.write(data.getBoundingBoxInWorldForRequest(), cdr);
+      ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType.write(data.getBoundingBoxInWorldForRequest(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.RequestPlanarRegionsListMessage data, us.ihmc.idl.CDR cdr)
@@ -86,7 +86,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
       	
       data.setPlanarRegionsRequestType(cdr.read_type_9());
       	
-      controller_msgs.msg.dds.BoundingBox3DMessagePubSubType.read(data.getBoundingBoxInWorldForRequest(), cdr);	
+      ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType.read(data.getBoundingBoxInWorldForRequest(), cdr);	
 
    }
 
@@ -95,7 +95,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("planar_regions_request_type", data.getPlanarRegionsRequestType());
-      ser.write_type_a("bounding_box_in_world_for_request", new controller_msgs.msg.dds.BoundingBox3DMessagePubSubType(), data.getBoundingBoxInWorldForRequest());
+      ser.write_type_a("bounding_box_in_world_for_request", new ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType(), data.getBoundingBoxInWorldForRequest());
 
    }
 
@@ -104,7 +104,7 @@ public class RequestPlanarRegionsListMessagePubSubType implements us.ihmc.pubsub
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setPlanarRegionsRequestType(ser.read_type_9("planar_regions_request_type"));
-      ser.read_type_a("bounding_box_in_world_for_request", new controller_msgs.msg.dds.BoundingBox3DMessagePubSubType(), data.getBoundingBoxInWorldForRequest());
+      ser.read_type_a("bounding_box_in_world_for_request", new ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType(), data.getBoundingBoxInWorldForRequest());
 
    }
 

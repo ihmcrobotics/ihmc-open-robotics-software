@@ -1,7 +1,7 @@
 #ifndef __quadruped_msgs__msg__QuadrupedTimedStepListMessage__idl__
 #define __quadruped_msgs__msg__QuadrupedTimedStepListMessage__idl__
 
-#include "controller_msgs/msg/./QueueableMessage_.idl"
+#include "ihmc_common_msgs/msg/./QueueableMessage_.idl"
 #include "quadruped_msgs/msg/./QuadrupedTimedStepMessage_.idl"
 module quadruped_msgs
 {
@@ -29,7 +29,7 @@ module quadruped_msgs
         /**
          * Properties for queueing footstep lists.
          */
-        controller_msgs::msg::dds::QueueableMessage queueing_properties;
+        ihmc_common_msgs::msg::dds::QueueableMessage queueing_properties;
         /**
          * Defines if the step list is adjustable
          */

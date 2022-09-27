@@ -11,6 +11,6 @@ uint32 sequence_id
 bool is_expressed_in_absolute_time
 
 # List of body path waypoint
-controller_msgs/EuclideanTrajectoryPointMessage[] body_path_points
+ihmc_common_msgs/EuclideanTrajectoryPointMessage[] body_path_points
 
 

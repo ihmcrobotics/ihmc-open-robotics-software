@@ -42,7 +42,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += controller_msgs.msg.dds.TimeIntervalMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -62,7 +62,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += controller_msgs.msg.dds.TimeIntervalMessagePubSubType.getCdrSerializedSize(data.getTimeInterval(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.getCdrSerializedSize(data.getTimeInterval(), current_alignment);
 
       current_alignment += quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType.getCdrSerializedSize(data.getQuadrupedStepMessage(), current_alignment);
 
@@ -74,7 +74,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       cdr.write_type_4(data.getSequenceId());
 
-      controller_msgs.msg.dds.TimeIntervalMessagePubSubType.write(data.getTimeInterval(), cdr);
+      ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.write(data.getTimeInterval(), cdr);
       quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType.write(data.getQuadrupedStepMessage(), cdr);
    }
 
@@ -82,7 +82,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      controller_msgs.msg.dds.TimeIntervalMessagePubSubType.read(data.getTimeInterval(), cdr);	
+      ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.read(data.getTimeInterval(), cdr);	
       quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType.read(data.getQuadrupedStepMessage(), cdr);	
 
    }
@@ -91,7 +91,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void serialize(quadruped_msgs.msg.dds.QuadrupedTimedStepMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_a("time_interval", new controller_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getTimeInterval());
+      ser.write_type_a("time_interval", new ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getTimeInterval());
 
       ser.write_type_a("quadruped_step_message", new quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType(), data.getQuadrupedStepMessage());
 
@@ -101,7 +101,7 @@ public class QuadrupedTimedStepMessagePubSubType implements us.ihmc.pubsub.Topic
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, quadruped_msgs.msg.dds.QuadrupedTimedStepMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      ser.read_type_a("time_interval", new controller_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getTimeInterval());
+      ser.read_type_a("time_interval", new ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getTimeInterval());
 
       ser.read_type_a("quadruped_step_message", new quadruped_msgs.msg.dds.QuadrupedStepMessagePubSubType(), data.getQuadrupedStepMessage());
 

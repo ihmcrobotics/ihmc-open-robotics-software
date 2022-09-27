@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.TimeIntervalMessage;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

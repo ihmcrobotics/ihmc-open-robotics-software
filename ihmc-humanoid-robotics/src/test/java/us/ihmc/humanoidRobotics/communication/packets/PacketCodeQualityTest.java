@@ -12,6 +12,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
+import ihmc_common_msgs.msg.dds.FrameInformation;
+import perception_msgs.msg.dds.VideoPacket;
 import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;

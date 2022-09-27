@@ -23,11 +23,11 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
             */
    public long sequence_id_;
    public byte planar_regions_request_type_;
-   public controller_msgs.msg.dds.BoundingBox3DMessage bounding_box_in_world_for_request_;
+   public ihmc_common_msgs.msg.dds.BoundingBox3DMessage bounding_box_in_world_for_request_;
 
    public RequestPlanarRegionsListMessage()
    {
-      bounding_box_in_world_for_request_ = new controller_msgs.msg.dds.BoundingBox3DMessage();
+      bounding_box_in_world_for_request_ = new ihmc_common_msgs.msg.dds.BoundingBox3DMessage();
    }
 
    public RequestPlanarRegionsListMessage(RequestPlanarRegionsListMessage other)
@@ -42,7 +42,7 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
 
       planar_regions_request_type_ = other.planar_regions_request_type_;
 
-      controller_msgs.msg.dds.BoundingBox3DMessagePubSubType.staticCopy(other.bounding_box_in_world_for_request_, bounding_box_in_world_for_request_);
+      ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType.staticCopy(other.bounding_box_in_world_for_request_, bounding_box_in_world_for_request_);
    }
 
    /**
@@ -70,7 +70,7 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
    }
 
 
-   public controller_msgs.msg.dds.BoundingBox3DMessage getBoundingBoxInWorldForRequest()
+   public ihmc_common_msgs.msg.dds.BoundingBox3DMessage getBoundingBoxInWorldForRequest()
    {
       return bounding_box_in_world_for_request_;
    }

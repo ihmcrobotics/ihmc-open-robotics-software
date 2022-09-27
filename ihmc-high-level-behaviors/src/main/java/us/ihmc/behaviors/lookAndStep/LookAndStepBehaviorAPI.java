@@ -2,7 +2,7 @@ package us.ihmc.behaviors.lookAndStep;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;

@@ -19,8 +19,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    public int end_effector_hash_code_;
    public us.ihmc.idl.IDLSequence.Double  waypoint_times_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  waypoints_;
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
    public us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
    public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
    public double weight_ = -1.0;
@@ -30,8 +30,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
       waypoint_times_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
       waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D> (100, new geometry_msgs.msg.dds.PosePubSubType());
-      angular_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
-      linear_selection_matrix_ = new controller_msgs.msg.dds.SelectionMatrix3DMessage();
+      angular_selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
+      linear_selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
       control_frame_position_in_end_effector_ = new us.ihmc.euclid.tuple3D.Point3D();
       control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.tuple4D.Quaternion();
 
@@ -51,8 +51,8 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
       waypoint_times_.set(other.waypoint_times_);
       waypoints_.set(other.waypoints_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
-      controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
+      ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.control_frame_position_in_end_effector_, control_frame_position_in_end_effector_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.control_frame_orientation_in_end_effector_, control_frame_orientation_in_end_effector_);
       weight_ = other.weight_;
@@ -96,13 +96,13 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
    }
 
 
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getAngularSelectionMatrix()
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage getAngularSelectionMatrix()
    {
       return angular_selection_matrix_;
    }
 
 
-   public controller_msgs.msg.dds.SelectionMatrix3DMessage getLinearSelectionMatrix()
+   public ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage getLinearSelectionMatrix()
    {
       return linear_selection_matrix_;
    }

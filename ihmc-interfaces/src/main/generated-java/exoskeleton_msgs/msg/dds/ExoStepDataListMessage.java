@@ -42,13 +42,13 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
    public byte step_type_;
 
    public ExoStepDataListMessage()
    {
       step_data_list_ = new us.ihmc.idl.IDLSequence.Object<exoskeleton_msgs.msg.dds.ExoStepDataMessage> (50, new exoskeleton_msgs.msg.dds.ExoStepDataMessagePubSubType());
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
 
    }
 
@@ -67,7 +67,7 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
       default_transfer_duration_ = other.default_transfer_duration_;
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
       step_type_ = other.step_type_;
 
    }
@@ -142,7 +142,7 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
    /**
             * Properties for queueing footstep lists.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }

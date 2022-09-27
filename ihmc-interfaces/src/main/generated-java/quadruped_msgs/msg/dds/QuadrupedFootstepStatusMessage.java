@@ -45,18 +45,18 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
    /**
             * Specifies the desired timing of the step
             */
-   public controller_msgs.msg.dds.TimeIntervalMessage desired_step_interval_;
+   public ihmc_common_msgs.msg.dds.TimeIntervalMessage desired_step_interval_;
    /**
             * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
             */
-   public controller_msgs.msg.dds.TimeIntervalMessage actual_step_interval_;
+   public ihmc_common_msgs.msg.dds.TimeIntervalMessage actual_step_interval_;
 
    public QuadrupedFootstepStatusMessage()
    {
       desired_touchdown_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       actual_touchdown_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
-      desired_step_interval_ = new controller_msgs.msg.dds.TimeIntervalMessage();
-      actual_step_interval_ = new controller_msgs.msg.dds.TimeIntervalMessage();
+      desired_step_interval_ = new ihmc_common_msgs.msg.dds.TimeIntervalMessage();
+      actual_step_interval_ = new ihmc_common_msgs.msg.dds.TimeIntervalMessage();
    }
 
    public QuadrupedFootstepStatusMessage(QuadrupedFootstepStatusMessage other)
@@ -77,8 +77,8 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_touchdown_position_in_world_, desired_touchdown_position_in_world_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.actual_touchdown_position_in_world_, actual_touchdown_position_in_world_);
-      controller_msgs.msg.dds.TimeIntervalMessagePubSubType.staticCopy(other.desired_step_interval_, desired_step_interval_);
-      controller_msgs.msg.dds.TimeIntervalMessagePubSubType.staticCopy(other.actual_step_interval_, actual_step_interval_);
+      ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.staticCopy(other.desired_step_interval_, desired_step_interval_);
+      ihmc_common_msgs.msg.dds.TimeIntervalMessagePubSubType.staticCopy(other.actual_step_interval_, actual_step_interval_);
    }
 
    /**
@@ -163,7 +163,7 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
    /**
             * Specifies the desired timing of the step
             */
-   public controller_msgs.msg.dds.TimeIntervalMessage getDesiredStepInterval()
+   public ihmc_common_msgs.msg.dds.TimeIntervalMessage getDesiredStepInterval()
    {
       return desired_step_interval_;
    }
@@ -172,7 +172,7 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
    /**
             * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
             */
-   public controller_msgs.msg.dds.TimeIntervalMessage getActualStepInterval()
+   public ihmc_common_msgs.msg.dds.TimeIntervalMessage getActualStepInterval()
    {
       return actual_step_interval_;
    }

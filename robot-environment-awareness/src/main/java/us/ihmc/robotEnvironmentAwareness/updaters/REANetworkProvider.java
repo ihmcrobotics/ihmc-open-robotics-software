@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import perception_msgs.msg.dds.*;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
