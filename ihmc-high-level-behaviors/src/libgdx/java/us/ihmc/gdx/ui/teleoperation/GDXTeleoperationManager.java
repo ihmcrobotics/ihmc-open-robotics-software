@@ -93,8 +93,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
-   private GDXLiveRobotPartInteractable pelvisInteractable;
-   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
+//   private GDXLiveRobotPartInteractable pelvisInteractable;
+//   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
    private final ImBoolean joystickOn = new ImBoolean(false);
 
@@ -354,7 +354,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.calculate3DViewPick(input);
 
-         if (interactablesAvailable)
+         if (interactableExists)
          {
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
