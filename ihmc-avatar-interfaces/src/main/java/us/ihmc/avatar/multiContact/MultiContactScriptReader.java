@@ -16,6 +16,11 @@ import us.ihmc.log.LogTools;
 
 public class MultiContactScriptReader
 {
+   static final String SCRIPT_TAG = "script";
+   static final String ENVIRONMENT_TAG = "environment";
+   static final String ENVIRONMENT_SHAPES_TAG = "shape_types";
+   static final String ENVIRONMENT_DATA_TAG = "shape_data";
+
    private int currentMessageIndex = 0;
    private final List<KinematicsToolboxSnapshotDescription> loadedMessages = new ArrayList<>();
 
