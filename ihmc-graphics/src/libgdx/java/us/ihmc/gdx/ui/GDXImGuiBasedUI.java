@@ -26,9 +26,14 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -105,9 +110,19 @@ public class GDXImGuiBasedUI
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
-   // FOR THEMES
    private int themeLabelIndex = 0;
+   private ImInt themeLabelImInt = new ImInt();
+   private int vButton = 0;
    private final String[] themeLabels = {"Light", "Dark", "ImGui Classic"};
+   private boolean isLight = true;
+   private boolean isDark = false;
+   private boolean isClassic = false;
+   private enum THEME
+   {
+      LIGHT, DARK, CLASSIC
+   }
+   THEME theme = THEME.LIGHT;
+   private String userHomeDirectory;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -212,6 +227,65 @@ public class GDXImGuiBasedUI
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
+
+      // Note: check for theme file, if exists, read and load the appropriate theme from it.
+      userHomeDirectory = System.getProperty("user.home");
+      File file = new File(userHomeDirectory + "/.ihmc/themePreference.ini");
+      if (file.isFile())
+      {
+         try
+         {
+            Scanner reader = new Scanner(file);
+            String data = reader.nextLine();
+            String useTheme = "useTheme=";
+            StringBuilder themeFromFile = new StringBuilder();
+            if (data.length() > useTheme.length())
+            {
+               for (int i = 0; i < data.length(); ++i)
+               {
+                  if (i >= useTheme.length())
+                  {
+                     themeFromFile.append(data.charAt(i));
+                  }
+                  if (i > 50)
+                     break;
+               }
+               if (themeFromFile.toString().contains("LIGHT"))
+               {
+                  theme = THEME.LIGHT;
+                  isLight = true;
+                  isDark = false;
+                  isClassic = false;
+               }
+               else if (themeFromFile.toString().contains("DARK"))
+               {
+                  theme = THEME.DARK;
+                  isDark = true;
+                  isLight = false;
+                  isClassic = false;
+               }
+               else if (themeFromFile.toString().contains("CLASSIC"))
+               {
+                  theme = THEME.CLASSIC;
+                  isClassic = true;
+                  isDark = false;
+                  isLight = false;
+               }
+               else
+               {
+                  theme = THEME.LIGHT;
+                  isLight = true;
+                  isDark = false;
+                  isClassic = false;
+               }
+            }
+         }
+         catch (FileNotFoundException e)
+         {
+            LogTools.info("No saved theme preference found. Loading default theme: light");
+            e.printStackTrace();
+         }
+      }
    }
 
    public void renderBeforeOnScreenUI()
@@ -307,20 +381,57 @@ public class GDXImGuiBasedUI
          ImGui.separator();
          ImGui.text("UI Theme:");
          ImGui.sameLine();
-         if (ImGui.button(labels.get(themeLabels[themeLabelIndex % 3])))
+
+         if (ImGui.radioButton(labels.get("Light"), isLight))
          {
-            themeLabelIndex++;
-            switch (themeLabelIndex % 3)
-            {
-               case 0 -> ImGui.styleColorsLight();
-               case 1 -> ImGui.styleColorsDark();
-               case 2 -> ImGui.styleColorsClassic();
-            }
+            theme = THEME.LIGHT;
+            isLight = true;
+            isDark = false;
+            isClassic = false;
          }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Dark"), isDark))
+         {
+            theme = THEME.DARK;
+            isLight = false;
+            isDark = true;
+            isClassic = false;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("ImGui Classic"), isClassic))
+         {
+            theme = THEME.CLASSIC;
+            isLight = false;
+            isDark = false;
+            isClassic = true;
+         }
+
+         // NOTE: save the theme to ~/.ihmc/lightDarkPreference.ini
+         File file = new File(userHomeDirectory + "/.ihmc/themePreference.ini");
+         try
+         {
+            FileWriter fileWriter = new FileWriter(file);
+            fileWriter.write("useTheme=" + theme.toString());
+            fileWriter.close();
+         }
+         catch (IOException e)
+         {
+            LogTools.info("Could not save theme preference.");
+            e.printStackTrace();
+         }
+
 
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
+
+      switch (theme)
+      {
+         case LIGHT -> ImGui.styleColorsLight();
+         case DARK -> ImGui.styleColorsDark();
+         case CLASSIC -> ImGui.styleColorsClassic();
+      }
+
       ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
       fpsCalculator.ping();
       String fpsString = String.valueOf((int) fpsCalculator.getFrequency());
