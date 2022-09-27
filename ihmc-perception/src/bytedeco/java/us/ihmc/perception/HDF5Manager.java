@@ -18,6 +18,7 @@ public class HDF5Manager
 
    private HashMap<String, Group> groups;
    private HashMap<String, ArrayList<Float>> buffers;
+   private HashMap<String, Integer> counts;
    private H5File file;
 
    public HDF5Manager(String filePath, int flag)
