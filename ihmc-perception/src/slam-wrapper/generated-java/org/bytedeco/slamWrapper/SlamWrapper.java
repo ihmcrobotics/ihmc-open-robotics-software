@@ -54,9 +54,9 @@ public static class FactorGraphExternal extends Pointer {
         public native void clearISAM2();
 
         // Expects packed Pose3
-        public native void setPoseInitialValue_Pose3(int index, FloatPointer value);
-        public native void setPoseInitialValue_Pose3(int index, FloatBuffer value);
-        public native void setPoseInitialValue_Pose3(int index, float[] value);
+        public native void setPoseInitialValue(int index, FloatPointer value);
+        public native void setPoseInitialValue(int index, FloatBuffer value);
+        public native void setPoseInitialValue(int index, float[] value);
 
         // Expects packed OrientedPlane3
         public native void setOrientedPlaneInitialValue(int landmarkId, FloatPointer value);
@@ -72,6 +72,8 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(FloatPointer lmVariances);
         public native void createOrientedPlaneNoiseModel(FloatBuffer lmVariances);
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
+
+        public native void printResults();
 
         public native void helloWorldTest();
 }
