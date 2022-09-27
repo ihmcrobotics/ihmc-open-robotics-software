@@ -256,6 +256,10 @@ public class VirtualModelControlOptimizationControlModule
          LogTools.error("Jacobian is not of the right size: {}, expected: {}", jacobian.getNumCols(), numberOfDoFs);
          return false;
       }
+      if (commandToConvert.isNullspaceProjected())
+      {
+         throw new RuntimeException("You cannot project a QP Objective Command into the nullspace of the virtual model control module.");
+      }
 
       qpInputToPack.reshape(taskSize);
       qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
@@ -266,10 +270,9 @@ public class VirtualModelControlOptimizationControlModule
 
       CommonOps_DDRM.mult(selectionMatrix, objective, qpInputToPack.taskObjective);
 
-      tempTaskJacobian.reshape(taskSize, numberOfDoFs); //jacobianCalculator.getNumberOfDegreesOfFreedom());
+      tempTaskJacobian.reshape(taskSize, numberOfDoFs);
       CommonOps_DDRM.mult(selectionMatrix, jacobian, tempTaskJacobian);
 
-//      recordTaskJacobian(qpInputToPack.taskJacobian);
       return true;
    }
    
