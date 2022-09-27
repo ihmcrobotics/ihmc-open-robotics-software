@@ -164,7 +164,6 @@ public class GDXVRKinematicsStreamingMode
          kinematicsRecorder.processRecordReplayInput(bButton);
       });
 
-
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
@@ -219,7 +218,6 @@ public class GDXVRKinematicsStreamingMode
                kinematicsRecorder.record(tempFramePose);
             });
          }
-
 
 //         vrContext.getHeadset().runIfConnected(headset ->
 //         {

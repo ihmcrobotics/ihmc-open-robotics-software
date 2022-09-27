@@ -141,25 +141,25 @@ public class ReachabilitySphereMapSimulationHelper
 
       calculator.setVoxelCompletedListener(voxel ->
       {
-       voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
+         voxelVisualization.get(VisualizationType.PositionReach).add(ReachabilityMapTools.createPositionReachabilityVisual(voxel, 0.2, true));
 
-       if (voxel.getR() > 1e-3)
-       {
+         if (voxel.getR() > 1e-3)
+         {
           voxelVisualization.get(VisualizationType.RayReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR()));
           voxelVisualization.get(VisualizationType.PoseReach).add(ReachabilityMapTools.createMetricVisual(voxel, 0.25, voxel.getR2()));
-       }
-       else
-       {
+         }
+         else
+         {
           voxelVisualization.get(VisualizationType.Unreachable).add(ReachabilityMapTools.createMetricVisual(voxel, 0.1, (double) -1));
-       }
+         }
       });
 
       currentVisualizationType.addListener(v ->
-                                           {
-                                              guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.get()));
-                                              guiControls.addStaticVisuals(voxelVisualization.get(currentVisualizationType.getValue()));
-                                              previousVisualizationType.set(currentVisualizationType.getValue());
-                                           });
+      {
+         guiControls.removeStaticVisuals(voxelVisualization.get(previousVisualizationType.get()));
+         guiControls.addStaticVisuals(voxelVisualization.get(currentVisualizationType.getValue()));
+         previousVisualizationType.set(currentVisualizationType.getValue());
+      });
    }
 
    public void exportDataToMatlabFile(Class<?> classForFilePath) throws IOException
