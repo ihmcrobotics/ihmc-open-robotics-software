@@ -56,6 +56,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MotionQPInputCalculator
 {
+   private static final double minWeightForTaskInclusion = 1e-12;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -64,8 +65,6 @@ public class MotionQPInputCalculator
 
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
-
-   private final OneDoFJointBasics[] oneDoFJoints;
 
    private final CentroidalMomentumCalculator centroidalMomentumCalculator;
    private final CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
@@ -102,8 +101,7 @@ public class MotionQPInputCalculator
    private final NativeNullspaceProjector accelerationNativeNullspaceProjector;
    private final NativeNullspaceProjector velocityNativeNullspaceProjector;
    
-   private final YoInteger allTJSize = new YoInteger("allTJSize", registry);
-   private int prevallTJSize = 0;
+   private final YoInteger sizeOfAllTasksJacobian = new YoInteger("sizeOfAllTasksJacobian", registry);
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame,
                                   CentroidalMomentumRateCalculator centroidalMomentumRateCalculator,
@@ -151,7 +149,7 @@ public class MotionQPInputCalculator
       this.centroidalMomentumCalculator = centroidalMomentumCalculator;
       this.centroidalMomentumRateCalculator = centroidalMomentumRateCalculator;
 
-      oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      OneDoFJointBasics[] oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
 
       if (jointPrivilegedConfigurationParameters != null)
@@ -185,6 +183,7 @@ public class MotionQPInputCalculator
       if (gravityGradientCalculator != null)
          gravityGradientCalculator.reset();
       allTaskJacobian.reshape(0, numberOfDoFs);
+      sizeOfAllTasksJacobian.set(0);
    }
 
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
@@ -970,11 +969,10 @@ public class MotionQPInputCalculator
    public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       int taskSize = 0;
-      double minWeight = 1.0e-12;
 
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
-         if (commandToConvert.getWeight(jointIndex) > minWeight)
+         if (commandToConvert.getWeight(jointIndex) > minWeightForTaskInclusion)
             taskSize++;
       }
 
@@ -990,7 +988,7 @@ public class MotionQPInputCalculator
       int row = 0;
       for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
       {
-         if (commandToConvert.getWeight(jointIndex) <= minWeight)
+         if (commandToConvert.getWeight(jointIndex) <= minWeightForTaskInclusion)
             continue;
 
          JointBasics joint = commandToConvert.getJoint(jointIndex);
@@ -1011,40 +1009,6 @@ public class MotionQPInputCalculator
       recordTaskJacobian(qpInputToPack.taskJacobian);
       return true;
    }
-//   public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
-//   {
-//      int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
-//
-//      if (taskSize == 0)
-//         return false;
-//
-//      qpInputToPack.reshape(taskSize);
-//      qpInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
-//      qpInputToPack.taskJacobian.zero();
-//      qpInputToPack.taskWeightMatrix.zero();
-//      qpInputToPack.setUseWeightScalar(false);
-//
-//      int row = 0;
-//      for (int jointIndex = 0; jointIndex < commandToConvert.getNumberOfJoints(); jointIndex++)
-//      {
-//         JointBasics joint = commandToConvert.getJoint(jointIndex);
-//         double weight = commandToConvert.getWeight(jointIndex);
-//         int[] columns = jointIndexHandler.getJointIndices(joint);
-//         if (columns == null)
-//            return false;
-//
-//         CommonOps_DDRM.insert(commandToConvert.getDesiredAcceleration(jointIndex), qpInputToPack.taskObjective, row, 0);
-//         for (int column : columns)
-//         {
-//            qpInputToPack.taskJacobian.set(row, column, 1.0);
-//            qpInputToPack.taskWeightMatrix.set(row, row, weight);
-//            row++;
-//         }
-//      }
-//
-//      recordTaskJacobian(qpInputToPack.taskJacobian);
-//      return true;
-//   }
 
    /**
     * Converts a {@link JointspaceVelocityCommand} into a {@link QPInputTypeA}.
@@ -1091,11 +1055,8 @@ public class MotionQPInputCalculator
       int taskSize = taskJacobian.getNumRows();
       allTaskJacobian.reshape(allTaskJacobian.getNumRows() + taskSize, numberOfDoFs, true);
       CommonOps_DDRM.insert(taskJacobian, allTaskJacobian, allTaskJacobian.getNumRows() - taskSize, 0);
-      if (prevallTJSize > allTaskJacobian.getNumRows())
-      {
-         allTJSize.set(prevallTJSize);
-      }
-      prevallTJSize = allTaskJacobian.getNumRows();
+      if (allTaskJacobian.getNumRows() > sizeOfAllTasksJacobian.getIntegerValue())
+         sizeOfAllTasksJacobian.set(allTaskJacobian.getNumRows());
    }
 
    public DMatrixRMaj getCentroidalMomentumMatrix()
