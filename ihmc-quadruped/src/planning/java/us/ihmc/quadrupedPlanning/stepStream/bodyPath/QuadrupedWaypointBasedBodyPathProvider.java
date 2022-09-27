@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

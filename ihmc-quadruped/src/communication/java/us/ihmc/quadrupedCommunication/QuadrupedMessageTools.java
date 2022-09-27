@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedCommunication;
 
 import controller_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;

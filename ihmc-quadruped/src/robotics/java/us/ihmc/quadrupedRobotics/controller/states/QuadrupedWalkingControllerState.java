@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.GroundPlaneMessage;
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;

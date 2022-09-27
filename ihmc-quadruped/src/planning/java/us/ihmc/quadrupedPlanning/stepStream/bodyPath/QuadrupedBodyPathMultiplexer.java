@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedPlanning.stepStream.bodyPath;
 
-import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;

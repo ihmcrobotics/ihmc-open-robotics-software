@@ -3,9 +3,12 @@ package us.ihmc.quadrupedUI;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;

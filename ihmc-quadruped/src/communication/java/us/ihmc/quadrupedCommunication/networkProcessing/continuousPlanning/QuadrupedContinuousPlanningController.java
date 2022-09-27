@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
 import controller_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

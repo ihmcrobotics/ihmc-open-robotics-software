@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 import java.util.List;
 
+import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacketPubSubType;
 import footstep_plan_msgs.msg.dds.*;
 import org.ejml.data.DMatrixRMaj;
 

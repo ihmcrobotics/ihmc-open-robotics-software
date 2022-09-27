@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.tools;
 
-import controller_msgs.msg.dds.PawStepPlanningRequestPacket;
+import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;
 import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

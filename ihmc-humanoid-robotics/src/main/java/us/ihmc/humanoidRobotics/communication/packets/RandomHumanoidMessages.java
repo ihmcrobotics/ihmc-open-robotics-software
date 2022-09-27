@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import controller_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
