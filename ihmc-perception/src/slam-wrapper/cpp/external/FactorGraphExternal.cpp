@@ -1,4 +1,4 @@
-#include "factor_graph_external.h"
+#include "FactorGraphExternal.h"
 
 void FactorGraphExternal::addPriorPoseFactor(int index, float *pose)
 {
@@ -60,4 +60,9 @@ void FactorGraphExternal::printResults()
 void FactorGraphExternal::helloWorldTest()
 {
     std::cout << "Hello from native code" << std::endl;
+
+    for (int i = 0; i < 5; i++)
+    {
+       std::cout << "Hello " << i << std::endl;
+    }
 }

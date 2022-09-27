@@ -11,4 +11,4 @@ sudo -u root docker run \
     --rm \
     --volume $(pwd)/..:/root/dev/slam-wrapper \
     --workdir /root/dev/slam-wrapper/cpp \
-    ihmcrobotics/slam-wrapper:0.1 bash /root/dev/slam-wrapper/cpp/generate-java-mappings.sh
+    ihmcrobotics/slam-wrapper:0.2 bash /root/dev/slam-wrapper/cpp/generate-java-mappings.sh
