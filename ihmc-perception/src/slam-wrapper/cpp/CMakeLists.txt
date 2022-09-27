@@ -17,10 +17,10 @@ find_package(GTSAM REQUIRED)
 include_directories(${GTSAM_INCLUDE_DIR})
 
 set(SW_SOURCES
-    factor_graph/factor_graph_handler.cpp
-    factor_graph/factor_graph_handler.h
-    external/factor_graph_external.cpp
-    external/factor_graph_external.h
+    factorGraph/FactorGraphHandler.cpp
+    factorGraph/FactorGraphHandler.h
+    external/FactorGraphExternal.cpp
+    external/FactorGraphExternal.h
 )
 
 add_library(slam-wrapper SHARED ${SW_SOURCES})
@@ -31,7 +31,7 @@ target_link_libraries(slam-wrapper
 )
 
 target_include_directories(slam-wrapper PUBLIC
-    factor_graph/
+    factorGraph/
     external/
 )
 
@@ -45,7 +45,7 @@ install(FILES ${SW_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
 
 add_executable(FactorGraphHeadless 
     ${SW_SOURCES}
-    launcher/application.cpp
+    launcher/Application.cpp
 )
 
 target_link_libraries(FactorGraphHeadless
@@ -54,6 +54,6 @@ target_link_libraries(FactorGraphHeadless
 )
 
 target_include_directories(FactorGraphHeadless PUBLIC
-    factor_graph/
+    factorGraph/
     external/
 )

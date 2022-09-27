@@ -1,4 +1,4 @@
-#include "factor_graph_handler.h"
+#include "FactorGraphHandler.h"
 
 FactorGraphHandler::FactorGraphHandler()
 {

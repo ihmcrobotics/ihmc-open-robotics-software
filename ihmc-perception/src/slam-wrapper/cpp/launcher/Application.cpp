@@ -1,6 +1,6 @@
 
-#include "factor_graph_handler.h"
-#include "factor_graph_external.h"
+#include "FactorGraphHandler.h"
+#include "FactorGraphExternal.h"
 
 void SLAMTest(FactorGraphHandler& factorGraphHandler)
 {
