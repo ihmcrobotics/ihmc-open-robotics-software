@@ -17,6 +17,14 @@ import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 
 import java.util.ArrayList;
 
+/**
+ * This class works with a copy of ModelData that it will mutate to create scaled ModelInstances.
+ * Every time scale is called, the modelIntance will be recreated as a new object.
+ *
+ * The scaling is about the center of mass of the vertices, i.e. the centroid. This is so the model will
+ * get bigger but not translate much, so that scaled up models will be in the same place roughly.
+ * This is useful when you want a bigger model to enclose a smaller version.
+ */
 public class GDXModelInstanceScaler
 {
    private final ModelData modelData;
