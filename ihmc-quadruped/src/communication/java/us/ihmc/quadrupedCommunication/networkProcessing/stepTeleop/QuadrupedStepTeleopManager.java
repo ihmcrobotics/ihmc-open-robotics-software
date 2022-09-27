@@ -7,12 +7,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
-import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

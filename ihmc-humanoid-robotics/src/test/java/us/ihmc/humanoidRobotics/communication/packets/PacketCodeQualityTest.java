@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
 import footstep_plan_msgs.msg.dds.FootstepPlannerStatusMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -22,6 +23,7 @@ import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;

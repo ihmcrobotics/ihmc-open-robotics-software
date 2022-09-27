@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import net.java.games.input.Event;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import quadruped_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
+import quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
