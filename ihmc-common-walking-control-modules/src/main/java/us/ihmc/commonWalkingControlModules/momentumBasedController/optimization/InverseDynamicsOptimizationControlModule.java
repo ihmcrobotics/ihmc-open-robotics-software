@@ -90,8 +90,6 @@ public class InverseDynamicsOptimizationControlModule
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
 
-   private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
-
    private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
@@ -170,9 +168,6 @@ public class InverseDynamicsOptimizationControlModule
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
       maximumNumberOfIterations.set(optimizationSettings.getMaxNumberOfSolverIterations());
 
-      zeroObjective.reshape(wrenchMatrixCalculator.getCopTaskSize(), 1);
-      zeroObjective.zero();
-
       parentRegistry.addChild(registry);
    }
 
@@ -209,6 +204,7 @@ public class InverseDynamicsOptimizationControlModule
 
       setupWrenchesEquilibriumConstraint();
 
+      // The Jacobian for all the primary tasks has been computed, so we should now submit the tasks take place in the nullspace.
       for (int i = 0; i < nullspaceQPObjectiveCommands.size(); i++)
       {
          QPObjectiveCommand command = nullspaceQPObjectiveCommands.get(i);
