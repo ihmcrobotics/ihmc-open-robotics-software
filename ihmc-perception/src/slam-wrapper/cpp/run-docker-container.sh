@@ -13,4 +13,4 @@ docker run \
     --rm \
     --network host \
     --dns=1.1.1.1 \
-    ihmcrobotics/slam-wrapper:0.1 bash
+    ihmcrobotics/slam-wrapper:0.2 bash
