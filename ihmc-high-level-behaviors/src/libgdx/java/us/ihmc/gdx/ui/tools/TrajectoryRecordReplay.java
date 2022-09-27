@@ -19,7 +19,7 @@ public class TrajectoryRecordReplay<T extends Number>
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
-   private boolean notReplaying = true;
+   private boolean doneReplaying = true;
 
    public TrajectoryRecordReplay(Class<T> clazz, String filePath)
    {
@@ -35,7 +35,7 @@ public class TrajectoryRecordReplay<T extends Number>
       T[] values = dataMatrix.get(timeStepReplay);
       if (timeStepReplay >= dataMatrix.size() - 2)
       {
-         notReplaying = true;
+         doneReplaying = true;
          this.reset();
       }
       else
@@ -63,7 +63,7 @@ public class TrajectoryRecordReplay<T extends Number>
 
    private void readCSV()
    {
-      notReplaying = false;
+      doneReplaying = false;
       try
       {
          BufferedReader fileReader = new BufferedReader(new FileReader(filePath));
@@ -196,7 +196,7 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public boolean hasDoneReplay()
    {
-      return notReplaying;
+      return doneReplaying;
    }
 
    public String getPath()
