@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 
@@ -83,6 +84,7 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
       jacobian.set(other.jacobian);
       weightMatrix.set(other.weightMatrix);
       selectionMatrix.set(other.selectionMatrix);
+      doNullspaceProjection = other.doNullspaceProjection;
    }
 
    @Override
@@ -142,5 +144,36 @@ public class QPObjectiveCommand implements InverseDynamicsCommand<QPObjectiveCom
    public DMatrixRMaj getSelectionMatrix()
    {
       return selectionMatrix;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof QPObjectiveCommand)
+      {
+         QPObjectiveCommand other = (QPObjectiveCommand) object;
+
+         if (commandId != other.commandId)
+            return false;
+         if (!MatrixFeatures_DDRM.isEquals(weightMatrix, other.weightMatrix))
+            return false;
+         if (!MatrixFeatures_DDRM.isEquals(selectionMatrix, other.selectionMatrix))
+            return false;
+         if (!MatrixFeatures_DDRM.isEquals(objective, other.objective))
+            return false;
+         if (!MatrixFeatures_DDRM.isEquals(jacobian, other.jacobian))
+            return false;
+         if (doNullspaceProjection != other.doNullspaceProjection)
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }
