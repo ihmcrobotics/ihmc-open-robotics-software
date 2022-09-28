@@ -71,7 +71,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
    {
-      super(title);
+      super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.pointsPerSegment = pointsPerSegment;
