@@ -1,6 +1,16 @@
 package us.ihmc.quadrupedUI;
 
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.VideoPacket;
+import toolbox_msgs.msg.dds.BodyPathPlanMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerStatusMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import quadruped_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

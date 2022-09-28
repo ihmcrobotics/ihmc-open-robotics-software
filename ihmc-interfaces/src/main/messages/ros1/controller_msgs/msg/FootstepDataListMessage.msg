@@ -55,7 +55,7 @@ bool offset_footsteps_with_execution_error
 bool offset_footsteps_height_with_execution_error
 
 # Properties for queueing footstep lists.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 # Default step constraints regions
 controller_msgs/StepConstraintsListMessage default_step_constraints

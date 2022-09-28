@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters;
 
-import controller_msgs.msg.dds.PawStepPlannerParametersPacket;
+import quadruped_msgs.msg.dds.PawStepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import static us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParameterKeys.*;

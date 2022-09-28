@@ -13,4 +13,4 @@ uint32 sequence_id
 # Specifies which foot will execute the trajectory.
 byte robot_quadrant 255
 # The position trajectory information.
-EuclideanTrajectoryMessage position_trajectory
+ihmc_common_msgs/EuclideanTrajectoryMessage position_trajectory

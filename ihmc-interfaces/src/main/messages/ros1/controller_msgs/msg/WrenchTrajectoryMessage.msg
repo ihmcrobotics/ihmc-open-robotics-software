@@ -9,7 +9,7 @@ uint32 sequence_id
 controller_msgs/WrenchTrajectoryPointMessage[] wrench_trajectory_points
 
 # Frame information for this message.
-controller_msgs/FrameInformation frame_information
+ihmc_common_msgs/FrameInformation frame_information
 
 # Flag that tells the controller whether the use of a custom control frame is requested.
 bool use_custom_control_frame
@@ -19,6 +19,6 @@ bool use_custom_control_frame
 geometry_msgs/Pose control_frame_pose
 
 # Properties for queueing trajectories.
-controller_msgs/QueueableMessage queueing_properties
+ihmc_common_msgs/QueueableMessage queueing_properties
 
 

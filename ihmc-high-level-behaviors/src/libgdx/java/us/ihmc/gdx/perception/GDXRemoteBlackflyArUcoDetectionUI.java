@@ -3,7 +3,7 @@ package us.ihmc.gdx.perception;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.ArUcoMarkerPoses;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.colorVision.DualBlackflyComms;
 import us.ihmc.commons.thread.TypedNotification;
