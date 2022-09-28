@@ -242,7 +242,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    {
       heightWaypoints.clear();
 
-      if (soleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ() > soleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ())
+      if (soleFrames.get(RobotSide.LEFT).getTransformToRoot().getTranslationZ() > soleFrames.get(RobotSide.RIGHT).getTransformToRoot().getTranslationZ())
          setSupportLeg(RobotSide.RIGHT);
       else
          setSupportLeg(RobotSide.LEFT);
