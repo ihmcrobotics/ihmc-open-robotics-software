@@ -30,8 +30,9 @@ public class HDF5Manager
 
    public void resetBuffer(String namespace)
    {
-      ArrayList<Float> list = new ArrayList<>();
-      buffers.put(namespace, list);
+      buffers.get(namespace).clear();
+//      ArrayList<Float> list = new ArrayList<>();
+//      buffers.put(namespace, list);
    }
 
    public int getBufferIndex(String namespace)
