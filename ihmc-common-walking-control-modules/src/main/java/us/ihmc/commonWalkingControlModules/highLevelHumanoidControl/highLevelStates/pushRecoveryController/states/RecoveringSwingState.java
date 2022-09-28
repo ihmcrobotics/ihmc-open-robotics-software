@@ -123,7 +123,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
 
-      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
+      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGroundFiltered();
    }
 
    @Override
