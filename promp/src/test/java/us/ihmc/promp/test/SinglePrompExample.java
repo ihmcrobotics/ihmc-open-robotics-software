@@ -26,8 +26,8 @@ public class SinglePrompExample
       System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
 
       List<String> libraryFiles = new ArrayList<>();
-      libraryFiles.add("libpromp.so");
       libraryFiles.add("libjnipromp.so");
+      libraryFiles.add("libpromp.so");
 
       WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/src/main/resources");
       for (String libraryFile : libraryFiles)
@@ -52,16 +52,16 @@ public class SinglePrompExample
 
       List<String> fileList = new ArrayList<>();
 
-      fileList.add(putasideBoxDemoDirAbs + "p1.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p2.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p3.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p4.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p5.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p6.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p7.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p8.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p9.csv");
-      fileList.add(putasideBoxDemoDirAbs + "p10.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p1.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p2.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p3.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p4.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p5.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p6.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p7.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p8.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p9.csv");
+      fileList.add(putasideBoxDemoDirAbs + "/p10.csv");
 
       List<Long> dofs = List.of(0L, 1L, 2L);
 
