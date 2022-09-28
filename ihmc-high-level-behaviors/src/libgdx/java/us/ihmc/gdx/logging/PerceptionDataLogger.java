@@ -48,12 +48,12 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 
 public class PerceptionDataLogger
 {
-   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
+   static final String FILE_NAME = "/home/quantum/Workspace/Data/Sensor_Logs/experimental.h5";
    private final HDF5Manager h5;
 
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo depthSampleInfo = new SampleInfo();
-
+`
    private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
    private final SampleInfo ousterSampleInfo = new SampleInfo();
 
@@ -69,11 +69,12 @@ public class PerceptionDataLogger
 
    private ROS2Callback<RobotConfigurationData> robotConfigurationCallback;
    private ROS2Callback<BigVideoPacket> bigVideoPacketROS2Callback;
+   private LidarScanMessage lidarScanMessage = new LidarScanMessage();
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                   getClass(),
                                                                                                   ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   private final BackgroundExecutorManager executor = new BackgroundExecutorManager(4);
+   private final BackgroundExecutorManager executor = new BackgroundExecutorManager(1);
 
    private int depthMessageCounter = 0;
    private int compressedImageCounter = 0;
@@ -134,7 +135,8 @@ public class PerceptionDataLogger
    {
       LogTools.info("OUSTER POINT CLOUD Received.");
 
-      storePointCloud("/os_cloud_node/points/", message);
+      lidarScanMessage.set(message);
+      storePointCloud("/os_cloud_node/points/", lidarScanMessage);
 
    }
 
@@ -184,29 +186,36 @@ public class PerceptionDataLogger
    {
       Group group = h5.getGroup(namespace);
 
-      int numberOfScanPoints = message.getNumberOfPoints();
-      ArrayList<Float> pointFloats = new ArrayList<>();
-      LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfScanPoints, (i, x, y, z) ->
-      {
-         pointFloats.add((float) x);
-         pointFloats.add((float) y);
-         pointFloats.add((float) z);
-      });
-
-      ArrayList<Float> buffer = h5.getBuffer(namespace);
-      buffer.addAll(pointFloats);
-
-      LogTools.info("Thread Store Triggered");
-
-      ArrayList<Float> data = new ArrayList<>(buffer);
-      h5.resetBuffer(namespace);
+//      int numberOfScanPoints = message.getNumberOfPoints();
+//      ArrayList<Float> pointFloats = new ArrayList<>();
+//
+//
+//      LogTools.info("Compressed Message Size: {}", message.getScan().size());
+//
+//      LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfScanPoints, (i, x, y, z) ->
+//      {
+//         pointFloats.add((float) x);
+//         pointFloats.add((float) y);
+//         pointFloats.add((float) z);
+//      });
+//
+//      ArrayList<Float> buffer = h5.getBuffer(namespace);
+//      buffer.addAll(pointFloats);
+//
+//      ArrayList<Float> data = new ArrayList<>(buffer);
+//      h5.resetBuffer(namespace);
 
       executor.executeInBackground(() ->
                                    {
-                                      long count = h5.getCount(namespace);
-                                      LogTools.info("Storing Buffer: {}", count);
-                                      HDF5Tools.storeFloatArray2D(group, count, data, numberOfScanPoints, 3);
-                                      LogTools.info("Done Storing Buffer: {}", count);
+                                      synchronized (this)
+                                      {
+                                         LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
+                                         pointCloudCount = (int) h5.getCount(namespace);
+                                         HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
+                                         LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
+
+//                                         pointCloudCount++;
+                                      }
                                    });
    }
 

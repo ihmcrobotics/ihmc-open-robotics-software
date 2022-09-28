@@ -151,6 +151,16 @@ public class HDF5Tools
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
       float[] dataObject = ArrayUtils.toPrimitive(data.toArray(new Float[0]), 0.0F);
       dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
+      dataset.close();
+   }
+
+   public static void storeByteArray(Group group, long index, byte[] data, long size)
+   {
+      LogTools.info("Store Byte Array: {} {}", index, size);
+      long[] dims = {size};
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), new DataSpace(1, dims));
+      dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
+      dataset.close();
    }
 
    public static void storeMatrix(Group group, double[] data)
@@ -160,10 +170,12 @@ public class HDF5Tools
       {
          DataSet dataset = group.openDataSet(String.valueOf(0));
          dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
+         dataset.close();
       }
       else
       {
          DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dims));
+         dataset.close();
       }
    }
 
