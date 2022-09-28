@@ -1,5 +1,6 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import org.bytedeco.opencl._cl_kernel;
@@ -59,7 +60,7 @@ public class GDXNettyOusterUI
             ImGuiPanel panel = new ImGuiPanel("Ouster", this::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(panel);
 
-            GDXModelInstance ousterSensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/ousterSensor/Ouster.g3dj"));
+            ModelData ousterSensorModel = GDXModelLoader.loadModelData("environmentObjects/ousterSensor/Ouster.g3dj");
             CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
             ousterInteractable = new GDXInteractableFrameModel();
             ousterInteractable.create(ReferenceFrame.getWorldFrame(),
