@@ -1,11 +1,9 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.stateTransitions;
+package us.ihmc.quadrupedRobotics.controller.states;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -20,9 +18,13 @@ public class QuadrupedFeetLoadedToWalkingStandTransition extends QuadrupedFeetLo
 
    private final YoDouble minimumTimeInState;
 
-   public QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum, YoEnum<HighLevelControllerName> requestedState,
-                                                      QuadrantDependentList<FootSwitchInterface> footSwitches, double controlDT, double totalMass,
-                                                      double gravityZ, HighLevelControllerParameters highLevelControllerParameters,
+   public QuadrupedFeetLoadedToWalkingStandTransition(HighLevelControllerName nextStateEnum,
+                                                      YoEnum<HighLevelControllerName> requestedState,
+                                                      QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches,
+                                                      double controlDT,
+                                                      double totalMass,
+                                                      double gravityZ,
+                                                      HighLevelControllerParameters highLevelControllerParameters,
                                                       YoRegistry parentRegistry)
    {
       super(footSwitches, controlDT, totalMass, gravityZ, parentRegistry);
