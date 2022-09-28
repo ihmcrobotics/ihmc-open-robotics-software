@@ -6,14 +6,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.UnitConversions;
 
 public class HandJointAngleCommunicator
 {
-   private final int WORKER_SLEEP_TIME_MILLIS = 500;
+   private final int WORKER_SLEEP_TIME_MILLIS = (int) Conversions.secondsToMilliseconds(UnitConversions.hertzToSeconds(120.0));
 
    private final ConcurrentCopier<HandJointAnglePacket> packetCopier;
    private double[] fingers;
