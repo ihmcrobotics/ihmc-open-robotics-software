@@ -404,6 +404,7 @@ public class MotionQPInputCalculator
       DMatrixRMaj weightMatrix = commandToConvert.getWeightMatrix();
 
       int taskSize = selectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
@@ -464,6 +465,7 @@ public class MotionQPInputCalculator
       // Gets the M-by-6 selection matrix S.
       commandToConvert.getSelectionMatrix(controlFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
@@ -515,7 +517,7 @@ public class MotionQPInputCalculator
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, qpInputToPack.taskJacobian);
 
-      if (true) //(primaryBase == null)
+      if (primaryBase == null)
       { // No primary base provided for this task.
         // Record the resulting Jacobian matrix for the privileged configuration.
          recordTaskJacobian(qpInputToPack.taskJacobian);
@@ -581,6 +583,7 @@ public class MotionQPInputCalculator
       commandToConvert.getControlFrame(controlFrame);
       commandToConvert.getSelectionMatrix(controlFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
@@ -694,6 +697,7 @@ public class MotionQPInputCalculator
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
@@ -773,6 +777,7 @@ public class MotionQPInputCalculator
       tempSelectionMatrix.zero();
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
@@ -817,6 +822,7 @@ public class MotionQPInputCalculator
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
@@ -1018,6 +1024,7 @@ public class MotionQPInputCalculator
    public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, QPInputTypeA qpInputToPack)
    {
       int taskSize = MultiBodySystemTools.computeDegreesOfFreedom(commandToConvert.getJoints());
+      // TODO check the weights to determine the task size as well.
 
       if (taskSize == 0)
          return false;
