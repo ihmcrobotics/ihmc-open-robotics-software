@@ -11,7 +11,7 @@ module ihmc_common_msgs
     {
 
       /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        */
       @TypeCode(type="ihmc_common_msgs::msg::dds_::Cylinder3DMessage_")
       struct Cylinder3DMessage

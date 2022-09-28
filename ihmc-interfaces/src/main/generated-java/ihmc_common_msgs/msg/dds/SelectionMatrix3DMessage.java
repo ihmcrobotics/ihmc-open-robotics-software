@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        * This message allows the user to precisely select what component in taskspace are to be achieved.
        */
 public class SelectionMatrix3DMessage extends Packet<SelectionMatrix3DMessage> implements Settable<SelectionMatrix3DMessage>, EpsilonComparable<SelectionMatrix3DMessage>

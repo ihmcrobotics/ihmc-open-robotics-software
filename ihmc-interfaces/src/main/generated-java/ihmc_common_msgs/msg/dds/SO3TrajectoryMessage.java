@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        * This message carries the information to execute a trajectory in taskspace (orientation only) by defining trajectory points.
        * A Hermite based curve (third order) is used to interpolate the orientations.
        * To execute a single straight "line" trajectory to reach a desired orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.

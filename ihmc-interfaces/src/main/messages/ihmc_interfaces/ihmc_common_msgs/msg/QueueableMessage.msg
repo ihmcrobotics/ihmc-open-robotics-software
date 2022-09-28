@@ -1,4 +1,4 @@
-# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This is part of the IHMC Common message package.
 # General message carrying the information needed to safely queue messages.
 
 byte EXECUTION_MODE_OVERRIDE = 0

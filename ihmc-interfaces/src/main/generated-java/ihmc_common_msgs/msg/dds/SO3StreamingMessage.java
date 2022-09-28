@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        * It is a lightweight version of SO3TrajectoryMessage designed for streaming.
        */
 public class SO3StreamingMessage extends Packet<SO3StreamingMessage> implements Settable<SO3StreamingMessage>, EpsilonComparable<SO3StreamingMessage>

@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        */
 public class Ramp3DMessage extends Packet<Ramp3DMessage> implements Settable<Ramp3DMessage>, EpsilonComparable<Ramp3DMessage>
 {

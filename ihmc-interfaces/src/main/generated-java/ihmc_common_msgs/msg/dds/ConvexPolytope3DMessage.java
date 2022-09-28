@@ -7,23 +7,19 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        */
 public class ConvexPolytope3DMessage extends Packet<ConvexPolytope3DMessage> implements Settable<ConvexPolytope3DMessage>, EpsilonComparable<ConvexPolytope3DMessage>
 {
    /**
-            * Dimensions of the ramp, see Ramp3D.
+            * Vertices of the polytope, see ConvexPolytope3D.
             */
-   public us.ihmc.euclid.tuple3D.Vector3D size_;
-   /**
-            * Pose of the ramp
-            */
-   public us.ihmc.euclid.geometry.Pose3D pose_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  vertices_;
 
    public ConvexPolytope3DMessage()
    {
-      size_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      vertices_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (50, new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public ConvexPolytope3DMessage(ConvexPolytope3DMessage other)
@@ -34,26 +30,16 @@ public class ConvexPolytope3DMessage extends Packet<ConvexPolytope3DMessage> imp
 
    public void set(ConvexPolytope3DMessage other)
    {
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.size_, size_);
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
+      vertices_.set(other.vertices_);
    }
 
 
    /**
-            * Dimensions of the ramp, see Ramp3D.
+            * Vertices of the polytope, see ConvexPolytope3D.
             */
-   public us.ihmc.euclid.tuple3D.Vector3D getSize()
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getVertices()
    {
-      return size_;
-   }
-
-
-   /**
-            * Pose of the ramp
-            */
-   public us.ihmc.euclid.geometry.Pose3D getPose()
-   {
-      return pose_;
+      return vertices_;
    }
 
 
@@ -74,8 +60,12 @@ public class ConvexPolytope3DMessage extends Packet<ConvexPolytope3DMessage> imp
       if(other == null) return false;
       if(other == this) return true;
 
-      if (!this.size_.epsilonEquals(other.size_, epsilon)) return false;
-      if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
+      if (this.vertices_.size() != other.vertices_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.vertices_.size(); i++)
+         {  if (!this.vertices_.get(i).epsilonEquals(other.vertices_.get(i), epsilon)) return false; }
+      }
 
       return true;
    }
@@ -89,8 +79,7 @@ public class ConvexPolytope3DMessage extends Packet<ConvexPolytope3DMessage> imp
 
       ConvexPolytope3DMessage otherMyClass = (ConvexPolytope3DMessage) other;
 
-      if (!this.size_.equals(otherMyClass.size_)) return false;
-      if (!this.pose_.equals(otherMyClass.pose_)) return false;
+      if (!this.vertices_.equals(otherMyClass.vertices_)) return false;
 
       return true;
    }
@@ -101,10 +90,8 @@ public class ConvexPolytope3DMessage extends Packet<ConvexPolytope3DMessage> imp
       StringBuilder builder = new StringBuilder();
 
       builder.append("ConvexPolytope3DMessage {");
-      builder.append("size=");
-      builder.append(this.size_);      builder.append(", ");
-      builder.append("pose=");
-      builder.append(this.pose_);
+      builder.append("vertices=");
+      builder.append(this.vertices_);
       builder.append("}");
       return builder.toString();
    }

@@ -1,4 +1,4 @@
-# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This is part of the IHMC Common message package.
 # Notifies the user that a MessageCollection has been received.
 # This is used to know when the controller is ready to start collecting the actual collection of messages.
 

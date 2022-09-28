@@ -1,4 +1,4 @@
-# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This is part of the IHMC Common message package.
 
 # Pose of the ellipsoid, see Ellipsoid3D
 geometry_msgs/Pose pose
