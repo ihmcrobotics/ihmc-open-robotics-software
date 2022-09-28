@@ -40,11 +40,9 @@ public class ConvexPolytope3DMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       return current_alignment - initial_alignment;
    }
 
@@ -57,43 +55,38 @@ public class ConvexPolytope3DMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getSize(), current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getVertices().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertices().get(i0), current_alignment);}
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage data, us.ihmc.idl.CDR cdr)
    {
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getSize(), cdr);
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
+      if(data.getVertices().size() <= 50)
+      cdr.write_type_e(data.getVertices());else
+          throw new RuntimeException("vertices field exceeds the maximum length");
+
    }
 
    public static void read(ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage data, us.ihmc.idl.CDR cdr)
    {
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getSize(), cdr);	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
+      cdr.read_type_e(data.getVertices());	
 
    }
 
    @Override
    public final void serialize(ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
-      ser.write_type_a("size", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getSize());
-
-      ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
-
+      ser.write_type_e("vertices", data.getVertices());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage data)
    {
-      ser.read_type_a("size", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getSize());
-
-      ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
-
+      ser.read_type_e("vertices", data.getVertices());
    }
 
    public static void staticCopy(ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage src, ihmc_common_msgs.msg.dds.ConvexPolytope3DMessage dest)

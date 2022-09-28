@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        */
 public class Ellipsoid3DMessage extends Packet<Ellipsoid3DMessage> implements Settable<Ellipsoid3DMessage>, EpsilonComparable<Ellipsoid3DMessage>
 {

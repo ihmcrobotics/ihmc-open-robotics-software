@@ -1,4 +1,4 @@
-# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This is part of the IHMC Common message package.
 # This message allows the user to precisely select what component in taskspace are to be achieved.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.

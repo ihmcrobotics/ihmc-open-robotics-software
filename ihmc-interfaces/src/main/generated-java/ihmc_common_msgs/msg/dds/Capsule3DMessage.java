@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        */
 public class Capsule3DMessage extends Packet<Capsule3DMessage> implements Settable<Capsule3DMessage>, EpsilonComparable<Capsule3DMessage>
 {

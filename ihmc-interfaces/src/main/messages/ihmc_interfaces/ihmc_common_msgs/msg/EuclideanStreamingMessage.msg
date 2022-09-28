@@ -1,4 +1,4 @@
-# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This is part of the IHMC Common message package.
 # It is a lightweight version of EuclideanTrajectoryMessage designed for streaming.
 
 ihmc_common_msgs/FrameInformation frame_information

@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+       * This is part of the IHMC Common message package.
        * This class is used to build trajectory messages in taskspace.
        * It holds the necessary information for one trajectory point.
        * Feel free to look at EuclideanTrajectoryPointMessage (translational) and SE3TrajectoryPointMessage (rotational AND translational).

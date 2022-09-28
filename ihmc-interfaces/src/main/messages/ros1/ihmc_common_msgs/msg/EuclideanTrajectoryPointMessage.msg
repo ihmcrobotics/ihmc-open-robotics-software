@@ -1,4 +1,4 @@
-# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This is part of the IHMC Common message package.
 # This message is used to build trajectory messages in taskspace.
 # It holds the only the translational information for one trajectory point (position & linear velocity).
 # Feel free to look at SO3TrajectoryPointMessage (rotational) and SE3TrajectoryPointMessage (rotational AND translational).
