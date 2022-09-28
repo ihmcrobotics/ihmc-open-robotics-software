@@ -30,6 +30,9 @@ public class PrompInfoMapper implements InfoMapper
    public void map(InfoMap infoMap)
    {
       infoMap.put(new Info("promp::TrajectoryGroup::normalize_length").javaText("public native long normalize_length();"));
+      // For some reason, normalize_length(size_t) isn't treated as a method when javacpp generates the C++ jni code
+      // It's referenced like: ptr->normalize_length;
+      // Which obviously can't compile, so for now, we skip it
       infoMap.put(new Info("promp::TrajectoryGroup::normalize_length(size_t)").skip());
       infoMap.put(new Info("Eigen::MatrixXd").pointerTypes("EigenMatrixXd"));
       infoMap.put(new Info("Eigen::VectorXd").pointerTypes("EigenVectorXd"));
