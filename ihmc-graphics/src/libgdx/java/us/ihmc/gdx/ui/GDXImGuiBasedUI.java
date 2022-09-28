@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.utils.Array;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -12,7 +11,10 @@ import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.imgui.*;
+import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
+import us.ihmc.gdx.imgui.ImGuiPanelManager;
+import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -286,6 +288,7 @@ public class GDXImGuiBasedUI
             e.printStackTrace();
          }
       }
+      setTheme();
    }
 
    public void renderBeforeOnScreenUI()
@@ -388,6 +391,7 @@ public class GDXImGuiBasedUI
             isLight = true;
             isDark = false;
             isClassic = false;
+            setTheme();
          }
          ImGui.sameLine();
          if (ImGui.radioButton(labels.get("Dark"), isDark))
@@ -396,6 +400,7 @@ public class GDXImGuiBasedUI
             isLight = false;
             isDark = true;
             isClassic = false;
+            setTheme();
          }
          ImGui.sameLine();
          if (ImGui.radioButton(labels.get("ImGui Classic"), isClassic))
@@ -404,6 +409,7 @@ public class GDXImGuiBasedUI
             isLight = false;
             isDark = false;
             isClassic = true;
+            setTheme();
          }
 
          // NOTE: save the theme to ~/.ihmc/lightDarkPreference.ini
@@ -420,16 +426,8 @@ public class GDXImGuiBasedUI
             e.printStackTrace();
          }
 
-
          ImGui.popItemWidth();
          ImGui.endMenu();
-      }
-
-      switch (theme)
-      {
-         case LIGHT -> ImGui.styleColorsLight();
-         case DARK -> ImGui.styleColorsDark();
-         case CLASSIC -> ImGui.styleColorsClassic();
       }
 
       ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
@@ -571,6 +569,16 @@ public class GDXImGuiBasedUI
       for (GDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
+      }
+   }
+
+   public void setTheme()
+   {
+      switch (theme)
+      {
+         case LIGHT -> ImGui.styleColorsLight();
+         case DARK -> ImGui.styleColorsDark();
+         case CLASSIC -> ImGui.styleColorsClassic();
       }
    }
 }
