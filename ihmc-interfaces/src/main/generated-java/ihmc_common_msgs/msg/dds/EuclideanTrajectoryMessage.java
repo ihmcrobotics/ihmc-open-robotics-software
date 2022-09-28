@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the collection of platform-independent ROS messages.
+       * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
        * This message carries the information to execute a trajectory in taskspace (position only) by defining trajectory points.
        * A third order polynomial function is used to interpolate positions.
        * To execute a single straight line trajectory to reach a desired position, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.

@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class FrameInformation extends Packet<FrameInformation> implements Settable<FrameInformation>, EpsilonComparable<FrameInformation>
 {
    /**
-          * This message is part of the collection of platform-independent ROS messages.
+          * This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
           * This message carries the frame related information needed for some messages such as taskspace trajectories.
           * Valid codes and their associated frames include:"
           */

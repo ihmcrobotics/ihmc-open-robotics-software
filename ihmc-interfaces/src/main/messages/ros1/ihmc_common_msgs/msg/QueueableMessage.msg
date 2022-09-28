@@ -1,4 +1,4 @@
-# This message is part of the collection of platform-independent ROS messages.
+# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
 # General message carrying the information needed to safely queue messages.
 
 int8 EXECUTION_MODE_OVERRIDE=0
