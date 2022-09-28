@@ -1,4 +1,7 @@
-# ProMP C++
+# ProMP C++ with Java bindings
+
+[Original Project](https://github.com/hucebot/promp)
+
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
 This is a library in C++ that implements Probabilistic Motion Primitives algorithms. References :
@@ -58,6 +61,10 @@ You can refer to the source code of some examples in the `examples` folder to un
 The api is described in [doc/api.md](doc/api.md)
 
 In the folder `etc/demos/` you can find many recordings of human whole-body postures (i.csv i=1,2,...) and/or body segments poses  (pi.csv i=1,2,...) for several motions. With these you can train and play with your own ProMPs. Have fun!
+
+## Java usage
+For an example usage in Java, see: `src/test/java/us/ihmc/promp/test/SinglePrompExample.java`. This example is a replica of the C++ example `examples/single_promp.cpp`.
+
 
 ## Python module
 
