@@ -141,15 +141,15 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       highlightedArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
       highlightedArrowMaterial.set(new BlendingAttribute(true, ARROW_HIGHLIGHTED_COLOR.a));
 
-      transformToWorld.appendTranslation(0.0f,0.0f,0.05f);
-      double zHeightOffset = transformToWorld.getTranslationZ();
+//      transformToWorld.appendTranslation(0.0f, 0.0f, 0.05f);
+//      double zHeightOffset = transformToWorld.getTranslationZ();
 
       discModel.setMesh(meshBuilder ->
       {
          meshBuilder.addHollowCylinder(discThickness.get(),
                                        discOuterRadius.get(),
                                        discInnerRadius.get(),
-                                       new Point3D(0.0, 0.0, zHeightOffset - discThickness.get() / 2.0),
+                                       new Point3D(0.0, 0.0,  0.0),
                                        DISC_NORMAL_COLOR);
       });
       positiveXArrowModel.setMesh(meshBuilder ->
@@ -157,7 +157,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, zHeightOffset),
+                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
                                                  new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
@@ -166,7 +166,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), zHeightOffset),
+                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
                                                  new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
@@ -175,7 +175,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, zHeightOffset),
+                                                 new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
                                                  new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
@@ -184,7 +184,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), zHeightOffset),
+                                                 new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), discThickness.get() / 2.0),
                                                  new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
                                                  ARROW_NORMAL_COLOR);
       });
