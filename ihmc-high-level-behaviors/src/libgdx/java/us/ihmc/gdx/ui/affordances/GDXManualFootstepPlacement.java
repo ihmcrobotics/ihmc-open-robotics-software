@@ -268,6 +268,6 @@ public class GDXManualFootstepPlacement implements RenderableProvider
 
    public boolean isPlacingFootstep()
    {
-      return footstepBeingPlaced!=null;
+      return footstepBeingPlaced != null;
    }
 }
