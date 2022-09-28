@@ -59,7 +59,6 @@ tasks.create("generateMessages") {
    doFirst {
       delete("src/main/generated-idl")
       delete("src/main/generated-java")
-      delete("src/main/messages/ros1/controller_msgs/msg")
       delete("build/tmp/generateMessages")
 
       for (packag in msg_packages) {
