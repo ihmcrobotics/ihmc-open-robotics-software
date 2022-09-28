@@ -53,7 +53,7 @@ public class PerceptionDataLogger
 
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo depthSampleInfo = new SampleInfo();
-`
+
    private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
    private final SampleInfo ousterSampleInfo = new SampleInfo();
 
@@ -67,8 +67,6 @@ public class PerceptionDataLogger
 
    private int pointCloudCount = 0;
 
-   private ROS2Callback<RobotConfigurationData> robotConfigurationCallback;
-   private ROS2Callback<BigVideoPacket> bigVideoPacketROS2Callback;
    private LidarScanMessage lidarScanMessage = new LidarScanMessage();
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
@@ -98,19 +96,16 @@ public class PerceptionDataLogger
 
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "logger");
 
-//      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), this::logDepthMap);
-//      new ROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), this::logBigVideoPacket);
+      //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), this::logDepthMap);
+      //      new ROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), this::logBigVideoPacket);
 
       new IHMCROS2Callback<>(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN.withType(LidarScanMessage.class), this::logLidarScanMessage);
-//
-//      new IHMCROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
-//      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
-//      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
+      //
+      //      new IHMCROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
+      //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
+      //      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
 
-      robotConfigurationCallback = new ROS2Callback<>(ros2Node,
-                                                      RobotConfigurationData.class,
-                                                      ROS2Tools.getRobotConfigurationDataTopic("Nadia"),
-                                                      this::logRobotConfigurationData);
+      new ROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
 
       executorService.scheduleAtFixedRate(this::collectStatistics, 0, 10, TimeUnit.MILLISECONDS);
    }
@@ -124,11 +119,11 @@ public class PerceptionDataLogger
    {
       LogTools.info("Robot Configuration Data Received: {}", data.getMonotonicTime());
 
-//      storeFloatArray("/robot/root/position/", data.getRootPosition());
-//      storeFloatArray("/robot/root/orientation/", data.getRootOrientation());
-//      storeFloatArray("/robot/joint_angles/", data.getJointAngles().toArray());
-//      storeFloatArray("/robot/joint_velocities/", data.getJointVelocities().toArray());
-//      storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
+      storeFloatArray("/robot/root/position/", data.getRootPosition());
+      storeFloatArray("/robot/root/orientation/", data.getRootOrientation());
+      storeFloatArray("/robot/joint_angles/", data.getJointAngles().toArray());
+      storeFloatArray("/robot/joint_velocities/", data.getJointVelocities().toArray());
+      storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
    }
 
    public void logLidarScanMessage(LidarScanMessage message)
@@ -137,15 +132,14 @@ public class PerceptionDataLogger
 
       lidarScanMessage.set(message);
       storePointCloud("/os_cloud_node/points/", lidarScanMessage);
-
    }
 
    public void logDepthMap(BigVideoPacket packet)
    {
       LogTools.info("Depth Map Received.");
-//      convertBigVideoPacketToMat(videoPacket, depthMap);
-//      HDF5Tools.storeDepthMap(h5.getGroup("/chest_l515/depth/image_rect_raw/"), depthMessageCounter, depthMap);
-//      depthMessageCounter += 1;
+      //      convertBigVideoPacketToMat(videoPacket, depthMap);
+      //      HDF5Tools.storeDepthMap(h5.getGroup("/chest_l515/depth/image_rect_raw/"), depthMessageCounter, depthMap);
+      //      depthMessageCounter += 1;
    }
 
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
@@ -167,9 +161,9 @@ public class PerceptionDataLogger
    public void logBigVideoPacket(BigVideoPacket packet)
    {
       LogTools.info("BIG Video Received.");
-//      Mat mat = new Mat(packet.getImageHeight(), packet.getImageHeight(), opencv_core.CV_8UC3);
-//      convertBigVideoPacketToMat(packet, mat);
-//      logImage(mat);
+      //      Mat mat = new Mat(packet.getImageHeight(), packet.getImageHeight(), opencv_core.CV_8UC3);
+      //      convertBigVideoPacketToMat(packet, mat);
+      //      logImage(mat);
    }
 
    public void logImage(Mat mat)
@@ -186,24 +180,24 @@ public class PerceptionDataLogger
    {
       Group group = h5.getGroup(namespace);
 
-//      int numberOfScanPoints = message.getNumberOfPoints();
-//      ArrayList<Float> pointFloats = new ArrayList<>();
-//
-//
-//      LogTools.info("Compressed Message Size: {}", message.getScan().size());
-//
-//      LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfScanPoints, (i, x, y, z) ->
-//      {
-//         pointFloats.add((float) x);
-//         pointFloats.add((float) y);
-//         pointFloats.add((float) z);
-//      });
-//
-//      ArrayList<Float> buffer = h5.getBuffer(namespace);
-//      buffer.addAll(pointFloats);
-//
-//      ArrayList<Float> data = new ArrayList<>(buffer);
-//      h5.resetBuffer(namespace);
+      //      int numberOfScanPoints = message.getNumberOfPoints();
+      //      ArrayList<Float> pointFloats = new ArrayList<>();
+      //
+      //
+      //      LogTools.info("Compressed Message Size: {}", message.getScan().size());
+      //
+      //      LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfScanPoints, (i, x, y, z) ->
+      //      {
+      //         pointFloats.add((float) x);
+      //         pointFloats.add((float) y);
+      //         pointFloats.add((float) z);
+      //      });
+      //
+      //      ArrayList<Float> buffer = h5.getBuffer(namespace);
+      //      buffer.addAll(pointFloats);
+      //
+      //      ArrayList<Float> data = new ArrayList<>(buffer);
+      //      h5.resetBuffer(namespace);
 
       executor.executeInBackground(() ->
                                    {
@@ -214,7 +208,7 @@ public class PerceptionDataLogger
                                          HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
                                          LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
 
-//                                         pointCloudCount++;
+                                         //                                         pointCloudCount++;
                                       }
                                    });
    }
