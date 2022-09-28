@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType;
-import controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessagePubSubType;
+import quadruped_msgs.msg.dds.QuadrupedBodyPathPlanMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;

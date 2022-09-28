@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.tools;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.SwingPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;

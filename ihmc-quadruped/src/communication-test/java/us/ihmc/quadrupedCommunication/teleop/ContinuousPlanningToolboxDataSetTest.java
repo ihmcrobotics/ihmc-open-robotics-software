@@ -17,13 +17,13 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.PawStepPlannerParametersPacket;
-import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.QuadrupedContinuousPlanningRequestPacket;
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.PawStepPlannerParametersPacket;
+import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import quadruped_msgs.msg.dds.QuadrupedContinuousPlanningRequestPacket;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;

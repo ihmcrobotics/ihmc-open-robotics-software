@@ -4,15 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
-import controller_msgs.msg.dds.TimeIntervalMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;

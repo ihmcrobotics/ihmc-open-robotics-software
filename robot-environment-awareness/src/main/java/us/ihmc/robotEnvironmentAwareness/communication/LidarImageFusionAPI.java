@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.Image32;
+import perception_msgs.msg.dds.Image32;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
