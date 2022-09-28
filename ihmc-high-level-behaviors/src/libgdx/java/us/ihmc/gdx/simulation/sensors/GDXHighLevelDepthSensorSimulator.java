@@ -141,6 +141,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
 
    private final ImBoolean useSensorColor = new ImBoolean(false);
+   private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
    private final Color pointColorFromPicker = new Color();
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
@@ -300,7 +301,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
          {
             GDXTools.toGDX(color, pointColorFromPicker);
             Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-            depthSensorSimulator.render(scene, pointColor, pointSize.get());
+            depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSize.get());
             pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
          }
          else
@@ -453,6 +454,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
       ImGui.checkbox("Use Sensor Color", useSensorColor);
+      ImGui.sameLine();
+      ImGui.checkbox("Color based on world Z", colorBasedOnWorldZ);
       ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.10f);
       ImGui.colorPicker4("Color", color);
       ImGui.text("Publish:");
