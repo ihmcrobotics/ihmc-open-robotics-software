@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+// This demo corresponds to promp/examples/single_promp.cpp
 public class SinglePrompExample
 {
    private static void loadLibraries() throws IOException
