@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2QosProfile;
 
 import java.io.IOException;
@@ -18,7 +18,7 @@ public class ROS2IntraProcessExample
       {
          ROS2Node node = new ROS2Node(PubSubImplementation.INTRAPROCESS, "MockAtlasController");
          //      RosPublisher<AtlasRobotConfigurationData> publisher = node.createPublisher(new AtlasRobotConfigurationDataPubSubType(), "/robot_configuration_data");
-         ROS2Publisher<RobotConfigurationData> publisher = node.createPublisher(new RobotConfigurationDataPubSubType(), "/robot_configuration_data");
+         ROS2PublisherBasics<RobotConfigurationData> publisher = node.createPublisher(new RobotConfigurationDataPubSubType(), "/robot_configuration_data");
 
          for (int i = 0; true; i++)
          {
@@ -51,7 +51,7 @@ public class ROS2IntraProcessExample
             System.out.println(robotConfigurationData.getMonotonicTime());
          }
       }, (subscriber, info) -> {
-         System.out.println("Subscription matched!: " + subscriber.getAttributes().getTopic().getTopicName() + " " + info.getStatus().name());
+         System.out.println("Subscription matched!: " + subscriber.getAttributes().getTopicName() + " " + info.getStatus().name());
       }, "/robot_configuration_data", ROS2QosProfile.DEFAULT());
       Thread.currentThread().join();
    }
