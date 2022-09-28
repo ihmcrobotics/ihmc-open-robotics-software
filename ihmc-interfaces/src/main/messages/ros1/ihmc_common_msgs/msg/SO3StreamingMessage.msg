@@ -1,4 +1,4 @@
-# This message is part of the collection of platform-independent ROS messages.
+# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
 # It is a lightweight version of SO3TrajectoryMessage designed for streaming.
 
 ihmc_common_msgs/FrameInformation frame_information

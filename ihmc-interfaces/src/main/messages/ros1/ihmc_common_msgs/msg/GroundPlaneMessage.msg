@@ -1,5 +1,5 @@
-# This message is part of the IHMC quadruped controller API.
-# This message contains the controller's estimate of the ground plane.
+# This is part of the IHMC Common message package and intended to be platform-independent, such as primitives and generic data.
+# This message contains a model of the ground plane.
 # It is defined by an origin and a normal
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
