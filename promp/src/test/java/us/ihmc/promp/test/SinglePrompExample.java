@@ -26,8 +26,8 @@ public class SinglePrompExample
       System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
 
       List<String> libraryFiles = new ArrayList<>();
-      libraryFiles.add("libjnipromp.so");
       libraryFiles.add("libpromp.so");
+      libraryFiles.add("libjnipromp.so");
 
       WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/src/main/resources");
       for (String libraryFile : libraryFiles)
