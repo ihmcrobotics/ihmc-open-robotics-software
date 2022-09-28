@@ -6,10 +6,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.PawStepPlanningRequestPacket;
-import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;
+import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;

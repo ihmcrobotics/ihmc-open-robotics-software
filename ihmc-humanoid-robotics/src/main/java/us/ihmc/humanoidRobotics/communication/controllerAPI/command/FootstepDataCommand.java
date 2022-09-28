@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.StepConstraintsListMessage;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;

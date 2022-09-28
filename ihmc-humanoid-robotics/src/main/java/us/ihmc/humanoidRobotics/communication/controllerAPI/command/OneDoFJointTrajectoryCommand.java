@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;

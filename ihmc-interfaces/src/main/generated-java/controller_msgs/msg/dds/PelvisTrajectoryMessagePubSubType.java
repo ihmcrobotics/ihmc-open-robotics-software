@@ -48,7 +48,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -75,7 +75,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -91,7 +91,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_7(data.getEnableUserPelvisControlDuringWalking());
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.write(data.getSe3Trajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.PelvisTrajectoryMessage data, us.ihmc.idl.CDR cdr)
@@ -104,7 +104,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setEnableUserPelvisControlDuringWalking(cdr.read_type_7());
       	
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.read(data.getSe3Trajectory(), cdr);	
 
    }
 
@@ -115,7 +115,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_7("force_execution", data.getForceExecution());
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
       ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
-      ser.write_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+      ser.write_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
 
@@ -126,7 +126,7 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setForceExecution(ser.read_type_7("force_execution"));
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
       data.setEnableUserPelvisControlDuringWalking(ser.read_type_7("enable_user_pelvis_control_during_walking"));
-      ser.read_type_a("se3_trajectory", new controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
+      ser.read_type_a("se3_trajectory", new ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType(), data.getSe3Trajectory());
 
    }
 

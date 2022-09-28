@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
-import us.ihmc.commonWalkingControlModules.touchdownDetector.NecessaryTouchdownDetectors;
-import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.robotics.sensors.FootSwitchInterface;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import us.ihmc.commonWalkingControlModules.touchdownDetector.TouchdownDetector;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class TouchdownDetectorBasedFootSwitch implements FootSwitchInterface
 {
@@ -28,13 +27,6 @@ public abstract class TouchdownDetectorBasedFootSwitch implements FootSwitchInte
       controllerThinksHasTouchedDown.set(false);
    }
 
-   @Override
-   public boolean getForceMagnitudePastThreshhold()
-   {
-      return false;
-   }
-
-   @Override
    public void setFootContactState(boolean hasFootHitGround)
    {
       controllerThinksHasTouchedDown.set(hasFootHitGround);
