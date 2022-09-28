@@ -4,8 +4,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SoleTrajectoryMessage;
 import javafx.application.Platform;

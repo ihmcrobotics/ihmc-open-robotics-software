@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.tools;
 
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;

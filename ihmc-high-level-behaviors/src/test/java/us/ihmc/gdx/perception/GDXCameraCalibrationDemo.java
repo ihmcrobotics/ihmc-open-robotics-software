@@ -1,6 +1,6 @@
 package us.ihmc.gdx.perception;
 
-import controller_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;

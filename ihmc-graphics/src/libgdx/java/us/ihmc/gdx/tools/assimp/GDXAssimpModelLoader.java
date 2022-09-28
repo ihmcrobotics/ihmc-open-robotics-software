@@ -31,6 +31,14 @@ public class GDXAssimpModelLoader
 
    public Model load()
    {
+      TextureProvider.FileTextureProvider textureProvider = new TextureProvider.FileTextureProvider();
+      ModelData modelData = loadModelData();
+      Model model = new Model(modelData, textureProvider);
+      return model;
+   }
+
+   public ModelData loadModelData()
+   {
       AIPropertyStore assimpPropertyStore = Assimp.aiCreatePropertyStore();
 
       int postProcessingSteps = 0; // none
@@ -95,8 +103,6 @@ public class GDXAssimpModelLoader
       modelData.nodes.ensureCapacity(1);
       modelData.nodes.add(new GDXAssimpNodeLoader(gdxAssimpMeshLoaders, gdxAssimpMaterialLoaders).load(assimpRootNode));
 
-      TextureProvider.FileTextureProvider textureProvider = new TextureProvider.FileTextureProvider();
-      Model model = new Model(modelData, textureProvider);
-      return model;
+      return modelData;
    }
 }

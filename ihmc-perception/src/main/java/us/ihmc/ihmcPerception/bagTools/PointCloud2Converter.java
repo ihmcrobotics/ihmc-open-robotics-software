@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.bagTools;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
 import sensor_msgs.msg.dds.PointCloud2;
 import sensor_msgs.msg.dds.PointCloud2PubSubType;

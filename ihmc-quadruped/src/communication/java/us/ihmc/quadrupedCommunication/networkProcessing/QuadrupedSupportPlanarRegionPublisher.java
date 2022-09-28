@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.ejml.data.DMatrixRMaj;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.thread.ThreadTools;

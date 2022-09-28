@@ -1,0 +1,27 @@
+#ifndef __perception_msgs__msg__SimulatedLidarScanPacket__idl__
+#define __perception_msgs__msg__SimulatedLidarScanPacket__idl__
+
+#include "perception_msgs/msg/./LidarScanParametersMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::SimulatedLidarScanPacket_")
+      struct SimulatedLidarScanPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        sequence<float> ranges;
+        long sensor_id;
+        perception_msgs::msg::dds::LidarScanParametersMessage lidar_scan_parameters;
+      };
+    };
+  };
+};
+
+#endif

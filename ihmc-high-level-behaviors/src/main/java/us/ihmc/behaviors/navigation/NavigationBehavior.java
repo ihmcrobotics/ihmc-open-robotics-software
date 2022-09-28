@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.navigation;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;

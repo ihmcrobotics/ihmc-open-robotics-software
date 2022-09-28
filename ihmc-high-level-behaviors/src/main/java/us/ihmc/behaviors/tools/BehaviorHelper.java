@@ -1,8 +1,11 @@
 package us.ihmc.behaviors.tools;
 
 import com.google.common.base.CaseFormat;
-import controller_msgs.msg.dds.*;
 import org.apache.commons.lang.WordUtils;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
