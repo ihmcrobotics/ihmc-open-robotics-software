@@ -25,7 +25,7 @@ unzip -j javacpp-platform-$JAVACPP_VERSION-bin.zip
 
 java -jar javacpp.jar us/ihmc/promp/presets/PrompInfoMapper.java
 # This will generate the jni shared library and place it into the classpath resources dir
-java -jar javacpp.jar us/ihmc/promp/ProMP.java -d ../../src/main/resources
+java -jar javacpp.jar us/ihmc/promp/*.java us/ihmc/promp/presets/*.java us/ihmc/promp/global/*.java -d ../../src/main/resources
 
 # Clean old generated Java code
 rm -rf ../../src/main/generated-java/*
