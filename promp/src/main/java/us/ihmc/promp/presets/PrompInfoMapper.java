@@ -10,16 +10,27 @@ import org.bytedeco.javacpp.tools.Info;
 import org.bytedeco.javacpp.tools.InfoMap;
 import org.bytedeco.javacpp.tools.InfoMapper;
 
-@Properties(value = {@Platform(compiler = "cpp11",
-      define = {"UNIQUE_PTR_NAMESPACE std", "SHARED_PTR_NAMESPACE std"},
-      includepath = "../include",
-      linkpath = "../lib",
-      include = {"promp/trajectory.hpp",
-                 "promp/trajectory_group.hpp",
-                 "promp/promp.hpp",},
-      link = "promp")},
+@Properties(value = {
+      @Platform(
+            value = {"linux", "windows", "macosx"},
+            compiler = "cpp11",
+            define = {"UNIQUE_PTR_NAMESPACE std", "SHARED_PTR_NAMESPACE std"},
+            include = {"promp/trajectory.hpp",
+                       "promp/trajectory_group.hpp",
+                       "promp/promp.hpp",},
+            link = "promp"),
+      @Platform(
+            value = "linux",
+            includepath = "../include",
+            linkpath = "../lib"),
+      @Platform(
+            value = "windows",
+            includepath = "../../include",
+            linkpath = "../Release")
+      },
       target = "us.ihmc.promp",
-      global = "us.ihmc.promp.global.promp")
+      global = "us.ihmc.promp.global.promp"
+)
 public class PrompInfoMapper implements InfoMapper
 {
    static
