@@ -65,6 +65,16 @@ In the folder `etc/demos/` you can find many recordings of human whole-body post
 ## Java usage
 For an example usage in Java, see: `src/test/java/us/ihmc/promp/test/SinglePrompExample.java`. This example is a replica of the C++ example `examples/single_promp.cpp`.
 
+## Generate Java bindings
+If you make any changes to the C++ code, you should re-generate the Java bindings. Utilize the scripts provided in this project's root directory. These scripts will generate
+the shared library files required at runtime (.so/.dll/.dylib) as well as the mapped Java code in `src/main/generated-java`.
+
+### Linux
+To generate the Java bindings for Linux, you should utilize Docker and the Docker build script in the root directory, `generate-java-mappings-docker.sh`.
+Using the Docker build script/the Docker image, you will ensure that the native libraries it produces are compatible with older distros (Ubuntu 20.04; glibc 2.31).
+
+### Windows
+TODO
 
 ## Python module
 
