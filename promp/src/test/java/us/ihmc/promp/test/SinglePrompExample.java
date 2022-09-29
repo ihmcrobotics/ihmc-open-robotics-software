@@ -5,9 +5,10 @@ import us.ihmc.promp.ProMP;
 import us.ihmc.promp.SizeTVector;
 import us.ihmc.promp.StringVector;
 import us.ihmc.promp.TrajectoryGroup;
-import us.ihmc.promp.global.promp;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+
+import static us.ihmc.promp.global.promp.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,9 +83,9 @@ public class SinglePrompExample
       int n_rbf = 20;
 
       ProMP m_promp = new ProMP(trajectoryGroup, n_rbf);
-      promp.EigenMatrixXd vect = m_promp.generate_trajectory();
-      promp.EigenMatrixXd stdTraj = m_promp.gen_traj_std_dev();
-      promp.EigenMatrixXd traj_covariance = m_promp.generate_trajectory_covariance();
+      EigenMatrixXd vect = m_promp.generate_trajectory();
+      EigenMatrixXd stdTraj = m_promp.gen_traj_std_dev();
+      EigenMatrixXd traj_covariance = m_promp.generate_trajectory_covariance();
 
       DoublePointer vectData = vect.data();
       DoublePointer stdTrajData = stdTraj.data();
