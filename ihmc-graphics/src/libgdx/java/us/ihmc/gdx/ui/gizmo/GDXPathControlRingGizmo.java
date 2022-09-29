@@ -192,10 +192,10 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    {
       updateTransforms();
 
-      ImGuiMouseDragData tranlateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+      ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
 
-      if (!tranlateDragData.isDragging() && !yawDragData.isDragging())
+      if (!translateDragData.isDragging() && !yawDragData.isDragging())
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
