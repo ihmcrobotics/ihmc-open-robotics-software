@@ -153,7 +153,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
       int imageWidth = parameters[6];
       int imageHeight = parameters[7];
       float pointSize = parameters[8];
-      bool colorBasedOnDepth = (bool) parameters[9];
+      bool colorBasedOnWorldZ = (bool) parameters[9];
       float pointColorR = parameters[10];
       float pointColorG = parameters[11];
       float pointColorB = parameters[12];
@@ -208,7 +208,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
             pointColorB = (rgba8888Color.z / 255.0f);
             pointColorA = (rgba8888Color.w / 255.0f);
          }
-         else if (colorBasedOnDepth)
+         else if (colorBasedOnWorldZ)
          {
             float4 rgba8888Color = createRGB(worldFramePoint.z);
             pointColorR = (rgba8888Color.x);
