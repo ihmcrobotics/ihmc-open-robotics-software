@@ -7,4 +7,4 @@ docker run \
     --rm \
     --network host \
     --dns=1.1.1.1 \
-    ihmcrobotics/promp:0.1 bash
+    ihmcrobotics/promp:0.2 bash
