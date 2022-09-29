@@ -29,10 +29,10 @@ public class ProMP extends Pointer {
          *	@param num_bf 	 number of basis functions
          *	@param std_bf	 standard deviation; this is set automatically to  1.0 / (n_rbf*n_rbf) if std_bf <= 0
          */
-        public ProMP(@StdVector Trajectory data, int num_bf, double std_bf/*=-1*/) { super((Pointer)null); allocate(data, num_bf, std_bf); }
-        private native void allocate(@StdVector Trajectory data, int num_bf, double std_bf/*=-1*/);
-        public ProMP(@StdVector Trajectory data, int num_bf) { super((Pointer)null); allocate(data, num_bf); }
-        private native void allocate(@StdVector Trajectory data, int num_bf);
+        public ProMP(@Const @ByRef TrajectoryVector data, int num_bf, double std_bf/*=-1*/) { super((Pointer)null); allocate(data, num_bf, std_bf); }
+        private native void allocate(@Const @ByRef TrajectoryVector data, int num_bf, double std_bf/*=-1*/);
+        public ProMP(@Const @ByRef TrajectoryVector data, int num_bf) { super((Pointer)null); allocate(data, num_bf); }
+        private native void allocate(@Const @ByRef TrajectoryVector data, int num_bf);
 
         /** \brief constructor: The constructor will parameterize a phase vector, and compute the basis function matrix
          * {@code  \Psi } for all phase steps. Then, for each demonstration within the std::vector \p data, it will estimate a.
