@@ -187,7 +187,7 @@ public class GDXLowLevelDepthSensorSimulator
       render(scene, true, null, 0.01f);
    }
 
-   public void render(GDX3DScene scene, boolean colorBasedOnDepth, Color userPointColor, float pointSize)
+   public void render(GDX3DScene scene, boolean colorBasedOnWorldZ, Color userPointColor, float pointSize)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -252,7 +252,7 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(6, imageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(7, imageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(8, pointSize);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(9, colorBasedOnDepth ? 1.0f : 0.0f);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(9, colorBasedOnWorldZ ? 1.0f : 0.0f);
       parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.r);
       parametersBuffer.getBytedecoFloatBufferPointer().put(11, userPointColor == null ? -1.0f : userPointColor.g);
       parametersBuffer.getBytedecoFloatBufferPointer().put(12, userPointColor == null ? -1.0f : userPointColor.b);
