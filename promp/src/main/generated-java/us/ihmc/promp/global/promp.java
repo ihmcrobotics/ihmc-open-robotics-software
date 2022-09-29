@@ -17,6 +17,9 @@ public class promp extends us.ihmc.promp.presets.PrompInfoMapper {
 // Targeting ../SizeTVector.java
 
 
+// Targeting ../TrajectoryVector.java
+
+
 // Targeting ../VectorVectorPair.java
 
 

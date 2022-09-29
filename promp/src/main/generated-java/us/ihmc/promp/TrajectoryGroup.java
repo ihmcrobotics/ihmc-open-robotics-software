@@ -87,5 +87,5 @@ public class TrajectoryGroup extends Pointer {
         /**
          * \brief	return the vector of trajectories
          */
-        public native @StdVector Trajectory trajectories();
+        public native @Const @ByRef TrajectoryVector trajectories();
     }
