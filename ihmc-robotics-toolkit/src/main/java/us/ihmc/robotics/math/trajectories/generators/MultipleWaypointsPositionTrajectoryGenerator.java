@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -46,7 +47,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    private final FramePoint3DBasics currentPosition;
    private final FrameVector3DBasics currentVelocity;
    private final FrameVector3DBasics currentAcceleration;
-   private final YoPolynomial3D subTrajectory;
+   private final Polynomial3D subTrajectory;
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
@@ -79,7 +80,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
       registerFrameChangeables(currentPosition, currentVelocity, currentAcceleration);
 
-      subTrajectory = new YoPolynomial3D(namePrefix, 4, registry);
+      subTrajectory = new Polynomial3D(4);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
