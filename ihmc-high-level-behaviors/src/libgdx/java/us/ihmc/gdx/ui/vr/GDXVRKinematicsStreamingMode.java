@@ -208,14 +208,14 @@ public class GDXVRKinematicsStreamingMode
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                if (kinematicsRecorder.isReplaying())
-                  kinematicsRecorder.replay(tempFramePose); //get values of tempFramePose from replay
+                  kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
                                                                                  side.negateIfLeftSide(Math.PI / 2.0),
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
-               kinematicsRecorder.record(tempFramePose);
+               kinematicsRecorder.framePoseToRecord(tempFramePose);
             });
          }
 
