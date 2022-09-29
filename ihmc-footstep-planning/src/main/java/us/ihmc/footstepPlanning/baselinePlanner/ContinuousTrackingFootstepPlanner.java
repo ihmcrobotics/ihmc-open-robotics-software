@@ -12,6 +12,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +37,7 @@ public class ContinuousTrackingFootstepPlanner
    private double swingTime = 0.6;
    private double transferTime = 0.25;
    private FootstepDataListMessage plannedFootsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
+   private ArrayList<SimpleTimedFootstep> allSteps = new ArrayList<>();
 
    public ContinuousTrackingFootstepPlanner(BaselineFootstepPlannerParameters parameters,
                                             double previewTime,
@@ -206,6 +208,7 @@ public class ContinuousTrackingFootstepPlanner
                                                                                            tailFootstep.getSoleFramePose().getPosition(),
                                                                                            tailFootstep.getSoleFramePose().getOrientation());
          plannedFootsteps.getFootstepDataList().add().set(footstepData);
+         allSteps.add(tailFootstep);
       }
    }
 
@@ -226,5 +229,10 @@ public class ContinuousTrackingFootstepPlanner
       {
          trajectory.compute(t0 + sampleIdx * dt);
       }
+   }
+
+   public ArrayList<SimpleTimedFootstep> getAllSteps()
+   {
+      return allSteps;
    }
 }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import javassist.Loader;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -132,6 +133,11 @@ public class GDXPoseTracking
       public MODE getTestMode()
       {
          return mode;
+      }
+
+      public ContinuousTrackingFootstepPlanner getPlanner()
+      {
+         return this.planner;
       }
    }
 
@@ -284,5 +290,15 @@ public class GDXPoseTracking
          stop();
          initiate();
       }
+   }
+
+   public boolean isActivated()
+   {
+      return activated;
+   }
+
+   public ArrayList<SimpleTimedFootstep> getAllSteps()
+   {
+      return controller.getPlanner().getAllSteps();
    }
 }

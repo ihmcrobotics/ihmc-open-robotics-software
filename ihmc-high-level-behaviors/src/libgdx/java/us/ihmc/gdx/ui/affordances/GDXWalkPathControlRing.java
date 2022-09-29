@@ -78,7 +78,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private SideDependentList<MovingReferenceFrame> footFrames;
    private final AtomicInteger footstepPlannerId = new AtomicInteger(0);
    private FootstepPlanningModule footstepPlanner;
-   private GDXFootstepPlanGraphic foostepPlanGraphic;
+   private GDXFootstepPlanGraphic footstepPlanGraphic;
    private double halfIdealFootstepWidth;
    private volatile FootstepPlan footstepPlan;
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
@@ -132,7 +132,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);
       leftStanceFootstepGraphic.create();
       rightStanceFootstepGraphic.create();
       leftGoalFootstepGraphic.create();
@@ -159,7 +159,6 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
 
-
       if (footstepPlanToGenerateMeshes != null)
 //      if (footstepPlan != null)
       {
@@ -168,7 +167,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 //                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
-      foostepPlanGraphic.update();
+      footstepPlanGraphic.update();
 
       if (joystickOn)
       {
@@ -303,13 +302,11 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          {
             planJoystick();
             joystickOn = true;
-//            footstepPlannerGoalGizmo.setJoystickMode(true);
          }
          if (plannerToUse!=3)
          {
             poseTracking.stop();
             joystickOn = false;
-//            footstepPlannerGoalGizmo.setJoystickMode(false);
          }
       });
    }
@@ -479,7 +476,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          rightStanceFootstepGraphic.getRenderables(renderables, pool);
          leftGoalFootstepGraphic.getRenderables(renderables, pool);
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
-         foostepPlanGraphic.getRenderables(renderables, pool);
+         footstepPlanGraphic.getRenderables(renderables, pool);
       }
       if (modified || mouseRingPickSelected)
       {
@@ -505,13 +502,13 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       rightStanceFootstepGraphic.setPose(BehaviorTools.createNaNPose());
       leftGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
       rightGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
-      foostepPlanGraphic.clear();
+      footstepPlanGraphic.clear();
    }
 
    public void destroy()
    {
       footstepPlanningThread.destroy();
-      foostepPlanGraphic.destroy();
+      footstepPlanGraphic.destroy();
    }
 
    @Override
