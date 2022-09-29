@@ -1,4 +1,4 @@
-# Current version: 0.1
+# Current version: 0.2
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -34,4 +34,4 @@ RUN apt-get --quiet 2 --yes update  \
 # Ubuntu installs the headers at /usr/include/eigen3/Eigen
 RUN ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 
-WORKDIR /root/dev
+WORKDIR /home/robotlab
