@@ -34,4 +34,9 @@ RUN apt-get --quiet 2 --yes update  \
 # Ubuntu installs the headers at /usr/include/eigen3/Eigen
 RUN ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 
+RUN useradd robotlab
+
+# Switch to our robotlab user last because prior tasks need to run as root
+USER robotlab
+
 WORKDIR /home/robotlab
