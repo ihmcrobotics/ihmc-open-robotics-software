@@ -6,6 +6,7 @@ import org.apache.commons.math3.util.Precision;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -39,7 +40,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
    private final YoDouble currentPosition;
    private final YoDouble currentVelocity;
    private final YoDouble currentAcceleration;
-   private final YoPolynomial subTrajectory;
+   private final Polynomial subTrajectory;
 
    public MultipleWaypointsTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
@@ -77,7 +78,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       currentVelocity = new YoDouble(currentVelocityName, registry);
       currentAcceleration = new YoDouble(currentAccelerationName, registry);
 
-      subTrajectory = new YoPolynomial(namePrefix, 4, registry);
+      subTrajectory = new Polynomial(4);
 
       clear();
    }
