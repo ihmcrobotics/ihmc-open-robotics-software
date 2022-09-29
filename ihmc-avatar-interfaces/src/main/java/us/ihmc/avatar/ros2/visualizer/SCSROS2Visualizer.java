@@ -74,7 +74,10 @@ public class SCSROS2Visualizer
    {
       int domainID = NetworkParameters.getRTPSDomainID();
       Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
-      ParticipantAttributes attributes = domain.createParticipantAttributes(domainID, getClass().getSimpleName());
+      ParticipantAttributes attributes = domain.createParticipantAttributes();
+      attributes.setDomainId(domainID);
+      attributes.setLeaseDuration(Time.Infinite);
+      attributes.setName(getClass().getSimpleName());
 
       participant = domain.createParticipant(attributes, (participant, info) ->
       {
@@ -93,13 +96,15 @@ public class SCSROS2Visualizer
          }
       });
       participant.registerEndpointDiscoveryListeners(
-      ((isAlive, guid, participantGuid, typeName, topicName, userDefinedId, typeMaxSerialized, topicKind) ->
+      ((isAlive, guid, unicastLocatorList, multicastLocatorList, participantGuid, typeName,
+        topicName, userDefinedId, typeMaxSerialized, topicKind, writerQosHolder) ->
       {
          numberOfPublishers.add(1);
          numberOfEndpoints.add(1);
          LogTools.info("Discovered publisher on topic: {}", topicName);
       }),
-      ((isAlive, guid, expectsInlineQos, participantGuid, typeName, topicName, userDefinedId, javaTopicKind) ->
+      ((isAlive, guid, expectsInlineQos, unicastLocatorList, multicastLocatorList, participantGuid, typeName,
+        topicName, userDefinedId, javaTopicKind, readerQosHolder) ->
       {
          numberOfSubscribers.add(1);
          numberOfEndpoints.add(1);
