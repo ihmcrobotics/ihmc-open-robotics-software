@@ -244,7 +244,15 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    public DataServerSettings getYoVariableServerSettings()
    {
-      return new DataServerSettings(false);
+      return getYoVariableServerSettings(false);
+   }
+
+   public DataServerSettings getYoVariableServerSettings(boolean logSession)
+   {
+      boolean autoDiscoverable = DataServerSettings.DEFAULT_AUTODISCOVERABLE;
+      int port = DataServerSettings.DEFAULT_PORT + 1; // Start higher than default to reduce conflicts
+      String videoStreamIdentifier = null;
+      return new DataServerSettings(logSession, autoDiscoverable, port, videoStreamIdentifier);
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
