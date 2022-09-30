@@ -53,13 +53,17 @@ generatorDependencies {
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()
+val msg_packages = listOf("ihmc_common_msgs", "controller_msgs", "toolbox_msgs", "quadruped_msgs", "perception_msgs", "exoskeleton_msgs", "atlas_msgs")
 
 tasks.create("generateMessages") {
    doFirst {
       delete("src/main/generated-idl")
       delete("src/main/generated-java")
-      delete("src/main/messages/ros1/controller_msgs/msg")
       delete("build/tmp/generateMessages")
+
+      for (packag in msg_packages) {
+         delete("src/main/messages/ros1/" + packag + "/msg")
+      }
 
       var foundDependency = false
 
@@ -91,19 +95,21 @@ tasks.create("generateMessages") {
                          file("build/tmp/generateMessages/generated-ros1").toPath(),
                          file("build/tmp/generateMessages/generated-java").toPath())
 
-      copy {
-         from("build/tmp/generateMessages/generated-idl/controller_msgs")
-         into("src/main/generated-idl/controller_msgs")
-      }
+      for (packag in msg_packages) {
+         copy {
+            from("build/tmp/generateMessages/generated-idl/$packag")
+            into("src/main/generated-idl/$packag")
+         }
 
-      copy {
-         from("build/tmp/generateMessages/generated-java/controller_msgs")
-         into("src/main/generated-java/controller_msgs")
-      }
+         copy {
+            from("build/tmp/generateMessages/generated-java/$packag")
+            into("src/main/generated-java/$packag")
+         }
 
-      copy {
-         from("build/tmp/generateMessages/generated-ros1/controller_msgs")
-         into("src/main/messages/ros1/controller_msgs")
+         copy {
+            from("build/tmp/generateMessages/generated-ros1/$packag")
+            into("src/main/messages/ros1/$packag")
+         }
       }
 
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())

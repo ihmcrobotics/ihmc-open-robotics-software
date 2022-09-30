@@ -6,8 +6,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import controller_msgs.msg.dds.BehaviorControlModeResponsePacket;
-import controller_msgs.msg.dds.BehaviorStatusPacket;
+import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;

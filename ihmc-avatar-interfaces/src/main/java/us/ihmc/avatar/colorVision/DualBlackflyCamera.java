@@ -1,11 +1,10 @@
 package us.ihmc.avatar.colorVision;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.ArUcoMarkerPoses;
-import controller_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.BigVideoPacket;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -22,7 +21,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;

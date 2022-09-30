@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HeightQuadTreeMessage;
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.HeightQuadTreeMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
