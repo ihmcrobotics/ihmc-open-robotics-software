@@ -52,6 +52,7 @@ public class PrompInfoMapper implements InfoMapper
       infoMap.put(new Info("std::vector<std::string>").pointerTypes("StringVector").define());
       infoMap.put(new Info("std::vector<size_t>").pointerTypes("SizeTVector").define());
       infoMap.put(new Info("std::vector<promp::Trajectory>").pointerTypes("TrajectoryVector").define());
+      infoMap.put(new Info("PROMPEXPORT").skip());
    }
 
    @Name("Eigen::MatrixXd")

@@ -16,6 +16,12 @@
 #ifndef PROMP_TRAJECTORY_HPP
 #define PROMP_TRAJECTORY_HPP
 
+#if defined(_MSC_VER)
+    #define PROMPEXPORT __declspec(dllexport)
+#else
+    #define PROMPEXPORT
+#endif
+
 #include <vector>
 
 #include <Eigen/Core>
@@ -35,62 +41,62 @@ namespace promp {
         /**
          *  @\brief default constructor. Build empty trajectory.
          */
-        Trajectory() = default;
+        PROMPEXPORT Trajectory() = default;
 
         /**
          *  @\brief constructor that build a trajectory starting from data and speed
          *  @\param data Eigen::Matrix containing the raw data, each column is a different dof
          *  @\param speed speed of the original trajectory (time-scale factor: e.g., 2.0 to go from 200 time-steps to 100 time-steps)
          */
-        explicit Trajectory(const Eigen::MatrixXd& data, double speed = 1.0);
+        PROMPEXPORT explicit Trajectory(const Eigen::MatrixXd& data, double speed = 1.0);
 
-        virtual ~Trajectory() = default;
+        PROMPEXPORT virtual ~Trajectory() = default;
 
         /**
          *  @\brief return number of dimensions of the trajectory
          */
-        inline size_t dims() const { return _data.cols(); }
+        PROMPEXPORT inline size_t dims() const { return _data.cols(); }
 
         /**
          *  @\brief return number of timesteps in the trajectory
          */
-        inline size_t timesteps() const { return _data.rows(); }
+        PROMPEXPORT inline size_t timesteps() const { return _data.rows(); }
 
         /**
          *  @\brief return the trajectory' speed
          */
-        inline double speed() const { return _speed; }
+        PROMPEXPORT inline double speed() const { return _speed; }
 
         /**
          *  @\brief return the raw data as Eigen::Matrix
          */
-        inline const Eigen::MatrixXd& matrix() const { return _data; }
+        PROMPEXPORT inline const Eigen::MatrixXd& matrix() const { return _data; }
 
         /**
          *  @\brief return monodimensional trajectory from the selected dimension
          *  @\param dim  dimension used to create the returned trajectory
          */
-        Trajectory sub_trajectory(size_t dim) const;
+        PROMPEXPORT Trajectory sub_trajectory(size_t dim) const;
 
         /**
          *  @\brief return  trajectory using data from the selected dimensions
          *  @\param dim  list of dimensions used to create the returned trajectory
          */
-        Trajectory sub_trajectory(const std::vector<size_t>& dims) const;
+        PROMPEXPORT Trajectory sub_trajectory(const std::vector<size_t>& dims) const;
 
         /**
          *  @\brief modulate the trajectory to the desired number of timesteps
          *  Adjust speed according to speed = this->speed() * this->timesteps() / timesteps
          *  @\param timesteps  desired number of steps in the trajectory
          */
-        void modulate_in_place(size_t timesteps, bool fast = true);
+        PROMPEXPORT void modulate_in_place(size_t timesteps, bool fast = true);
 
         /**
          *  @\brief create a new modulated trajectory with the desired number of timesteps
          *  Adjust its speed according to speed = this->speed() * this->timesteps() / timesteps
          *  @\param timesteps  desired number of steps in the trajectory
          */
-        Trajectory modulate(size_t steps, bool fast = true) const;
+        PROMPEXPORT Trajectory modulate(size_t steps, bool fast = true) const;
 
         /**
          *  @\brief compute the Euclidean distance between this and a second trajectory
@@ -98,7 +104,7 @@ namespace promp {
          *  @\param modulate  if false the distance is computed using data until the smaller trajectory lenght,
          *  if true the other trajectory is modulated to this trajectory length before computing the distance
          */
-        double distance(const Trajectory& other, bool modulate = false) const;
+        PROMPEXPORT double distance(const Trajectory& other, bool modulate = false) const;
 
         /**
          *  @\brief infer the speed of a trajectory starting from the raw data
@@ -107,7 +113,7 @@ namespace promp {
          *  @\param ub  upper bound for inferred speed
          *  @\param steps  number of speeds to be tested (linspace(lb, ub, steps))
          */
-        double infer_speed(const Eigen::MatrixXd& obs_traj, double lb, double ub, size_t steps) const;
+        PROMPEXPORT double infer_speed(const Eigen::MatrixXd& obs_traj, double lb, double ub, size_t steps) const;
 
     private:
         Eigen::MatrixXd create_modulated_matrix(size_t steps) const;
