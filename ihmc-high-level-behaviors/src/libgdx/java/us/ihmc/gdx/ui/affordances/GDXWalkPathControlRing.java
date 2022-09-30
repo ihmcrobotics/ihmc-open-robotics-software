@@ -604,6 +604,11 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       return goalPose;
    }
 
+   public boolean isSelected()
+   {
+      return selected;
+   }
+
    public FramePose3D getLeftGoalFootPose()
    {
       return leftGoalFootPose;

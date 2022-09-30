@@ -78,6 +78,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean isGizmoHovered = false;
+   private boolean isBeingManipulated = false;
    private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
@@ -221,10 +222,10 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    {
       updateTransforms();
 
-      ImGuiMouseDragData tranlateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+      ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
 
-      if (!tranlateDragData.isDragging() && !yawDragData.isDragging())
+      if (!translateDragData.isDragging() && !yawDragData.isDragging())
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
@@ -253,14 +254,27 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       isNewlyModified = false;
       isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
       boolean isRingHovered = isGizmoHovered && closestCollisionSelection == 0;
+      boolean leftButtonDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
+      boolean rightButtonDown = ImGui.isMouseDown(yawMouseButton);
 
       if (allowUserInput)
       {
-         if (isRingHovered && yawDragData.getDragJustStarted())
+         if (isRingHovered)
          {
-            clockFaceDragAlgorithm.reset();
+            if(yawDragData.getDragJustStarted())
+            {
+               clockFaceDragAlgorithm.reset();
+               yawDragData.setObjectBeingDragged(this);
+            }
+            else if(translateDragData.getDragJustStarted())
+            {
+               translateDragData.setObjectBeingDragged(this);
+            }
          }
-         if (isRingHovered && (translateDragData.isDragging() || yawDragData.isDragging()))
+
+         isBeingManipulated = (yawDragData.getObjectBeingDragged() == this && rightButtonDown)
+                              || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
+         if (isBeingManipulated)
          {
             isNewlyModified = true;
             Line3DReadOnly pickRay = input.getPickRayInWorld();
