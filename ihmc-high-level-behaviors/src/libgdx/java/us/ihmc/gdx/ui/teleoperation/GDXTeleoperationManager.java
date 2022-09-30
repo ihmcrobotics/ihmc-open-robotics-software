@@ -341,7 +341,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
          if (interactableExists)
          {
-            if (input.isWindowHovered() && !walkPathControlRing.isSelected())
+//            if (input.isWindowHovered() && !walkPathControlRing.isSelected())
+            if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
 
             pelvisInteractable.calculate3DViewPick(input);
