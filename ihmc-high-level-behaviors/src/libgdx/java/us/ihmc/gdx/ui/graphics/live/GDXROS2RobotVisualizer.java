@@ -154,7 +154,6 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 
    public void teleportCameraToRobotPelvis()
    {
-      RigidBodyTransform robotTransform = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame();
-      cameraForTracking.setFocusPointPose(robotTransform);
+      cameraForTracking.setCameraFocusPoint(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getPosition());
    }
 }
