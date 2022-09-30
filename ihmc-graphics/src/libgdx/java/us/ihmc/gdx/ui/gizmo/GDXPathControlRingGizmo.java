@@ -32,22 +32,28 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+import java.util.function.Supplier;
+
 public class GDXPathControlRingGizmo implements RenderableProvider
 {
-   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.836f);
-   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.95f);
-   public static final Color YELLOW_HIGHLIGHT = new Color().fromHsv(61.5f, 0.783f, 0.892f);
-   public static final Color DISC_NORMAL_COLOR = LIGHT_GRAY;
-   public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
-   public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY;
-   public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
+   public static final Supplier<Color> LIGHT_GRAY = () -> new Color().fromHsv(0.0f, 0.0f, 0.6f);
+   public static final Supplier<Color> LIGHTER_GRAY = () -> new Color().fromHsv(0.0f, 0.0f, 0.5f);
+   public static final Supplier<Color> YELLOW_HIGHLIGHT = () -> new Color().fromHsv(61.5f, 0.783f, 0.892f);
+   public static final Color DISC_NORMAL_COLOR = LIGHT_GRAY.get();
+   public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY.get();
+   public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY.get();
+   public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY.get();
+   public static final Color POSITIVE_X_ARROW_NORMAL_COLOR = YELLOW_HIGHLIGHT.get();
+   public static final Color POSITIVE_X_ARROW_HIGHLIGHTED_COLOR = YELLOW_HIGHLIGHT.get();
 
    static
    {
-      DISC_NORMAL_COLOR.a = 0.4f;
-      ARROW_NORMAL_COLOR.a = 0.4f;
+      DISC_NORMAL_COLOR.a = 0.7f;
+      ARROW_NORMAL_COLOR.a = 0.7f;
+      POSITIVE_X_ARROW_NORMAL_COLOR.a = 0.7f;
       DISC_HIGHLIGHTED_COLOR.a = 0.9f;
       ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
+      POSITIVE_X_ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
    }
 
    private final double QUARTER_TURN = Math.PI / 2.0;
@@ -155,7 +161,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
                                                  discThickness.get(),
                                                  new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
                                                  new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                                 ARROW_NORMAL_COLOR);
+                                                 POSITIVE_X_ARROW_NORMAL_COLOR);
       });
       positiveYArrowModel.setMesh(meshBuilder ->
       {
