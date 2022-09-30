@@ -71,6 +71,15 @@ public class PrompInfoMapper implements InfoMapper
 
       // Calls data() on the C++ side
       public native DoublePointer data();
+
+      // Calls rows() on the C++ side
+      public native long rows();
+
+      // Calls cols() on the C++ side
+      public native long cols();
+
+      // Calls coeff(Index rowId, Index colId) on the C++ side
+      public native double coeff(int rowId, int colId);
    }
 
    @Name("Eigen::VectorXd")
@@ -90,5 +99,8 @@ public class PrompInfoMapper implements InfoMapper
 
       // Calls data() on the C++ side
       public native DoublePointer data();
+
+      // Calls size() on the C++ side
+      public native long size();
    }
 }
