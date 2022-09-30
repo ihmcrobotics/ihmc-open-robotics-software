@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.HeightMapMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

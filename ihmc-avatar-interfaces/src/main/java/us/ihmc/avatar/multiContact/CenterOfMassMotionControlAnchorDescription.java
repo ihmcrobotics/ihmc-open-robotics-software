@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 

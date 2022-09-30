@@ -2,6 +2,7 @@ package us.ihmc.gdx.ui.interactable;
 
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.math.Frustum;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDX3DPanel;
@@ -53,7 +53,7 @@ public class GDXInteractableBlackflyFujinon
 
    private void create(GDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
-      GDXModelInstance sensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/blackflyFujinon/BlackflyFujinon.g3dj"));
+      ModelData sensorModel = GDXModelLoader.loadModelData("environmentObjects/blackflyFujinon/BlackflyFujinon.g3dj");
       interactableFrameModel.create(referenceFrameToRepresent, transformToParentToModify, panel3D, sensorModel, this::calculateClosestCollision);
 
       interactableFrameModel.setExtendedContextMenu(this::renderImGuiContextMenu);

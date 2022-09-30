@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedBasics.gait;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import controller_msgs.msg.dds.TimeIntervalMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.QuadrupedTimedStepCommand;

@@ -34,6 +34,7 @@ public class GDXVRDepthSensorDemo
    private final Matrix4 tempTransform = new Matrix4();
    private final ImBoolean enablePointCloudRender = new ImBoolean(true);
    private final ImBoolean useSensorColor = new ImBoolean(false);
+   private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
    private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
@@ -147,7 +148,7 @@ public class GDXVRDepthSensorDemo
             {
                pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
                Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-               depthSensorSimulator.render(baseUI.getPrimaryScene(), pointColor, pointSize.get());
+               depthSensorSimulator.render(baseUI.getPrimaryScene(), colorBasedOnWorldZ.get(), pointColor, pointSize.get());
                pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
             }
 
@@ -160,6 +161,7 @@ public class GDXVRDepthSensorDemo
             ImGui.checkbox("Enable point cloud", enablePointCloudRender);
             ImGui.checkbox("Use Gizmo to pose sensor", useGizmoToPoseSensor);
             ImGui.checkbox("Use Sensor Color", useSensorColor);
+            ImGui.checkbox("Color based on world Z", colorBasedOnWorldZ);
             ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
             ImGui.colorPicker4("Color", color);
          }

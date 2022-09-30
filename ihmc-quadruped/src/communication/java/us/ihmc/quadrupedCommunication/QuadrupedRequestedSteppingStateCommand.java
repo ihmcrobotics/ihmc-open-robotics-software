@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedCommunication;
 
-import controller_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
+import quadruped_msgs.msg.dds.QuadrupedRequestedSteppingStateMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingRequestedEvent;
 

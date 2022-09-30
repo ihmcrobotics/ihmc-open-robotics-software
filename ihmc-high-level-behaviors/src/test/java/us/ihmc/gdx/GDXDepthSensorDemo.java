@@ -43,7 +43,7 @@ public class GDXDepthSensorDemo
          @Override
          public void render()
          {
-            depthSensorSimulator.render(sceneManager.getScene(), Color.WHITE, 0.01f);
+            depthSensorSimulator.render(sceneManager.getScene(), false, Color.WHITE, 0.01f);
             pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
 
             GDX3DSceneTools.glClearGray();

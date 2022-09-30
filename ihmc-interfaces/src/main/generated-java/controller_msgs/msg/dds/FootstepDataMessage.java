@@ -78,7 +78,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * All waypoints are for the sole frame and expressed in the trajectory frame.
             * The maximum number of points can be found in the Footstep class.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage>  swing_trajectory_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage>  swing_trajectory_;
    /**
             * In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
             * If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
@@ -130,7 +130,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       custom_waypoint_proportions_ = new us.ihmc.idl.IDLSequence.Double (2, "type_6");
 
       custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (12, new geometry_msgs.msg.dds.PointPubSubType());
-      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (12, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (12, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       step_constraints_ = new controller_msgs.msg.dds.StepConstraintsListMessage();
 
    }
@@ -306,7 +306,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             * All waypoints are for the sole frame and expressed in the trajectory frame.
             * The maximum number of points can be found in the Footstep class.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage>  getSwingTrajectory()
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage>  getSwingTrajectory()
    {
       return swing_trajectory_;
    }

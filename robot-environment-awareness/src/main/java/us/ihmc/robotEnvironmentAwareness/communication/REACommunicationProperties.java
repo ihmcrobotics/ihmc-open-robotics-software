@@ -2,17 +2,17 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.BoundingBox3DMessagePubSubType;
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanMessagePubSubType;
-import controller_msgs.msg.dds.PlanarRegionMessage;
-import controller_msgs.msg.dds.PlanarRegionMessagePubSubType;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
+import ihmc_common_msgs.msg.dds.BoundingBox3DMessagePubSubType;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessagePubSubType;
+import perception_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.msg.dds.PlanarRegionMessagePubSubType;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import controller_msgs.msg.dds.Polygon2DMessage;
 import controller_msgs.msg.dds.Polygon2DMessagePubSubType;
-import controller_msgs.msg.dds.RequestLidarScanMessagePubSubType;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
+import perception_msgs.msg.dds.RequestLidarScanMessagePubSubType;
+import perception_msgs.msg.dds.RequestPlanarRegionsListMessagePubSubType;
 import geometry_msgs.msg.dds.PointPubSubType;
 import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;

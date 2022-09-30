@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.genericQuadruped.controller.force;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.genericQuadruped.GenericQuadrupedTestFactory;

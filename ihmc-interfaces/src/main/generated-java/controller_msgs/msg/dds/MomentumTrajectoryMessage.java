@@ -22,11 +22,11 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
             * Each waypoint contains the angular momentum and the angular momentum rate at a given time.
             * NOTE: As the angular momentum can't be encoded using the SO3TrajectoryMessage, the EuclideanTrajectoryMessage is used.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage angular_momentum_trajectory_;
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage angular_momentum_trajectory_;
 
    public MomentumTrajectoryMessage()
    {
-      angular_momentum_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
+      angular_momentum_trajectory_ = new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public MomentumTrajectoryMessage(MomentumTrajectoryMessage other)
@@ -39,7 +39,7 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
    {
       sequence_id_ = other.sequence_id_;
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.angular_momentum_trajectory_, angular_momentum_trajectory_);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.angular_momentum_trajectory_, angular_momentum_trajectory_);
    }
 
    /**
@@ -63,7 +63,7 @@ public class MomentumTrajectoryMessage extends Packet<MomentumTrajectoryMessage>
             * Each waypoint contains the angular momentum and the angular momentum rate at a given time.
             * NOTE: As the angular momentum can't be encoded using the SO3TrajectoryMessage, the EuclideanTrajectoryMessage is used.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage getAngularMomentumTrajectory()
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage getAngularMomentumTrajectory()
    {
       return angular_momentum_trajectory_;
    }

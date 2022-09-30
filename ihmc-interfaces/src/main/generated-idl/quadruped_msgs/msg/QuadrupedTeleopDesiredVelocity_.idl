@@ -1,0 +1,30 @@
+#ifndef __quadruped_msgs__msg__QuadrupedTeleopDesiredVelocity__idl__
+#define __quadruped_msgs__msg__QuadrupedTeleopDesiredVelocity__idl__
+
+module quadruped_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message sends a desired stepping velocity to the step teleop module.
+       */
+      @TypeCode(type="quadruped_msgs::msg::dds_::QuadrupedTeleopDesiredVelocity_")
+      struct QuadrupedTeleopDesiredVelocity
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        double desired_x_velocity;
+        double desired_y_velocity;
+        double desired_yaw_velocity;
+      };
+    };
+  };
+};
+
+#endif
