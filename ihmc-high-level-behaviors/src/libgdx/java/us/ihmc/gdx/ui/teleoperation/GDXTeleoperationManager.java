@@ -337,7 +337,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         walkPathControlRing.calculate3DViewPick(input);
+         if (!manualFootstepPlacement.isPlacingFootstep())
+            walkPathControlRing.calculate3DViewPick(input);
 
          if (interactableExists)
          {
@@ -362,7 +363,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesEnabled.get())
       {
-         walkPathControlRing.process3DViewInput(input);
+         if (!manualFootstepPlacement.isPlacingFootstep())
+            walkPathControlRing.process3DViewInput(input);
 
          if (interactableExists)
          {

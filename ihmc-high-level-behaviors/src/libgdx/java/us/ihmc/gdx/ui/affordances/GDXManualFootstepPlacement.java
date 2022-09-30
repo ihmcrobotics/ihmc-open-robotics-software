@@ -265,4 +265,9 @@ public class GDXManualFootstepPlacement implements RenderableProvider
          return footstepPlan.getLastFootstep();
       }
    }
+
+   public boolean isPlacingFootstep()
+   {
+      return footstepBeingPlaced != null;
+   }
 }
