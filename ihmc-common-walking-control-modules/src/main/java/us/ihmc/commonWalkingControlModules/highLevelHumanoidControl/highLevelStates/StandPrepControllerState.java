@@ -25,6 +25,8 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
+   private final YoPolynomial trajectory;
+
    private final YoBoolean reinitialize = new YoBoolean("standPrepReinitialize", registry);
    private final YoBoolean continuousUpdate = new YoBoolean("standPrepContinuousUpdate", registry);
    private final YoDouble splineStartTime = new YoDouble("standPrepSplineStartTime", registry);
@@ -48,12 +50,15 @@ public class StandPrepControllerState extends HighLevelControllerState
       WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
 
+      trajectory = new YoPolynomial("StandPrepTrajectory", 4, registry);
+
+
       for (OneDoFJointBasics controlledJoint : controlledJoints)
       {
          String jointName = controlledJoint.getName();
          String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, jointName);
 
-         YoPolynomial trajectory = new YoPolynomial(namePrefix + "StandPrepTrajectory", 4, registry);
+//         YoPolynomial trajectory = new YoPolynomial(namePrefix + "StandPrepTrajectory", 4, registry);
          DoubleProvider standPrepFinalConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition",
                                                                           registry,
                                                                           standPrepParameters.getSetpoint(jointName));
@@ -103,8 +108,10 @@ public class StandPrepControllerState extends HighLevelControllerState
             startAngle = joint.getQ();
          double startVelocity = 0.0;
 
-         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), startAngle, startVelocity, desiredFinalPosition, desiredFinalVelocity);
+//         trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), startAngle, startVelocity, desiredFinalPosition, desiredFinalVelocity);
       }
+
+      trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), 0, 1, 0, 0);
    }
 
    @Override
@@ -131,6 +138,11 @@ public class StandPrepControllerState extends HighLevelControllerState
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
+         //Set up alpha for eacah joint
+         trajectory.compute(timeInTrajectory);
+         double alphaPosition = trajectory.getValue();
+         double alphaVelocity = trajectory.getVelocity();
+
          OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
 
@@ -139,6 +151,14 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          trajectory.compute(timeInTrajectory);
          desiredPosition.set(trajectory.getValue());
+
+         //Not sure if this is correct, because q0 and qf are what need to be saved per joint, but when drawing on the whiteboard
+         //q0 and qf were the parameters for the alpha functions. So how can I use something I am trying to get??
+         double q_initial = trajectoryData.getDesiredJointConfiguration().getValue();
+         double q_final = trajectoryData.getFinalJointConfiguration().getValue();;
+
+         double jointPosition = (1 - alphaPosition) * q_initial + alphaPosition * q_final;
+         double jointVelocity = alphaVelocity * (q_final - q_initial);
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
