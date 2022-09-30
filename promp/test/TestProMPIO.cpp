@@ -17,22 +17,22 @@
 
 #include <promp/io/serializer.hpp>
 
-TEST(IO, promp_save)
+TEST(IO, prompSave)
 {
-    std::string file_name = "promp.txt";
-    std::string folder_path = "../../etc/test/";
-    auto promp = promp::io::load_promp(folder_path + file_name);
-    promp::io::save_promp(folder_path + "__" + file_name, promp);
-    auto saved_promp = promp::io::load_promp(folder_path + "__" + file_name);
+    std::string fileName = "promp.txt";
+    std::string folderPath = "../../etc/test/";
+    auto promp = promp::io::load_promp(folderPath + fileName);
+    promp::io::save_promp(folderPath + "__" + fileName, promp);
+    auto savedPromp = promp::io::load_promp(folderPath + "__" + fileName);
 
-    ASSERT_EQ(promp.get_std_bf(), saved_promp.get_std_bf());
-    ASSERT_EQ(promp.get_dims(), saved_promp.get_dims());
-    ASSERT_EQ(promp.get_n_samples(), saved_promp.get_n_samples());
-    ASSERT_EQ(promp.get_weights(), saved_promp.get_weights());
-    ASSERT_EQ(promp.get_covariance(), saved_promp.get_covariance());
+    ASSERT_EQ(promp.get_std_bf(), savedPromp.get_std_bf());
+    ASSERT_EQ(promp.get_dims(), savedPromp.get_dims());
+    ASSERT_EQ(promp.get_n_samples(), savedPromp.get_n_samples());
+    ASSERT_EQ(promp.get_weights(), savedPromp.get_weights());
+    ASSERT_EQ(promp.get_covariance(), savedPromp.get_covariance());
 }
 
-TEST(IO, trajectory_save)
+TEST(IO, trajectorySave)
 {
     size_t timesteps = 100;
     size_t dims = 5;

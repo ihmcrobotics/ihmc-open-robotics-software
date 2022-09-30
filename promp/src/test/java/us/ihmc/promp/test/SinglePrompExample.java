@@ -1,20 +1,19 @@
 package us.ihmc.promp.test;
 
-import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.promp.*;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
 import java.io.File;
+
 import us.ihmc.promp.ProMP;
 import us.ihmc.promp.SizeTVector;
 import us.ihmc.promp.StringVector;
 import us.ihmc.promp.TrajectoryGroup;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,15 +47,16 @@ public class SinglePrompExample
    private static void saveAsCSV(EigenMatrixXd dataMatrix, String fileName)
    {
       List<String[]> dataLines = new ArrayList<>();
-      for (int i=0; i<dataMatrix.rows(); i++)
+      for (int i = 0; i < dataMatrix.rows(); i++)
       {
          String[] stringLine = new String[(int) dataMatrix.cols()];
-         for (int j=0; j<dataMatrix.cols(); j++)
+         for (int j = 0; j < dataMatrix.cols(); j++)
             stringLine[j] = "" + dataMatrix.coeff(i, j);
          dataLines.add(stringLine);
       }
-      String filePath = String.valueOf(Paths.get(System.getProperty("user.home"), "repository-group/ihmc-open-robotics-software/promp/etc")) + fileName;
-      File csvFile = new File(filePath);
+      WorkspaceDirectory fileDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
+      String fileDirAbs = fileDirectory.getDirectoryPath().toAbsolutePath().toString();
+      File csvFile = new File(fileDirAbs + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
          dataLines.stream().map(s -> convertToCSV(s)).forEach(writer::println);
@@ -122,31 +122,32 @@ public class SinglePrompExample
       EigenMatrixXd covarianceTrajectory = m_promp.generate_trajectory_covariance();
 
       TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
-      List<EigenMatrixXd> hand_demo_trajectory = new ArrayList<>();
-      for (int i=0; i<demoTrajectories.size(); i++)
+      List<EigenMatrixXd> handDemoTrajectory = new ArrayList<>();
+      for (int i = 0; i < demoTrajectories.size(); i++)
       {
-         hand_demo_trajectory.add((demoTrajectories.get(i)).matrix());
-         saveAsCSV(hand_demo_trajectory.get(i),("/demo"+(i+1)+".csv"));
+         handDemoTrajectory.add((demoTrajectories.get(i)).matrix());
+         saveAsCSV(handDemoTrajectory.get(i), ("/demo" + (i + 1) + ".csv"));
       }
-
-      saveAsCSV(meanTrajectory,"/mean.csv");
-      saveAsCSV(stdTrajectory,"/variance.csv");
-      saveAsCSV(covarianceTrajectory,"/covariance.csv");
+      saveAsCSV(meanTrajectory, "/mean.csv");
+      saveAsCSV(stdTrajectory, "/variance.csv");
+      saveAsCSV(covarianceTrajectory, "/covariance.csv");
 
       printMatrix(meanTrajectory, "Mean");
       printMatrix(stdTrajectory, "Std Deviation");
       printMatrix(covarianceTrajectory, "Covariance");
    }
 
-   private static void printMatrix(EigenMatrixXd matrix, String name) {
+   private static void printMatrix(EigenMatrixXd matrix, String name)
+   {
       System.out.println(name);
-      for (int row = 0; row < matrix.rows(); row++) {
-         for (int col = 0; col < matrix.cols(); col++) {
+      for (int row = 0; row < matrix.rows(); row++)
+      {
+         for (int col = 0; col < matrix.cols(); col++)
+         {
             System.out.print(matrix.coeff(row, col) + " ");
          }
          System.out.println();
       }
       System.out.println();
    }
-
 }
