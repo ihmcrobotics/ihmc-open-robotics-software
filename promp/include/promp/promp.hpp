@@ -42,7 +42,7 @@ namespace promp {
          *	\param num_bf 	 number of basis functions
          *	\param std_bf	 standard deviation; this is set automatically to  1.0 / (n_rbf*n_rbf) if std_bf <= 0
          */
-        ProMP(const std::vector<Trajectory>& data, int num_bf, double std_bf = -1)
+        PROMPEXPORT ProMP(const std::vector<Trajectory>& data, int num_bf, double std_bf = -1)
             : _num_bf(num_bf),
               _alpha(1.0)
         {
@@ -58,7 +58,7 @@ namespace promp {
          *	\param num_bf 	 number of basis functions
          *	\param std_bf	 standard deviation; this is set automatically to  1.0 / (n_rbf*n_rbf) if std_bf <= 0
          */
-        ProMP(const TrajectoryGroup& data, int num_bf, double std_bf = -1)
+        PROMPEXPORT ProMP(const TrajectoryGroup& data, int num_bf, double std_bf = -1)
             : _num_bf(num_bf),
               _alpha(1.0)
         {
