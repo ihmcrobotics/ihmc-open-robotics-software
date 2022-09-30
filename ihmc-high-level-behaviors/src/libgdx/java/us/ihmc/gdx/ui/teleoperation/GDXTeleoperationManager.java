@@ -53,9 +53,8 @@ import java.util.List;
  */
 public class GDXTeleoperationManager extends ImGuiPanel
 {
-   GDXImGuiBasedUI baseUI;
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   GDXImGuiBasedUI baseUI;
    private final CommunicationHelper communicationHelper;
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
@@ -93,7 +92,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final ImString tempImGuiText = new ImString(1000);
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
-   private final boolean interactableExists;
+   private final boolean interactablesAvailable;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -158,8 +157,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new GDXFootstepPlanning(robotModel, syncedRobot);
 
-      interactableExists = robotSelfCollisionModel != null;
-      if (interactableExists)
+      interactablesAvailable = robotSelfCollisionModel != null;
+      if (interactablesAvailable)
       {
          selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
@@ -196,7 +195,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
@@ -308,7 +307,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.update(interactableFootstepPlan);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             wholeBodyDesiredIKManager.update(handInteractables);
 
@@ -338,7 +337,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
          if (!manualFootstepPlacement.isPlacingFootstep())
             walkPathControlRing.calculate3DViewPick(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
@@ -364,7 +363,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
          if (!manualFootstepPlacement.isPlacingFootstep())
             walkPathControlRing.process3DViewInput(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             environmentCollisionModel.process3DViewInput(input);
 
@@ -455,7 +454,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
          desiredRobot.setDesiredToCurrent();
       }
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          wholeBodyDesiredIKManager.renderImGuiWidgets();
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
@@ -584,7 +583,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesEnabled.get())
       {
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (showSelfCollisionMeshes.get())
             {
