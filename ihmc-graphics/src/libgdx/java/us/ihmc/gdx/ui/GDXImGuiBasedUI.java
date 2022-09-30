@@ -97,7 +97,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
-   private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
+   private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(true);
    private final ImFloat backgroundShade = new ImFloat(GDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);

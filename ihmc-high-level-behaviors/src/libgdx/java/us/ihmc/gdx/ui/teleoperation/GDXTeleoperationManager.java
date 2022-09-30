@@ -38,7 +38,6 @@ import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.ui.vr.GDXVRInputMode;
 import us.ihmc.gdx.ui.vr.GDXWholeBodyIKStreaming;
-import us.ihmc.gdx.ui.yo.GDXContinuousStepping;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -100,8 +99,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
    private final boolean interactablesAvailable;
-   private final GDXContinuousStepping continuousStepping;
-   private final ImBoolean joystickOn = new ImBoolean(false);
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -163,8 +160,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                         ros2Helper,
                                         teleoperationParameters);
       }
-
-      continuousStepping = new GDXContinuousStepping(robotModel);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -176,13 +171,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       this.baseUI = baseUI;
       desiredRobot.create();
-
-//      vrModeManager.create(baseUI,
-//                           syncedRobot,
-//                           ros2Helper,
-//                           kinematicsStreamingToolboxProcess != null,
-//                           teleoperationParameters,
-//                           this::renderExtraWidgetsOnVRPanel);
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -200,14 +188,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
 
-      walkPathControlRing.create(baseUI,
-                                 baseUI.getPrimary3DPanel(),
-                                 robotModel,
-                                 syncedRobot,
-                                 teleoperationParameters,
-                                 communicationHelper,
-                                 ros2Helper,
-                                 footstepPlanning.getFootstepPlannerParameters());
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
 
       if (interactablesAvailable)
       {
@@ -302,8 +283,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-
-      continuousStepping.create(baseUI,ros2Helper, robotModel, teleoperationParameters, syncedRobot, communicationHelper, walkPathControlRing);
    }
 
    public void update()
@@ -385,8 +364,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
-
-//      vrModeManager.update(nativesLoaded, nativesNewlyLoaded);
+      
       if (wholeBodyIKStreaming != null)
       {
          boolean isIKStreamingMode = armManager.getArmControlMode() == GDXArmControlMode.STREAMING;
@@ -396,7 +374,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
             wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().start();
          }
       }
-      continuousStepping.update(true);
    }
 
    private void calculateVRPick(GDXVRContext vrContext)
@@ -457,9 +434,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
       }
-
-//      continuousStepping.calculate3DViewPick(input);
-
    }
 
    // This happens after update.
@@ -484,7 +458,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
       }
-//      continuousStepping.processInput(input);
    }
 
    private void renderExtraWidgetsOnVRPanel()
@@ -756,7 +729,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       desiredRobot.destroy();
       walkPathControlRing.destroy();
       footstepsSentToControllerGraphic.destroy();
-//      vrModeManager.destroy();
       if (wholeBodyIKStreaming != null)
          wholeBodyIKStreaming.destroy();
    }
