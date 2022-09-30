@@ -27,9 +27,9 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
    }
 
    @Override
-   public DataServerSettings getYoVariableServerSettings()
+   public DataServerSettings createYoVariableServerSettings()
    {
-      return super.getYoVariableServerSettings(true);
+      return super.createYoVariableServerSettings(true);
    }
 
    private static Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
