@@ -126,7 +126,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addHollowCylinder(discThickness.get(),
                                        discOuterRadius.get(),
                                        discInnerRadius.get(),
-                                       new Point3D(0.0, 0.0, -discThickness.get() / 2.0),
+                                       new Point3D(0.0, 0.0, 0.0),
                                        DISC_COLOR);
       });
       positiveXArrowModel.setMesh(meshBuilder ->
@@ -134,7 +134,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
+                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
                                                  new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
                                                  X_ARROW_COLOR);
       });
@@ -143,14 +143,14 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
+                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
                                                  new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
                                                  Y_ARROW_COLOR);
       });
       negativeXArrowModel.setMesh(meshBuilder ->
       {
          float arrowLength = arrowTailLengthRatio.get() * arrowHeight.get();
-         xArrowTailTransform.getTranslation().set(-discOuterRadius.get() - arrowSpacing.get() - (arrowLength / 2.0), 0.0, 0.0);
+         xArrowTailTransform.getTranslation().set(-discOuterRadius.get() - arrowSpacing.get() - (arrowLength / 2.0), 0.0, discThickness.get() / 2.0);
          xArrowTailTransform.getRotation().setYawPitchRoll(QUARTER_TURN, 0.0, 0.0);
          meshBuilder.addBox(arrowTailWidthRatio.get() * arrowWidth.get(),
                             arrowLength,
@@ -162,7 +162,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       negativeYArrowModel.setMesh(meshBuilder ->
       {
          float arrowLength = arrowTailLengthRatio.get() * arrowHeight.get();
-         yArrowTailTransform.getTranslation().set(0.0, -discOuterRadius.get() - arrowSpacing.get() - (arrowLength / 2.0), 0.0);
+         yArrowTailTransform.getTranslation().set(0.0, -discOuterRadius.get() - arrowSpacing.get() - (arrowLength / 2.0), discThickness.get() / 2.0);
          yArrowTailTransform.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
          meshBuilder.addBox(arrowTailWidthRatio.get() * arrowWidth.get(),
                             arrowLength,
@@ -360,7 +360,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       closestCollisionSelection = -1;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transformToWorld);
+      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
@@ -374,7 +374,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          positiveXArrowIntersection.setup(arrowWidth.get(),
                                           arrowHeight.get(),
                                           discThickness.get(),
-                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
+                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
                                           transformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
@@ -388,7 +388,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          positiveYArrowIntersection.setup(arrowWidth.get(),
                                           arrowHeight.get(),
                                           discThickness.get(),
-                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
+                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
                                           transformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
