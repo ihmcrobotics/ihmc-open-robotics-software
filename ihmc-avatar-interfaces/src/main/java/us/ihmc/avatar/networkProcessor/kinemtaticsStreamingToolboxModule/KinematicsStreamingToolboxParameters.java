@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
@@ -32,6 +32,7 @@ public class KinematicsStreamingToolboxParameters
    private double inputWeightDecayDuration;
    private double inputVelocityDecayDuration;
    private boolean useStreamingPublisher;
+   private double publishingPeriod;
 
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
 
@@ -69,6 +70,7 @@ public class KinematicsStreamingToolboxParameters
       inputVelocityDecayDuration = 0.5;
 
       useStreamingPublisher = true;
+      publishingPeriod = 5.0 * 0.006;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
@@ -278,5 +280,15 @@ public class KinematicsStreamingToolboxParameters
    public void setUseStreamingPublisher(boolean useStreamingPublisher)
    {
       this.useStreamingPublisher = useStreamingPublisher;
+   }
+
+   public void setPublishingPeriod(double publishingPeriod)
+   {
+      this.publishingPeriod = publishingPeriod;
+   }
+
+   public double getPublishingPeriod()
+   {
+      return publishingPeriod;
    }
 }

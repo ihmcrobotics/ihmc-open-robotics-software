@@ -3,7 +3,7 @@ package us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;

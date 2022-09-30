@@ -1,0 +1,25 @@
+#ifndef __exoskeleton_msgs__msg__PilotAlarmPacket__idl__
+#define __exoskeleton_msgs__msg__PilotAlarmPacket__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::PilotAlarmPacket_")
+      struct PilotAlarmPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        double beep_rate;
+        boolean enable_tone;
+      };
+    };
+  };
+};
+
+#endif

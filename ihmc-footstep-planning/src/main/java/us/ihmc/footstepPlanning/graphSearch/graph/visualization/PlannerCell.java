@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 
-import controller_msgs.msg.dds.FootstepPlannerCellMessage;
+import toolbox_msgs.msg.dds.FootstepPlannerCellMessage;
 
 public class PlannerCell
 {

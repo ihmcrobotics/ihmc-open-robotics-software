@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI;
 
-import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 

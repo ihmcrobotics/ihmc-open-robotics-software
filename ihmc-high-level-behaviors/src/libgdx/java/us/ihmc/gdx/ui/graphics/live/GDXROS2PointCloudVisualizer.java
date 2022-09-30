@@ -5,8 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
@@ -71,7 +71,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
    {
-      super(title);
+      super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.pointsPerSegment = pointsPerSegment;

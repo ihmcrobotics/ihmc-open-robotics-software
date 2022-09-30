@@ -162,7 +162,7 @@ public class GDXLowLevelDepthSensorSimulator
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
-      parametersBuffer = new OpenCLFloatBuffer(28);
+      parametersBuffer = new OpenCLFloatBuffer(29);
 
       // TODO these panels should be removable to a separate class
       depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
@@ -184,10 +184,10 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void render(GDX3DScene scene)
    {
-      render(scene, null, 0.01f);
+      render(scene, true, null, 0.01f);
    }
 
-   public void render(GDX3DScene scene, Color userPointColor, float pointSize)
+   public void render(GDX3DScene scene, boolean colorBasedOnWorldZ, Color userPointColor, float pointSize)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -252,25 +252,26 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(6, imageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(7, imageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(8, pointSize);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(9, userPointColor == null ? -1.0f : userPointColor.r);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.g);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(11, userPointColor == null ? -1.0f : userPointColor.b);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(12, userPointColor == null ? -1.0f : userPointColor.a);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(13, transformToWorldFrame.getTranslation().getX32());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(14, transformToWorldFrame.getTranslation().getY32());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(15, transformToWorldFrame.getTranslation().getZ32());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) transformToWorldFrame.getRotation().getM00());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) transformToWorldFrame.getRotation().getM01());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) transformToWorldFrame.getRotation().getM02());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) transformToWorldFrame.getRotation().getM10());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(20, (float) transformToWorldFrame.getRotation().getM11());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) transformToWorldFrame.getRotation().getM12());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) transformToWorldFrame.getRotation().getM20());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) transformToWorldFrame.getRotation().getM21());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(24, (float) transformToWorldFrame.getRotation().getM22());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(25, noiseAmplitudeAtMinRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(26, noiseAmplitudeAtMaxRange);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(27, simulateL515Noise);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(9, colorBasedOnWorldZ ? 1.0f : 0.0f);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.r);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(11, userPointColor == null ? -1.0f : userPointColor.g);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(12, userPointColor == null ? -1.0f : userPointColor.b);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(13, userPointColor == null ? -1.0f : userPointColor.a);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(14, transformToWorldFrame.getTranslation().getX32());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(15, transformToWorldFrame.getTranslation().getY32());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(16, transformToWorldFrame.getTranslation().getZ32());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) transformToWorldFrame.getRotation().getM00());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) transformToWorldFrame.getRotation().getM01());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) transformToWorldFrame.getRotation().getM02());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(20, (float) transformToWorldFrame.getRotation().getM10());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) transformToWorldFrame.getRotation().getM11());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) transformToWorldFrame.getRotation().getM12());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) transformToWorldFrame.getRotation().getM20());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(24, (float) transformToWorldFrame.getRotation().getM21());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(25, (float) transformToWorldFrame.getRotation().getM22());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(26, noiseAmplitudeAtMinRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(27, noiseAmplitudeAtMaxRange);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(28, simulateL515Noise);
       if (firstRender)
       {
          firstRender = false;
