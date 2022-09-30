@@ -24,9 +24,10 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             includepath = "../include",
             linkpath = "../lib"),
       @Platform(
-            value = "windows",
-            includepath = "../../include",
-            linkpath = "../Release")
+            value = "windows-x86_64",
+            includepath = {"..\\..\\include", "C:\\Program Files (x86)\\Eigen3\\include\\eigen3"},
+            linkpath = "..\\Release",
+            link = "promp")
       },
       target = "us.ihmc.promp",
       global = "us.ihmc.promp.global.promp"
