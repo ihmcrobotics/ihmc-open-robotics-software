@@ -219,10 +219,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
                   pelvisInteractable.setOnSpacePressed(() ->
-                                                       {
-                                                          ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                                                            pelvisInteractable.getPose()));
-                                                       });
+                  {
+                     ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                                                                                                       pelvisInteractable.getPose()));
+                  });
                }
                else
                {
