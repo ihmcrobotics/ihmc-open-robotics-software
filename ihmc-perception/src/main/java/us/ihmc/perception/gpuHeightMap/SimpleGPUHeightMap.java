@@ -1,6 +1,6 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import controller_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.bytedeco.opencv.opencv_core.Mat;

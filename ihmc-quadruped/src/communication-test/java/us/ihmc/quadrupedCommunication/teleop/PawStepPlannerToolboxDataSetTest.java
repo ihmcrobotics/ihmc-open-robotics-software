@@ -10,9 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;

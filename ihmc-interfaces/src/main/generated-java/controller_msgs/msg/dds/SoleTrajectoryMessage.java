@@ -28,11 +28,11 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
    /**
             * The position trajectory information.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage position_trajectory_;
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage position_trajectory_;
 
    public SoleTrajectoryMessage()
    {
-      position_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
+      position_trajectory_ = new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public SoleTrajectoryMessage(SoleTrajectoryMessage other)
@@ -47,7 +47,7 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
       robot_quadrant_ = other.robot_quadrant_;
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.position_trajectory_, position_trajectory_);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.position_trajectory_, position_trajectory_);
    }
 
    /**
@@ -84,7 +84,7 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
    /**
             * The position trajectory information.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage getPositionTrajectory()
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage getPositionTrajectory()
    {
       return position_trajectory_;
    }

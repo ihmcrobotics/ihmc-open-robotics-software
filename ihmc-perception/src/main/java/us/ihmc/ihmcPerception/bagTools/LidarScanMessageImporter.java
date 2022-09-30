@@ -2,8 +2,8 @@ package us.ihmc.ihmcPerception.bagTools;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanMessagePubSubType;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessagePubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

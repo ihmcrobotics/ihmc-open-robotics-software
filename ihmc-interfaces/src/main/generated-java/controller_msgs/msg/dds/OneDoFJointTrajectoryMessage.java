@@ -22,7 +22,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
             * The list of trajectory points to go through while executing the trajectory.
             * The time has to be strictly increasing.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage>  trajectory_points_;
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage>  trajectory_points_;
    /**
             * Weight used to encode the priority for achieving this trajectory:
             * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
@@ -34,7 +34,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
    public OneDoFJointTrajectoryMessage()
    {
-      trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage> (50, new controller_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
+      trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage> (50, new ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessagePubSubType());
 
    }
 
@@ -73,7 +73,7 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
             * The list of trajectory points to go through while executing the trajectory.
             * The time has to be strictly increasing.
             */
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage>  getTrajectoryPoints()
+   public us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage>  getTrajectoryPoints()
    {
       return trajectory_points_;
    }

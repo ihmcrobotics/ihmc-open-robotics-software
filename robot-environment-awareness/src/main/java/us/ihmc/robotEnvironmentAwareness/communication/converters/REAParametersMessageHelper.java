@@ -1,8 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import controller_msgs.msg.dds.NormalEstimationParametersMessage;
-import controller_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
-import controller_msgs.msg.dds.PolygonizerParametersMessage;
+import perception_msgs.msg.dds.NormalEstimationParametersMessage;
+import perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 

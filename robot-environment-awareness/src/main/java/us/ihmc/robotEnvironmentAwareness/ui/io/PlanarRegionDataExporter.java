@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.stage.Window;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
