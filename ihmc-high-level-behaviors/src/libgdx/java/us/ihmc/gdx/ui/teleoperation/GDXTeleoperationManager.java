@@ -19,6 +19,7 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -384,6 +385,83 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       robotLowLevelMessenger.renderImGuiWidgets();
 
+      if (interactablesAvailable)
+      {
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Delete all")))
+         {
+            walkPathControlRing.delete();
+            pelvisInteractable.delete();
+            for (RobotSide side : footInteractables.sides())
+               footInteractables.get(side).delete();
+            for (RobotSide side : handInteractables.sides())
+               handInteractables.get(side).delete();
+         }
+      }
+      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
+      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
+
+      ImGui.separator();
+      pelvisHeightSlider.renderImGuiWidgets();
+      if (interactablesAvailable)
+      {
+         ImGui.text("Pelvis pose:");
+         ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
+         ImGui.sameLine();
+         pelvisInteractable.renderImGuiWidgets();
+      }
+      ImGui.separator();
+      chestPitchSlider.renderImGuiWidgets();
+      chestYawSlider.renderImGuiWidgets();
+      ImGui.separator();
+
+      manualFootstepPlacement.renderImGuiWidgets();
+      ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
+
+      ImGui.text("Walk path control ring planner:");
+      walkPathControlRing.renderImGuiWidgets();
+
+      interactableFootstepPlan.renderImGuiWidgets();
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete All")))
+      {
+         footstepsSentToControllerGraphic.clear();
+         ballAndArrowMidFeetPosePlacement.clear();
+         manualFootstepPlacement.exitPlacement();
+         interactableFootstepPlan.clear();
+         walkPathControlRing.delete();
+      }
+
+      if (interactablesAvailable)
+      {
+         for (RobotSide side : footInteractables.sides())
+         {
+            ImGui.text(side.getPascalCaseName() + " foot:");
+            ImGui.sameLine();
+            footInteractables.get(side).renderImGuiWidgets();
+         }
+      }
+
+      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
+      swingTimeSlider.render();
+      transferTimeSlider.render();
+      turnAggressivenessSlider.render();
+      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
+
+      ImGui.separator();
+
+      handManager.renderImGuiWidgets();
+
+//      desiredRobot.renderImGuiWidgets();
+//      ImGui.sameLine();
+//      if (ImGui.button(labels.get("Set Desired To Current")))
+//      {
+//         wholeBodyDesiredIKManager.setDesiredToCurrent();
+//         desiredRobot.setDesiredToCurrent();
+//      }
+
       ImGui.text("Arms:");
       for (RobotSide side : RobotSide.values)
       {
@@ -409,93 +487,19 @@ public class GDXTeleoperationManager extends ImGuiPanel
          }
       }
 
-      pelvisHeightSlider.renderImGuiWidgets();
-      chestPitchSlider.renderImGuiWidgets();
-      chestYawSlider.renderImGuiWidgets();
-
-      swingTimeSlider.render();
-      transferTimeSlider.render();
-      turnAggressivenessSlider.render();
-      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
-
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
-
-      ImGui.separator();
-
-      manualFootstepPlacement.renderImGuiWidgets();
-
-      ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
-
-      ImGui.text("Walk path control ring planner:");
-      walkPathControlRing.renderImGuiWidgets();
-
-      interactableFootstepPlan.renderImGuiWidgets();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete All")))
-      {
-         footstepsSentToControllerGraphic.clear();
-         ballAndArrowMidFeetPosePlacement.clear();
-         manualFootstepPlacement.exitPlacement();
-         interactableFootstepPlan.clear();
-         walkPathControlRing.delete();
-      }
-      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
-
-      ImGui.separator();
-
-      handManager.renderImGuiWidgets();
-
-//      desiredRobot.renderImGuiWidgets();
-//      ImGui.sameLine();
-      if (ImGui.button(labels.get("Set Desired To Current")))
-      {
-         wholeBodyDesiredIKManager.setDesiredToCurrent();
-         desiredRobot.setDesiredToCurrent();
-      }
-
       if (interactablesAvailable)
       {
          wholeBodyDesiredIKManager.renderImGuiWidgets();
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
-         {
-            walkPathControlRing.delete();
-            pelvisInteractable.delete();
-            for (RobotSide side : footInteractables.sides())
-               footInteractables.get(side).delete();
-            for (RobotSide side : handInteractables.sides())
-               handInteractables.get(side).delete();
-         }
-
-         ImGui.text("Pelvis:");
-         ImGui.sameLine();
-         pelvisInteractable.renderImGuiWidgets();
-
+         boolean handInteractablesAreDeleted = true;
          for (RobotSide side : handInteractables.sides())
          {
             ImGui.text(side.getPascalCaseName() + " hand:");
             ImGui.sameLine();
             handInteractables.get(side).renderImGuiWidgets();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            ImGui.text(side.getPascalCaseName() + " foot:");
-            ImGui.sameLine();
-            footInteractables.get(side).renderImGuiWidgets();
+            handInteractablesAreDeleted &= handInteractables.get(side).isDeleted();
          }
 
-         boolean allAreDeleted = pelvisInteractable.isDeleted();
-         for (RobotSide side : handInteractables.sides())
-         {
-            allAreDeleted &= handInteractables.get(side).isDeleted();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            allAreDeleted &= footInteractables.get(side).isDeleted();
-         }
-         desiredRobot.setActive(!allAreDeleted);
+         desiredRobot.setActive(!handInteractablesAreDeleted);
 
          ImGui.separator();
 
