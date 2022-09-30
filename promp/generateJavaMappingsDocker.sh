@@ -6,4 +6,4 @@ docker run \
     --volume $(pwd):/home/robotlab/promp \
     --workdir /home/robotlab/promp \
     --user $(id -u):$(id -g) \
-    ihmcrobotics/promp:0.2 bash /home/robotlab/promp/generate-java-mappings.sh
+    ihmcrobotics/promp:0.2 bash /home/robotlab/promp/generateJavaMappings.sh
