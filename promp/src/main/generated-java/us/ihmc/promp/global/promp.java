@@ -46,12 +46,6 @@ public class promp extends us.ihmc.promp.presets.PrompInfoMapper {
 // #ifndef PROMP_TRAJECTORY_HPP
 // #define PROMP_TRAJECTORY_HPP
 
-// #if defined(_MSC_VER)
-//     #define PROMPEXPORT __declspec(dllexport)
-// #else
-//     #define PROMPEXPORT
-// #endif
-
 // #include <vector>
 
 // #include <Eigen/Core>
