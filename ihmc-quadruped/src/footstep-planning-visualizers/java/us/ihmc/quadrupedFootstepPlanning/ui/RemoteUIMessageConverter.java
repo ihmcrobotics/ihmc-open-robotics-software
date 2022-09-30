@@ -1,6 +1,10 @@
 package us.ihmc.quadrupedFootstepPlanning.ui;
 
-import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TimeIntervalMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

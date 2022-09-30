@@ -1,7 +1,7 @@
 #ifndef __controller_msgs__msg__ChestTrajectoryMessage__idl__
 #define __controller_msgs__msg__ChestTrajectoryMessage__idl__
 
-#include "controller_msgs/msg/./SO3TrajectoryMessage_.idl"
+#include "ihmc_common_msgs/msg/./SO3TrajectoryMessage_.idl"
 module controller_msgs
 {
   module msg
@@ -25,7 +25,7 @@ module controller_msgs
         /**
          * The orientation trajectory information.
          */
-        controller_msgs::msg::dds::SO3TrajectoryMessage so3_trajectory;
+        ihmc_common_msgs::msg::dds::SO3TrajectoryMessage so3_trajectory;
       };
     };
   };

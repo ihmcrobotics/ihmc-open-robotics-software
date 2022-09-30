@@ -1,7 +1,7 @@
 package us.ihmc.atlas.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;

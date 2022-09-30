@@ -1,6 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.parameters;
 
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys.*;

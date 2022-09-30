@@ -32,11 +32,11 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    /**
             * The position/orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
 
    public HandTrajectoryMessage()
    {
-      se3_trajectory_ = new controller_msgs.msg.dds.SE3TrajectoryMessage();
+      se3_trajectory_ = new ihmc_common_msgs.msg.dds.SE3TrajectoryMessage();
    }
 
    public HandTrajectoryMessage(HandTrajectoryMessage other)
@@ -53,7 +53,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
       robot_side_ = other.robot_side_;
 
-      controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
+      ihmc_common_msgs.msg.dds.SE3TrajectoryMessagePubSubType.staticCopy(other.se3_trajectory_, se3_trajectory_);
    }
 
    /**
@@ -107,7 +107,7 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    /**
             * The position/orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
+   public ihmc_common_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3_trajectory_;
    }
