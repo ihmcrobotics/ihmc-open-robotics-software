@@ -225,6 +225,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       isNewlyModified = false;
       isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
       boolean isRingHovered = isGizmoHovered && closestCollisionSelection == 0;
+      boolean leftButtonDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
+      boolean rightButtonDown = ImGui.isMouseDown(yawMouseButton);
 
       if (allowUserInput)
       {
@@ -241,8 +243,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             }
          }
 
-         isBeingManipulated = yawDragData.getObjectBeingDragged() == this || translateDragData.getObjectBeingDragged() == this;
-//         if (isRingHovered && (translateDragData.isDragging() || yawDragData.isDragging()))
+         isBeingManipulated = (yawDragData.getObjectBeingDragged() == this && rightButtonDown)
+                              || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
          if (isBeingManipulated)
          {
             isNewlyModified = true;
