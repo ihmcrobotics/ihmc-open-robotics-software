@@ -16,16 +16,13 @@ import static us.ihmc.promp.global.promp.*;
      * Each column within .csv file represents a trajectory.
      * All .csv files must have trajectories(columns) in the same sequence (column-wise)
      */
-    @Namespace("promp") @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
+    @Namespace("promp") @NoOffset @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
 public class TrajectoryGroup extends Pointer {
         static { Loader.load(); }
-        /** Default native constructor. */
-        public TrajectoryGroup() { super((Pointer)null); allocate(); }
-        /** Native array allocator. Access with {@link Pointer#position(long)}. */
-        public TrajectoryGroup(long size) { super((Pointer)null); allocateArray(size); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
         public TrajectoryGroup(Pointer p) { super(p); }
-        private native void allocate();
+        /** Native array allocator. Access with {@link Pointer#position(long)}. */
+        public TrajectoryGroup(long size) { super((Pointer)null); allocateArray(size); }
         private native void allocateArray(long size);
         @Override public TrajectoryGroup position(long position) {
             return (TrajectoryGroup)super.position(position);
@@ -38,12 +35,15 @@ public class TrajectoryGroup extends Pointer {
         /**
          *  \brief default constructor: create an empty trajectory group
          */
+        public TrajectoryGroup() { super((Pointer)null); allocate(); }
+        private native void allocate();
 
         /**
          *  \brief    load trajectories from list of files (formatted as generated from io/serializer). 
          *	\param	files of files.
          *	\param	index list of indexes representing dofs to keep.
          */
+        public native void load_trajectories(@Const @ByRef StringVector files, @Const @ByRef SizeTVector index);
 
         /**
          *  \brief    load trajectories from list of .csv files. 
@@ -52,6 +52,10 @@ public class TrajectoryGroup extends Pointer {
          *	\param	sep values separator.
          *	\param	skip_header if true skip first line.
          */
+        public native void load_csv_trajectories(@Const @ByRef StringVector files,
+                    @Const @ByRef SizeTVector index, @Cast("char") byte sep/*=','*/, @Cast("bool") boolean skip_header/*=false*/);
+        public native void load_csv_trajectories(@Const @ByRef StringVector files,
+                    @Const @ByRef SizeTVector index);
 
         /**
          *  \brief    load trajectories from list of .csv files. 
@@ -59,10 +63,15 @@ public class TrajectoryGroup extends Pointer {
          *	\param	cols list of columns (dofs) to keep.
          *	\param	sep values separator.
          */
+        public native void load_csv_trajectories(@Const @ByRef StringVector files,
+                    @Const @ByRef StringVector cols, @Cast("char") byte sep/*=','*/);
+        public native void load_csv_trajectories(@Const @ByRef StringVector files,
+                    @Const @ByRef StringVector cols);
 
         /**
          *   \brief    Normalize all trajectories to the mean length (number of timesteps)
          */
+        public native long normalize_length();
 
         /**
          *  \brief     Normalize all trajectories to the same desired length
@@ -73,6 +82,7 @@ public class TrajectoryGroup extends Pointer {
         /**
          *   \brief    standardize each dof among the trajectories
          */
+        public native @ByVal VectorVectorPair standardize_dims();
 
         /**
          * \brief	return the vector of trajectories
