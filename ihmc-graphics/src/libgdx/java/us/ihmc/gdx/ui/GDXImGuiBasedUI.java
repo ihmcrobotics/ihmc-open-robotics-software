@@ -8,7 +8,6 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import org.bytedeco.opencv.presets.opencv_core;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -32,13 +31,10 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -227,10 +223,10 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
       themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
-      String line = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PRINT_STACKTRACE).get(0);
-      EnumSet.allOf(Theme.class)
-            .forEach(t -> {if (line.contains(t.toString())) theme = t;});
-      setTheme(theme);
+      String line = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY).get(0);
+      for (Theme theme : Theme.values())
+         if (line.contains(theme.name()))
+            setTheme(theme);
    }
 
    public void renderBeforeOnScreenUI()
@@ -327,12 +323,13 @@ public class GDXImGuiBasedUI
          ImGui.text("UI Theme:");
          ImGui.sameLine();
          Theme prevTheme = theme;
-         EnumSet.allOf(Theme.class)
-                .forEach(t -> {
-                            if (ImGui.radioButton(labels.get(t.toString()), theme == t))
-                               setTheme(t);
-                            ImGui.sameLine();
-                });
+
+         for (Theme theme : Theme.values())
+         {
+            if (ImGui.radioButton(labels.get(theme.toString()), this.theme == theme))
+               setTheme(theme);
+            ImGui.sameLine();
+         }
          if (theme != prevTheme)
             FileTools.writeAllLines(List.of("theme=" + theme.toString()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          ImGui.popItemWidth();
