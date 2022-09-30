@@ -8,6 +8,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -322,16 +323,16 @@ public class GDXImGuiBasedUI
          ImGui.separator();
          ImGui.text("UI Theme:");
          ImGui.sameLine();
-         Theme prevTheme = theme;
-
-         for (Theme theme : Theme.values())
+         Theme previousTheme = theme;
+         for (int i = 0; i < Theme.values().length; ++i)
          {
-            if (ImGui.radioButton(labels.get(theme.toString()), this.theme == theme))
-               setTheme(theme);
-            ImGui.sameLine();
+            if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i]))
+               setTheme(Theme.values()[i]);
+            if (i < Theme.values().length - 1)
+               ImGui.sameLine();
          }
-         if (theme != prevTheme)
-            FileTools.writeAllLines(List.of("theme=" + theme.toString()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         if (theme != previousTheme)
+            FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
