@@ -35,7 +35,7 @@ namespace promp {
      * Each column within .csv file represents a trajectory.
      * All .csv files must have trajectories(columns) in the same sequence (column-wise)
      */
-    class PROMPEXPORT TrajectoryGroup {
+    class TrajectoryGroup {
 
     public:
         
