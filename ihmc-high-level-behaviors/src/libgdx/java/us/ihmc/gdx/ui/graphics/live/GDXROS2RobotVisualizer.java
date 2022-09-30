@@ -107,9 +107,7 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 
    public void processImGuiInput(ImGui3DViewInput input)
    {
-      boolean ctrlHeld = imgui.internal.ImGui.getIO().getKeyCtrl();
-      boolean isPPressed = input.isWindowHovered() && ImGui.isKeyDown('P');
-      if (ctrlHeld && isPPressed)
+      if (input.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('P'))
       {
          teleportCameraToRobotPelvis();
       }
