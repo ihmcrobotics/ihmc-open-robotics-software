@@ -1,17 +1,13 @@
 package us.ihmc.pathPlanning;
 
-import controller_msgs.msg.dds.HeightMapMessage;
-import controller_msgs.msg.dds.HeightMapMessagePubSubType;
-import us.ihmc.commons.nio.FileTools;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.robotics.heightMap.HeightMapData;
-import us.ihmc.robotics.heightMap.HeightMapTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public enum HeightMapDataSetName
 {

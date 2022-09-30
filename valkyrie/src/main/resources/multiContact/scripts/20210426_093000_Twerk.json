@@ -45,7 +45,7 @@
       }
     },
     "ikSolution" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
         "sequence_id" : 0,
         "current_toolbox_state" : 3,
         "joint_name_hash" : 1976133317,
@@ -76,7 +76,7 @@
       }
     },
     "ikPrivilegedConfiguration" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
         "sequence_id" : 0,
         "use_privileged_root_joint_position" : false,
         "use_privileged_root_joint_orientation" : false,
@@ -103,7 +103,7 @@
         "isContactState" : false,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 1492890379,
             "desired_position_in_world" : {
@@ -165,7 +165,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -227,7 +227,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -289,7 +289,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 601127246,
             "desired_position_in_world" : {
@@ -351,7 +351,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -413,7 +413,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -475,7 +475,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -537,7 +537,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -599,7 +599,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 612165328,
             "desired_position_in_world" : {
@@ -705,7 +705,7 @@
       }
     },
     "ikSolution" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
         "sequence_id" : 0,
         "current_toolbox_state" : 3,
         "joint_name_hash" : 1976133317,
@@ -736,7 +736,7 @@
       }
     },
     "ikPrivilegedConfiguration" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
         "sequence_id" : 0,
         "use_privileged_root_joint_position" : false,
         "use_privileged_root_joint_orientation" : false,
@@ -763,7 +763,7 @@
         "isContactState" : false,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 1492890379,
             "desired_position_in_world" : {
@@ -825,7 +825,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -887,7 +887,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -949,7 +949,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 601127246,
             "desired_position_in_world" : {
@@ -1011,7 +1011,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1073,7 +1073,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1135,7 +1135,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1197,7 +1197,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1259,7 +1259,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 612165328,
             "desired_position_in_world" : {
@@ -1365,7 +1365,7 @@
       }
     },
     "ikSolution" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
         "sequence_id" : 0,
         "current_toolbox_state" : 3,
         "joint_name_hash" : 1976133317,
@@ -1396,7 +1396,7 @@
       }
     },
     "ikPrivilegedConfiguration" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
         "sequence_id" : 0,
         "use_privileged_root_joint_position" : false,
         "use_privileged_root_joint_orientation" : false,
@@ -1423,7 +1423,7 @@
         "isContactState" : false,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 1492890379,
             "desired_position_in_world" : {
@@ -1485,7 +1485,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -1547,7 +1547,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -1609,7 +1609,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 601127246,
             "desired_position_in_world" : {
@@ -1671,7 +1671,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1733,7 +1733,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1795,7 +1795,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1857,7 +1857,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -1919,7 +1919,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 612165328,
             "desired_position_in_world" : {
@@ -2025,7 +2025,7 @@
       }
     },
     "ikSolution" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
         "sequence_id" : 0,
         "current_toolbox_state" : 3,
         "joint_name_hash" : 1976133317,
@@ -2056,7 +2056,7 @@
       }
     },
     "ikPrivilegedConfiguration" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
         "sequence_id" : 0,
         "use_privileged_root_joint_position" : false,
         "use_privileged_root_joint_orientation" : false,
@@ -2083,7 +2083,7 @@
         "isContactState" : false,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 1492890379,
             "desired_position_in_world" : {
@@ -2145,7 +2145,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -2207,7 +2207,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -2269,7 +2269,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 601127246,
             "desired_position_in_world" : {
@@ -2331,7 +2331,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -2393,7 +2393,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -2455,7 +2455,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -2517,7 +2517,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -2579,7 +2579,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 612165328,
             "desired_position_in_world" : {
@@ -2685,7 +2685,7 @@
       }
     },
     "ikSolution" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
         "sequence_id" : 0,
         "current_toolbox_state" : 3,
         "joint_name_hash" : 1976133317,
@@ -2716,7 +2716,7 @@
       }
     },
     "ikPrivilegedConfiguration" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
         "sequence_id" : 0,
         "use_privileged_root_joint_position" : false,
         "use_privileged_root_joint_orientation" : false,
@@ -2743,7 +2743,7 @@
         "isContactState" : false,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 1492890379,
             "desired_position_in_world" : {
@@ -2805,7 +2805,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -2867,7 +2867,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -2929,7 +2929,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 601127246,
             "desired_position_in_world" : {
@@ -2991,7 +2991,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3053,7 +3053,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3115,7 +3115,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3177,7 +3177,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3239,7 +3239,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 612165328,
             "desired_position_in_world" : {
@@ -3345,7 +3345,7 @@
       }
     },
     "ikSolution" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxOutputStatus_" : {
         "sequence_id" : 0,
         "current_toolbox_state" : 3,
         "joint_name_hash" : 1976133317,
@@ -3376,7 +3376,7 @@
       }
     },
     "ikPrivilegedConfiguration" : {
-      "controller_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
+      "toolbox_msgs::msg::dds_::KinematicsToolboxPrivilegedConfigurationMessage_" : {
         "sequence_id" : 0,
         "use_privileged_root_joint_position" : false,
         "use_privileged_root_joint_orientation" : false,
@@ -3403,7 +3403,7 @@
         "isContactState" : false,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 1492890379,
             "desired_position_in_world" : {
@@ -3465,7 +3465,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -3527,7 +3527,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 532235394,
             "desired_position_in_world" : {
@@ -3589,7 +3589,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 601127246,
             "desired_position_in_world" : {
@@ -3651,7 +3651,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3713,7 +3713,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3775,7 +3775,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3837,7 +3837,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : -284345206,
             "desired_position_in_world" : {
@@ -3899,7 +3899,7 @@
         "isContactState" : true,
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxRigidBodyMessage_" : {
             "sequence_id" : 0,
             "end_effector_hash_code" : 612165328,
             "desired_position_in_world" : {

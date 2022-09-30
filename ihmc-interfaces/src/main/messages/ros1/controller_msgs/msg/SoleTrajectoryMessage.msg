@@ -18,6 +18,6 @@ uint32 sequence_id
 int8 robot_quadrant
 
 # The position trajectory information.
-controller_msgs/EuclideanTrajectoryMessage position_trajectory
+ihmc_common_msgs/EuclideanTrajectoryMessage position_trajectory
 
 

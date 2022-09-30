@@ -57,7 +57,7 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    {
       super.create();
       cameraForTracking = cameraForTrackingSupplier.get();
-      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+      RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
       for (RobotSide robotSide : RobotSide.values)
       {

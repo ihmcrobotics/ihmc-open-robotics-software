@@ -19,6 +19,6 @@ bool force_execution
 int8 robot_side
 
 # The position/orientation trajectory information.
-controller_msgs/SE3TrajectoryMessage se3_trajectory
+ihmc_common_msgs/SE3TrajectoryMessage se3_trajectory
 
 

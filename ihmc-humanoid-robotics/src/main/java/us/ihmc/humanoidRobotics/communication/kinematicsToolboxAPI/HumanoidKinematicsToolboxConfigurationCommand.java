@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 
 public class HumanoidKinematicsToolboxConfigurationCommand

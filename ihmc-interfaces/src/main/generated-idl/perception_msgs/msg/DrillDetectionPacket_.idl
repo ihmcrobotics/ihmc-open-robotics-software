@@ -1,0 +1,24 @@
+#ifndef __perception_msgs__msg__DrillDetectionPacket__idl__
+#define __perception_msgs__msg__DrillDetectionPacket__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::DrillDetectionPacket_")
+      struct DrillDetectionPacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        boolean is_drill_on;
+      };
+    };
+  };
+};
+
+#endif

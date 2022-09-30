@@ -2,7 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTra
 
 import java.util.Random;
 
-import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import toolbox_msgs.msg.dds.WaypointBasedTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;

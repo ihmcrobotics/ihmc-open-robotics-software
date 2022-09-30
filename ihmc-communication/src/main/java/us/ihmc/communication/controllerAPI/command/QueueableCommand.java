@@ -1,6 +1,6 @@
 package us.ihmc.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.QueueableMessage;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.interfaces.Settable;

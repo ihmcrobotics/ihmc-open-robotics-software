@@ -7,13 +7,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.quadrupedRobotics.estimator.footSwitch.QuadrupedFootSwitchInterface;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -30,7 +30,7 @@ public class QuadrupedStateEstimatorFactory
    private final RequiredFactoryField<FullRobotModel> fullRobotModel = new RequiredFactoryField<>("fullRobotModel");
    private final RequiredFactoryField<SensorOutputMapReadOnly> sensorOutputMapReadOnly = new RequiredFactoryField<>("sensorOutputMapReadOnly");
    private final RequiredFactoryField<QuadrantDependentList<ContactablePlaneBody>> footContactableBodies = new RequiredFactoryField<>("footContactableBodies");
-   private final RequiredFactoryField<QuadrantDependentList<FootSwitchInterface>> footSwitches = new RequiredFactoryField<>("footSwitches");
+   private final RequiredFactoryField<QuadrantDependentList<QuadrupedFootSwitchInterface>> footSwitches = new RequiredFactoryField<>("footSwitches");
    private final RequiredFactoryField<Double> gravity = new RequiredFactoryField<>("gravity");
    private final RequiredFactoryField<Double> estimatorDT = new RequiredFactoryField<>("estimatorDT");
    private final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
@@ -97,7 +97,7 @@ public class QuadrupedStateEstimatorFactory
       this.footContactableBodies.set(footContactableBodies);
    }
 
-   public void setFootSwitches(QuadrantDependentList<FootSwitchInterface> footSwitches)
+   public void setFootSwitches(QuadrantDependentList<QuadrupedFootSwitchInterface> footSwitches)
    {
       this.footSwitches.set(footSwitches);
    }

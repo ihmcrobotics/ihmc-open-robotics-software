@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
-import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import toolbox_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.commons.FormattingTools;

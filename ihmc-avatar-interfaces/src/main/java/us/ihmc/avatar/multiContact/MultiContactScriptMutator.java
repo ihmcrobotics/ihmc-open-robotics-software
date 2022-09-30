@@ -1,6 +1,6 @@
 package us.ihmc.avatar.multiContact;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.tools.io.WorkspacePathTools;
 
