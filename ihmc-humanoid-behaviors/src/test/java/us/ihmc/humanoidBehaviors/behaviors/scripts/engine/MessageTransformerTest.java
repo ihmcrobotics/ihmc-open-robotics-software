@@ -7,16 +7,15 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.EuclideanTrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.EuclideanTrajectoryPointMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
-import controller_msgs.msg.dds.QuadrupedBodyHeightMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.VehiclePosePacket;
-import controller_msgs.msg.dds.VideoPacket;
-import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
+import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import perception_msgs.msg.dds.VehiclePosePacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;

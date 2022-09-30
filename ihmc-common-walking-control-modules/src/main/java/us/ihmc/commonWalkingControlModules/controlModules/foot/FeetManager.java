@@ -169,7 +169,7 @@ public class FeetManager
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         footSwitches.get(robotSide).hasFootHitGround(); //debug
+         footSwitches.get(robotSide).hasFootHitGroundFiltered(); //debug
          footControlModules.get(robotSide).doControl();
       }
    }

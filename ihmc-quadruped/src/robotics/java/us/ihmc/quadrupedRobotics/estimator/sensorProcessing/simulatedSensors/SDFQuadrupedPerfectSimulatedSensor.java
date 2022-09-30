@@ -86,7 +86,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
    public long read(SensorDataContext sensorDataContextToSet)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
-         otherFootSwitches.get(robotQuadrant).updateMeasurement();
+         otherFootSwitches.get(robotQuadrant).update();
 
       super.read();
       return getMonotonicTime();

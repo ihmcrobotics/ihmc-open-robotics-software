@@ -21,11 +21,11 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public ChestTrajectoryMessage()
    {
-      so3_trajectory_ = new controller_msgs.msg.dds.SO3TrajectoryMessage();
+      so3_trajectory_ = new ihmc_common_msgs.msg.dds.SO3TrajectoryMessage();
    }
 
    public ChestTrajectoryMessage(ChestTrajectoryMessage other)
@@ -38,7 +38,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
    {
       sequence_id_ = other.sequence_id_;
 
-      controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
+      ihmc_common_msgs.msg.dds.SO3TrajectoryMessagePubSubType.staticCopy(other.so3_trajectory_, so3_trajectory_);
    }
 
    /**
@@ -60,7 +60,7 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
    /**
             * The orientation trajectory information.
             */
-   public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
+   public ihmc_common_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3_trajectory_;
    }

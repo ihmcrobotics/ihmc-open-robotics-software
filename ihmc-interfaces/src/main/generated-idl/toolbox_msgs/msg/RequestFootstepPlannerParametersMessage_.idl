@@ -1,0 +1,23 @@
+#ifndef __toolbox_msgs__msg__RequestFootstepPlannerParametersMessage__idl__
+#define __toolbox_msgs__msg__RequestFootstepPlannerParametersMessage__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::RequestFootstepPlannerParametersMessage_")
+      struct RequestFootstepPlannerParametersMessage
+      {
+        boolean unused_placeholder_field;
+      };
+    };
+  };
+};
+
+#endif

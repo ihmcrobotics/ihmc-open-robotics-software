@@ -1,0 +1,33 @@
+#ifndef __toolbox_msgs__msg__WholeBodyTrajectoryToolboxConfigurationMessage__idl__
+#define __toolbox_msgs__msg__WholeBodyTrajectoryToolboxConfigurationMessage__idl__
+
+#include "toolbox_msgs/msg/./KinematicsToolboxOutputStatus_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message used to configure the IHMC whole-body trajetory planner.
+       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::WholeBodyTrajectoryToolboxConfigurationMessage_")
+      struct WholeBodyTrajectoryToolboxConfigurationMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=-1)
+        long number_of_initial_guesses;
+        @defaultValue(value=-1)
+        long maximum_expansion_size;
+        toolbox_msgs::msg::dds::KinematicsToolboxOutputStatus initial_configuration;
+      };
+    };
+  };
+};
+
+#endif

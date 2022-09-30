@@ -3,6 +3,10 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
+import exoskeleton_msgs.msg.dds.ExoStepDataListMessage;
+import exoskeleton_msgs.msg.dds.ExoStepDataMessage;
+import ihmc_common_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
