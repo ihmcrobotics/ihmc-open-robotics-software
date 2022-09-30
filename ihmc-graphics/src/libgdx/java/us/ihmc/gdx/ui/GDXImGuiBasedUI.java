@@ -8,7 +8,11 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.opencv.presets.opencv_core;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
@@ -34,8 +38,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -116,8 +119,8 @@ public class GDXImGuiBasedUI
    {
       LIGHT, DARK, CLASSIC
    }
-   Theme theme = Theme.LIGHT;
-   private File themeFile;
+   private Theme theme = Theme.LIGHT;
+   private Path themeFilePath;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -223,51 +226,10 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
-      String userHomeDirectory = System.getProperty("user.home");
-      themeFile = new File(userHomeDirectory + "/.ihmc/themePreference.ini");
-      if (themeFile.isFile())
-      {
-         try
-         {
-            Scanner reader = new Scanner(themeFile);
-            String data = reader.nextLine();
-            String useTheme = "theme=";
-            StringBuilder themeFromFile = new StringBuilder();
-            if (data.length() > useTheme.length())
-            {
-               for (int i = 0; i < data.length(); ++i)
-               {
-                  if (i >= useTheme.length())
-                  {
-                     themeFromFile.append(data.charAt(i));
-                  }
-                  if (i > 50)
-                     break;
-               }
-               if (themeFromFile.toString().contains("LIGHT"))
-               {
-                  theme = Theme.LIGHT;
-               }
-               else if (themeFromFile.toString().contains("DARK"))
-               {
-                  theme = Theme.DARK;
-               }
-               else if (themeFromFile.toString().contains("CLASSIC"))
-               {
-                  theme = Theme.CLASSIC;
-               }
-               else  // Default if no saved preference
-               {
-                  theme = Theme.LIGHT;
-               }
-            }
-         }
-         catch (FileNotFoundException e)
-         {
-            LogTools.info("No saved theme preference found. Loading default theme: light");
-            e.printStackTrace();
-         }
-      }
+      themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
+      String line = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PRINT_STACKTRACE).get(0);
+      EnumSet.allOf(Theme.class)
+            .forEach(t -> {if (line.contains(t.toString())) theme = t;});
       setTheme(theme);
    }
 
@@ -364,38 +326,15 @@ public class GDXImGuiBasedUI
          ImGui.separator();
          ImGui.text("UI Theme:");
          ImGui.sameLine();
-
          Theme prevTheme = theme;
-         if (ImGui.radioButton(labels.get("Light"), theme == Theme.LIGHT))
-         {
-            setTheme(Theme.LIGHT);
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Dark"), theme == Theme.DARK))
-         {
-            setTheme(Theme.DARK);
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Classic"), theme == Theme.CLASSIC))
-         {
-            setTheme(Theme.CLASSIC);
-         }
-
+         EnumSet.allOf(Theme.class)
+                .forEach(t -> {
+                            if (ImGui.radioButton(labels.get(t.toString()), theme == t))
+                               setTheme(t);
+                            ImGui.sameLine();
+                });
          if (theme != prevTheme)
-         {
-            try
-            {
-               FileWriter themeFileWriter = new FileWriter(themeFile);
-               themeFileWriter.write("theme=" + theme.toString());
-               themeFileWriter.close();
-            }
-            catch (IOException e)
-            {
-               LogTools.info("Could not save theme preference.");
-               e.printStackTrace();
-            }
-         }
-
+            FileTools.writeAllLines(List.of("theme=" + theme.toString()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
