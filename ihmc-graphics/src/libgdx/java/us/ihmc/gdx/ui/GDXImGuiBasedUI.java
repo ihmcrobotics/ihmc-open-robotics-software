@@ -112,9 +112,6 @@ public class GDXImGuiBasedUI
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
-   private boolean isLight = true;
-   private boolean isDark = false;
-   private boolean isClassic = false;
    private enum THEME
    {
       LIGHT, DARK, CLASSIC
@@ -271,9 +268,6 @@ public class GDXImGuiBasedUI
             e.printStackTrace();
          }
       }
-      isLight = theme == THEME.LIGHT;
-      isDark = theme == THEME.DARK;
-      isClassic = theme == THEME.CLASSIC;
       setTheme(theme);
    }
 
@@ -372,17 +366,17 @@ public class GDXImGuiBasedUI
          ImGui.sameLine();
 
          THEME prevTheme = theme;
-         if (ImGui.radioButton(labels.get("Light"), isLight))
+         if (ImGui.radioButton(labels.get("Light"), theme == THEME.LIGHT))
          {
             setTheme(THEME.LIGHT);
          }
          ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Dark"), isDark))
+         if (ImGui.radioButton(labels.get("Dark"), theme == THEME.DARK))
          {
             setTheme(THEME.DARK);
          }
          ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Classic"), isClassic))
+         if (ImGui.radioButton(labels.get("Classic"), theme == THEME.CLASSIC))
          {
             setTheme(THEME.CLASSIC);
          }
@@ -559,8 +553,5 @@ public class GDXImGuiBasedUI
          case CLASSIC -> ImGui.styleColorsClassic();
       }
       this.theme = theme;
-      isLight = theme == THEME.LIGHT;
-      isDark = theme == THEME.DARK;
-      isClassic = theme == THEME.CLASSIC;
    }
 }
