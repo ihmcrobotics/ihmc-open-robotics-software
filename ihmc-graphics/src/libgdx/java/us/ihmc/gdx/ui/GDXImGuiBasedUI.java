@@ -112,11 +112,11 @@ public class GDXImGuiBasedUI
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
-   private enum THEME
+   private enum Theme
    {
       LIGHT, DARK, CLASSIC
    }
-   THEME theme = THEME.LIGHT;
+   Theme theme = Theme.LIGHT;
    private File themeFile;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
@@ -246,19 +246,19 @@ public class GDXImGuiBasedUI
                }
                if (themeFromFile.toString().contains("LIGHT"))
                {
-                  theme = THEME.LIGHT;
+                  theme = Theme.LIGHT;
                }
                else if (themeFromFile.toString().contains("DARK"))
                {
-                  theme = THEME.DARK;
+                  theme = Theme.DARK;
                }
                else if (themeFromFile.toString().contains("CLASSIC"))
                {
-                  theme = THEME.CLASSIC;
+                  theme = Theme.CLASSIC;
                }
                else  // Default if no saved preference
                {
-                  theme = THEME.LIGHT;
+                  theme = Theme.LIGHT;
                }
             }
          }
@@ -365,24 +365,22 @@ public class GDXImGuiBasedUI
          ImGui.text("UI Theme:");
          ImGui.sameLine();
 
-         THEME prevTheme = theme;
-         if (ImGui.radioButton(labels.get("Light"), theme == THEME.LIGHT))
+         Theme prevTheme = theme;
+         if (ImGui.radioButton(labels.get("Light"), theme == Theme.LIGHT))
          {
-            setTheme(THEME.LIGHT);
+            setTheme(Theme.LIGHT);
          }
          ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Dark"), theme == THEME.DARK))
+         if (ImGui.radioButton(labels.get("Dark"), theme == Theme.DARK))
          {
-            setTheme(THEME.DARK);
+            setTheme(Theme.DARK);
          }
          ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Classic"), theme == THEME.CLASSIC))
+         if (ImGui.radioButton(labels.get("Classic"), theme == Theme.CLASSIC))
          {
-            setTheme(THEME.CLASSIC);
+            setTheme(Theme.CLASSIC);
          }
 
-         // NOTE: save the theme to ~/.ihmc/lightDarkPreference.ini
-//         the = new File(userHomeDirectory + "/.ihmc/themePreference.ini");
          if (theme != prevTheme)
          {
             try
@@ -544,7 +542,7 @@ public class GDXImGuiBasedUI
       }
    }
 
-   public void setTheme(THEME theme)
+   public void setTheme(Theme theme)
    {
       switch (theme)
       {
