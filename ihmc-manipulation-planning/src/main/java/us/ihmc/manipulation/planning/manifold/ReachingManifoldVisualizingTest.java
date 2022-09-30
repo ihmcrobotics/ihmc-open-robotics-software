@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import controller_msgs.msg.dds.ReachingManifoldMessage;
+import toolbox_msgs.msg.dds.ReachingManifoldMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

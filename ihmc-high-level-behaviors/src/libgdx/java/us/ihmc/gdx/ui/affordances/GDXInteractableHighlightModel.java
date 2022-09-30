@@ -1,15 +1,14 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.interactable.GDXModelInstanceScaler;
+import us.ihmc.gdx.tools.GDXModelInstanceScaler;
 
 /**
  * This class creates a model that's slightly larger and half transparent
@@ -17,21 +16,18 @@ import us.ihmc.gdx.ui.interactable.GDXModelInstanceScaler;
  */
 public class GDXInteractableHighlightModel implements RenderableProvider
 {
-   private final ModelInstance modelInstance;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final GDXModelInstanceScaler scaledModelInstance;
 
    public GDXInteractableHighlightModel(String modelFileName)
    {
-      this(GDXModelLoader.load(modelFileName));
+      this(GDXModelLoader.loadModelData(modelFileName));
    }
 
-   public GDXInteractableHighlightModel(Model model)
+   public GDXInteractableHighlightModel(ModelData modelData)
    {
-      modelInstance = new ModelInstance(model);
-      scaledModelInstance = new GDXModelInstanceScaler(modelInstance);
-      double scaleFactor = 1.01;
-      scaledModelInstance.scale(scaleFactor);
+      double startingScaleFactor = 1.01;
+      scaledModelInstance = new GDXModelInstanceScaler(modelData, startingScaleFactor);
       setTransparency(0.5);
    }
 
@@ -49,17 +45,17 @@ public class GDXInteractableHighlightModel implements RenderableProvider
 
    public void setTransparency(double transparency)
    {
-      GDXTools.setTransparency(modelInstance, (float) transparency);
+      GDXTools.setTransparency(scaledModelInstance.getModelInstance(), (float) transparency);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      modelInstance.getRenderables(renderables, pool);
+      scaledModelInstance.getRenderables(renderables, pool);
    }
 
    public void dispose()
    {
-      modelInstance.model.dispose();
+      scaledModelInstance.getModelInstance().model.dispose();
    }
 }

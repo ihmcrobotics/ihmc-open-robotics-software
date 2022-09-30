@@ -1,6 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
-import controller_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;

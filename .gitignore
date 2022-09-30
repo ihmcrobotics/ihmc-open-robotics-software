@@ -46,6 +46,7 @@
 **/pit-test
 **/pit-reports
 **/generated-src2
+**/.vscode*
 
 
 # File types to ignore

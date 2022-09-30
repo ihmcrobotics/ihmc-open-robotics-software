@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.tuple.Pair;

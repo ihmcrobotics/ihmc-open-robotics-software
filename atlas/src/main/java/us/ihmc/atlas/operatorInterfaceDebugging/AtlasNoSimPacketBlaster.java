@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.PointCloudWorldPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.atlas.AtlasRobotModel;

@@ -6,7 +6,7 @@
 uint32 sequence_id
 
 # The taskspace trajectory information.
-controller_msgs/SO3TrajectoryMessage taskspace_trajectory_message
+ihmc_common_msgs/SO3TrajectoryMessage taskspace_trajectory_message
 
 # The jointspace trajectory information.
 # The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
