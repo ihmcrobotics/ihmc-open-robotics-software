@@ -35,21 +35,21 @@ namespace promp {
      * Each column within .csv file represents a trajectory.
      * All .csv files must have trajectories(columns) in the same sequence (column-wise)
      */
-    class TrajectoryGroup {
+    class PROMPEXPORT TrajectoryGroup {
 
     public:
         
         /**
          *  @\brief default constructor: create an empty trajectory group
          */
-        PROMPEXPORT TrajectoryGroup() = default;
+        TrajectoryGroup() = default;
 
         /**
          *  @\brief    load trajectories from list of files (formatted as generated from io/serializer). 
          *	@\param	files of files.
          *	@\param	index list of indexes representing dofs to keep.
          */
-        PROMPEXPORT void load_trajectories(const std::vector<std::string>& files, const std::vector<size_t>& index);
+        void load_trajectories(const std::vector<std::string>& files, const std::vector<size_t>& index);
 
         /**
          *  @\brief    load trajectories from list of .csv files. 
@@ -58,7 +58,7 @@ namespace promp {
          *	@\param	sep values separator.
          *	@\param	skip_header if true skip first line.
          */
-        PROMPEXPORT void load_csv_trajectories(const std::vector<std::string>& files,
+        void load_csv_trajectories(const std::vector<std::string>& files,
             const std::vector<size_t>& index, char sep = ',', bool skip_header = false);
 
         /**
@@ -67,29 +67,29 @@ namespace promp {
          *	@\param	cols list of columns (dofs) to keep.
          *	@\param	sep values separator.
          */
-        PROMPEXPORT void load_csv_trajectories(const std::vector<std::string>& files,
+        void load_csv_trajectories(const std::vector<std::string>& files,
             const std::vector<std::string>& cols, char sep = ',');
 
         /**
          *   @\brief    Normalize all trajectories to the mean length (number of timesteps)
          */
-        PROMPEXPORT size_t normalize_length();
+        size_t normalize_length();
 
         /**
          *  @\brief     Normalize all trajectories to the same desired length
          *	@\param	len desired length
          */
-        PROMPEXPORT void normalize_length(size_t len);
+        void normalize_length(size_t len);
 
         /**
          *   @\brief    standardize each dof among the trajectories
          */
-        PROMPEXPORT std::pair<Eigen::VectorXd, Eigen::VectorXd> standardize_dims();
+        std::pair<Eigen::VectorXd, Eigen::VectorXd> standardize_dims();
 
         /**
          * @\brief	return the vector of trajectories
          */
-        PROMPEXPORT const std::vector<Trajectory>& trajectories() const { return _trajs; }
+        const std::vector<Trajectory>& trajectories() const { return _trajs; }
 
     private:
 

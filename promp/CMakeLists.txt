@@ -9,6 +9,7 @@ project(${PROJECTNAME})
 
 set(promp_VERSION 1.0.0)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 option(BUILD_PYTHON_MODULE "build python module" OFF)
 
@@ -75,8 +76,8 @@ add_subdirectory(examples)
 add_subdirectory(doc)
 
 # googletests
-enable_testing()
-add_subdirectory(test)
+# enable_testing()
+# add_subdirectory(test)
 
 # create promp python module
 if(${BUILD_PYTHON_MODULE})
