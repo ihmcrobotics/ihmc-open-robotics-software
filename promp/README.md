@@ -73,6 +73,13 @@ the shared library files required at runtime (.so/.dll/.dylib) as well as the ma
 To generate the Java bindings for Linux, you should utilize Docker and the Docker build script in the root directory, `generateJavaMappingsDocker.sh`.
 Using the Docker build script/the Docker image, you will ensure that the native libraries it produces are compatible with older distros (Ubuntu 20.04; glibc 2.31).
 
+Before running the Docker build script, ensure your user can access Docker functions (normally, it's root-only access).
+```
+$ sudo groupadd docker
+$ sudo usermod -aG docker $USER
+$ newgrp docker 
+```
+
 ### Windows
 TODO
 
