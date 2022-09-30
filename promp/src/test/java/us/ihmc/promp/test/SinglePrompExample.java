@@ -1,6 +1,5 @@
 package us.ihmc.promp.test;
 
-import org.bytedeco.javacpp.DoublePointer;
 import us.ihmc.promp.ProMP;
 import us.ihmc.promp.SizeTVector;
 import us.ihmc.promp.StringVector;
@@ -8,11 +7,11 @@ import us.ihmc.promp.TrajectoryGroup;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
-import static us.ihmc.promp.global.promp.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static us.ihmc.promp.global.promp.EigenMatrixXd;
 
 // This demo corresponds to promp/examples/single_promp.cpp
 public class SinglePrompExample
@@ -78,8 +77,6 @@ public class SinglePrompExample
       trajectoryGroup.load_csv_trajectories(fileListStringVector, doFsSizeTVector);
       long t_len = trajectoryGroup.normalize_length();
 
-      System.out.println("t_len " + t_len);
-
       int n_rbf = 20;
 
       ProMP m_promp = new ProMP(trajectoryGroup, n_rbf);
@@ -87,29 +84,19 @@ public class SinglePrompExample
       EigenMatrixXd stdTraj = m_promp.gen_traj_std_dev();
       EigenMatrixXd traj_covariance = m_promp.generate_trajectory_covariance();
 
-      DoublePointer vectData = vect.data();
-      DoublePointer stdTrajData = stdTraj.data();
-      DoublePointer traj_covarianceData = traj_covariance.data();
+      printMatrix(vect, "vect");
+      printMatrix(stdTraj, "stdTraj");
+      printMatrix(traj_covariance, "traj_covariance");
+   }
 
-      System.out.println("vect");
-      for (int i = 0; i < t_len; i++)
-      {
-         System.out.println(vectData.get(i));
-      }
-      System.out.println();
-
-      System.out.println("stdTraj");
-      for (int i = 0; i < t_len; i++)
-      {
-         System.out.println(stdTrajData.get(i));
-      }
-      System.out.println();
-
-      System.out.println("traj_covariance");
-      for (int i = 0; i < t_len; i++)
-      {
-         System.out.println(traj_covarianceData.get(i));
+   private static void printMatrix(EigenMatrixXd matrix, String name) {
+      System.out.println(name);
+      for (int row = 0; row < matrix.rows(); row++) {
+         for (int col = 0; col < matrix.cols(); col++) {
+            System.out.println(matrix.coeff(row, col));
+         }
       }
       System.out.println();
    }
+
 }
