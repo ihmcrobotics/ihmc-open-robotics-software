@@ -13,7 +13,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 @Properties(value = {
       @Platform(
             value = {"linux", "windows", "macosx"},
-            compiler = "cpp11",
+            compiler = "cpp17",
             define = {"UNIQUE_PTR_NAMESPACE std", "SHARED_PTR_NAMESPACE std"},
             include = {"promp/trajectory.hpp",
                        "promp/trajectory_group.hpp",
