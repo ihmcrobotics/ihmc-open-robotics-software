@@ -65,10 +65,10 @@ public class GDXVRController extends GDXVRTrackedDevice
    private final ReferenceFrame xForwardZUpControllerFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
-   private final FramePose3D selectionSphereFramePose = new FramePose3D();
-   private final RigidBodyTransform selectionSphereTransformToControllerFrame = new RigidBodyTransform();
-   private final ImGuiRigidBodyTransformTuner selectionSphereTransformTuner = new ImGuiRigidBodyTransformTuner(selectionSphereTransformToControllerFrame);
-   private GDXModelInstance selectionSphere;
+   private final FramePose3D pickSphereFramePose = new FramePose3D();
+   private final RigidBodyTransform pickSphereTransformToControllerFrame = new RigidBodyTransform();
+   private final ImGuiRigidBodyTransformTuner pickSphereTransformTuner = new ImGuiRigidBodyTransformTuner(pickSphereTransformToControllerFrame);
+   private GDXModelInstance pickSphere;
 
    public GDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -80,9 +80,9 @@ public class GDXVRController extends GDXVRTrackedDevice
                                                                                 getDeviceYUpZBackFrame(),
                                                                                 controllerYBackZLeftXRightToXForwardZUp);
 
-      selectionSphereTransformToControllerFrame.getTranslation().setX(0.029);
-      selectionSphereTransformToControllerFrame.getTranslation().setY(side.negateIfLeftSide(0.020));
-      selectionSphereTransformToControllerFrame.getTranslation().setZ(-0.017);
+      pickSphereTransformToControllerFrame.getTranslation().setX(0.029);
+      pickSphereTransformToControllerFrame.getTranslation().setY(side.negateIfLeftSide(0.020));
+      pickSphereTransformToControllerFrame.getTranslation().setZ(-0.017);
    }
 
    public void initSystem()
@@ -127,14 +127,14 @@ public class GDXVRController extends GDXVRTrackedDevice
 
       if (isConnected())
       {
-         if (selectionSphere == null)
+         if (pickSphere == null)
          {
-            selectionSphere = new GDXModelInstance(GDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
+            pickSphere = new GDXModelInstance(GDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
          }
 
-         selectionSphereFramePose.setIncludingFrame(xForwardZUpControllerFrame, selectionSphereTransformToControllerFrame);
-         selectionSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         selectionSphere.setPoseInWorldFrame(selectionSphereFramePose);
+         pickSphereFramePose.setIncludingFrame(xForwardZUpControllerFrame, pickSphereTransformToControllerFrame);
+         pickSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         pickSphere.setPoseInWorldFrame(pickSphereFramePose);
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -153,12 +153,12 @@ public class GDXVRController extends GDXVRTrackedDevice
 
    public void renderImGuiTunerWidgets()
    {
-      selectionSphereTransformTuner.renderTunerWithYawPitchRoll(0.001);
+      pickSphereTransformTuner.renderTunerWithYawPitchRoll(0.001);
    }
 
-   public GDXModelInstance getSelectionSphere()
+   public GDXModelInstance getPickSphere()
    {
-      return selectionSphere;
+      return pickSphere;
    }
 
    public InputDigitalActionData getClickTriggerActionData()
@@ -247,8 +247,8 @@ public class GDXVRController extends GDXVRTrackedDevice
       }
    }
 
-   public FramePose3DReadOnly getSelectionPose()
+   public FramePose3D getPickPose()
    {
-      return selectionSphereFramePose;
+      return pickSphereFramePose;
    }
 }

@@ -164,8 +164,9 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
       placedNotification.set();
    }
 
-   public void renderPlaceGoalButton()
+   public boolean renderPlaceGoalButton()
    {
+      boolean placementStarted = false;
       if (locationFlagIcon != null)
       {
          ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
@@ -180,6 +181,7 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
       }
       if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
       {
+         placementStarted = true;
          placeGoalActionMap.start();
       }
       if (pushedFlags)
@@ -207,6 +209,7 @@ public class GDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
          ImGui.popItemWidth();
       }
+      return placementStarted;
    }
 
    @Override

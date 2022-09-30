@@ -9,7 +9,6 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.Axis3D;
@@ -51,6 +50,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
    private boolean selected = false;
    private boolean modified = false;
+   private boolean newlyModified = false;
    private boolean mouseRingPickSelected;
    private GDX3DPanel panel3D;
    private GDXTeleoperationParameters teleoperationParameters;
@@ -171,11 +171,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 
       if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
-         selected = true;
-         modified = true;
-         walkFacingDirection.set(Axis3D.Z, 0.0);
-         updateStuff();
-         queueFootstepPlan();
+         becomeModified();
       }
       if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
       {
@@ -237,6 +233,23 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerGoalGizmo.setHighlightingEnabled(modified);
    }
 
+   private void becomeModified()
+   {
+      selected = true;
+      modified = true;
+      newlyModified = true;
+      walkFacingDirection.set(Axis3D.Z, 0.0);
+      updateStuff();
+      queueFootstepPlan();
+   }
+
+   public boolean checkIsNewlyModified()
+   {
+      boolean newlyModifiedReturn = newlyModified;
+      newlyModified = false;
+      return newlyModifiedReturn;
+   }
+
    private void queueFootstepPlan()
    {
       footstepPlanningThread.clearQueueAndExecute(() ->
@@ -252,14 +265,14 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
          {
             planFootstepsUsingTurnWalkTurnPlanner();
          }
-         else
+         else if (plannerToUse == 2)
          {
             planFootstepsUsingTurnStraightTurnFootstepGenerator();
          }
       });
    }
 
-   private void updateStuff()
+   public void updateStuff()
    {
       goalFrame.update();
       goalPose.setToZero(goalFrame);
@@ -340,6 +353,32 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       if (ImGui.radioButton(labels.get("Turn Straight Turn"), plannerToUse == 2))
       {
          plannerToUse = 2;
+      }
+
+      ImGuiTools.previousWidgetTooltip("WARNING!! Do not check this box if you don't have xbox controller connected!");
+      ImGui.text("Control ring:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Deleted"), !selected && !modified))
+      {
+         delete();
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Modified"), !selected && modified))
+      {
+         selected = false;
+         if (!modified)
+         {
+            becomeModified();
+         }
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Selected"), selected && modified))
+      {
+         selected = true;
+         if (!modified)
+         {
+            becomeModified();
+         }
       }
    }
 
@@ -466,11 +505,6 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    public double getTurningStepWidth()
    {
       return steppingParameters.getTurningStepWidth();
-   }
-
-   public FootstepPlan getFootstepPlan()
-   {
-      return footstepPlan;
    }
 
    public boolean isSelected()

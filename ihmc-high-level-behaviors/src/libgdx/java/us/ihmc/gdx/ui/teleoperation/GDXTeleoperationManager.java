@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -21,6 +20,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -34,7 +34,11 @@ import us.ihmc.gdx.ui.footstepPlanner.GDXFootstepPlanning;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.interactable.GDXChestOrientationSlider;
 import us.ihmc.gdx.ui.interactable.GDXPelvisHeightSlider;
+import us.ihmc.gdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.gdx.ui.vr.GDXVRInputMode;
+import us.ihmc.gdx.ui.vr.GDXWholeBodyIKStreaming;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -55,9 +59,8 @@ import java.util.List;
  */
 public class GDXTeleoperationManager extends ImGuiPanel
 {
-   GDXImGuiBasedUI baseUI;
-
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private GDXImGuiBasedUI baseUI;
    private final CommunicationHelper communicationHelper;
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
@@ -73,8 +76,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final GDXFootstepPlanning footstepPlanning;
+   private final GDXVRInputMode vrInputMode = GDXVRInputMode.ARM_MODE;
+   private GDXLegControlMode legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
    private final GDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new GDXBallAndArrowPosePlacement();
    private final GDXManualFootstepPlacement manualFootstepPlacement = new GDXManualFootstepPlacement();
+   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final GDXInteractableFootstepPlan interactableFootstepPlan = new GDXInteractableFootstepPlan();
    private final GDXPelvisHeightSlider pelvisHeightSlider;
    private final GDXChestOrientationSlider chestPitchSlider;
@@ -83,19 +89,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final GDXHandConfigurationManager handManager = new GDXHandConfigurationManager();
    private GDXRobotCollisionModel selfCollisionModel;
    private GDXRobotCollisionModel environmentCollisionModel;
-   private GDXWholeBodyDesiredIKManager wholeBodyDesiredIKManager;
+   private GDXArmManager armManager;
+   private GDXWholeBodyIKStreaming wholeBodyIKStreaming;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
-
+   private GDXLiveRobotPartInteractable pelvisInteractable;
    private final SideDependentList<GDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<GDXHandInteractable> handInteractables = new SideDependentList<>();
-   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
-   private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
-   private GDXLiveRobotPartInteractable pelvisInteractable;
-   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
-   private final boolean interactableExists;
+   private final boolean interactablesAvailable;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -126,20 +129,6 @@ public class GDXTeleoperationManager extends ImGuiPanel
       teleoperationParameters.load();
       teleoperationParameters.save();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         armHomes.put(side,
-                      new double[] {0.5,
-                                    side.negateIfRightSide(0.0),
-                                    side.negateIfRightSide(-0.5),
-                                    -1.0,
-                                    side.negateIfRightSide(0.0),
-                                    0.000,
-                                    side.negateIfLeftSide(0.0)});
-      }
-      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
-      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
-
       syncedRobot = communicationHelper.newSyncedRobot();
 
       robotLowLevelMessenger = new GDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
@@ -160,20 +149,25 @@ public class GDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new GDXFootstepPlanning(robotModel, syncedRobot);
 
-      interactableExists = robotSelfCollisionModel != null;
-      if (interactableExists)
+      interactablesAvailable = robotSelfCollisionModel != null;
+      if (interactablesAvailable)
       {
          selfCollisionModel = new GDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new GDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         wholeBodyDesiredIKManager = new GDXWholeBodyDesiredIKManager(robotModel,
-                                                                      syncedRobot,
-                                                                      desiredRobot.getDesiredFullRobotModel(),
-                                                                      ros2Helper,
-                                                                      teleoperationParameters);
+         armManager = new GDXArmManager(robotModel,
+                                        syncedRobot,
+                                        desiredRobot.getDesiredFullRobotModel(),
+                                        ros2Helper,
+                                        teleoperationParameters);
       }
    }
 
    public void create(GDXImGuiBasedUI baseUI)
+   {
+      create(baseUI, null);
+   }
+
+   public void create(GDXImGuiBasedUI baseUI, RestartableJavaProcess kinematicsStreamingToolboxProcess)
    {
       this.baseUI = baseUI;
       desiredRobot.create();
@@ -193,18 +187,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
       manualFootstepPlacement.create(baseUI, interactableFootstepPlan);
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
-      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
          // create the manager for the desired arm setpoints
-         wholeBodyDesiredIKManager.create();
+         armManager.create();
 
          for (GDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
          {
@@ -222,10 +214,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
                   pelvisInteractable.setOnSpacePressed(() ->
-                                                       {
-                                                          ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                                                            pelvisInteractable.getPose()));
-                                                       });
+                  {
+                     ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                                                                                                       pelvisInteractable.getPose()));
+                  });
                }
                else
                {
@@ -258,7 +250,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
                      handInteractables.put(side, handInteractable);
                      // TODO this should probably not handle the space event!
                      // This sends a command to the controller.
-                     handInteractable.setOnSpacePressed(wholeBodyDesiredIKManager.getSubmitDesiredArmSetpointsCallback(side));
+                     handInteractable.setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
                   }
                   else
                   {
@@ -268,8 +260,16 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
 
+         if (kinematicsStreamingToolboxProcess != null)
+         {
+            wholeBodyIKStreaming = new GDXWholeBodyIKStreaming(syncedRobot.getRobotModel(), ros2Helper, kinematicsStreamingToolboxProcess);
+            wholeBodyIKStreaming.create(baseUI.getVRManager().getContext(), handInteractables);
+         }
+
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
+         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
       }
@@ -286,6 +286,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
    }
 
    public void update()
+   {
+      update(false, false);
+   }
+
+   public void update(boolean nativesLoaded, boolean nativesNewlyLoaded)
    {
       syncedRobot.update();
       desiredRobot.update();
@@ -310,9 +315,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.update(interactableFootstepPlan);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
-            wholeBodyDesiredIKManager.update(handInteractables);
+            armManager.update(handInteractables);
 
             selfCollisionModel.update();
             environmentCollisionModel.update();
@@ -324,6 +329,34 @@ public class GDXTeleoperationManager extends ImGuiPanel
          }
       }
 
+      if (walkPathControlRing.checkIsNewlyModified())
+      {
+         legControlMode = GDXLegControlMode.PATH_CONTROL_RING;
+      }
+
+      if (legControlMode != GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         for (RobotSide side : footInteractables.sides())
+         {
+            footInteractables.get(side).delete();
+         }
+      }
+
+      if (legControlMode != GDXLegControlMode.PATH_CONTROL_RING)
+      {
+         walkPathControlRing.delete();
+      }
+
+      if (legControlMode == GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         interactableFootstepPlan.clear();
+      }
+
+      if (legControlMode != GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
+      {
+         manualFootstepPlacement.exitPlacement();
+      }
+
       manualFootstepPlacement.update();
       interactableFootstepPlan.update();
       if (interactableFootstepPlan.getFootsteps().size() > 0)
@@ -331,15 +364,61 @@ public class GDXTeleoperationManager extends ImGuiPanel
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
+      
+      if (wholeBodyIKStreaming != null)
+      {
+         boolean isIKStreamingMode = armManager.getArmControlMode() == GDXArmControlMode.STREAMING;
+         wholeBodyIKStreaming.update(isIKStreamingMode);
+         if (isIKStreamingMode && armManager.getArmControlModeChanged() && !wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().isStarted())
+         {
+            wholeBodyIKStreaming.getKinematicsStreamingToolboxProcess().start();
+         }
+      }
    }
 
-   public void calculate3DViewPick(ImGui3DViewInput input)
+   private void calculateVRPick(GDXVRContext vrContext)
+   {
+      if (interactablesEnabled.get())
+      {
+         if (interactablesAvailable)
+         {
+            environmentCollisionModel.calculateVRPick(vrContext);
+         }
+      }
+   }
+
+   private void processVRInput(GDXVRContext vrContext)
+   {
+      pelvisInteractable.processVRInput(vrContext);
+      for (RobotSide side : footInteractables.sides())
+      {
+         footInteractables.get(side).processVRInput(vrContext);
+      }
+      for (RobotSide side : handInteractables.sides())
+      {
+         handInteractables.get(side).processVRInput(vrContext);
+      }
+
+      if (vrInputMode == GDXVRInputMode.ARM_MODE)
+      {
+      }
+
+      if (interactablesEnabled.get())
+      {
+         if (interactablesAvailable)
+         {
+            environmentCollisionModel.processVRInput(vrContext);
+         }
+      }
+   }
+
+   private void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
          walkPathControlRing.calculate3DViewPick(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
@@ -358,13 +437,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
    }
 
    // This happens after update.
-   public void process3DViewInput(ImGui3DViewInput input)
+   private void process3DViewInput(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
          walkPathControlRing.process3DViewInput(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             environmentCollisionModel.process3DViewInput(input);
 
@@ -379,94 +458,19 @@ public class GDXTeleoperationManager extends ImGuiPanel
             }
          }
       }
-      boolean ctrlHeld = imgui.internal.ImGui.getIO().getKeyCtrl();
-      boolean isPPressed = input.isWindowHovered() && ImGui.isKeyDown('P');
-      if (ctrlHeld)
-      {
-         if (isPPressed)
-         {
-            teleportCameraToRobotPelvis();
-         }
-      }
+   }
+
+   private void renderExtraWidgetsOnVRPanel()
+   {
+      renderSharedImGuiWidgets();
    }
 
    public void renderImGuiWidgets()
    {
       robotLowLevelMessenger.renderImGuiWidgets();
 
-      ImGui.text("Arms:");
-      for (RobotSide side : RobotSide.values)
+      if (interactablesAvailable)
       {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
-         {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armHomes.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
-         }
-      }
-      ImGui.text("Door avoidance arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
-         {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        doorAvoidanceArms.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
-         }
-      }
-
-      pelvisHeightSlider.renderImGuiWidgets();
-      chestPitchSlider.renderImGuiWidgets();
-      chestYawSlider.renderImGuiWidgets();
-
-      swingTimeSlider.render();
-      transferTimeSlider.render();
-      turnAggressivenessSlider.render();
-      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
-
-      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
-      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
-
-      ImGui.separator();
-
-      manualFootstepPlacement.renderImGuiWidgets();
-
-      ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
-
-      ImGui.text("Walk path control ring planner:");
-      walkPathControlRing.renderImGuiWidgets();
-
-      interactableFootstepPlan.renderImGuiWidgets();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete All")))
-      {
-         footstepsSentToControllerGraphic.clear();
-         ballAndArrowMidFeetPosePlacement.clear();
-         manualFootstepPlacement.exitPlacement();
-         interactableFootstepPlan.clear();
-         walkPathControlRing.delete();
-      }
-      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
-
-      ImGui.separator();
-
-      handManager.renderImGuiWidgets();
-
-//      desiredRobot.renderImGuiWidgets();
-//      ImGui.sameLine();
-      if (ImGui.button(labels.get("Set Desired To Current")))
-      {
-         wholeBodyDesiredIKManager.setDesiredToCurrent();
-         desiredRobot.setDesiredToCurrent();
-      }
-
-      if (interactableExists)
-      {
-         wholeBodyDesiredIKManager.renderImGuiWidgets();
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
          ImGui.sameLine();
          if (ImGui.button(labels.get("Delete all")))
@@ -478,34 +482,120 @@ public class GDXTeleoperationManager extends ImGuiPanel
             for (RobotSide side : handInteractables.sides())
                handInteractables.get(side).delete();
          }
+      }
+      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
+      ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
 
-         ImGui.text("Pelvis:");
+      ImGui.separator();
+      pelvisHeightSlider.renderImGuiWidgets();
+      if (interactablesAvailable)
+      {
+         ImGui.text("Pelvis pose:");
+         ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
          pelvisInteractable.renderImGuiWidgets();
+      }
+      ImGui.separator();
+      chestPitchSlider.renderImGuiWidgets();
+      chestYawSlider.renderImGuiWidgets();
+      ImGui.separator();
 
+      ImGui.text("Leg control mode: " + legControlMode.name());
+      if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
+      {
+         legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == GDXLegControlMode.PATH_CONTROL_RING))
+      {
+         legControlMode = GDXLegControlMode.PATH_CONTROL_RING;
+      }
+      if (ImGui.radioButton(labels.get("Joystick walking"), legControlMode == GDXLegControlMode.JOYSTICK_WALKING))
+      {
+         legControlMode = GDXLegControlMode.JOYSTICK_WALKING;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
+      {
+         legControlMode = GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+      }
+
+      if (manualFootstepPlacement.renderImGuiWidgets())
+         legControlMode = GDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+
+      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+         legControlMode = GDXLegControlMode.PATH_CONTROL_RING;
+
+      ImGui.text("Walk path control ring planner:");
+      walkPathControlRing.renderImGuiWidgets();
+
+      interactableFootstepPlan.renderImGuiWidgets();
+
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Delete All")))
+      {
+         footstepsSentToControllerGraphic.clear();
+         ballAndArrowMidFeetPosePlacement.clear();
+         manualFootstepPlacement.exitPlacement();
+         interactableFootstepPlan.clear();
+         walkPathControlRing.delete();
+      }
+
+      if (interactablesAvailable)
+      {
+         for (RobotSide side : footInteractables.sides())
+         {
+            ImGui.text(side.getPascalCaseName() + " foot:");
+            ImGui.sameLine();
+            if (footInteractables.get(side).renderImGuiWidgets())
+            {
+               legControlMode = GDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+            }
+         }
+      }
+
+      ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
+      swingTimeSlider.render();
+      transferTimeSlider.render();
+      turnAggressivenessSlider.render();
+      ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
+
+      ImGui.separator();
+
+      handManager.renderImGuiWidgets();
+
+//      desiredRobot.renderImGuiWidgets();
+//      ImGui.sameLine();
+//      if (ImGui.button(labels.get("Set Desired To Current")))
+//      {
+//         wholeBodyDesiredIKManager.setDesiredToCurrent();
+//         desiredRobot.setDesiredToCurrent();
+//      }
+
+      if (interactablesAvailable)
+      {
+         armManager.renderImGuiWidgets();
+
+         boolean handInteractablesAreDeleted = true;
          for (RobotSide side : handInteractables.sides())
          {
             ImGui.text(side.getPascalCaseName() + " hand:");
             ImGui.sameLine();
             handInteractables.get(side).renderImGuiWidgets();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            ImGui.text(side.getPascalCaseName() + " foot:");
-            ImGui.sameLine();
-            footInteractables.get(side).renderImGuiWidgets();
+            handInteractablesAreDeleted &= handInteractables.get(side).isDeleted();
          }
 
-         boolean allAreDeleted = pelvisInteractable.isDeleted();
-         for (RobotSide side : handInteractables.sides())
+         desiredRobot.setActive(!handInteractablesAreDeleted);
+
+         if (!handInteractablesAreDeleted)
          {
-            allAreDeleted &= handInteractables.get(side).isDeleted();
+//            desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
+            for (RobotSide side : handInteractables.sides())
+               desiredRobot.setArmShowing(side, !handInteractables.get(side).isDeleted()
+                                                && armManager.getArmControlMode() == GDXArmControlMode.JOINT_ANGLES);
+//            for (RobotSide side : footInteractables.sides())
+//               desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
          }
-         for (RobotSide side : footInteractables.sides())
-         {
-            allAreDeleted &= footInteractables.get(side).isDeleted();
-         }
-         desiredRobot.setActive(!allAreDeleted);
 
          ImGui.separator();
 
@@ -516,8 +606,18 @@ public class GDXTeleoperationManager extends ImGuiPanel
          ImGui.checkbox("Avoidance", showSelfCollisionMeshes);
       }
 
+      renderSharedImGuiWidgets();
+
       // TODO: Add transparency sliders
       // TODO: Add motion previews
+   }
+
+   private void renderSharedImGuiWidgets()
+   {
+      if (armManager.getArmControlMode() == GDXArmControlMode.STREAMING)
+      {
+         wholeBodyIKStreaming.renderImGuiWidgets();
+      }
    }
 
    private void renderTooltipsAndContextMenus()
@@ -593,7 +693,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesEnabled.get())
       {
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (showSelfCollisionMeshes.get())
             {
@@ -616,6 +716,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
+
+         if (armManager.getArmControlMode() == GDXArmControlMode.STREAMING)
+         {
+            wholeBodyIKStreaming.getVirtualRenderables(renderables, pool);
+         }
       }
    }
 
@@ -624,6 +729,8 @@ public class GDXTeleoperationManager extends ImGuiPanel
       desiredRobot.destroy();
       walkPathControlRing.destroy();
       footstepsSentToControllerGraphic.destroy();
+      if (wholeBodyIKStreaming != null)
+         wholeBodyIKStreaming.destroy();
    }
 
    public List<ImGuiGDXVisualizer> getVisualizers()
@@ -650,10 +757,5 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public GDXHandConfigurationManager getHandManager()
    {
       return handManager;
-   }
-
-   public GDXTeleoperationParameters getTeleoperationParameters()
-   {
-      return teleoperationParameters;
    }
 }

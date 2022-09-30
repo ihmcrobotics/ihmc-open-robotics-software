@@ -24,7 +24,6 @@ import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 /**
@@ -42,7 +41,6 @@ public class GDXManualFootstepPlacement implements RenderableProvider
    private GDX3DPanel primary3DPanel;
    private GDXInteractableFootstepPlan footstepPlan;
    private boolean renderTooltip = false;
-   private final ArrayDeque<GDXInteractableFootstep> newlyPlacedFootsteps = new ArrayDeque<>();
    private final FramePose3D tempFramePose = new FramePose3D();
 
    private GDXIconTexture feetIcon;
@@ -65,6 +63,17 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       rightFootButton.loadAndSetIcon("icons/rightFoot_depress.png");
       rightFootButton.setTooltipText("Place right footstep");
       rightFootButton.setOnPressed(() -> createNewFootStep(RobotSide.RIGHT));
+
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
+
+//      baseUI.getVRManager()
+   }
+
+   public void update()
+   {
+      if (footstepBeingPlaced != null)
+         footstepBeingPlaced.update();
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -99,7 +108,7 @@ public class GDXManualFootstepPlacement implements RenderableProvider
 
          footstepBeingPlaced.getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
-         // NOTE: changing yaw while placing the step (not yet placed) engaged when control held and scrolling the mouse wheel.
+         // Adjust footstep yaw while placing with Ctrl + Mouse Scroll Up/Down
          double deltaYaw = 0.0;
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
          if (ctrlHeld)
@@ -136,14 +145,19 @@ public class GDXManualFootstepPlacement implements RenderableProvider
                                           currentFootStepSide,
                                           footstepPlan.getFootsteps().size());
 
-         //Get the warnings and flash if the footstep's placement isn't okay
+         // Get the warnings and flash if the footstep's placement isn't okay
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
          footstepBeingPlaced.flashFootstepWhenBadPlacement(temporaryReasons.get(temporaryReasons.size() - 1));
 
-         // when left button clicked and released.
+         // When left button clicked and released.
          if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
          {
-            placeFootstep();
+            footstepIndex++;
+            GDXInteractableFootstep addedStep = footstepPlan.getFootsteps().add();
+            addedStep.copyFrom(baseUI, footstepBeingPlaced);
+            // Switch sides
+            currentFootStepSide = currentFootStepSide.getOppositeSide();
+            createNewFootStep(currentFootStepSide);
          }
 
          if (input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
@@ -153,30 +167,22 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   private void placeFootstep()
+   public boolean renderImGuiWidgets()
    {
-      footstepIndex++;
-      GDXInteractableFootstep addedStep = footstepPlan.getFootsteps().add();
-      addedStep.copyFrom(baseUI, footstepBeingPlaced);
-      // Switch sides
-      currentFootStepSide = currentFootStepSide.getOppositeSide();
-      createNewFootStep(currentFootStepSide);
-   }
-
-   public void renderImGuiWidgets()
-   {
-//      ImGui.text("Manual footstep placement:");
-
+      //      ImGui.text("Manual footstep placement:");
+      boolean modeActivated = false;
       ImGui.image(feetIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
       {
+         modeActivated = true;
          createNewFootStep(RobotSide.LEFT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: R");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
       {
+         modeActivated = true;
          createNewFootStep(RobotSide.RIGHT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
@@ -186,6 +192,16 @@ public class GDXManualFootstepPlacement implements RenderableProvider
          exitPlacement();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
+      return modeActivated;
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (footstepBeingPlaced != null)
+      {
+         footstepBeingPlaced.getVirtualRenderables(renderables, pool);
+      }
    }
 
    private void renderTooltips()
@@ -211,21 +227,6 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       }
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (footstepBeingPlaced != null)
-      {
-         footstepBeingPlaced.getVirtualRenderables(renderables, pool);
-      }
-   }
-
-   public void update()
-   {
-      if (footstepBeingPlaced != null)
-         footstepBeingPlaced.update();
-   }
-
    public void exitPlacement()
    {
       footstepBeingPlaced = null;
@@ -240,7 +241,7 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced = new GDXInteractableFootstep(baseUI, footstepSide, footstepIndex);
       currentFootStepSide = footstepSide;
 
-      //set the yaw of the new footstep to the yaw of the previous footstep
+      // Set the yaw of the new footstep to the yaw of the previous footstep
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       GDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
@@ -250,9 +251,9 @@ public class GDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
    }
 
-   /*
-   Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
-   Does NOT return footsteps that you already walked on
+   /**
+    * Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
+    * Does NOT return footsteps that you already walked on.
     */
    public GDXInteractableFootstep getFootstepBeingPlacedOrLastFootstepPlaced()
    {
