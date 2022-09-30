@@ -59,12 +59,16 @@ public class StandPrepControllerState extends HighLevelControllerState
          String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, jointName);
 
 //         YoPolynomial trajectory = new YoPolynomial(namePrefix + "StandPrepTrajectory", 4, registry);
+         DoubleProvider standPrepInitialConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition",
+                                                                            registry,
+                                                                            standPrepParameters.getSetpoint(jointName));
          DoubleProvider standPrepFinalConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition",
                                                                           registry,
                                                                           standPrepParameters.getSetpoint(jointName));
          YoDouble standPrepDesiredConfiguration = new YoDouble(namePrefix + "StandPrepCurrentDesired", registry);
 
-         TrajectoryData jointData = new TrajectoryData(standPrepFinalConfiguration, standPrepDesiredConfiguration, trajectory);
+         TrajectoryData jointData = new TrajectoryData(standPrepInitialConfiguration, standPrepFinalConfiguration,
+                                                       standPrepDesiredConfiguration, trajectory);
          jointsData.add(controlledJoint, jointData);
       }
 
@@ -154,7 +158,7 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          //Not sure if this is correct, because q0 and qf are what need to be saved per joint, but when drawing on the whiteboard
          //q0 and qf were the parameters for the alpha functions. So how can I use something I am trying to get??
-         double q_initial = trajectoryData.getDesiredJointConfiguration().getValue();
+         double q_initial = trajectoryData.getInitialJoinConfiguration().getValue();
          double q_final = trajectoryData.getFinalJointConfiguration().getValue();;
 
          double jointPosition = (1 - alphaPosition) * q_initial + alphaPosition * q_final;
@@ -191,15 +195,22 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private class TrajectoryData
    {
+      private final DoubleProvider initialJoinConfiguration;
       private final DoubleProvider finalJointConfiguration;
       private final YoDouble desiredJointConfiguration;
       private final YoPolynomial jointTrajectory;
 
-      public TrajectoryData(DoubleProvider finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
+      public TrajectoryData(DoubleProvider initialJointConfiguration, DoubleProvider finalJointConfiguration, YoDouble desiredJointConfiguration, YoPolynomial jointTrajectory)
       {
+         this.initialJoinConfiguration = initialJointConfiguration;
          this.finalJointConfiguration = finalJointConfiguration;
          this.desiredJointConfiguration = desiredJointConfiguration;
          this.jointTrajectory = jointTrajectory;
+      }
+
+      public DoubleProvider getInitialJoinConfiguration()
+      {
+         return initialJoinConfiguration;
       }
 
       public DoubleProvider getFinalJointConfiguration()
