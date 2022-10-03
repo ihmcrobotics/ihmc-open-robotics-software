@@ -70,8 +70,15 @@ If you make any changes to the C++ code, you should re-generate the Java binding
 the shared library files required at runtime (.so/.dll/.dylib) as well as the mapped Java code in `src/main/generated-java`.
 
 ### Linux
-To generate the Java bindings for Linux, you should utilize Docker and the Docker build script in the root directory, `generate-java-mappings-docker.sh`.
+To generate the Java bindings for Linux, you should utilize Docker and the Docker build script in the root directory, `generateJavaMappingsDocker.sh`.
 Using the Docker build script/the Docker image, you will ensure that the native libraries it produces are compatible with older distros (Ubuntu 20.04; glibc 2.31).
+
+Before running the Docker build script, ensure your user can access Docker functions (normally, it's root-only access).
+```
+$ sudo groupadd docker
+$ sudo usermod -aG docker $USER
+$ newgrp docker 
+```
 
 ### Windows
 TODO
