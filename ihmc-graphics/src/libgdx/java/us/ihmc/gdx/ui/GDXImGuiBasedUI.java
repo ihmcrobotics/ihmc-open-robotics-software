@@ -32,9 +32,11 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -224,10 +226,36 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
       themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
-      String line = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY).get(0);
-      for (Theme theme : Theme.values())
-         if (line.contains(theme.name()))
-            setTheme(theme);
+
+      Theme theme = Theme.LIGHT; // Fallback theme
+
+      if (!Files.exists(themeFilePath))
+      {
+         LogTools.info(themeFilePath.toAbsolutePath() + " not found. Using default theme.");
+      }
+      else
+      {
+         List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
+
+         boolean iniContainedTheme = false;
+
+         if (!lines.isEmpty())
+         {
+            String themeLine = lines.get(0);
+
+            for (Theme themeValue : Theme.values())
+               if (themeLine.contains(theme.name()))
+               {
+                  theme = themeValue;
+                  iniContainedTheme = true;
+               }
+         }
+
+         if (!iniContainedTheme)
+            LogTools.info("No defined theme in theme preference file: " + themeFilePath.toAbsolutePath());
+      }
+
+      setTheme(theme);
    }
 
    public void renderBeforeOnScreenUI()
