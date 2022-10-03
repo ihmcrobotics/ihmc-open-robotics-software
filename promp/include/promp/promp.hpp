@@ -31,7 +31,7 @@ namespace promp {
      * - Paraschos A, Daniel C, Peters J, Neumann G. Probabilistic movement primitives. Advances in neural information processing systems. 2013. <a href="https://www.ias.informatik.tu-darmstadt.de/uploads/Publications/Paraschos_NIPS_2013.pdf">[pdf]</a>
 	 * - Paraschos A, Daniel C, Peters J, Neumann G. Using probabilistic movement primitives in robotics. Autonomous Robots. 2018 Mar;42(3):529-51. <a href="https://www.ias.informatik.tu-darmstadt.de/uploads/Team/AlexandrosParaschos/promps_auro.pdf">[pdf]</a>.
      */
-    class PROMPEXPORT ProMP {
+    class ProMP {
     public:
         /** \brief constructor: The constructor will parameterize a phase vector, and compute the basis function matrix
          * \f$ \Psi \f$ for all phase steps. Then, for each demonstration within the std::vector \p data, it will estimate a.

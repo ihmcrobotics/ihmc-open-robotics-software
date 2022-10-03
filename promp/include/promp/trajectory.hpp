@@ -28,7 +28,7 @@ namespace promp {
      * speed indicates how the trajectory has been modulated, 
      * for example speed=2 means that the original trajectory had twice the timesteps.
      */
-    class PROMPEXPORT Trajectory {
+    class Trajectory {
 
     public:
         
