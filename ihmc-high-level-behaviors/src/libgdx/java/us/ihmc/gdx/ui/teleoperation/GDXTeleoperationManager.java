@@ -194,7 +194,14 @@ public class GDXTeleoperationManager extends ImGuiPanel
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
+      walkPathControlRing.create(baseUI,
+                                 baseUI.getPrimary3DPanel(),
+                                 robotModel,
+                                 syncedRobot,
+                                 teleoperationParameters,
+                                 communicationHelper,
+                                 ros2Helper,
+                                 footstepPlanning.getFootstepPlannerParameters());
 
       if (interactableExists)
       {
