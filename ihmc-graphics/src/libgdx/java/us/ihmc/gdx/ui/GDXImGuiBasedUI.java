@@ -32,11 +32,12 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.nio.file.Files;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -92,7 +93,7 @@ public class GDXImGuiBasedUI
    private final ArrayList<GDX3DPanel> additional3DPanels = new ArrayList<>();
    private final GDXVRManager vrManager = new GDXVRManager();
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-//   private final GDXLinuxGUIRecorder guiRecorder;
+   //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
@@ -146,7 +147,7 @@ public class GDXImGuiBasedUI
       perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(imGuiWindowAndDockSystem::setDirectory);
       perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(updatedPerspectiveDirectory ->
       {
-         libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
+        libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
       });
       perspectiveManager.getLoadListeners().add(imGuiWindowAndDockSystem::loadConfiguration);
       perspectiveManager.getLoadListeners().add(loadConfigurationLocation ->
@@ -163,14 +164,14 @@ public class GDXImGuiBasedUI
       perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
       perspectiveManager.applyPerspectiveDirectory();
 
-//      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
-//      onCloseRequestListeners.add(guiRecorder::stop);
-//      Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
+      //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
+      //      onCloseRequestListeners.add(guiRecorder::stop);
+      //      Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
 
       if (RECORD_VIDEO)
       {
          //         ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
-//         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
+         //         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
       }
 
       primary3DPanel = new GDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
@@ -227,13 +228,10 @@ public class GDXImGuiBasedUI
 
       themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
       List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
-
       if (lines != null)
       {
-         String line = lines.get(0);
-
          for (Theme theme : Theme.values())
-            if (line.contains(theme.name()))
+            if (lines.get(0).contains(theme.name()))
                setTheme(theme);
       }
    }
@@ -340,7 +338,19 @@ public class GDXImGuiBasedUI
                ImGui.sameLine();
          }
          if (theme != previousTheme)
-            FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         {
+            File myFile = themeFilePath.toFile();
+            myFile.getParentFile().mkdirs();
+            try
+            {
+               myFile.createNewFile();
+               FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            }
+            catch (IOException e)
+            {
+               e.printStackTrace();
+            }
+         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
