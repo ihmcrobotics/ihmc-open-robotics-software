@@ -9,6 +9,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -21,6 +23,7 @@ import java.util.function.Supplier;
 
 public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 {
+   private final GDXImGuiBasedUI baseUI;
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier;
@@ -34,14 +37,18 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private String chestName;
 
-   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   public GDXROS2RobotVisualizer(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
-      this(robotModel, syncedRobot, () -> null);
+      this(baseUI, robotModel, syncedRobot, () -> null);
    }
 
-   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier)
+   public GDXROS2RobotVisualizer(GDXImGuiBasedUI baseUI,
+                                 DRCRobotModel robotModel,
+                                 ROS2SyncedRobotModel syncedRobot,
+                                 Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier)
    {
       super(robotModel.getSimpleRobotName() + " Robot Visualizer (ROS 2)");
+      this.baseUI = baseUI;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
@@ -56,6 +63,7 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    public void create()
    {
       super.create();
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
@@ -97,17 +105,27 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
       }
    }
 
+   public void processImGuiInput(ImGui3DViewInput input)
+   {
+      if (input.isWindowHovered() && ImGui.getIO().getKeyCtrl() && ImGui.isKeyReleased('P'))
+      {
+         teleportCameraToRobotPelvis();
+      }
+   }
+
    @Override
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgets();
       frequencyPlot.renderImGuiWidgets();
-      if (ImGui.button(labels.get("Find My Robot")))
+
+      if (ImGui.button(labels.get("Snap to Robot")))
       {
          teleportCameraToRobotPelvis();
       }
-      ImGuiTools.previousWidgetTooltip("Brings camera focus to robot's pelvis");
+      ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\nKeybind: Ctrl + P");
       ImGui.sameLine();
+
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
       {
          if (!trackRobot.get())
@@ -134,7 +152,6 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 
    public void teleportCameraToRobotPelvis()
    {
-      RigidBodyTransform robotPelvisTransform = syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToWorldFrame();
-      cameraForTracking.setFocusPointPose(robotPelvisTransform);
+      cameraForTracking.setCameraFocusPoint(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getPelvisZUpFrame).getPosition());
    }
 }

@@ -69,7 +69,7 @@ public class GDXVRKinematicsStreamingMode
    private final SideDependentList<GDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
-   private boolean streamToController;
+   private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
@@ -146,7 +146,7 @@ public class GDXVRKinematicsStreamingMode
          InputDigitalActionData aButton = controller.getAButtonActionData();
          if (aButton.bChanged() && !aButton.bState())
          {
-            streamToController = !streamToController;
+            streamToController.set(!streamToController.get());
          }
 
          // NOTE: Implement hand open close for controller trigger button.
@@ -230,7 +230,7 @@ public class GDXVRKinematicsStreamingMode
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
 
-         toolboxInputMessage.setStreamToController(streamToController);
+         toolboxInputMessage.setStreamToController(streamToController.get());
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
@@ -241,9 +241,9 @@ public class GDXVRKinematicsStreamingMode
    {
       // Safety features!
       if (!ikStreamingModeEnabled)
-         streamToController = false;
+         streamToController.set(false);
       if (!enabled.get())
-         streamToController = false;
+         streamToController.set(false);
 
       if (status.getMessageNotification().poll())
       {
@@ -301,7 +301,7 @@ public class GDXVRKinematicsStreamingMode
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
       }
-      ImGui.text("Streaming to controller: " + streamToController);
+      ImGui.checkbox(labels.get("Streaming to controller"), streamToController);
       ImGui.text("Output:");
       ImGui.sameLine();
       outputFrequencyPlot.renderImGuiWidgets();
