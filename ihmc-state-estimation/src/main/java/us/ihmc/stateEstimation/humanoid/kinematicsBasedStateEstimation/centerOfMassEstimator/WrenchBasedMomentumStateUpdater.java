@@ -321,7 +321,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          @Override
          public void getMeasuredWrench(Wrench wrenchToPack)
          {
-            footSwitchInterface.computeAndPackFootWrench(wrenchToPack);
+            footSwitchInterface.getMeasuredWrench(wrenchToPack);
          }
       };
    }

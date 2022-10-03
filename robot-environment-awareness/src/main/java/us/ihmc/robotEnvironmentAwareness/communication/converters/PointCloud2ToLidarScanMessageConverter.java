@@ -1,8 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import gnu.trove.list.array.TByteArrayList;
-import javafx.geometry.Point3D;
+import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

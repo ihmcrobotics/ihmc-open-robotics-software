@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 
-import controller_msgs.msg.dds.Image32;
+import perception_msgs.msg.dds.Image32;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Header;

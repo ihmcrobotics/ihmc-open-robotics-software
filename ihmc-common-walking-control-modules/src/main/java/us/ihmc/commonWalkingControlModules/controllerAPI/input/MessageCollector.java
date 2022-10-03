@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import controller_msgs.msg.dds.MessageCollection;
-import controller_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.interfaces.Settable;

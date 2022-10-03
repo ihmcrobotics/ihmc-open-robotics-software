@@ -1,10 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.euclid.geometry.Pose3D;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;

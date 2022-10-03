@@ -472,4 +472,9 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    {
       return footstepPlan;
    }
+
+   public boolean isSelected()
+   {
+      return selected;
+   }
 }
