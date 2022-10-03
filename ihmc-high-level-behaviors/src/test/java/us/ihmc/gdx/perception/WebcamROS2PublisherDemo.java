@@ -23,6 +23,7 @@ import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -30,6 +31,7 @@ import us.ihmc.ros2.RealtimeROS2Publisher;
 import us.ihmc.tools.thread.Activator;
 
 import java.io.IOException;
+import java.time.Instant;
 
 public class WebcamROS2PublisherDemo
 {
@@ -52,7 +54,7 @@ public class WebcamROS2PublisherDemo
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read Duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode Duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read Frequency");
-   private final ImPlotFrequencyPlot encodeFrequencyPlot = new ImPlotFrequencyPlot("Encode Frequency");
+   private final ImPlotFrequencyPlot publishFrequencyPlot = new ImPlotFrequencyPlot("Publish Frequency");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
    private final Stopwatch threadOneDuration = new Stopwatch();
    private final Stopwatch threadTwoDuration = new Stopwatch();
@@ -213,19 +215,20 @@ public class WebcamROS2PublisherDemo
          }
 
          encodeDurationPlot.start();
-
          opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
+         encodeDurationPlot.stop();
 
          byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
          jpegImageBytePointer.asBuffer().get(heapByteArrayData);
          videoPacket.getData().resetQuick();
          videoPacket.getData().add(heapByteArrayData);
          compressedBytesPlot.addValue(videoPacket.getData().size());
+         Instant now = TimeTools.now();
+         videoPacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
+         videoPacket.setAcquisitionTimeAdditionalNanos(now.getNano());
          publisher.publish(videoPacket);
 
-         encodeFrequencyPlot.ping();
-
-         encodeDurationPlot.stop();
+         publishFrequencyPlot.ping();
 
          synchronized (measurementSyncObject)
          {
@@ -243,7 +246,7 @@ public class WebcamROS2PublisherDemo
          ImGui.text("Reported fps: " + reportedFPS);
          ImGui.text("Backend name: " + backendName);
          readFrequencyPlot.renderImGuiWidgets();
-         encodeFrequencyPlot.renderImGuiWidgets();
+         publishFrequencyPlot.renderImGuiWidgets();
          readDurationPlot.renderImGuiWidgets();
          encodeDurationPlot.renderImGuiWidgets();
          compressedBytesPlot.renderImGuiWidgets();

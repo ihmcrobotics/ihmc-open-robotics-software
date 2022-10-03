@@ -36,6 +36,7 @@ public class WebcamROS2SubscriberDemo
 //   private ImGuiVideoPanel videoPanel;
    private GDXCVImagePanel cvImagePanel;
    private final ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
+   private final ImPlotFrequencyPlot delayPlot = new ImPlotFrequencyPlot("Delay");
    private final ImPlotFrequencyPlot transferFrequencyPlot = new ImPlotFrequencyPlot("Transfer frequency");
    private final ImPlotFrequencyPlot uiUpdateFrequencyPlot = new ImPlotFrequencyPlot("UI update frequency");
    private final ImPlotStopwatchPlot copyBytesDurationPlot = new ImPlotStopwatchPlot("Copy bytes duration");
@@ -154,6 +155,8 @@ public class WebcamROS2SubscriberDemo
 
                      inputJPEGMat.cols(imageEncodedTByteArrayList.size());
                      inputJPEGMat.data(messageEncodedBytePointer);
+
+//                     delayPlot.
                   }
 
                   // imdecode takes the longest by far out of all this stuff
@@ -182,6 +185,7 @@ public class WebcamROS2SubscriberDemo
       {
          ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
          receiveFrequencyPlot.renderImGuiWidgets();
+         delayPlot.renderImGuiWidgets();
          transferFrequencyPlot.renderImGuiWidgets();
          copyBytesDurationPlot.renderImGuiWidgets();
          uiUpdateFrequencyPlot.renderImGuiWidgets();
