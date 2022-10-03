@@ -1,4 +1,4 @@
-package us.ihmc.bytedeco.slamWrapperTest;
+package us.ihmc.bytedeco.slamWrapper.test;
 
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.tools.io.WorkspaceDirectory;
