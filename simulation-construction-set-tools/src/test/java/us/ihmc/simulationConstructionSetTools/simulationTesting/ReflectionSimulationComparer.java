@@ -183,8 +183,6 @@ public class ReflectionSimulationComparer implements SimulationComparer
          comparer.addStringFieldsToIgnore(stringFieldMatcherToIgnore);
 
          comparer.addFieldToIgnore(AbstractList.class.getDeclaredField("modCount"));
-         
-         comparer.addFieldToIgnore(YoVariable.class.getDeclaredField("stackTraceAtInitialization"));
       }
       catch (SecurityException e)
       {

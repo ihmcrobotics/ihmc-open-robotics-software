@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.communication;
 
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 
 public class BehaviorPacketPassthroughList
 {

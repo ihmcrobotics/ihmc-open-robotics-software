@@ -5,9 +5,9 @@ import java.util.Random;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.NormalEstimationParametersMessage;
-import controller_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
-import controller_msgs.msg.dds.PolygonizerParametersMessage;
+import perception_msgs.msg.dds.NormalEstimationParametersMessage;
+import perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 
 public class REAParametersMessageHelperTest
 {

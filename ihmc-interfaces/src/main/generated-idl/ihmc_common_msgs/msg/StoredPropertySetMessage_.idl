@@ -1,0 +1,23 @@
+#ifndef __ihmc_common_msgs__msg__StoredPropertySetMessage__idl__
+#define __ihmc_common_msgs__msg__StoredPropertySetMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::StoredPropertySetMessage_")
+      struct StoredPropertySetMessage
+      {
+        /**
+         * StoredPropertySet values serialized as a string array
+         */
+        sequence<string> strings;
+      };
+    };
+  };
+};
+
+#endif

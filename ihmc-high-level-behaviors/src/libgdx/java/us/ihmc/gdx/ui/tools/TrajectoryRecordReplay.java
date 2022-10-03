@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 
 /**
  * Class to record and replay multi-dimensional trajectories of primitive Number types.
- * The multi-dimension represents the number of elements that are considered to represent a given motion.
- * For each dimension, at each time step the class stores or reads the setpoint of the motion.
+ * The multi-dimension represents the number of elements that are considered.
+ * For each dimension, at each time step the class stores or reads a setpoint.
  * The collection of setpoints defines the trajectory.
  * The trajectories are saved and loaded from .csv files.
  * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the center of mass, etc...).

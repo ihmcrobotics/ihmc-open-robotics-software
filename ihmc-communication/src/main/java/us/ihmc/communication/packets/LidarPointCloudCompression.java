@@ -1,6 +1,6 @@
 package us.ihmc.communication.packets;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
 import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.communication.compression.LZ4CompressionImplementation;

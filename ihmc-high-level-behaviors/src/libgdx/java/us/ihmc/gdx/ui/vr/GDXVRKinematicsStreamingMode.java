@@ -3,10 +3,10 @@ package us.ihmc.gdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -70,7 +70,7 @@ public class GDXVRKinematicsStreamingMode
    private final SideDependentList<GDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
-   private boolean streamToController;
+   private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
 
@@ -148,7 +148,7 @@ public class GDXVRKinematicsStreamingMode
          InputDigitalActionData aButton = controller.getAButtonActionData();
          if (aButton.bChanged() && !aButton.bState())
          {
-            streamToController = !streamToController;
+            streamToController.set(!streamToController.get());
          }
 
          // NOTE: Implement hand open close for controller trigger button.
@@ -240,7 +240,7 @@ public class GDXVRKinematicsStreamingMode
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
          if(enabled.get())
-            toolboxInputMessage.setStreamToController(streamToController);
+            toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
          toolboxInputMessage.setTimestamp(System.nanoTime());
@@ -253,9 +253,9 @@ public class GDXVRKinematicsStreamingMode
    {
       // Safety features!
       if (!ikStreamingModeEnabled)
-         streamToController = false;
+         streamToController.set(false);
       if (!enabled.get())
-         streamToController = false;
+         streamToController.set(false);
 
       if (status.getMessageNotification().poll())
       {
@@ -318,7 +318,7 @@ public class GDXVRKinematicsStreamingMode
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
       }
-      ImGui.text("Streaming to controller: " + streamToController);
+      ImGui.checkbox(labels.get("Streaming to controller"), streamToController);
       ImGui.text("Output:");
       ImGui.sameLine();
       outputFrequencyPlot.renderImGuiWidgets();
