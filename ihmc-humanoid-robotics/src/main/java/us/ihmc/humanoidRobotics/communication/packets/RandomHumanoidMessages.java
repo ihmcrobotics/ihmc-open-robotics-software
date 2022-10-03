@@ -4,7 +4,16 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.stream.IntStream;
 
+import atlas_msgs.msg.dds.*;
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import ihmc_common_msgs.msg.dds.*;
+import perception_msgs.msg.dds.*;
+import quadruped_msgs.msg.dds.QuadrupedBodyHeightMessage;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorControlModeResponsePacket;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.ExecutionTiming;
@@ -904,17 +913,6 @@ public final class RandomHumanoidMessages
    public static StopAllTrajectoryMessage nextStopAllTrajectoryMessage(Random random)
    {
       StopAllTrajectoryMessage next = new StopAllTrajectoryMessage();
-      return next;
-   }
-
-   public static AdjustFootstepMessage nextAdjustFootstepMessage(Random random)
-   {
-      AdjustFootstepMessage next = new AdjustFootstepMessage();
-      next.setRobotSide(RandomNumbers.nextEnum(random, RobotSide.class).toByte());
-      next.getLocation().set(EuclidCoreRandomTools.nextPoint3D(random));
-      next.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
-      IntStream.range(0, random.nextInt(10)).mapToObj(i -> EuclidCoreRandomTools.nextPoint2D(random)).forEach(next.getPredictedContactPoints2d().add()::set);
-      next.setExecutionDelayTime(RandomNumbers.nextDoubleWithEdgeCases(random, 0.1));
       return next;
    }
 

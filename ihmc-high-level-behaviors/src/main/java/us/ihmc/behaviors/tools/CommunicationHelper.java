@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools;
 
-import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
@@ -219,6 +219,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return ros2Helper.subscribe(topic);
+   }
+
+   @Override
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   {
+      return ros2Helper.subscribe(topic, messageFilter);
    }
 
    @Override

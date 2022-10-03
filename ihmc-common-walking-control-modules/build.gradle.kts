@@ -21,7 +21,7 @@ mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
 
    api("us.ihmc:ihmc-realtime:1.5.1")
-   api("us.ihmc:ihmc-native-library-loader:1.3.1")
+   api("us.ihmc:ihmc-native-library-loader:2.0.1")
    api("us.ihmc:euclid:0.19.0")
    api("us.ihmc:euclid-geometry:0.19.0")
    api("us.ihmc:ihmc-robot-models:source")
@@ -46,8 +46,8 @@ testDependencies {
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.22.9")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.10.0")
+   api("us.ihmc:simulation-construction-set:0.22.10")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.10.2")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

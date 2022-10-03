@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
+import us.ihmc.gdx.ui.gizmo.GDXVisualModelInstance;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 
 import java.util.ArrayList;
@@ -26,17 +26,15 @@ public class GDXSimulatedTerrainObject
    {
       Gdx.app.postRunnable(() ->
       {
-         for (DynamicGDXModel terrainModelPart : GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
+         for (GDXVisualModelInstance terrainModelInstance : GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
          {
-            ModelInstance modelInstance = terrainModelPart.getOrCreateModelInstance();
-            visualModelInstances.add(modelInstance);
-            GDXTools.toGDX(terrainModelPart.getLocalTransform(), modelInstance.transform);
+            visualModelInstances.add(terrainModelInstance);
+            GDXTools.toGDX(terrainModelInstance.getLocalTransform(), terrainModelInstance.transform);
          }
-         for (DynamicGDXModel terrainCollisionModelPart : GDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
+         for (GDXVisualModelInstance terrainCollisionModelInstance : GDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
          {
-            ModelInstance modelInstance = terrainCollisionModelPart.getOrCreateModelInstance();
-            collisionModelInstances.add(modelInstance);
-            GDXTools.toGDX(terrainCollisionModelPart.getLocalTransform(), modelInstance.transform);
+            collisionModelInstances.add(terrainCollisionModelInstance);
+            GDXTools.toGDX(terrainCollisionModelInstance.getLocalTransform(), terrainCollisionModelInstance.transform);
          }
       });
    }

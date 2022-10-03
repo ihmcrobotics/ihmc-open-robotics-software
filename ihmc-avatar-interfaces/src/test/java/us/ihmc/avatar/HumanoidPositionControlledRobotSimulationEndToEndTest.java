@@ -11,7 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -323,7 +323,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
                                                          commandInputManager,
                                                          statusOutputManager,
                                                          controlledJoints,
-                                                         controllerToolbox,
+                                                         controllerToolbox.getYoTime(),
                                                          highLevelControllerParameters,
                                                          highLevelControllerOutput);
          }

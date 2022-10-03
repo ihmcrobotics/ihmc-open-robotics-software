@@ -1,7 +1,7 @@
 package us.ihmc.ihmcPerception.bagTools;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.LidarScanMessagePubSubType;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessagePubSubType;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 

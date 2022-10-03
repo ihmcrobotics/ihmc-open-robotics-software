@@ -1,0 +1,59 @@
+#ifndef __exoskeleton_msgs__msg__QuixSideStepStateMessage__idl__
+#define __exoskeleton_msgs__msg__QuixSideStepStateMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet STANDING =
+      0;
+
+      const octet TO_SWING_OUT_LEFT_SUPPORT =
+      1;
+
+      const octet TO_SWING_OUT_RIGHT_SUPPORT =
+      2;
+
+      const octet SWING_OUT_LEFT_SUPPORT =
+      3;
+
+      const octet SWING_OUT_RIGHT_SUPPORT =
+      4;
+
+      const octet TO_SWING_CLOSE_LEFT_SUPPORT =
+      5;
+
+      const octet TO_SWING_CLOSE_RIGHT_SUPPORT =
+      6;
+
+      const octet SWING_CLOSE_LEFT_SUPPORT =
+      7;
+
+      const octet SWING_CLOSE_RIGHT_SUPPORT =
+      8;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to notify the crutch display of the current side-step walking state.
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::QuixSideStepStateMessage_")
+      struct QuixSideStepStateMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies which state the controller should transition into.
+         */
+        @defaultValue(value=255)
+        octet side_step_state_name;
+      };
+    };
+  };
+};
+
+#endif

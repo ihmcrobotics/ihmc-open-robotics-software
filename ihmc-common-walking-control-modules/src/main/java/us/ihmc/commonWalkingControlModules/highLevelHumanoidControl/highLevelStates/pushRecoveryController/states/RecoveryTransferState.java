@@ -102,7 +102,7 @@ public class RecoveryTransferState extends PushRecoveryState
 
 //      pelvisOrientationManager.setUpcomingFootstep(footsteps);
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      pelvisOrientationManager.initializeTransfer(transferToSide, stepTiming.getTransferTime(), stepTiming.getSwingTime());
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
@@ -166,15 +166,10 @@ public class RecoveryTransferState extends PushRecoveryState
 
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
-                                                     nextFootstep,
-                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
-                                                     desiredCoP,
                                                      balanceManager.getDesiredICP(),
-                                                     capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP(),
-                                                     balanceManager.getLinearMomentumRateControlModuleInput().getPerfectCoP());
+                                                     capturePoint2d);
 
          if (feetManager.okForPointToeOff(false))
          {

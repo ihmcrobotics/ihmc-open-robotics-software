@@ -1,0 +1,71 @@
+#ifndef __perception_msgs__msg__HeightMapMessage__idl__
+#define __perception_msgs__msg__HeightMapMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC height map module
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::HeightMapMessage_")
+      struct HeightMapMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Discretization of the height map grid
+         */
+        @defaultValue(value=-1.0)
+        double xy_resolution;
+        /**
+         * The height map covers a square of this width
+         */
+        @defaultValue(value=-1.0)
+        double grid_size_xy;
+        /**
+         * X coordinate of the center of the height map
+         */
+        double grid_center_x;
+        /**
+         * Y coordinate of the center of the height map
+         */
+        double grid_center_y;
+        /**
+         * Height of the ground plane, which is assumed to be flat
+         */
+        double estimated_ground_height;
+        /**
+         * List of height map keys. See HeightMapTools for converting keys to coordinates
+         */
+        sequence<long, 30000> keys;
+        /**
+         * List of heights, which correspond to the list of keys
+         */
+        sequence<float, 30000> heights;
+        /**
+         * List of variances, which correspond to the list of keys. May be empty.
+         */
+        sequence<float, 30000> variances;
+        /**
+         * List of centroids for each cell, which correspond to the list of keys. May be empty
+         * Note: The z coordinate of each point is ignored, but should correspond to the height.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 30000> centroids;
+        /**
+         * List of normals for each cell, which correspond to the list of keys. May be empty.
+         */
+        sequence<geometry_msgs::msg::dds::Vector3, 30000> normals;
+      };
+    };
+  };
+};
+
+#endif

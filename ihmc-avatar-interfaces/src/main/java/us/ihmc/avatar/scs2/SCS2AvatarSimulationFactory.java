@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
@@ -139,7 +139,6 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
 
-
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
    protected Robot robot;
@@ -193,8 +192,8 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setFullHumanoidRobotModel(controllerThread.getFullRobotModel());
       avatarSimulation.setShowGUI(showGUI.get());
       avatarSimulation.setAutomaticallyStartSimulation(automaticallyStartSimulation.get());
-      
-      if(realtimeROS2Node.hasBeenSet())
+
+      if (realtimeROS2Node.hasBeenSet())
       {
          avatarSimulation.setRealTimeROS2Node(realtimeROS2Node.get());
       }
@@ -283,6 +282,7 @@ public class SCS2AvatarSimulationFactory
       robot = simulationConstructionSet.addRobot(robotDefinition);
       robot.addThrottledController(new SCS2StateEstimatorDebugVariables(simulationConstructionSet.getInertialFrame(),
                                                                         gravity.get(),
+                                                                        robotModel.getEstimatorDT(),
                                                                         robot.getControllerManager().getControllerInput()),
                                    robotModel.getEstimatorDT());
 
@@ -305,11 +305,10 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = outputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
-                                                               robot.getControllerManager().getControllerOutput());
+      simulationOutputWriter = outputWriterFactory.get()
+                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
    }
-   
-   
+
    private void setupStateEstimationThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
@@ -322,11 +321,10 @@ public class SCS2AvatarSimulationFactory
       else
          sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
 
-      
       ROS2Topic<?> outputTopic = null;
       ROS2Topic<?> inputTopic = null;
-      
-      if(realtimeROS2Node.hasBeenSet())
+
+      if (realtimeROS2Node.hasBeenSet())
       {
          outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
          inputTopic = ROS2Tools.getControllerInputTopic(robotName);
@@ -338,7 +336,7 @@ public class SCS2AvatarSimulationFactory
       }
       else
       {
-         if(realtimeROS2Node.hasBeenSet())
+         if (realtimeROS2Node.hasBeenSet())
          {
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
@@ -350,8 +348,8 @@ public class SCS2AvatarSimulationFactory
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       AvatarEstimatorThreadFactory avatarEstimatorThreadFactory = new AvatarEstimatorThreadFactory();
-      
-      if(realtimeROS2Node.hasBeenSet())
+
+      if (realtimeROS2Node.hasBeenSet())
       {
          avatarEstimatorThreadFactory.setROS2Info(realtimeROS2Node.get(), robotName);
       }
@@ -370,11 +368,11 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
       RealtimeROS2Node ros2Node = null;
-      if(realtimeROS2Node.hasBeenSet())
+      if (realtimeROS2Node.hasBeenSet())
       {
          ros2Node = realtimeROS2Node.get();
       }
-      
+
       controllerThread = new AvatarControllerThread(robotName,
                                                     robotModel.get(),
                                                     robotInitialSetup.get(),
@@ -425,16 +423,20 @@ public class SCS2AvatarSimulationFactory
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, simulationDT.get(), masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator",
+                                                                      stepGeneratorThread,
+                                                                      stepGeneratorDivisor,
+                                                                      simulationDT.get(),
+                                                                      masterFullRobotModel);
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
 
-      if(realtimeROS2Node.hasBeenSet())
+      if (realtimeROS2Node.hasBeenSet())
       {
          handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
-         
-         if(handControlThread != null)
+
+         if (handControlThread != null)
          {
             List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
             SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
@@ -521,14 +523,36 @@ public class SCS2AvatarSimulationFactory
                                                                                  stepGeneratorThread.getYoVariableRegistry()));
       }
 
-      setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry());
-      setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry());
-      setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry());
+      List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
+      mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
       if (handControlThread != null)
-         setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry());
+         mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {
+         @Override
+         public void initialize()
+         {
+            // We splitting steps the MirroredYoVariableRegistry#updateMirror() here to avoid values from the threads getting overridden.
+            // Maybe this behavior could be considered a bug...
+            mirroredRegistries.forEach(mirror -> mirror.updateChangedValues()); // Pulling values from the simulation's variables
+
+            FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
+            RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
+
+            TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+            SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+            estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
+            controllerThread.initialize();
+            stepGeneratorThread.initialize();
+            masterContext.set(estimatorThread.getHumanoidRobotContextData());
+
+            robotController.initialize();
+            mirroredRegistries.forEach(mirror -> mirror.updateValuesFromOriginal()); // Pushing the tasks values to the simulation's variables
+         }
+
          @Override
          public void doControl()
          {
@@ -544,11 +568,18 @@ public class SCS2AvatarSimulationFactory
       });
    }
 
-   private static void setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
+   private static MirroredYoVariableRegistry setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
    {
       MirroredYoVariableRegistry mirroredRegistry = new MirroredYoVariableRegistry(registry);
-      owner.addRunnableOnSchedulerThread(() -> mirroredRegistry.updateMirror());
+      owner.addRunnableOnSchedulerThread(() ->
+      {
+         // Reversed the ordering of MirroredYoVariableRegistry#updateMirror() to inverse priority when variables are changed on both sides.
+         // This way, changes on the controller side take priority over changes in SCS.
+         mirroredRegistry.updateValuesFromOriginal();
+         mirroredRegistry.updateChangedValues();
+      });
       schedulerRegistry.addChild(mirroredRegistry);
+      return mirroredRegistry;
    }
 
    private void setupLidarController()
@@ -652,8 +683,7 @@ public class SCS2AvatarSimulationFactory
 
       controllerFactory.setInitialState(HighLevelControllerName.WALKING);
 
-      
-      if(realtimeROS2Node.hasBeenSet())
+      if (realtimeROS2Node.hasBeenSet())
       {
          controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
       }

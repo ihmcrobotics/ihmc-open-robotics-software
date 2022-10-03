@@ -2,6 +2,8 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.stream.Stream;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameMomentumBasics;
@@ -20,6 +22,12 @@ public class MomentumCalculator
    public MomentumCalculator(RigidBodyReadOnly rootBody)
    {
       this(rootBody.subtreeArray());
+   }
+
+   public MomentumCalculator(MultiBodySystemReadOnly input)
+   {
+      rigidBodiesInOrders = input.getJointsToConsider().stream().map(JointReadOnly::getSuccessor).filter(body -> body.getInertia() != null)
+                                 .toArray(RigidBodyReadOnly[]::new);
    }
 
    public void computeAndPack(FixedFrameMomentumBasics momentum)

@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.messageHandlers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanOffsetStatus;
-import controller_msgs.msg.dds.TextToSpeechPacket;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
@@ -20,7 +19,6 @@ import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -28,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -69,8 +66,6 @@ public class WalkingMessageHandler
    private final YoDouble timeToContinueWalking = new YoDouble("TimeToContinueWalking", registry);
    private final DoubleProvider minimumPauseTime = new DoubleParameter("MinimumPauseTime", registry, 0.0);
 
-   private final YoBoolean hasNewFootstepAdjustment = new YoBoolean("hasNewFootstepAdjustement", registry);
-   private final AdjustFootstepCommand requestedFootstepAdjustment = new AdjustFootstepCommand();
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -115,7 +110,6 @@ public class WalkingMessageHandler
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
 
    private final YoFrameVector3D planOffsetInWorld = new YoFrameVector3D("planOffsetInWorld", worldFrame, registry);
-   private final YoFrameVector3D planOffsetFromAdjustment = new YoFrameVector3D("comPlanOffsetFromAdjustment", worldFrame, registry);
 
    private final DoubleProvider maxStepDistance = new DoubleParameter("MaxStepDistance", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
@@ -204,10 +198,10 @@ public class WalkingMessageHandler
                   // If we queued a command and the previous already finished, just continue as if everything is normal
                   break;
                }
-               else if (lastCommandID.getValue() == 0L)
+               else if (upcomingFootsteps.isEmpty())
                {
-                  LogTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
-
+                  // No footstep, let's do it.
+                  break;
                }
                else
                {
@@ -314,20 +308,6 @@ public class WalkingMessageHandler
    public StepConstraintRegionHandler getStepConstraintRegionHandler()
    {
       return stepConstraintRegionHandler;
-   }
-
-   public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
-   {
-      if (isWalkingPaused.getBooleanValue())
-      {
-         LogTools.warn("Received " + AdjustFootstepCommand.class.getSimpleName() + " but walking is currently paused. Command ignored.");
-         requestedFootstepAdjustment.clear();
-         hasNewFootstepAdjustment.set(false);
-         return;
-      }
-
-      requestedFootstepAdjustment.set(command);
-      hasNewFootstepAdjustment.set(true);
    }
 
    public void handlePauseWalkingCommand(PauseWalkingCommand command)
@@ -486,38 +466,6 @@ public class WalkingMessageHandler
       return upcomingFootTrajectoryCommandListForFlamingoStance.get(swingSide).poll();
    }
 
-   public boolean pollRequestedFootstepAdjustment(Footstep footstepToAdjust)
-   {
-      if (!hasNewFootstepAdjustment.getBooleanValue())
-         return false;
-
-      if (footstepToAdjust.getRobotSide() != requestedFootstepAdjustment.getRobotSide())
-      {
-         LogTools.warn("RobotSide does not match: side of footstep to be adjusted: " + footstepToAdjust.getRobotSide() + ", side of adjusted footstep: "
-               + requestedFootstepAdjustment.getRobotSide());
-         hasNewFootstepAdjustment.set(false);
-         requestedFootstepAdjustment.clear();
-         return false;
-      }
-
-      FramePoint3D adjustedPosition = requestedFootstepAdjustment.getPosition();
-      FrameQuaternion adjustedOrientation = requestedFootstepAdjustment.getOrientation();
-      footstepToAdjust.setPose(adjustedPosition, adjustedOrientation);
-
-      if (!requestedFootstepAdjustment.getPredictedContactPoints().isEmpty())
-      {
-         List<Point2D> contactPoints = new ArrayList<>();
-         for (int i = 0; i < footstepToAdjust.getPredictedContactPoints().size(); i++)
-            contactPoints.add(footstepToAdjust.getPredictedContactPoints().get(i));
-         footstepToAdjust.setPredictedContactPoints(contactPoints);
-      }
-
-      hasNewFootstepAdjustment.set(false);
-      requestedFootstepAdjustment.clear();
-
-      return true;
-   }
-
    public boolean hasUpcomingFootsteps()
    {
       return getStepsBeforePause() > 0 && !isWalkingPaused.getBooleanValue();
@@ -558,16 +506,6 @@ public class WalkingMessageHandler
       }
 
       return stepIndex;
-   }
-
-   public boolean hasRequestedFootstepAdjustment()
-   {
-      if (isWalkingPaused.getBooleanValue())
-      {
-         hasNewFootstepAdjustment.set(false);
-         requestedFootstepAdjustment.clear();
-      }
-      return hasNewFootstepAdjustment.getBooleanValue();
    }
 
    public boolean isNextFootstepFor(RobotSide swingSide)
@@ -1089,29 +1027,6 @@ public class WalkingMessageHandler
 
    private final FrameVector3D footstepOffsetVector = new FrameVector3D();
 
-   private final SideDependentList<FramePoint3DReadOnly> desiredFootstepPositions = new SideDependentList<>();
-   private final SideDependentList<FramePoint3DReadOnly> actualFootstepPositions = new SideDependentList<>();
-
-   public void registerDesiredFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly desiredFootstepPosition)
-   {
-      desiredFootstepPositions.put(robotSide, desiredFootstepPosition);
-   }
-
-   public void registerActualFootstepPosition(RobotSide robotSide, FramePoint3DReadOnly actualFootstepPosition)
-   {
-      actualFootstepPositions.put(robotSide, actualFootstepPosition);
-   }
-
-
-   private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
-
-   public void addOffsetVectorFromTouchdownError(RobotSide robotSide)
-   {
-      touchdownErrorVector.sub(actualFootstepPositions.get(robotSide), desiredFootstepPositions.get(robotSide));
-
-      addOffsetVectorOnTouchdown(touchdownErrorVector);
-   }
-
    public void addOffsetVectorOnTouchdown(FrameVector3DReadOnly offset)
    {
       if (!offsettingXYPlanWithFootstepError.getValue() && !offsettingHeightPlanWithFootstepError.getValue())
@@ -1140,18 +1055,7 @@ public class WalkingMessageHandler
       this.planOffsetInWorld.add(footstepOffsetVector);
       setPlanOffsetInternal(planOffsetInWorld);
 
-      planOffsetFromAdjustment.setToZero();
-
       updateVisualization();
-   }
-
-   private final FrameVector3D totalOffset = new FrameVector3D();
-
-   public void setPlanOffsetFromAdjustment(FrameVector3DReadOnly planOffsetFromAdjustment)
-   {
-      this.planOffsetFromAdjustment.set(planOffsetFromAdjustment);
-      totalOffset.add(planOffsetInWorld, planOffsetFromAdjustment);
-      setPlanOffsetInternal(totalOffset);
    }
 
    private void setPlanOffsetInternal(FrameVector3DReadOnly planOffset)

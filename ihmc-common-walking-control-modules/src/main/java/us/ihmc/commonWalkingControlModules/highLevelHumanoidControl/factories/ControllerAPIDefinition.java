@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateAdjustFootstepMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmDesiredAccelerationsMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateArmTrajectoryMessage;
 import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker.validateChestTrajectoryMessage;
@@ -26,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
@@ -61,7 +62,6 @@ public class ControllerAPIDefinition
       commands.add(PelvisHeightTrajectoryCommand.class);
       commands.add(StopAllTrajectoryCommand.class);
       commands.add(FootstepDataListCommand.class);
-      commands.add(AdjustFootstepCommand.class);
       commands.add(GoHomeCommand.class);
       commands.add(FootLoadBearingCommand.class);
       commands.add(ArmDesiredAccelerationsCommand.class);
@@ -158,7 +158,6 @@ public class ControllerAPIDefinition
                      message -> validatePelvisOrientationTrajectoryMessage((PelvisOrientationTrajectoryMessage) message));
       validators.put(PelvisHeightTrajectoryMessage.class, message -> validatePelvisHeightTrajectoryMessage((PelvisHeightTrajectoryMessage) message));
       validators.put(FootstepDataListMessage.class, message -> validateFootstepDataListMessage((FootstepDataListMessage) message));
-      validators.put(AdjustFootstepMessage.class, message -> validateAdjustFootstepMessage((AdjustFootstepMessage) message));
       validators.put(GoHomeMessage.class, message -> validateGoHomeMessage((GoHomeMessage) message));
       validators.put(FootLoadBearingMessage.class, message -> validateFootLoadBearingMessage((FootLoadBearingMessage) message));
       validators.put(ArmDesiredAccelerationsMessage.class, message -> validateArmDesiredAccelerationsMessage((ArmDesiredAccelerationsMessage) message));
@@ -191,7 +190,6 @@ public class ControllerAPIDefinition
       extractors.put(PelvisHeightTrajectoryMessage.class, m -> ((PelvisHeightTrajectoryMessage) m).getSequenceId());
       extractors.put(StopAllTrajectoryMessage.class, m -> ((StopAllTrajectoryMessage) m).getSequenceId());
       extractors.put(FootstepDataListMessage.class, m -> ((FootstepDataListMessage) m).getSequenceId());
-      extractors.put(AdjustFootstepMessage.class, m -> ((AdjustFootstepMessage) m).getSequenceId());
       extractors.put(GoHomeMessage.class, m -> ((GoHomeMessage) m).getSequenceId());
       extractors.put(FootLoadBearingMessage.class, m -> ((FootLoadBearingMessage) m).getSequenceId());
       extractors.put(ArmDesiredAccelerationsMessage.class, m -> ((ArmDesiredAccelerationsMessage) m).getSequenceId());

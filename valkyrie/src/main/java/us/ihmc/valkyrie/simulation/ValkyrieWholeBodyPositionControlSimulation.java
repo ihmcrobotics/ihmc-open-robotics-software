@@ -2,10 +2,9 @@ package us.ihmc.valkyrie.simulation;
 
 import java.util.EnumMap;
 
-import controller_msgs.msg.dds.GroundPlaneMessage;
+import ihmc_common_msgs.msg.dds.GroundPlaneMessage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
@@ -112,7 +111,7 @@ public class ValkyrieWholeBodyPositionControlSimulation
                                                          commandInputManager,
                                                          statusOutputManager,
                                                          controlledJoints,
-                                                         controllerToolbox,
+                                                         controllerToolbox.getYoTime(),
                                                          highLevelControllerParameters,
                                                          highLevelControllerOutput);
          }

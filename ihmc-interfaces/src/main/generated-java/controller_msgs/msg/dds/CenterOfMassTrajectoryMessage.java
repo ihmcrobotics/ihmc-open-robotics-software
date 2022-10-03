@@ -19,11 +19,11 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
    /**
             * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public CenterOfMassTrajectoryMessage()
    {
-      euclidean_trajectory_ = new controller_msgs.msg.dds.EuclideanTrajectoryMessage();
+      euclidean_trajectory_ = new ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage();
    }
 
    public CenterOfMassTrajectoryMessage(CenterOfMassTrajectoryMessage other)
@@ -36,7 +36,7 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
    {
       sequence_id_ = other.sequence_id_;
 
-      controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
+      ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.staticCopy(other.euclidean_trajectory_, euclidean_trajectory_);
    }
 
    /**
@@ -58,7 +58,7 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
    /**
             * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
             */
-   public controller_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
+   public ihmc_common_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclidean_trajectory_;
    }

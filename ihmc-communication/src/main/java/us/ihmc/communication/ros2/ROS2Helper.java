@@ -6,7 +6,6 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -49,6 +48,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return new IHMCROS2Input<>(managedROS2Node, topic.getType(), topic);
+   }
+
+   @Override
+   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   {
+      return new IHMCROS2Input<>(managedROS2Node, topic.getType(), topic, messageFilter);
    }
 
    @Override

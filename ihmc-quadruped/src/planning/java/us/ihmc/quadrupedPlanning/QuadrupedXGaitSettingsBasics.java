@@ -1,6 +1,6 @@
 package us.ihmc.quadrupedPlanning;
 
-import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 
 public interface QuadrupedXGaitSettingsBasics extends QuadrupedXGaitSettingsReadOnly
 {
