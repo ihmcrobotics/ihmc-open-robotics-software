@@ -226,36 +226,16 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
       themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
+      List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
 
-      Theme theme = Theme.LIGHT; // Fallback theme
-
-      if (!Files.exists(themeFilePath))
+      if (lines != null)
       {
-         LogTools.info(themeFilePath.toAbsolutePath() + " not found. Using default theme.");
+         String line = lines.get(0);
+
+         for (Theme theme : Theme.values())
+            if (line.contains(theme.name()))
+               setTheme(theme);
       }
-      else
-      {
-         List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
-
-         boolean iniContainedTheme = false;
-
-         if (!lines.isEmpty())
-         {
-            String themeLine = lines.get(0);
-
-            for (Theme themeValue : Theme.values())
-               if (themeLine.contains(theme.name()))
-               {
-                  theme = themeValue;
-                  iniContainedTheme = true;
-               }
-         }
-
-         if (!iniContainedTheme)
-            LogTools.info("No defined theme in theme preference file: " + themeFilePath.toAbsolutePath());
-      }
-
-      setTheme(theme);
    }
 
    public void renderBeforeOnScreenUI()
