@@ -144,8 +144,6 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          double q_initial = trajectoryData.getInitialJointConfiguration().getValue();
          double q_final = trajectoryData.getFinalJointConfiguration().getValue();
-         double q_curr = trajectoryData.getDesiredJointConfiguration().getValue();
-         double q_curr_velocity = trajectoryData.getDesiredJointVelocity().getValue();
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
@@ -157,15 +155,10 @@ public class StandPrepControllerState extends HighLevelControllerState
 
             trajectoryData.getDesiredJointConfiguration().set(jointPosition);
             trajectoryData.getDesiredJointVelocity().set(jointVelocity);
+         }
 
-            lowLevelJointData.setDesiredPosition(trajectoryData.getDesiredJointConfiguration().getValue());
-            lowLevelJointData.setDesiredVelocity(trajectoryData.getDesiredJointVelocity().getValue());
-         }
-         else
-         {
-            lowLevelJointData.setDesiredPosition(q_curr);
-            lowLevelJointData.setDesiredVelocity(q_curr_velocity);
-         }
+         lowLevelJointData.setDesiredPosition(trajectoryData.getDesiredJointConfiguration().getValue());
+         lowLevelJointData.setDesiredVelocity(trajectoryData.getDesiredJointVelocity().getValue());
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
