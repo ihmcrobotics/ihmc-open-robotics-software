@@ -5,12 +5,6 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
 import java.io.File;
-
-import us.ihmc.promp.ProMP;
-import us.ihmc.promp.SizeTVector;
-import us.ihmc.promp.StringVector;
-import us.ihmc.promp.TrajectoryGroup;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -20,8 +14,11 @@ import java.util.stream.Stream;
 
 import static us.ihmc.promp.global.promp.EigenMatrixXd;
 
-// This demo corresponds to promp/examples/single_promp.cpp
-public class SinglePrompExample
+/**
+ * This example shows you how to load training trajectories and learn a multidimensional ProMP for the specified dofs.
+ * The ProMP can be intuitively analyzed by plotting its mean trajectory and std deviation.
+ */
+public class LearnPrompExample
 {
    private static void loadLibraries() throws IOException
    {
@@ -72,6 +69,20 @@ public class SinglePrompExample
       return Stream.of(data).collect(Collectors.joining(","));
    }
 
+   private static void printMatrix(EigenMatrixXd matrix, String name)
+   {
+      System.out.println(name);
+      for (int row = 0; row < matrix.rows(); row++)
+      {
+         for (int col = 0; col < matrix.cols(); col++)
+         {
+            System.out.print(matrix.coeff(row, col) + " ");
+         }
+         System.out.println();
+      }
+      System.out.println();
+   }
+
    public static void main(String[] args)
    {
       try
@@ -90,16 +101,8 @@ public class SinglePrompExample
       // The trajectories contained in the Reaching1 folder represent different demonstration of a given task
       // Several trajectories of different body parts have been recorded
       // 0: waist Z; 1,2,3: right hand X,Y,Z; 5,6,7: left hand X,Y,Z
-      fileList.add(demoDirAbs + "/pr1.csv");
-      fileList.add(demoDirAbs + "/pr2.csv");
-      fileList.add(demoDirAbs + "/pr3.csv");
-      fileList.add(demoDirAbs + "/pr4.csv");
-      fileList.add(demoDirAbs + "/pr5.csv");
-      fileList.add(demoDirAbs + "/pr6.csv");
-      fileList.add(demoDirAbs + "/pr7.csv");
-      fileList.add(demoDirAbs + "/pr8.csv");
-      fileList.add(demoDirAbs + "/pr9.csv");
-      fileList.add(demoDirAbs + "/pr10.csv");
+      for (int i=0; i<10; i++) //get training files
+         fileList.add(demoDirAbs + "/pr"+(i+1)+".csv");
       // consider only right hand trajectories
       List<Long> dofs = List.of(1L, 2L, 3L);
 
@@ -122,11 +125,9 @@ public class SinglePrompExample
       EigenMatrixXd covarianceTrajectory = m_promp.generate_trajectory_covariance();
 
       TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
-      List<EigenMatrixXd> handDemoTrajectory = new ArrayList<>();
       for (int i = 0; i < demoTrajectories.size(); i++)
       {
-         handDemoTrajectory.add((demoTrajectories.get(i)).matrix());
-         saveAsCSV(handDemoTrajectory.get(i), ("/demo" + (i + 1) + ".csv"));
+         saveAsCSV(demoTrajectories.get(i).matrix(), ("/demo" + (i + 1) + ".csv"));
       }
       saveAsCSV(meanTrajectory, "/mean.csv");
       saveAsCSV(stdTrajectory, "/variance.csv");
@@ -135,19 +136,5 @@ public class SinglePrompExample
       printMatrix(meanTrajectory, "Mean");
       printMatrix(stdTrajectory, "Std Deviation");
       printMatrix(covarianceTrajectory, "Covariance");
-   }
-
-   private static void printMatrix(EigenMatrixXd matrix, String name)
-   {
-      System.out.println(name);
-      for (int row = 0; row < matrix.rows(); row++)
-      {
-         for (int col = 0; col < matrix.cols(); col++)
-         {
-            System.out.print(matrix.coeff(row, col) + " ");
-         }
-         System.out.println();
-      }
-      System.out.println();
    }
 }
