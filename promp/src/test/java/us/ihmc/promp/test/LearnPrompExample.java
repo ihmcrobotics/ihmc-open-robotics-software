@@ -119,10 +119,10 @@ public class LearnPrompExample
 
       int n_rbf = 20;
 
-      ProMP m_promp = new ProMP(trajectoryGroup, n_rbf);
-      EigenMatrixXd meanTrajectory = m_promp.generate_trajectory();
-      EigenMatrixXd stdTrajectory = m_promp.gen_traj_std_dev();
-      EigenMatrixXd covarianceTrajectory = m_promp.generate_trajectory_covariance();
+      ProMP myProMP = new ProMP(trajectoryGroup, n_rbf);
+      EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
+      EigenMatrixXd stdTrajectory = myProMP.gen_traj_std_dev();
+      EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
       TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
       for (int i = 0; i < demoTrajectories.size(); i++)

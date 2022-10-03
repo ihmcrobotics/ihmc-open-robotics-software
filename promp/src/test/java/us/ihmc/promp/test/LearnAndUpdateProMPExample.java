@@ -128,10 +128,10 @@ public class LearnAndUpdateProMPExample
 
       /* Learn ProMP */
       int n_rbf = 20;
-      ProMP m_promp = new ProMP(trainingTrajectories, n_rbf);
-      EigenMatrixXd meanTrajectory = m_promp.generate_trajectory();
-      EigenMatrixXd stdTrajectory = m_promp.gen_traj_std_dev();
-      EigenMatrixXd covarianceTrajectory = m_promp.generate_trajectory_covariance();
+      ProMP myProMP = new ProMP(trainingTrajectories, n_rbf);
+      EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
+      EigenMatrixXd stdTrajectory = myProMP.gen_traj_std_dev();
+      EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
       /* Create training/demo trajectories vectors for logging and later usage */
       TrajectoryVector demoTrajectories = trainingTrajectories.trajectories();
@@ -150,6 +150,7 @@ public class LearnAndUpdateProMPExample
 
       /* Select a demo trajectory and infer modulation of ProMP */
       // create trajectory object for the meanTrajectory of the ProMP
+//      EigenMatrixXd meanModulatedTrajectory = myProMP.generate_trajectory_with_speed();
       Trajectory trajectoryOriginal = new Trajectory(meanTrajectory, 1.0);
       // see current timesteps of ProMP
       long timestepOriginal = trajectoryOriginal.timesteps();
@@ -165,10 +166,9 @@ public class LearnAndUpdateProMPExample
       int observedTimesteps = (int) timestepDemo/4;
       // build observed matrix
       EigenMatrixXd observedTrajectory= new EigenMatrixXd(observedTimesteps, (int) meanTrajectory.cols());
-      EigenMatrixXd demoTrajectory = demoTestTrajectories.get(0).matrix();
       for (int i=0; i<observedTrajectory.rows(); i++){
          for (int j=0; i<observedTrajectory.cols(); j++){
-            observedTrajectory.coeff(i,j) = demoTrajectory.coeff(i,j);
+            observedTrajectory.coeff(i,j) = demoTestTrajectories.get(0).matrix().coeff(i,j);
          }
       }
 //      double inferredSpeed = trajectoryOriginal.infer_speed(demoTestTrajectories.get(0).matrix(), 0.25, 4.0, 20);
@@ -177,5 +177,7 @@ public class LearnAndUpdateProMPExample
       timestepOriginal = trajectoryOriginal.timesteps();
       System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
       System.out.println("New timestepOriginal: " + timestepOriginal);
+
+
    }
 }
