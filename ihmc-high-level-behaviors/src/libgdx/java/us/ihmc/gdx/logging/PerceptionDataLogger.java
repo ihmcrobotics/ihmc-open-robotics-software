@@ -48,7 +48,7 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 
 public class PerceptionDataLogger
 {
-   static final String FILE_NAME = "/home/quantum/Workspace/Data/Sensor_Logs/experimental.h5";
+   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
    private final HDF5Manager h5;
 
    private final BigVideoPacket videoPacket = new BigVideoPacket();
@@ -96,16 +96,18 @@ public class PerceptionDataLogger
 
       ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "logger");
 
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN.withType(LidarScanMessage.class), this::logLidarScanMessage);
+      new IHMCROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
+//      new ROS2Callback<>()
+
+//      "D435 Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420
+
       //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), this::logDepthMap);
       //      new ROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), this::logBigVideoPacket);
-
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN.withType(LidarScanMessage.class), this::logLidarScanMessage);
-      //
       //      new IHMCROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
       //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
       //      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
 
-      new ROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
 
       executorService.scheduleAtFixedRate(this::collectStatistics, 0, 10, TimeUnit.MILLISECONDS);
    }
