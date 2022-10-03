@@ -229,12 +229,12 @@ public class GDXImGuiBasedUI
       if (Files.exists(themeFilePath))
       {
          List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
-         int n = lines.size();
+         int numberOfLines = lines.size();
          String firstLine = "";
          String secondLine = "";
-         if (n > 0)
+         if (numberOfLines > 0)
             firstLine = lines.get(0);
-         if (n > 1)
+         if (numberOfLines > 1)
             secondLine = lines.get(1);
          for (Theme theme : Theme.values())
             if (firstLine.contains(theme.name()))
@@ -355,7 +355,7 @@ public class GDXImGuiBasedUI
             if (i < Theme.values().length - 1)
                ImGui.sameLine();
          }
-         if (theme != previousTheme || previousShade!= backgroundShade.get())
+         if (theme != previousTheme || previousShade != backgroundShade.get())
          {
             FileTools.ensureFileExists(themeFilePath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
             FileTools.writeAllLines(List.of("theme=" + theme.name() + "\n" + shadePrefix + backgroundShade),
