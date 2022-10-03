@@ -97,8 +97,6 @@ public class StandPrepControllerState extends HighLevelControllerState
       {
          OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
          TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
-         DoubleProvider standPrepFinal = trajectoryData.getFinalJointConfiguration();
-
 
          JointDesiredOutputReadOnly jointDesiredOutput = highLevelControlOutput.getJointDesiredOutput(joint);
          double startAngle;
@@ -106,10 +104,11 @@ public class StandPrepControllerState extends HighLevelControllerState
             startAngle = jointDesiredOutput.getDesiredPosition();
          else
             startAngle = joint.getQ();
-         double startVelocity = 0.0;
+
+         trajectoryData.setInitialJointConfiguration(startAngle);
       }
 
-      trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), 0, 1, 0, 0);
+      trajectory.setCubic(0.0, timeToPrepareForStanding.getDoubleValue(), 0, 0, 1, 0);
    }
 
    @Override
@@ -145,14 +144,15 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          double q_initial = trajectoryData.getInitialJointConfiguration().getValue();
          double q_final = trajectoryData.getFinalJointConfiguration().getValue();
-         double q_curr = trajectoryData.getDesiredJointConfiguration().getValue();
+//         double q_curr = trajectoryData.getDesiredJointConfiguration().getValue();
          double q_curr_velocity = trajectoryData.getDesiredVelocityJointConfiguration().getValue();
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
+         lowLevelJointData.clear();
 
          if (timeInTrajectory < timeToPrepareForStanding.getDoubleValue())
          {
-            double jointPosition = (1 - alphaPosition) * q_initial + alphaPosition * q_final;
+            double jointPosition = ((1 - alphaPosition) * q_initial) + (alphaPosition * q_final);
             double jointVelocity = alphaVelocity * (q_final - q_initial);
 
             lowLevelJointData.setDesiredPosition(jointPosition);
@@ -160,11 +160,9 @@ public class StandPrepControllerState extends HighLevelControllerState
          }
          else
          {
-            lowLevelJointData.setDesiredPosition(q_curr);
+            lowLevelJointData.setDesiredPosition(q_final);
             lowLevelJointData.setDesiredVelocity(q_curr_velocity);
          }
-
-         lowLevelJointData.clear();
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
@@ -191,7 +189,7 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private class TrajectoryData
    {
-      private final YoDouble initialJoinConfiguration;
+      private final YoDouble initialJointConfiguration;
       private final DoubleProvider finalJointConfiguration;
       private final YoDouble desiredJointConfiguration;
       private final YoDouble desiredVelocityJointConfiguration;
@@ -199,15 +197,20 @@ public class StandPrepControllerState extends HighLevelControllerState
       public TrajectoryData(YoDouble initialJointConfiguration, DoubleProvider finalJointConfiguration, YoDouble desiredJointConfiguration,
                             YoDouble desiredVelocityJointConfiguration)
       {
-         this.initialJoinConfiguration = initialJointConfiguration;
+         this.initialJointConfiguration = initialJointConfiguration;
          this.finalJointConfiguration = finalJointConfiguration;
          this.desiredJointConfiguration = desiredJointConfiguration;
          this.desiredVelocityJointConfiguration = desiredVelocityJointConfiguration;
       }
 
+      public void setInitialJointConfiguration(double initialJointConfiguration)
+      {
+         this.initialJointConfiguration.set(initialJointConfiguration);
+      }
+
       public YoDouble getInitialJointConfiguration()
       {
-         return initialJoinConfiguration;
+         return initialJointConfiguration;
       }
 
       public DoubleProvider getFinalJointConfiguration()
