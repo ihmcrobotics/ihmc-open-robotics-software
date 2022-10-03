@@ -3,9 +3,7 @@ package us.ihmc.promp.presets;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.annotation.Name;
-import org.bytedeco.javacpp.annotation.Platform;
-import org.bytedeco.javacpp.annotation.Properties;
+import org.bytedeco.javacpp.annotation.*;
 import org.bytedeco.javacpp.tools.Info;
 import org.bytedeco.javacpp.tools.InfoMap;
 import org.bytedeco.javacpp.tools.InfoMapper;
@@ -56,14 +54,34 @@ public class PrompInfoMapper implements InfoMapper
       infoMap.put(new Info("PROMPEXPORT").cppTypes().annotations());
    }
 
+   /*
+    *    Eigen matrix example
+    *
+    *    Eigen::MatrixXd m(2,2);
+    *    m(0,0) = 3;
+    *
+    *    m(0,0) is a functor which returns a Scalar& which has an operator= overload;
+    *    so we can directly assign a value, ie 3
+    *
+    *    See: Eigen/src/Core/DenseCoeffsBase.h:362
+    */
+
+   @Name("Eigen::DenseBase<Eigen::MatrixXd>::Scalar")
+   public static class EigenDoubleScalar extends Pointer
+   {
+      public EigenDoubleScalar(double value)
+      {
+         allocate(value);
+      }
+
+      private native void allocate(double value);
+
+      public native @Name("operator =") void put(double value);
+   }
+
    @Name("Eigen::MatrixXd")
    public static class EigenMatrixXd extends Pointer
    {
-      static
-      {
-         Loader.load();
-      }
-
       public EigenMatrixXd(int rows, int cols)
       {
          allocate(rows, cols);
@@ -82,16 +100,25 @@ public class PrompInfoMapper implements InfoMapper
 
       // Calls coeff(Index rowId, Index colId) on the C++ side
       public native double coeff(int rowId, int colId);
+
+      public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int rowId, int colId);
+
+      public void debugPrint()
+      {
+         for (int row = 0; row < rows(); row++)
+         {
+            for (int col = 0; col < cols(); col++)
+            {
+               System.out.print(coeff(row, col) + " ");
+            }
+            System.out.println();
+         }
+      }
    }
 
    @Name("Eigen::VectorXd")
    public static class EigenVectorXd extends Pointer
    {
-      static
-      {
-         Loader.load();
-      }
-
       public EigenVectorXd(int length)
       {
          allocate(length);
