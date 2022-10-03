@@ -4,11 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.CharMatcher;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
+import org.bytedeco.opencv.presets.opencv_core;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -33,6 +35,7 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -120,6 +123,7 @@ public class GDXImGuiBasedUI
    }
    private Theme theme = Theme.LIGHT;
    private Path themeFilePath;
+   private final String shadePrefix = "shade=";
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -229,10 +233,28 @@ public class GDXImGuiBasedUI
       if (Files.exists(themeFilePath))
       {
          List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
-         String firstLine = lines.get(0);
+         int n = lines.size();
+         String firstLine = "";
+         String secondLine = "";
+         if (n > 0)
+            firstLine = lines.get(0);
+         if (n > 1)
+            secondLine = lines.get(1);
          for (Theme theme : Theme.values())
             if (firstLine.contains(theme.name()))
                setTheme(theme);
+         try
+         {
+            if (!secondLine.isEmpty())
+            {
+               backgroundShade.set(Float.parseFloat(secondLine.substring(shadePrefix.length())));
+               setBackgroundShade(backgroundShade.get());
+            }
+         }
+         catch (Exception e)
+         {
+            LogTools.info("No saved background shade preference");
+         }
       }
    }
 
@@ -321,6 +343,7 @@ public class GDXImGuiBasedUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
+         float previousShade = backgroundShade.get();
          if (ImGuiTools.volatileInputFloat(labels.get("Background shade"), backgroundShade))
          {
             setBackgroundShade(backgroundShade.get());
@@ -337,10 +360,13 @@ public class GDXImGuiBasedUI
             if (i < Theme.values().length - 1)
                ImGui.sameLine();
          }
-         if (theme != previousTheme)
+         if (theme != previousTheme || previousShade!= backgroundShade.get())
          {
             FileTools.ensureFileExists(themeFilePath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-            FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            FileTools.writeAllLines(List.of("theme=" + theme.name() + "\n" + shadePrefix + backgroundShade),
+                                    themeFilePath,
+                                    WriteOption.TRUNCATE,
+                                    DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
          ImGui.popItemWidth();
          ImGui.endMenu();
