@@ -220,13 +220,6 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
 
       currentWaypointIndex.set(0);
-
-      if (numberOfWaypoints.getIntegerValue() == 1)
-      {
-         subTrajectory.setConstant(waypoints.get(0).getPosition());
-      }
-      else
-         initializeSubTrajectory(0);
    }
 
    private void initializeSubTrajectory(int waypointIndex)
@@ -246,24 +239,18 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
 
       currentTrajectoryTime.set(time);
-      boolean changedSubTrajectory = false;
 
       if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
       {
          currentWaypointIndex.set(0);
-         changedSubTrajectory = true;
       }
-
-      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
-            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+      else
       {
-         currentWaypointIndex.increment();
-         changedSubTrajectory = true;
-      }
-
-      if (changedSubTrajectory)
-      {
-         initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
+         while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
+                && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+         {
+            currentWaypointIndex.increment();
+         }
       }
 
       int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
@@ -293,9 +280,9 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          return;
       }
 
+      // Initialize the segment trajectory, in case the index or waypoints have changed
+      subTrajectory.setCubic(0.0, end.getTime() - start.getTime(), start.getPosition(), start.getLinearVelocity(), end.getPosition(), end.getLinearVelocity());
       double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
-
-      subTrajectory.initialize();
       subTrajectory.compute(subTrajectoryTime);
 
       currentPosition.set(subTrajectory.getPosition());

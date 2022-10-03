@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.trajectories.generators;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.util.Precision;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
@@ -161,15 +162,6 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       }
 
       currentWaypointIndex.set(0);
-
-      if (numberOfWaypoints.getIntegerValue() == 1)
-      {
-         subTrajectory.setConstant(waypoints.get(0).getPosition());
-      }
-      else
-      {
-         initializeSubTrajectory(0);
-      }
    }
 
    private void initializeSubTrajectory(int waypointIndex)
@@ -196,24 +188,18 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       }
 
       currentTrajectoryTime.set(time);
-      boolean changedSubTrajectory = false;
 
       if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
       {
          currentWaypointIndex.set(0);
-         changedSubTrajectory = true;
       }
-
-      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
-            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+      else
       {
-         currentWaypointIndex.increment();
-         changedSubTrajectory = true;
-      }
-
-      if (changedSubTrajectory)
-      {
-         initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
+         while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(
+               currentWaypointIndex.getIntegerValue() + 1).getTime())
+         {
+            currentWaypointIndex.increment();
+         }
       }
 
       int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
@@ -243,9 +229,9 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          return;
       }
 
-      double subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
-
-      subTrajectory.initialize();
+      // Initialize the segment trajectory, in case the index or waypoints have changed
+      subTrajectory.setCubic(0.0, end.getTime() - start.getTime(), start.getPosition(), start.getVelocity(), end.getPosition(), end.getVelocity());
+      double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       subTrajectory.compute(subTrajectoryTime);
 
       currentPosition.set(subTrajectory.getValue());
@@ -262,8 +248,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       boolean isLastWaypoint = currentWaypointIndex.getIntegerValue() >= numberOfWaypoints.getIntegerValue() - 2;
       if (!isLastWaypoint)
          return false;
-      boolean subTrajectoryIsDone = subTrajectory.isDone();
-      return subTrajectoryIsDone;
+      return subTrajectory.isDone();
    }
 
    public boolean isEmpty()
