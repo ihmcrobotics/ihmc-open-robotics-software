@@ -1299,7 +1299,7 @@
         "jointName" : "rightElbowPitch",
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
             "sequence_id" : 0,
             "joint_hash_code" : -1630808225,
             "desired_position" : 1.2143042018975336,
@@ -1786,7 +1786,7 @@
         "jointName" : "rightElbowPitch",
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
             "sequence_id" : 0,
             "joint_hash_code" : -1630808225,
             "desired_position" : 1.2143042018975336,
@@ -2273,7 +2273,7 @@
         "jointName" : "rightElbowPitch",
         "isTrackingController" : false,
         "ikSolverMessage" : {
-          "controller_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
+          "toolbox_msgs::msg::dds_::KinematicsToolboxOneDoFJointMessage_" : {
             "sequence_id" : 0,
             "joint_hash_code" : -1630808225,
             "desired_position" : 1.2143042018975336,

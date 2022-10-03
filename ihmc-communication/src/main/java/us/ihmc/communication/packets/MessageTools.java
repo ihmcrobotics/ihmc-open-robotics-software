@@ -11,9 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
@@ -1117,61 +1115,61 @@ public class MessageTools
                                                  rigidBodyTransformMessage.getM22());
    }
 
-   public static Box3DMessage createBoxMessage(Box3DReadOnly box)
+   public static Box3DMessage createBox3DMessage(Box3DReadOnly box)
    {
       Box3DMessage message = new Box3DMessage();
-      packBoxMessage(box, message);
+      packBox3DMessage(box, message);
       return message;
    }
 
-   public static Ramp3DMessage createRampMessage(Ramp3DReadOnly ramp)
+   public static Ramp3DMessage createRamp3DMessage(Ramp3DReadOnly ramp)
    {
       Ramp3DMessage message = new Ramp3DMessage();
-      packRampMessage(ramp, message);
+      packRamp3DMessage(ramp, message);
       return message;
    }
 
-   public static ConvexPolytope3DMessage createConvexPolytopeMessage(ConvexPolytope3DReadOnly polytope)
+   public static ConvexPolytope3DMessage createConvexPolytope3DMessage(ConvexPolytope3DReadOnly polytope)
    {
       ConvexPolytope3DMessage message = new ConvexPolytope3DMessage();
-      packConvexPolytopeMessage(polytope, message);
+      packConvexPolytope3DMessage(polytope, message);
       return message;
    }
 
-   public static Cylinder3DMessage createCylinderMessage(Cylinder3DReadOnly cylinder)
+   public static Cylinder3DMessage createCylinder3DMessage(Cylinder3DReadOnly cylinder)
    {
       Cylinder3DMessage message = new Cylinder3DMessage();
-      packCylinderMessage(cylinder, message);
+      packCylinder3DMessage(cylinder, message);
       return message;
    }
 
-   public static Capsule3DMessage createCapsuleMessage(Capsule3DReadOnly capsule)
+   public static Capsule3DMessage createCapsule3DMessage(Capsule3DReadOnly capsule)
    {
       Capsule3DMessage message = new Capsule3DMessage();
-      packCapsuleMessage(capsule, message);
+      packCapsule3DMessage(capsule, message);
       return message;
    }
 
-   public static Ellipsoid3DMessage createEllipsoidMessage(Ellipsoid3DReadOnly ellipsoid)
+   public static Ellipsoid3DMessage createEllipsoid3DMessage(Ellipsoid3DReadOnly ellipsoid)
    {
       Ellipsoid3DMessage message = new Ellipsoid3DMessage();
-      packEllipsoidMessage(ellipsoid, message);
+      packEllipsoid3DMessage(ellipsoid, message);
       return message;
    }
 
-   public static void packBoxMessage(Box3DReadOnly box, Box3DMessage boxMessageToSet)
+   public static void packBox3DMessage(Box3DReadOnly box, Box3DMessage boxMessageToSet)
    {
       boxMessageToSet.getSize().set(box.getSize());
       boxMessageToSet.getPose().set(box.getPose());
    }
 
-   public static void packRampMessage(Ramp3DReadOnly ramp, Ramp3DMessage rampMessageToSet)
+   public static void packRamp3DMessage(Ramp3DReadOnly ramp, Ramp3DMessage rampMessageToSet)
    {
       rampMessageToSet.getSize().set(ramp.getSize());
       rampMessageToSet.getPose().set(ramp.getPose());
    }
 
-   public static void packConvexPolytopeMessage(ConvexPolytope3DReadOnly polytope, ConvexPolytope3DMessage convexPolytopeMessageToSet)
+   public static void packConvexPolytope3DMessage(ConvexPolytope3DReadOnly polytope, ConvexPolytope3DMessage convexPolytopeMessageToSet)
    {
       convexPolytopeMessageToSet.getVertices().clear();
 
@@ -1181,7 +1179,7 @@ public class MessageTools
       }
    }
 
-   public static void packCylinderMessage(Cylinder3DReadOnly cylinder, Cylinder3DMessage cylinderMessageToSet)
+   public static void packCylinder3DMessage(Cylinder3DReadOnly cylinder, Cylinder3DMessage cylinderMessageToSet)
    {
       cylinderMessageToSet.getPosition().set(cylinder.getPosition());
       cylinderMessageToSet.getAxis().set(cylinder.getAxis());
@@ -1189,7 +1187,7 @@ public class MessageTools
       cylinderMessageToSet.setLength(cylinder.getLength());
    }
 
-   public static void packCapsuleMessage(Capsule3DReadOnly capsule, Capsule3DMessage capsuleMessageToSet)
+   public static void packCapsule3DMessage(Capsule3DReadOnly capsule, Capsule3DMessage capsuleMessageToSet)
    {
       capsuleMessageToSet.getPosition().set(capsule.getPosition());
       capsuleMessageToSet.getAxis().set(capsule.getAxis());
@@ -1197,25 +1195,25 @@ public class MessageTools
       capsuleMessageToSet.setLength(capsule.getLength());
    }
 
-   public static void packEllipsoidMessage(Ellipsoid3DReadOnly ellipsoid, Ellipsoid3DMessage ellipsoidMessageToSet)
+   public static void packEllipsoid3DMessage(Ellipsoid3DReadOnly ellipsoid, Ellipsoid3DMessage ellipsoidMessageToSet)
    {
       ellipsoidMessageToSet.getPose().set(ellipsoid.getPose());
       ellipsoidMessageToSet.getRadii().set(ellipsoid.getRadii());
    }
 
-   public static void unpackBoxMessage(Box3DMessage boxMessage, Box3DBasics boxToSet)
+   public static void unpackBox3DMessage(Box3DMessage boxMessage, Box3DBasics boxToSet)
    {
       boxToSet.getSize().set(boxMessage.getSize());
       boxToSet.getPose().set(boxMessage.getPose());
    }
 
-   public static void unpackRampMessage(Ramp3DMessage rampMessage, Ramp3DBasics rampToSet)
+   public static void unpackRamp3DMessage(Ramp3DMessage rampMessage, Ramp3DBasics rampToSet)
    {
       rampToSet.getSize().set(rampMessage.getSize());
       rampToSet.getPose().set(rampMessage.getPose());
    }
 
-   public static void unpackConvexPolytopeMessage(ConvexPolytope3DMessage convexPolytopeMessage, FrameConvexPolytope3D polytopeToSet)
+   public static void unpackConvexPolytope3DMessage(ConvexPolytope3DMessage convexPolytopeMessage, FrameConvexPolytope3D polytopeToSet)
    {
       polytopeToSet.getVertices().clear();
 
@@ -1225,7 +1223,7 @@ public class MessageTools
       }
    }
 
-   public static void unpackConvexPolytopeMessage(ConvexPolytope3DMessage convexPolytopeMessage, ConvexPolytope3D polytopeToSet)
+   public static void unpackConvexPolytope3DMessage(ConvexPolytope3DMessage convexPolytopeMessage, ConvexPolytope3D polytopeToSet)
    {
       polytopeToSet.getVertices().clear();
 
@@ -1235,7 +1233,7 @@ public class MessageTools
       }
    }
 
-   public static void unpackCylinderMessage(Cylinder3DMessage cylinderMessage, Cylinder3DBasics cylinderToSet)
+   public static void unpackCylinder3DMessage(Cylinder3DMessage cylinderMessage, Cylinder3DBasics cylinderToSet)
    {
       cylinderToSet.getPosition().set(cylinderMessage.getPosition());
       cylinderToSet.getAxis().set(cylinderMessage.getAxis());
@@ -1243,7 +1241,7 @@ public class MessageTools
       cylinderToSet.setLength(cylinderMessage.getLength());
    }
 
-   public static void unpackCapsuleMessage(Capsule3DMessage capsuleMessage, Capsule3DBasics capsuleToSet)
+   public static void unpackCapsule3DMessage(Capsule3DMessage capsuleMessage, Capsule3DBasics capsuleToSet)
    {
       capsuleToSet.getPosition().set(capsuleMessage.getPosition());
       capsuleToSet.getAxis().set(capsuleMessage.getAxis());
@@ -1251,7 +1249,7 @@ public class MessageTools
       capsuleToSet.setLength(capsuleMessage.getLength());
    }
 
-   public static void unpackEllipsoidMessage(Ellipsoid3DMessage ellipsoidMessage, Ellipsoid3DBasics ellipsoidToSet)
+   public static void unpackEllipsoid3DMessage(Ellipsoid3DMessage ellipsoidMessage, Ellipsoid3DBasics ellipsoidToSet)
    {
       ellipsoidToSet.getPose().set(ellipsoidMessage.getPose());
       ellipsoidToSet.getRadii().set(ellipsoidMessage.getRadii());
