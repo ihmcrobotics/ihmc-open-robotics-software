@@ -23,7 +23,7 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   private final PairList<OneDoFJointBasics, us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState.TrajectoryData> jointsData = new PairList<>();
+   private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
    private final YoPolynomial trajectory;
 
@@ -96,7 +96,7 @@ public class StandPrepControllerState extends HighLevelControllerState
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
          OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
-         us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.StandPrepControllerState.TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
+         TrajectoryData trajectoryData = jointsData.get(jointIndex).getRight();
          DoubleProvider standPrepFinal = trajectoryData.getFinalJointConfiguration();
 
 
