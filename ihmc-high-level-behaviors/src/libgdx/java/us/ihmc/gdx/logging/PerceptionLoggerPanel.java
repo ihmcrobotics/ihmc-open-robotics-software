@@ -15,7 +15,7 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    private ArrayList<String> topicNames = new ArrayList<>();
    private ArrayList<Integer> topicObjectCounts = new ArrayList<>();
 
-   static final String PERCEPTION_LOG_FILE = "/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+   static final String PERCEPTION_LOG_FILE = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
 
    private String currentTopic;
 

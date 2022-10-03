@@ -7,6 +7,6 @@ public class RealsenseD435VideoViewer
 {
    public static void main(String[] args)
    {
-      new JavaFXROS2VideoViewer(ROS2Tools.D435_VIDEO, 640, 480);
+      new JavaFXROS2VideoViewer(ROS2Tools.VIDEO, 640, 480);
    }
 }
