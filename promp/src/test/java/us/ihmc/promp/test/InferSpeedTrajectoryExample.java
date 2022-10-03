@@ -74,8 +74,8 @@ public class InferSpeedTrajectoryExample
 
       int n_rbf = 20;
 
-      ProMP m_promp = new ProMP(trainingTrajectories, n_rbf);
-      EigenMatrixXd meanTrajectory = m_promp.generate_trajectory();
+      ProMP myProMP = new ProMP(trainingTrajectories, n_rbf);
+      EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
 
       // Test speed inference on a trajectory
       Trajectory trajectoryOriginal = new Trajectory(meanTrajectory, 1.0);
@@ -90,12 +90,15 @@ public class InferSpeedTrajectoryExample
       System.out.println("timestepOriginal: " + timestepOriginal);
       // Modulate trajectory according to new speed
       // newTimesteps/timestepsOriginal = NewModulation/modulationOriginal = speedOriginal/newSpeed
-      Trajectory trajectoryModulated = trajectoryOriginal.modulate(timestepOriginal / newSpeed);
+      Trajectory trajectoryModulated = trajectoryOriginal.modulate(timestepOriginal / newSpeed); //you can modulate the trajectory object
+      //      EigenMatrixXd meanModulatedTrajectory = myProMP.generate_trajectory_with_speed(newSpeed); //or directly modulate the mean trajectory of the proMP
       long timestepNew = trajectoryModulated.timesteps();
       System.out.println("timestepNew: " + timestepNew);
+      //      System.out.println("timestepNew: " + meanModulatedTrajectory.rows());
 
       // infer the new speed for the modulated trajectory
       double inferredSpeed = trajectoryOriginal.infer_speed(trajectoryModulated.matrix(), 0.25, 4.0, 20); //new speed in range 0.25-4
+      //      double inferredSpeed = trajectoryOriginal.infer_speed(meanModulatedTrajectory, 0.25, 4.0, 20); //new speed in range 0.25-4
       System.out.println("Inferred speed for modulated trajectory: " + inferredSpeed);
    }
 }

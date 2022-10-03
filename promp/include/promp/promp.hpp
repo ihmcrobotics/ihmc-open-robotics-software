@@ -151,6 +151,12 @@ namespace promp {
          */
         void set_ridge_factor(double ridge_factor);
 
+         /**
+         * @brief		Set the ridge factor value which condition the pphi inverse. Helps against singularities
+         * @param[in]	ridge_factor
+         */
+        void set_conditioning_ridge_factor(double ridge_factor);
+
         /**
          * @brief      Generates MEAN trajectory based on current weights distribution and rbf
          *
@@ -252,6 +258,11 @@ namespace promp {
          */
         inline double phase_speed_from_steps(int steps) { return static_cast<double>(_s) / steps; }
 
+         /**
+         * @brief Gets the time modulation.
+         */
+        void update_time_modulation();
+
     private:
         /** \brief	maps time vector into a phase vector using the inner timesteps parametrization
          */
@@ -340,6 +351,8 @@ namespace promp {
         double _alpha = 1.0;
         //! ridge factor
         double _ridge_factor = 1e-10;
+        //!conditioning ridge factor
+        double _conditioning_ridge_factor = 1e-3;
         //! number of samples used to rescale all the trajectories to same duration
         int _s;
         //! Mean of weights' distribution

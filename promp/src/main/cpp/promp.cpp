@@ -234,6 +234,11 @@ void ProMP::set_ridge_factor(double ridge_factor)
 	_ridge_factor = ridge_factor;
 }
 
+void ProMP::set_conditioning_ridge_factor(double ridge_factor)
+{
+	_condtioning_ridge_factor = ridge_factor;
+}
+
 Eigen::MatrixXd ProMP::compute_ridge_pseudo_inverse(const Eigen::MatrixXd& m)
 {
 	auto eye = Eigen::MatrixXd::Identity(m.cols(), m.cols());
@@ -414,8 +419,8 @@ void ProMP::condition_via_points(const std::vector<std::tuple<int, Eigen::Vector
 		// auto phi_obs = repeat_block_diagonal(generate_basis_function(phase_obs), _dims);  // TODO optimize (this matrix grow a lot)
 
 		RepeatBlockDiagonalMatrix phi_obs(generate_basis_function(phase_obs), _dims);
-		//Eigen::MatrixXd ridge = _ridge_factor * Eigen::MatrixXd::Identity(_dims, _dims); // might be useful with a lot of points ????
-		Eigen::MatrixXd L = _cov_w * phi_obs * (sig_obs + phi_obs.transpose() * _cov_w * phi_obs).inverse(); // NOT use auto, broken with RepeatBlockDiagonalMatrix
+		Eigen::MatrixXd ridge = _ridge_factor * Eigen::MatrixXd::Identity(_dims, _dims);
+		Eigen::MatrixXd L = _cov_w * phi_obs * (sig_obs + phi_obs.transpose() * _cov_w * phi_obs +ridge).inverse(); // NOT use auto, broken with RepeatBlockDiagonalMatrix
 
 		_mean_w = _mean_w + L * (obs - phi_obs.transpose() * _mean_w);
 		_cov_w = _cov_w - L * phi_obs.transpose() * _cov_w;
