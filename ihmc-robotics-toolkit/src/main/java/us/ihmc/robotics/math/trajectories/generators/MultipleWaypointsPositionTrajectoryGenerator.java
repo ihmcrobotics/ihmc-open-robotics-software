@@ -294,6 +294,8 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
 
       double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
+
+      subTrajectory.initialize();
       subTrajectory.compute(subTrajectoryTime);
 
       currentPosition.set(subTrajectory.getPosition());

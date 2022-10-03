@@ -244,6 +244,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       }
 
       double subTrajectoryTime = time - waypoints.get(currentWaypointIndex.getIntegerValue()).getTime();
+
+      subTrajectory.initialize();
       subTrajectory.compute(subTrajectoryTime);
 
       currentPosition.set(subTrajectory.getValue());
