@@ -247,9 +247,8 @@ public class GDXImGuiBasedUI
                setBackgroundShade(backgroundShade.get());
             }
          }
-         catch (Exception e)
+         catch (Exception ignored)
          {
-            LogTools.info("No saved background shade preference");
          }
       }
    }
