@@ -1,4 +1,4 @@
-package org.bytedeco.slamWrapper.presets;
+package us.ihmc.bytedeco.slamWrapper.presets;
 
 import org.bytedeco.javacpp.annotation.*;
 import org.bytedeco.javacpp.tools.*;
@@ -12,7 +12,7 @@ import org.bytedeco.javacpp.tools.*;
             include = {"include/FactorGraphExternal.h"},
             link = {"slam-wrapper"}
          ),
-      target = "org.bytedeco.slamWrapper.SlamWrapper"
+      target = "us.ihmc.bytedeco.slamWrapper.SlamWrapper"
 )
 public class SlamWrapperInfoMapper implements InfoMapper
 {
