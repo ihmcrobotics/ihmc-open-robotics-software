@@ -46,7 +46,13 @@ public class FFMPEGLoggerDemoHelper
       this(fileSuffix, sourcePixelFormat, encoderPixelFormat, lossless, framerate, bitRate, null);
    }
 
-   public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless, int framerate, int bitRate, String preferredVideoEncoder)
+   public FFMPEGLoggerDemoHelper(String fileSuffix,
+                                 int sourcePixelFormat,
+                                 int encoderPixelFormat,
+                                 boolean lossless,
+                                 int framerate,
+                                 int bitRate,
+                                 String preferredVideoEncoder)
    {
       this.fileSuffix = fileSuffix;
       this.sourcePixelFormat = sourcePixelFormat;
@@ -58,7 +64,8 @@ public class FFMPEGLoggerDemoHelper
       updateFileName();
    }
 
-   public void setLoggerClass(Class<? extends FFMPEGLogger> loggerClass) {
+   public void setLoggerClass(Class<? extends FFMPEGLogger> loggerClass)
+   {
       LogTools.debug("loggerClass set to " + loggerClass.getSimpleName());
       this.loggerClass = loggerClass;
    }
@@ -157,7 +164,15 @@ public class FFMPEGLoggerDemoHelper
       }
 
       if (logger == null)
-         logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), bitRate, sourcePixelFormat, encoderPixelFormat, fileName, preferredVideoEncoder);
+         logger = new FFMPEGLogger(imageWidth,
+                                   imageHeight,
+                                   lossless,
+                                   framerate.get(),
+                                   bitRate,
+                                   sourcePixelFormat,
+                                   encoderPixelFormat,
+                                   fileName,
+                                   preferredVideoEncoder);
 
       finalizing = true;
 
