@@ -1,4 +1,4 @@
-# Current version: 0.2
+# Current version: 0.3
 FROM ubuntu:20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
@@ -57,4 +57,8 @@ RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH' >> /root/.bash
 # Ubuntu installs the headers at /usr/include/eigen3/Eigen
 RUN ln -s /usr/include/eigen3/Eigen /usr/include/Eigen
 
-WORKDIR /root/dev
+RUN useradd robotlab
+# Switch to our robotlab user last because prior tasks need to run as root
+USER robotlab
+
+WORKDIR /home/robotlab

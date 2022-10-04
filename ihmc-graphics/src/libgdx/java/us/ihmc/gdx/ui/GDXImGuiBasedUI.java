@@ -8,10 +8,18 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.imgui.*;
+import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
+import us.ihmc.gdx.imgui.ImGuiPanelManager;
+import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -25,9 +33,11 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -104,6 +114,12 @@ public class GDXImGuiBasedUI
    private final GDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
+   private enum Theme
+   {
+      LIGHT, DARK, CLASSIC
+   }
+   private Theme theme = Theme.LIGHT;
+   private Path themeFilePath;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -208,6 +224,16 @@ public class GDXImGuiBasedUI
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
+
+      themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
+      if (Files.exists(themeFilePath))
+      {
+         List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
+         String firstLine = lines.get(0);
+         for (Theme theme : Theme.values())
+            if (firstLine.contains(theme.name()))
+               setTheme(theme);
+      }
    }
 
    public void renderBeforeOnScreenUI()
@@ -299,9 +325,27 @@ public class GDXImGuiBasedUI
          {
             setBackgroundShade(backgroundShade.get());
          }
+
+         ImGui.separator();
+         ImGui.text("UI Theme:");
+         ImGui.sameLine();
+         Theme previousTheme = theme;
+         for (int i = 0; i < Theme.values().length; ++i)
+         {
+            if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i]))
+               setTheme(Theme.values()[i]);
+            if (i < Theme.values().length - 1)
+               ImGui.sameLine();
+         }
+         if (theme != previousTheme)
+         {
+            FileTools.ensureFileExists(themeFilePath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
+
       ImGui.sameLine(ImGui.getWindowSizeX() - 220.0f);
       fpsCalculator.ping();
       String fpsString = String.valueOf((int) fpsCalculator.getFrequency());
@@ -442,5 +486,16 @@ public class GDXImGuiBasedUI
       {
          additional3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
       }
+   }
+
+   public void setTheme(Theme theme)
+   {
+      switch (theme)
+      {
+         case LIGHT -> ImGui.styleColorsLight();
+         case DARK -> ImGui.styleColorsDark();
+         case CLASSIC -> ImGui.styleColorsClassic();
+      }
+      this.theme = theme;
    }
 }
