@@ -90,6 +90,37 @@ public class MultiContactScriptReader
       }
    }
 
+   public boolean loadScriptNew(File scriptFile)
+   {
+      if (scriptFile == null)
+      {
+         LogTools.info("No file provided");
+         return false;
+      }
+
+      if (!scriptFile.exists())
+      {
+         LogTools.info("Script file does not exist: " + scriptFile);
+         return false;
+      }
+
+      if (!scriptFile.isFile())
+      {
+         LogTools.info("Not a file: " + scriptFile);
+         return false;
+      }
+
+      try
+      {
+         return loadScriptNew(new FileInputStream(scriptFile));
+      }
+      catch (FileNotFoundException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
    public boolean loadScriptNew(InputStream inputStream)
    {
       if (inputStream == null)
