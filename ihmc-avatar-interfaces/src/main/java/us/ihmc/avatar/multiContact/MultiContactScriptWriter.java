@@ -141,7 +141,7 @@ public class MultiContactScriptWriter
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
          ObjectNode rootNode = objectMapper.createObjectNode();
 
-         ObjectNode environmentNode = rootNode.putObject(KinematicsToolboxSnapshotDescription.ENVIRONMENT_JSON);
+         ObjectNode environmentNode = rootNode.putObject(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
          ArrayNode scriptNode = rootNode.putArray(KinematicsToolboxSnapshotDescription.SCRIPT_JSON);
 
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)

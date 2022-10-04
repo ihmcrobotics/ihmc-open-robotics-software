@@ -23,9 +23,7 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class KinematicsToolboxSnapshotDescription
 {
-   public static final String ENVIRONMENT_JSON = "environment";
    public static final String SCRIPT_JSON = "script";
-
    public static final String CONFIGURATION_JSON = KinematicsToolboxSnapshotDescription.class.getSimpleName();
    public static final String CONTROLLER_CONFIGURATION_JSON = "controllerConfiguration";
    public static final String IK_SOLUTION_JSON = "ikSolution";
@@ -135,6 +133,39 @@ public class KinematicsToolboxSnapshotDescription
          oneDoFAnchors.forEach(anchor -> arrayOneDoFAnchorNode.add(anchor.toJSON(objectMapper)));
          configurationJSON.set(ONE_DOF_ANCHORS_JSON, arrayOneDoFAnchorNode);
          configurationJSON.put(EXECUTION_DURATION_JSON, executionDuration);
+
+         return root;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public JsonNode toJSONNew(ObjectMapper objectMapper)
+   {
+      Objects.requireNonNull(controllerConfiguration);
+      Objects.requireNonNull(ikSolution);
+      Objects.requireNonNull(ikPrivilegedConfiguration);
+      Objects.requireNonNull(sixDoFAnchors);
+      Objects.requireNonNull(oneDoFAnchors);
+
+      try
+      {
+         ObjectNode root = objectMapper.createObjectNode();
+
+         root.set(CONTROLLER_CONFIGURATION_JSON, messageToJSON(rcdSerializer, controllerConfiguration));
+         root.set(IK_SOLUTION_JSON, messageToJSON(ktosSerializer, ikSolution));
+         root.set(IK_PRIVILEGED_CONFIGURATION_JSON, messageToJSON(ktpcmSerializer, ikPrivilegedConfiguration));
+         if (centerOfMassAnchor != null)
+            root.set(COM_ANCHOR_JSON, centerOfMassAnchor.toJSON(objectMapper));
+         ArrayNode arraySixDoFAnchorNode = root.arrayNode(sixDoFAnchors.size());
+         sixDoFAnchors.forEach(anchor -> arraySixDoFAnchorNode.add(anchor.toJSON(objectMapper)));
+         root.set(SIX_DOF_ANCHORS_JSON, arraySixDoFAnchorNode);
+         ArrayNode arrayOneDoFAnchorNode = root.arrayNode(oneDoFAnchors.size());
+         oneDoFAnchors.forEach(anchor -> arrayOneDoFAnchorNode.add(anchor.toJSON(objectMapper)));
+         root.set(ONE_DOF_ANCHORS_JSON, arrayOneDoFAnchorNode);
+         root.put(EXECUTION_DURATION_JSON, executionDuration);
 
          return root;
       }

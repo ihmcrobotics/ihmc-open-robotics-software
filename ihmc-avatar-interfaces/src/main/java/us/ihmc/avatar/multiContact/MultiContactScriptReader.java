@@ -11,13 +11,16 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.log.LogTools;
 
 public class MultiContactScriptReader
 {
    private int currentMessageIndex = 0;
-   private final List<KinematicsToolboxSnapshotDescription> loadedMessages = new ArrayList<>();
+   private final List<FrameShape3DReadOnly> loadedEnvironmentShapes = new ArrayList<>();
+   private final List<KinematicsToolboxSnapshotDescription> loadedScriptKeyFrames = new ArrayList<>();
 
    public MultiContactScriptReader()
    {
@@ -75,8 +78,8 @@ public class MultiContactScriptReader
             messages.add(KinematicsToolboxSnapshotDescription.fromJSON(child));
          }
 
-         loadedMessages.clear();
-         loadedMessages.addAll(messages);
+         loadedScriptKeyFrames.clear();
+         loadedScriptKeyFrames.addAll(messages);
          currentMessageIndex = -1;
          return true;
       }
@@ -100,16 +103,30 @@ public class MultiContactScriptReader
          ObjectMapper objectMapper = new ObjectMapper();
          JsonNode jsonNode = objectMapper.readTree(inputStream);
 
-         List<KinematicsToolboxSnapshotDescription> messages = new ArrayList<>();
+         JsonNode environmentNode = jsonNode.get(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
+         JsonNode scriptNode = jsonNode.get(KinematicsToolboxSnapshotDescription.SCRIPT_JSON);
 
-         for (int i = 0; i < jsonNode.size(); i++)
+         List<FrameShape3DReadOnly> environmentShapes = new ArrayList<>();
+         List<KinematicsToolboxSnapshotDescription> scriptKeyFrames = new ArrayList<>();
+
+         for (int i = 0; i < environmentNode.size(); i++)
          {
-            JsonNode child = jsonNode.get(i);
-            messages.add(KinematicsToolboxSnapshotDescription.fromJSON(child));
+            ObjectNode environmentShape = (ObjectNode) environmentNode.get(i);
+            environmentShapes.add(MultiContactEnvironmentDescription.fromJSON(environmentShape));
          }
 
-         loadedMessages.clear();
-         loadedMessages.addAll(messages);
+         loadedEnvironmentShapes.clear();
+         loadedEnvironmentShapes.addAll(environmentShapes);
+
+         for (int i = 0; i < scriptNode.size(); i++)
+         {
+            JsonNode keyframe = scriptNode.get(i);
+            scriptKeyFrames.add(KinematicsToolboxSnapshotDescription.fromJSON(keyframe));
+         }
+
+         loadedScriptKeyFrames.clear();
+         loadedScriptKeyFrames.addAll(scriptKeyFrames);
+
          currentMessageIndex = -1;
          return true;
       }
@@ -122,7 +139,7 @@ public class MultiContactScriptReader
 
    public int size()
    {
-      return loadedMessages.size();
+      return loadedScriptKeyFrames.size();
    }
 
    public int getCurrentMessageIndex()
@@ -132,7 +149,7 @@ public class MultiContactScriptReader
 
    public boolean hasNext()
    {
-      return currentMessageIndex < loadedMessages.size() - 1;
+      return currentMessageIndex < loadedScriptKeyFrames.size() - 1;
    }
 
    public KinematicsToolboxSnapshotDescription rewind()
@@ -143,17 +160,17 @@ public class MultiContactScriptReader
 
    public KinematicsToolboxSnapshotDescription getFirst()
    {
-      if (loadedMessages.isEmpty())
+      if (loadedScriptKeyFrames.isEmpty())
          return null;
       else
-         return loadedMessages.get(0);
+         return loadedScriptKeyFrames.get(0);
    }
 
    public KinematicsToolboxSnapshotDescription next()
    {
       currentMessageIndex++;
-      if (currentMessageIndex >= loadedMessages.size())
-         currentMessageIndex = loadedMessages.size() - 1;
+      if (currentMessageIndex >= loadedScriptKeyFrames.size())
+         currentMessageIndex = loadedScriptKeyFrames.size() - 1;
       return getCurrent();
    }
 
@@ -167,20 +184,25 @@ public class MultiContactScriptReader
 
    public KinematicsToolboxSnapshotDescription getCurrent()
    {
-      if (loadedMessages.isEmpty() || currentMessageIndex == -1)
+      if (loadedScriptKeyFrames.isEmpty() || currentMessageIndex == -1)
          return null;
       else
-         return loadedMessages.get(currentMessageIndex);
+         return loadedScriptKeyFrames.get(currentMessageIndex);
+   }
+
+   public List<FrameShape3DReadOnly> getEnvironmentShapes()
+   {
+      return loadedEnvironmentShapes;
    }
 
    public List<KinematicsToolboxSnapshotDescription> getAllItems()
    {
-      return loadedMessages;
+      return loadedScriptKeyFrames;
    }
 
    public void applyTransform(Transform transform)
    {
-      for (KinematicsToolboxSnapshotDescription description : loadedMessages)
+      for (KinematicsToolboxSnapshotDescription description : loadedScriptKeyFrames)
       {
          description.applyTransform(transform);
       }
