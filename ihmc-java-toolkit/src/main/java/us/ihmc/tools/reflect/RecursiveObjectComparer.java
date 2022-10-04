@@ -7,13 +7,14 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import us.ihmc.tools.containers.ContainerTools;
 
 /**
  * @author Twan
- *
  */
 public class RecursiveObjectComparer
 {
@@ -35,12 +36,10 @@ public class RecursiveObjectComparer
    private long fieldsProcessed = 0;
    private final StringBuffer differenceLocationBuffer = new StringBuffer();
 
-
    private LinkedHashMap<Object, ArrayList<Object>> objectPairsToIgnore = new LinkedHashMap<Object, ArrayList<Object>>();
    private LinkedHashSet<Field> fieldsToIgnore = new LinkedHashSet<Field>();
    private LinkedHashSet<Class<?>> classesToIgnore = new LinkedHashSet<Class<?>>();
    private StringFieldMatcher stringFieldMatchersToIgnore = new StringFieldMatcher();
-
 
    private final boolean isTopLevel;
 
@@ -64,12 +63,12 @@ public class RecursiveObjectComparer
       this.isTopLevel = false;
 
       // link to parent comparer
-      this.classesToIgnore = parentComparer.classesToIgnore;    // will not be changed by the child comparer
-      this.fieldsToIgnore = parentComparer.fieldsToIgnore;    // will not be changed by the child comparer
+      this.classesToIgnore = parentComparer.classesToIgnore; // will not be changed by the child comparer
+      this.fieldsToIgnore = parentComparer.fieldsToIgnore; // will not be changed by the child comparer
       this.stringFieldMatchersToIgnore = parentComparer.stringFieldMatchersToIgnore;
-      this.previouslyProcessedEqualObjectPairs = parentComparer.previouslyProcessedEqualObjectPairs;    // stuff will be added by this comparer, but that's to parentComparers benefit
-      this.previouslyProcessedDifferentObjectPairs = parentComparer.previouslyProcessedDifferentObjectPairs;    // stuff will be added by this comparer, but that's to parentComparers benefit
-      this.objectStack = parentComparer.objectStack;    // have to add this, otherwise loops won't be resolved correctly.
+      this.previouslyProcessedEqualObjectPairs = parentComparer.previouslyProcessedEqualObjectPairs; // stuff will be added by this comparer, but that's to parentComparers benefit
+      this.previouslyProcessedDifferentObjectPairs = parentComparer.previouslyProcessedDifferentObjectPairs; // stuff will be added by this comparer, but that's to parentComparers benefit
+      this.objectStack = parentComparer.objectStack; // have to add this, otherwise loops won't be resolved correctly.
    }
 
    public boolean compare(Object object1, Object object2) throws IllegalArgumentException, IllegalAccessException
@@ -78,16 +77,16 @@ public class RecursiveObjectComparer
       this.topLevelObject2 = object2;
       boolean objectsEqual = recursivelyCompareObjects(topLevelObject1, topLevelObject2, maxDepth, null);
       doPostCompareSanityChecks();
-   
-//      if (!objectsEqual && this.differingFields.isEmpty())
-//      {
-//         throw new RuntimeException("(ret == false) && this.differingFields.isEmpty()");
-//      }
-//      if (objectsEqual && !differingFields.isEmpty())
-//      {
-//         throw new RuntimeException("(ret == true) && !differingFields.isEmpty()");
-//      }
-      
+
+      //      if (!objectsEqual && this.differingFields.isEmpty())
+      //      {
+      //         throw new RuntimeException("(ret == false) && this.differingFields.isEmpty()");
+      //      }
+      //      if (objectsEqual && !differingFields.isEmpty())
+      //      {
+      //         throw new RuntimeException("(ret == true) && !differingFields.isEmpty()");
+      //      }
+
       return objectsEqual;
    }
 
@@ -159,7 +158,7 @@ public class RecursiveObjectComparer
          this.stringFieldMatchersToIgnore.combine(stringFieldMatcherToIgnore);
       }
    }
-   
+
    public void addClassToIgnore(Class<?> classToIgnore)
    {
       this.classesToIgnore.add(classToIgnore);
@@ -215,7 +214,7 @@ public class RecursiveObjectComparer
    }
 
    private boolean recursivelyCompareObjects(Object object1, Object object2, int depthToGo, Field callingField)
-           throws IllegalArgumentException, IllegalAccessException
+         throws IllegalArgumentException, IllegalAccessException
    {
       boolean ret;
       if (hasMaximumNumberOfDifferencesBeenReached())
@@ -235,7 +234,7 @@ public class RecursiveObjectComparer
       }
       else
       {
-         Class<?> objectType = object1.getClass();    // doesn't matter which one we use, since they're the same at this point
+         Class<?> objectType = object1.getClass(); // doesn't matter which one we use, since they're the same at this point
 
          if (isClassAnException(objectType))
             ret = true;
@@ -270,10 +269,20 @@ public class RecursiveObjectComparer
                ret = handleArrays(object1, object2, depthToGo, callingField);
                doBookKeeping(object1, object2, ret);
             }
+            else if (List.class.isAssignableFrom(objectType))
+            {
+               ret = handleLists(object1, object2, depthToGo, callingField);
+               doBookKeeping(object1, object2, ret);
+            }
             else if (Map.class.isAssignableFrom(objectType))
             {
                // handle maps
                ret = handleMaps(object1, object2, depthToGo, callingField);
+               doBookKeeping(object1, object2, ret);
+            }
+            else if (String.class.isAssignableFrom(objectType))
+            {
+               ret = Objects.equals(object1, object2);
                doBookKeeping(object1, object2, ret);
             }
             else
@@ -322,7 +331,7 @@ public class RecursiveObjectComparer
       {
          removeFromObjectStack(object1, object2);
 
-         return true;    // don't know, actually...
+         return true; // don't know, actually...
       }
    }
 
@@ -337,10 +346,10 @@ public class RecursiveObjectComparer
          {
             continue;
          }
-         
+
          if (stringFieldMatchersToIgnore != null)
          {
-            if (stringFieldMatchersToIgnore.matches(object1)) 
+            if (stringFieldMatchersToIgnore.matches(object1))
             {
                continue;
             }
@@ -371,7 +380,7 @@ public class RecursiveObjectComparer
             boolean fieldEqual = recursivelyCompareObjects(fieldContent1, fieldContent2, depthToGo - 1, field);
             if (!fieldEqual)
             {
-               equal = false;    // design choice: don't return here: keep going to find more differences
+               equal = false; // design choice: don't return here: keep going to find more differences
             }
          }
 
@@ -383,7 +392,6 @@ public class RecursiveObjectComparer
 
       return equal;
    }
-
 
    private void addObjectPairToObjectStack(Object object1, Object object2)
    {
@@ -408,11 +416,10 @@ public class RecursiveObjectComparer
       return objectsAlreadyBeingCompared;
    }
 
-
    private boolean alreadyKnowObjectsAreEqual(Object object1, Object object2)
    {
       boolean alreadyKnowObjectsAreEqual = (previouslyProcessedEqualObjectPairs.get(object1) != null)
-                                           && previouslyProcessedEqualObjectPairs.get(object1).contains(object2);
+            && previouslyProcessedEqualObjectPairs.get(object1).contains(object2);
 
       return alreadyKnowObjectsAreEqual;
    }
@@ -420,7 +427,7 @@ public class RecursiveObjectComparer
    private boolean alreadyKnowObjectsAreDifferent(Object object1, Object object2)
    {
       boolean alreadyKnowObjectsAreDifferent = (previouslyProcessedDifferentObjectPairs.get(object1) != null)
-                                               && previouslyProcessedDifferentObjectPairs.get(object1).contains(object2);
+            && previouslyProcessedDifferentObjectPairs.get(object1).contains(object2);
 
       return alreadyKnowObjectsAreDifferent;
    }
@@ -469,7 +476,7 @@ public class RecursiveObjectComparer
       boolean object1Null = object1 == null;
       boolean object2Null = object2 == null;
 
-      if ((object1Null &&!object2Null) || (!object1Null && object2Null))
+      if ((object1Null && !object2Null) || (!object1Null && object2Null))
       {
          return true;
       }
@@ -534,7 +541,7 @@ public class RecursiveObjectComparer
    }
 
    private void storePrimitiveDifferenceForArrays(Object array1, Object array2, Field callingField, int arrayIndex)
-           throws IllegalArgumentException, IllegalAccessException
+         throws IllegalArgumentException, IllegalAccessException
    {
       log(array1, array2, callingField);
 
@@ -545,7 +552,7 @@ public class RecursiveObjectComparer
    private void storeArrayLengthDifference(Object array1, Object array2, Field callingField)
    {
       log(array1, array2, callingField);
-      
+
       String[] differenceString = getLengthDifferenceForArrays(array1, array2);
       lowestLevelDifferencesList.add(differenceString);
    }
@@ -671,6 +678,38 @@ public class RecursiveObjectComparer
       }
    }
 
+   @SuppressWarnings("rawtypes")
+   private boolean handleLists(Object list1, Object list2, int depthToGo, Field callingField) throws IllegalArgumentException, IllegalAccessException
+   {
+      List list1Casted = (List) list1;
+      List list2Casted = (List) list2;
+
+      if (list1Casted.size() != list1Casted.size())
+         return false;
+
+      if (list1Casted.isEmpty() && list2Casted.isEmpty())
+         return true;
+
+      boolean equal = true;
+      for (int i = 0; i < list1Casted.size(); i++)
+      {
+         int oldLocationBufferLength = differenceLocationBuffer.length();
+         differenceLocationBuffer.append("[" + i + "]");
+         boolean entryEqual = recursivelyCompareObjects(list1Casted.get(i), list2Casted.get(i), depthToGo - 1, callingField);
+
+         if (!entryEqual)
+         {
+            equal = false;
+
+            // design choice: don't return here; keep going to find more differences
+         }
+
+         differenceLocationBuffer.setLength(oldLocationBufferLength);
+      }
+
+      return equal;
+   }
+
    private boolean handleMaps(Object map1, Object map2, int depthToGo, Field callingField) throws IllegalArgumentException, IllegalAccessException
    {
       Map<?, ?> map1Cast = (Map<?, ?>) map1;
@@ -685,8 +724,7 @@ public class RecursiveObjectComparer
       Object[] keySet2 = map2Cast.keySet().toArray();
 
       boolean equal = true;
-      key1Loop:
-      for (int i = 0; i < keySet1.length; i++)
+      key1Loop: for (int i = 0; i < keySet1.length; i++)
       {
          Object key1 = keySet1[i];
          boolean keyFound = false;
@@ -706,14 +744,14 @@ public class RecursiveObjectComparer
                   equal = false;
                }
 
-               continue key1Loop;    // design choice: don't return here: keep going to find more differences
+               continue key1Loop; // design choice: don't return here: keep going to find more differences
             }
          }
 
          // correct key not found
          if (!keyFound && isTopLevel())
          {
-//          System.err.println("Could not find map2's counterpart of map1's key " + key1);
+            //          System.err.println("Could not find map2's counterpart of map1's key " + key1);
             equal = false;
          }
       }
@@ -745,17 +783,17 @@ public class RecursiveObjectComparer
          buf.append("Field: " + field + "\n");
          buf.append("Location: " + location + "\n");
 
-         String[] primitiveDifference = lowestLevelDifferencesList.get(i);    // should be synchronized with differingFields (not very nice, but it's late)
+         String[] primitiveDifference = lowestLevelDifferencesList.get(i); // should be synchronized with differingFields (not very nice, but it's late)
          Object[] secondLowestLevelDifference = secondLowestLevelDifferenceList.get(i);
          for (int j = 0; j < primitiveDifference.length; j++)
          {
             buf.append("   Primitive " + (j) + ": " + primitiveDifference[j]);
-            
+
             Object containingObject = secondLowestLevelDifference[j];
             buf.append("   Containing object " + (j) + ": " + containingObject);
             if (containingObject != null)
             {
-               buf.append("   Containing object class " + (j) + ": " + containingObject.getClass());               
+               buf.append("   Containing object class " + (j) + ": " + containingObject.getClass());
             }
             buf.append("\n");
          }

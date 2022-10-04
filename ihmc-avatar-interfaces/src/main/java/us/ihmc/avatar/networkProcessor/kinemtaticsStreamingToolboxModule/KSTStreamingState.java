@@ -228,7 +228,7 @@ public class KSTStreamingState implements State
       //                                             .collect(Collectors.toList()));
       //      }
 
-      publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
+      publishingPeriod.set(parameters.getPublishingPeriod());
 
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());

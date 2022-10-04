@@ -46,10 +46,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -98,10 +98,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -150,10 +150,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -245,10 +245,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -340,10 +340,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -435,10 +435,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -530,10 +530,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -625,10 +625,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -720,10 +720,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -815,10 +815,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -944,10 +944,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -996,10 +996,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1048,10 +1048,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1108,10 +1108,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -1237,10 +1237,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1289,10 +1289,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1341,10 +1341,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1401,10 +1401,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -1496,10 +1496,10 @@
       <source>0</source>
       <sequence__id__>0</sequence__id__>
       <taskspace__trajectory__points__>
-        <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+        <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
         <values/>
         <size>0</size>
-        <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+        <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
           <serializeCDR/>
           <deserializeCDR/>
         </topicDataType>
@@ -1625,10 +1625,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1677,10 +1677,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>
@@ -1729,10 +1729,10 @@
             </topicDataType>
           </custom__position__waypoints__>
           <swing__trajectory__>
-            <clazz>controller_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
+            <clazz>ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage</clazz>
             <values/>
             <size>0</size>
-            <topicDataType class="controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
+            <topicDataType class="ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType">
               <serializeCDR/>
               <deserializeCDR/>
             </topicDataType>

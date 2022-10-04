@@ -1,11 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
-
-import java.lang.reflect.Field;
-import java.util.Collection;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,25 +46,6 @@ public class ReflectionSimulationComparerTest
       SimulationConstructionSet scs1 = new SimulationConstructionSet(new Robot("Null"), parameters);
       
       boolean simulationsAreTheSame = comparer.compare(scs0, scs1);
-      assertFalse(simulationsAreTheSame);
-      simulationsAreTheSame = comparer.compare(scs0, scs1);
-      assertFalse(simulationsAreTheSame);
-
-      Collection<Field> differingFields = comparer.getDifferingFields();
-
-      assertEquals(2, differingFields.size());
-      for (Field field : differingFields)
-      {
-        String fieldName = field.getName();
-        assertTrue(fieldName.equals("hash"));
-      }
-      
-      comparer = new ReflectionSimulationComparer(Integer.MAX_VALUE, Integer.MAX_VALUE);
-      
-      comparer.addFieldsToIgnore(differingFields);
-      
-      simulationsAreTheSame = comparer.compare(scs0, scs1);
-     
       assertTrue(simulationsAreTheSame);
    }
 

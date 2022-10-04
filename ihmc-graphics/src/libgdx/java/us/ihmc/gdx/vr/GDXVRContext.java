@@ -22,7 +22,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.input.ImGui3DViewPickResult;
 import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
