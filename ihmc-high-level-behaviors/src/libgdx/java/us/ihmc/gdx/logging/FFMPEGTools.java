@@ -1,5 +1,6 @@
 package us.ihmc.gdx.logging;
 
+import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.ffmpeg.global.*;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
@@ -11,6 +12,11 @@ import java.util.function.Supplier;
 
 public class FFMPEGTools
 {
+   public static double rationalToFloatingPoint(AVRational rational)
+   {
+      return rational.num() / (double) rational.den();
+   }
+
    public static void checkError(int returnCode, Pointer pointerToCheck, String message)
    {
       checkNonZeroError(returnCode, message);
@@ -20,26 +26,47 @@ public class FFMPEGTools
    public static void checkPointer(Pointer pointerToCheck, String message)
    {
       if (pointerToCheck == null)
-      {
-         Supplier<String> messageSupplier = StringTools.format("pointer == null: {}", message);
-         LogTools.error(messageSupplier);
-         throw new RuntimeException(messageSupplier.get());
-      }
+         handleError(StringTools.format("pointer == null: {}", message), true);
       else if (pointerToCheck.isNull())
-      {
-         Supplier<String> messageSupplier = StringTools.format("Pointer isNull() returned true: {}: {}", pointerToCheck.getClass().getSimpleName(), message);
-         LogTools.error(messageSupplier);
-         throw new RuntimeException(messageSupplier.get());
-      }
+         handleError(StringTools.format("Pointer isNull() returned true: {}: {}", pointerToCheck.getClass().getSimpleName(), message), true);
+   }
+
+   public static void checkNegativeError(int returnCode, String message)
+   {
+      checkNonZeroError(returnCode, message, true);
+   }
+
+   public static void checkNegativeError(int returnCode, String message, boolean throwException)
+   {
+      if (returnCode >= 0)
+         return;
+
+      handleError(StringTools.format("Code {} {}: {}", returnCode, getErrorCodeString(returnCode), message), throwException);
    }
 
    public static void checkNonZeroError(int returnCode, String message)
    {
-      if (returnCode != 0)
+      checkNonZeroError(returnCode, message, true);
+   }
+
+   public static void checkNonZeroError(int returnCode, String message, boolean throwException)
+   {
+      if (returnCode == 0)
+         return;
+
+      handleError(StringTools.format("Code {} {}: {}", returnCode, getErrorCodeString(returnCode), message), throwException);
+   }
+
+   private static void handleError(Supplier<String> messageSupplier, boolean throwException)
+   {
+      if (throwException)
       {
-         Supplier<String> messageSupplier = StringTools.format("Code {} {}: {}", returnCode, FFMPEGTools.getErrorCodeString(returnCode), message);
-         LogTools.error(messageSupplier);
+         LogTools.fatal(messageSupplier);
          throw new RuntimeException(messageSupplier.get());
+      }
+      else
+      {
+         LogTools.error(messageSupplier);
       }
    }
 
