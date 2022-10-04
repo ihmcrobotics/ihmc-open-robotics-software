@@ -102,14 +102,23 @@ namespace promp {
 
         /**
          *  @\brief infer the speed of a trajectory starting from the raw data
-         *  @\param obs_traj  data from whoch speed is inferred, comparing it to this trajectory
+         *  @\param obs_traj  data from which speed is inferred, comparing it to this trajectory
          *  @\param lb  lower bound for inferred speed 
          *  @\param ub  upper bound for inferred speed
          *  @\param steps  number of speeds to be tested (linspace(lb, ub, steps))
          */
         double infer_speed(const Eigen::MatrixXd& obs_traj, double lb, double ub, size_t steps) const;
 
+       /**
+        *  @\brief compute the closest trajectory to current observed trajectory among a set of trajectories
+        *  @\param obs_traj   observed trajectory
+        *  @\param demo_trajectories  vector of trajectories to compute the difference with
+        *  @\return  index of the closest trajectory in vector to observed trajectory
+        */
+        static int infer_closest_trajectory(const Eigen::MatrixXd& obs_traj, const std::vector<Trajectory>& demo_trajectories);
     private:
+
+
         Eigen::MatrixXd create_modulated_matrix(size_t steps) const;
         Eigen::MatrixXd create_modulated_matrix_fast(size_t steps) const;
 

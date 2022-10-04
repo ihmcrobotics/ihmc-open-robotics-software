@@ -150,7 +150,6 @@ public class LearnAndUpdateProMPExample
 
       /* Select a demo trajectory and infer modulation of ProMP */
       // create trajectory object for the meanTrajectory of the ProMP
-//      EigenMatrixXd meanModulatedTrajectory = myProMP.generate_trajectory_with_speed();
       Trajectory trajectoryOriginal = new Trajectory(meanTrajectory, 1.0);
       // see current timesteps of ProMP
       long timestepOriginal = trajectoryOriginal.timesteps();
@@ -162,19 +161,18 @@ public class LearnAndUpdateProMPExample
       long timestepDemo = demoTestTrajectories.get(0).timesteps();
       System.out.println("timestepDemo: " + timestepDemo);
 
-      // infer the new speed for the ProMP based on observed portion of demo trajectory
-      int observedTimesteps = (int) timestepDemo/4;
+      // infer the new speed for the ProMP based on observed portion of demo trajectory //TODO update promp class to find closest demo and infer speed based on that
+      int observedTimesteps = (int) timestepDemo/3;
+      System.out.println("observed timesteps: " + observedTimesteps);
       // build observed matrix
-      EigenMatrixXd observedTrajectory= new EigenMatrixXd(observedTimesteps, (int) meanTrajectory.cols());
-      for (int i=0; i<observedTrajectory.rows(); i++){
-         for (int j=0; i<observedTrajectory.cols(); j++){
-            observedTrajectory.coeff(i,j) = demoTestTrajectories.get(0).matrix().coeff(i,j);
-         }
-      }
+      EigenMatrixXd observedTrajectory = new EigenMatrixXd(observedTimesteps, (int) meanTrajectory.cols());
+      for (int i=0; i<observedTrajectory.rows(); i++)
+         for (int j=0; j<observedTrajectory.cols(); j++)
+            observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
 //      double inferredSpeed = trajectoryOriginal.infer_speed(demoTestTrajectories.get(0).matrix(), 0.25, 4.0, 20);
-      double inferredSpeed = trajectoryOriginal.infer_speed(observedTrajectory, 0.25, 4.0, 20);
-      trajectoryOriginal.modulate((long) (timestepOriginal / inferredSpeed));
-      timestepOriginal = trajectoryOriginal.timesteps();
+      double inferredSpeed = trajectoryOriginal.infer_speed(observedTrajectory, 0.25, 4.0, 50);
+      Trajectory trajectoryModulated = trajectoryOriginal.modulate((long) (timestepOriginal / inferredSpeed));
+      timestepOriginal = trajectoryModulated.timesteps();
       System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
       System.out.println("New timestepOriginal: " + timestepOriginal);
 
