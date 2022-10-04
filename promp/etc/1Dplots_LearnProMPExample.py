@@ -21,7 +21,7 @@ for i in range(1,n_demos+1):
     demos_pathname = 'demo' + str(i) + '.csv'
     demo.append(np.genfromtxt(demos_pathname,delimiter=',', dtype = float))
 mean = np.genfromtxt('mean.csv',delimiter=',', dtype = float)
-variance = np.genfromtxt('variance.csv',delimiter=',', dtype = float)
+variance = np.genfromtxt('stdDeviation.csv',delimiter=',', dtype = float)
 
 mean_handX = np.array([row[0] for row in mean])
 std_handX= np.array([row[0] for row in variance])
