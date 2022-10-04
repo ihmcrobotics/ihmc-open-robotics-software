@@ -7,10 +7,12 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.tools.ImPlotFrequencyPlot;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -19,6 +21,7 @@ public class FFMPEGLoggerDemoHelper
    private int imageWidth;
    private int imageHeight;
    private final String fileSuffix;
+   private final String preferredVideoEncoder;
    private final int sourcePixelFormat;
    private final int encoderPixelFormat;
    private final int bitRate;
@@ -36,8 +39,20 @@ public class FFMPEGLoggerDemoHelper
    private FFMPEGLogger logger;
    private Runnable sourceImageInputRunnable;
    private final Throttler throttler = new Throttler();
+   private Class<? extends FFMPEGLogger> loggerClass = FFMPEGLogger.class;
 
    public FFMPEGLoggerDemoHelper(String fileSuffix, int sourcePixelFormat, int encoderPixelFormat, boolean lossless, int framerate, int bitRate)
+   {
+      this(fileSuffix, sourcePixelFormat, encoderPixelFormat, lossless, framerate, bitRate, null);
+   }
+
+   public FFMPEGLoggerDemoHelper(String fileSuffix,
+                                 int sourcePixelFormat,
+                                 int encoderPixelFormat,
+                                 boolean lossless,
+                                 int framerate,
+                                 int bitRate,
+                                 String preferredVideoEncoder)
    {
       this.fileSuffix = fileSuffix;
       this.sourcePixelFormat = sourcePixelFormat;
@@ -45,7 +60,14 @@ public class FFMPEGLoggerDemoHelper
       this.lossless = lossless;
       this.framerate.set(framerate);
       this.bitRate = bitRate;
+      this.preferredVideoEncoder = preferredVideoEncoder;
       updateFileName();
+   }
+
+   public void setLoggerClass(Class<? extends FFMPEGLogger> loggerClass)
+   {
+      LogTools.debug("loggerClass set to " + loggerClass.getSimpleName());
+      this.loggerClass = loggerClass;
    }
 
    public void create(int imageWidth, int imageHeight, Runnable sourceImageInputRunnable)
@@ -110,7 +132,47 @@ public class FFMPEGLoggerDemoHelper
 
    private void loggingThread()
    {
-      logger = new FFMPEGLogger(imageWidth, imageHeight, lossless, framerate.get(), bitRate, sourcePixelFormat, encoderPixelFormat, fileName);
+      if (loggerClass != FFMPEGLogger.class)
+      {
+         try
+         {
+            LogTools.info("Creating logger of class " + loggerClass.getSimpleName() + " using reflection");
+            Constructor<? extends FFMPEGLogger> c = loggerClass.getConstructor(int.class,
+                                                                               int.class,
+                                                                               boolean.class,
+                                                                               int.class,
+                                                                               int.class,
+                                                                               int.class,
+                                                                               int.class,
+                                                                               String.class,
+                                                                               String.class);
+            logger = c.newInstance(imageWidth,
+                                   imageHeight,
+                                   lossless,
+                                   framerate.get(),
+                                   bitRate,
+                                   sourcePixelFormat,
+                                   encoderPixelFormat,
+                                   fileName,
+                                   preferredVideoEncoder);
+         }
+         catch (ReflectiveOperationException ex)
+         {
+            LogTools.error("Failed to use reflection to build logging class. Defaulting to FFMPEGLogger");
+            LogTools.error(ex.getStackTrace());
+         }
+      }
+
+      if (logger == null)
+         logger = new FFMPEGLogger(imageWidth,
+                                   imageHeight,
+                                   lossless,
+                                   framerate.get(),
+                                   bitRate,
+                                   sourcePixelFormat,
+                                   encoderPixelFormat,
+                                   fileName,
+                                   preferredVideoEncoder);
 
       finalizing = true;
 
