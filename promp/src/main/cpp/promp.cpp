@@ -229,6 +229,13 @@ double ProMP::get_time_mod() const
 	return _alpha;
 }
 
+void ProMP::update_time_modulation(double alpha)
+{
+    _alpha = alpha;
+    _phase = compute_phase();
+    _phi = generate_basis_function(_phase);
+}
+
 void ProMP::set_ridge_factor(double ridge_factor)
 {
 	_ridge_factor = ridge_factor;
@@ -236,7 +243,7 @@ void ProMP::set_ridge_factor(double ridge_factor)
 
 void ProMP::set_conditioning_ridge_factor(double ridge_factor)
 {
-	_condtioning_ridge_factor = ridge_factor;
+	_conditioning_ridge_factor = ridge_factor;
 }
 
 Eigen::MatrixXd ProMP::compute_ridge_pseudo_inverse(const Eigen::MatrixXd& m)

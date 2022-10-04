@@ -73,6 +73,19 @@ namespace promp
         return diff.colwise().norm().sum();
     }
 
+    int Trajectory::infer_closest_trajectory(const Eigen::MatrixXd& obs_traj, const std::vector<Trajectory>& demo_trajectories)
+    {
+        std::vector<double> scores(demo_trajectories.size());
+        // Find the trajectory in demo_trajectories that minimizes the distance with the observed trajectory
+        for (int i=0; i < demo_trajectories.size(); i++)
+        {
+            Eigen::MatrixXd demo_trajectory = demo_trajectories[i].matrix();
+            int min_size = std::min(obs_traj.rows(), demo_trajectory.rows());
+            scores[i] = (obs_traj.topRows(min_size-1) - demo_trajectory.topRows(min_size-1)).cwiseAbs().sum();
+        }
+        return std::min_element(scores.begin(), scores.end()) - scores.begin();
+    }
+
     double Trajectory::infer_speed(const Eigen::MatrixXd& obs_traj, double lb, double ub, size_t steps) const
     {
         assert(obs_traj.cols() == this->dims());

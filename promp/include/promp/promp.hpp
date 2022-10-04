@@ -158,6 +158,13 @@ namespace promp {
         void set_conditioning_ridge_factor(double ridge_factor);
 
         /**
+        * @brief Updates the time modulation alpha and computes a new phase and basis function for the ProMP.
+        *
+        * @param[in]  alpha  The requested time modulation
+        */
+        void update_time_modulation(double alpha);
+
+        /**
          * @brief      Generates MEAN trajectory based on current weights distribution and rbf
          *
          * @return     Mean trajectory
@@ -257,11 +264,6 @@ namespace promp {
          * @return double the phase speed to obtain the desired number of steps in the trajectory
          */
         inline double phase_speed_from_steps(int steps) { return static_cast<double>(_s) / steps; }
-
-         /**
-         * @brief Gets the time modulation.
-         */
-        void update_time_modulation();
 
     private:
         /** \brief	maps time vector into a phase vector using the inner timesteps parametrization
