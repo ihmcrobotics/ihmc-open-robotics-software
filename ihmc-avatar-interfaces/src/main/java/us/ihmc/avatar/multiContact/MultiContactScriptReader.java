@@ -87,6 +87,39 @@ public class MultiContactScriptReader
       }
    }
 
+   public boolean loadScriptNew(InputStream inputStream)
+   {
+      if (inputStream == null)
+      {
+         LogTools.info("Stream is null");
+         return false;
+      }
+
+      try
+      {
+         ObjectMapper objectMapper = new ObjectMapper();
+         JsonNode jsonNode = objectMapper.readTree(inputStream);
+
+         List<KinematicsToolboxSnapshotDescription> messages = new ArrayList<>();
+
+         for (int i = 0; i < jsonNode.size(); i++)
+         {
+            JsonNode child = jsonNode.get(i);
+            messages.add(KinematicsToolboxSnapshotDescription.fromJSON(child));
+         }
+
+         loadedMessages.clear();
+         loadedMessages.addAll(messages);
+         currentMessageIndex = -1;
+         return true;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
    public int size()
    {
       return loadedMessages.size();

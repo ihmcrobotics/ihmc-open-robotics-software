@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.nio.FileTools;
 
 public class MultiContactScriptWriter
@@ -116,6 +117,37 @@ public class MultiContactScriptWriter
             arrayNode.add(message.toJSON(objectMapper));
 
          objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, arrayNode);
+         printStream.close();
+         scriptFile = null;
+         return true;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         if (printStream != null)
+            printStream.close();
+         return false;
+      }
+   }
+
+   public boolean writeScriptNew()
+   {
+      PrintStream printStream = null;
+
+      try
+      {
+         printStream = new PrintStream(scriptFile);
+         JsonFactory jsonFactory = new JsonFactory();
+         ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+         ObjectNode rootNode = objectMapper.createObjectNode();
+
+         ObjectNode environmentNode = rootNode.putObject(KinematicsToolboxSnapshotDescription.ENVIRONMENT_JSON);
+         ArrayNode scriptNode = rootNode.putArray(KinematicsToolboxSnapshotDescription.SCRIPT_JSON);
+
+         for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
+            scriptNode.add(message.toJSON(objectMapper));
+
+         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, rootNode);
          printStream.close();
          scriptFile = null;
          return true;
