@@ -1,0 +1,8 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Image" : true,
+    "Playback Video" : true,
+    "VR Thread Debugger" : false
+  }
+}
