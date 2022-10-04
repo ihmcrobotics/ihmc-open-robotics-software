@@ -67,12 +67,13 @@ public class FFMPEGTools
       mapAddNewValueOrAppend(licenses, swresample.swresample_license().getString(), "swresample");
       mapAddNewValueOrAppend(licenses, swscale.swscale_license().getString(), "swscale");
 
-      StringBuilder sb = new StringBuilder();
-      sb.append("FFMPEG License(s):");
-      licenses.forEach((String key, String value) -> {
-         sb.append(' ').append(key).append(": ").append(value).append(".");
-      });
+      StringBuilder licensesStringBuilder = new StringBuilder();
+      licensesStringBuilder.append("FFMPEG License(s):");
+      licenses.forEach((String key, String value) ->
+                       {
+                          licensesStringBuilder.append(' ').append(key).append(": ").append(value).append(".");
+                       });
 
-      LogTools.debug(sb.toString());
+      LogTools.debug(licensesStringBuilder.toString());
    }
 }

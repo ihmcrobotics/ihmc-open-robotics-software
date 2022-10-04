@@ -45,7 +45,7 @@ public class FFMPEGLogger
    private final int pictureGroupSize = 12;
    private final int sourceAVPixelFormat;
    private final int encoderAVPixelFormat;
-   private boolean encoderFormatConversionNecessary;
+   private final boolean encoderFormatConversionNecessary;
    private final boolean formatWantsGlobalHeader;
    private boolean isInitialized = false;
    private final AVDictionary avDictionary;
@@ -77,8 +77,8 @@ public class FFMPEGLogger
       this.formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
       this.encoderAVPixelFormat = encoderPixelFormat;
 
-      encoderFormatConversionNecessary = sourceAVPixelFormat != encoderAVPixelFormat &&
-                                         !(sourceAVPixelFormat == avutil.AV_PIX_FMT_RGBA && encoderPixelFormat == avutil.AV_PIX_FMT_RGB0); //No conversion for RGBA>RGB0
+      encoderFormatConversionNecessary = sourceAVPixelFormat != encoderAVPixelFormat && !(sourceAVPixelFormat == avutil.AV_PIX_FMT_RGBA && encoderPixelFormat
+                                                                                                                                           == avutil.AV_PIX_FMT_RGB0); //No conversion for RGBA>RGB0
 
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 
@@ -137,7 +137,7 @@ public class FFMPEGLogger
 
          if (avEncoder != null && !avEncoder.isNull())
          {
-            if (outputFormat.video_codec() !=  avEncoder.id())
+            if (outputFormat.video_codec() != avEncoder.id())
                outputFormat.video_codec(avEncoder.id());
             LogTools.info("Found encoder " + preferredVideoEncoder + " - id:" + avEncoder.id());
          }
@@ -157,7 +157,8 @@ public class FFMPEGLogger
       avEncoderContext = avcodec.avcodec_alloc_context3(avEncoder);
    }
 
-   protected void initialize() {
+   protected void initialize()
+   {
       isInitialized = true;
 
       int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), avDictionary);
