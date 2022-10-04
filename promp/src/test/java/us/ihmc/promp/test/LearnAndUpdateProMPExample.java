@@ -178,11 +178,13 @@ public class LearnAndUpdateProMPExample
       double inferredSpeed = demoTestTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       int inferredTimesteps = (int) (demoTestTrajectories.get(demo).timesteps() / inferredSpeed);
       // generate ProMP mean trajectory with new time modulation
+      EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
       EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
       System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
       System.out.println("Inferred timestep: " + inferredTimesteps);
 
       saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
+      saveAsCSV(stdDeviationTrajectoryModulated, "/stdDeviationModulated.csv");
       // update the time modulation of the ProMP object with estimated value
       System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
       myProMP.update_time_modulation((double) myProMP.get_traj_length() / inferredTimesteps);
@@ -192,18 +194,37 @@ public class LearnAndUpdateProMPExample
        * Update ProMP with conditioning operation according to observations from demo
        */
       EigenMatrixXd viaPointStdDeviation = new EigenMatrixXd(dofs.size(), dofs.size());
-      for (int i=0; i<viaPointStdDeviation.cols(); i++)
-         viaPointStdDeviation.apply(i, i).put(0.00001); // Preferably keep std low. Lower std -> higher precision but less damping
+      for (int i = 0; i < viaPointStdDeviation.rows(); i++)
+      {
+         for (int j = 0; j < viaPointStdDeviation.cols(); j++)
+         {
+            if (i == j)
+               viaPointStdDeviation.apply(i, j).put(0.00001); // Preferably keep std low. Lower std -> higher precision but less damping
+            else
+               viaPointStdDeviation.apply(i, j).put(0);
+         }
+      }
       // condition point at a general timestep
       EigenVectorXd viaPoint = new EigenVectorXd(dofs.size());
       int conditioningTimestep = 10;
-      for (int i=0; i<viaPoint.size(); i++)
-         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep,i));
-      myProMP.condition_via_point(conditioningTimestep,viaPoint,viaPointStdDeviation);
+      //      for (int i=0; i<viaPoint.size(); i++)
+      //         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep,i));
+      //      myProMP.condition_via_point(conditioningTimestep,viaPoint,viaPointStdDeviation);
       // condition goal
-      viaPoint.apply(0).put(0.35);
-      viaPoint.apply(1).put(-0.05);
-      viaPoint.apply(2).put(0.45);
-      myProMP.condition_goal(viaPoint,viaPointStdDeviation);
+      conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps();
+      System.out.println("Conditioning timestep: " + conditioningTimestep);
+//      myProMP.set_conditioning_ridge_factor(0.001);
+//      for (int i = 0; i < viaPoint.size(); i++)
+//         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
+      viaPoint.apply(0).put(0.25);
+      viaPoint.apply(1).put(0.08);
+      viaPoint.apply(2).put(0.33);
+      myProMP.condition_goal(viaPoint, viaPointStdDeviation);
+      //generate updated mean trajectory
+      EigenMatrixXd meanTrajectoryConditioned = myProMP.generate_trajectory();
+      EigenMatrixXd stdDeviationTrajectoryConditioned = myProMP.gen_traj_std_dev(inferredTimesteps);
+
+      saveAsCSV(meanTrajectoryConditioned, "/meanConditioned.csv");
+      saveAsCSV(stdDeviationTrajectoryConditioned, "/stdDeviationConditioned.csv");
    }
 }

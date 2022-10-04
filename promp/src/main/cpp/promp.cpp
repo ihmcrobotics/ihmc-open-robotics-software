@@ -426,7 +426,7 @@ void ProMP::condition_via_points(const std::vector<std::tuple<int, Eigen::Vector
 		// auto phi_obs = repeat_block_diagonal(generate_basis_function(phase_obs), _dims);  // TODO optimize (this matrix grow a lot)
 
 		RepeatBlockDiagonalMatrix phi_obs(generate_basis_function(phase_obs), _dims);
-		Eigen::MatrixXd ridge = _ridge_factor * Eigen::MatrixXd::Identity(_dims, _dims);
+		Eigen::MatrixXd ridge = _conditioning_ridge_factor * Eigen::MatrixXd::Identity(_dims, _dims);
 		Eigen::MatrixXd L = _cov_w * phi_obs * (sig_obs + phi_obs.transpose() * _cov_w * phi_obs +ridge).inverse(); // NOT use auto, broken with RepeatBlockDiagonalMatrix
 
 		_mean_w = _mean_w + L * (obs - phi_obs.transpose() * _mean_w);
