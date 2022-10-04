@@ -41,7 +41,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private final double QUARTER_TURN = Math.PI / 2.0;
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
-   private final ImFloat discThickness = new ImFloat(0.014f);
+   private final ImFloat discThickness = new ImFloat(0.03f);
    private final ImFloat arrowWidth = new ImFloat(0.257f);
    private final ImFloat arrowHeight = new ImFloat(0.137f);
    private final ImFloat arrowSpacing = new ImFloat(0.079f);
