@@ -121,7 +121,7 @@ public class LearnPrompExample
 
       ProMP myProMP = new ProMP(trajectoryGroup, n_rbf);
       EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
-      EigenMatrixXd stdTrajectory = myProMP.gen_traj_std_dev();
+      EigenMatrixXd stdDeviationTrajectory = myProMP.gen_traj_std_dev();
       EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
       TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
@@ -130,11 +130,11 @@ public class LearnPrompExample
          saveAsCSV(demoTrajectories.get(i).matrix(), ("/demo" + (i + 1) + ".csv"));
       }
       saveAsCSV(meanTrajectory, "/mean.csv");
-      saveAsCSV(stdTrajectory, "/variance.csv");
+      saveAsCSV(stdDeviationTrajectory, "/stdDeviation.csv");
       saveAsCSV(covarianceTrajectory, "/covariance.csv");
 
       printMatrix(meanTrajectory, "Mean");
-      printMatrix(stdTrajectory, "Std Deviation");
+      printMatrix(stdDeviationTrajectory, "Std Deviation");
       printMatrix(covarianceTrajectory, "Covariance");
    }
 }
