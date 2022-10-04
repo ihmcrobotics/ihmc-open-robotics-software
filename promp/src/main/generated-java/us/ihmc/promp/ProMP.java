@@ -137,6 +137,19 @@ public class ProMP extends Pointer {
          */
         public native void set_ridge_factor(double ridge_factor);
 
+         /**
+         * \brief		Set the ridge factor value which condition the pphi inverse. Helps against singularities
+         * @param ridge_factor [in]
+         */
+        public native void set_conditioning_ridge_factor(double ridge_factor);
+
+        /**
+        * \brief Updates the time modulation alpha and computes a new phase and basis function for the ProMP.
+        *
+        * @param alpha [in]  The requested time modulation
+        */
+        public native void update_time_modulation(double alpha);
+
         /**
          * \brief      Generates MEAN trajectory based on current weights distribution and rbf
          *

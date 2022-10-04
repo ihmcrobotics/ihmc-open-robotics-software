@@ -106,10 +106,18 @@ public class Trajectory extends Pointer {
 
         /**
          *  \brief infer the speed of a trajectory starting from the raw data
-         *  \param obs_traj  data from whoch speed is inferred, comparing it to this trajectory
+         *  \param obs_traj  data from which speed is inferred, comparing it to this trajectory
          *  \param lb  lower bound for inferred speed 
          *  \param ub  upper bound for inferred speed
          *  \param steps  number of speeds to be tested (linspace(lb, ub, steps))
          */
         public native double infer_speed(@Const @ByRef EigenMatrixXd obs_traj, double lb, double ub, @Cast("size_t") long steps);
+
+       /**
+        *  \brief compute the closest trajectory to current observed trajectory among a set of trajectories
+        *  \param obs_traj   observed trajectory
+        *  \param demo_trajectories  vector of trajectories to compute the difference with
+        *  \return  index of the closest trajectory in vector to observed trajectory
+        */
+        public static native int infer_closest_trajectory(@Const @ByRef EigenMatrixXd obs_traj, @Const @ByRef TrajectoryVector demo_trajectories);
     }
