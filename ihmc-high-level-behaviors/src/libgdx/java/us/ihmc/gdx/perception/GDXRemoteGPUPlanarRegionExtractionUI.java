@@ -65,9 +65,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final TypedNotification<StoredPropertySetMessage> gpuRegionParametersROS2Notification = new TypedNotification<>();
    private final TypedNotification<StoredPropertySetMessage> polygonizerParametersROS2Notification = new TypedNotification<>();
    private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryParametersROS2Notification = new TypedNotification<>();
-   private boolean gpuRegionParametersHaveBeenReceived = false;
-   private boolean polygonizerParametersHaveBeenReceived = false;
-   private boolean concaveHullFactoryParametersHaveBeenReceived = false;
+   private boolean gpuRegionParametersWaitingForUpdate = true;
+   private boolean polygonizerParametersWaitingForUpdate = true;
+   private boolean concaveHullFactoryParametersWaitingForUpdate = true;
    private ROS1Helper ros1Helper;
    private ROS2Helper ros2Helper;
 
@@ -97,9 +97,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       if (ImGui.button("Update parameters from remote"))
       {
-         gpuRegionParametersHaveBeenReceived = false;
-         polygonizerParametersHaveBeenReceived = false;
-         concaveHullFactoryParametersHaveBeenReceived = false;
+         gpuRegionParametersWaitingForUpdate = true;
+         polygonizerParametersWaitingForUpdate = true;
+         concaveHullFactoryParametersWaitingForUpdate = true;
       }
 
       if (ImGui.button("Reconnect remote ROS 1 node"))
@@ -109,65 +109,65 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (!gpuRegionParametersHaveBeenReceived && gpuRegionParametersROS2Notification.poll())
+      if (gpuRegionParametersWaitingForUpdate && gpuRegionParametersROS2Notification.poll())
       {
          StoredPropertySetMessageTools.copyToStoredPropertySet(gpuRegionParametersROS2Notification.read(),
                                                                gpuRegionParameters,
                                                                () -> LogTools.info("Updating GPU planar regions parameters from remote."));
          setGPUImGuiWidgetsFromParameters();
-         gpuRegionParametersHaveBeenReceived = true;
+         gpuRegionParametersWaitingForUpdate = false;
       }
 
       ImGui.text("GPU Planar Regions Parameters");
-      if (gpuRegionParametersHaveBeenReceived)
+      if (gpuRegionParametersWaitingForUpdate)
       {
-         renderGPUParameterWidgets();
+         ImGui.text("Waiting for updated values from remote...");
       }
       else
       {
-         ImGui.text("Waiting for initial values from remote...");
+         renderGPUParameterWidgets();
       }
 
       ImGui.separator();
 
-      if (!polygonizerParametersHaveBeenReceived && polygonizerParametersROS2Notification.poll())
+      if (polygonizerParametersWaitingForUpdate && polygonizerParametersROS2Notification.poll())
       {
          StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersROS2Notification.read(),
                                                                polygonizerParameters,
                                                                () -> LogTools.info("Updating polygonizer parameters from remote."));
          setPolygonizerImGuiWidgetsFromParameters();
-         polygonizerParametersHaveBeenReceived = true;
+         polygonizerParametersWaitingForUpdate = false;
       }
 
       ImGui.text("Polygonizer Parameters");
-      if (polygonizerParametersHaveBeenReceived)
+      if (polygonizerParametersWaitingForUpdate)
       {
-         renderPolygonizerParameterWidgets();
+         ImGui.text("Waiting for initial values from remote...");
       }
       else
       {
-         ImGui.text("Waiting for initial values from remote...");
+         renderPolygonizerParameterWidgets();
       }
 
       ImGui.separator();
 
-      if (!concaveHullFactoryParametersHaveBeenReceived && concaveHullFactoryParametersROS2Notification.poll())
+      if (concaveHullFactoryParametersWaitingForUpdate && concaveHullFactoryParametersROS2Notification.poll())
       {
          StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactoryParametersROS2Notification.read(),
                                                                concaveHullFactoryParameters,
                                                                () -> LogTools.info("Updating concave hull factory parameters from remote."));
          setConcaveHullFactoryImGuiWidgetsFromParameters();
-         concaveHullFactoryParametersHaveBeenReceived = true;
+         concaveHullFactoryParametersWaitingForUpdate = false;
       }
 
       ImGui.text("Concave Hull Factory Parameters");
-      if (concaveHullFactoryParametersHaveBeenReceived)
+      if (concaveHullFactoryParametersWaitingForUpdate)
       {
-         renderConcaveHullFactoryParameterWidgets();
+         ImGui.text("Waiting for initial values from remote...");
       }
       else
       {
-         ImGui.text("Waiting for initial values from remote...");
+         renderConcaveHullFactoryParameterWidgets();
       }
    }
 
