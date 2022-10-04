@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static us.ihmc.promp.Trajectory.infer_closest_trajectory;
 import static us.ihmc.promp.global.promp.EigenMatrixXd;
 
 public class LearnAndUpdateProMPExample
@@ -149,33 +150,33 @@ public class LearnAndUpdateProMPExample
       saveAsCSV(covarianceTrajectory, "/covariance.csv");
 
       /* Select a demo trajectory and infer modulation of ProMP */
-      // create trajectory object for the meanTrajectory of the ProMP
-      Trajectory trajectoryOriginal = new Trajectory(meanTrajectory, 1.0);
-      // see current timesteps of ProMP
-      long timestepOriginal = trajectoryOriginal.timesteps();
-      // current speed is 1
-      double speedOriginal = trajectoryOriginal.speed();
-      System.out.println("speedOriginal: " + speedOriginal);
-      System.out.println("timestepOriginal: " + timestepOriginal);
       // see timesteps of selected demo trajectory
       long timestepDemo = demoTestTrajectories.get(0).timesteps();
       System.out.println("timestepDemo: " + timestepDemo);
 
-      // infer the new speed for the ProMP based on observed portion of demo trajectory //TODO update promp class to find closest demo and infer speed based on that
+      // infer the new speed for the ProMP based on observed portion of demo trajectory
       int observedTimesteps = (int) timestepDemo/3;
-      System.out.println("observed timesteps: " + observedTimesteps);
-      // build observed matrix
+      // build observed matrix from demo test 1
       EigenMatrixXd observedTrajectory = new EigenMatrixXd(observedTimesteps, (int) meanTrajectory.cols());
       for (int i=0; i<observedTrajectory.rows(); i++)
          for (int j=0; j<observedTrajectory.cols(); j++)
             observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
-//      double inferredSpeed = trajectoryOriginal.infer_speed(demoTestTrajectories.get(0).matrix(), 0.25, 4.0, 20);
-      double inferredSpeed = trajectoryOriginal.infer_speed(observedTrajectory, 0.25, 4.0, 50);
-      Trajectory trajectoryModulated = trajectoryOriginal.modulate((long) (timestepOriginal / inferredSpeed));
-      timestepOriginal = trajectoryModulated.timesteps();
-      System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
-      System.out.println("New timestepOriginal: " + timestepOriginal);
 
+      int demo = infer_closest_trajectory(observedTrajectory,demoTestTrajectories);
+      System.out.println("Inferred closest demo to current observation: "+(demo+1));
+
+      double inferredSpeed = demoTestTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      int inferredTimesteps = (int) (demoTestTrajectories.get(demo).timesteps() / inferredSpeed);
+      // generate ProMP mean trajectory with new time modulation
+      EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
+      System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
+      System.out.println("Inferred timestep: " + inferredTimesteps);
+
+      saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
+      // update the time modulation of the ProMP object with estimated value
+      System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
+      myProMP.update_time_modulation((double) myProMP.get_traj_length()/inferredTimesteps);
+      System.out.println("New ProMp timestep: " + myProMP.get_traj_length());
 
    }
 }
