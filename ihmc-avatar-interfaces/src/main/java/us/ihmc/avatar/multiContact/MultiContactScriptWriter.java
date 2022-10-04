@@ -12,10 +12,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 
 public class MultiContactScriptWriter
 {
    private File scriptFile = null;
+
+   private final List<FrameShape3DReadOnly> environmentShapes = new ArrayList<>();
    private final List<KinematicsToolboxSnapshotDescription> messagesToWrite = new ArrayList<>();
 
    public MultiContactScriptWriter()
@@ -59,7 +62,23 @@ public class MultiContactScriptWriter
       return true;
    }
 
-   public void clear()
+   public void clearEnvironment()
+   {
+      environmentShapes.clear();
+   }
+
+   public void addEnvironmentShape(FrameShape3DReadOnly environmentShape)
+   {
+      this.environmentShapes.add(environmentShape);
+   }
+
+   public void setEnvironmentShapes(List<FrameShape3DReadOnly> environmentShapes)
+   {
+      this.environmentShapes.clear();
+      this.environmentShapes.addAll(environmentShapes);
+   }
+
+   public void clearScript()
    {
       messagesToWrite.clear();
    }
@@ -141,8 +160,11 @@ public class MultiContactScriptWriter
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
          ObjectNode rootNode = objectMapper.createObjectNode();
 
-         ObjectNode environmentNode = rootNode.putObject(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
+         ArrayNode environmentNode = rootNode.putArray(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
          ArrayNode scriptNode = rootNode.putArray(KinematicsToolboxSnapshotDescription.SCRIPT_JSON);
+
+         for (FrameShape3DReadOnly environmentShape : environmentShapes)
+            environmentNode.add(MultiContactEnvironmentDescription.toJSON(environmentShape));
 
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
             scriptNode.add(message.toJSON(objectMapper));
@@ -150,6 +172,7 @@ public class MultiContactScriptWriter
          objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, rootNode);
          printStream.close();
          scriptFile = null;
+
          return true;
       }
       catch (IOException e)
