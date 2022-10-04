@@ -131,5 +131,7 @@ public class PrompInfoMapper implements InfoMapper
 
       // Calls size() on the C++ side
       public native long size();
+
+      public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int id);
    }
 }
