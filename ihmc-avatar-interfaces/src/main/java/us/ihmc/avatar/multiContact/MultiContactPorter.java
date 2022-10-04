@@ -37,6 +37,9 @@ public class MultiContactPorter
          reader.loadScript(new FileInputStream(files.get(i)));
 
          MultiContactScriptWriter writer = new MultiContactScriptWriter();
+
+//         System.out.println("trying to write to");
+//         System.out.println(files.get(i).getAbsolutePath());
          writer.startNewScript(files.get(i), true);
 
          writer.addEnvironmentShape(new FrameBox3D(ReferenceFrame.getWorldFrame(), new Point3D(0.0, 0.0, -0.5), new Quaternion(), 10.0, 10.0, 1.0));
@@ -52,6 +55,6 @@ public class MultiContactPorter
 
    public static void main(String[] args) throws Exception
    {
-//      new MultiContactPorter();
+      new MultiContactPorter();
    }
 }
