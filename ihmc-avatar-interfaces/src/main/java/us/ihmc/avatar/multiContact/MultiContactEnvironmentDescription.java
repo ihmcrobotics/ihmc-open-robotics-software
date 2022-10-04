@@ -1,13 +1,20 @@
 package us.ihmc.avatar.multiContact;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import ihmc_common_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Capsule3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.robotics.geometry.Capsule;
 
 import java.io.IOException;
 
@@ -15,12 +22,40 @@ public class MultiContactEnvironmentDescription
 {
    public static final String ENVIRONMENT_JSON = "environment";
 
+   private static final ObjectMapper objectMapper = new ObjectMapper(new JsonFactory());
    private static final JSONSerializer<Box3DMessage> boxSerializer = new JSONSerializer<>(new Box3DMessagePubSubType());
    private static final JSONSerializer<Capsule3DMessage> capsuleSerializer = new JSONSerializer<>(new Capsule3DMessagePubSubType());
    private static final JSONSerializer<ConvexPolytope3DMessage> polytopeSerializer = new JSONSerializer<>(new ConvexPolytope3DMessagePubSubType());
    private static final JSONSerializer<Cylinder3DMessage> cylinderSerializer = new JSONSerializer<>(new Cylinder3DMessagePubSubType());
    private static final JSONSerializer<Ellipsoid3DMessage> ellipsoidSerializer = new JSONSerializer<>(new Ellipsoid3DMessagePubSubType());
    private static final JSONSerializer<Ramp3DMessage> rampSerializer = new JSONSerializer<>(new Ramp3DMessagePubSubType());
+
+   public static JsonNode toJSON(FrameShape3DReadOnly environmentShape)
+   {
+      try
+      {
+         if (environmentShape instanceof Box3DReadOnly)
+         {
+            return messageToJSON(boxSerializer, MessageTools.createBox3DMessage((Box3DReadOnly) environmentShape));
+         }
+         else if (environmentShape instanceof Capsule3DMessage)
+         {
+            return messageToJSON(capsuleSerializer, MessageTools.createCapsule3DMessage((Capsule3DReadOnly) environmentShape));
+         }
+         else if (environmentShape instanceof ConvexPolytope3DReadOnly)
+         {
+            return messageToJSON(polytopeSerializer, MessageTools.createConvexPolytope3DMessage((ConvexPolytope3DReadOnly) environmentShape));
+         }
+         else
+         {
+            throw new RuntimeException("Shape type not supported: " + environmentShape.getClass().getSimpleName());
+         }
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
    public static FrameShape3DReadOnly fromJSON(JsonNode jsonNode)
    {
@@ -74,6 +109,11 @@ public class MultiContactEnvironmentDescription
       {
          throw new RuntimeException(e);
       }
+   }
+
+   private static <T> JsonNode messageToJSON(JSONSerializer<T> serializer, T message) throws IOException
+   {
+      return objectMapper.readTree(serializer.serializeToString(message));
    }
 
    private static String getMessageClassName(ObjectNode jsonNode)
