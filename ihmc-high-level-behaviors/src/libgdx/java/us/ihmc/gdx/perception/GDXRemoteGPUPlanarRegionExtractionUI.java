@@ -1,25 +1,25 @@
 package us.ihmc.gdx.perception;
 
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
+import us.ihmc.communication.property.StoredPropertySetROS2Input;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 public class GDXRemoteGPUPlanarRegionExtractionUI
 {
+   private final ROS1Helper ros1Helper;
+   private final ROS2Helper ros2Helper;
    private final GPUPlanarRegionExtractionParameters gpuRegionParameters = new GPUPlanarRegionExtractionParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
@@ -62,14 +62,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final ImFloat depthThresholdSlider = new ImFloat(0.10f);
    private final ImInt minNumberOfNodesSlider = new ImInt(10);
    private final ImBoolean cutNarrowPassageChecked = new ImBoolean(true);
-   private final TypedNotification<StoredPropertySetMessage> gpuRegionParametersROS2Notification = new TypedNotification<>();
-   private final TypedNotification<StoredPropertySetMessage> polygonizerParametersROS2Notification = new TypedNotification<>();
-   private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryParametersROS2Notification = new TypedNotification<>();
-   private boolean gpuRegionParametersWaitingForUpdate = true;
-   private boolean polygonizerParametersWaitingForUpdate = true;
-   private boolean concaveHullFactoryParametersWaitingForUpdate = true;
-   private ROS1Helper ros1Helper;
-   private ROS2Helper ros2Helper;
+   private final StoredPropertySetROS2Input gpuRegionParametersROS2Input;
+   private final StoredPropertySetROS2Input polygonizerParametersROS2Input;
+   private final StoredPropertySetROS2Input concaveHullFactoryParametersROS2Input;
 
    public GDXRemoteGPUPlanarRegionExtractionUI(ROS1Helper ros1Helper, ROS2Helper ros2Helper)
    {
@@ -80,9 +75,13 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       debugExtractionPanel.create();
       panel.addChild(debugExtractionPanel.getPanel());
 
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT, gpuRegionParametersROS2Notification::set);
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT, polygonizerParametersROS2Notification::set);
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT, concaveHullFactoryParametersROS2Notification::set);
+      gpuRegionParametersROS2Input = new StoredPropertySetROS2Input(ros2Helper, GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT, gpuRegionParameters);
+      polygonizerParametersROS2Input = new StoredPropertySetROS2Input(ros2Helper,
+                                                                      GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT,
+                                                                      polygonizerParameters);
+      concaveHullFactoryParametersROS2Input = new StoredPropertySetROS2Input(ros2Helper,
+                                                                             GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT,
+                                                                             concaveHullFactoryParameters);
    }
 
    public void update()
@@ -97,9 +96,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       if (ImGui.button("Update parameters from remote"))
       {
-         gpuRegionParametersWaitingForUpdate = true;
-         polygonizerParametersWaitingForUpdate = true;
-         concaveHullFactoryParametersWaitingForUpdate = true;
+         gpuRegionParametersROS2Input.setToAcceptUpdate();
+         polygonizerParametersROS2Input.setToAcceptUpdate();
+         concaveHullFactoryParametersROS2Input.setToAcceptUpdate();
       }
 
       if (ImGui.button("Reconnect remote ROS 1 node"))
@@ -109,17 +108,13 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (gpuRegionParametersWaitingForUpdate && gpuRegionParametersROS2Notification.poll())
+      if (gpuRegionParametersROS2Input.update())
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(gpuRegionParametersROS2Notification.read(),
-                                                               gpuRegionParameters,
-                                                               () -> LogTools.info("Updating GPU planar regions parameters from remote."));
          setGPUImGuiWidgetsFromParameters();
-         gpuRegionParametersWaitingForUpdate = false;
       }
 
       ImGui.text("GPU Planar Regions Parameters");
-      if (gpuRegionParametersWaitingForUpdate)
+      if (gpuRegionParametersROS2Input.getWaitingForUpdate())
       {
          ImGui.text("Waiting for updated values from remote...");
       }
@@ -130,17 +125,13 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (polygonizerParametersWaitingForUpdate && polygonizerParametersROS2Notification.poll())
+      if (polygonizerParametersROS2Input.update())
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersROS2Notification.read(),
-                                                               polygonizerParameters,
-                                                               () -> LogTools.info("Updating polygonizer parameters from remote."));
          setPolygonizerImGuiWidgetsFromParameters();
-         polygonizerParametersWaitingForUpdate = false;
       }
 
       ImGui.text("Polygonizer Parameters");
-      if (polygonizerParametersWaitingForUpdate)
+      if (polygonizerParametersROS2Input.getWaitingForUpdate())
       {
          ImGui.text("Waiting for initial values from remote...");
       }
@@ -151,17 +142,13 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
       ImGui.separator();
 
-      if (concaveHullFactoryParametersWaitingForUpdate && concaveHullFactoryParametersROS2Notification.poll())
+      if (concaveHullFactoryParametersROS2Input.update())
       {
-         StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactoryParametersROS2Notification.read(),
-                                                               concaveHullFactoryParameters,
-                                                               () -> LogTools.info("Updating concave hull factory parameters from remote."));
          setConcaveHullFactoryImGuiWidgetsFromParameters();
-         concaveHullFactoryParametersWaitingForUpdate = false;
       }
 
       ImGui.text("Concave Hull Factory Parameters");
-      if (concaveHullFactoryParametersWaitingForUpdate)
+      if (concaveHullFactoryParametersROS2Input.getWaitingForUpdate())
       {
          ImGui.text("Waiting for initial values from remote...");
       }
