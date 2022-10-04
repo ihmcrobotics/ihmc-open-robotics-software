@@ -23,6 +23,9 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class KinematicsToolboxSnapshotDescription
 {
+   public static final String ENVIRONMENT_JSON = "environment";
+   public static final String SCRIPT_JSON = "script";
+
    public static final String CONFIGURATION_JSON = KinematicsToolboxSnapshotDescription.class.getSimpleName();
    public static final String CONTROLLER_CONFIGURATION_JSON = "controllerConfiguration";
    public static final String IK_SOLUTION_JSON = "ikSolution";
