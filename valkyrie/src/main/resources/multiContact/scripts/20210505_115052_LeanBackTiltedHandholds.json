@@ -20,6 +20,48 @@
         }
       }
     }
+  }, {
+    "ihmc_common_msgs::msg::dds_::Box3DMessage_" : {
+      "size" : {
+        "x" : 0.3,
+        "y" : 0.3,
+        "z" : 0.85
+      },
+      "pose" : {
+        "position" : {
+          "x" : 0.0,
+          "y" : 0.45,
+          "z" : 0.7
+        },
+        "orientation" : {
+          "x" : 0.0,
+          "y" : 0.0,
+          "z" : 0.0,
+          "w" : 1.0
+        }
+      }
+    }
+  }, {
+    "ihmc_common_msgs::msg::dds_::Box3DMessage_" : {
+      "size" : {
+        "x" : 0.3,
+        "y" : 0.3,
+        "z" : 0.85
+      },
+      "pose" : {
+        "position" : {
+          "x" : 0.0,
+          "y" : -0.45,
+          "z" : 0.7
+        },
+        "orientation" : {
+          "x" : 0.0,
+          "y" : 0.0,
+          "z" : 0.0,
+          "w" : 1.0
+        }
+      }
+    }
   } ],
   "script" : [ {
     "KinematicsToolboxSnapshotDescription" : {
