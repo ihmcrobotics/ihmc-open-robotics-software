@@ -24,10 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.RealtimeROS2Publisher;
+import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.Activator;
 
 import java.io.IOException;
@@ -59,7 +56,7 @@ public class WebcamROS2PublisherDemo
    private final Stopwatch threadOneDuration = new Stopwatch();
    private final Stopwatch threadTwoDuration = new Stopwatch();
    private RealtimeROS2Node realtimeROS2Node;
-   private RealtimeROS2Publisher<BigVideoPacket> publisher;
+   private ROS2PublisherBasics<BigVideoPacket> publisher;
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private IntPointer compressionParameters;
    private final Runnable encodeAndPublish = this::encodeAndPublish;
