@@ -135,9 +135,10 @@ public class FFMPEGLogger
       {
          avEncoder = avcodec.avcodec_find_encoder_by_name(preferredVideoEncoder);
 
-         if (avEncoder != null)
+         if (avEncoder != null && !avEncoder.isNull())
          {
-            outputFormat.video_codec(avEncoder.id());
+            if (outputFormat.video_codec() !=  avEncoder.id())
+               outputFormat.video_codec(avEncoder.id());
             LogTools.info("Found encoder " + preferredVideoEncoder + " - id:" + avEncoder.id());
          }
          else
@@ -149,6 +150,7 @@ public class FFMPEGLogger
          int codecId = outputFormat.video_codec();
          avEncoder = avcodec.avcodec_find_encoder(codecId);
          FFMPEGTools.checkPointer(avEncoder, "Finding encoder for id: " + codecId + " name: " + formatName);
+         LogTools.info("Found encoder " + avEncoder.name().getString() + " - id:" + avEncoder.id());
       }
 
       codecLongName = avEncoder.long_name().getString().trim();
