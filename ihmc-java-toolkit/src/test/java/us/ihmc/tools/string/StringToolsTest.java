@@ -44,7 +44,7 @@ public class StringToolsTest
       assertEquals("kebab-case", StringTools.titleToKebabCase("Kebab Case"));
       assertEquals("hellokebab-case", StringTools.titleToKebabCase("HELLOKebab Case"));
       assertEquals("hello-kebab-case", StringTools.titleToKebabCase(" HELLO Kebab Case"));
-      assertEquals("meepman", StringTools.titleToPascalCase("meep man"));
+      assertEquals("MeepMan", StringTools.titleToPascalCase("meep man"));
       assertEquals("meepMan", StringTools.titleToCamelCase("meep man"));
       assertEquals("camelCase", StringTools.titleToCamelCase("Camel case"));
       assertEquals("gpuPlanarRegions", StringTools.titleToCamelCase("GPU planar regions"));
