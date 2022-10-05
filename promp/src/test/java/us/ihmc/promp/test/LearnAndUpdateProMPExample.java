@@ -199,7 +199,7 @@ public class LearnAndUpdateProMPExample
          for (int j = 0; j < viaPointStdDeviation.cols(); j++)
          {
             if (i == j)
-               viaPointStdDeviation.apply(i, j).put(0.00001); // Preferably keep std low. Lower std -> higher precision but less damping
+               viaPointStdDeviation.apply(i, j).put(0); // Preferably keep std low. Lower std -> higher precision but less damping
             else
                viaPointStdDeviation.apply(i, j).put(0);
          }
@@ -211,14 +211,12 @@ public class LearnAndUpdateProMPExample
       //         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep,i));
       //      myProMP.condition_via_point(conditioningTimestep,viaPoint,viaPointStdDeviation);
       // condition goal
-      conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps();
-      System.out.println("Conditioning timestep: " + conditioningTimestep);
-//      myProMP.set_conditioning_ridge_factor(0.001);
-//      for (int i = 0; i < viaPoint.size(); i++)
-//         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
-      viaPoint.apply(0).put(0.25);
-      viaPoint.apply(1).put(0.08);
-      viaPoint.apply(2).put(0.33);
+      conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps()-1;
+      System.out.print("Conditioning timestep: " + conditioningTimestep);
+      System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 1) + " " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 2));
+      myProMP.set_conditioning_ridge_factor(0.01);
+      for (int i = 0; i < viaPoint.size(); i++)
+         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
       myProMP.condition_goal(viaPoint, viaPointStdDeviation);
       //generate updated mean trajectory
       EigenMatrixXd meanTrajectoryConditioned = myProMP.generate_trajectory();
