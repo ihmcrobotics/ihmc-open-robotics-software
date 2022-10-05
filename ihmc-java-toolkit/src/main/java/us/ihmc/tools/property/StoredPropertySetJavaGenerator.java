@@ -88,7 +88,6 @@ public class StoredPropertySetJavaGenerator
             objectNode.fieldNames().forEachRemaining(fieldName ->
             {
                JsonNode propertyNode = objectNode.get(fieldName);
-               LogTools.info("Name: {} Value: {}", fieldName, propertyNode);
                if (fieldName.equals("title"))
                {
                   storedPropertySetTitle = propertyNode.asText();
