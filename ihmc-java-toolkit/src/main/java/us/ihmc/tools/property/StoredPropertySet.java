@@ -1,6 +1,7 @@
 package us.ihmc.tools.property;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
@@ -350,7 +351,16 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      throw new RuntimeException(workspaceJSONFile.getClasspathResource() + " does not contain key: " + key.getTitleCasedName());
                   }
 
-                  String stringValue = propertyNode.asText();
+                  String stringValue;
+                  if (propertyNode instanceof ArrayNode arrayNode)
+                  {
+                     stringValue = arrayNode.get(0).asText();
+                     key.setDescription(arrayNode.get(1).asText());
+                  }
+                  else
+                  {
+                     stringValue = propertyNode.asText();
+                  }
 
                   if (stringValue.equals("null"))
                   {
@@ -429,19 +439,41 @@ public class StoredPropertySet implements StoredPropertySetBasics
          jsonRootObjectNode.put("title", title);
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            boolean valueIsNull = get(key) == null;
-            boolean defaultValueIsNull = key.getDefaultValue() == null;
-            if (key instanceof BooleanStoredPropertyKey booleanKey)
+            if (!key.getDescription().isEmpty())
             {
-               jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? false : (boolean) key.getDefaultValue()) : get(booleanKey));
+               ArrayNode arrayNode = jsonRootObjectNode.putArray(key.getTitleCasedName());
+               boolean valueIsNull = get(key) == null;
+               boolean defaultValueIsNull = key.getDefaultValue() == null;
+               if (key instanceof BooleanStoredPropertyKey booleanKey)
+               {
+                  arrayNode.add(valueIsNull ? (defaultValueIsNull ? false : (boolean) key.getDefaultValue()) : get(booleanKey));
+               }
+               else if (key instanceof DoubleStoredPropertyKey doubleKey)
+               {
+                  arrayNode.add(valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
+               }
+               else if (key instanceof IntegerStoredPropertyKey integerKey)
+               {
+                  arrayNode.add(valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+               }
+               arrayNode.add(key.getDescription());
             }
-            else if (key instanceof DoubleStoredPropertyKey doubleKey)
+            else
             {
-               jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
-            }
-            else if (key instanceof IntegerStoredPropertyKey integerKey)
-            {
-               jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+               boolean valueIsNull = get(key) == null;
+               boolean defaultValueIsNull = key.getDefaultValue() == null;
+               if (key instanceof BooleanStoredPropertyKey booleanKey)
+               {
+                  jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? false : (boolean) key.getDefaultValue()) : get(booleanKey));
+               }
+               else if (key instanceof DoubleStoredPropertyKey doubleKey)
+               {
+                  jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
+               }
+               else if (key instanceof IntegerStoredPropertyKey integerKey)
+               {
+                  jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+               }
             }
          }
       });

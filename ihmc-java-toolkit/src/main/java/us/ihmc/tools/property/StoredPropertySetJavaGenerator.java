@@ -1,13 +1,12 @@
 package us.ihmc.tools.property;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.BooleanNode;
-import com.fasterxml.jackson.databind.node.DoubleNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.*;
+import org.apache.commons.text.WordUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -27,7 +26,7 @@ public class StoredPropertySetJavaGenerator
    private final WorkspaceFile basicsJavaFile;
    private final WorkspaceFile readOnlyJavaFile;
    private String storedPropertySetTitle;
-   private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName) { }
+   private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName, String description) { }
    private final ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
 
    public StoredPropertySetJavaGenerator(Class<?> clazz,
@@ -62,17 +61,37 @@ public class StoredPropertySetJavaGenerator
                }
                else
                {
-                  if (propertyNode instanceof BooleanNode)
+                  String description = "";
+                  if (propertyNode instanceof ArrayNode arrayNode)
                   {
-                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean"));
+                     description = arrayNode.get(1).asText();
+                     if (arrayNode.get(0) instanceof BooleanNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean", description));
+                     }
+                     else if (arrayNode.get(0) instanceof DoubleNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double", description));
+                     }
+                     else if (arrayNode.get(0) instanceof IntNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int", description));
+                     }
                   }
-                  else if (propertyNode instanceof DoubleNode)
+                  else
                   {
-                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double"));
-                  }
-                  else if (propertyNode instanceof IntNode)
-                  {
-                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int"));
+                     if (propertyNode instanceof BooleanNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean", description));
+                     }
+                     else if (propertyNode instanceof DoubleNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double", description));
+                     }
+                     else if (propertyNode instanceof IntNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int", description));
+                     }
                   }
                }
             });
@@ -87,15 +106,15 @@ public class StoredPropertySetJavaGenerator
       {
          if (key instanceof BooleanStoredPropertyKey)
          {
-            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Boolean", "boolean"));
+            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Boolean", "boolean", key.getDescription()));
          }
          else if (key instanceof DoubleStoredPropertyKey)
          {
-            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Double", "double"));
+            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Double", "double", key.getDescription()));
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
-            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Integer", "int"));
+            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Integer", "int", key.getDescription()));
          }
       }
    }
@@ -195,6 +214,7 @@ public class StoredPropertySetJavaGenerator
       for (int i = 0; i < storedPropertiesFromFile.size(); i++)
       {
          StoredPropertyFromFile storedPropertyFromFile = storedPropertiesFromFile.get(i);
+         propertyKeyDeclarations.append(getParameterJavadoc(storedPropertyFromFile.description()));
          propertyKeyDeclarations.append(
             """
             default void set%1$s(%2$s %3$s)
@@ -220,6 +240,7 @@ public class StoredPropertySetJavaGenerator
       for (int i = 0; i < storedPropertiesFromFile.size(); i++)
       {
          StoredPropertyFromFile storedPropertyFromFile = storedPropertiesFromFile.get(i);
+         propertyKeyDeclarations.append(getParameterJavadoc(storedPropertyFromFile.description()));
          propertyKeyDeclarations.append(
             """
             default %2$s get%1$s()
@@ -237,5 +258,22 @@ public class StoredPropertySetJavaGenerator
          }
       }
       return propertyKeyDeclarations.toString();
+   }
+
+   private String getParameterJavadoc(String description)
+   {
+      if (description.isEmpty())
+      {
+         return "";
+      }
+      else
+      {
+         return
+         """
+         /**
+          * %s
+          */
+         """.indent(3).formatted(WordUtils.wrap(description, 80, "\n    * ", true));
+      }
    }
 }
