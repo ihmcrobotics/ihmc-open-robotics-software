@@ -49,6 +49,13 @@ public class promp extends us.ihmc.promp.presets.PrompInfoMapper {
 // #include <vector>
 
 // #include <Eigen/Core>
+
+// #if defined(WINDOWS) || defined(WIN32)
+//     #include <windows.h>
+//     #define PROMPCALL WINAPI
+// #else
+//     #define PROMPCALL
+// #endif
 // Targeting ../Trajectory.java
 
 
