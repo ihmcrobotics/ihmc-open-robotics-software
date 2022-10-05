@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -7,17 +8,24 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public interface EuclideanWaypointReadOnly
+public interface EuclideanWaypointReadOnly extends EuclidGeometry
 {
    Point3DReadOnly getPosition();
 
    Vector3DReadOnly getLinearVelocity();
 
+   default boolean containsNaN()
+   {
+      return getPosition().containsNaN() || getLinearVelocity().containsNaN();
+   }
+
+   @Deprecated
    default Point3DBasics getPositionCopy()
    {
       return new Point3D(getPosition());
    }
 
+   @Deprecated
    default Vector3DBasics getLinearVelocityCopy()
    {
       return new Vector3D(getLinearVelocity());
@@ -58,11 +66,13 @@ public interface EuclideanWaypointReadOnly
       return getPosition().distance(other.getPosition());
    }
 
+   @Deprecated
    default void getPosition(Point3DBasics positionToPack)
    {
       positionToPack.set(getPosition());
    }
 
+   @Deprecated
    default void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.set(getLinearVelocity());
@@ -70,31 +80,70 @@ public interface EuclideanWaypointReadOnly
 
    default void get(Point3DBasics positionToPack, Vector3DBasics linearVelocityToPack)
    {
-      getPosition(positionToPack);
-      getLinearVelocity(linearVelocityToPack);
+      positionToPack.set(getPosition());
+      linearVelocityToPack.set(getLinearVelocity());
    }
 
+   @Deprecated
    default void get(EuclideanWaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(EuclideanWaypointReadOnly other, double epsilon)
+   @Override
+   default boolean equals(EuclidGeometry geometry)
    {
-      boolean positionMatches = getPosition().epsilonEquals(other.getPosition(), epsilon);
-      boolean linearVelocityMatches = getLinearVelocity().epsilonEquals(other.getLinearVelocity(), epsilon);
-      return positionMatches && linearVelocityMatches;
+      if (geometry == this)
+         return true;
+      if ((geometry == null) || !(geometry instanceof EuclideanWaypointReadOnly))
+         return false;
+
+      EuclideanWaypointReadOnly other = (EuclideanWaypointReadOnly) geometry;
+
+      if (!getPosition().equals(other.getPosition()))
+         return false;
+      if (!getLinearVelocity().equals(other.getLinearVelocity()))
+         return false;
+      return true;
    }
 
-   default boolean geometricallyEquals(EuclideanWaypointReadOnly other, double epsilon)
+   @Override
+   default boolean epsilonEquals(EuclidGeometry geometry, double epsilon)
    {
-      boolean positionMatches = getPosition().geometricallyEquals(other.getPosition(), epsilon);
-      boolean linearVelocityMatches = getLinearVelocity().geometricallyEquals(other.getLinearVelocity(), epsilon);
-      return positionMatches && linearVelocityMatches;
+      if (geometry == this)
+         return true;
+      if ((geometry == null) || !(geometry instanceof EuclideanWaypointReadOnly))
+         return false;
+
+      EuclideanWaypointReadOnly other = (EuclideanWaypointReadOnly) geometry;
+
+      if (!getPosition().epsilonEquals(other.getPosition(), epsilon))
+         return false;
+      if (!getLinearVelocity().epsilonEquals(other.getLinearVelocity(), epsilon))
+         return false;
+      return true;
    }
 
-   default boolean containsNaN()
+   @Override
+   default boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
    {
-      return getPosition().containsNaN() || getLinearVelocity().containsNaN();
+      if (geometry == this)
+         return true;
+      if ((geometry == null) || !(geometry instanceof EuclideanWaypointReadOnly))
+         return false;
+
+      EuclideanWaypointReadOnly other = (EuclideanWaypointReadOnly) geometry;
+
+      if (!getPosition().geometricallyEquals(other.getPosition(), epsilon))
+         return false;
+      if (!getLinearVelocity().geometricallyEquals(other.getLinearVelocity(), epsilon))
+         return false;
+      return true;
+   }
+
+   @Override
+   default String toString(String format)
+   {
+      return String.format("Euclidean waypoint: [position=%s, linear velocity=%s]", getPosition().toString(format), getLinearVelocity().toString(format));
    }
 }

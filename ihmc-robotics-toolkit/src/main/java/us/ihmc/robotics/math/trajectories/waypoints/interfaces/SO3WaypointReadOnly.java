@@ -1,5 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
+import us.ihmc.euclid.interfaces.EuclidGeometry;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -7,17 +9,24 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
-public interface SO3WaypointReadOnly
+public interface SO3WaypointReadOnly extends EuclidGeometry
 {
    QuaternionReadOnly getOrientation();
 
    Vector3DReadOnly getAngularVelocity();
 
+   default boolean containsNaN()
+   {
+      return getOrientation().containsNaN() || getAngularVelocity().containsNaN();
+   }
+
+   @Deprecated
    default QuaternionBasics getOrientationCopy()
    {
       return new Quaternion(getOrientation());
    }
 
+   @Deprecated
    default Vector3DBasics getAngularVelocityCopy()
    {
       return new Vector3D(getAngularVelocity());
@@ -63,44 +72,84 @@ public interface SO3WaypointReadOnly
       return getOrientation().distance(other.getOrientation());
    }
 
-   default void getOrientation(QuaternionBasics orientationToPack)
+   @Deprecated
+   default void getOrientation(Orientation3DBasics orientationToPack)
    {
       orientationToPack.set(getOrientation());
    }
 
+   @Deprecated
    default void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(getAngularVelocity());
    }
 
+   @Deprecated
    default void get(SO3WaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
-   default void get(QuaternionBasics orientationToPack, Vector3DBasics angularVelocityToPack)
+   default void get(Orientation3DBasics orientationToPack, Vector3DBasics angularVelocityToPack)
    {
       getOrientation(orientationToPack);
       getAngularVelocity(angularVelocityToPack);
    }
 
-   default boolean epsilonEquals(SO3WaypointReadOnly other, double epsilon)
+   @Override
+   default boolean equals(EuclidGeometry geometry)
    {
-      boolean orientationMatches = getOrientation().epsilonEquals(other.getOrientation(), epsilon);
-      boolean angularVelocityMatches = getAngularVelocity().epsilonEquals(other.getAngularVelocity(), epsilon);
-      return orientationMatches && angularVelocityMatches;
+      if (geometry == this)
+         return true;
+      if ((geometry == null) || !(geometry instanceof SO3WaypointReadOnly))
+         return false;
+
+      SO3WaypointReadOnly other = (SO3WaypointReadOnly) geometry;
+
+      if (!getOrientation().equals(other.getOrientation()))
+         return false;
+      if (!getAngularVelocity().equals(other.getAngularVelocity()))
+         return false;
+      return true;
    }
 
-   default boolean geometricallyEquals(SO3WaypointReadOnly other, double epsilon)
+   @Override
+   default boolean epsilonEquals(EuclidGeometry geometry, double epsilon)
    {
-      boolean orientationMatches = getOrientation().geometricallyEquals(other.getOrientation(), epsilon);
-      boolean angularVelocityMatches = getAngularVelocity().geometricallyEquals(other.getAngularVelocity(), epsilon);
-      return orientationMatches && angularVelocityMatches;
+      if (geometry == this)
+         return true;
+      if ((geometry == null) || !(geometry instanceof SO3WaypointReadOnly))
+         return false;
+
+      SO3WaypointReadOnly other = (SO3WaypointReadOnly) geometry;
+
+      if (!getOrientation().epsilonEquals(other.getOrientation(), epsilon))
+         return false;
+      if (!getAngularVelocity().epsilonEquals(other.getAngularVelocity(), epsilon))
+         return false;
+      return true;
    }
 
-   default boolean containsNaN()
+   @Override
+   default boolean geometricallyEquals(EuclidGeometry geometry, double epsilon)
    {
-      return getOrientation().containsNaN() || getAngularVelocity().containsNaN();
+      if (geometry == this)
+         return true;
+      if ((geometry == null) || !(geometry instanceof SO3WaypointReadOnly))
+         return false;
+
+      SO3WaypointReadOnly other = (SO3WaypointReadOnly) geometry;
+
+      if (!getOrientation().geometricallyEquals(other.getOrientation(), epsilon))
+         return false;
+      if (!getAngularVelocity().geometricallyEquals(other.getAngularVelocity(), epsilon))
+         return false;
+      return true;
    }
 
+   @Override
+   default String toString(String format)
+   {
+      return String.format("SO3 waypoint: [orientation=%s, angular velocity=%s]", getOrientation().toString(format), getAngularVelocity().toString(format));
+   }
 }

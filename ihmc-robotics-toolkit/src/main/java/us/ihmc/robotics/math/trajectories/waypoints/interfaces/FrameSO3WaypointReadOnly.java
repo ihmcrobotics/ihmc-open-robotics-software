@@ -2,15 +2,17 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.EuclidFrameGeometry;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 
-public interface FrameSO3WaypointReadOnly extends SO3WaypointReadOnly, ReferenceFrameHolder
+public interface FrameSO3WaypointReadOnly extends SO3WaypointReadOnly, EuclidFrameGeometry
 {
    @Override
    FrameQuaternionReadOnly getOrientation();
@@ -18,12 +20,14 @@ public interface FrameSO3WaypointReadOnly extends SO3WaypointReadOnly, Reference
    @Override
    FrameVector3DReadOnly getAngularVelocity();
 
+   @Deprecated
    @Override
    default FrameQuaternionBasics getOrientationCopy()
    {
       return new FrameQuaternion(getOrientation());
    }
 
+   @Deprecated
    @Override
    default FrameVector3DBasics getAngularVelocityCopy()
    {
@@ -35,61 +39,57 @@ public interface FrameSO3WaypointReadOnly extends SO3WaypointReadOnly, Reference
       return getOrientation().distance(other.getOrientation());
    }
 
+   @Deprecated
    default void getOrientation(FixedFrameQuaternionBasics orientationToPack)
    {
-      checkReferenceFrameMatch(orientationToPack);
       orientationToPack.set(getOrientation());
    }
 
+   @Deprecated
    default void getAngularVelocity(FixedFrameVector3DBasics angularVelocityToPack)
    {
-      checkReferenceFrameMatch(angularVelocityToPack);
       angularVelocityToPack.set(getAngularVelocity());
    }
 
-   default void getOrientationIncludingFrame(FrameQuaternionBasics orientationToPack)
+   @Deprecated
+   default void getOrientationIncludingFrame(FrameOrientation3DBasics orientationToPack)
    {
       orientationToPack.setIncludingFrame(getOrientation());
    }
 
+   @Deprecated
    default void getAngularVelocityIncludingFrame(FrameVector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.setIncludingFrame(getAngularVelocity());
    }
 
+   @Deprecated
    default void get(FixedFrameSO3WaypointBasics otherToPack)
    {
       otherToPack.set(this);
    }
 
+   @Deprecated
    default void getIncludingFrame(FrameSO3WaypointBasics otherToPack)
    {
       otherToPack.setIncludingFrame(this);
    }
 
-   default void get(FixedFrameQuaternionBasics orientationToPack, FixedFrameVector3DBasics angularVelocityToPack)
+   default void get(FixedFrameOrientation3DBasics orientationToPack, FixedFrameVector3DBasics angularVelocityToPack)
    {
-      getOrientation(orientationToPack);
-      getAngularVelocity(angularVelocityToPack);
+      orientationToPack.set(getOrientation());
+      angularVelocityToPack.set(getAngularVelocity());
    }
 
-   default void getIncludingFrame(FrameQuaternionBasics orientationToPack, FrameVector3DBasics angularVelocityToPack)
+   default void getIncludingFrame(FrameOrientation3DBasics orientationToPack, FrameVector3DBasics angularVelocityToPack)
    {
-      getOrientationIncludingFrame(orientationToPack);
-      getAngularVelocityIncludingFrame(angularVelocityToPack);
+      orientationToPack.setIncludingFrame(getOrientation());
+      angularVelocityToPack.setIncludingFrame(getAngularVelocity());
    }
 
-   default boolean epsilonEquals(FrameSO3WaypointReadOnly other, double epsilon)
+   @Override
+   default String toString(String format)
    {
-      boolean orientationMatches = getOrientation().epsilonEquals(other.getOrientation(), epsilon);
-      boolean angularVelocityMatches = getAngularVelocity().epsilonEquals(other.getAngularVelocity(), epsilon);
-      return orientationMatches && angularVelocityMatches;
-   }
-
-   default boolean geometricallyEquals(FrameSO3WaypointReadOnly other, double epsilon)
-   {
-      boolean orientationMatches = getOrientation().geometricallyEquals(other.getOrientation(), epsilon);
-      boolean angularVelocityMatches = getAngularVelocity().geometricallyEquals(other.getAngularVelocity(), epsilon);
-      return orientationMatches && angularVelocityMatches;
+      return SO3WaypointReadOnly.super.toString(format) + " - " + getReferenceFrame();
    }
 }
