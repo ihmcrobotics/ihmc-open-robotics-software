@@ -2,74 +2,111 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 
-public interface SO3WaypointBasics extends Transformable, Clearable, SO3WaypointReadOnly
+public interface SO3WaypointBasics extends SO3WaypointReadOnly, Transformable, Clearable
 {
-   void setOrientation(double x, double y, double z, double s);
+   @Override
+   QuaternionBasics getOrientation();
 
-   void setAngularVelocity(double x, double y, double z);
-
-   default void setOrientation(QuaternionReadOnly orientation)
-   {
-      setOrientation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-   }
-
-   default void setOrientationToZero()
-   {
-      setOrientation(0.0, 0.0, 0.0, 1.0);
-   }
-
-   default void setOrientationToNaN()
-   {
-      setOrientation(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   default void setAngularVelocity(Vector3DReadOnly angularVelocity)
-   {
-      setAngularVelocity(angularVelocity.getX(), angularVelocity.getY(), angularVelocity.getZ());
-   }
-
-   default void setAngularVelocityToZero()
-   {
-      setAngularVelocity(0.0, 0.0, 0.0);
-   }
-
-   default void setAngularVelocityToNaN()
-   {
-      setAngularVelocity(Double.NaN, Double.NaN, Double.NaN);
-   }
-
-   default void set(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity)
-   {
-      setOrientation(orientation);
-      setAngularVelocity(angularVelocity);
-   }
-
-   default void set(SO3WaypointReadOnly other)
-   {
-      setOrientation(other.getOrientation());
-      setAngularVelocity(other.getAngularVelocity());
-   }
+   @Override
+   Vector3DBasics getAngularVelocity();
 
    @Override
    default void setToNaN()
    {
-      setOrientationToNaN();
-      setAngularVelocityToNaN();
+      getOrientation().setToNaN();
+      getAngularVelocity().setToNaN();
    }
 
    @Override
    default void setToZero()
    {
-      setOrientationToZero();
-      setAngularVelocityToZero();
+      getOrientation().setToZero();
+      getAngularVelocity().setToZero();
    }
 
    @Override
    default boolean containsNaN()
    {
       return SO3WaypointReadOnly.super.containsNaN();
+   }
+
+   @Deprecated
+   default void setOrientation(double x, double y, double z, double s)
+   {
+      getOrientation().set(x, y, z, s);
+   }
+
+   @Deprecated
+   default void setAngularVelocity(double x, double y, double z)
+   {
+      getAngularVelocity().set(x, y, z);
+   }
+
+   @Deprecated
+   default void setOrientation(Orientation3DReadOnly orientation)
+   {
+      getOrientation().set(orientation);
+   }
+
+   @Deprecated
+   default void setOrientationToZero()
+   {
+      getOrientation().setToZero();
+   }
+
+   @Deprecated
+   default void setOrientationToNaN()
+   {
+      getOrientation().setToNaN();
+   }
+
+   @Deprecated
+   default void setAngularVelocity(Vector3DReadOnly angularVelocity)
+   {
+      getAngularVelocity().set(angularVelocity);
+   }
+
+   @Deprecated
+   default void setAngularVelocityToZero()
+   {
+      getAngularVelocity().setToZero();
+   }
+
+   @Deprecated
+   default void setAngularVelocityToNaN()
+   {
+      getAngularVelocity().setToNaN();
+   }
+
+   default void set(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity)
+   {
+      getOrientation().set(orientation);
+      getAngularVelocity().set(angularVelocity);
+   }
+
+   default void set(SO3WaypointReadOnly other)
+   {
+      getOrientation().set(other.getOrientation());
+      getAngularVelocity().set(other.getAngularVelocity());
+   }
+
+   @Override
+   default void applyTransform(Transform transform)
+   {
+      getOrientation().applyTransform(transform);
+      getAngularVelocity().applyTransform(transform);
+   }
+
+   @Override
+   default void applyInverseTransform(Transform transform)
+   {
+      getOrientation().applyInverseTransform(transform);
+      getAngularVelocity().applyInverseTransform(transform);
    }
 }

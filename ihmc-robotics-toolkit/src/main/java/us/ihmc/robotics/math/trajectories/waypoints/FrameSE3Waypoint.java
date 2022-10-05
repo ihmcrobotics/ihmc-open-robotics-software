@@ -1,19 +1,22 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameEuclideanWaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameSO3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointReadOnly;
 
 public class FrameSE3Waypoint implements FrameSE3WaypointBasics
 {
-   private final FrameEuclideanWaypoint euclideanWaypoint = new FrameEuclideanWaypoint();
-   private final FrameSO3Waypoint so3Waypoint = new FrameSO3Waypoint();
+   private ReferenceFrame referenceFrame;
+   private final FixedFrameEuclideanWaypointBasics euclideanWaypoint = FixedFrameEuclideanWaypointBasics.newFixedFrameEuclideanWaypointBasics(this);
+   private final FixedFrameSO3WaypointBasics so3Waypoint = FixedFrameSO3WaypointBasics.newFixedFrameSO3WaypointBasics(this);
 
    public FrameSE3Waypoint()
    {
+      setToZero(ReferenceFrame.getWorldFrame());
    }
 
    public FrameSE3Waypoint(ReferenceFrame referenceFrame)
@@ -22,78 +25,49 @@ public class FrameSE3Waypoint implements FrameSE3WaypointBasics
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public FixedFrameEuclideanWaypointBasics getEuclideanWaypoint()
    {
-      return euclideanWaypoint.getPosition();
+      return euclideanWaypoint;
    }
 
    @Override
-   public FrameVector3DReadOnly getLinearVelocity()
+   public FixedFrameSO3WaypointBasics getSO3Waypoint()
    {
-      return euclideanWaypoint.getLinearVelocity();
-   }
-
-   @Override
-   public void setPosition(double x, double y, double z)
-   {
-      euclideanWaypoint.setPosition(x, y, z);
-   }
-
-   @Override
-   public void setLinearVelocity(double x, double y, double z)
-   {
-      euclideanWaypoint.setLinearVelocity(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      euclideanWaypoint.applyTransform(transform);
-      so3Waypoint.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      euclideanWaypoint.applyInverseTransform(transform);
-      so3Waypoint.applyInverseTransform(transform);
+      return so3Waypoint;
    }
 
    @Override
    public void setReferenceFrame(ReferenceFrame referenceFrame)
    {
-      euclideanWaypoint.setReferenceFrame(referenceFrame);
-      so3Waypoint.setReferenceFrame(referenceFrame);
+      this.referenceFrame = referenceFrame;
    }
 
    @Override
    public ReferenceFrame getReferenceFrame()
    {
-      euclideanWaypoint.checkReferenceFrameMatch(so3Waypoint);
-      return euclideanWaypoint.getReferenceFrame();
+      return referenceFrame;
    }
 
    @Override
-   public FrameQuaternionReadOnly getOrientation()
+   public int hashCode()
    {
-      return so3Waypoint.getOrientation();
+      return EuclidHashCodeTools.toIntHashCode(getEuclideanWaypoint(), getSO3Waypoint());
    }
 
    @Override
-   public FrameVector3DReadOnly getAngularVelocity()
+   public boolean equals(Object object)
    {
-      return so3Waypoint.getAngularVelocity();
+      if (object == this)
+         return true;
+      else if (object instanceof FrameSE3WaypointReadOnly)
+         return equals((FrameSE3WaypointReadOnly) object);
+      else
+         return false;
    }
 
    @Override
-   public void setOrientation(double x, double y, double z, double s)
+   public String toString()
    {
-      so3Waypoint.setOrientation(x, y, z, s);
-   }
-
-   @Override
-   public void setAngularVelocity(double x, double y, double z)
-   {
-      so3Waypoint.setAngularVelocity(x, y, z);
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }
