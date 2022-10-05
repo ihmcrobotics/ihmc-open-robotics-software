@@ -230,7 +230,7 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       }
 
       // Initialize the segment trajectory, in case the index or waypoints have changed
-      subTrajectory.setCubic(0.0, end.getTime() - start.getTime(), start.getPosition(), start.getVelocity(), end.getPosition(), end.getVelocity());
+      subTrajectory.setCubicDirectly(end.getTime() - start.getTime(), start.getPosition(), start.getVelocity(), end.getPosition(), end.getVelocity());
       double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       subTrajectory.compute(subTrajectoryTime);
 
