@@ -10,7 +10,7 @@ public interface SE3TrajectoryPointReadOnly extends TrajectoryPointReadOnly, SE3
    @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getTime()) || SE3WaypointReadOnly.super.containsNaN();
+      return isTimeNaN() || SE3WaypointReadOnly.super.containsNaN();
    }
 
    @Override

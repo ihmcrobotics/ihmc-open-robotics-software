@@ -33,6 +33,6 @@ public interface OneDoFTrajectoryPointBasics extends OneDoFTrajectoryPointReadOn
    @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getTime()) || OneDoFWaypointBasics.super.containsNaN();
+      return OneDoFTrajectoryPointReadOnly.super.containsNaN();
    }
 }

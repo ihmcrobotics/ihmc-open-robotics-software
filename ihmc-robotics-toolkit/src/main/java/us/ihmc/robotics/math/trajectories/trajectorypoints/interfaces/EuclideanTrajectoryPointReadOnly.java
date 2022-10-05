@@ -10,7 +10,7 @@ public interface EuclideanTrajectoryPointReadOnly extends TrajectoryPointReadOnl
    @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getTime()) || EuclideanWaypointReadOnly.super.containsNaN();
+      return isTimeNaN() || EuclideanWaypointReadOnly.super.containsNaN();
    }
 
    @Override
