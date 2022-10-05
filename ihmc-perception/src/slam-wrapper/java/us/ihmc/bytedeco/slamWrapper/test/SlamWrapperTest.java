@@ -1,6 +1,6 @@
-package us.ihmc.perception.slamWrapperTest;
+package us.ihmc.bytedeco.slamWrapper.test;
 
-import org.bytedeco.slamWrapper.SlamWrapper;
+import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
