@@ -54,10 +54,4 @@ public interface SE3TrajectoryPointBasics
       set(euclideanWaypoint);
       set(so3Waypoint);
    }
-
-   default void get(EuclideanTrajectoryPointBasics euclideanTrajectoryPointToPack, SO3TrajectoryPointBasics so3TrajectoryPointToPack)
-   {
-      euclideanTrajectoryPointToPack.set(getEuclideanWaypoint());
-      so3TrajectoryPointToPack.set(getSO3Waypoint());
-   }
 }

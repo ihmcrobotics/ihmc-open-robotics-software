@@ -1,14 +1,14 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointReadOnly;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameEuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameSO3WaypointBasics;
@@ -29,7 +29,7 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
 
    public FrameSE3TrajectoryPoint(double time,
                                   FramePoint3DReadOnly position,
-                                  FrameQuaternionReadOnly orientation,
+                                  FrameOrientation3DReadOnly orientation,
                                   FrameVector3DReadOnly linearVelocity,
                                   FrameVector3DReadOnly angularVelocity)
    {
@@ -41,7 +41,7 @@ public class FrameSE3TrajectoryPoint implements FrameSE3TrajectoryPointBasics
       setIncludingFrame(other);
    }
 
-   public FrameSE3TrajectoryPoint(ReferenceFrame referenceFrame, SE3TrajectoryPointBasics other)
+   public FrameSE3TrajectoryPoint(ReferenceFrame referenceFrame, SE3TrajectoryPointReadOnly other)
    {
       setIncludingFrame(referenceFrame, other);
    }

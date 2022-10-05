@@ -710,7 +710,8 @@ public class SE3TrajectoryPointTest
       simpleSE3TrajectoryPointTwo = new SE3TrajectoryPoint();
       euclideanWaypoint = new EuclideanWaypoint();
       so3Waypoint = new SO3Waypoint();
-      simpleSE3TrajectoryPoint.get(euclideanWaypoint, so3Waypoint);
+      euclideanWaypoint.set(simpleSE3TrajectoryPoint.getEuclideanWaypoint());
+      so3Waypoint.set(simpleSE3TrajectoryPoint.getSO3Waypoint());
 
       simpleSE3TrajectoryPointTwo.set(time, euclideanWaypoint, so3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
@@ -719,7 +720,10 @@ public class SE3TrajectoryPointTest
       Quaternion orientationToPack = new Quaternion();
       Vector3D linearVelocityToPack = new Vector3D();
       Vector3D angularVelocityToPack = new Vector3D();
-      simpleSE3TrajectoryPoint.get(positionToPack, orientationToPack, linearVelocityToPack, angularVelocityToPack);
+      positionToPack.set(simpleSE3TrajectoryPoint.getPosition());
+      linearVelocityToPack.set(simpleSE3TrajectoryPoint.getLinearVelocity());
+      orientationToPack.set(simpleSE3TrajectoryPoint.getOrientation());
+      angularVelocityToPack.set(simpleSE3TrajectoryPoint.getAngularVelocity());
 
       simpleSE3TrajectoryPointTwo = new SE3TrajectoryPoint();
       simpleSE3TrajectoryPointTwo.set(time, positionToPack, orientationToPack, linearVelocityToPack, angularVelocityToPack);

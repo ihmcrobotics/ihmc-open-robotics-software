@@ -81,7 +81,7 @@ public interface SO3TrajectoryPointReadOnly extends TrajectoryPointReadOnly, SO3
    {
       return String.format("SO3 trajectory point: [time=%s, orientation=%s, angular velocity=%s]",
                            EuclidCoreIOTools.getStringOf(null, format, getTime()),
-                           getOrientation().toString(format),
-                           getAngularVelocity().toString(format));
+                           EuclidCoreIOTools.getTuple4DString(format, getOrientation()),
+                           EuclidCoreIOTools.getTuple3DString(format, getAngularVelocity()));
    }
 }

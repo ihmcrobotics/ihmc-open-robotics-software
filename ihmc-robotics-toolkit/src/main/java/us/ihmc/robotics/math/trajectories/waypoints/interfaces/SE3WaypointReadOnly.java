@@ -2,10 +2,7 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.interfaces.EuclidGeometry;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
@@ -43,21 +40,6 @@ public interface SE3WaypointReadOnly extends EuclideanWaypointReadOnly, SO3Waypo
    default boolean containsNaN()
    {
       return EuclideanWaypointReadOnly.super.containsNaN() || SO3WaypointReadOnly.super.containsNaN();
-   }
-
-   default void get(Point3DBasics positionToPack,
-                    Orientation3DBasics orientationToPack,
-                    Vector3DBasics linearVelocityToPack,
-                    Vector3DBasics angularVelocityToPack)
-   {
-      getEuclideanWaypoint().get(positionToPack, linearVelocityToPack);
-      getSO3Waypoint().get(orientationToPack, angularVelocityToPack);
-   }
-
-   default void get(EuclideanWaypointBasics euclideanWaypointToPack, SO3WaypointBasics so3WaypointToPack)
-   {
-      euclideanWaypointToPack.set(getEuclideanWaypoint());
-      so3WaypointToPack.set(getSO3Waypoint());
    }
 
    default void getPose(Pose3DBasics poseToPack)

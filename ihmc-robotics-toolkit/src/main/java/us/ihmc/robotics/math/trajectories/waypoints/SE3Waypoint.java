@@ -1,7 +1,10 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointReadOnly;
 
@@ -9,6 +12,15 @@ public class SE3Waypoint implements SE3WaypointBasics
 {
    private final EuclideanWaypoint euclideanWaypoint = new EuclideanWaypoint();
    private final SO3Waypoint so3Waypoint = new SO3Waypoint();
+
+   public SE3Waypoint()
+   {
+   }
+
+   public SE3Waypoint(Point3DReadOnly position, Orientation3DReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
+   {
+      set(position, orientation, linearVelocity, angularVelocity);
+   }
 
    @Override
    public EuclideanWaypoint getEuclideanWaypoint()
