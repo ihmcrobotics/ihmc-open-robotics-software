@@ -1,6 +1,8 @@
 package us.ihmc.tools.property;
 
-public interface StoredPropertySetGeneratorTestBasics extends StoredPropertySetGeneratorTestReadOnly, StoredPropertySetBasics
+import us.ihmc.tools.property.StoredPropertySetBasics;
+
+public interface StoredPropertySetTestParametersBasics extends StoredPropertySetTestParametersReadOnly, StoredPropertySetBasics
 {
    default void setTheFirstBooleanProperty(boolean theFirstBooleanProperty)
    {

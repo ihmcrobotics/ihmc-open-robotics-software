@@ -1,8 +1,10 @@
 package us.ihmc.tools.property;
 
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
+
 import static us.ihmc.tools.property.StoredPropertySetTestParameters.*;
 
-public interface StoredPropertySetGeneratorTestReadOnly extends StoredPropertySetReadOnly
+public interface StoredPropertySetTestParametersReadOnly extends StoredPropertySetReadOnly
 {
    default boolean getTheFirstBooleanProperty()
    {
