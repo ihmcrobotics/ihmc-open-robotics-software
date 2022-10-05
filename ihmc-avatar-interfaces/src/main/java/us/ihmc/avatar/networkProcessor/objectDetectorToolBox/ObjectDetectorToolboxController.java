@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.objectDetectorToolBox;
 
-import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.DetectedFiducialPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;

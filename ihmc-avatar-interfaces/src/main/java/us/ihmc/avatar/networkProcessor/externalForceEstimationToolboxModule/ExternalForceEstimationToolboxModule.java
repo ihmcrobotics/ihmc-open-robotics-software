@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
-import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
+import toolbox_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

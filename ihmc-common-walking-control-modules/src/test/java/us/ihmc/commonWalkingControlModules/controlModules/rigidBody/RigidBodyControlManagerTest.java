@@ -12,7 +12,7 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;

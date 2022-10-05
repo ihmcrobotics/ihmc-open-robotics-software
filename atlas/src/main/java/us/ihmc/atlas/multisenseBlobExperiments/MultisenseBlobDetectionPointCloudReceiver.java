@@ -1,6 +1,6 @@
 package us.ihmc.atlas.multisenseBlobExperiments;
 
-import controller_msgs.msg.dds.PointCloudWorldPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;

@@ -1,0 +1,33 @@
+#ifndef __ihmc_common_msgs__msg__StampedPosePacket__idl__
+#define __ihmc_common_msgs__msg__StampedPosePacket__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Twist_.idl"
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC localization module.
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::StampedPosePacket_")
+      struct StampedPosePacket
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        geometry_msgs::msg::dds::Pose pose;
+        geometry_msgs::msg::dds::Twist twist;
+        long long timestamp;
+        double confidence_factor;
+        string frame_id;
+      };
+    };
+  };
+};
+
+#endif

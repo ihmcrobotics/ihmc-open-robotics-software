@@ -1,6 +1,8 @@
 package us.ihmc.gdx.ui.affordances;
 
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
@@ -42,26 +44,26 @@ public class GDXInteractableFrameModel
 
    public void create(ReferenceFrame parentFrame,
                       GDX3DPanel panel3D,
-                      GDXModelInstance modelInstance,
+                      ModelData modelData,
                       GDXMousePickRayCollisionCalculator collisionCalculator)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
-      create(referenceFrame, transform, panel3D, modelInstance, collisionCalculator);
+      create(referenceFrame, transform, panel3D, modelData, collisionCalculator);
    }
 
    public void create(ReferenceFrame referenceFrameToRepresent,
                       RigidBodyTransform transformToParentToModify,
                       GDX3DPanel panel3D,
-                      GDXModelInstance modelInstance,
+                      ModelData modelData,
                       GDXMousePickRayCollisionCalculator collisionCalculator)
    {
       representativeReferenceFrame = referenceFrameToRepresent;
       transformToParent = transformToParentToModify;
-      this.modelInstance = modelInstance;
+      this.modelInstance = new GDXModelInstance(new Model(modelData));
       this.collisionCalculator = collisionCalculator;
 
-      highlightModelInstance = new GDXInteractableHighlightModel(modelInstance.model);
+      highlightModelInstance = new GDXInteractableHighlightModel(modelData);
       selectablePose3DGizmo = new GDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
       panel3D.addImGui3DViewPickCalculator(this::calculate3DViewPick);

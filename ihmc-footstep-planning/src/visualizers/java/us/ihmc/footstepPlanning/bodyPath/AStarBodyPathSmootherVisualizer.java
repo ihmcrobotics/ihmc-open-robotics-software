@@ -1,12 +1,8 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.HeightMapMessage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.ContinuousIntegrationTools;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;

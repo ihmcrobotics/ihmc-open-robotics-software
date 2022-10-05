@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
-import controller_msgs.msg.dds.MessageCollection;
-import controller_msgs.msg.dds.MessageCollectionNotification;
+import ihmc_common_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

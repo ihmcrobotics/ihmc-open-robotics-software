@@ -1,7 +1,7 @@
 package us.ihmc.gdx.ui;
 
 import com.badlogic.gdx.math.Matrix4;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.communication.IHMCROS2Callback;

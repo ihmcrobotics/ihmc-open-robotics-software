@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import controller_msgs.msg.dds.PointCloudWorldPacket;
+import perception_msgs.msg.dds.PointCloudWorldPacket;
 import optiTrack.IHMCMocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;

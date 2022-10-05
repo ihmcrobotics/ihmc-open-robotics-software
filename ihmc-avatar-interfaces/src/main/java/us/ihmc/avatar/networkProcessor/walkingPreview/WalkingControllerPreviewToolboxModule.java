@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;

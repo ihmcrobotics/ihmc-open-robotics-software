@@ -1,6 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;

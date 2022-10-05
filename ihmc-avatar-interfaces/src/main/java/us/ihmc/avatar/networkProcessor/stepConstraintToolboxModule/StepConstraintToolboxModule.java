@@ -1,6 +1,9 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import perception_msgs.msg.dds.PlanarRegionMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
