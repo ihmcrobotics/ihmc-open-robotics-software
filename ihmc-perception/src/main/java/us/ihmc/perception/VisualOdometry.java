@@ -3,10 +3,13 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_features2d.DescriptorMatcher;
 import org.bytedeco.opencv.opencv_features2d.ORB;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
+import static org.bytedeco.opencv.global.opencv_core.cvNorm;
 import static org.bytedeco.opencv.global.opencv_features2d.drawKeypoints;
 import static org.bytedeco.opencv.global.opencv_features2d.drawMatches;
 import static org.bytedeco.opencv.global.opencv_highgui.*;
@@ -22,7 +25,8 @@ public class VisualOdometry
 
    private final ORB orb = ORB.create();
 
-   private static final String DATASET_PATH = "/home/quantum/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/";
+//   private static final String DATASET_PATH = "/home/bmishra/Workspace/Storage/Other/Temp/dataset/sequences/00/image_0/";
+   private static final String DATASET_PATH = "/home/bmishra/Workspace/Data/Datasets/dataset/sequences/00/image_2/";
 
    private Mat previousImage;
    private Mat currentImage;
@@ -67,7 +71,7 @@ public class VisualOdometry
 
          // Match keypoints to tracks
 
-         matchKeypoints(previousDescriptors, currentDescriptors, matches);
+         matchKeypoints(previousKeypoints, previousDescriptors, currentKeypoints, currentDescriptors, matches);
          LogTools.info("Matches Found: {} {}", matches.size(), code);
 
          display = currentImage.clone();
@@ -137,7 +141,7 @@ public class VisualOdometry
    public int displayImage(Mat image)
    {
       Mat largeImage = new Mat(image.rows() * 2, image.cols() * 2, image.type());
-      resize(image, largeImage, new Size(image.cols() * 2, image.rows() * 2));
+      resize(image, largeImage, new Size((int) (image.cols() * 1.5), (int) (image.rows() * 1.5)));
       imshow("Visual Odometry", largeImage);
       int code = waitKeyEx(30);
       if (code == 113)
@@ -158,7 +162,7 @@ public class VisualOdometry
       return kp;
    }
 
-   public DMatchVector matchKeypoints(Mat previousDesc, Mat currentDesc, DMatchVector matchesToPack)
+   public DMatchVector matchKeypoints(KeyPointVector previousKp, Mat previousDesc, KeyPointVector currentKp, Mat currentDesc, DMatchVector matchesToPack)
    {
       matchesToPack.clear();
 
@@ -169,7 +173,12 @@ public class VisualOdometry
       float ratio_thresh = 0.8f;
       for (int i = 0; i < knn_matches.size(); i++)
       {
-         if (knn_matches.get(i).get(0).distance() < ratio_thresh * knn_matches.get(i).get(1).distance())
+         KeyPoint previousPoint = previousKp.get(knn_matches.get(i).get(0).trainIdx());
+         KeyPoint currentPoint = currentKp.get(knn_matches.get(i).get(0).queryIdx());
+         double distanceInPixels = EuclidGeometryTools.distanceBetweenPoint2Ds(previousPoint.pt().x(), previousPoint.pt().y(),
+                                                                               currentPoint.pt().x(), currentPoint.pt().y());
+
+         if (knn_matches.get(i).get(0).distance() < ratio_thresh * knn_matches.get(i).get(1).distance() && distanceInPixels < 100)
          {
             matchesToPack.push_back(knn_matches.get(i).get(0));
          }
