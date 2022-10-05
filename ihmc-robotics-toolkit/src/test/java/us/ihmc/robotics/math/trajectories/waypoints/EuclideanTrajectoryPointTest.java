@@ -501,9 +501,8 @@ public class EuclideanTrajectoryPointTest
       assertTrue(simpleEuclideanTrajectoryPointTwo.epsilonEquals(simpleEuclideanTrajectoryPoint, 1e-10));
 
 
-      Point3D positionToPack = new Point3D();
-      Vector3D linearVelocityToPack = new Vector3D();
-      simpleEuclideanTrajectoryPoint.get(positionToPack, linearVelocityToPack);
+      Point3D positionToPack = new Point3D(simpleEuclideanTrajectoryPoint.getPosition());
+      Vector3D linearVelocityToPack = new Vector3D(simpleEuclideanTrajectoryPoint.getLinearVelocity());
 
       simpleEuclideanTrajectoryPointTwo = new EuclideanTrajectoryPoint();
       simpleEuclideanTrajectoryPointTwo.set(time, positionToPack, linearVelocityToPack);
@@ -512,9 +511,8 @@ public class EuclideanTrajectoryPointTest
 
 
 
-      positionToPack = new Point3D();
-      linearVelocityToPack = new Vector3D();
-      simpleEuclideanTrajectoryPoint.get( positionToPack, linearVelocityToPack);
+      positionToPack = new Point3D(simpleEuclideanTrajectoryPoint.getPosition());
+      linearVelocityToPack = new Vector3D(simpleEuclideanTrajectoryPoint.getLinearVelocity());
 
       simpleEuclideanTrajectoryPointTwo = new EuclideanTrajectoryPoint();
       simpleEuclideanTrajectoryPointTwo.set(time, positionToPack, linearVelocityToPack);
