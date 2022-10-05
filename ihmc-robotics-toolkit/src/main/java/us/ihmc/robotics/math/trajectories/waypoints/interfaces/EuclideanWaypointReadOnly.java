@@ -95,7 +95,9 @@ public interface EuclideanWaypointReadOnly extends EuclidGeometry
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof EuclideanWaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof EuclideanWaypointReadOnly))
          return false;
 
       EuclideanWaypointReadOnly other = (EuclideanWaypointReadOnly) geometry;
@@ -112,7 +114,9 @@ public interface EuclideanWaypointReadOnly extends EuclidGeometry
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof EuclideanWaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof EuclideanWaypointReadOnly))
          return false;
 
       EuclideanWaypointReadOnly other = (EuclideanWaypointReadOnly) geometry;
@@ -129,7 +133,9 @@ public interface EuclideanWaypointReadOnly extends EuclidGeometry
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof EuclideanWaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof EuclideanWaypointReadOnly))
          return false;
 
       EuclideanWaypointReadOnly other = (EuclideanWaypointReadOnly) geometry;

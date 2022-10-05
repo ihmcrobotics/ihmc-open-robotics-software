@@ -101,7 +101,9 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof SO3WaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof SO3WaypointReadOnly))
          return false;
 
       SO3WaypointReadOnly other = (SO3WaypointReadOnly) geometry;
@@ -118,7 +120,9 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof SO3WaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof SO3WaypointReadOnly))
          return false;
 
       SO3WaypointReadOnly other = (SO3WaypointReadOnly) geometry;
@@ -135,7 +139,9 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof SO3WaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof SO3WaypointReadOnly))
          return false;
 
       SO3WaypointReadOnly other = (SO3WaypointReadOnly) geometry;
