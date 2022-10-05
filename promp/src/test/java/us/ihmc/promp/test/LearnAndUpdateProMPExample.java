@@ -199,22 +199,24 @@ public class LearnAndUpdateProMPExample
          for (int j = 0; j < viaPointStdDeviation.cols(); j++)
          {
             if (i == j)
-               viaPointStdDeviation.apply(i, j).put(0); // Preferably keep std low. Lower std -> higher precision but less damping
+               viaPointStdDeviation.apply(i, j).put(0.00001); // Preferably keep std low. Lower std -> higher precision but less damping
             else
                viaPointStdDeviation.apply(i, j).put(0);
          }
       }
       // condition point at a general timestep
-      EigenVectorXd viaPoint = new EigenVectorXd(dofs.size());
-      int conditioningTimestep = 10;
-      //      for (int i=0; i<viaPoint.size(); i++)
-      //         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep,i));
-      //      myProMP.condition_via_point(conditioningTimestep,viaPoint,viaPointStdDeviation);
-      // condition goal
-      conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps()-1;
-      System.out.print("Conditioning timestep: " + conditioningTimestep);
-      System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 1) + " " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 2));
       myProMP.set_conditioning_ridge_factor(0.0001);
+      EigenVectorXd viaPoint = new EigenVectorXd(dofs.size());
+      int conditioningTimestep = 350;
+      for (int i = 0; i < viaPoint.size(); i++)
+         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
+      myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
+      // condition goal
+      conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps() - 1;
+      System.out.print("Conditioning timestep: " + conditioningTimestep);
+      System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " +
+                         demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 1) + " " +
+                         demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 2));
       for (int i = 0; i < viaPoint.size(); i++)
          viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
       myProMP.condition_goal(viaPoint, viaPointStdDeviation);
