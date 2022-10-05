@@ -2,6 +2,7 @@ package us.ihmc.tools.property;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -33,13 +34,13 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private final StoredPropertyKeyList keys;
    private final Object[] values;
    private String title;
-   private String saveFileNameINI;
+   private String legacyFileNameINI;
    private String saveFileNameJSON;
    private String currentVersionSuffix;
    private Class<?> classForLoading;
    private final WorkspaceDirectory workspaceDirectory;
    private final String uncapitalizedClassName;
-   private WorkspaceFile workspaceINIFile;
+   private WorkspaceFile workspaceLegacyINIFile;
    private WorkspaceFile workspaceJSONFile;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
@@ -226,8 +227,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
    public void updateBackingSaveFile(String versionSuffix)
    {
       currentVersionSuffix = versionSuffix;
-      saveFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
-      workspaceINIFile = new WorkspaceFile(workspaceDirectory, saveFileNameINI);
+      legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
+      workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
       saveFileNameJSON = classForLoading.getSimpleName() + currentVersionSuffix + ".json";
       workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
    }
@@ -268,6 +269,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
          {
             if (node instanceof ObjectNode objectNode)
             {
+               if (objectNode.get("title") instanceof TextNode textNode)
+               {
+                  title = textNode.asText();
+               }
+
                for (StoredPropertyKey<?> key : keys.keys())
                {
                   JsonNode propertyNode = objectNode.get(key.getTitleCasedName());
@@ -301,15 +307,15 @@ public class StoredPropertySet implements StoredPropertySetBasics
          ExceptionTools.handle(() ->
          {
             Properties properties = new Properties();
-            InputStream streamForLoading = workspaceINIFile.getClasspathResourceAsStream();
+            InputStream streamForLoading = workspaceLegacyINIFile.getClasspathResourceAsStream();
 
             if (streamForLoading == null)
             {
-               LogTools.warn("Parameter file {} could not be found. Values will be null.", saveFileNameINI);
+               LogTools.warn("Parameter file {} could not be found. Values will be null.", legacyFileNameINI);
             }
             else
             {
-               LogTools.info("Loading parameters from {}", saveFileNameINI);
+               LogTools.info("Loading parameters from {}", legacyFileNameINI);
                properties.load(streamForLoading);
 
                for (StoredPropertyKey<?> key : keys.keys())
@@ -322,14 +328,14 @@ public class StoredPropertySet implements StoredPropertySetBasics
                         continue;
                      }
 
-                     throw new RuntimeException(workspaceINIFile.getClasspathResource() + " does not contain key: " + key.getCamelCasedName());
+                     throw new RuntimeException(workspaceLegacyINIFile.getClasspathResource() + " does not contain key: " + key.getCamelCasedName());
                   }
 
                   String stringValue = (String) properties.get(key.getCamelCasedName());
 
                   if (stringValue.equals("null"))
                   {
-                     LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameINI);
+                     LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), legacyFileNameINI);
                   }
                   else
                   {
@@ -343,24 +349,32 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    public void save()
    {
-      ExceptionTools.handle(() ->
+      Path fileForSaving = findFileForSaving();
+      LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
+      if (workspaceDirectory.isFileAccessAvailable())
       {
-         ArrayList<String> lines = new ArrayList<>();
+         FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      }
+      JSONFileTools.save(fileForSaving, jsonRootObjectNode ->
+      {
+         jsonRootObjectNode.put("title", title == null ? classForLoading.getSimpleName() : title);
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            lines.add(key.getCamelCasedName() + "=" + serializeValue(values[key.getIndex()]));
+            if (key instanceof BooleanStoredPropertyKey booleanKey)
+            {
+               jsonRootObjectNode.put(key.getTitleCasedName(), get(booleanKey));
+            }
+            else if (key instanceof DoubleStoredPropertyKey doubleKey)
+            {
+               jsonRootObjectNode.put(key.getTitleCasedName(), get(doubleKey));
+            }
+            else if (key instanceof IntegerStoredPropertyKey integerKey)
+            {
+               jsonRootObjectNode.put(key.getTitleCasedName(), get(integerKey));
+            }
          }
-
-         Path fileForSaving = findFileForSaving();
-         LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
-         if (workspaceDirectory.isFileAccessAvailable())
-         {
-            FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-         }
-         FileTools.writeAllLines(lines, fileForSaving, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-
-         convertLineEndingsToUnix(fileForSaving);
-      }, DefaultExceptionHandler.PRINT_STACKTRACE);
+      });
+      convertLineEndingsToUnix(fileForSaving);
    }
 
    private String serializeValue(Object object)
@@ -424,9 +438,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
-   public Path findFileForSaving()
+   private Path findFileForSaving()
    {
-      return findSaveFileDirectory().resolve(saveFileNameINI);
+      return findSaveFileDirectory().resolve(saveFileNameJSON);
    }
 
    /**

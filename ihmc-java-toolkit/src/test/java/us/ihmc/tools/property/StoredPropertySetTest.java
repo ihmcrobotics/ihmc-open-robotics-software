@@ -111,4 +111,23 @@ public class StoredPropertySetTest
       LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
       LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
    }
+
+   public static void main(String[] args)
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      storedPropertySetTestParameters.load();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.save();
+   }
 }
