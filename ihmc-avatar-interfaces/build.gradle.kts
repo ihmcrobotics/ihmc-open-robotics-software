@@ -54,6 +54,7 @@ mainDependencies {
    api("us.ihmc:scs2-bullet-simulation:17-0.10.2")
    api("us.ihmc:scs2-session-visualizer-jfx:17-0.10.2")
    api("us.ihmc:scs2-simulation-construction-set:17-0.10.2")
+   api("us.ihmc:promp:source")
 }
 
 testDependencies {

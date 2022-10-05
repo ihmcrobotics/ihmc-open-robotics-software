@@ -172,7 +172,7 @@ public class LearnAndUpdateProMPExample
          for (int j = 0; j < observedTrajectory.cols(); j++)
             observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
 
-      int demo = infer_closest_trajectory(observedTrajectory, demoTestTrajectories);
+      int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       System.out.println("Inferred closest demo to current observation: " + (demo + 1));
 
       double inferredSpeed = demoTestTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
