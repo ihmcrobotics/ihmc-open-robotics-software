@@ -23,7 +23,6 @@ public class StoredPropertySetGeneratorTest extends StoredPropertySet implements
    {
       StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(StoredPropertySetGeneratorTest.class,
                                                                                     "ihmc-open-robotics-software",
-                                                                                    "ihmc-java-toolkit/src/test/resources",
                                                                                     "ihmc-java-toolkit/src/test/java");
       generator.generate();
    }

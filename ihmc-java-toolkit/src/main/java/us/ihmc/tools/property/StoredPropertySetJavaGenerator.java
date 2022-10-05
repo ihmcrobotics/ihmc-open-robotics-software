@@ -30,7 +30,6 @@ public class StoredPropertySetJavaGenerator
 
    public StoredPropertySetJavaGenerator(Class<?> clazz,
                                          String directoryNameToAssumePresent,
-                                         String subsequentPathToResourceFolder,
                                          String subsequentPathToJavaFolder)
    {
       this.clazz = clazz;
@@ -44,7 +43,6 @@ public class StoredPropertySetJavaGenerator
 
    public void generate()
    {
-
       JSONFileTools.loadFromClasspath(clazz, jsonFileName, node ->
       {
          if (node instanceof ObjectNode objectNode)
@@ -181,8 +179,6 @@ public class StoredPropertySetJavaGenerator
       }
       return propertyKeyDeclarations.toString();
    }
-
-
 
    private String getParameterGetterStrings()
    {
