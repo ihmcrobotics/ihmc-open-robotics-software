@@ -14,20 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -369,6 +356,9 @@ public class CrossRobotCommandResolver
             case LIMIT_REDUCTION:
                resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
                break;
+            case QP_INPUT:
+               resolveQPObjectiveCommand((QPObjectiveCommand) commandToResolve, out.addQPObjectiveCommand());
+               break;
             default:
                throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
@@ -470,6 +460,9 @@ public class CrossRobotCommandResolver
                break;
             case VIRTUAL_WRENCH:
                resolveVirtualWrenchCommand((VirtualWrenchCommand) commandToResolve, out.addVirtualWrenchCommand());
+               break;
+            case QP_INPUT:
+               resolveQPObjectiveCommand((QPObjectiveCommand) commandToResolve, out.addQPObjectiveCommand());
                break;
             default:
                throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
@@ -606,6 +599,16 @@ public class CrossRobotCommandResolver
       out.setMomentumRateGradient(in.getMomentumRateGradient());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveQPObjectiveCommand(QPObjectiveCommand in, QPObjectiveCommand out)
+   {
+      out.setCommandId(in.getCommandId());
+      out.getSelectionMatrix().set(in.getSelectionMatrix());
+      out.getWeightMatrix().set(in.getWeightMatrix());
+      out.getObjective().set(in.getObjective());
+      out.getJacobian().set(in.getJacobian());
+      out.setDoNullSpaceProjection(in.isNullspaceProjected());
    }
 
    public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)
