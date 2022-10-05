@@ -5,7 +5,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointRea
 
 public interface OneDoFTrajectoryPointReadOnly extends TrajectoryPointReadOnly, OneDoFWaypointReadOnly
 {
-   default boolean epsilonEquals(OneDoFTrajectoryPointBasics other, double epsilon)
+   default boolean equals(OneDoFTrajectoryPointReadOnly other)
+   {
+      return EuclidCoreTools.equals(getTime(), other.getTime()) && OneDoFWaypointReadOnly.super.equals(other);
+   }
+
+   default boolean epsilonEquals(OneDoFTrajectoryPointReadOnly other, double epsilon)
    {
       return EuclidCoreTools.epsilonEquals(getTime(), other.getTime(), epsilon) && OneDoFWaypointReadOnly.super.epsilonEquals(other, epsilon);
    }
