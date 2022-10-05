@@ -22,8 +22,11 @@ public class EigenTest
       System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
 
       List<String> libraryFiles = new ArrayList<>();
-      libraryFiles.add("libpromp.so");
-      libraryFiles.add("libjnipromp.so");
+//      libraryFiles.add("libpromp.so");
+//      libraryFiles.add("libjnipromp.so");
+
+      libraryFiles.add("promp.dll");
+      libraryFiles.add("jnipromp.dll");
 
       WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/src/main/resources");
       for (String libraryFile : libraryFiles)
