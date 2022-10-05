@@ -1,19 +1,14 @@
 package us.ihmc.gdx.ui;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.math.Matrix4;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import org.bytedeco.hdf5.H5File;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -21,14 +16,10 @@ import us.ihmc.gdx.logging.PerceptionLoggerPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXBuildingConstructor;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXOusterSensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.HDF5Tools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -40,11 +31,6 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 
 import java.net.URISyntaxException;
-
-import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
-import static org.bytedeco.opencv.global.opencv_core.convertScaleAbs;
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
 public class PerceptionVisualizerUI
 {
@@ -146,13 +132,12 @@ public class PerceptionVisualizerUI
             globalVisualizersUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
             pointCloudRenderer.create(200000);
-
          }
 
          @Override
          public void render()
          {
-            if(nativesLoadedActivator.poll())
+            if (nativesLoadedActivator.poll())
             {
                globalVisualizersUI.update();
 
