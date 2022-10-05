@@ -1,4 +1,4 @@
-package us.ihmc.robotics.heightMap;
+package us.ihmc.sensorProcessing.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;

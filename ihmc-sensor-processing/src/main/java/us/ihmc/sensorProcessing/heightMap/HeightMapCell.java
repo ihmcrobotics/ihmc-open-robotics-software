@@ -1,9 +1,8 @@
-package us.ihmc.robotics.heightMap;
+package us.ihmc.sensorProcessing.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.heightMap.HeightMapParametersReadOnly;
 
 /**
  * Contains data for a given XY grid cell.
