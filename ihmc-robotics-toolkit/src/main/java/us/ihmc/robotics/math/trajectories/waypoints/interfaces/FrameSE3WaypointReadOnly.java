@@ -45,18 +45,6 @@ public interface FrameSE3WaypointReadOnly extends SE3WaypointReadOnly, FrameEucl
       return getSO3Waypoint().getAngularVelocity();
    }
 
-   @Deprecated
-   default void get(FixedFrameSE3WaypointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
-   @Deprecated
-   default void getIncludingFrame(FrameSE3WaypointBasics otherToPack)
-   {
-      otherToPack.setIncludingFrame(this);
-   }
-
    default void get(FixedFrameEuclideanWaypointBasics euclideanWaypointToPack, FixedFrameSO3WaypointBasics so3WaypointToPack)
    {
       euclideanWaypointToPack.set(getEuclideanWaypoint());

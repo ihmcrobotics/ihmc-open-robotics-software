@@ -36,54 +36,6 @@ public interface EuclideanWaypointBasics extends Transformable, Clearable, Eucli
       return EuclideanWaypointReadOnly.super.containsNaN();
    }
 
-   @Deprecated
-   default void setPosition(double x, double y, double z)
-   {
-      getPosition().set(x, y, z);
-   }
-
-   @Deprecated
-   default void setLinearVelocity(double x, double y, double z)
-   {
-      getLinearVelocity().set(x, y, z);
-   }
-
-   @Deprecated
-   default void setPosition(Point3DReadOnly position)
-   {
-      getPosition().set(position);
-   }
-
-   @Deprecated
-   default void setPositionToZero()
-   {
-      getPosition().setToZero();
-   }
-
-   @Deprecated
-   default void setPositionToNaN()
-   {
-      getPosition().setToNaN();
-   }
-
-   @Deprecated
-   default void setLinearVelocity(Vector3DReadOnly linearVelocity)
-   {
-      getLinearVelocity().set(linearVelocity);
-   }
-
-   @Deprecated
-   default void setLinearVelocityToZero()
-   {
-      getLinearVelocity().setToZero();
-   }
-
-   @Deprecated
-   default void setLinearVelocityToNaN()
-   {
-      getLinearVelocity().setToNaN();
-   }
-
    default void set(Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       getPosition().set(position);

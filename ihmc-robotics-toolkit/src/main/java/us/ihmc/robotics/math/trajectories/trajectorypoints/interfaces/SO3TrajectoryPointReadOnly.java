@@ -13,12 +13,6 @@ public interface SO3TrajectoryPointReadOnly extends TrajectoryPointReadOnly, SO3
       return Double.isNaN(getTime()) || SO3WaypointReadOnly.super.containsNaN();
    }
 
-   @Deprecated
-   default void get(SO3TrajectoryPointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
    @Override
    default boolean equals(EuclidGeometry geometry)
    {

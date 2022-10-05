@@ -54,12 +54,6 @@ public interface SE3WaypointReadOnly extends EuclideanWaypointReadOnly, SO3Waypo
       getSO3Waypoint().get(orientationToPack, angularVelocityToPack);
    }
 
-   @Deprecated
-   default void get(SE3WaypointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
    default void get(EuclideanWaypointBasics euclideanWaypointToPack, SO3WaypointBasics so3WaypointToPack)
    {
       euclideanWaypointToPack.set(getEuclideanWaypoint());

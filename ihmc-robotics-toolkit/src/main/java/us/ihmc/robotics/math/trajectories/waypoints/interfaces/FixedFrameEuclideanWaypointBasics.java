@@ -19,18 +19,6 @@ public interface FixedFrameEuclideanWaypointBasics extends FrameEuclideanWaypoin
    @Override
    FixedFrameVector3DBasics getLinearVelocity();
 
-   @Deprecated
-   default void setPosition(FramePoint3DReadOnly position)
-   {
-      getPosition().set(position);
-   }
-
-   @Deprecated
-   default void setLinearVelocity(FrameVector3DReadOnly linearVelocity)
-   {
-      getLinearVelocity().set(linearVelocity);
-   }
-
    default double positionDistance(FrameEuclideanWaypointReadOnly other)
    {
       return getPosition().distance(other.getPosition());

@@ -568,7 +568,7 @@ public class Footstep implements Settable<Footstep>
          FrameSE3TrajectoryPoint trajectoryPoint = swingTrajectory.get(pointIdx);
          trajectoryPoint.getPoseIncludingFrame(tempPose);
          tempPose.prependTranslation(offset);
-         trajectoryPoint.setPosition(tempPose.getPosition());
+         trajectoryPoint.getPosition().set((FramePoint3DReadOnly) tempPose.getPosition());
       }
    }
 

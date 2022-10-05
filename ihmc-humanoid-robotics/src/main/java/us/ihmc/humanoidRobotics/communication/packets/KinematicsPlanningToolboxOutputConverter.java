@@ -120,7 +120,7 @@ public class KinematicsPlanningToolboxOutputConverter
 
          double time = keyFrameTimes.get(i);
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
          trajectoryPoint.setTime(time);
@@ -179,7 +179,7 @@ public class KinematicsPlanningToolboxOutputConverter
          trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
          double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                           .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,

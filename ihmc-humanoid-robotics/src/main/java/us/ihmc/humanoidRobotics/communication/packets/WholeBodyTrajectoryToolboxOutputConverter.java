@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -68,7 +68,6 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       trajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
       // message params.
-      ReferenceFrame trajectoryFrame = worldFrame;
       Point3D[] desiredPositions = new Point3D[numberOfTrajectoryPoints];
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
@@ -110,7 +109,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
          double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                           .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,
@@ -133,7 +132,6 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       so3Trajectory.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
 
       // message params.
-      ReferenceFrame trajectoryFrame = worldFrame;
       Quaternion[] desiredOrientations = new Quaternion[numberOfTrajectoryPoints];
 
       SO3TrajectoryPointCalculator orientationCalculator = new SO3TrajectoryPointCalculator();
@@ -165,7 +163,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
 
          double time = firstTrajectoryPointTime + solution.getTrajectoryTimes().get(i);
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          SO3TrajectoryPointMessage trajectoryPoint = so3Trajectory.getTaskspaceTrajectoryPoints().add();
          trajectoryPoint.setTime(time);
@@ -227,7 +225,7 @@ public class WholeBodyTrajectoryToolboxOutputConverter
          trajectoryPoints.getTrajectoryPoint(i).get(desiredPositions[i], desiredLinearVelocity);
          double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
-         orientationCalculator.getTrajectoryPoint(i).getAngularVelocity(desiredAngularVelocity);
+         desiredAngularVelocity.set(orientationCalculator.getTrajectoryPoint(i).getAngularVelocity());
 
          trajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                           .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(time, desiredPositions[i], desiredOrientations[i], desiredLinearVelocity,
@@ -235,11 +233,6 @@ public class WholeBodyTrajectoryToolboxOutputConverter
       }
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().set(trajectoryMessage);
-   }
-
-   private void computeHeadTrajectoryMessage(WholeBodyTrajectoryToolboxOutputStatus solution)
-   {
-
    }
 
    public KinematicsToolboxOutputStatus getRobotConfiguration(WholeBodyTrajectoryToolboxOutputStatus solution, double time)
