@@ -2,7 +2,7 @@ package us.ihmc.communication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

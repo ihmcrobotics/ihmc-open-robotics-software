@@ -3,8 +3,8 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 import java.io.File;
 import java.io.IOException;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import perception_msgs.msg.dds.LidarScanMessage;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

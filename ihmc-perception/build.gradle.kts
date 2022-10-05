@@ -14,6 +14,7 @@ plugins {
 ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
+   javaDirectory("slam-wrapper", "generated-java")
    configurePublications()
 }
 
@@ -74,6 +75,11 @@ javacvDependencies {
    apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
+slamWrapperDependencies {
+   apiBytedecoNatives("javacpp")
+   api("us.ihmc:ihmc-java-toolkit:source")
+}
+
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
@@ -106,6 +112,12 @@ visualizersDependencies {
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+}
+
+tasks.create("generateMappings", Exec::class)
+{
+   workingDir = file("src/slam-wrapper/cpp")
+   commandLine = listOf("./generate-java-mappings-docker.sh")
 }
 
 

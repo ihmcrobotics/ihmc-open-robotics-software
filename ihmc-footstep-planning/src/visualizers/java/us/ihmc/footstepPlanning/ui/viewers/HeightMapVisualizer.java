@@ -1,7 +1,7 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
 import com.google.common.util.concurrent.AtomicDouble;
-import controller_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;

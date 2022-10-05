@@ -1,6 +1,6 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import controller_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;

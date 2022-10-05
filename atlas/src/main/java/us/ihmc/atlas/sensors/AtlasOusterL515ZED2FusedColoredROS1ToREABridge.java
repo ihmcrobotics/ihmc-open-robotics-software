@@ -1,9 +1,8 @@
 package us.ihmc.atlas.sensors;
 
-import controller_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.opencv_core.Point3fVector;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
