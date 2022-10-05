@@ -133,10 +133,6 @@ public class StoredPropertySet implements StoredPropertySetBasics
          load();
          save();
       }
-      if (iniResourceExists() && workspaceLegacyINIFile.isFileAccessAvailable())
-      {
-         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilePath());
-      }
    }
 
    @Override
@@ -450,6 +446,12 @@ public class StoredPropertySet implements StoredPropertySetBasics
          }
       });
       convertLineEndingsToUnix(fileForSaving);
+
+      // Automatically upgrade the stored file to JSON
+      if (iniResourceExists() && workspaceLegacyINIFile.isFileAccessAvailable())
+      {
+         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilePath());
+      }
    }
 
    private String serializeValue(Object object)
