@@ -36,11 +36,32 @@ public interface FixedFrameSO3WaypointBasics extends FrameSO3WaypointReadOnly, S
       set(other);
    }
 
+   /**
+    * Creates a new frame waypoint which reference frame is linked to the given
+    * {@code referenceFrameHolder}.
+    *
+    * @param referenceFrameHolder the reference frame holder to link to the new frame waypoint.
+    * @return the new linked frame waypoint.
+    */
    public static FixedFrameSO3WaypointBasics newFixedFrameSO3WaypointBasics(ReferenceFrameHolder referenceFrameHolder)
    {
       return newLinkedFixedFrameSO3WaypointBasics(referenceFrameHolder, new SO3Waypoint());
    }
 
+   /**
+    * Creates a new frame waypoint which is linked to the given frameless waypoint and
+    * {@code referenceFrameHolder}.
+    * <p>
+    * This can essentially be used to wrap a frameless waypoint into a frame waypoint. Modifications on
+    * the returned object will affect the frameless waypoint.
+    * </p>
+    *
+    * @param referenceFrameHolder the reference frame holder to link to the new frame waypoint.
+    * @param originalWaypoint     the waypoint to link to the new frame waypoint. Modifications on
+    *                             either the {@code originalWaypoint} or the new frame waypoint will be
+    *                             propagated to the other.
+    * @return the new linked frame waypoint.
+    */
    public static FixedFrameSO3WaypointBasics newLinkedFixedFrameSO3WaypointBasics(ReferenceFrameHolder referenceFrameHolder, SO3WaypointBasics originalWaypoint)
    {
       return new FixedFrameSO3WaypointBasics()
