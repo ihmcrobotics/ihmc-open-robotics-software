@@ -14,9 +14,12 @@ rd /s /q build
 mkdir build
 cd build
 
-cmake -DCMAKE_INSTALL_PREFIX=. ..
+cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=. ..
 
-msbuild promp.sln -t:promp -p:Configuration=Release || exit /b 1
+nmake || exit /b 1
+nmake install || exit /b 1
+
+:: msbuild promp.sln -t:promp -p:Configuration=Release || exit /b 1
 
 :: Use the latest release on GitHub
 :: https://github.com/bytedeco/javacpp/releases

@@ -22,6 +22,8 @@
 
 #include <Eigen/Core>
 
+#include <promp/trajectory.hpp>
+
 namespace promp::io {
 
     /**

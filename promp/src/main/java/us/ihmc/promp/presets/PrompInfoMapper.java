@@ -10,7 +10,6 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 
 @Properties(value = {
       @Platform(
-            value = {"linux", "windows", "macosx"},
             compiler = "cpp17",
             define = {"UNIQUE_PTR_NAMESPACE std", "SHARED_PTR_NAMESPACE std"},
             include = {"promp/trajectory.hpp",
@@ -23,9 +22,8 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             linkpath = "../lib"),
       @Platform(
             value = "windows-x86_64",
-            includepath = {"..\\..\\include", "C:\\Program Files (x86)\\Eigen3\\include\\eigen3"},
-            linkpath = "..\\Release",
-            link = "promp")
+            includepath = {"..\\include", "C:\\Program Files (x86)\\Eigen3\\include\\eigen3"},
+            linkpath = "..\\")
       },
       target = "us.ihmc.promp",
       global = "us.ihmc.promp.global.promp"
