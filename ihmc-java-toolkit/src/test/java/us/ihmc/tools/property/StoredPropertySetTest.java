@@ -1,6 +1,7 @@
 package us.ihmc.tools.property;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -100,5 +101,14 @@ public class StoredPropertySetTest
       storedPropertySet2.load();
 
       assertFalse(storedPropertySet.equals(storedPropertySet2));
+   }
+
+   @Test
+   public void testLoadingStoredPropertySetGeneratorTest()
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
    }
 }
