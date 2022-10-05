@@ -65,9 +65,9 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTra
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGeneratorTest;
 import us.ihmc.robotics.math.trajectories.waypoints.SE3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.SO3Waypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleEuclideanTrajectoryPointTest;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPointTest;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleSO3TrajectoryPointTest;
+import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointTest;
+import us.ihmc.robotics.math.trajectories.waypoints.SE3TrajectoryPointTest;
+import us.ihmc.robotics.math.trajectories.waypoints.SO3TrajectoryPointTest;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizerTest;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanTrajectoryPointTest;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
@@ -454,9 +454,9 @@ public class TrajectoryWaypointAPITest
       mutationTestFacilitator.addTestClassesToRun(MultipleWaypointsOrientationTrajectoryGeneratorTest.class);
       mutationTestFacilitator.addTestClassesToRun(MultipleWaypointsPositionTrajectoryGeneratorTest.class);
       mutationTestFacilitator.addTestClassesToRun(MultipleWaypointsTrajectoryGeneratorTest.class);
-      mutationTestFacilitator.addTestClassesToRun(SimpleEuclideanTrajectoryPointTest.class);
-      mutationTestFacilitator.addTestClassesToRun(SimpleSE3TrajectoryPointTest.class);
-      mutationTestFacilitator.addTestClassesToRun(SimpleSO3TrajectoryPointTest.class);
+      mutationTestFacilitator.addTestClassesToRun(EuclideanTrajectoryPointTest.class);
+      mutationTestFacilitator.addTestClassesToRun(SE3TrajectoryPointTest.class);
+      mutationTestFacilitator.addTestClassesToRun(SO3TrajectoryPointTest.class);
       mutationTestFacilitator.addTestClassesToRun(TrajectoryPointOptimizerTest.class);
       mutationTestFacilitator.addTestClassesToRun(YoFrameEuclideanTrajectoryPointTest.class);
       mutationTestFacilitator.addTestClassesToRun(YoFrameSE3TrajectoryPointTest.class);
