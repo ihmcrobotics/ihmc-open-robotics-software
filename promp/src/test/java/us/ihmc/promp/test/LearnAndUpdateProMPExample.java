@@ -214,7 +214,7 @@ public class LearnAndUpdateProMPExample
       conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps()-1;
       System.out.print("Conditioning timestep: " + conditioningTimestep);
       System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 1) + " " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 2));
-      myProMP.set_conditioning_ridge_factor(0.01);
+      myProMP.set_conditioning_ridge_factor(0.0001);
       for (int i = 0; i < viaPoint.size(); i++)
          viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
       myProMP.condition_goal(viaPoint, viaPointStdDeviation);
