@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -170,7 +169,7 @@ public class RigidBodyOrientationControlHelper
 
       desiredOrientation.setIncludingFrame(orientation);
       desiredOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
-      trajectoryPoint.getOrientation().set((FrameOrientation3DReadOnly) desiredOrientation);
+      trajectoryPoint.getOrientation().set(desiredOrientation);
    }
 
    public void goToOrientation(FrameQuaternionReadOnly orientation, double trajectoryTime)
@@ -183,7 +182,7 @@ public class RigidBodyOrientationControlHelper
 
       desiredOrientation.setIncludingFrame(orientation);
       desiredOrientation.changeFrame(trajectoryGenerator.getReferenceFrame());
-      trajectoryPoint.getOrientation().set((FrameOrientation3DReadOnly) desiredOrientation);
+      trajectoryPoint.getOrientation().set(desiredOrientation);
    }
 
    public void getDesiredOrientation(FrameQuaternion orientationToPack)
@@ -407,7 +406,7 @@ public class RigidBodyOrientationControlHelper
          integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
          integratedOrientation.setRotationVector(integratedRotationVector);
          integratedOrientation.append(integratedPoint.getOrientation());
-         integratedPoint.getOrientation().set((Orientation3DReadOnly) integratedOrientation);
+         integratedPoint.getOrientation().set(integratedOrientation);
          integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
       else
@@ -445,7 +444,7 @@ public class RigidBodyOrientationControlHelper
       FrameSO3TrajectoryPoint initialPoint = pointQueue.addLast();
       initialPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       initialPoint.setTime(0.0);
-      initialPoint.getOrientation().set((FrameOrientation3DReadOnly) initialOrientation);
+      initialPoint.getOrientation().set(initialOrientation);
    }
 
    private FrameSO3TrajectoryPoint addPoint()

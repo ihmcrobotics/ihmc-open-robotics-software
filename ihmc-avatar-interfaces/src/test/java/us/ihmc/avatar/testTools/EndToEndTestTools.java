@@ -19,8 +19,8 @@ import java.util.function.DoubleUnaryOperator;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
@@ -136,15 +136,11 @@ public class EndToEndTestTools
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
       assertEquals(expectedWaypoint.getTime(), actualWaypoint.getTime(), epsilon, "Time");
       EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Orientation",
-                                                              expectedWaypoint.getOrientation(),
-                                                              actualWaypoint.getOrientation(),
-                                                              epsilon,
-                                                              FORMAT);
-      EuclidCoreTestTools.assertEquals("Angular Velocity",
-                                              expectedWaypoint.getAngularVelocity(),
-                                              actualWaypoint.getAngularVelocity(),
-                                              epsilon,
-                                              FORMAT);
+                                                                 expectedWaypoint.getOrientation(),
+                                                                 actualWaypoint.getOrientation(),
+                                                                 epsilon,
+                                                                 FORMAT);
+      EuclidCoreTestTools.assertEquals("Angular Velocity", expectedWaypoint.getAngularVelocity(), actualWaypoint.getAngularVelocity(), epsilon, FORMAT);
    }
 
    public static void assertOneDoFJointsFeebackControllerDesireds(String[] jointNames,
@@ -396,7 +392,8 @@ public class EndToEndTestTools
       String angularVelocityName = bodyName + "AngularVelocity";
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPoint.setTime(yoVariableHolder.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
-      simpleSO3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSO3TrajectoryPoint.getOrientation()
+                              .set((Orientation3DReadOnly) findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
       simpleSO3TrajectoryPoint.getAngularVelocity().set(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSO3TrajectoryPoint;
    }
@@ -417,7 +414,7 @@ public class EndToEndTestTools
       SE3TrajectoryPoint simpleSE3TrajectoryPoint = new SE3TrajectoryPoint();
       simpleSE3TrajectoryPoint.setTime(yoVariableHolder.findVariable(positionTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSE3TrajectoryPoint.getPosition().set(findPoint3D(positionTrajectoryName, positionName, suffix, yoVariableHolder));
-      simpleSE3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
+      simpleSE3TrajectoryPoint.getOrientation().set(findQuaternion(orientationTrajectoryName, orientationName, suffix, yoVariableHolder));
       simpleSE3TrajectoryPoint.getLinearVelocity().set(findVector3D(positionTrajectoryName, linearVelocityName, suffix, yoVariableHolder));
       simpleSE3TrajectoryPoint.getAngularVelocity().set(findVector3D(orientationTrajectoryName, angularVelocityName, suffix, yoVariableHolder));
       return simpleSE3TrajectoryPoint;

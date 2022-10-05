@@ -222,7 +222,7 @@ public class RigidBodyPositionControlHelper
 
       desiredPosition.setIncludingFrame(position);
       desiredPosition.changeFrame(trajectoryGenerator.getReferenceFrame());
-      trajectoryPoint.getPosition().set((FramePoint3DReadOnly) desiredPosition);
+      trajectoryPoint.getPosition().set(desiredPosition);
    }
 
    public void goToPosition(FramePoint3DReadOnly position, FrameQuaternionBasics currentDesiredOrientation, double trajectoryTime)
@@ -235,7 +235,7 @@ public class RigidBodyPositionControlHelper
 
       desiredPosition.setIncludingFrame(position);
       desiredPosition.changeFrame(trajectoryGenerator.getReferenceFrame());
-      trajectoryPoint.getPosition().set((FramePoint3DReadOnly) desiredPosition);
+      trajectoryPoint.getPosition().set(desiredPosition);
    }
 
    public void getDesiredPosition(FramePoint3D positionToPack)
@@ -504,7 +504,7 @@ public class RigidBodyPositionControlHelper
       FrameEuclideanTrajectoryPoint initialPoint = pointQueue.addLast();
       initialPoint.setToZero(trajectoryGenerator.getReferenceFrame());
       initialPoint.setTime(0.0);
-      initialPoint.getPosition().set((FramePoint3DReadOnly) initialPosition);
+      initialPoint.getPosition().set(initialPosition);
    }
 
    private FrameEuclideanTrajectoryPoint addPoint()
