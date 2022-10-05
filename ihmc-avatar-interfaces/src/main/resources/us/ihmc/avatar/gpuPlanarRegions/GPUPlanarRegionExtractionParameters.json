@@ -1,5 +1,5 @@
 {
-  "title" : "GPUPlanarRegionExtractionParameters",
+  "title" : "GPU planar region extraction parameters",
   "Merge distance threshold" : 0.008,
   "Merge angular threshold" : 0.82,
   "Filter disparity threshold" : 2000.0,
