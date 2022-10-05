@@ -11,6 +11,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
@@ -32,6 +33,7 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -224,10 +226,14 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
       themeFilePath = Paths.get(System.getProperty("user.home"), ".ihmc/themePreference.ini");
-      String line = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY).get(0);
-      for (Theme theme : Theme.values())
-         if (line.contains(theme.name()))
-            setTheme(theme);
+      if (Files.exists(themeFilePath))
+      {
+         List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
+         String firstLine = lines.get(0);
+         for (Theme theme : Theme.values())
+            if (firstLine.contains(theme.name()))
+               setTheme(theme);
+      }
    }
 
    public void renderBeforeOnScreenUI()
@@ -332,7 +338,10 @@ public class GDXImGuiBasedUI
                ImGui.sameLine();
          }
          if (theme != previousTheme)
+         {
+            FileTools.ensureFileExists(themeFilePath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
             FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         }
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
