@@ -28,7 +28,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SO3WaypointBasics
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class SimpleSO3TrajectoryPointTest
+public class SO3TrajectoryPointTest
 {
    @AfterEach
    public void tearDown()

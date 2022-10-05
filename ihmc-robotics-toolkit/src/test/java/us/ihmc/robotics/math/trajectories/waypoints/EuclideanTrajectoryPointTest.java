@@ -26,7 +26,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypoint
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class SimpleEuclideanTrajectoryPointTest
+public class EuclideanTrajectoryPointTest
 {
    @AfterEach
    public void tearDown()
