@@ -76,6 +76,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
 import us.ihmc.robotics.math.trajectories.generators.EuclideanTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
@@ -493,12 +494,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < trajectoryPoints.getNumberOfTrajectoryPoints(); i++)
          {
-            Point3D desiredPosition = new Point3D();
-            Vector3D desiredLinearVelocity = new Vector3D();
+            FrameEuclideanTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(i);
+            Point3D desiredPosition = new Point3D(trajectoryPoint.getPosition());
+            Vector3D desiredLinearVelocity = new Vector3D(trajectoryPoint.getLinearVelocity());
             Quaternion desiredOrientation = new Quaternion(tempOrientation);
             Vector3D desiredAngularVelocity = new Vector3D();
 
-            trajectoryPoints.getTrajectoryPoint(i).get(desiredPosition, desiredLinearVelocity);
             double time = trajectoryPoints.getTrajectoryPoint(i).getTime();
 
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -785,8 +786,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             Vector3D desiredLinearVelocity = new Vector3D();
             Quaternion desiredOrientation = new Quaternion(tempOrientation);
             Vector3D desiredAngularVelocity = new Vector3D();
+            FrameEuclideanTrajectoryPoint r = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
 
-            trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+            desiredPosition.set(r.getPosition());
+            desiredLinearVelocity.set(r.getLinearVelocity());
             double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -1013,8 +1016,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                Vector3D desiredLinearVelocity = new Vector3D();
                Quaternion desiredOrientation = new Quaternion(tempOrientation);
                Vector3D desiredAngularVelocity = new Vector3D();
+               FrameEuclideanTrajectoryPoint r = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
 
-               trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               desiredPosition.set(r.getPosition());
+               desiredLinearVelocity.set(r.getLinearVelocity());
                double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
                VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
@@ -1132,8 +1137,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                Vector3D desiredLinearVelocity = new Vector3D();
                Quaternion desiredOrientation = new Quaternion(tempOrientation);
                Vector3D desiredAngularVelocity = new Vector3D();
+               FrameEuclideanTrajectoryPoint r = trajectoryPoints.getTrajectoryPoint(calculatorIndex);
 
-               trajectoryPoints.getTrajectoryPoint(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+               desiredPosition.set(r.getPosition());
+               desiredLinearVelocity.set(r.getLinearVelocity());
                double time = trajectoryPoints.getTrajectoryPoint(calculatorIndex).getTime();
 
                VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
