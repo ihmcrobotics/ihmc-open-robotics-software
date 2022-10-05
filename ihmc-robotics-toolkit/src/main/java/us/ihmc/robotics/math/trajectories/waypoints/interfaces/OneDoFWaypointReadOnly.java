@@ -13,7 +13,12 @@ public interface OneDoFWaypointReadOnly
       otherToPack.set(this);
    }
 
-   default boolean epsilonEquals(OneDoFWaypointBasics other, double epsilon)
+   default boolean equals(OneDoFWaypointReadOnly other)
+   {
+      return EuclidCoreTools.equals(getPosition(), other.getPosition()) && EuclidCoreTools.equals(getVelocity(), other.getVelocity());
+   }
+
+   default boolean epsilonEquals(OneDoFWaypointReadOnly other, double epsilon)
    {
       return EuclidCoreTools.epsilonEquals(getPosition(), other.getPosition(), epsilon)
             && EuclidCoreTools.epsilonEquals(getVelocity(), other.getVelocity(), epsilon);
