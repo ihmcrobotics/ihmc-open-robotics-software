@@ -10,7 +10,7 @@ public interface SO3TrajectoryPointReadOnly extends TrajectoryPointReadOnly, SO3
    @Override
    default boolean containsNaN()
    {
-      return Double.isNaN(getTime()) || SO3WaypointReadOnly.super.containsNaN();
+      return isTimeNaN() || SO3WaypointReadOnly.super.containsNaN();
    }
 
    @Override

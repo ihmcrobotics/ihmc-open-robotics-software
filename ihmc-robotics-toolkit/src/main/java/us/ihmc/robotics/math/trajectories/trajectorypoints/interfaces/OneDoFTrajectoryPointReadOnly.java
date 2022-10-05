@@ -5,6 +5,12 @@ import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFWaypointRea
 
 public interface OneDoFTrajectoryPointReadOnly extends TrajectoryPointReadOnly, OneDoFWaypointReadOnly
 {
+   @Override
+   default boolean containsNaN()
+   {
+      return isTimeNaN() || OneDoFWaypointReadOnly.super.containsNaN();
+   }
+
    default boolean equals(OneDoFTrajectoryPointReadOnly other)
    {
       return EuclidCoreTools.equals(getTime(), other.getTime()) && OneDoFWaypointReadOnly.super.equals(other);
