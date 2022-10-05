@@ -310,7 +310,7 @@ public class OneWaypointSwingGenerator implements SwingGenerator
 
       waypointDataToPack.setToNaN(worldFrame);
       waypointDataToPack.setTime(waypointTime);
-      waypointDataToPack.getPosition().set((FramePoint3DReadOnly) waypointPositions.get(waypointIndex));
-      waypointDataToPack.getLinearVelocity().set((FrameVector3DReadOnly) tempWaypointVelocity);
+      waypointDataToPack.getPosition().set(waypointPositions.get(waypointIndex));
+      waypointDataToPack.getLinearVelocity().set(tempWaypointVelocity);
    }
 }

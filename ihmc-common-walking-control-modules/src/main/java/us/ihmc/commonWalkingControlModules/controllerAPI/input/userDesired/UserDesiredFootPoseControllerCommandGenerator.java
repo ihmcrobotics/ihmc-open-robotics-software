@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -27,15 +25,18 @@ public class UserDesiredFootPoseControllerCommandGenerator
    private final YoBoolean userDoFootPose = new YoBoolean("userDoFootPose", registry);
    private final YoDouble userDesiredFootPoseTrajectoryTime = new YoDouble("userDesiredFootPoseTrajectoryTime", registry);
 
-   private final YoEnum<RobotSide> userFootPoseSide = new YoEnum<RobotSide>("userFootPoseSide", registry, RobotSide.class);
+   private final YoEnum<RobotSide> userFootPoseSide = new YoEnum<>("userFootPoseSide", registry, RobotSide.class);
 
    private final YoFramePoseUsingYawPitchRoll userDesiredFootPose;
-   
+
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
    private final FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame());
-   
-   public UserDesiredFootPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, final FullHumanoidRobotModel fullRobotModel, double defaultTrajectoryTime, YoRegistry parentRegistry)
+
+   public UserDesiredFootPoseControllerCommandGenerator(final CommandInputManager controllerCommandInputManager,
+                                                        final FullHumanoidRobotModel fullRobotModel,
+                                                        double defaultTrajectoryTime,
+                                                        YoRegistry parentRegistry)
    {
       userDesiredFootPose = new YoFramePoseUsingYawPitchRoll("userDesiredFootPose", ReferenceFrame.getWorldFrame(), registry);
 
@@ -45,9 +46,10 @@ public class UserDesiredFootPoseControllerCommandGenerator
          ZUpFrame zUpFrame = new ZUpFrame(ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUpFrame");
          ankleZUpFrames.set(robotSide, zUpFrame);
       }
-      
+
       userDoFootPose.addListener(new YoVariableChangedListener()
       {
+         @Override
          public void changed(YoVariable v)
          {
             if (userDoFootPose.getBooleanValue())
@@ -61,21 +63,21 @@ public class UserDesiredFootPoseControllerCommandGenerator
                System.out.println("framePose " + framePose);
 
                FootTrajectoryCommand footTrajectoryControllerCommand = new FootTrajectoryCommand();
-               
+
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
                trajectoryPoint.setTime(userDesiredFootPoseTrajectoryTime.getDoubleValue());
-               trajectoryPoint.getPosition().set((FramePoint3DReadOnly) framePose.getPosition());
-               trajectoryPoint.getOrientation().set((FrameOrientation3DReadOnly) framePose.getOrientation());
+               trajectoryPoint.getPosition().set(framePose.getPosition());
+               trajectoryPoint.getOrientation().set(framePose.getOrientation());
                trajectoryPoint.getLinearVelocity().set(new Vector3D());
                trajectoryPoint.getAngularVelocity().set(new Vector3D());
-    
+
                footTrajectoryControllerCommand.getSE3Trajectory().addTrajectoryPoint(trajectoryPoint);
-               
+
                footTrajectoryControllerCommand.setRobotSide(userFootPoseSide.getEnumValue());
 
                System.out.println("Submitting " + footTrajectoryControllerCommand);
                controllerCommandInputManager.submitCommand(footTrajectoryControllerCommand);
-               
+
                userDoFootPose.set(false);
             }
          }
@@ -85,6 +87,5 @@ public class UserDesiredFootPoseControllerCommandGenerator
       userFootPoseSide.set(RobotSide.LEFT);
       parentRegistry.addChild(registry);
    }
-
 
 }
