@@ -76,7 +76,9 @@ public interface SE3WaypointReadOnly extends EuclideanWaypointReadOnly, SO3Waypo
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof SE3WaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof SE3WaypointReadOnly))
          return false;
 
       SE3WaypointReadOnly other = (SE3WaypointReadOnly) geometry;
@@ -93,7 +95,9 @@ public interface SE3WaypointReadOnly extends EuclideanWaypointReadOnly, SO3Waypo
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof SE3WaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof SE3WaypointReadOnly))
          return false;
 
       SE3WaypointReadOnly other = (SE3WaypointReadOnly) geometry;
@@ -110,7 +114,9 @@ public interface SE3WaypointReadOnly extends EuclideanWaypointReadOnly, SO3Waypo
    {
       if (geometry == this)
          return true;
-      if ((geometry == null) || !(geometry instanceof SE3WaypointReadOnly))
+      if (geometry == null)
+         return false;
+      if (!(geometry instanceof SE3WaypointReadOnly))
          return false;
 
       SE3WaypointReadOnly other = (SE3WaypointReadOnly) geometry;
