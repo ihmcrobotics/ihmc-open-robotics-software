@@ -5,7 +5,7 @@
 :: Assumes this is also in the Path: C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.33.31629\bin\Hostx64\x64
 
 pushd "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools"
-call VsDevCmd.bat
+call VsDevCmd.bat -host_arch=amd64 -arch=amd64
 popd
 
 :: Most closely resembles "rm -rf" on *nix
@@ -14,10 +14,12 @@ rd /s /q build
 mkdir build
 cd build
 
-cmake -G "NMake Makefiles" -DCMAKE_INSTALL_PREFIX=. ..
+cmake -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=. ..
 
 nmake || exit /b 1
 nmake install || exit /b 1
+
+xcopy /Y promp.dll ..\src\main\resources
 
 :: msbuild promp.sln -t:promp -p:Configuration=Release || exit /b 1
 
