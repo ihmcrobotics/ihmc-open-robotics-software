@@ -13,12 +13,6 @@ public interface EuclideanTrajectoryPointReadOnly extends TrajectoryPointReadOnl
       return Double.isNaN(getTime()) || EuclideanWaypointReadOnly.super.containsNaN();
    }
 
-   @Deprecated
-   default void get(EuclideanTrajectoryPointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
    @Override
    default boolean equals(EuclidGeometry geometry)
    {

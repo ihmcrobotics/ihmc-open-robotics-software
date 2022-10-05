@@ -13,12 +13,6 @@ public interface SE3TrajectoryPointReadOnly extends TrajectoryPointReadOnly, SE3
       return Double.isNaN(getTime()) || SE3WaypointReadOnly.super.containsNaN();
    }
 
-   @Deprecated
-   default void get(SE3TrajectoryPointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
    @Override
    default boolean equals(EuclidGeometry geometry)
    {

@@ -2,11 +2,8 @@ package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface SO3WaypointReadOnly extends EuclidGeometry
@@ -18,18 +15,6 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
    default boolean containsNaN()
    {
       return getOrientation().containsNaN() || getAngularVelocity().containsNaN();
-   }
-
-   @Deprecated
-   default QuaternionBasics getOrientationCopy()
-   {
-      return new Quaternion(getOrientation());
-   }
-
-   @Deprecated
-   default Vector3DBasics getAngularVelocityCopy()
-   {
-      return new Vector3D(getAngularVelocity());
    }
 
    default double getOrientationX()
@@ -72,28 +57,10 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
       return getOrientation().distance(other.getOrientation());
    }
 
-   @Deprecated
-   default void getOrientation(Orientation3DBasics orientationToPack)
-   {
-      orientationToPack.set(getOrientation());
-   }
-
-   @Deprecated
-   default void getAngularVelocity(Vector3DBasics angularVelocityToPack)
-   {
-      angularVelocityToPack.set(getAngularVelocity());
-   }
-
-   @Deprecated
-   default void get(SO3WaypointBasics otherToPack)
-   {
-      otherToPack.set(this);
-   }
-
    default void get(Orientation3DBasics orientationToPack, Vector3DBasics angularVelocityToPack)
    {
-      getOrientation(orientationToPack);
-      getAngularVelocity(angularVelocityToPack);
+      orientationToPack.set(getOrientation());
+      angularVelocityToPack.set(getAngularVelocity());
    }
 
    @Override

@@ -365,7 +365,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
 
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -377,7 +377,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(footName,
                                                                                                                                  simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-         lastFramePoint.get(expectedTrajectoryPoint);
+         expectedTrajectoryPoint.set(lastFramePoint);
 
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -537,7 +537,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(footName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
 
@@ -570,8 +570,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String varnameOrientationDesired = footName + Type.DESIRED.getName() + SpaceData3D.ORIENTATION.getName();
       Quaternion currentDesiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, simulationTestHelper);
 
-      EuclidCoreTestTools.assertEquals(lastPoint.getPositionCopy(), currentDesiredPosition, 0.001);
-      EuclidCoreTestTools.assertEquals(lastPoint.getOrientationCopy(), currentDesiredOrientation, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getPosition(), currentDesiredPosition, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getOrientation(), currentDesiredOrientation, 0.001);
 
       assertEquals(2 * footTrajectoryMessages.size(), statusMessages.size());
       double startTime = 0.0;

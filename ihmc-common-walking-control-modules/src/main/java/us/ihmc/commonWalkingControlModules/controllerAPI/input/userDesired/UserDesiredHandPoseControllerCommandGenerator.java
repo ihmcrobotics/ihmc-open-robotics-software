@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
@@ -89,10 +91,10 @@ public class UserDesiredHandPoseControllerCommandGenerator
 
                FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(referenceFrameToUse);
                trajectoryPoint.setTime(userDesiredHandPoseTrajectoryTime.getDoubleValue());
-               trajectoryPoint.setPosition(framePose.getPosition());
-               trajectoryPoint.setOrientation(framePose.getOrientation());
-               trajectoryPoint.setLinearVelocity(new Vector3D());
-               trajectoryPoint.setAngularVelocity(new Vector3D());
+               trajectoryPoint.getPosition().set((FramePoint3DReadOnly) framePose.getPosition());
+               trajectoryPoint.getOrientation().set((FrameOrientation3DReadOnly) framePose.getOrientation());
+               trajectoryPoint.getLinearVelocity().set(new Vector3D());
+               trajectoryPoint.getAngularVelocity().set(new Vector3D());
 
                handTrajectoryControllerCommand.getSE3Trajectory().addTrajectoryPoint(trajectoryPoint);
 

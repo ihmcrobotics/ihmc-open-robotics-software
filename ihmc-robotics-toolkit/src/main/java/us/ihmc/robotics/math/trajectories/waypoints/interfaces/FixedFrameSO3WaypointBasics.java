@@ -19,18 +19,6 @@ public interface FixedFrameSO3WaypointBasics extends FrameSO3WaypointReadOnly, S
    @Override
    FixedFrameVector3DBasics getAngularVelocity();
 
-   @Deprecated
-   default void setOrientation(FrameOrientation3DReadOnly orientation)
-   {
-      getOrientation().set(orientation);
-   }
-
-   @Deprecated
-   default void setAngularVelocity(FrameVector3DReadOnly angularVelocity)
-   {
-      getAngularVelocity().set(angularVelocity);
-   }
-
    default void set(FrameOrientation3DReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       getOrientation().set(orientation);

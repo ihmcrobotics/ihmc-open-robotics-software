@@ -19,9 +19,9 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
@@ -570,7 +570,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(handName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
 
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -590,7 +590,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(handName,
                                                                                                                                  simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-         framePoint.get(expectedTrajectoryPoint);
+         expectedTrajectoryPoint.set(framePoint);
 
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
@@ -837,7 +837,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findSE3TrajectoryPoint(handName, trajectoryPointIndex, simulationTestHelper);
             SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-            framePoint.get(expectedTrajectoryPoint);
+            expectedTrajectoryPoint.set(framePoint);
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
             assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
 
@@ -868,8 +868,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       String varnamePosition = handName + "ErrorPosition";
       Vector3D positionError = EndToEndTestTools.findVector3D(namespacePosition, varnamePosition, simulationTestHelper);
 
-      assertTrue(rotationError.length() < Math.toRadians(15.0));
-      assertTrue(positionError.length() < 0.05);
+      assertTrue(rotationError.norm() < Math.toRadians(15.0));
+      assertTrue(positionError.norm() < 0.05);
 
       // check internal desired matches last trajectory point:
       String namespacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
@@ -881,8 +881,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       Quaternion desiredOrientation = EndToEndTestTools.findQuaternion(namespaceOrientationDesired, varnameOrientationDesired, simulationTestHelper);
 
       lastPoint.changeFrame(worldFrame);
-      EuclidCoreTestTools.assertEquals(lastPoint.getPositionCopy(), desiredPosition, 0.001);
-      EuclidCoreTestTools.assertEquals(lastPoint.getOrientationCopy(), desiredOrientation, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getPosition(), desiredPosition, 0.001);
+      EuclidCoreTestTools.assertEquals(lastPoint.getOrientation(), desiredOrientation, 0.001);
 
       assertEquals(2 * handTrajectoryMessages.size(), statusMessages.size());
       double startTime = 0.0;
@@ -1205,8 +1205,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          SE3TrajectoryPoint controllerTrajectoryPoint = EndToEndTestTools.findFeedbackControllerCurrentDesiredSE3TrajectoryPoint(handName,
                                                                                                                                  simulationTestHelper);
          SE3TrajectoryPoint expectedTrajectoryPoint = new SE3TrajectoryPoint();
-         expectedTrajectoryPoint.setPosition(desiredPose.getPosition());
-         expectedTrajectoryPoint.setOrientation(desiredPose.getOrientation());
+         expectedTrajectoryPoint.getPosition().set(desiredPose.getPosition());
+         expectedTrajectoryPoint.getOrientation().set(desiredPose.getOrientation());
 
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
       }
@@ -1532,9 +1532,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          EuclidCoreTestTools.assertGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
                + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
-                                                                 controllerDesiredPose,
-                                                                 currentPose,
-                                                                 0.1);
+                                                       controllerDesiredPose,
+                                                       currentPose,
+                                                       0.1);
       }
 
       success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
@@ -1559,14 +1559,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          currentPose.changeFrame(worldFrame);
          EuclidCoreTestTools.assertEquals("Poor position tracking for side: " + robotSide + " error: "
                + currentPose.getPosition().distance(controllerDesiredPose.getPosition()),
-                                                 controllerDesiredPose.getPosition(),
-                                                 currentPose.getPosition(),
-                                                 3.0e-2);
+                                          controllerDesiredPose.getPosition(),
+                                          currentPose.getPosition(),
+                                          3.0e-2);
          EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
                + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
-                                                                 controllerDesiredPose.getOrientation(),
-                                                                 currentPose.getOrientation(),
-                                                                 0.3);
+                                                                    controllerDesiredPose.getOrientation(),
+                                                                    currentPose.getOrientation(),
+                                                                    0.3);
       }
    }
 
