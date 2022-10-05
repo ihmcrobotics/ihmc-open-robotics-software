@@ -1,0 +1,9 @@
+{
+  "title" : "HeightMapParameters",
+  "Grid Resolution XY" : 0.03,
+  "Grid Size XY" : 5.0,
+  "Max Z" : 0.6,
+  "Nominal Std Dev" : 0.017992,
+  "Max Points Per Cell" : 20,
+  "Mahalonobis Scale" : 3.0
+}
