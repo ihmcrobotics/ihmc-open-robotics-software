@@ -42,14 +42,14 @@ namespace promp {
         /**
          *  @\brief default constructor: create an empty trajectory group
          */
-        TrajectoryGroup() = default;
+        PROMPCALL TrajectoryGroup() = default;
 
         /**
          *  @\brief    load trajectories from list of files (formatted as generated from io/serializer). 
          *	@\param	files of files.
          *	@\param	index list of indexes representing dofs to keep.
          */
-        void load_trajectories(const std::vector<std::string>& files, const std::vector<size_t>& index);
+        void PROMPCALL load_trajectories(const std::vector<std::string>& files, const std::vector<size_t>& index);
 
         /**
          *  @\brief    load trajectories from list of .csv files. 
@@ -58,7 +58,7 @@ namespace promp {
          *	@\param	sep values separator.
          *	@\param	skip_header if true skip first line.
          */
-        void load_csv_trajectories(const std::vector<std::string>& files,
+        void PROMPCALL load_csv_trajectories(const std::vector<std::string>& files,
             const std::vector<size_t>& index, char sep = ',', bool skip_header = false);
 
         /**
@@ -67,29 +67,29 @@ namespace promp {
          *	@\param	cols list of columns (dofs) to keep.
          *	@\param	sep values separator.
          */
-        void load_csv_trajectories(const std::vector<std::string>& files,
+        void PROMPCALL load_csv_trajectories(const std::vector<std::string>& files,
             const std::vector<std::string>& cols, char sep = ',');
 
         /**
          *   @\brief    Normalize all trajectories to the mean length (number of timesteps)
          */
-        size_t normalize_length();
+        size_t PROMPCALL normalize_length();
 
         /**
          *  @\brief     Normalize all trajectories to the same desired length
          *	@\param	len desired length
          */
-        void normalize_length(size_t len);
+        void PROMPCALL normalize_length(size_t len);
 
         /**
          *   @\brief    standardize each dof among the trajectories
          */
-        std::pair<Eigen::VectorXd, Eigen::VectorXd> standardize_dims();
+        std::pair<Eigen::VectorXd, Eigen::VectorXd> PROMPCALL standardize_dims();
 
         /**
          * @\brief	return the vector of trajectories
          */
-        const std::vector<Trajectory>& trajectories() const { return _trajs; }
+        const std::vector<Trajectory>& PROMPCALL trajectories() const { return _trajs; }
 
     private:
 
