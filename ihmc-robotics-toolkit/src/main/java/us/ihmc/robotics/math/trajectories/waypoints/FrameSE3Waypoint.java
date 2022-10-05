@@ -1,12 +1,16 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameEuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FixedFrameSO3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameSE3WaypointReadOnly;
+import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3WaypointReadOnly;
 
 public class FrameSE3Waypoint implements FrameSE3WaypointBasics
 {
@@ -22,6 +26,19 @@ public class FrameSE3Waypoint implements FrameSE3WaypointBasics
    public FrameSE3Waypoint(ReferenceFrame referenceFrame)
    {
       setToZero(referenceFrame);
+   }
+
+   public FrameSE3Waypoint(FramePoint3DReadOnly position,
+                           FrameOrientation3DReadOnly orientation,
+                           FrameVector3DReadOnly linearVelocity,
+                           FrameVector3DReadOnly angularVelocity)
+   {
+      setIncludingFrame(position, orientation, linearVelocity, angularVelocity);
+   }
+
+   public FrameSE3Waypoint(ReferenceFrame referenceFrame, SE3WaypointReadOnly waypoint)
+   {
+      setIncludingFrame(referenceFrame, waypoint);
    }
 
    @Override

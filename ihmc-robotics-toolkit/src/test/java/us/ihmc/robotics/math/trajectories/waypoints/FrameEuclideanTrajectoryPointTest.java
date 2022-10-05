@@ -4,18 +4,24 @@ import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
 
+import java.lang.reflect.Method;
 import java.util.Random;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.EuclidTestConstants;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.api.EuclidFrameAPITester;
+import us.ihmc.euclid.referenceFrame.api.FrameTypeCopier;
+import us.ihmc.euclid.referenceFrame.api.RandomFramelessTypeBuilder;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -26,6 +32,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointReadOnly;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanWaypointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.FrameEuclideanWaypointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -502,6 +511,36 @@ public class FrameEuclideanTrajectoryPointTest
       frameEuclideanTrajectoryPointTwo = new FrameEuclideanTrajectoryPoint(worldFrame);
       frameEuclideanTrajectoryPointTwo.setIncludingFrame(time, frameEuclideanWaypoint);
       assertTrue(frameEuclideanTrajectoryPointTwo.epsilonEquals(frameEuclideanTrajectoryPoint, 1e-10));
+   }
 
+   @Test
+   public void testReferenceFrameChecks() throws Throwable
+   {
+      Predicate<Method> methodFilter = m -> !m.getName().equals("equals") && !m.getName().equals("epsilonEquals");
+      EuclidFrameAPITester tester = new EuclidFrameAPITester(new FrameTrajectoryPointAPIDefaultConfiguration());
+      tester.assertMethodsOfReferenceFrameHolderCheckReferenceFrame(TrajectoryPointRandomTools::nextFrameEuclideanTrajectoryPoint,
+                                                                    methodFilter,
+                                                                    EuclidTestConstants.API_FRAME_CHECKS_ITERATIONS);
+   }
+
+   @Test
+   public void testConsistencyWithEuclideanTrajectoryPoint() throws Exception
+   {
+      FrameTypeCopier frameTypeBuilder = (frame, TrajectoryPoint) -> new FrameEuclideanTrajectoryPoint(frame, (EuclideanTrajectoryPointReadOnly) TrajectoryPoint);
+      RandomFramelessTypeBuilder framelessTypeBuilber = TrajectoryPointRandomTools::nextEuclideanTrajectoryPoint;
+      Predicate<Method> methodFilter = m -> !m.getName().equals("hashCode") && !m.getName().equals("toString");
+      EuclidFrameAPITester tester = new EuclidFrameAPITester(new FrameTrajectoryPointAPIDefaultConfiguration());
+      tester.assertFrameMethodsOfFrameHolderPreserveFunctionality(frameTypeBuilder,
+                                                                  framelessTypeBuilber,
+                                                                  methodFilter,
+                                                                  EuclidTestConstants.API_FUNCTIONALITY_TEST_ITERATIONS);
+   }
+
+   @Test
+   public void testOverloading() throws Exception
+   {
+      EuclidFrameAPITester tester = new EuclidFrameAPITester(new FrameTrajectoryPointAPIDefaultConfiguration());
+      tester.assertOverloadingWithFrameObjects(FrameEuclideanTrajectoryPointBasics.class, EuclideanTrajectoryPointBasics.class, false, 1);
+      tester.assertOverloadingWithFrameObjects(FrameEuclideanTrajectoryPointReadOnly.class, EuclideanTrajectoryPointReadOnly.class, false, 1);
    }
 }

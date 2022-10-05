@@ -1,8 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.interfaces.EuclidGeometry;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
@@ -55,12 +54,6 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
    default double orientationDistance(SO3WaypointReadOnly other)
    {
       return getOrientation().distance(other.getOrientation());
-   }
-
-   default void get(Orientation3DBasics orientationToPack, Vector3DBasics angularVelocityToPack)
-   {
-      orientationToPack.set(getOrientation());
-      angularVelocityToPack.set(getAngularVelocity());
    }
 
    @Override
@@ -123,6 +116,8 @@ public interface SO3WaypointReadOnly extends EuclidGeometry
    @Override
    default String toString(String format)
    {
-      return String.format("SO3 waypoint: [orientation=%s, angular velocity=%s]", getOrientation().toString(format), getAngularVelocity().toString(format));
+      return String.format("SO3 waypoint: [orientation=%s, angular velocity=%s]",
+                           EuclidCoreIOTools.getTuple4DString(format, getOrientation()),
+                           EuclidCoreIOTools.getTuple3DString(format, getAngularVelocity()));
    }
 }

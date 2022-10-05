@@ -1,9 +1,8 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.interfaces.EuclidGeometry;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public interface EuclideanWaypointReadOnly extends EuclidGeometry
@@ -50,12 +49,6 @@ public interface EuclideanWaypointReadOnly extends EuclidGeometry
    default double positionDistance(EuclideanWaypointReadOnly other)
    {
       return getPosition().distance(other.getPosition());
-   }
-
-   default void get(Point3DBasics positionToPack, Vector3DBasics linearVelocityToPack)
-   {
-      positionToPack.set(getPosition());
-      linearVelocityToPack.set(getLinearVelocity());
    }
 
    @Override
@@ -118,6 +111,8 @@ public interface EuclideanWaypointReadOnly extends EuclidGeometry
    @Override
    default String toString(String format)
    {
-      return String.format("Euclidean waypoint: [position=%s, linear velocity=%s]", getPosition().toString(format), getLinearVelocity().toString(format));
+      return String.format("Euclidean waypoint: [position=%s, linear velocity=%s]",
+                           EuclidCoreIOTools.getTuple3DString(format, getPosition()),
+                           EuclidCoreIOTools.getTuple3DString(format, getLinearVelocity()));
    }
 }

@@ -81,7 +81,7 @@ public interface EuclideanTrajectoryPointReadOnly extends TrajectoryPointReadOnl
    {
       return String.format("Euclidean trajectory point: [time=%s, position=%s, linear velocity=%s]",
                            EuclidCoreIOTools.getStringOf(null, format, getTime()),
-                           getPosition().toString(format),
-                           getLinearVelocity().toString(format));
+                           EuclidCoreIOTools.getTuple3DString(format, getPosition()),
+                           EuclidCoreIOTools.getTuple3DString(format, getLinearVelocity()));
    }
 }

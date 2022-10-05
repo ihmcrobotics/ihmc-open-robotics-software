@@ -81,9 +81,9 @@ public interface SE3TrajectoryPointReadOnly extends TrajectoryPointReadOnly, SE3
    {
       return String.format("SE3 trajectory point: [time=%s, position=%s, orientation=%s, linear velocity=%s, angular velocity=%s]",
                            EuclidCoreIOTools.getStringOf(null, format, getTime()),
-                           getPosition().toString(format),
-                           getOrientation().toString(format),
-                           getLinearVelocity().toString(format),
-                           getAngularVelocity().toString(format));
+                           EuclidCoreIOTools.getTuple3DString(format, getPosition()),
+                           EuclidCoreIOTools.getTuple4DString(format, getOrientation()),
+                           EuclidCoreIOTools.getTuple3DString(format, getLinearVelocity()),
+                           EuclidCoreIOTools.getTuple3DString(format, getAngularVelocity()));
    }
 }

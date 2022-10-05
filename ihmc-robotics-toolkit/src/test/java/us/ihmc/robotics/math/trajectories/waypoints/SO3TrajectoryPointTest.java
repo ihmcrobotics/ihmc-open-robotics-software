@@ -497,7 +497,8 @@ public class SO3TrajectoryPointTest
 
       Quaternion orientationToPack = new Quaternion();
       Vector3D angularVelocityToPack = new Vector3D();
-      simpleSO3TrajectoryPoint.get(orientationToPack, angularVelocityToPack);
+      orientationToPack.set(simpleSO3TrajectoryPoint.getOrientation());
+      angularVelocityToPack.set(simpleSO3TrajectoryPoint.getAngularVelocity());
 
       simpleSO3TrajectoryPointTwo = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPointTwo.set(time, orientationToPack, angularVelocityToPack);
@@ -505,7 +506,8 @@ public class SO3TrajectoryPointTest
 
       orientationToPack = new Quaternion();
       angularVelocityToPack = new Vector3D();
-      simpleSO3TrajectoryPoint.get( orientationToPack, angularVelocityToPack);
+      orientationToPack.set(simpleSO3TrajectoryPoint.getOrientation());
+      angularVelocityToPack.set(simpleSO3TrajectoryPoint.getAngularVelocity());
 
       simpleSO3TrajectoryPointTwo = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPointTwo.set(time, orientationToPack, angularVelocityToPack);
