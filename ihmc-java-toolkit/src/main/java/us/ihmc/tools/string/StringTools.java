@@ -136,7 +136,13 @@ public class StringTools
 
    public static String titleToPascalCase(String titleCased)
    {
-      return titleCased.trim().replaceAll("\\s+", "");
+      String[] parts = titleCased.split("\\s+");
+      StringBuilder camelCased = new StringBuilder();
+      for (int i = 0; i < parts.length; i++)
+      {
+         camelCased.append(StringUtils.capitalize(parts[i]));
+      }
+      return camelCased.toString();
    }
 
    public static String titleToCamelCase(String titleCased)

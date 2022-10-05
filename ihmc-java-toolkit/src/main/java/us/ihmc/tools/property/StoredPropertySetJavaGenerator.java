@@ -27,7 +27,7 @@ public class StoredPropertySetJavaGenerator
    private String directoryNameToAssumePresent;
    private String subsequentPathToResourceFolder;
    private String storedPropertySetTitle;
-   private record StoredPropertyFromFile(String titleCasedName, String typeName) { }
+   private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName) { }
    private ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
 
    public StoredPropertySetJavaGenerator(Class<?> clazz,
@@ -66,15 +66,15 @@ public class StoredPropertySetJavaGenerator
                {
                   if (propertyNode instanceof BooleanNode booleanNode)
                   {
-                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean"));
+                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean"));
                   }
                   else if (propertyNode instanceof DoubleNode doubleNode)
                   {
-                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double"));
+                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double"));
                   }
                   else if (propertyNode instanceof IntNode integerNode)
                   {
-                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer"));
+                     storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int"));
                   }
                }
             });
@@ -113,6 +113,37 @@ public class StoredPropertySetJavaGenerator
       """.formatted(clazz.getPackage().getName(), clazz.getSimpleName(), getParameterKeysStrings());
 
       FileTools.write(primaryJavaFile.getFilePath(), primaryJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+      String basicsJavaFileContents =
+      """
+      package %s;
+      
+      import us.ihmc.tools.property.StoredPropertySetBasics;
+      
+      public interface %2$sBasics extends %2$sReadOnly, StoredPropertySetBasics
+      {
+      %3$s}
+      """.formatted(clazz.getPackage().getName(), clazz.getSimpleName(), getParameterSetterStrings());
+
+      FileTools.write(basicsJavaFile.getFilePath(), basicsJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+      String readOnlyJavaFileContents =
+      """
+      package %s;
+      
+      import us.ihmc.tools.property.StoredPropertySetReadOnly;
+      
+      import static %4$s.%2$s.*;
+      
+      public interface %2$sReadOnly extends StoredPropertySetReadOnly
+      {
+      %3$s}
+      """.formatted(clazz.getPackage().getName(), clazz.getSimpleName(), getParameterGetterStrings(), clazz.getPackage().getName());
+
+      FileTools.write(readOnlyJavaFile.getFilePath(),
+                      readOnlyJavaFileContents.getBytes(),
+                      WriteOption.TRUNCATE,
+                      DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    private String getParameterKeysStrings()
@@ -127,6 +158,58 @@ public class StoredPropertySetJavaGenerator
                                     storedPropertyFromFile.typeName(),
                                     storedPropertyFromFile.titleCasedName())
          );
+      }
+      return propertyKeyDeclarations.toString();
+   }
+
+   private String getParameterSetterStrings()
+   {
+      StringBuilder propertyKeyDeclarations = new StringBuilder();
+      for (int i = 0; i < storedPropertiesFromFile.size(); i++)
+      {
+         StoredPropertyFromFile storedPropertyFromFile = storedPropertiesFromFile.get(i);
+         propertyKeyDeclarations.append(
+            """
+            default void set%1$s(%2$s %3$s)
+            {
+               set(%4$s.%3$s, %3$s);
+            }
+            """.indent(3).formatted(StringTools.titleToPascalCase(storedPropertyFromFile.titleCasedName()),
+                                    storedPropertyFromFile.typePrimitiveName(),
+                                    StringTools.titleToCamelCase(storedPropertyFromFile.titleCasedName()),
+                                    clazz.getSimpleName())
+         );
+         if (i < storedPropertiesFromFile.size() - 1)
+         {
+            propertyKeyDeclarations.append("\n");
+         }
+      }
+      return propertyKeyDeclarations.toString();
+   }
+
+
+
+   private String getParameterGetterStrings()
+   {
+      StringBuilder propertyKeyDeclarations = new StringBuilder();
+      for (int i = 0; i < storedPropertiesFromFile.size(); i++)
+      {
+         StoredPropertyFromFile storedPropertyFromFile = storedPropertiesFromFile.get(i);
+         propertyKeyDeclarations.append(
+            """
+            default %2$s get%1$s()
+            {
+               return get(%3$s);
+            }
+            """.indent(3).formatted(StringTools.titleToPascalCase(storedPropertyFromFile.titleCasedName()),
+                                    storedPropertyFromFile.typePrimitiveName(),
+                                    StringTools.titleToCamelCase(storedPropertyFromFile.titleCasedName()),
+                                    clazz.getSimpleName())
+         );
+         if (i < storedPropertiesFromFile.size() - 1)
+         {
+            propertyKeyDeclarations.append("\n");
+         }
       }
       return propertyKeyDeclarations.toString();
    }

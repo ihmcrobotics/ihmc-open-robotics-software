@@ -2,7 +2,7 @@ package us.ihmc.tools.property;
 
 import us.ihmc.tools.property.*;
 
-public class StoredPropertySetGeneratorTest extends StoredPropertySet
+public class StoredPropertySetGeneratorTest extends StoredPropertySet implements StoredPropertySetGeneratorTestBasics
 {
    public static final String PROJECT_NAME = "ihmc-open-robotics-software";
    public static final String TO_RESOURCE_FOLDER = "ihmc-high-level-behaviors/src/libgdx/resources";
