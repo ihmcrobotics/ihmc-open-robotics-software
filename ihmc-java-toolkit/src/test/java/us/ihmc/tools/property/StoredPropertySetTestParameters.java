@@ -22,10 +22,10 @@ public class StoredPropertySetTestParameters extends StoredPropertySet implement
 
    public static void main(String[] args)
    {
-      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(StoredPropertySetTestParameters.class,
-                                                                                    DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                                                    SUBSEQUENT_PATH_TO_RESOURCE_FOLDER,
-                                                                                    SUBSEQUENT_PATH_TO_JAVA_FOLDER);
-      generator.generate();
+      StoredPropertySet parameters = new StoredPropertySet(keys,
+                                                           StoredPropertySetTestParameters.class,
+                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
+                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
    }
 }

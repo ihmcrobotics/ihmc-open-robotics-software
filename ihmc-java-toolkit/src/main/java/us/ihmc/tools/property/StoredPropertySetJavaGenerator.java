@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -16,37 +15,6 @@ import us.ihmc.tools.string.StringTools;
 
 import java.util.ArrayList;
 
-/**
- * To create a StoredPropertySet, create a main, us.ihmc.YourStoredPropertySet.java
- *
- * <pre>
- * public static void main(String[] args)
- * {
- *    StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(StoredPropertySetGeneratorTest.class,
- *                                                                                  "ihmc-open-robotics-software",
- *                                                                                  "ihmc-java-toolkit/src/test/resources",
- *                                                                                  "ihmc-java-toolkit/src/test/java");
- *    generator.generate();
- * }
- * </pre>
- *
- * where the paths are replaced to match your situation. The subsequest paths may be shorter or longer depending on how nested the
- * projects are. Typically, the "directory name to assume present" is the name of the repository. These paths are necessary
- * to allow saving the parameters in version control.
- *
- * Then, create a us.ihmc.YourStoredPropertySetName.json in the resources folder. The name should be the exact same as the *.java class.
- *
- * <pre>
- * {
- *   "title": "Stored property set name",
- *   "The first boolean property": false,
- *   "The first double property": 0.5,
- *   "The first integer property": 3
- * }
- * </pre>
- *
- * Run the main, and then you will be further assisted by the generated code there.
- */
 public class StoredPropertySetJavaGenerator
 {
    private final String jsonFileName;
@@ -79,7 +47,7 @@ public class StoredPropertySetJavaGenerator
       readOnlyJavaFile = new WorkspaceFile(javaDirectory, clazz.getSimpleName() + "ReadOnly.java");
    }
 
-   public void generate()
+   public void loadFromJSON()
    {
       JSONFileTools.loadFromClasspath(clazz, jsonFileName, node ->
       {
@@ -94,15 +62,15 @@ public class StoredPropertySetJavaGenerator
                }
                else
                {
-                  if (propertyNode instanceof BooleanNode booleanNode)
+                  if (propertyNode instanceof BooleanNode)
                   {
                      storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean"));
                   }
-                  else if (propertyNode instanceof DoubleNode doubleNode)
+                  else if (propertyNode instanceof DoubleNode)
                   {
                      storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double"));
                   }
-                  else if (propertyNode instanceof IntNode integerNode)
+                  else if (propertyNode instanceof IntNode)
                   {
                      storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int"));
                   }
@@ -110,7 +78,30 @@ public class StoredPropertySetJavaGenerator
             });
          }
       });
+   }
 
+   public void loadFromStoredPropertySet(StoredPropertySet storedPropertySet)
+   {
+      storedPropertySetTitle = storedPropertySet.getTitle();
+      for (StoredPropertyKey<?> key : storedPropertySet.getKeyList().keys())
+      {
+         if (key instanceof BooleanStoredPropertyKey)
+         {
+            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Boolean", "boolean"));
+         }
+         else if (key instanceof DoubleStoredPropertyKey)
+         {
+            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Double", "double"));
+         }
+         else if (key instanceof IntegerStoredPropertyKey)
+         {
+            storedPropertiesFromFile.add(new StoredPropertyFromFile(key.getTitleCasedName(), "Integer", "int"));
+         }
+      }
+   }
+
+   public void generate()
+   {
       String primaryJavaFileContents =
       """
       package %s;
@@ -134,11 +125,11 @@ public class StoredPropertySetJavaGenerator
       
          public static void main(String[] args)
          {
-            StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(%2$s.class,
-                                                                                          DIRECTORY_NAME_TO_ASSUME_PRESENT,
-                                                                                          SUBSEQUENT_PATH_TO_RESOURCE_FOLDER,
-                                                                                          SUBSEQUENT_PATH_TO_JAVA_FOLDER);
-            generator.generate();
+            StoredPropertySet parameters = new StoredPropertySet(keys,
+                                                                 %2$s.class,
+                                                                 DIRECTORY_NAME_TO_ASSUME_PRESENT,
+                                                                 SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+            parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
          }
       }
       """.formatted(clazz.getPackage().getName(),
