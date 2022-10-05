@@ -24,11 +24,9 @@ public class StoredPropertySetJavaGenerator
    private final WorkspaceFile primaryJavaFile;
    private final WorkspaceFile basicsJavaFile;
    private final WorkspaceFile readOnlyJavaFile;
-   private String directoryNameToAssumePresent;
-   private String subsequentPathToResourceFolder;
    private String storedPropertySetTitle;
    private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName) { }
-   private ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
+   private final ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
 
    public StoredPropertySetJavaGenerator(Class<?> clazz,
                                          String directoryNameToAssumePresent,
@@ -36,10 +34,7 @@ public class StoredPropertySetJavaGenerator
                                          String subsequentPathToJavaFolder)
    {
       this.clazz = clazz;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-//      String subsequentPathToJavaPackage = subsequentPathToJavaFolder + "/" + clazz.getPackage().getName().replaceAll("\\.", "/");
       javaDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToJavaFolder, clazz);
       jsonFileName = clazz.getSimpleName() + ".json";
       primaryJavaFile = new WorkspaceFile(javaDirectory, clazz.getSimpleName() + ".java");
