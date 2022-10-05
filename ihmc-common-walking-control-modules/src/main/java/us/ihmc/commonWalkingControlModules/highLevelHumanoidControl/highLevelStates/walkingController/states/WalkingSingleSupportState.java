@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -244,7 +245,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       pelvisOrientationManager.initializeSwing();
 
-      nextFootstep.getPose(desiredFootPoseInWorld);
+      desiredFootPoseInWorld.set(nextFootstep.getFootstepPose());
       desiredFootPoseInWorld.changeFrame(worldFrame);
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
@@ -300,7 +301,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       return nextFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(nextFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
    }
 
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D(worldFrame);
    private final FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
    private final FramePoint2D currentICP = new FramePoint2D(worldFrame);
 
@@ -312,9 +312,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
 
-      Footstep nextNextFootstep = null;
-      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
-         nextNextFootstep = this.nextNextFootstep;
       feetManager.updateToeOffStatusSingleSupport(nextFootstep,
                                                   supportFootExitCMP,
                                                   balanceManager.getDesiredCMP(),
@@ -325,8 +322,6 @@ public class WalkingSingleSupportState extends SingleSupportState
          feetManager.requestPointToeOff(supportSide, supportFootExitCMP, desiredCoP);
       else if (feetManager.okForLineToeOff(true))
          feetManager.requestLineToeOff(supportSide, supportFootExitCMP, desiredCoP);
-
-//         updateHeightManager();
    }
 
    /**
