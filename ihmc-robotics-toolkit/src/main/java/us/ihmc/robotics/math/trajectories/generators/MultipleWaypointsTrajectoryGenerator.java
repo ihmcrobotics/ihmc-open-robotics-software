@@ -193,13 +193,11 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       {
          currentWaypointIndex.set(0);
       }
-      else
+
+      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(
+            currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
-         while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(
-               currentWaypointIndex.getIntegerValue() + 1).getTime())
-         {
-            currentWaypointIndex.increment();
-         }
+         currentWaypointIndex.increment();
       }
 
       int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
