@@ -292,7 +292,7 @@ void ProMP::condition_start(const Eigen::VectorXd& start, const Eigen::MatrixXd&
 
 void ProMP::condition_goal(const Eigen::VectorXd& goal ,const Eigen::MatrixXd& std)
 {
-	condition_via_point(this.get_traj_length()-1, goal, std);
+	condition_via_point(this->get_traj_length()-1, goal, std);
 }
 
 Eigen::MatrixXd ProMP::generate_trajectory(size_t req_num_steps) const
