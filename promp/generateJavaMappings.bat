@@ -40,7 +40,9 @@ tar -xf javacpp-platform-%JAVACPP_VERSION%-bin.zip --strip-components 1
 
 java -jar javacpp.jar us\ihmc\promp\presets\PrompInfoMapper.java || exit /b 1
 :: This will generate the jni shared library and place it into the classpath resources dir
-java -jar javacpp.jar -Dplatform.compiler.cpp17=/std:c++17 "us\ihmc\promp\**.java" -d ..\..\src\main\resources || exit /b 1
+java -jar javacpp.jar -Dplatform.compiler.cpp17=/std:c++17 "us\ihmc\promp\**.java" -d . || exit /b 1
+
+xcopy /Y jnipromp.dll ..\..\src\main\resources
 
 :: Clean old generated Java code
 rd /s /q ..\..\src\main\generated-java
