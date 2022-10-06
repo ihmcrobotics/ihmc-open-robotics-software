@@ -320,11 +320,12 @@ public class PlanarRegionToolsTest
       List<Point2DReadOnly> intersections;
 
       // Check to see if the correct number of vertices are being received after cropping the polygon to the planarRegion
-      for(Point2D point2D : translatePointsAssertTrue)
+      for(int i = 0; i < translatePointsAssertTrue.size() - 2; i++)
       {
-         intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(point2D, convexPolygon));
+         intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(translatePointsAssertTrue.get(i), convexPolygon));
          Assertions.assertEquals(4, intersections.size(),
-                                 "Translated polygon was: " + translateConvexPolygon(point2D, convexPolygon) + ", Point was: " + point2D);
+                                 "Translated polygon was: " + translateConvexPolygon(translatePointsAssertTrue.get(i), convexPolygon)
+                                       + ", Point was: " + translatePointsAssertTrue.get(i));
       }
 
       // These points should all be outside of the planarRegion so no vertices should be stored in the intersections list
