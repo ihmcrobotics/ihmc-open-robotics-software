@@ -54,3 +54,5 @@ robocopy us ..\..\src\main\generated-java\us /e /xf *.class* ProMPInfoMapper.jav
 :: I couldn't get robocopy to exclude a directory by name like this
 :: So, just delete it afterwards
 rd /s /q ..\..\src\main\generated-java\us\ihmc\promp\presets
+
+pause
