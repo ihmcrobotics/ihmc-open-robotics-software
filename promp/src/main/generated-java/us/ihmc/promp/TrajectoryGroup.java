@@ -16,7 +16,7 @@ import static us.ihmc.promp.global.promp.*;
      * Each column within .csv file represents a trajectory.
      * All .csv files must have trajectories(columns) in the same sequence (column-wise)
      */
-    @Namespace("promp") @NoOffset @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
+    @Namespace("promp") @NoOffset @Properties(inherit = us.ihmc.promp.presets.ProMPInfoMapper.class)
 public class TrajectoryGroup extends Pointer {
         static { Loader.load(); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
