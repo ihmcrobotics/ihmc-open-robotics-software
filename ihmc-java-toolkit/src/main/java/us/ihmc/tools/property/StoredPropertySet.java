@@ -47,7 +47,10 @@ import java.util.*;
  * projects are. Typically, the "directory name to assume present" is the name of the repository. These paths are necessary
  * to allow saving the parameters in version control.
  *
- * Then, create a us.ihmc.YourStoredPropertySetName.json in the resources folder. The name should be the exact same as the *.java class.
+ * Then, create a us.ihmc.YourStoredPropertySetName.json in the resources folder.
+ * The name should be the exact same as the *.java class.
+ *
+ * Properties should only be declared in the JSON if using the generator.
  *
  * <pre>
  * {
@@ -58,7 +61,7 @@ import java.util.*;
  * }
  * </pre>
  *
- * Run the main, and then you will be further assisted by the generated code there.
+ * Run the main, which will generate Basics and ReadOnly interfaces and rewrite the main class to extend and implement the correct classes.
  */
 public class StoredPropertySet implements StoredPropertySetBasics
 {
