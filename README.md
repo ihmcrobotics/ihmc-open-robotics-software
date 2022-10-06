@@ -3,7 +3,7 @@
 **Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
 **Test (3000+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
 
- [ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/atlas/images/download.svg?version=0.12.0) ](https://bintray.com/ihmcrobotics/maven-release/atlas/0.12.0/link) <-- Download from Bintray
+[ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/atlas/images/download.svg?version=0.12.0) ](https://bintray.com/ihmcrobotics/maven-release/atlas/0.12.0/link) <-- Download from Bintray
 
 ### Tested Platforms
 
@@ -11,11 +11,15 @@
 
 - Atlas
 - Valkyrie
+- [Nadia](https://boardwalkrobotics.com/Nadia.html)
 
 #### Developers
 
-We test all of our software on OSX, Windows, and Ubuntu. It is likely to work on other platforms but
-not necessarily tested.
+Our developers are a mix of Windows and Linux users. We officially support:
+- Windows 10/11
+- Ubuntu 20.04+
+
+Other GNU/Linux distros will likely work, however largely untested. macOS is partially supported, but incomplete at this time.
 
 ### Branches
 This repository uses the git-flow branching model. You can find more about git-flow [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
@@ -86,7 +90,7 @@ An example workflow for developing against a local clone of the software:
 2. Make modifications
 3. Publish to your local `$HOME/.m2` repository
 
-**To publish jars to your local Maven repository:**  
+**To publish jars to your local Maven repository:**
 ```bash
 $ cd /path/to/ihmc-open-robotics-software
 $ gradle publishAll -PcompositeSearchHeight=0
@@ -180,3 +184,4 @@ testDependencies {
 * Inho Lee (ilee@ihmc.us)
 * Daniel Duran (dduran@ihmc.us)
 * John Carff (jcarff@ihmc.us)
+* Dexton Anderson (danderson@ihmc.us)
