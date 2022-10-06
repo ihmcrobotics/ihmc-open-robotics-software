@@ -136,19 +136,19 @@ If this is set up correctly, you will have applied the [`ihmc-build` plugin](htt
 and use the dependency resolver methods exposed by the build extension. Alternatively, you can manually identify dependencies on projects using the normal Gradle syntax for
 project dependencies. A sample build.gradle dependency block:
 
-```gradle
+```build.gradle.kts
 /* Normal Gradle way */
 dependencies {
-  compile project(':ihmc-open-robotics-software:ihmc-java-toolkit')
-  testCompile project(':ihmc-open-robotics-software:ihmc-java-toolkit-test')
+  api(project(":ihmc-open-robotics-software:ihmc-java-toolkit"))
+  testApi(project(":ihmc-open-robotics-software:ihmc-java-toolkit-test"))
 }
 
 /* ihmc-build way */
 mainDependencies {
-  compile group: "us.ihmc", name: "ihmc-java-toolkit", version: "source"
+  api("us.ihmc:ihmc-java-toolkit:source")
 }
 testDependencies {
-  compile group: "us.ihmc", name: "ihmc-java-toolkit-test", version: "source"
+  api("us.ihmc:ihmc-java-toolkit-test:source")
 }
 ```
 
