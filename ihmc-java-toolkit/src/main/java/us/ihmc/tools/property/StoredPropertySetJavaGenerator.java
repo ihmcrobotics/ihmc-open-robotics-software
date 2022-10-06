@@ -120,6 +120,10 @@ public class StoredPropertySetJavaGenerator
 
    public void generate()
    {
+      // This code uses text blocks. Read about them at https://docs.oracle.com/en/java/javase/17/text-blocks/index.html
+      // We are using the formatted method which is just the using regular Java formatter:
+      // https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/Formatter.html
+      // We are using the [argument_index$] to reuse variables within the text block.
       String primaryJavaFileContents =
       """
       package %s;
