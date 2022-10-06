@@ -49,6 +49,9 @@ public class WorkspaceFile
       return getResourceAsStream.get();
    }
 
+   /**
+    * @return null if not found
+    */
    public URL getClasspathResource()
    {
       return getResource.get();

@@ -2,10 +2,15 @@ package us.ihmc.avatar.gpuPlanarRegions;
 
 import us.ihmc.tools.property.*;
 
+/**
+ * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+ * and run the main to regenerate.
+ */
 public class GPUPlanarRegionExtractionParameters extends StoredPropertySet implements GPUPlanarRegionExtractionParametersBasics
 {
-   public static final String PROJECT_NAME = "ihmc-open-robotics-software";
-   public static final String TO_RESOURCE_FOLDER = "ihmc-high-level-behaviors/src/libgdx/resources";
+   public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
+   public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-avatar-interfaces/src/main/resources";
+   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-avatar-interfaces/src/main/java";
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
@@ -31,14 +36,16 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
 
    public GPUPlanarRegionExtractionParameters()
    {
-      super(keys, GPUPlanarRegionExtractionParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
+      super(keys, GPUPlanarRegionExtractionParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
       load();
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys, GPUPlanarRegionExtractionParameters.class, PROJECT_NAME, TO_RESOURCE_FOLDER);
-      parameters.loadUnsafe();
-      parameters.save();
+      StoredPropertySet parameters = new StoredPropertySet(keys,
+                                                           GPUPlanarRegionExtractionParameters.class,
+                                                           DIRECTORY_NAME_TO_ASSUME_PRESENT,
+                                                           SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+      parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
    }
 }
