@@ -1,0 +1,8 @@
+{
+  "title" : "Concave hull factory parameters for GPU regions",
+  "Edge length threshold" : 0.1,
+  "Remove all triangles with two border edges" : false,
+  "Allow splitting concave hull" : false,
+  "Max number of iterations" : 5000,
+  "Triangulation tolerance" : 0.0
+}
