@@ -255,7 +255,11 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       String polygonizerParametersFile = filePropertyHelper.loadProperty(planarRegionsPolygonizerParametersTopic.getName());
       if (polygonizerParametersFile != null)
-         polygonizerParameters.set(PolygonizerParameters.parse(polygonizerParametersFile));
+      {
+         PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+         polygonizerParameters.setFromColonCommaString(polygonizerParametersFile);
+         polygonizerParameters.set(polygonizerParameters);
+      }
 
       String intersectionEstimationParametersFile = filePropertyHelper.loadProperty(planarRegionsIntersectionParametersTopic.getName());
       if (intersectionEstimationParametersFile != null)

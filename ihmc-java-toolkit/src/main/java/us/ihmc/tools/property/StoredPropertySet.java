@@ -232,6 +232,12 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   @Override
+   public void set(StoredPropertySetReadOnly other)
+   {
+      setAll(other.getAll());
+   }
+
    private void setInternal(StoredPropertyKey key, Object newValue)
    {
       boolean valueChanged;
@@ -593,18 +599,83 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   /**
+    * Sets the properties from a colon-comma string containing all the keys
+    * in their natural order. This method does not handle partial subsets or
+    * out of order parameters. They are assumed to be of the form:
+    * <pre>
+    * camelCaseKeyName: value, camelCasedKeyName2: value2, camelCasedKeyName3: value2
+    * </pre>
+    */
+   @Override
+   public void setFromColonCommaString(String colonCommaString)
+   {
+      colonCommaString = colonCommaString.replace(",", "");
+      Scanner scanner = new Scanner(colonCommaString);
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         {
+            while (!scanner.hasNextDouble())
+               scanner.next();
+            set(doubleKey, scanner.nextDouble());
+         }
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         {
+            while (!scanner.hasNextInt())
+               scanner.next();
+            set(integerKey, scanner.nextInt());
+         }
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         {
+            while (!scanner.hasNextBoolean())
+               scanner.next();
+            set(booleanKey, scanner.nextBoolean());
+         }
+      }
+      scanner.close();
+   }
+
+   @Override
+   public String toString()
+   {
+      List<StoredPropertyKey<?>> storedPropertyKeys = keys.keys();
+      StringBuilder result = new StringBuilder();
+      for (int i = 0; i < storedPropertyKeys.size(); i++)
+      {
+         StoredPropertyKey<?> key = storedPropertyKeys.get(i);
+         result.append(key.getCamelCasedName());
+         result.append(": ");
+         result.append(serializeValue(get(key)));
+         if (i < storedPropertyKeys.size() - 1)
+         {
+            result.append(", ");
+         }
+      }
+      return result.toString();
+   }
+
+   @Override
    public String getCurrentVersionSuffix()
    {
       return currentVersionSuffix;
    }
 
+   @Override
    public String getUncapitalizedClassName()
    {
       return uncapitalizedClassName;
    }
 
+   @Override
    public String getTitle()
    {
       return title;
+   }
+
+   @Override
+   public void setTitle(String title)
+   {
+      this.title = title;
    }
 }
