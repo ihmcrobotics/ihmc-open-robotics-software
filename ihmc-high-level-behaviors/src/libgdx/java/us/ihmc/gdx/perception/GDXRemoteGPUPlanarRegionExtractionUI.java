@@ -50,7 +50,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
    private final ImFloat regionGrowthFactor = new ImFloat();
-   private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
+   private final ImFloat edgeLengthThresholdSlider = new ImFloat(0.224f);
    private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
    private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
    private final ImBoolean allowSplittingConcaveHullChecked = new ImBoolean(false);
@@ -214,7 +214,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private void renderConcaveHullFactoryParameterWidgets()
    {
       boolean anyChanged = false;
-      ImGui.sliderFloat("Edge Length Threshold", edgeLengthTresholdSlider.getData(), 0, 0.5f);
+      ImGui.sliderFloat("Edge Length Threshold", edgeLengthThresholdSlider.getData(), 0, 0.5f);
       ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 0.3f);
       ImGui.sliderInt("Max Number of Iterations", maxNumberOfIterationsSlider.getData(), 2000, 6000);
       ImGui.checkbox("Remove Degenerate Triangles", removeAllTrianglesWithTwoBorderEdgesChecked);
@@ -264,7 +264,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
    private void setConcaveHullParametersFromImGuiWidgets()
    {
-      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
+      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthThresholdSlider.get());
       concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
       concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
       concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
@@ -307,7 +307,7 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
 
    public void setConcaveHullFactoryImGuiWidgetsFromParameters()
    {
-      edgeLengthTresholdSlider.set((float) concaveHullFactoryParameters.getEdgeLengthThreshold());
+      edgeLengthThresholdSlider.set((float) concaveHullFactoryParameters.getEdgeLengthThreshold());
       triangulationToleranceSlider.set((float) concaveHullFactoryParameters.getTriangulationTolerance());
       maxNumberOfIterationsSlider.set(concaveHullFactoryParameters.getMaxNumberOfIterations());
       removeAllTrianglesWithTwoBorderEdgesChecked.set(concaveHullFactoryParameters.getRemoveAllTrianglesWithTwoBorderEdges());
