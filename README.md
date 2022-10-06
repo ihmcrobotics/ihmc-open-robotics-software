@@ -56,7 +56,7 @@ We provide a native ROS 2 API for many of the core components in our software st
 We have ROS 1 support via the ROS 2 `ros1_bridge` package. You can find the ROS 1 message definitions and instructions on using the ROS 1 Bridge here: https://github.com/ihmcrobotics/ihmc_msgs
 
 #### IDE Support
-Our Gradle models are tested in IntelliJ IDEA 2018 (both Community and Ultimate) with the Gradle plugin.
+Our Gradle models are tested in IntelliJ IDEA (both Community and Ultimate) with the Gradle plugin.
 Eclipse 2018.09+ or higher with the Buildship plugin. The Buildship plugin is bundled with the Eclipse IDE for Java Developers (but *not* Java EE Developers). It can always be manually installed to any version of Eclipse using the [installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
 
 #### Building .jars
