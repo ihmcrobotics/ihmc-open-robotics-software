@@ -194,8 +194,8 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
          currentWaypointIndex.set(0);
       }
 
-      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2 && time >= waypoints.get(
-            currentWaypointIndex.getIntegerValue() + 1).getTime())
+      while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
+             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
       }
