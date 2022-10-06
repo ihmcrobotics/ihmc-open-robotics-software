@@ -3,8 +3,6 @@
 **Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
 **Test (3000+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
 
-[ ![Download](https://api.bintray.com/packages/ihmcrobotics/maven-release/atlas/images/download.svg?version=0.12.0) ](https://bintray.com/ihmcrobotics/maven-release/atlas/0.12.0/link) <-- Download from Bintray
-
 ### Tested Platforms
 
 #### Robots
@@ -28,25 +26,6 @@ This repository uses the git-flow branching model. You can find more about git-f
 All of the software in *IHMC Open Robotics Software* is licensed under the Apache 2.0 license.
 
 ## Getting Started
-
-### Using IHMC Open Robotics Software .jar releases with Maven/Gradle
-The release .jars for the various *IHMC Open Robotics Software* packages are hosted on Bintray. You can browse the release packages at https://bintray.com/ihmcrobotics/maven-release.
-Instructions for adding the Maven repository and identifying the artifacts can also be found on Bintray for each package.
-
-At a minimum, you will need to have the following repositories declared in your build script to use *IHMC Open Robotics Software* .jars:
-
-```gradle
-repositories {
-   maven {
-      url  "https://dl.bintray.com/ihmcrobotics/maven-release" // IHMC Code releases
-   }
-   maven {
-      url  "https://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
-   }
-
-   /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */
-}
-```
 
 ### Developing with *IHMC Open Robotics Software* from source
 
