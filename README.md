@@ -154,15 +154,13 @@ testDependencies {
 
 ## Maintainers
 
-* Jerry Pratt (jpratt@ihmc.org)
-* Peter Neuhaus (pneuhaus@ihmc.org)
-* Doug Stephen (dstephen@ihmc.org)
 * Sylvain Bertrand (sbertrand@ihmc.org)
 * Duncan Calvert (dcalvert@ihmc.org)
 * Stephen McCrory (smcrory@ihmc.org)
 * Robert Griffin (rgriffin@ihmc.org)
-* Georg Wiedebach (gwiedebach@ihmc.org)
-* Inho Lee (ilee@ihmc.org)
-* Daniel Duran (dduran@ihmc.org)
-* John Carff (jcarff@ihmc.org)
+* Bhavyansh Mishra (bmishra@ihmc.org)
+* James Foster (jfoster@ihmc.org)
 * Dexton Anderson (danderson@ihmc.org)
+* Jae Oh (joh@ihmc.org)
+* Luigi Penco (lpenco@ihmc.org)
+* Nick Kitchel (nkitchel@ihmc.org)
