@@ -15,7 +15,7 @@ import static us.ihmc.promp.global.promp.*;
      * speed indicates how the trajectory has been modulated, 
      * for example speed=2 means that the original trajectory had twice the timesteps.
      */
-    @Namespace("promp") @NoOffset @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
+    @Namespace("promp") @NoOffset @Properties(inherit = us.ihmc.promp.presets.ProMPInfoMapper.class)
 public class Trajectory extends Pointer {
         static { Loader.load(); }
         /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */

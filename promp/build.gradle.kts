@@ -15,4 +15,5 @@ ihmc {
 mainDependencies {
    api("org.bytedeco:javacpp:1.5.7")
    api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-native-library-loader:2.0.1")
 }

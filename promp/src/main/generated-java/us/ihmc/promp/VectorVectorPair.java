@@ -8,7 +8,7 @@ import org.bytedeco.javacpp.annotation.*;
 
 import static us.ihmc.promp.global.promp.*;
 
-@NoOffset @Name("std::pair<Eigen::VectorXd,Eigen::VectorXd>") @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
+@NoOffset @Name("std::pair<Eigen::VectorXd,Eigen::VectorXd>") @Properties(inherit = us.ihmc.promp.presets.ProMPInfoMapper.class)
 public class VectorVectorPair extends Pointer {
     static { Loader.load(); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */

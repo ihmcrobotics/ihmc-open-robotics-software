@@ -28,7 +28,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
       target = "us.ihmc.promp",
       global = "us.ihmc.promp.global.promp"
 )
-public class PrompInfoMapper implements InfoMapper
+public class ProMPInfoMapper implements InfoMapper
 {
    static
    {
@@ -101,8 +101,10 @@ public class PrompInfoMapper implements InfoMapper
 
       public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int rowId, int colId);
 
-      public void debugPrint()
+      public void debugPrint(String name)
       {
+         System.out.println(name);
+
          for (int row = 0; row < rows(); row++)
          {
             for (int col = 0; col < cols(); col++)
