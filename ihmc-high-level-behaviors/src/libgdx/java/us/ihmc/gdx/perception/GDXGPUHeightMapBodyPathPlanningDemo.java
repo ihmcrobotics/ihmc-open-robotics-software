@@ -33,7 +33,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMap;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;

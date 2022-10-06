@@ -1,0 +1,9 @@
+{
+  "title" : "ExploreAreaBehaviorParameters",
+  "Turn chest trajectory duration" : 1.0,
+  "Turn trajectory wait time multiplier" : 3.0,
+  "Perceive duration" : 1.0,
+  "Chest yaw amount" : 1.0,
+  "Minimum distance between observation points" : 2.0,
+  "Minimum distance to walk if possible" : 3.0
+}
