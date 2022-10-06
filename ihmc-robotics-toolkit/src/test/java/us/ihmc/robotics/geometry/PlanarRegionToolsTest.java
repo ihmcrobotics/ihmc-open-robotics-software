@@ -71,7 +71,7 @@ public class PlanarRegionToolsTest
    }
 
    @Test
-   public void testWithLShapedPlanarRegionWithIdentityTransform()
+   public void testPointAndLinesOnPlanarRegionWithIdentityTransform()
    {
       // polygons forming a L-shaped region.
       List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
@@ -229,7 +229,39 @@ public class PlanarRegionToolsTest
       Assertions.assertEquals(2, points.length);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(2.0, 1.0), points[0], 1e-7);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(2.0, -1.0), points[1], 1e-7);
+   }
 
+   @Test
+   public void testPolygonOnPlanarRegionWithIdentityTransform()
+   {
+      // Polygons forming a L-shaped planar region.
+      List<ConvexPolygon2D> regionConvexPolygons = new ArrayList<>();
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D();
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.addVertex(-1.0, 1.0);
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D();
+      polygon2.addVertex(3.0, 1.0);
+      polygon2.addVertex(3.0, -1.0);
+      polygon2.addVertex(1.0, -1.0);
+      polygon2.addVertex(1.0, 1.0);
+      ConvexPolygon2D polygon3 = new ConvexPolygon2D();
+      polygon3.addVertex(1.0, 3.0);
+      polygon3.addVertex(1.0, 1.0);
+      polygon3.addVertex(-1.0, 1.0);
+      polygon3.addVertex(-1.0, 3.0);
+
+      regionConvexPolygons.add(polygon1);
+      regionConvexPolygons.add(polygon2);
+      regionConvexPolygons.add(polygon3);
+      for (ConvexPolygon2D convexPolygon : regionConvexPolygons)
+         convexPolygon.update();
+
+      RigidBodyTransform regionTransform = new RigidBodyTransform();
+      PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
+
+      // Create test polygon and translation points for polygon asserts
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
       convexPolygon.addVertex(0.2, -0.2);
@@ -237,35 +269,88 @@ public class PlanarRegionToolsTest
       convexPolygon.addVertex(-0.2, 0.2);
       convexPolygon.update();
 
-      // Do a bunch of trivial queries with isPolygonIntersecting(ConvexPolygon2d) method.
-      Assertions.assertTrue(planarRegion.isPolygonIntersecting(convexPolygon));
-      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(2.0, 0.0, convexPolygon)));
-      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(0.0, 2.0, convexPolygon)));
-      Assertions.assertFalse(planarRegion.isPolygonIntersecting(translateConvexPolygon(2.0, 2.0, convexPolygon)));
-      Assertions.assertFalse(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.21, 1.21, convexPolygon)));
-      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.09, convexPolygon)));
-      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.21, 1.09, convexPolygon)));
-      Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(1.09, 1.21, convexPolygon)));
+      ArrayList<Point2D> translatePointsAssertTrue = new ArrayList<>();
+      ArrayList<Point2D> translatePointsAssertFalse = new ArrayList<>();
+      // Translate points that keep convexPolygon inside PlanarRegion, assertTrue
+      translatePointsAssertTrue.add(new Point2D(0.0, 0.0));
+      translatePointsAssertTrue.add(new Point2D(2.0, 0.0));
+      translatePointsAssertTrue.add(new Point2D(0.0, 2.0));
+      translatePointsAssertTrue.add(new Point2D(2.0, 0.0));
+      // Translate points that are outside PlanarRegion, assertFalse
+      translatePointsAssertFalse.add(new Point2D(2.0, 2.0));
+      translatePointsAssertFalse.add(new Point2D(-2.0, -2.0));
+      translatePointsAssertFalse.add(new Point2D(1.21, 1.21));
+      // Translate points partly inside PlanarRegion on sides, assertTrue
+      translatePointsAssertTrue.add(new Point2D(-1.0, 0.0));
+      translatePointsAssertTrue.add(new Point2D(3.0, 0.0));
+      translatePointsAssertTrue.add(new Point2D(0.0, -1.0));
+      translatePointsAssertTrue.add(new Point2D(0.0, 3.0));
+      translatePointsAssertTrue.add(new Point2D(1.0, 2.0));
+      // Translate points partly inside PlanarRegion on corners, assertTrue
+      translatePointsAssertTrue.add(new Point2D(-1.0, -1.0));
+      translatePointsAssertTrue.add(new Point2D(-1.0, 3.0));
+      translatePointsAssertTrue.add(new Point2D(1.0, 3.0));
+      translatePointsAssertTrue.add(new Point2D(1.09, 1.09));
+      translatePointsAssertTrue.add(new Point2D(1.09, 1.21));
+      // Translate points touching PlanarRegion on side, assertFalse
+      translatePointsAssertFalse.add(new Point2D(-1.2, 0.0));
+      translatePointsAssertFalse.add(new Point2D(3.2, 0.0));
+      translatePointsAssertFalse.add(new Point2D(0.0, -1.2));
+      translatePointsAssertFalse.add(new Point2D(0.0, 3.2));
+      // Translate points touching PlanarRegion on corners, assertFalse
+      translatePointsAssertFalse.add(new Point2D(-1.2, -1.2));
+      translatePointsAssertFalse.add(new Point2D(-1.2, 3.2));
+      translatePointsAssertFalse.add(new Point2D(1.2, 3.2));
+      translatePointsAssertFalse.add(new Point2D(3.2, 1.2));
+      translatePointsAssertFalse.add(new Point2D(3.2, -1.2));
+
+      // The points in translatePointsAssertTrue should intersect with the planarRegion.
+      for(int i = 0; i < translatePointsAssertTrue.size(); i++)
+      {
+         Assertions.assertTrue(planarRegion.isPolygonIntersecting(translateConvexPolygon(translatePointsAssertTrue.get(i), convexPolygon)),
+                               "Translated polygon was: " + translateConvexPolygon(translatePointsAssertTrue.get(i), convexPolygon)
+                                       + ", Point was: " + translatePointsAssertTrue.get(i));
+      }
+
+      // The points in translatePointsAssertFalse should not intersect with the planarRegion
+      for(int i = 0; i < translatePointsAssertFalse.size(); i++)
+      {
+         Assertions.assertFalse(planarRegion.isPolygonIntersecting(translateConvexPolygon(translatePointsAssertFalse.get(i), convexPolygon)),
+                               "Translated polygon was: " + translateConvexPolygon(translatePointsAssertFalse.get(i), convexPolygon)
+                               + ", Point was: " + translatePointsAssertFalse.get(i));
+      }
 
       List<Point2DReadOnly> intersections = new ArrayList<>();
 
-      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, convexPolygon);
-      Assertions.assertEquals(1, intersections.size());
+      // Check to see if the correct number of vertices are being received after cropping the polygon to the planarRegion
+      for(int i = 0; i < translatePointsAssertTrue.size() - 2; i++)
+      {
+         intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically
+                                                (planarRegion, translateConvexPolygon(translatePointsAssertTrue.get(i), convexPolygon));
+         Assertions.assertEquals(4, intersections.size(),
+                                 "Translated polygon was: " + translateConvexPolygon(translatePointsAssertTrue.get(i), convexPolygon)
+                                 + ", Point was: " + translatePointsAssertTrue.get(i));
+      }
 
-      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(2.0, 0.0, convexPolygon));
-      Assertions.assertEquals(1, intersections.size());
+      // These points should all be outside of the planarRegion so no vertices should be stored in the intersections list
+      for(int i = 0; i < translatePointsAssertFalse.size(); i++)
+      {
+         intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically
+                                                (planarRegion, translateConvexPolygon(translatePointsAssertFalse.get(i), convexPolygon));
+         Assertions.assertEquals(0, intersections.size(),
+                                 "Translated polygon was: " + translateConvexPolygon(translatePointsAssertFalse.get(i), convexPolygon)
+                                 + ", Point was: " + translatePointsAssertFalse.get(i));
+      }
 
-      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(0.0, 2.0, convexPolygon));
-      Assertions.assertEquals(1, intersections.size());
+      // Special case where polygon is surrounding a concave part of the planarRegion, for all parts inside the planarRegion,
+      // concave polygons are created and their points are added to the intersections list.
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically
+                                             (planarRegion, translateConvexPolygon(translatePointsAssertTrue.get(12), convexPolygon));
+      Assertions.assertEquals(12, intersections.size());
 
-      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(2.0, 2.0, convexPolygon));
-      Assertions.assertEquals(0, intersections.size());
-
-      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(1.21, 1.21, convexPolygon));
-      Assertions.assertEquals(0, intersections.size());
-
-      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically(planarRegion, translateConvexPolygon(1.09, 1.09, convexPolygon));
-      Assertions.assertEquals(3, intersections.size());
+      intersections = PlanarRegionTools.getPolygonIntersectionsWhenProjectedVertically
+                                             (planarRegion, translateConvexPolygon(translatePointsAssertTrue.get(13), convexPolygon));
+      Assertions.assertEquals(4, intersections.size());
    }
 
    @Test
@@ -722,6 +807,13 @@ public class PlanarRegionToolsTest
       Vector2D translation = new Vector2D(xTranslation, yTranslation);
       return convexPolygon.translateCopy(translation);
    }
+
+   static ConvexPolygon2DBasics translateConvexPolygon(Point2D pointTranslation, ConvexPolygon2DReadOnly convexPolygon)
+   {
+      Vector2D translation = new Vector2D(pointTranslation.getX(), pointTranslation.getY());
+      return convexPolygon.translateCopy(translation);
+   }
+
 
    @Test
    public void testFilterPlanarRegionsWithBoundingCapsule()
@@ -1292,7 +1384,7 @@ public class PlanarRegionToolsTest
             Point2DReadOnly pointAlongPerimeter = getPointAlongEdge(distanceAlongEdge, randomPolygon);
             assertTrue(randomPolygon.pointIsOnPerimeter(pointAlongPerimeter));
 
-//            assertTrue(PlanarRegionTools.isPointInsideConcaveHull(randomPolygon.getPolygonVerticesView(), pointAlongPerimeter));
+            //            assertTrue(PlanarRegionTools.isPointInsideConcaveHull(randomPolygon.getPolygonVerticesView(), pointAlongPerimeter));
 
          }
       }
