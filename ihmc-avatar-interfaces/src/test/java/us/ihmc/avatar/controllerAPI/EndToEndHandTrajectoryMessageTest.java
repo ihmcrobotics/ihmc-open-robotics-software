@@ -332,7 +332,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
