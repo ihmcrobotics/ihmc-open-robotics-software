@@ -426,8 +426,8 @@ public class GDXGPUPlanarRegionExtractionUI
       edgeLengthTresholdSlider.set((float) concaveHullFactoryParameters.getEdgeLengthThreshold());
       triangulationToleranceSlider.set((float) concaveHullFactoryParameters.getTriangulationTolerance());
       maxNumberOfIterationsSlider.set(concaveHullFactoryParameters.getMaxNumberOfIterations());
-      removeAllTrianglesWithTwoBorderEdgesChecked.set(concaveHullFactoryParameters.doRemoveAllTrianglesWithTwoBorderEdges());
-      allowSplittingConcaveHullChecked.set(concaveHullFactoryParameters.isSplittingConcaveHullAllowed());
+      removeAllTrianglesWithTwoBorderEdgesChecked.set(concaveHullFactoryParameters.getRemoveAllTrianglesWithTwoBorderEdges());
+      allowSplittingConcaveHullChecked.set(concaveHullFactoryParameters.getAllowSplittingConcaveHull());
 
       PolygonizerParameters polygonizerParameters = gpuPlanarRegionExtraction.getPolygonizerParameters();
       concaveHullThresholdSlider.set((float) polygonizerParameters.getConcaveHullThreshold());
