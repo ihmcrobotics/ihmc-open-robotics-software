@@ -71,10 +71,8 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
-         waypoints.add(FixedFrameSO3TrajectoryPointBasics.newLinkedFixedFrameSO3TrajectoryPointBasics(this,
-                                                                                                      new YoSO3TrajectoryPoint(namePrefix,
-                                                                                                                               "AtWaypoint" + i,
-                                                                                                                               registry)));
+         YoSO3TrajectoryPoint yoTrajectoryPoint = new YoSO3TrajectoryPoint(namePrefix, "AtWaypoint" + i, registry);
+         waypoints.add(FixedFrameSO3TrajectoryPointBasics.newLinkedFixedFrameSO3TrajectoryPointBasics(this, yoTrajectoryPoint));
       }
 
       clear(referenceFrame);
