@@ -13,20 +13,20 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 public class BaselineFootstepPlannerParameters
 {
 
-   protected double stanceWidth = 0.24; // m
+   protected double stanceWidth = 0.25; // m
    protected double stanceSplay = 0.00; // rad
-   protected double lateralVelocityStanceScaling = 0.4; // m / (m / s)
-   protected double turningVelocityStanceScaling = 0.4; // rad / (rad / s)
-   protected double swingDuration = 0.6; // s
+   protected double lateralVelocityStanceScaling = 0.3; // m / (m / s)
+   protected double turningVelocityStanceScaling = 0.3; // rad / (rad / s)
+   protected double swingDuration = 0.4; // s
    protected double minimumTransferDuration = 0.2; // s
    protected double minimumForwardStride = 0.025; // m
-   protected double minimumLateralStride = 0.025; // m
+   protected double minimumLateralStride = 0.025; // mk
    protected double minimumTurningStride = 0.2; // rad
    protected double forwardSymmetryWeight = 1.0;
    protected double lateralSymmetryWeight = 1.0;
    protected double turningSymmetryWeight = 1.0;
-   protected double stancePositionAlignmentThreshold = 0.03; // m
-   protected double stanceRotationAlignmentThreshold = 0.10; // rad
+   protected double stancePositionAlignmentThreshold = 0.001; // m
+   protected double stanceRotationAlignmentThreshold = 0.01; // rad
 
    public BaselineFootstepPlannerParameters()
    {

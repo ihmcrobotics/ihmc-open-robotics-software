@@ -37,6 +37,9 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    private double MAX_Y_VELOCITY;
    private double MAX_YAW_VELOCITY;
 
+   private static double lastVx = 0;
+   private static double lastVy = 0;
+
    public PreviewWindowPoseTrajectoryGenerator(ReferenceFrame frame, int windowSize, double dt, double maxVelocityX, double maxVelocityY, double maxVelocityYaw)
    {
       this(frame, windowSize, dt);
@@ -121,9 +124,12 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
          distanceVector.setY(Math.signum(distanceVector.getY()) * MAX_Y_VELOCITY * dt);
       }
 
-      linearVelocities[headIdx].set(distanceVector.getX() / dt, distanceVector.getY() / dt, 0.0);
+      lastVx = distanceVector.getX() / dt;
+      lastVy = distanceVector.getY() / dt;
+      linearVelocities[headIdx].set(lastVx, lastVy, 0.0);
       angularVelocities[headIdx].set(0.0, 0.0, yawdot);
       headPose.set(poses[prevIdx]);
+
       // NOTE: change distanceVector back to world frame before appending to poses.
       prevPose.transform(distanceVector);
       headPose.getPosition().add(distanceVector);
@@ -257,5 +263,15 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    public FramePose3D[] getPoses()
    {
       return poses;
+   }
+
+   public static double getLastVx()
+   {
+      return lastVx;
+   }
+
+   public static double getLastVy()
+   {
+      return lastVy;
    }
 }

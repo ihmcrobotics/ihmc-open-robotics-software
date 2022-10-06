@@ -2,19 +2,16 @@ package us.ihmc.footstepPlanning.baselinePlanner;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.trajectories.interfaces.PoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class ContinuousTrackingFootstepPlanner
 {
@@ -34,10 +31,10 @@ public class ContinuousTrackingFootstepPlanner
    private final SimpleTimedFootstep ongoingFootstep;
    private final BaselineFootstepPlannerParameters parameters;
 
-   private double swingTime = 0.6;
+   private double swingTime = 0.4;
    private double transferTime = 0.25;
    private FootstepDataListMessage plannedFootsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-   private ArrayList<SimpleTimedFootstep> allSteps = new ArrayList<>();
+   private ArrayList<SimpleTimedFootstep> allSteps = new ArrayList<SimpleTimedFootstep>(20);
 
    public ContinuousTrackingFootstepPlanner(BaselineFootstepPlannerParameters parameters,
                                             double previewTime,
@@ -208,7 +205,7 @@ public class ContinuousTrackingFootstepPlanner
                                                                                            tailFootstep.getSoleFramePose().getPosition(),
                                                                                            tailFootstep.getSoleFramePose().getOrientation());
          plannedFootsteps.getFootstepDataList().add().set(footstepData);
-         allSteps.add(tailFootstep);
+         allSteps.add(new SimpleTimedFootstep(tailFootstep));
       }
    }
 
@@ -233,6 +230,6 @@ public class ContinuousTrackingFootstepPlanner
 
    public ArrayList<SimpleTimedFootstep> getAllSteps()
    {
-      return allSteps;
+      return this.allSteps;
    }
 }

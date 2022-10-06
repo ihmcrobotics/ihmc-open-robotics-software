@@ -107,7 +107,6 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    public void queueRemoveChild(ImGuiPanel panel)
    {
       removalQueue.add(panel);
-
    }
    public void queueAddChild(ImGuiPanel panel)
    {

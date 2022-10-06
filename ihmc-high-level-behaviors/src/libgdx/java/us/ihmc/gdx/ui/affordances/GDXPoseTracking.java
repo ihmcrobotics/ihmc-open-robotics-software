@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import javassist.Loader;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -76,19 +75,19 @@ public class GDXPoseTracking
             previousFootholds.get(robotSide).set(initialFootholds.get(robotSide));
          }
 
-         planner = new ContinuousTrackingFootstepPlanner(plannerParameters, 5.0, dt, 10, MAX_X_VELOCITY, MAX_Y_VELOCITY, MAX_YAW_VELOCITY);
+         planner = new ContinuousTrackingFootstepPlanner(plannerParameters, 5.0, dt, 10, vx, vy, vw);
 
          if (joystick!=null)
          {
             joystick.addJoystickEventListener(event ->
-                                              {
-                                                 if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
-                                                    xdot.set(MAX_X_VELOCITY * event.getValue());
-                                                 else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
-                                                    ydot.set(MAX_Y_VELOCITY * event.getValue());
-                                                 else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
-                                                    yawdot.set(MAX_YAW_VELOCITY * event.getValue());
-                                              });
+            {
+               if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
+                  xdot.set(vx * event.getValue());
+               else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
+                  ydot.set(vy * event.getValue());
+               else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
+                  yawdot.set(vw * event.getValue());
+            });
          }
       }
 
@@ -141,11 +140,11 @@ public class GDXPoseTracking
       }
    }
 
-   // NOTE: GDXJoystickStepper stuff starts here
+   // NOTE: SET MAX VELOCITIES HERE. GDXJoystickStepper stuff starts here
    private static final double dt = 0.05;
-   private static final double MAX_X_VELOCITY = 0.3;  // m/s
-   private static final double MAX_Y_VELOCITY = 0.15;  // m/s
-   private static final double MAX_YAW_VELOCITY = Math.PI / 6.0;  // rad/s
+   private static final double vx = 0.5;  // m/s
+   private static final double vy = 0.2;  // m/s
+   private static final double vw = Math.PI / 6.0;  // rad/s
    private GDXImGuiBasedUI baseUI;
 
    private final GDXSphereAndArrowGraphic sphereAndArrowGraphic;
@@ -160,7 +159,7 @@ public class GDXPoseTracking
    ROS2ControllerHelper controllerHelper;
    CommunicationHelper communicationHelper;
    private boolean activated = false;
-   Controller controller;
+   Controller controller = null;
    FootstepPlannerParametersBasics footstepPlannerParameters;
    private FramePose3D goalPoseWithZOffset = new FramePose3D();
 
@@ -300,5 +299,10 @@ public class GDXPoseTracking
    public ArrayList<SimpleTimedFootstep> getAllSteps()
    {
       return controller.getPlanner().getAllSteps();
+   }
+
+   public boolean hasController()
+   {
+      return this.controller!=null;
    }
 }
