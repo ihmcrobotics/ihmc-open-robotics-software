@@ -3,7 +3,7 @@
 # Current version: 0.1
 # This file is mostly taken from https://github.com/osrf/docker_images/blob/master/ros/rolling/ubuntu/focal/ros-core/Dockerfile
 # We aren't yet sure how to get around copying this code.
-FROM ihmcrobotics/nvidia:0.4
+FROM ihmcrobotics/nvidia:0.5
 
 # Setup ROS 2 Rolling
 USER root
