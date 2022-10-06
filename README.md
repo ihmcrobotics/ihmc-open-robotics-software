@@ -20,7 +20,8 @@ Our developers are a mix of Windows and Linux users. We officially support:
 Other GNU/Linux distros will likely work, however largely untested. macOS is partially supported, but incomplete at this time.
 
 ### Branches
-This repository uses the git-flow branching model. You can find more about git-flow [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
+This repository uses the git-flow branching model. 
+You can find more about git-flow [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
 
 ### Licensing
 All of the software in *IHMC Open Robotics Software* is licensed under the Apache 2.0 license.
@@ -30,7 +31,8 @@ All of the software in *IHMC Open Robotics Software* is licensed under the Apach
 ### Developing with *IHMC Open Robotics Software* from source
 
 #### Requirements
-*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 17. We also strongly suggest an IDE, either Eclipse
+*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 17. 
+We also strongly suggest an IDE, either Eclipse
 or IntelliJ (Ultimate or Community is fine). Currently, we require **Gradle 7.5.1+**.
 
 Installing Gradle: https://gradle.org/install/
@@ -38,30 +40,45 @@ Installing Gradle: https://gradle.org/install/
 ### Companion Software
 
 #### Other IHMC Libraries
-IHMC Open Robotics Software both depends on and is depended on by many other IHMC Robotics Libraries. A small sampling of our other software includes:
+IHMC Open Robotics Software both depends on and is depended on by many other IHMC Robotics Libraries. 
+A small sampling of our other software includes:
 
-- Simulation Construction Set 2, our own simulation environment with built-in analysis tools: https://github.com/ihmcrobotics/simulation-construction-set-2
-- Euclid, an alternative vector/geometry library for Java with support for additional structures common in 3D geometry without needing vecmath or Java3D: https://github.com/ihmcrobotics/euclid
+- Simulation Construction Set 2, our own simulation environment with 
+built-in analysis tools: https://github.com/ihmcrobotics/simulation-construction-set-2
+- Euclid, an alternative vector/geometry library for Java with support for additional structures 
+common in 3D geometry without needing vecmath or Java3D: https://github.com/ihmcrobotics/euclid
 - Mecano, a rigid-body dynamics library built on top of Euclid and EJML: https://github.com/ihmcrobotics/mecano
-- IHMC YoVariables, our core data structures tools that enable the time-series tracing and analysis of Simulation Construction Set: https://github.com/ihmcrobotics/ihmc-yovariables
+- IHMC YoVariables, our core data structures tools that enable the time-series tracing 
+and analysis of Simulation Construction Set: https://github.com/ihmcrobotics/ihmc-yovariables
 - JOctoMap, a Java implementation of OctoMap: https://github.com/ihmcrobotics/joctomap
-- IHMC Realtime, a library for enabling soft real-time threading for Java on Linux using the RT_PREEMPT patches: https://github.com/ihmcrobotics/ihmc-realtime
-- IHMC EtherCAT Master, a Java library using IHMC Realtime and Simple Open EtherCAT Master (SOEM) that makes it simple to start a software EtherCAT Master and pure Java data structures that map to EtherCAT Slave defintions: https://github.com/ihmcrobotics/ihmc-ethercat-master
+- IHMC Realtime, a library for enabling soft real-time threading for Java on Linux using the 
+RT_PREEMPT patches: https://github.com/ihmcrobotics/ihmc-realtime
+- IHMC EtherCAT Master, a Java library using IHMC Realtime and Simple Open EtherCAT Master (SOEM) 
+that makes it simple to start a software EtherCAT Master and pure Java data structures that map to 
+EtherCAT Slave defintions: https://github.com/ihmcrobotics/ihmc-ethercat-master
 
 You can find all of our other repositories as well as the ones above at https://github.com/ihmcrobotics
 
 #### ROS API's
-We provide a native ROS 2 API for many of the core components in our software stack. You can find the .msg definitions for use in your own projects in this project's ihmc-interfaces folder.
+We provide a native ROS 2 API for many of the core components in our software stack. 
+You can find the .msg definitions for use in your own projects in this project's ihmc-interfaces folder.
 
-We have ROS 1 support via the ROS 2 `ros1_bridge` package. You can find the ROS 1 message definitions and instructions on using the ROS 1 Bridge here: https://github.com/ihmcrobotics/ihmc_msgs
+We have ROS 1 support via the ROS 2 `ros1_bridge` package. 
+You can find the ROS 1 message definitions and instructions on using the 
+ROS 1 Bridge here: https://github.com/ihmcrobotics/ihmc_msgs
 
 #### IDE Support
 Our Gradle models are tested in IntelliJ IDEA (both Community and Ultimate) with the Gradle plugin.
-Eclipse 2021 or higher with the Buildship plugin. The Buildship plugin is bundled with the Eclipse IDE for Java Developers (but *not* Java EE Developers). It can always be manually installed to any version of Eclipse using the [installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
+Eclipse 2021 or higher with the Buildship plugin. The Buildship plugin is bundled with the 
+Eclipse IDE for Java Developers (but *not* Java EE Developers). 
+It can always be manually installed to any version of Eclipse using the 
+[installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
 
 #### Building .jars
-*IHMC Open Robotics Software* is pre-configured for generating Maven publications. You can publish directly from the source code right in to your local Maven
-repository, e.g. the `$HOME/.m2` directory. These builds will be tagged with a build "version" of `"LOCAL"` instead of an incrementing version number.
+*IHMC Open Robotics Software* is pre-configured for generating Maven publications. 
+You can publish directly from the source code right in to your local Maven
+repository, e.g. the `$HOME/.m2` directory. These builds will be tagged with a 
+build "version" of `"LOCAL"` instead of an incrementing version number.
 
 An example workflow for developing against a local clone of the software:
 
@@ -77,7 +94,8 @@ $ gradle publishAll -PcompositeSearchHeight=0
 
 **To depend on the jars in your local Maven repository:**
 
-In this example we'll have a compile-time dependency of the locally built Simulation Construction Set project. In the `build.gradle` of the project you wish to
+In this example we'll have a compile-time dependency of the locally built 
+Simulation Construction Set project. In the `build.gradle` of the project you wish to
 have link against Simulation Construction Set:
 
 ```gradle
@@ -133,7 +151,8 @@ src/ihmc
 ```
 
 If this is set up correctly, you will have applied the [`ihmc-build` plugin](https://github.com/ihmcrobotics/ihmc-build)
-and use the dependency resolver methods exposed by the build extension. Alternatively, you can manually identify dependencies on projects using the normal Gradle syntax for
+and use the dependency resolver methods exposed by the build extension. 
+Alternatively, you can manually identify dependencies on projects using the normal Gradle syntax for
 project dependencies. A sample build.gradle dependency block:
 
 ```build.gradle.kts
