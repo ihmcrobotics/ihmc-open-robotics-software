@@ -16,9 +16,13 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
    @Override
    <T> StoredPropertyBasics<T> getProperty(StoredPropertyKey<T> key);
 
+   void set(StoredPropertySetReadOnly other);
+
    void setAll(List<Object> newValues);
 
    void setAllFromStrings(List<String> stringValues);
+
+   void setFromColonCommaString(String colonCommaString);
 
    void addPropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged);
 
@@ -41,4 +45,6 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
    String getCurrentVersionSuffix();
 
    String getUncapitalizedClassName();
+
+   void setTitle(String title);
 }

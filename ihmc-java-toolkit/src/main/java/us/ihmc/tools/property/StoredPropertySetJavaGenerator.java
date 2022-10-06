@@ -127,9 +127,9 @@ public class StoredPropertySetJavaGenerator
       String primaryJavaFileContents =
       """
       package %s;
-      
+            
       import us.ihmc.tools.property.*;
-      
+            
       /**
        * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
        * and run the main to regenerate.
@@ -145,10 +145,21 @@ public class StoredPropertySetJavaGenerator
       %3$s
          public %2$s()
          {
-            super(keys, %2$s.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+            this("");
+         }
+         
+         public %2$s(String versionSpecifier)
+         {
+            super(keys, %2$s.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
             load();
          }
-      
+         
+         public %2$s(StoredPropertySetReadOnly other)
+         {
+            super(keys, %2$s.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+            set(other);
+         }
+            
          public static void main(String[] args)
          {
             StoredPropertySet parameters = new StoredPropertySet(keys,
@@ -212,6 +223,7 @@ public class StoredPropertySetJavaGenerator
       StringBuilder propertyKeyDeclarations = new StringBuilder();
       for (StoredPropertyFromFile storedPropertyFromFile : storedPropertiesFromFile)
       {
+         propertyKeyDeclarations.append(getParameterJavadoc(storedPropertyFromFile.description()));
          propertyKeyDeclarations.append(
             """
             public static final %2$sStoredPropertyKey %1$s = keys.add%2$sKey("%3$s");
@@ -288,7 +300,7 @@ public class StoredPropertySetJavaGenerator
          /**
           * %s
           */
-         """.indent(3).formatted(WordUtils.wrap(description, 80, "\n    * ", true));
+         """.indent(3).formatted(WordUtils.wrap(description, 80, "\n    * ", false));
       }
    }
 }
