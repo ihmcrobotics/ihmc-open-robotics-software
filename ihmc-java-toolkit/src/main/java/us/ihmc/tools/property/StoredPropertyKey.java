@@ -10,6 +10,7 @@ public class StoredPropertyKey<T>
    private final Class<T> type;
    private final int index;
    private final Object defaultValue;
+   /** A long-form description of the parameter. Will be used in generated Javadoc and UI tooltips. */
    private String description = "";
 
    public StoredPropertyKey(Class<T> type, int index, String titleCasedName)
