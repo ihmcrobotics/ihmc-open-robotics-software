@@ -4,6 +4,10 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import static us.ihmc.sensorProcessing.heightMap.HeightMapParameters.*;
 
+/**
+ * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+ * and run the main in super to regenerate.
+ */
 public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
 {
    /**
