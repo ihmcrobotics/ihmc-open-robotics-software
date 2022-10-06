@@ -15,7 +15,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
