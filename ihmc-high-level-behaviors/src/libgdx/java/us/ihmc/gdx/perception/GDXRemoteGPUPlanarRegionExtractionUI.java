@@ -50,18 +50,18 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
    private final ImFloat regionGrowthFactor = new ImFloat();
-   private final ImFloat edgeLengthThresholdSlider = new ImFloat(0.224f);
-   private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
-   private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
-   private final ImBoolean allowSplittingConcaveHullChecked = new ImBoolean(false);
-   private final ImBoolean removeAllTrianglesWithTwoBorderEdgesChecked = new ImBoolean(false);
-   private final ImFloat concaveHullThresholdSlider = new ImFloat(0.15f);
-   private final ImFloat shallowAngleThresholdSlider = new ImFloat((float) Math.toRadians(1.0));
-   private final ImFloat peakAngleThresholdSlider = new ImFloat((float) Math.toRadians(170.0));
-   private final ImFloat lengthThresholdSlider = new ImFloat(0.05f);
-   private final ImFloat depthThresholdSlider = new ImFloat(0.10f);
-   private final ImInt minNumberOfNodesSlider = new ImInt(10);
-   private final ImBoolean cutNarrowPassageChecked = new ImBoolean(true);
+   private final ImFloat edgeLengthThresholdSlider = new ImFloat();
+   private final ImFloat triangulationToleranceSlider = new ImFloat();
+   private final ImInt maxNumberOfIterationsSlider = new ImInt();
+   private final ImBoolean allowSplittingConcaveHullChecked = new ImBoolean();
+   private final ImBoolean removeAllTrianglesWithTwoBorderEdgesChecked = new ImBoolean();
+   private final ImFloat concaveHullThresholdSlider = new ImFloat();
+   private final ImFloat shallowAngleThresholdSlider = new ImFloat();
+   private final ImFloat peakAngleThresholdSlider = new ImFloat();
+   private final ImFloat lengthThresholdSlider = new ImFloat();
+   private final ImFloat depthThresholdSlider = new ImFloat();
+   private final ImInt minNumberOfNodesSlider = new ImInt();
+   private final ImBoolean cutNarrowPassageChecked = new ImBoolean();
    private final StoredPropertySetROS2Input gpuRegionParametersROS2Input;
    private final StoredPropertySetROS2Input polygonizerParametersROS2Input;
    private final StoredPropertySetROS2Input concaveHullFactoryParametersROS2Input;
@@ -82,6 +82,9 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
       concaveHullFactoryParametersROS2Input = new StoredPropertySetROS2Input(ros2Helper,
                                                                              GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT,
                                                                              concaveHullFactoryParameters);
+      setGPUImGuiWidgetsFromParameters();
+      setConcaveHullFactoryImGuiWidgetsFromParameters();
+      setPolygonizerImGuiWidgetsFromParameters();
    }
 
    public void update()
