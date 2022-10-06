@@ -2,6 +2,10 @@ package us.ihmc.tools.property;
 
 import us.ihmc.tools.property.*;
 
+/**
+ * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+ * and run the main to regenerate.
+ */
 public class StoredPropertySetTestParameters extends StoredPropertySet implements StoredPropertySetTestParametersBasics
 {
    public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
