@@ -130,6 +130,10 @@ public class StoredPropertySetJavaGenerator
       
       import us.ihmc.tools.property.*;
       
+      /**
+       * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+       * and run the main to regenerate.
+       */
       public class %2$s extends StoredPropertySet implements %2$sBasics
       {
          public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "%4$s";
@@ -169,6 +173,10 @@ public class StoredPropertySetJavaGenerator
       
       import us.ihmc.tools.property.StoredPropertySetBasics;
       
+      /**
+       * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+       * and run the main in super to regenerate.
+       */
       public interface %2$sBasics extends %2$sReadOnly, StoredPropertySetBasics
       {
       %3$s}
@@ -184,6 +192,10 @@ public class StoredPropertySetJavaGenerator
       
       import static %4$s.%2$s.*;
       
+      /**
+       * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+       * and run the main in super to regenerate.
+       */
       public interface %2$sReadOnly extends StoredPropertySetReadOnly
       {
       %3$s}
