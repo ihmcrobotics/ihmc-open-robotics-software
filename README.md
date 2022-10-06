@@ -30,7 +30,7 @@ All of the software in *IHMC Open Robotics Software* is licensed under the Apach
 ### Developing with *IHMC Open Robotics Software* from source
 
 #### Requirements
-*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 16 with JavaFX. We also strongly suggest an IDE, either Eclipse
+*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 17 with JavaFX. We also strongly suggest an IDE, either Eclipse
 or IntelliJ (Ultimate or Community is fine). Currently, we require **Gradle 7.5.1+**.
 
 Installing Gradle: https://gradle.org/install/
