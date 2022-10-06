@@ -84,9 +84,9 @@ public class ProMPAssistance
       learnedProMPs.add(new ProMP(trainingTrajectories, 20)); // default 20 rbf functions seems to generalize well
    }
 
-   public void updateTaskSpeed(String taskName, List<Pose3DReadOnly> observedFrameTrajectory){
-      EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory);
-      // infer the new speed for the ProMP based on observed (portion of) trajectory
+//   public void updateTaskSpeed(String taskName, List<Pose3DReadOnly> observedFrameTrajectory){
+//      EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory);
+//      // infer the new speed for the ProMP based on observed (portion of) trajectory
 //      int demo = infer_closest_trajectory(observedTrajectory, demoTestTrajectories);
 //      System.out.println("Inferred closest demo to current observation: " + (demo + 1));
 
@@ -104,7 +104,7 @@ public class ProMPAssistance
 //      System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
 //      myProMP.update_time_modulation((double) myProMP.get_traj_length() / inferredTimesteps);
 //      System.out.println("New ProMp timestep: " + myProMP.get_traj_length());
-   }
+//   }
 
 
 //   private EigenMatrixXd toEigenMatrix(List<Pose3DReadOnly> frameList)

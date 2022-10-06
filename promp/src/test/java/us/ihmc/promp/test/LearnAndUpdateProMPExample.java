@@ -171,16 +171,17 @@ public class LearnAndUpdateProMPExample
       for (int i = 0; i < observedTrajectory.rows(); i++)
          for (int j = 0; j < observedTrajectory.cols(); j++)
             observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
-
+      //esitmate the demo training trajectory closest to observed data
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       System.out.println("Inferred closest demo to current observation: " + (demo + 1));
-
-      double inferredSpeed = demoTestTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
-      int inferredTimesteps = (int) (demoTestTrajectories.get(demo).timesteps() / inferredSpeed);
+      // infer the speed of the esitmated demo training trajectory that best matches the observed data
+      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
+      // The desired timesteps are given but the actual timesteps of the demo trajectory and the inferred speed
+      int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       // generate ProMP mean trajectory with new time modulation
       EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
       EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
-      System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
       System.out.println("Inferred timestep: " + inferredTimesteps);
 
       saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
