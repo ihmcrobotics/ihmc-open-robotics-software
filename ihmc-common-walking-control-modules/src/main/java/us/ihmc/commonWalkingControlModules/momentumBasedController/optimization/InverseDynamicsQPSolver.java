@@ -48,6 +48,8 @@ public class InverseDynamicsQPSolver
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
 
+   private final NativeMatrix nativeSolverInput_Aeq;
+   private final NativeMatrix nativeSolverInput_beq;
    private final DMatrixRMaj solverInput_Aeq;
    private final DMatrixRMaj solverInput_beq;
    private final DMatrixRMaj solverInput_Ain;
@@ -116,6 +118,8 @@ public class InverseDynamicsQPSolver
       solverInput_H_previous = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f_previous = new DMatrixRMaj(problemSize, 1);
 
+      nativeSolverInput_Aeq = new NativeMatrix(problemSize, problemSize);
+      nativeSolverInput_beq = new NativeMatrix(problemSize, 1);
       solverInput_Aeq = new DMatrixRMaj(0, problemSize);
       solverInput_beq = new DMatrixRMaj(0, 1);
       solverInput_Ain = new DMatrixRMaj(0, problemSize);
