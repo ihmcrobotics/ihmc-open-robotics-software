@@ -12,6 +12,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -126,7 +127,7 @@ public class JointAccelerationIntegrationCalculator
          OneDoFJointBasics joint = jointsToComputeDesiredPositionFor.get(jointIndex);
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
-         if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration())
+         if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration() || lowLevelJointData.getControlMode() == JointDesiredControlMode.POSITION)
             continue;
 
          double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificPositionBreakFrequency.get(jointIndex), controlDT);
