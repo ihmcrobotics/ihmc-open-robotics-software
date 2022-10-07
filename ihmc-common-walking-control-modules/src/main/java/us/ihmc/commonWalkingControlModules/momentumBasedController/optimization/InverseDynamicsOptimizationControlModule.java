@@ -66,6 +66,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final InverseDynamicsQPSolver qpSolver;
    private final QPInputTypeB directMotionQPInput;
    private final QPInputTypeA motionQPInput;
+   private final NativeQPInputTypeA nativeMotionQPInput;
    private final QPInputTypeA rhoQPInput;
    private final QPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
@@ -135,6 +136,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          basisVectorVisualizer = null;
 
       motionQPInput = new QPInputTypeA(numberOfDoFs);
+      nativeMotionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       directMotionQPInput = new QPInputTypeB(numberOfDoFs);
       rhoQPInput = new QPInputTypeA(rhoSize);
       motionQPVariableSubstitution = new QPVariableSubstitution();
@@ -327,9 +329,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private void computePrivilegedJointAccelerations()
    {
-      boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(motionQPInput);
+      boolean success = motionQPInputCalculator.computePrivilegedJointAccelerations(nativeMotionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(nativeMotionQPInput);
    }
 
    private void setupRhoTasks()
@@ -400,9 +402,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
-      boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertSpatialAccelerationCommand(command, nativeMotionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(nativeMotionQPInput);
    }
 
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)

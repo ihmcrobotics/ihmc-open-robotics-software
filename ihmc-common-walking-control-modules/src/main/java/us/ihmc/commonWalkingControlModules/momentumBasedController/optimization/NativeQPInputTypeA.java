@@ -73,9 +73,27 @@ public class NativeQPInputTypeA
       reshape(initialTaskSize);
    }
 
+   public void set(QPInputTypeA inputTypeA)
+   {
+      setTaskJacobian(inputTypeA.getTaskJacobian());
+      setTaskObjective(inputTypeA.getTaskObjective());
+      setUseWeightScalar(inputTypeA.useWeightScalar());
+      setNumberOfVariables(inputTypeA.taskJacobian.getNumCols());
+      setConstraintType(inputTypeA.getConstraintType());
+      if (useWeightScalar)
+         setWeight(inputTypeA.getWeightScalar());
+      else
+         setTaskWeightMatrix(inputTypeA.getTaskWeightMatrix());
+   }
+
    public void setNumberOfVariables(int numberOfVariables)
    {
       this.numberOfVariables = numberOfVariables;
+   }
+
+   public int getNumberOfVariables()
+   {
+      return numberOfVariables;
    }
 
    public void reshape(int taskSize)
