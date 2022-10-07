@@ -22,5 +22,5 @@ public interface StoredPropertySetReadOnly
 
    String getCurrentVersionSuffix();
 
-   String getUncapitalizedClassName();
+   String getCapitalizedClassName();
 }

@@ -42,9 +42,5 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    Path findSaveFileDirectory();
 
-   String getCurrentVersionSuffix();
-
-   String getCapitalizedClassName();
-
    void setTitle(String title);
 }
