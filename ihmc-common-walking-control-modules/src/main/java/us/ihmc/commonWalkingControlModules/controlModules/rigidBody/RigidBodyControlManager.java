@@ -218,9 +218,9 @@ public class RigidBodyControlManager
       userControlState.setWeights(userModeWeights);
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> jointspaceGains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains, Map<String, PIDGainsReadOnly> jointspaceLowLevelGains)
    {
-      jointspaceControlState.setGains(jointspaceGains);
+      jointspaceControlState.setGains(jointspaceHighLevelGains, jointspaceLowLevelGains);
    }
 
    /**
