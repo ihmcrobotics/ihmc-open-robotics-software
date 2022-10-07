@@ -17,7 +17,7 @@ import us.ihmc.tools.thread.Activator;
 import java.nio.ByteOrder;
 import java.util.Random;
 
-public class GDXFFMPEGLoggingDemo
+public class GDXFFMPEGvp9LoggingDemo
 {
    public static final int WIDTH = 256;
    public static final int HEIGHT = 256;
@@ -39,7 +39,7 @@ public class GDXFFMPEGLoggingDemo
    final byte[] data = new byte[4];
    int index = 0;
 
-   public GDXFFMPEGLoggingDemo()
+   public GDXFFMPEGvp9LoggingDemo()
    {
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -119,6 +119,6 @@ public class GDXFFMPEGLoggingDemo
 
    public static void main(String[] args)
    {
-      new GDXFFMPEGLoggingDemo();
+      new GDXFFMPEGvp9LoggingDemo();
    }
 }
