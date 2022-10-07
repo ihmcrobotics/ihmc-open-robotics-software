@@ -10,8 +10,11 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
@@ -25,12 +28,18 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
+   private final YoBoolean positionControlMode;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    public RigidBodyJointspaceControlState(String bodyName, OneDoFJointBasics[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
          YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
+
+      positionControlMode = new YoBoolean(bodyName + "PositionControlMode", parentRegistry);
+      positionControlMode.set(true);
+      jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
       numberOfJoints = jointsToControl.length;
       jointsHomeConfiguration = new double[numberOfJoints];
@@ -55,6 +64,24 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public void setDefaultWeight(DoubleProvider weight)
    {
       jointControlHelper.setDefaultWeight(weight);
+   }
+
+   @Override
+   public JointDesiredOutputListReadOnly getJointDesiredData()
+   {
+      if (positionControlMode.getValue())
+      {
+         for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+         {
+            jointDesiredOutputList.setupForPositionControl(i, getJointDesiredPosition(i), getJointDesiredVelocity(i));
+         }
+
+         return jointDesiredOutputList;
+      }
+      else
+      {
+         return null;
+      }
    }
 
    public void setGains(Map<String, PIDGainsReadOnly> gains)
