@@ -116,7 +116,9 @@ public class FFMPEGFileReader
 
    public long seek(long timestamp)
    {
-      FFMPEGTools.checkNegativeError(avformat.av_seek_frame(avFormatContext, streamIndex, timestamp, avformat.AVSEEK_FLAG_BACKWARD), "Seeking frame via timestamp", false);
+      FFMPEGTools.checkNegativeError(avformat.av_seek_frame(avFormatContext, streamIndex, timestamp, avformat.AVSEEK_FLAG_BACKWARD),
+                                     "Seeking frame via timestamp",
+                                     false);
 
       boolean firstRun = true;
 
@@ -130,7 +132,7 @@ public class FFMPEGFileReader
          if (!loadNextFrame())
             return -1;
       }
-      while(videoFrame.best_effort_timestamp() < timestamp);
+      while (videoFrame.best_effort_timestamp() < timestamp);
 
       return getNextFrame(false);
    }

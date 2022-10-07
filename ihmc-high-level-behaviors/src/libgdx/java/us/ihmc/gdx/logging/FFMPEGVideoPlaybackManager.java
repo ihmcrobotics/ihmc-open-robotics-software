@@ -109,19 +109,19 @@ public class FFMPEGVideoPlaybackManager
    {
       return baseUnits;
 
-//      long millis = 0;
-//      if (timeBase.num() == 1) //Should basically always be one, but just to be safe
-//      {
-//         //This method increases accuracy when the time base is simple (which is often the case)
-//         millis = baseUnits / timeBase.den() * 1000;
-//         millis += (baseUnits % timeBase.den()) * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000;
-//      }
-//      else
-//      {
-//         millis = (long) (baseUnits * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000);
-//      }
-//
-//      return millis;
+      //      long millis = 0;
+      //      if (timeBase.num() == 1) //Should basically always be one, but just to be safe
+      //      {
+      //         //This method increases accuracy when the time base is simple (which is often the case)
+      //         millis = baseUnits / timeBase.den() * 1000;
+      //         millis += (baseUnits % timeBase.den()) * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000;
+      //      }
+      //      else
+      //      {
+      //         millis = (long) (baseUnits * FFMPEGTools.rationalToFloatingPoint(timeBase) * 1000);
+      //      }
+      //
+      //      return millis;
    }
 
    public int getWidth()
