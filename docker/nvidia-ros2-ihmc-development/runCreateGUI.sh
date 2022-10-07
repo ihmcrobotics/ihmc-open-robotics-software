@@ -13,7 +13,6 @@ sudo -u $(whoami) xhost +local:docker
 sudo -u root docker run \
     --tty \
     --interactive \
-    --rm \
     --network host \
     --dns=1.1.1.1 \
     --privileged \
@@ -21,4 +20,5 @@ sudo -u root docker run \
     --device /dev/dri:/dev/dri \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    ihmcrobotics/nvidia-ros2-java:0.1
+    --name perception \
+    ihmcrobotics/nvidia-ros2-ihmc-development:0.1
