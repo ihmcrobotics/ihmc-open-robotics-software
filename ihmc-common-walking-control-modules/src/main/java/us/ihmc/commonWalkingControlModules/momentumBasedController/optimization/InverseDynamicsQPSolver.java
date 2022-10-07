@@ -6,6 +6,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -37,8 +38,12 @@ public class InverseDynamicsQPSolver
 
    private final QPVariableSubstitution accelerationVariablesSubstitution = new QPVariableSubstitution();
 
+   private final NativeMatrix nativeSolverInput_H;
+   private final NativeMatrix nativeSolverInput_f;
    private final DMatrixRMaj solverInput_H;
    private final DMatrixRMaj solverInput_f;
+   private final DMatrixRMaj finalSolverInput_H;
+   private final DMatrixRMaj finalSolverInput_f;
 
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
@@ -71,6 +76,7 @@ public class InverseDynamicsQPSolver
    private final DMatrixRMaj regularizationMatrix;
 
    private final DMatrixRMaj tempJtW;
+   private final NativeMatrix nativeTempJtW = new NativeMatrix(0, 0);
 
    private final int numberOfDoFs;
    private final int rhoSize;
@@ -100,8 +106,12 @@ public class InverseDynamicsQPSolver
 
       addRateRegularization.set(false);
 
+      nativeSolverInput_H = new NativeMatrix(problemSize, problemSize);
+      nativeSolverInput_f = new NativeMatrix(problemSize, 1);
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f = new DMatrixRMaj(problemSize, 1);
+      finalSolverInput_H = new DMatrixRMaj(problemSize, problemSize);
+      finalSolverInput_f = new DMatrixRMaj(problemSize, 1);
 
       solverInput_H_previous = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f_previous = new DMatrixRMaj(problemSize, 1);
@@ -208,6 +218,8 @@ public class InverseDynamicsQPSolver
       solverInput_H.zero();
 
       solverInput_f.zero();
+      nativeSolverInput_H.zero();
+      nativeSolverInput_f.zero();
 
       solverInput_Aeq.reshape(0, problemSize);
       solverInput_beq.reshape(0, 1);
@@ -240,6 +252,32 @@ public class InverseDynamicsQPSolver
       {
          solverInput_H.add(i, i, 1.0 / factor);
          solverInput_f.add(i, 0, -solverOutput_jointAccelerations.get(i, 0) / factor);
+      }
+   }
+
+   public void addMotionInput(NativeQPInputTypeA input)
+   {
+      switch (input.getConstraintType())
+      {
+         case OBJECTIVE:
+            if (input.useWeightScalar())
+               addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+            else
+               addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+            break;
+         default:
+            throw new RuntimeException("Constraint type is either not implemented or unexpected: " + input.getConstraintType());
+//         case EQUALITY:
+//            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+//            break;
+//         case LEQ_INEQUALITY:
+//            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+//            break;
+//         case GEQ_INEQUALITY:
+//            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+//            break;
+//         default:
+//            throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
    }
 
@@ -312,6 +350,15 @@ public class InverseDynamicsQPSolver
       addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
    }
 
+   public void addMotionTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
+   }
+
    public void addRhoTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight)
    {
       if (taskJacobian.getNumCols() != rhoSize)
@@ -333,6 +380,26 @@ public class InverseDynamicsQPSolver
     *       diagonal.
     */
    public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+      addTaskInternal(taskJacobian, taskObjective, taskWeight, 0);
+   }
+
+   /**
+    * Sets up a motion objective for the joint accelerations (qddot).
+    * <p>
+    * min (J qddot - b)^T * W * (J qddot - b)
+    * </p>
+    *
+    * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
+    * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
+    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be
+    *       diagonal.
+    */
+   public void addMotionTask(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight)
    {
       if (taskJacobian.getNumCols() != numberOfDoFs)
       {
@@ -419,6 +486,18 @@ public class InverseDynamicsQPSolver
       MatrixTools.multAddBlock(-1.0, taskWeight, taskObjective, solverInput_f, offset, 0);
    }
 
+   public void addTaskInternal(NativeMatrix taskObjective, NativeMatrix taskWeight, int offset, int variables)
+   {
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      nativeSolverInput_H.addBlock(taskObjective, offset, offset, 0, 0, variables, variables);
+      nativeSolverInput_f.multAddBlock(-1.0, taskWeight, taskObjective, offset, 0);
+   }
+
+
    private void addTaskInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, int offset)
    {
       int taskSize = taskJacobian.getNumRows();
@@ -440,6 +519,25 @@ public class InverseDynamicsQPSolver
       MatrixTools.multAddBlock(-1.0, tempJtW, taskObjective, solverInput_f, offset, 0);
    }
 
+   private void addTaskInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, int offset)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      // J^T W
+      nativeTempJtW.multTransA(taskJacobian, taskWeight);
+
+      // Compute: H += J^T W J
+      nativeSolverInput_H.multAddBlock(nativeTempJtW, taskJacobian, offset, offset);
+
+      // Compute: f += - J^T W Objective
+      nativeSolverInput_f.multAddBlock(-1.0, nativeTempJtW, taskObjective, offset, 0);
+   }
+
    private void addTaskInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, int offset)
    {
       int variables = taskJacobian.getNumCols();
@@ -453,6 +551,21 @@ public class InverseDynamicsQPSolver
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+   }
+
+   private void addTaskInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, int offset)
+   {
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      // Compute: H += J^T W J
+      nativeSolverInput_H.multAddBlockTransA(taskWeight, taskJacobian, taskJacobian, offset, offset);
+
+      // Compute: f += - J^T W Objective
+      nativeSolverInput_f.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, offset, 0);
    }
 
    private void addTaskInternal(DMatrixRMaj taskJacobian,
@@ -522,6 +635,15 @@ public class InverseDynamicsQPSolver
       addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
    }
 
+   public void addMotionEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
+   {
+      if (taskJacobian.getNumCols() != numberOfDoFs)
+      {
+         throw new RuntimeException("Motion task needs to have size macthing the DoFs of the robot.");
+      }
+      addEqualityConstraintInternal(taskJacobian, taskObjective, 0);
+   }
+
    public void addRhoEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective)
    {
       if (taskJacobian.getNumCols() != rhoSize)
@@ -532,6 +654,25 @@ public class InverseDynamicsQPSolver
    }
 
    private void addEqualityConstraintInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, int offset)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      int previousSize = solverInput_beq.getNumRows();
+
+      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
+      solverInput_Aeq.reshape(previousSize + taskSize, problemSize, true);
+      solverInput_beq.reshape(previousSize + taskSize, 1, true);
+
+      CommonOps_DDRM.insert(taskJacobian, solverInput_Aeq, previousSize, offset);
+      CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, offset);
+   }
+
+   private void addEqualityConstraintInternal(NativeMatrix taskJacobian, NativeMatrix taskObjective, int offset)
    {
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
@@ -724,6 +865,11 @@ public class InverseDynamicsQPSolver
             solverInput_activeIndices.set(inactiveIndices.get(i), 0, 0.0);
          }
       }
+
+      nativeSolverInput_H.get(finalSolverInput_H);
+      nativeSolverInput_f.get(finalSolverInput_f);
+      CommonOps_DDRM.addEquals(solverInput_H, finalSolverInput_H);
+      CommonOps_DDRM.addEquals(solverInput_f, finalSolverInput_f);
 
       numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
