@@ -1,6 +1,6 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia
-# Current version: 0.4
+# Current version: 0.5
 # Refer to the NVIDIA/CUDA base image here: (https://hub.docker.com/r/nvidia/cuda/)
 # This is currently based on Ubuntu 20.04 Focal Fossa.
 FROM nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04
