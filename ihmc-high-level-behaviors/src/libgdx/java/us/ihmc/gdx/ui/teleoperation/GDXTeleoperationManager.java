@@ -640,4 +640,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
    {
       return teleoperationParameters;
    }
+
+   public GDXManualFootstepPlacement getManualFootstepPlacement()
+   {
+      return manualFootstepPlacement;
+   }
 }
