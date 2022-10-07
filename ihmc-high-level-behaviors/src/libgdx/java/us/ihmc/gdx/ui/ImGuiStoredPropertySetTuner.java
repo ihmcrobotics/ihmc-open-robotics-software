@@ -54,8 +54,8 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       PathTools.walkFlat(saveFileDirectory, (path, pathType) ->
       {
          String fileName = path.getFileName().toString();
-         String prefix = storedPropertySet.getUncapitalizedClassName();
-         String extension = ".ini";
+         String prefix = storedPropertySet.getCapitalizedClassName();
+         String extension = ".json";
          if (pathType == BasicPathVisitor.PathType.FILE && fileName.startsWith(prefix) && fileName.endsWith(extension))
          {
             versions.add(fileName.replaceAll(extension, "").substring(prefix.length()));

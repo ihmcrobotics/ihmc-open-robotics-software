@@ -89,6 +89,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private String subsequentPathToResourceFolder;
    private final WorkspaceDirectory workspaceDirectory;
    private final String uncapitalizedClassName;
+   private final String capitalizedClassName;
    private WorkspaceFile workspaceLegacyINIFile;
    private WorkspaceFile workspaceJSONFile;
 
@@ -110,6 +111,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       this.keys = keys;
       this.uncapitalizedClassName = StringUtils.uncapitalize(classForLoading.getSimpleName());
+      this.capitalizedClassName = classForLoading.getSimpleName();
       this.classForLoading = classForLoading;
       title = classForLoading.getSimpleName();
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
@@ -776,10 +778,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
       return currentVersionSuffix;
    }
 
-   @Override
-   public String getUncapitalizedClassName()
+   public String getCapitalizedClassName()
    {
-      return uncapitalizedClassName;
+      return capitalizedClassName;
    }
 
    @Override
