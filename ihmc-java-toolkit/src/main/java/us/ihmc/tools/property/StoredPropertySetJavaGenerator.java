@@ -56,14 +56,14 @@ public class StoredPropertySetJavaGenerator
                JsonNode propertyNode = objectNode.get(fieldName);
                if (fieldName.equals("title"))
                {
-                  storedPropertySetTitle = propertyNode.asText();
+                  storedPropertySetTitle = propertyNode.textValue();
                }
                else
                {
                   String description = "";
                   if (propertyNode instanceof ArrayNode arrayNode)
                   {
-                     description = arrayNode.get(1).asText();
+                     description = arrayNode.get(1).textValue();
                      if (arrayNode.get(0) instanceof BooleanNode)
                      {
                         storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean", description));
@@ -73,6 +73,25 @@ public class StoredPropertySetJavaGenerator
                         storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double", description));
                      }
                      else if (arrayNode.get(0) instanceof IntNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int", description));
+                     }
+                  }
+                  else if (propertyNode instanceof ObjectNode keyObjectNode)
+                  {
+
+                     JsonNode descriptionNode = keyObjectNode.get("description");
+                     if (descriptionNode != null)
+                        description = descriptionNode.textValue();
+                     if (keyObjectNode.get("value") instanceof BooleanNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Boolean", "boolean", description));
+                     }
+                     else if (keyObjectNode.get("value") instanceof DoubleNode)
+                     {
+                        storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Double", "double", description));
+                     }
+                     else if (keyObjectNode.get("value") instanceof IntNode)
                      {
                         storedPropertiesFromFile.add(new StoredPropertyFromFile(fieldName, "Integer", "int", description));
                      }

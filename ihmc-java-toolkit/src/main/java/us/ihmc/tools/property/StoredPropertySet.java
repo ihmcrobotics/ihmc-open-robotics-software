@@ -1,9 +1,7 @@
 package us.ihmc.tools.property;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -364,20 +362,70 @@ public class StoredPropertySet implements StoredPropertySetBasics
                   if (propertyNode instanceof ArrayNode arrayNode)
                   {
                      stringValue = arrayNode.get(0).asText();
-                     key.setDescription(arrayNode.get(1).asText());
+                     if (stringValue.equals("null"))
+                     {
+                        LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
+                     }
+                     else
+                     {
+                        setInternal(key, deserializeString(key, stringValue));
+                     }
+                     key.setDescription(arrayNode.get(1).textValue());
+                  }
+                  else if (propertyNode instanceof ObjectNode keyObjectNode)
+                  {
+                     JsonNode valueNode = keyObjectNode.get("value");
+                     JsonNode descriptionNode = keyObjectNode.get("description");
+                     if (descriptionNode != null)
+                        key.setDescription(descriptionNode.textValue());
+
+                     if (key instanceof DoubleStoredPropertyKey doubleKey)
+                     {
+                        setInternal(key, valueNode.doubleValue());
+                        JsonNode lowerBound = keyObjectNode.get("lowerBound");
+                        if (lowerBound != null)
+                           doubleKey.setLowerBound(lowerBound.doubleValue());
+                        JsonNode upperBound = keyObjectNode.get("upperBound");
+                        if (upperBound != null)
+                           doubleKey.setUpperBound(upperBound.doubleValue());
+
+                     }
+                     else if (key instanceof IntegerStoredPropertyKey integerKey)
+                     {
+                        setInternal(key, valueNode.intValue());
+                        JsonNode lowerBound = keyObjectNode.get("lowerBound");
+                        if (lowerBound != null)
+                           integerKey.setLowerBound(lowerBound.intValue());
+                        JsonNode upperBound = keyObjectNode.get("upperBound");
+                        if (upperBound != null)
+                           integerKey.setUpperBound(upperBound.intValue());
+                        JsonNode validValues = keyObjectNode.get("validValues");
+                        if (validValues instanceof ArrayNode validValuesArray)
+                        {
+                           int[] validValuesPrimitiveArray = new int[validValuesArray.size()];
+                           for (int i = 0; i < validValuesArray.size(); i++)
+                           {
+                              validValuesPrimitiveArray[i] = validValuesArray.get(i).intValue();
+                           }
+                           integerKey.setValidValues(validValuesPrimitiveArray);
+                        }
+                     }
+                     else if (key instanceof BooleanStoredPropertyKey booleanKey)
+                     {
+                        setInternal(key, valueNode.booleanValue());
+                     }
                   }
                   else
                   {
                      stringValue = propertyNode.asText();
-                  }
-
-                  if (stringValue.equals("null"))
-                  {
-                     LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
-                  }
-                  else
-                  {
-                     setInternal(key, deserializeString(key, stringValue));
+                     if (stringValue.equals("null"))
+                     {
+                        LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
+                     }
+                     else
+                     {
+                        setInternal(key, deserializeString(key, stringValue));
+                     }
                   }
                }
             }
@@ -448,7 +496,59 @@ public class StoredPropertySet implements StoredPropertySetBasics
          jsonRootObjectNode.put("title", title);
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            if (!key.getDescription().isEmpty())
+            boolean isDoubleKeyAndHasExtras = false;
+            if (key instanceof DoubleStoredPropertyKey doubleKey)
+            {
+               isDoubleKeyAndHasExtras |= doubleKey.hasLowerBound();
+               isDoubleKeyAndHasExtras |= doubleKey.hasUpperBound();
+            }
+            boolean isIntegerKeyAndHasExtras = false;
+            if (key instanceof IntegerStoredPropertyKey integerKey)
+            {
+               isIntegerKeyAndHasExtras |= integerKey.hasLowerBound();
+               isIntegerKeyAndHasExtras |= integerKey.hasUpperBound();
+               isIntegerKeyAndHasExtras |= integerKey.hasSpecifiedValidValues();
+            }
+
+            if (isDoubleKeyAndHasExtras || isIntegerKeyAndHasExtras)
+            {
+               ObjectNode keyObjectNode = jsonRootObjectNode.putObject(key.getTitleCasedName());
+
+               boolean valueIsNull = get(key) == null;
+               boolean defaultValueIsNull = key.getDefaultValue() == null;
+               if (isDoubleKeyAndHasExtras)
+               {
+                  DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
+                  keyObjectNode.put("value", valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
+                  if (doubleKey.hasLowerBound())
+                     keyObjectNode.put("lowerBound", doubleKey.getLowerBound());
+                  if (doubleKey.hasUpperBound())
+                     keyObjectNode.put("upperBound", doubleKey.getUpperBound());
+               }
+               else if (isIntegerKeyAndHasExtras)
+               {
+                  IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) key;
+                  keyObjectNode.put("value", valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+                  if (integerKey.hasLowerBound())
+                     keyObjectNode.put("lowerBound", integerKey.getLowerBound());
+                  if (integerKey.hasUpperBound())
+                     keyObjectNode.put("upperBound", integerKey.getUpperBound());
+                  if (integerKey.hasSpecifiedValidValues())
+                  {
+                     ArrayNode validValuesJSONArray = keyObjectNode.putArray("validValues");
+                     for (int validValue : integerKey.getValidValues())
+                     {
+                        validValuesJSONArray.add(validValue);
+                     }
+                  }
+               }
+
+               if (key.hasDescription())
+               {
+                  keyObjectNode.put("description", key.getDescription());
+               }
+            }
+            else if (key.hasDescription())
             {
                ArrayNode arrayNode = jsonRootObjectNode.putArray(key.getTitleCasedName());
                boolean valueIsNull = get(key) == null;
