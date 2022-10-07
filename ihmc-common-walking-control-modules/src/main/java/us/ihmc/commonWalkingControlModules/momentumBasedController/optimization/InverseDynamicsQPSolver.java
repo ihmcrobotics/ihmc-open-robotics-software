@@ -42,8 +42,8 @@ public class InverseDynamicsQPSolver
    private final NativeMatrix nativeSolverInput_f;
    private final DMatrixRMaj solverInput_H;
    private final DMatrixRMaj solverInput_f;
-   private final DMatrixRMaj finalSolverInput_H;
-   private final DMatrixRMaj finalSolverInput_f;
+   private final NativeMatrix finalSolverInput_H;
+   private final NativeMatrix finalSolverInput_f;
 
    private final DMatrixRMaj solverInput_H_previous;
    private final DMatrixRMaj solverInput_f_previous;
@@ -108,10 +108,10 @@ public class InverseDynamicsQPSolver
 
       nativeSolverInput_H = new NativeMatrix(problemSize, problemSize);
       nativeSolverInput_f = new NativeMatrix(problemSize, 1);
+      finalSolverInput_H = new NativeMatrix(problemSize, problemSize);
+      finalSolverInput_f = new NativeMatrix(problemSize, 1);
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f = new DMatrixRMaj(problemSize, 1);
-      finalSolverInput_H = new DMatrixRMaj(problemSize, problemSize);
-      finalSolverInput_f = new DMatrixRMaj(problemSize, 1);
 
       solverInput_H_previous = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f_previous = new DMatrixRMaj(problemSize, 1);
@@ -866,13 +866,13 @@ public class InverseDynamicsQPSolver
          }
       }
 
-      nativeSolverInput_H.get(finalSolverInput_H);
-      nativeSolverInput_f.get(finalSolverInput_f);
-      CommonOps_DDRM.addEquals(solverInput_H, finalSolverInput_H);
-      CommonOps_DDRM.addEquals(solverInput_f, finalSolverInput_f);
+      finalSolverInput_H.set(solverInput_H);
+      finalSolverInput_f.set(solverInput_f);
+      finalSolverInput_H.addEquals(nativeSolverInput_H);
+      finalSolverInput_f.addEquals(nativeSolverInput_f);
 
       numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
-      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
+      qpSolver.setQuadraticCostFunction(finalSolverInput_H, finalSolverInput_f);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       qpSolver.setActiveVariables(solverInput_activeIndices);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
@@ -910,8 +910,8 @@ public class InverseDynamicsQPSolver
          }
       }
 
-      solverInput_H_previous.set(solverInput_H);
-      solverInput_f_previous.set(solverInput_f);
+      solverInput_H_previous.set(finalSolverInput_H);
+      solverInput_f_previous.set(finalSolverInput_f);
 
       solverInput_lb_previous.set(solverInput_lb);
       solverInput_ub_previous.set(solverInput_ub);
