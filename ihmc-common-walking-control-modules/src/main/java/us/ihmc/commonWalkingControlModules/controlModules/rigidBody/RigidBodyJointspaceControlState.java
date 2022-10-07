@@ -10,6 +10,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -73,7 +75,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
          {
-            jointDesiredOutputList.setupForPositionControl(i, getJointDesiredPosition(i), getJointDesiredVelocity(i));
+            JointDesiredOutput lowLevelJointData = jointDesiredOutputList.getJointDesiredOutput(i);
+
+            lowLevelJointData.setControlMode(JointDesiredControlMode.POSITION);
+            lowLevelJointData.setDesiredPosition(getJointDesiredPosition(i));
+            lowLevelJointData.setDesiredVelocity(getJointDesiredVelocity(i));
+            lowLevelJointData.setStiffness(jointControlHelper.getLowLevelJointGain(i).getKp());
+            lowLevelJointData.setDamping(jointControlHelper.getLowLevelJointGain(i).getKd());
          }
 
          return jointDesiredOutputList;
@@ -84,14 +92,14 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       }
    }
 
-   public void setGains(Map<String, PIDGainsReadOnly> gains)
+   public void setGains(Map<String, PIDGainsReadOnly> jointspaceHighLevelGains, Map<String, PIDGainsReadOnly> jointspaceLowLevelGains)
    {
-      jointControlHelper.setGains(gains);
+      jointControlHelper.setGains(jointspaceHighLevelGains, jointspaceLowLevelGains);
    }
 
-   public void setGains(YoPIDGains gains)
+   public void setGains(YoPIDGains highLevelGains)
    {
-      jointControlHelper.setGains(gains);
+      jointControlHelper.setHighLevelGains(highLevelGains);
    }
 
    public void holdCurrent()
