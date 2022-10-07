@@ -20,14 +20,14 @@ import java.util.*;
 
 /**
  * Provides a load/saveable property set accessed by strongly typed static keys.
- *
+ * <p>
  * The property JSON file is saved to the classpath by file and loaded from the classpath by resource.
- *
+ * <p>
  * Some of the benefits of this framework:
- * - Keys are created with title cased names available for GUI fields
- * - Lightweight and can be used as part of other frameworks
- * - JSON file can be placed in higher level projects to override the defaults
- *
+ * <li>Keys are created with title cased names available for GUI fields</li>
+ * <li>Lightweight and can be used as part of other frameworks</li>
+ * <li>JSON file can be placed in higher level projects to override the defaults</li>
+ * <p>
  * To create a StoredPropertySet, create a main, us.ihmc.YourStoredPropertySet.java
  *
  * <pre>
@@ -44,10 +44,10 @@ import java.util.*;
  * where the paths are replaced to match your situation. The subsequest paths may be shorter or longer depending on how nested the
  * projects are. Typically, the "directory name to assume present" is the name of the repository. These paths are necessary
  * to allow saving the parameters in version control.
- *
+ * <p>
  * Then, create a us.ihmc.YourStoredPropertySetName.json in the resources folder.
  * The name should be the exact same as the *.java class.
- *
+ * <p>
  * Properties should only be declared in the JSON if using the generator.
  *
  * <pre>
@@ -60,6 +60,21 @@ import java.util.*;
  * </pre>
  *
  * Run the main, which will generate Basics and ReadOnly interfaces and rewrite the main class to extend and implement the correct classes.
+ * <p>
+ * In order to add descriptions to parameters, you may add it by making the value a JSON array
+ * with the 2nd value being the description. You may mix parameters that have descriptions with ones
+ * that don't. Descriptions have to be a single long line in JSON, so it is recommended to enable word wrap
+ * for JSON files in your editor.
+ *
+ *  <pre>
+ *  {
+ *    "title": "Stored property set name",
+ *    "The first boolean property": [false, "This is an example test property."],
+ *    "The first double property": 0.5,
+ *    "The first integer property": [3, "The property before this one doesn't have a description."]
+ *  }
+ *  </pre>
+ *
  */
 public class StoredPropertySet implements StoredPropertySetBasics
 {
