@@ -13,8 +13,16 @@
   "Use filtered image" : true,
   "Use SVD normals" : true,
   "SVD reduction factor" : 20,
-  "Gaussian size" : 16,
-  "Gaussian sigma" : 6.0,
+  "Gaussian size" : {
+    "value" : 16,
+    "lowerBound" : 1,
+    "upperBound" : 20
+  },
+  "Gaussian sigma" : {
+    "value": 6.0,
+    "lowerBound" : 0.23,
+    "upperBound" : 10.0
+  },
   "Search depth limit" : 37000,
   "Region min patches" : 700,
   "Boundary min patches" : 20,

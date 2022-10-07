@@ -165,8 +165,14 @@ public class GDXRemoteGPUPlanarRegionExtractionUI
    {
       boolean anyChanged = false;
       anyChanged |= ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
-      anyChanged |= ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
-      anyChanged |= ImGui.sliderFloat(labels.get("Gaussian sigma"), gaussianSigma.getData(), 0.23f, 10.0f);
+      anyChanged |= ImGui.sliderInt(labels.get("Gaussian size"),
+                                    gaussianSize.getData(),
+                                    GPUPlanarRegionExtractionParameters.gaussianSize.getLowerBound(),
+                                    GPUPlanarRegionExtractionParameters.gaussianSize.getUpperBound());
+      anyChanged |= ImGui.sliderFloat(labels.get("Gaussian sigma"),
+                                      gaussianSigma.getData(),
+                                      (float) GPUPlanarRegionExtractionParameters.gaussianSigma.getLowerBound(),
+                                      (float) GPUPlanarRegionExtractionParameters.gaussianSigma.getUpperBound());
       anyChanged |= ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 2, 20);
       anyChanged |= ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
       anyChanged |= ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);

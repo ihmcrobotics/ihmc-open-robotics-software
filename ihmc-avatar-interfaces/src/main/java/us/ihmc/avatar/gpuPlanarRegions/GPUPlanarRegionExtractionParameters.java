@@ -36,8 +36,19 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
 
    public GPUPlanarRegionExtractionParameters()
    {
-      super(keys, GPUPlanarRegionExtractionParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+      this("");
+   }
+
+   public GPUPlanarRegionExtractionParameters(String versionSpecifier)
+   {
+      super(keys, GPUPlanarRegionExtractionParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
       load();
+   }
+
+   public GPUPlanarRegionExtractionParameters(StoredPropertySetReadOnly other)
+   {
+      super(keys, GPUPlanarRegionExtractionParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      set(other);
    }
 
    public static void main(String[] args)
