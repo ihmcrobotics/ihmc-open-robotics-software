@@ -40,7 +40,7 @@ public class StoredPropertySetROS2Input
          StoredPropertySetMessageTools.copyToStoredPropertySet(receptionNotification.read(),
                                                                storedPropertySetToUpdate,
                                                                () -> LogTools.info("Accepting property set update for {}",
-                                                                                   storedPropertySetToUpdate.getUncapitalizedClassName()));
+                                                                                   storedPropertySetToUpdate.getCapitalizedClassName()));
          waitingForUpdate = false;
          return true;
       }
