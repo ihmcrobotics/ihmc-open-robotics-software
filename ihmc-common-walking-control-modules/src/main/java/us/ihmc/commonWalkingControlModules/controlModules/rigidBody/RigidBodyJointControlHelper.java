@@ -615,7 +615,7 @@ public class RigidBodyJointControlHelper
       }
    }
 
-   public boolean hasLowLevelJointGains(int jointIdx)
+   public boolean hasLowLevelJointGains()
    {
       return hasLowLevelGains.getValue();
    }

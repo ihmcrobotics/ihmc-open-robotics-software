@@ -24,6 +24,12 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
             */
    public boolean force_execution_;
    /**
+            * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
+            * jointspace position control and the controller will not use the arms for balance.
+            * TODO switch to false by default after testing
+            */
+   public boolean enable_direct_position_control_ = true;
+   /**
             * Specifies the side of the robot that will execute the trajectory.
             */
    public byte robot_side_ = (byte) 255;
@@ -49,6 +55,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
       sequence_id_ = other.sequence_id_;
 
       force_execution_ = other.force_execution_;
+
+      enable_direct_position_control_ = other.enable_direct_position_control_;
 
       robot_side_ = other.robot_side_;
 
@@ -85,6 +93,25 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    public boolean getForceExecution()
    {
       return force_execution_;
+   }
+
+   /**
+            * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
+            * jointspace position control and the controller will not use the arms for balance.
+            * TODO switch to false by default after testing
+            */
+   public void setEnableDirectPositionControl(boolean enable_direct_position_control)
+   {
+      enable_direct_position_control_ = enable_direct_position_control;
+   }
+   /**
+            * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
+            * jointspace position control and the controller will not use the arms for balance.
+            * TODO switch to false by default after testing
+            */
+   public boolean getEnableDirectPositionControl()
+   {
+      return enable_direct_position_control_;
    }
 
    /**
@@ -134,6 +161,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_execution_, other.force_execution_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_direct_position_control_, other.enable_direct_position_control_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!this.jointspace_trajectory_.epsilonEquals(other.jointspace_trajectory_, epsilon)) return false;
@@ -154,6 +183,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       if(this.force_execution_ != otherMyClass.force_execution_) return false;
 
+      if(this.enable_direct_position_control_ != otherMyClass.enable_direct_position_control_) return false;
+
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!this.jointspace_trajectory_.equals(otherMyClass.jointspace_trajectory_)) return false;
@@ -171,6 +202,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("force_execution=");
       builder.append(this.force_execution_);      builder.append(", ");
+      builder.append("enable_direct_position_control=");
+      builder.append(this.enable_direct_position_control_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("jointspace_trajectory=");

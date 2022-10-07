@@ -12,6 +12,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    private long sequenceId;
    private RobotSide robotSide;
    private boolean forceExecution = false;
+   private boolean enableDirectPositionControl = false;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public ArmTrajectoryCommand()
@@ -36,6 +37,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       sequenceId = 0;
       robotSide = null;
       setForceExecution(false);
+      setEnableDirectPositionControl(false);
       jointspaceTrajectory.clear();
    }
 
@@ -43,6 +45,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       this.robotSide = robotSide;
       setForceExecution(false);
+      setEnableDirectPositionControl(false);
       jointspaceTrajectory.clear();
    }
 
@@ -51,6 +54,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       clear(RobotSide.fromByte(message.getRobotSide()));
       setForceExecution(message.getForceExecution());
+      setEnableDirectPositionControl(message.getEnableDirectPositionControl());
       sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
@@ -60,6 +64,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       clear(other.getRobotSide());
       setForceExecution(other.getForceExecution());
+      setEnableDirectPositionControl(other.getEnableDirectPositionControl());
       sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
@@ -79,9 +84,19 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       this.forceExecution = forceExecution;
    }
 
+   public void setEnableDirectPositionControl(boolean enableDirectPositionControl)
+   {
+      this.enableDirectPositionControl = enableDirectPositionControl;
+   }
+
    public boolean getForceExecution()
    {
       return forceExecution;
+   }
+
+   public boolean getEnableDirectPositionControl()
+   {
+      return enableDirectPositionControl;
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()
