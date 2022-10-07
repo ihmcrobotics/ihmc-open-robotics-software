@@ -351,6 +351,7 @@ public class WalkingCommandConsumer
          {
             JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
             jointspaceTrajectory.setSequenceId(command.getSequenceId());
+            handManager.setEnableDirectJointPositionControl(command.getEnableDirectPositionControl());
             handManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
          }
       }

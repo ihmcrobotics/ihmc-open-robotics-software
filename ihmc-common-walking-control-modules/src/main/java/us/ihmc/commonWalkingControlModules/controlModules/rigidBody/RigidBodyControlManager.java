@@ -574,6 +574,11 @@ public class RigidBodyControlManager
       return stateMachine.getCurrentState().getJointDesiredData();
    }
 
+   public void setEnableDirectJointPositionControl(boolean enable)
+   {
+      jointspaceControlState.setEnableDirectJointPositionControl(enable);
+   }
+
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();

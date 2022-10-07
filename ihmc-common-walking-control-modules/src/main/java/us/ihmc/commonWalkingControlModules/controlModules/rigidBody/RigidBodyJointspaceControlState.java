@@ -30,7 +30,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
-   private final YoBoolean positionControlMode;
+   private final YoBoolean directPositionControlMode;
    private final JointDesiredOutputList jointDesiredOutputList;
 
    public RigidBodyJointspaceControlState(String bodyName, OneDoFJointBasics[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
@@ -39,8 +39,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
 
-      positionControlMode = new YoBoolean(bodyName + "PositionControlMode", parentRegistry);
-      positionControlMode.set(true);
+      directPositionControlMode = new YoBoolean(bodyName + "DirectPositionControlMode", parentRegistry);
+
+      // TODO switch back to default false after testing
+      directPositionControlMode.set(true);
+
       jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
       numberOfJoints = jointsToControl.length;
@@ -71,7 +74,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
-      if (positionControlMode.getValue())
+      if (directPositionControlMode.getValue())
       {
          for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
          {
@@ -225,5 +228,17 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public JointspaceTrajectoryStatusMessage pollStatusToReport()
    {
       return statusHelper.pollStatusMessage(jointControlHelper.getJointspaceCommand());
+   }
+
+   public void setEnableDirectJointPositionControl(boolean enable)
+   {
+      if (jointControlHelper.hasLowLevelJointGains())
+      {
+         this.directPositionControlMode.set(enable);
+      }
+      else
+      {
+         this.directPositionControlMode.set(false);
+      }
    }
 }
