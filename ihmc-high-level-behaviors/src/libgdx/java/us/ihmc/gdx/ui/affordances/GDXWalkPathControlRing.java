@@ -149,7 +149,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
-      poseTracking = new GDXPoseTracking(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, footstepPlannerParameters);
+      poseTracking = new GDXPoseTracking(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, teleoperationParameters, footstepPlannerParameters);
    }
 
    public void update(GDXInteractableFootstepPlan plannedFootstepPlacement)

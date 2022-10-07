@@ -7,6 +7,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import imgui.ImGui;
+import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -24,7 +26,10 @@ import us.ihmc.footstepPlanning.baselinePlanner.BaselineFootstepPlannerParameter
 import us.ihmc.footstepPlanning.baselinePlanner.ContinuousTrackingFootstepPlanner;
 import us.ihmc.footstepPlanning.baselinePlanner.SimpleTimedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -75,19 +80,19 @@ public class GDXPoseTracking
             previousFootholds.get(robotSide).set(initialFootholds.get(robotSide));
          }
 
-         planner = new ContinuousTrackingFootstepPlanner(plannerParameters, 5.0, dt, 10, vx, vy, vw);
+         planner = new ContinuousTrackingFootstepPlanner(plannerParameters, 5.0, dt, 10, maxVx, maxVy, maxVyaw);
 
-         if (joystick!=null)
+         if (joystick != null)
          {
             joystick.addJoystickEventListener(event ->
-            {
-               if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
-                  xdot.set(vx * event.getValue());
-               else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
-                  ydot.set(vy * event.getValue());
-               else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
-                  yawdot.set(vw * event.getValue());
-            });
+                                              {
+                                                 if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_Y.getIdentifier())
+                                                    xdot.set(maxVx * event.getValue());
+                                                 else if (event.getComponent().getIdentifier() == XBoxOneMapping.LEFT_STICK_X.getIdentifier())
+                                                    ydot.set(maxVy * event.getValue());
+                                                 else if (event.getComponent().getIdentifier() == XBoxOneMapping.RIGHT_STICK_X.getIdentifier())
+                                                    yawdot.set(maxVyaw * event.getValue());
+                                              });
          }
       }
 
@@ -140,14 +145,18 @@ public class GDXPoseTracking
       }
    }
 
-   // NOTE: SET MAX VELOCITIES HERE. GDXJoystickStepper stuff starts here
+   // NOTE: SET MAX VELOCITIES HERE. GDXPoseTracking stuff starts here
    private static final double dt = 0.05;
-   private static final double vx = 0.5;  // m/s
-   private static final double vy = 0.2;  // m/s
-   private static final double vw = Math.PI / 6.0;  // rad/s
+   private static double maxVx = 0.5;  // m/s
+   private static double maxVy = 0.2;  // m/s
+   private static double maxVyaw = Math.PI / 6.0;  // rad/s
+   private ImDouble alpha = new ImDouble(0.1);
+   private ImDouble beta = new ImDouble(0.04);
    private GDXImGuiBasedUI baseUI;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final GDXSphereAndArrowGraphic sphereAndArrowGraphic;
+
    private enum MODE
    {
       joystick, other
@@ -162,12 +171,14 @@ public class GDXPoseTracking
    Controller controller = null;
    FootstepPlannerParametersBasics footstepPlannerParameters;
    private FramePose3D goalPoseWithZOffset = new FramePose3D();
+   private GDXTeleoperationParameters teleoperationParameters;
 
    public GDXPoseTracking(GDXImGuiBasedUI baseUI,
                           DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
                           ROS2ControllerHelper controllerHelper,
                           CommunicationHelper communicationHelper,
+                          GDXTeleoperationParameters teleoperationParameters,
                           FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.baseUI = baseUI;
@@ -175,6 +186,7 @@ public class GDXPoseTracking
       this.syncedRobot = syncedRobot;
       this.controllerHelper = controllerHelper;
       this.communicationHelper = communicationHelper;
+      this.teleoperationParameters = teleoperationParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       sphereAndArrowGraphic = new GDXSphereAndArrowGraphic();
       sphereAndArrowGraphic.create(0.05f, 0.4f, Color.PURPLE);
@@ -202,7 +214,10 @@ public class GDXPoseTracking
 
          Joystick joystick;
 
-         BaselineFootstepPlannerParameters plannerParameters = new BaselineFootstepPlannerParameters(footstepPlannerParameters);
+         BaselineFootstepPlannerParameters plannerParameters = new BaselineFootstepPlannerParameters(footstepPlannerParameters,
+                                                                                                     teleoperationParameters.getSwingTime(),
+                                                                                                     teleoperationParameters.getTransferTime(),
+                                                                                                     teleoperationParameters.getTrajectoryTime());
 
          try
          {
@@ -217,7 +232,7 @@ public class GDXPoseTracking
          catch (IOException e)
          {
             controller = new Controller(null, initialFootholds, plannerParameters, () -> Conversions.nanosecondsToSeconds(System.nanoTime()), dt);
-//            throw new RuntimeException("error opening joystick: " + e);
+            //            throw new RuntimeException("error opening joystick: " + e);
          }
          controller.initialize();
          activated = true;
@@ -231,13 +246,17 @@ public class GDXPoseTracking
 
    public FramePose3DReadOnly getCurrentPose()
    {
-      return (FramePose3DReadOnly) controller.planner.getPreviewTrajectory().getPose();
+      return (FramePose3DReadOnly) controller.getPlanner().getPreviewTrajectory().getPose();
    }
 
    public void run(FramePose3D framePose3D)
    {
       if (activated)
       {
+         // NOTE: scale these somehow to account for (transferTime + swingTime)
+         maxVx = alpha.get() * (1/teleoperationParameters.getSwingTime() + 1/teleoperationParameters.getTransferTime());
+         maxVy = beta.get() * (1/teleoperationParameters.getSwingTime() + 1/teleoperationParameters.getTransferTime());
+
          double deltaTime = Gdx.graphics.getDeltaTime();
          if (controller.getTestMode() == MODE.joystick)
             controller.doControl(deltaTime);
@@ -245,19 +264,33 @@ public class GDXPoseTracking
          {
             controller.doControl(deltaTime, framePose3D);
          }
-         FootstepDataListMessage footstepDataListMessage = controller.planner.getPlannedFootsteps();
+         FootstepDataListMessage footstepDataListMessage = controller.getPlanner().getPlannedFootsteps();
          goalPoseWithZOffset.set(getCurrentPose());
-         goalPoseWithZOffset.appendTranslation(0.0f,0.0f,0.1f);
+         goalPoseWithZOffset.appendTranslation(0.0f, 0.0f, 0.1f);
          sphereAndArrowGraphic.setToPose(goalPoseWithZOffset);
          int j = footstepDataListMessage.getFootstepDataList().size();
-         if (j>0)
+         if (j > 0)
             controllerHelper.publishToController(footstepDataListMessage);
 
-         for (int i = 0; i < j;  ++i)
+         for (int i = 0; i < j; ++i)
          {
-            controller.planner.removePublishedFootSteps();
+            controller.getPlanner().removePublishedFootSteps();
          }
+         controller.getPlanner()
+                   .update(teleoperationParameters.getSwingTime(),
+                           teleoperationParameters.getTransferTime(),
+                           teleoperationParameters.getTrajectoryTime(),
+                           maxVx,
+                           maxVy,
+                           maxVyaw);
       }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      ImGui.text("Tuning . . .");
+      ImGuiTools.volatileInputDouble(labels.get("alpha (scales forward velocity of virtual goal)"), alpha);
+      ImGuiTools.volatileInputDouble(labels.get("beta (scales side velocity of virtual goal)"), beta);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -277,13 +310,13 @@ public class GDXPoseTracking
 
    public void setMode(boolean incoming)
    {
-      if(incoming && mode == MODE.other)
+      if (incoming && mode == MODE.other)
       {
          mode = MODE.joystick;
          stop();
          initiate();
       }
-      else if(!incoming && mode == MODE.joystick)
+      else if (!incoming && mode == MODE.joystick)
       {
          mode = MODE.other;
          stop();
@@ -303,6 +336,36 @@ public class GDXPoseTracking
 
    public boolean hasController()
    {
-      return this.controller!=null;
+      return this.controller != null;
+   }
+
+   public static double getMaxVx()
+   {
+      return maxVx;
+   }
+
+   public static void setMaxVx(double maxVx)
+   {
+      GDXPoseTracking.maxVx = maxVx;
+   }
+
+   public static double getMaxVy()
+   {
+      return maxVy;
+   }
+
+   public static void setMaxVy(double maxVy)
+   {
+      GDXPoseTracking.maxVy = maxVy;
+   }
+
+   public static double getMaxVyaw()
+   {
+      return maxVyaw;
+   }
+
+   public static void setMaxVyaw(double maxVyaw)
+   {
+      GDXPoseTracking.maxVyaw = maxVyaw;
    }
 }

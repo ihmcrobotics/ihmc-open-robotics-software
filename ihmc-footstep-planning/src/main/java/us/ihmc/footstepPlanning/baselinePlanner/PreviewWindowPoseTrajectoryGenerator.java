@@ -274,4 +274,34 @@ public class PreviewWindowPoseTrajectoryGenerator implements PoseTrajectoryGener
    {
       return lastVy;
    }
+
+   public double getMAX_X_VELOCITY()
+   {
+      return MAX_X_VELOCITY;
+   }
+
+   public void setMAX_X_VELOCITY(double MAX_X_VELOCITY)
+   {
+      this.MAX_X_VELOCITY = MAX_X_VELOCITY;
+   }
+
+   public double getMAX_Y_VELOCITY()
+   {
+      return MAX_Y_VELOCITY;
+   }
+
+   public void setMAX_Y_VELOCITY(double MAX_Y_VELOCITY)
+   {
+      this.MAX_Y_VELOCITY = MAX_Y_VELOCITY;
+   }
+
+   public double getMAX_YAW_VELOCITY()
+   {
+      return MAX_YAW_VELOCITY;
+   }
+
+   public void setMAX_YAW_VELOCITY(double MAX_YAW_VELOCITY)
+   {
+      this.MAX_YAW_VELOCITY = MAX_YAW_VELOCITY;
+   }
 }

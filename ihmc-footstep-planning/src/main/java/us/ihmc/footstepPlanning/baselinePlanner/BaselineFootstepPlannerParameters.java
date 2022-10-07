@@ -26,16 +26,22 @@ public class BaselineFootstepPlannerParameters
    protected double lateralSymmetryWeight = 1.0;
    protected double turningSymmetryWeight = 1.0;
    protected double stancePositionAlignmentThreshold = 0.001; // m
-   protected double stanceRotationAlignmentThreshold = 0.01; // rad
+   protected double stanceRotationAlignmentThreshold = 0.001; // rad
+//   protected double swingTime = 1.0;
+   protected double transferTime = 0.6;
+   protected double trajectoryTime = 2.0;
 
    public BaselineFootstepPlannerParameters()
    {
 
    }
 
-   public BaselineFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParametersBasics)
+   public BaselineFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParametersBasics, double swingDuration, double transferTime, double trajectoryTime)
    {
       this();
+      this.swingDuration = swingDuration;
+      this.transferTime = transferTime;
+      this.trajectoryTime = trajectoryTime;
 //      this.minimumForwardStride = footstepPlannerParametersBasics.getIdealFootstepLength();
 //      this.minimumLateralStride = footstepPlannerParametersBasics.getIdealSideStepWidth();
    }
@@ -219,5 +225,25 @@ public class BaselineFootstepPlannerParameters
    public final void setStanceRotationAlignmentThreshold(double stanceRotationAlignmentThreshold)
    {
       this.stanceRotationAlignmentThreshold = stanceRotationAlignmentThreshold;
+   }
+
+   public double getTransferTime()
+   {
+      return transferTime;
+   }
+
+   public void setTransferTime(double transferTime)
+   {
+      this.transferTime = transferTime;
+   }
+
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime;
+   }
+
+   public void setTrajectoryTime(double trajectoryTime)
+   {
+      this.trajectoryTime = trajectoryTime;
    }
 }

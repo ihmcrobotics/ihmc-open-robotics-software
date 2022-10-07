@@ -32,9 +32,10 @@ public class ContinuousTrackingFootstepPlanner
    private final BaselineFootstepPlannerParameters parameters;
 
    private double swingTime = 0.4;
-   private double transferTime = 0.25;
+   private double transferTime = 0.6;
+   private double trajectoryTime = 2.0;
    private FootstepDataListMessage plannedFootsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-   private ArrayList<SimpleTimedFootstep> allSteps = new ArrayList<SimpleTimedFootstep>(20);
+   private ArrayList<SimpleTimedFootstep> allSteps = new ArrayList<>(20);
 
    public ContinuousTrackingFootstepPlanner(BaselineFootstepPlannerParameters parameters,
                                             double previewTime,
@@ -44,6 +45,8 @@ public class ContinuousTrackingFootstepPlanner
                                             double maxVelocityY,
                                             double maxVelocityYaw)
    {
+      swingTime = parameters.getSwingDuration();
+      transferTime = parameters.getTransferTime();
       this.parameters = parameters;
       this.previewTime = previewTime;
       this.dt = dt;
@@ -204,7 +207,10 @@ public class ContinuousTrackingFootstepPlanner
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(tailFootstep.getRobotSide(),
                                                                                            tailFootstep.getSoleFramePose().getPosition(),
                                                                                            tailFootstep.getSoleFramePose().getOrientation());
-         plannedFootsteps.getFootstepDataList().add().set(footstepData);
+         FootstepDataMessage message = plannedFootsteps.getFootstepDataList().add();
+         message.set(footstepData);
+         message.setSwingDuration(swingTime);
+         message.setTransferDuration(transferTime);
          allSteps.add(new SimpleTimedFootstep(tailFootstep));
       }
    }
@@ -231,5 +237,15 @@ public class ContinuousTrackingFootstepPlanner
    public ArrayList<SimpleTimedFootstep> getAllSteps()
    {
       return this.allSteps;
+   }
+
+   public void update(double swingTime, double transferTime, double trajectoryTime, double maxVx, double maxVy, double maxVyaw)
+   {
+      this.swingTime = swingTime;
+      this.transferTime = transferTime;
+      this.trajectoryTime = trajectoryTime;
+      trajectory.setMAX_X_VELOCITY(maxVx);
+      trajectory.setMAX_Y_VELOCITY(maxVy);
+      trajectory.setMAX_YAW_VELOCITY(maxVyaw);
    }
 }
