@@ -711,11 +711,11 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link MomentumRateCommand} into a {@link QPInputTypeA}.
+    * Converts a {@link MomentumRateCommand} into a {@link NativeQPInputTypeA}.
     * 
     * @return true if the command was successfully converted.
     */
-   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInputTypeA qpInputToPack)
+   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, NativeQPInputTypeA qpInputToPack)
    {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
@@ -724,29 +724,31 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
-      qpInputToPack.reshape(taskSize);
-      qpInputToPack.setUseWeightScalar(false);
-      qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      tempInputTypeA.setNumberOfVariables(qpInputToPack.getNumberOfVariables());
+
+      tempInputTypeA.reshape(taskSize);
+      tempInputTypeA.setUseWeightScalar(false);
+      tempInputTypeA.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
+      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, tempInputTypeA.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
 
       if (commandToConvert.isConsiderAllJoints())
       {
-         CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
+         CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempInputTypeA.taskJacobian);
       }
       else
       {
          tempTaskJacobian.reshape(taskSize, numberOfDoFs);
          CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempTaskJacobian);
-         qpInputToPack.taskJacobian.zero();
+         tempInputTypeA.taskJacobian.zero();
          List<JointReadOnly> jointSelection = commandToConvert.getJointSelection();
 
          for (int i = 0; i < jointSelection.size(); i++)
@@ -754,7 +756,7 @@ public class MotionQPInputCalculator
             int[] jointIndices = jointIndexHandler.getJointIndices(jointSelection.get(i));
             int jointFirstIndex = jointIndices[0];
             int jointLastIndex = jointIndices[jointIndices.length - 1];
-            CommonOps_DDRM.extract(tempTaskJacobian, 0, taskSize, jointFirstIndex, jointLastIndex + 1, qpInputToPack.taskJacobian, 0, jointFirstIndex);
+            CommonOps_DDRM.extract(tempTaskJacobian, 0, taskSize, jointFirstIndex, jointLastIndex + 1, tempInputTypeA.taskJacobian, 0, jointFirstIndex);
          }
       }
 
@@ -782,9 +784,11 @@ public class MotionQPInputCalculator
             tempTaskObjective.set(3 + axis.ordinal(), linearMomentum.getElement(axis) - tempTaskObjective.get(3 + axis.ordinal()));
          }
       }
-      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, tempInputTypeA.taskObjective);
 
-      recordTaskJacobian(qpInputToPack.taskJacobian);
+      recordTaskJacobian(tempInputTypeA.taskJacobian);
+
+      qpInputToPack.set(tempInputTypeA);
 
       return true;
    }

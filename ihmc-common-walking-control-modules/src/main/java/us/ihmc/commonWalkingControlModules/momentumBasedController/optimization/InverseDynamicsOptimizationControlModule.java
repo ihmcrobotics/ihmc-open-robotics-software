@@ -436,9 +436,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public void submitMomentumRateCommand(MomentumRateCommand command)
    {
-      boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, nativeMotionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(nativeMotionQPInput);
    }
 
    public void submitLinearMomentumRateCostCommand(LinearMomentumRateCostCommand command)
