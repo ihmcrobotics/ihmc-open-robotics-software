@@ -8,13 +8,12 @@ import imgui.type.ImInt;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.imgui.*;
 import us.ihmc.tools.property.*;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
@@ -27,8 +26,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    private Runnable onParametersUpdatedCallback;
    private final TreeSet<String> versions = new TreeSet<>();
 
-   private record ValueRange(float min, float max) { }
-
+   private final ArrayList<Runnable> imGuiWidgetRenderers = new ArrayList<>();
    private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
    private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
    private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
@@ -72,10 +70,37 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
          // Add supported types here
-         if (propertyKey.getType().equals(Double.class))
+         if (propertyKey instanceof DoubleStoredPropertyKey doubleKey)
          {
-            DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
-            doubleValues.put(key, new ImDouble(storedPropertySet.get(key)));
+            doubleValues.put(doubleKey, new ImDouble(storedPropertySet.get(doubleKey)));
+            String label = doubleKey.getTitleCasedName();
+            ImGuiDoubleWidget imGuiDoubleWidget = new ImGuiDoubleWidget(() -> storedPropertySet.get(doubleKey),
+                                                                        doubleValue -> storedPropertySet.set(doubleKey, doubleValue),
+                                                                        imDouble ->
+            {
+               boolean changed;
+               String format = "%.6f";
+               if (doubleKey.hasLowerBound() && doubleKey.hasUpperBound())
+               {
+                  changed = ImGui.sliderScalar(label,
+                                               ImGuiDataType.Double,
+                                               imDouble,
+                                               doubleKey.getLowerBound(),
+                                               doubleKey.getUpperBound(), format);
+               }
+               else
+               {
+                  double step = 0.01;
+                  double stepFast = 0.5;
+                  changed = ImGuiTools.volatileInputDouble(label, imDouble, step, stepFast, format);
+               }
+
+               if (changed)
+               {
+                  onParametersUpdatedCallback.run();
+               }
+            });
+            imGuiWidgetRenderers.add(imGuiDoubleWidget::renderImGuiWidget);
          }
          else if (propertyKey.getType().equals(Integer.class))
          {
@@ -116,6 +141,10 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
       //      ImGuiInputTextFlags. // TODO: Mess with various flags
       ImGui.pushItemWidth(150.0f);
+      for (Runnable imGuiWidgetRenderer : imGuiWidgetRenderers)
+      {
+         imGuiWidgetRenderer.run();
+      }
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
          renderAPropertyTuner(propertyKey);
