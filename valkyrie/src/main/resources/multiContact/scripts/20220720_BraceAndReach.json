@@ -20,6 +20,27 @@
         }
       }
     }
+  } , {
+    "ihmc_common_msgs::msg::dds_::Box3DMessage_" : {
+      "size" : {
+        "x" : 0.2,
+        "y" : 0.7,
+        "z" : 1.83
+      },
+      "pose" : {
+        "position" : {
+          "x" : 0.6,
+          "y" : -0.15,
+          "z" : 0.915
+        },
+        "orientation" : {
+          "x" : 0.0,
+          "y" : 0.0,
+          "z" : 0.0,
+          "w" : 1.0
+        }
+      }
+    }
   } ],
   "script" : [ {
     "KinematicsToolboxSnapshotDescription" : {
