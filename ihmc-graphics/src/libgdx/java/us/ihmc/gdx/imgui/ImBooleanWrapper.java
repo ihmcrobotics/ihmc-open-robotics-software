@@ -1,6 +1,8 @@
 package us.ihmc.gdx.imgui;
 
 import imgui.type.ImBoolean;
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.*;
 
@@ -9,6 +11,11 @@ public class ImBooleanWrapper
    private final ImBoolean imBoolean = new ImBoolean();
    private final Supplier<Boolean> wrappedValueGetter;
    private final Consumer<Boolean> wrappedValueSetter;
+
+   public ImBooleanWrapper(StoredPropertySetBasics storedPropertySet, BooleanStoredPropertyKey booleanKey)
+   {
+      this(() -> storedPropertySet.get(booleanKey), booleanValue -> storedPropertySet.set(booleanKey, booleanValue));
+   }
 
    public ImBooleanWrapper(Supplier<Boolean> wrappedValueGetter, Consumer<Boolean> wrappedValueSetter)
    {

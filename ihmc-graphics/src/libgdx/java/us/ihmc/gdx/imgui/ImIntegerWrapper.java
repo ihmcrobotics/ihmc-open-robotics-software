@@ -1,6 +1,8 @@
 package us.ihmc.gdx.imgui;
 
 import imgui.type.ImInt;
+import us.ihmc.tools.property.IntegerStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.*;
 
@@ -9,6 +11,11 @@ public class ImIntegerWrapper
    private final ImInt imInt = new ImInt();
    private final IntSupplier wrappedValueGetter;
    private final IntConsumer wrappedValueSetter;
+
+   public ImIntegerWrapper(StoredPropertySetBasics storedPropertySet, IntegerStoredPropertyKey key)
+   {
+      this(() -> storedPropertySet.get(key), integerValue -> storedPropertySet.set(key, integerValue));
+   }
 
    public ImIntegerWrapper(IntSupplier wrappedValueGetter, IntConsumer wrappedValueSetter)
    {
