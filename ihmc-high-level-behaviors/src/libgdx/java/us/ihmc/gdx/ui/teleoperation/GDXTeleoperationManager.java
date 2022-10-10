@@ -94,6 +94,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
+   private boolean isPlacingFootstep = false;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -288,7 +289,11 @@ public class GDXTeleoperationManager extends ImGuiPanel
       syncedRobot.update();
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
-      baseUI.setModelSceneMouseCollisionEnabled(getManualFootstepPlacement().isPlacingFootstep());
+      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep();
+      if (isPlacingFootstep!= isCurrentlyPlacingFootstep)
+         baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
+      isPlacingFootstep = isCurrentlyPlacingFootstep;
+
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
