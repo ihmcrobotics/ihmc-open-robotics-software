@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui;
 
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImDouble;
 import us.ihmc.commons.MathTools;
@@ -18,6 +19,7 @@ public class ImGuiStoredPropertySetDoubleWidget
    private final String label;
    private final double min;
    private final double max;
+   private String unitString;
    private final Runnable onParametersUpdatedCallback;
    private final ImDoubleWrapper imDoubleWrapper;
    private final Consumer<ImDouble> accessImDouble;
@@ -25,6 +27,10 @@ public class ImGuiStoredPropertySetDoubleWidget
    private double stepFast;
    private DoubleStoredPropertyKey key;
    private String format;
+   private String fancyPrefixLabel;
+   private float unitStringWidth;
+   private float fancyPrefixWidth;
+   private boolean widthsCalculated = false;
 
    public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
                                              DoubleStoredPropertyKey key,
@@ -47,16 +53,18 @@ public class ImGuiStoredPropertySetDoubleWidget
                                              String format,
                                              Runnable onParametersUpdatedCallback)
    {
+      this.key = key;
       this.format = format;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
       imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
-      label = labels.get(key.getTitleCasedName());
+      label = labels.getHidden(key.getTitleCasedName());
+      fancyPrefixLabel = key.getTitleCasedName() + ":";
 
       if (key.hasLowerBound() && key.hasUpperBound())
       {
          this.min = key.getLowerBound();
          this.max = key.getUpperBound();
-         accessImDouble = this::renderSliderWithMinMaxAndFormat;
+         accessImDouble = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
@@ -64,7 +72,7 @@ public class ImGuiStoredPropertySetDoubleWidget
          this.stepFast = stepFast;
          min = Double.NaN;
          max = Double.NaN;
-         accessImDouble = this::renderInputWithStepAndStepFast;
+         accessImDouble = this::renderInputWithStepAndStepFastFancy;
       }
    }
 
@@ -78,9 +86,11 @@ public class ImGuiStoredPropertySetDoubleWidget
    {
       this.key = key;
       this.format = format;
+      this.unitString = unitString;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
       imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.get(unitString, key.getTitleCasedName());
+      fancyPrefixLabel = key.getTitleCasedName() + ":";
 
       if (key.hasLowerBound() && key.hasUpperBound())
       {
@@ -105,9 +115,25 @@ public class ImGuiStoredPropertySetDoubleWidget
 
    private void renderInputWithStepAndStepFastFancy(ImDouble imDouble)
    {
-      fancyBefore();
+      if (!widthsCalculated)
+      {
+         widthsCalculated = true;
+         ImVec2 size = new ImVec2();
+         ImGui.calcTextSize(size, fancyPrefixLabel);
+         fancyPrefixWidth = size.x;
+         if (unitString != null)
+         {
+            ImGui.calcTextSize(size, unitString);
+            unitStringWidth = size.x;
+         }
+      }
+
+      ImGui.text(fancyPrefixLabel);
+      ImGui.sameLine();
+      float columnWidth = ImGuiTools.getUsableWindowWidth();
+      ImGui.pushItemWidth(columnWidth - fancyPrefixWidth - unitStringWidth);
       renderInputWithStepAndStepFast(imDouble);
-      fancyAfter();
+      ImGui.popItemWidth();
    }
 
    private void renderInputWithStepAndStepFast(ImDouble imDouble)
@@ -137,7 +163,7 @@ public class ImGuiStoredPropertySetDoubleWidget
    {
       if (ImGui.sliderScalar(label, ImGuiDataType.Double, imDouble, min, max))
       {
-         clamp(imDouble); // TODO: In what case is this necessary?
+//         clamp(imDouble); // TODO: In what case is this necessary?
          onParametersUpdatedCallback.run();
       }
    }
@@ -149,9 +175,23 @@ public class ImGuiStoredPropertySetDoubleWidget
 
    private void fancyBefore()
    {
-      ImGui.text(key.getTitleCasedName() + ":");
+      if (!widthsCalculated)
+      {
+         widthsCalculated = true;
+         ImVec2 size = new ImVec2();
+         ImGui.calcTextSize(size, fancyPrefixLabel);
+         fancyPrefixWidth = size.x;
+         if (unitString != null)
+         {
+            ImGui.calcTextSize(size, unitString);
+            unitStringWidth = size.x;
+         }
+      }
+
+      ImGui.text(fancyPrefixLabel);
       ImGui.sameLine();
-      ImGui.pushItemWidth(100.0f);
+      float columnWidth = ImGuiTools.getUsableWindowWidth();
+      ImGui.pushItemWidth(columnWidth - fancyPrefixWidth - unitStringWidth);
    }
 
    private void fancyAfter()

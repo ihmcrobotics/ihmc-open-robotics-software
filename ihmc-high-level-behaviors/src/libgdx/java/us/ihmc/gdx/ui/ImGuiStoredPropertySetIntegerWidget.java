@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui;
 
 import imgui.ImGui;
+import imgui.ImVec2;
 import imgui.flag.ImGuiDataType;
 import imgui.type.ImInt;
 import us.ihmc.commons.MathTools;
@@ -22,6 +23,9 @@ public class ImGuiStoredPropertySetIntegerWidget
    private final ImIntegerWrapper imIntegerWrapper;
    private final Consumer<ImInt> accessImInt;
    private int step;
+   private String fancyPrefixLabel;
+   private float fancyPrefixWidth;
+   private boolean widthsCalculated = false;
 
    public ImGuiStoredPropertySetIntegerWidget(StoredPropertySetBasics storedPropertySet,
                                               IntegerStoredPropertyKey key,
@@ -44,7 +48,8 @@ public class ImGuiStoredPropertySetIntegerWidget
    {
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
       imIntegerWrapper = new ImIntegerWrapper(storedPropertySet, key);
-      label = labels.get(key.getTitleCasedName());
+      label = labels.getHidden(key.getTitleCasedName());
+      fancyPrefixLabel = key.getTitleCasedName() + ":";
 
       if (key.hasLowerBound() && key.hasUpperBound())
       {
@@ -68,31 +73,57 @@ public class ImGuiStoredPropertySetIntegerWidget
 
    private void renderInputWithStep(ImInt imInteger)
    {
+      fancyBefore();
       if (ImGuiTools.volatileInputInt(label, imInteger, step))
       {
          onParametersUpdatedCallback.run();
       }
+      fancyAfter();
    }
 
    private void renderSliderWithMinMax(ImInt imInteger)
    {
+      fancyBefore();
       if (ImGui.sliderScalar(label, ImGuiDataType.S32, imInteger, min, max))
       {
          onParametersUpdatedCallback.run();
       }
+      fancyAfter();
    }
 
    private void renderSliderWithMinMaxAndClamp(ImInt imInteger)
    {
+      fancyBefore();
       if (ImGui.sliderScalar(label, ImGuiDataType.S32, imInteger, min, max))
       {
          clamp(imInteger); // TODO: In what case is this necessary?
          onParametersUpdatedCallback.run();
       }
+      fancyAfter();
    }
 
    private void clamp(ImInt imInteger)
    {
       imInteger.set(MathTools.clamp(imInteger.get(), min, max));
+   }
+
+   private void fancyBefore()
+   {
+      if (!widthsCalculated)
+      {
+         widthsCalculated = true;
+         ImVec2 size = new ImVec2();
+         ImGui.calcTextSize(size, fancyPrefixLabel);
+         fancyPrefixWidth = size.x;
+      }
+
+      ImGui.text(fancyPrefixLabel);
+      ImGui.sameLine();
+      ImGui.pushItemWidth(ImGuiTools.getUsableWindowWidth() - fancyPrefixWidth);
+   }
+
+   private void fancyAfter()
+   {
+      ImGui.popItemWidth();
    }
 }

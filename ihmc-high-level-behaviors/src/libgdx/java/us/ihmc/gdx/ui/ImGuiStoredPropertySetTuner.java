@@ -111,10 +111,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.text(storedPropertySet.getCurrentVersionSuffix());
       }
 
-      for (Runnable imGuiWidgetRenderer : imGuiWidgetRenderers)
-      {
-         imGuiWidgetRenderer.run();
-      }
       if (ImGui.button("Load"))
       {
          load();
@@ -123,6 +119,13 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       if (ImGui.button("Save"))
       {
          storedPropertySet.save();
+      }
+
+      ImGui.text("(Ctrl + click sliders to set exact and unbounded value.)");
+
+      for (Runnable imGuiWidgetRenderer : imGuiWidgetRenderers)
+      {
+         imGuiWidgetRenderer.run();
       }
    }
 
