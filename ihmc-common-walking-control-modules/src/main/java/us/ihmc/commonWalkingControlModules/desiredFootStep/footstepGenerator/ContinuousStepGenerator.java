@@ -291,9 +291,6 @@ public class ContinuousStepGenerator implements Updatable
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
       }
 
-      if (directionalControlMessenger != null)
-         directionalControlMessenger.submitDirectionalControlRequest(desiredVelocityX, desiredVelocityY, turningVelocity);
-
       for (int i = footsteps.size(); i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
 

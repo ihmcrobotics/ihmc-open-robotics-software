@@ -71,7 +71,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       secondaryFootstepAdjusterField.get().add(footStepAdjustment);
    }
 
-
    public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
    {
       useHeadingAndVelocityScriptField.set(useHeadingAndVelocityScript);
