@@ -93,7 +93,6 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
    public void create(GDXImGuiBasedUI baseUI)
    {
       targetFollowingParameterTuner.create(targetFollowingParameters,
-                                           TargetFollowingBehaviorParameters.keys,
                                            () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));
       targetApproachPoseGraphic = GDXModelBuilder.createCoordinateFrameInstance(0.1);
       targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
