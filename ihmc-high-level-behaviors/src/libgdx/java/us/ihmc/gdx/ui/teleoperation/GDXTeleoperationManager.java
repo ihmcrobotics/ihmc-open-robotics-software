@@ -290,10 +290,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
       boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep();
-      if (isPlacingFootstep!= isCurrentlyPlacingFootstep)
+      if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
-
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
