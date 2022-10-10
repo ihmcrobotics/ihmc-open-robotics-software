@@ -184,7 +184,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.transferTime, 0.3, 2.5);
       turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
 
-      trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
+      trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
