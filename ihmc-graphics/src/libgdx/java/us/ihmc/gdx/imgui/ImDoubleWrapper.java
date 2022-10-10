@@ -1,6 +1,8 @@
 package us.ihmc.gdx.imgui;
 
 import imgui.type.ImDouble;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
+import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
@@ -11,6 +13,11 @@ public class ImDoubleWrapper
    private final ImDouble imDouble = new ImDouble();
    private final DoubleSupplier wrappedValueGetter;
    private final DoubleConsumer wrappedValueSetter;
+
+   public ImDoubleWrapper(StoredPropertySetBasics storedPropertySet, DoubleStoredPropertyKey key)
+   {
+      this(() -> storedPropertySet.get(key), doubleValue -> storedPropertySet.set(key, doubleValue));
+   }
 
    public ImDoubleWrapper(DoubleSupplier wrappedValueGetter, DoubleConsumer wrappedValueSetter)
    {
