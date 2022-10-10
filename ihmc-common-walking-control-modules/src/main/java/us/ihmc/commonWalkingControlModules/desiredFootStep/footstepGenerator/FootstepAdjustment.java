@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -23,5 +24,10 @@ public interface FootstepAdjustment
     * @param adjustedPoseToPack the adjusted footstep to pack. Modified.
     * @return whether the adjustment was successful or not.
     */
-   boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack);
+   default boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack)
+   {
+      return adjustFootstep(null, footstepPose, footSide, adjustedPoseToPack);
+   }
+
+   boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack);
 }

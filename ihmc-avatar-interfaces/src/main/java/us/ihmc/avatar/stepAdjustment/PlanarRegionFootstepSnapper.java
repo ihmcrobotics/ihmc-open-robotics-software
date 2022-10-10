@@ -94,7 +94,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    }
 
    @Override
-   public boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack)
+   public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack)
    {
       footstepAtSameHeightAsStanceFoot.getPosition().set(footstepPose.getPosition());
       footstepAtSameHeightAsStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());

@@ -20,6 +20,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
@@ -100,7 +101,7 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
 
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
-   private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
+   private final OptionalFactoryField<FootstepAdjustment> footstepAdjustment = new OptionalFactoryField<>("footstepAdjustment");
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
 
    // TO CONSTRUCT
@@ -315,8 +316,8 @@ public class AvatarSimulationFactory
          componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
       if (headingAndVelocityEvaluationScriptParameters.hasValue())
          componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
-      if (heightMapForFootstepZ.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ.get());
+      if (footstepAdjustment.hasValue())
+         componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment.get());
 
       stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory,
                                                           contextDataFactory,
@@ -767,11 +768,11 @@ public class AvatarSimulationFactory
    }
 
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
-                                                                       HeightMap heightMapForFootstepZ,
+                                                                       FootstepAdjustment footstepAdjustment,
                                                                        HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
-      this.heightMapForFootstepZ.set(heightMapForFootstepZ);
+      this.footstepAdjustment.set(footstepAdjustment);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
    }
 }
