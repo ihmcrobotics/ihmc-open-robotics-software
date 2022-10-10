@@ -93,6 +93,7 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
+      ImGui.text(storedPropertySet.getTitle());
       ImGui.text("Version:");
       if (versions.size() > 1)
       {
