@@ -11,6 +11,7 @@ public class ImBooleanWrapper
    private final ImBoolean imBoolean = new ImBoolean();
    private final Supplier<Boolean> wrappedValueGetter;
    private final Consumer<Boolean> wrappedValueSetter;
+   private boolean changed = false;
 
    public ImBooleanWrapper(StoredPropertySetBasics storedPropertySet, BooleanStoredPropertyKey booleanKey)
    {
@@ -31,9 +32,15 @@ public class ImBooleanWrapper
       // wrappedValueSetter might be hooked to a callback, so let's prevent
       // that unless necessary
       boolean imBooleanValue = imBoolean.get();
-      if (imBooleanValue != wrappedValueGetter.get())
+      changed = imBooleanValue != wrappedValueGetter.get();
+      if (changed)
       {
          wrappedValueSetter.accept(imBooleanValue);
       }
+   }
+
+   public boolean changed()
+   {
+      return changed;
    }
 }

@@ -13,7 +13,7 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.Consumer;
 
-public class ImGuiStoredPropertySetDoubleWidget
+public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySetWidget
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String label;
@@ -108,9 +108,16 @@ public class ImGuiStoredPropertySetDoubleWidget
       }
    }
 
+   @Override
    public void render()
    {
       imDoubleWrapper.accessImDouble(accessImDouble);
+   }
+
+   @Override
+   public boolean changed()
+   {
+      return imDoubleWrapper.changed();
    }
 
    private void renderInputWithStepAndStepFastFancy(ImDouble imDouble)

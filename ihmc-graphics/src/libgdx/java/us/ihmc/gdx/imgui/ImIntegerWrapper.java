@@ -11,6 +11,7 @@ public class ImIntegerWrapper
    private final ImInt imInt = new ImInt();
    private final IntSupplier wrappedValueGetter;
    private final IntConsumer wrappedValueSetter;
+   private boolean changed = false;
 
    public ImIntegerWrapper(StoredPropertySetBasics storedPropertySet, IntegerStoredPropertyKey key)
    {
@@ -31,9 +32,15 @@ public class ImIntegerWrapper
       // wrappedValueSetter might be hooked to a callback, so let's prevent
       // that unless necessary
       int imIntValue = imInt.get();
-      if (imIntValue != wrappedValueGetter.getAsInt())
+      changed = imIntValue != wrappedValueGetter.getAsInt();
+      if (changed)
       {
          wrappedValueSetter.accept(imIntValue);
       }
+   }
+
+   public boolean changed()
+   {
+      return changed;
    }
 }

@@ -9,7 +9,7 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.Consumer;
 
-public class ImGuiStoredPropertySetBooleanWidget
+public class ImGuiStoredPropertySetBooleanWidget implements ImGuiStoredPropertySetWidget
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String label;
@@ -27,7 +27,7 @@ public class ImGuiStoredPropertySetBooleanWidget
       accessImBoolean = this::renderCheckbox;
    }
 
-
+   @Override
    public void render()
    {
       imBooleanWrapper.accessImBoolean(accessImBoolean);
@@ -39,5 +39,11 @@ public class ImGuiStoredPropertySetBooleanWidget
       {
          onParametersUpdatedCallback.run();
       }
+   }
+
+   @Override
+   public boolean changed()
+   {
+      return imBooleanWrapper.changed();
    }
 }

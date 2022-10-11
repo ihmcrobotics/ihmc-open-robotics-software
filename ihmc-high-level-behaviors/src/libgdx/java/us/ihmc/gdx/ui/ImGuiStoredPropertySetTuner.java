@@ -9,6 +9,7 @@ import us.ihmc.tools.property.*;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeSet;
 
 public class ImGuiStoredPropertySetTuner extends ImGuiPanel
@@ -16,9 +17,12 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private StoredPropertySetBasics storedPropertySet;
    private Runnable onParametersUpdatedCallback;
+   private final Runnable onParametersUpdatedCallbackAndMore = this::onParametersUpdatedCallbackAndMore;
+   private boolean anyParameterChanged = false;
    private final TreeSet<String> versions = new TreeSet<>();
 
-   private final ArrayList<Runnable> imGuiWidgetRenderers = new ArrayList<>();
+   private final ArrayList<ImGuiStoredPropertySetWidget> imGuiWidgetRenderers = new ArrayList<>();
+   private final HashMap<StoredPropertyKey<?>, ImGuiStoredPropertySetWidget> imGuiWidgetRendererMap = new HashMap<>();
 
    public ImGuiStoredPropertySetTuner(String name)
    {
@@ -57,41 +61,36 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
       for (StoredPropertyKey<?> propertyKey : storedPropertySet.getKeyList().keys())
       {
+         ImGuiStoredPropertySetWidget widget;
          if (propertyKey instanceof DoubleStoredPropertyKey doubleKey)
          {
             String format = "%.6f";
             double step = 0.01;
             double stepFast = 0.5;
-            ImGuiStoredPropertySetDoubleWidget widget = new ImGuiStoredPropertySetDoubleWidget(storedPropertySet,
-                                                                                               doubleKey,
-                                                                                               step,
-                                                                                               stepFast,
-                                                                                               format,
-                                                                                               onParametersUpdatedCallback);
-            imGuiWidgetRenderers.add(widget::render);
+            widget = new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, onParametersUpdatedCallbackAndMore);
          }
          else if (propertyKey instanceof IntegerStoredPropertyKey integerKey)
          {
             int step = 1;
-            ImGuiStoredPropertySetIntegerWidget widget = new ImGuiStoredPropertySetIntegerWidget(storedPropertySet,
-                                                                                                 integerKey,
-                                                                                                 step,
-                                                                                                 onParametersUpdatedCallback);
-            imGuiWidgetRenderers.add(widget::render);
+            widget = new ImGuiStoredPropertySetIntegerWidget(storedPropertySet, integerKey, step, onParametersUpdatedCallbackAndMore);
          }
          else if (propertyKey instanceof BooleanStoredPropertyKey booleanKey)
          {
-            ImGuiStoredPropertySetBooleanWidget widget = new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, booleanKey, onParametersUpdatedCallback);
-            imGuiWidgetRenderers.add(widget::render);
+            widget = new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, booleanKey, onParametersUpdatedCallbackAndMore);
          }
          else
          {
             throw new RuntimeException("Please implement spinner for type: " + propertyKey.getType());
          }
+         imGuiWidgetRenderers.add(widget);
+         imGuiWidgetRendererMap.put(propertyKey, widget);
       }
    }
 
-   public void renderImGuiWidgets()
+   /**
+    * @return if any parameter changed by the ImGui user
+    */
+   public boolean renderImGuiWidgets()
    {
       ImGui.text(storedPropertySet.getTitle());
       ImGui.text("Version:");
@@ -124,22 +123,39 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 
       ImGui.text("(Ctrl + click sliders to set exact and unbounded value.)");
 
-      for (Runnable imGuiWidgetRenderer : imGuiWidgetRenderers)
+      for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
       {
-         imGuiWidgetRenderer.run();
+         widget.render();
       }
+
+      boolean returnAnyChanged = anyParameterChanged;
+      anyParameterChanged = false;
+      return returnAnyChanged;
    }
 
-   public Runnable createDoubleSlider(DoubleStoredPropertyKey doubleKey, double step, double stepFast, String unitString, String format)
+   public boolean changed(StoredPropertyKey<?> key)
    {
-      ImGuiStoredPropertySetDoubleWidget widget;
-      widget = new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, unitString, onParametersUpdatedCallback);
-      return widget::render;
+      return imGuiWidgetRendererMap.get(key).changed();
+   }
+
+   public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey doubleKey,
+                                                                double step,
+                                                                double stepFast,
+                                                                String unitString,
+                                                                String format)
+   {
+      return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, unitString, onParametersUpdatedCallback);
    }
 
    public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey key, double min, double max)
    {
       return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, min, max, onParametersUpdatedCallback);
+   }
+
+   private void onParametersUpdatedCallbackAndMore()
+   {
+      anyParameterChanged = true;
+      onParametersUpdatedCallback.run();
    }
 
    private void load()
