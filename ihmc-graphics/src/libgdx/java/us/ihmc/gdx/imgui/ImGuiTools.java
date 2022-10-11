@@ -351,7 +351,7 @@ public class ImGuiTools
 
    public static float getUsableWindowWidth()
    {
-      return ImGui.getWindowWidth() - 23.0f;
+      return ImGui.getWindowWidth() - 32.0f;
    }
 
    private static void initializeUserMappedKeys()
