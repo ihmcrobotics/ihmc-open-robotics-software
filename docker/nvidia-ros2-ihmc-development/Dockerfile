@@ -20,6 +20,7 @@ RUN mkdir -p Downloads \
   && unzip -q gradle.zip -d gradle \
   && mv gradle/gradle-7.5.1/ /opt/. \
   && ln -s /opt/gradle-7.5.1/ /opt/gradle \
+  && ln -s /opt/gradle/bin/gradle /usr/bin/gradle \
   && cd .. \
   && rm -rf Downloads
 
@@ -34,21 +35,15 @@ RUN mkdir -p Downloads \
  && cd .. \
  && rm -rf Downloads
 
+USER robotlab
+WORKDIR /home/robotlab
+
 RUN mkdir -p /home/robotlab/.gradle \
   && cd /home/robotlab/.gradle \
   && touch gradle.properties \
   && echo "org.gradle.jvmargs=-Xmx8192m" >> ./gradle.properties
 
-
 RUN echo "alias intellij='/opt/intellij/bin/idea.sh &>/dev/null &'" >> /home/robotlab/.bashrc
-RUN echo "alias gradle='/opt/gradle/bin/gradle -g gradle-user-home'" >> /home/robotlab/.bashrc
-
-ENV GRADLE_HOME=/app/gradle-2.4
-ENV PATH=$PATH:$GRADLE_HOME/bin
-
-USER robotlab
-WORKDIR /home/robotlab
-
 
 ENTRYPOINT ["/home/robotlab/ros_entrypoint.sh"]
 CMD ["bash"]
