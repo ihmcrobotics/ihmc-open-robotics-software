@@ -1,6 +1,6 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware with ROS 2.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia-ros2
-# Current version: 0.2
+# Current version: 0.3
 # This file is mostly taken from https://github.com/osrf/docker_images/blob/master/ros/rolling/ubuntu/focal/ros-core/Dockerfile
 # We aren't yet sure how to get around copying this code.
 FROM ihmcrobotics/nvidia:0.5
@@ -27,12 +27,17 @@ RUN echo "deb http://packages.ros.org/ros2/ubuntu focal main" > /etc/apt/sources
 RUN apt-get --quiet 2 --yes update \
  && apt-get --quiet 2 --yes install \
     ros-rolling-desktop \
+    python3-colcon-common-extensions \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./ros_entrypoint.sh /home/robotlab/ros_entrypoint.sh
-
 RUN chmod a+x /home/robotlab/ros_entrypoint.sh
+
+COPY ihmc_interfaces /home/robotlab/ihmc_interfaces
+RUN mkdir -p /home/robotlab/colcon_ws/src \
+ && mv /home/robotlab/ihmc_interfaces/* /home/robotlab/colcon_ws/src/. \
+ && rm -rf /home/robotlab/ihmc_interfaces
 
 USER robotlab
 WORKDIR /home/robotlab
