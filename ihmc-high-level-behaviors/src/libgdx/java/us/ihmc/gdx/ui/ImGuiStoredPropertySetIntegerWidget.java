@@ -13,7 +13,7 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.Consumer;
 
-public class ImGuiStoredPropertySetIntegerWidget
+public class ImGuiStoredPropertySetIntegerWidget implements ImGuiStoredPropertySetWidget
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String label;
@@ -66,9 +66,16 @@ public class ImGuiStoredPropertySetIntegerWidget
       }
    }
 
+   @Override
    public void render()
    {
       imIntegerWrapper.accessImInt(accessImInt);
+   }
+
+   @Override
+   public boolean changed()
+   {
+      return imIntegerWrapper.changed();
    }
 
    private void renderInputWithStep(ImInt imInteger)

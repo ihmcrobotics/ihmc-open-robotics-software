@@ -13,6 +13,7 @@ public class ImDoubleWrapper
    private final ImDouble imDouble = new ImDouble();
    private final DoubleSupplier wrappedValueGetter;
    private final DoubleConsumer wrappedValueSetter;
+   private boolean changed = false;
 
    public ImDoubleWrapper(StoredPropertySetBasics storedPropertySet, DoubleStoredPropertyKey key)
    {
@@ -33,9 +34,15 @@ public class ImDoubleWrapper
       // wrappedValueSetter might be hooked to a callback, so let's prevent
       // that unless necessary
       double imDoubleValue = imDouble.get();
-      if (imDoubleValue != wrappedValueGetter.getAsDouble())
+      changed = imDoubleValue != wrappedValueGetter.getAsDouble();
+      if (changed)
       {
          wrappedValueSetter.accept(imDoubleValue);
       }
+   }
+
+   public boolean changed()
+   {
+      return changed;
    }
 }

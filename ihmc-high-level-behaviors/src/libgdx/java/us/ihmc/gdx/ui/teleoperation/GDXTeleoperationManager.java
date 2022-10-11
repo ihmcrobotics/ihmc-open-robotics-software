@@ -93,7 +93,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
-   private Runnable trajectoryTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -417,7 +417,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       swingTimeSlider.render();
       transferTimeSlider.render();
       turnAggressivenessSlider.render();
-      trajectoryTimeSlider.run();
+      trajectoryTimeSlider.render();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());
