@@ -18,6 +18,7 @@ import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -149,9 +150,12 @@ public class GDXPoseTracking
    private static final double dt = 0.05;
    private static double maxVx = 0.5;  // m/s
    private static double maxVy = 0.2;  // m/s
-   private static double maxVyaw = Math.PI / 6.0;  // rad/s
-   private ImDouble alpha = new ImDouble(0.1);
-   private ImDouble beta = new ImDouble(0.04);
+   private static double maxVyaw = Math.PI / 10.0;  // rad/s
+   private ImDouble alpha = new ImDouble(0.12);
+   private ImDouble beta = new ImDouble(0.03);
+   private ImDouble gamma = new ImDouble(Math.PI / 10.0);
+   private final double yawDotTopLimit = Math.PI / 6.0;
+   private final double yawDotBottomLimit = Math.PI / 20.0;
    private GDXImGuiBasedUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -256,6 +260,8 @@ public class GDXPoseTracking
          // NOTE: scale these somehow to account for (transferTime + swingTime)
          maxVx = alpha.get() * (1/teleoperationParameters.getSwingTime() + 1/teleoperationParameters.getTransferTime());
          maxVy = beta.get() * (1/teleoperationParameters.getSwingTime() + 1/teleoperationParameters.getTransferTime());
+         // NOTE: scale yawDot
+         maxVyaw = EuclidCoreTools.clamp(gamma.get() * teleoperationParameters.getTurnAggressiveness(), yawDotBottomLimit, yawDotTopLimit);
 
          double deltaTime = Gdx.graphics.getDeltaTime();
          if (controller.getTestMode() == MODE.joystick)
@@ -291,6 +297,7 @@ public class GDXPoseTracking
       ImGui.text("Tuning . . .");
       ImGuiTools.volatileInputDouble(labels.get("alpha (scales forward velocity of virtual goal)"), alpha);
       ImGuiTools.volatileInputDouble(labels.get("beta (scales side velocity of virtual goal)"), beta);
+      ImGuiTools.volatileInputDouble(labels.get("gamma (scales yaw velocity of virtual goal)"), gamma);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
