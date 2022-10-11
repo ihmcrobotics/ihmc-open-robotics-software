@@ -3,6 +3,7 @@ package us.ihmc.avatar.multiContact;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import ihmc_common_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
@@ -17,6 +18,8 @@ import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.robotics.geometry.Capsule;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MultiContactEnvironmentDescription
 {
@@ -116,11 +119,46 @@ public class MultiContactEnvironmentDescription
       return objectMapper.readTree(serializer.serializeToString(message));
    }
 
+   private static FrameShape3DReadOnly stringToShape(String serializedMessage) throws IOException
+   {
+      JsonNode jsonNode = objectMapper.readTree(serializedMessage);
+      return fromJSON(jsonNode);
+   }
+
    private static String getMessageClassName(ObjectNode jsonNode)
    {
       String field = jsonNode.fieldNames().next();
       String[] messagePath = field.split("::");
       String messageNameWithUnderbar = messagePath[messagePath.length - 1];
       return messageNameWithUnderbar.substring(0, messageNameWithUnderbar.length() - 1);
+   }
+
+   public static String serializeEnvironmentData(List<FrameShape3DReadOnly> environmentShapes)
+   {
+      ArrayNode arrayNode = objectMapper.createArrayNode();
+      for (int i = 0; i < environmentShapes.size(); i++)
+      {
+         arrayNode.add(toJSON(environmentShapes.get(i)));
+      }
+      return arrayNode.toString();
+   }
+
+   public static List<FrameShape3DReadOnly> deserializeEnvironmentData(String serializedEnvironmentData)
+   {
+      try
+      {
+         ArrayNode arrayNode = (ArrayNode) objectMapper.readTree(serializedEnvironmentData);
+         List<FrameShape3DReadOnly> environmentData = new ArrayList<>();
+         for (int i = 0; i < arrayNode.size(); i++)
+         {
+            environmentData.add(fromJSON(arrayNode.get(i)));
+         }
+
+         return environmentData;
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }
