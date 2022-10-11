@@ -31,16 +31,16 @@ RUN apt-get --quiet 2 --yes update \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
-COPY ./ros_entrypoint.sh /home/robotlab/ros_entrypoint.sh
-RUN chmod a+x /home/robotlab/ros_entrypoint.sh
-
-COPY ihmc_interfaces /home/robotlab/ihmc_interfaces
-RUN mkdir -p /home/robotlab/colcon_ws/src \
- && mv /home/robotlab/ihmc_interfaces/* /home/robotlab/colcon_ws/src/. \
- && rm -rf /home/robotlab/ihmc_interfaces
-
 USER robotlab
 WORKDIR /home/robotlab
+
+COPY --chown=robotlab:robotlab ros_entrypoint.sh ros_entrypoint.sh
+RUN chmod a+x /home/robotlab/ros_entrypoint.sh
+
+COPY --chown=robotlab:robotlab ihmc_interfaces ihmc_interfaces
+RUN mkdir -p colcon_ws/src \
+ && mv ihmc_interfaces/* colcon_ws/src \
+ && rm -rf ihmc_interfaces
 
 # Commands passed to i.e. 'docker run nvidia-ros [...]' will go through this entrypoint.
 # Therefore, if you pass i.e. 'docker run nvidia-ros rviz', then it will have passed
