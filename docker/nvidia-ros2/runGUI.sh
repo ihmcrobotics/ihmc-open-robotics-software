@@ -19,6 +19,7 @@ if [ ! "$(docker ps -a | grep ^nvidia-ros2$)" ]; then
         --device /dev/dri:/dev/dri \
         --env DISPLAY \
         --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
+#        --volume /home/duncan/dev/behavior/ihmc-open-robotics-software/ihmc-interfaces/src/main/messages/ihmc_interfaces:/home/robotlab/colcon_ws/src \
         ihmcrobotics/nvidia-ros2:0.3
 else
     docker start --attach nvidia-ros2
