@@ -130,34 +130,6 @@ public class MultiContactScriptWriter
          printStream = new PrintStream(scriptFile);
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-         ArrayNode arrayNode = objectMapper.createArrayNode();
-
-         for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
-            arrayNode.add(message.toJSON(objectMapper));
-
-         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, arrayNode);
-         printStream.close();
-         scriptFile = null;
-         return true;
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-         if (printStream != null)
-            printStream.close();
-         return false;
-      }
-   }
-
-   public boolean writeScriptNew()
-   {
-      PrintStream printStream = null;
-
-      try
-      {
-         printStream = new PrintStream(scriptFile);
-         JsonFactory jsonFactory = new JsonFactory();
-         ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
          ObjectNode rootNode = objectMapper.createObjectNode();
 
          ArrayNode environmentNode = rootNode.putArray(MultiContactEnvironmentDescription.ENVIRONMENT_JSON);
