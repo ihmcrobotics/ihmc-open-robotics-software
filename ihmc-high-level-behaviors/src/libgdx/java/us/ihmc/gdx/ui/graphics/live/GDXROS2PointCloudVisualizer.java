@@ -63,6 +63,8 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
+   private IHMCROS2Callback ihmcros2Callback;
+   private boolean subscribed = true;
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -81,21 +83,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
       decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
 
-      if (topic.getType().equals(LidarScanMessage.class))
-      {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
-      }
-      else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
-      {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
-      }
-      else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
-      {
-         new IHMCROS2Callback<>(ros2Node,
-                                topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                ROS2QosProfile.BEST_EFFORT(),
-                                this::queueRenderFusedSensorHeadPointCloud);
-      }
+      subscribe();
    }
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
@@ -141,7 +129,20 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    public void update()
    {
       super.update();
-      if (isActive())
+
+      if (subscribed != getIsSubscribed())
+      {
+         if (getIsSubscribed())
+         {
+            subscribe();
+         }
+         else
+         {
+            unsubscribe();
+         }
+      }
+
+      if (subscribed && isActive())
       {
          FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
          if (fusedMessage != null)
@@ -249,5 +250,31 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    {
       if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public void subscribe()
+   {
+      if (topic.getType().equals(LidarScanMessage.class))
+      {
+         ihmcros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
+      }
+      else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
+      {
+         ihmcros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
+      }
+      else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
+      {
+         ihmcros2Callback = new IHMCROS2Callback<>(ros2Node,
+                                                   topic.withType(FusedSensorHeadPointCloudMessage.class),
+                                                   ROS2QosProfile.BEST_EFFORT(),
+                                                   this::queueRenderFusedSensorHeadPointCloud);
+      }
+      subscribed = true;
+   }
+
+   public void unsubscribe()
+   {
+      ihmcros2Callback.destroy();
+      subscribed = false;
    }
 }

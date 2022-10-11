@@ -8,10 +8,13 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 
 public abstract class ImGuiGDXVisualizer implements RenderableProvider
 {
    private ImBoolean active = new ImBoolean(false);
+   private ImBoolean isSubscribed = new ImBoolean(true);
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String title;
    private boolean createdYet = false;
 
@@ -31,7 +34,8 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(title, active);
+      ImGui.checkbox(labels.get(title), active);
+      ImGui.checkbox(labels.get("Subscription"), isSubscribed);
    }
 
    public void update()
@@ -49,7 +53,12 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
 
    public boolean isActive()
    {
-      return active.get();
+      return isSubscribed.get() && active.get();
+   }
+
+   public boolean getIsSubscribed()
+   {
+      return isSubscribed.get();
    }
 
    @Override
