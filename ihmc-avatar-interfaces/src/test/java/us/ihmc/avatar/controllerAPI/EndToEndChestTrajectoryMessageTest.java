@@ -31,6 +31,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -606,16 +607,16 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          double time = so3Trajectory.getTaskspaceTrajectoryPoints().get(trajectoryPointIndex).getTime();
          SO3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, simulationTestHelper, chest);
          assertEquals(time, controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
-         desiredChestOrientations[trajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-         desiredChestAngularVelocities[trajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+         desiredChestOrientations[trajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+         desiredChestAngularVelocities[trajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
       }
 
       success = simulationTestHelper.simulateNow(trajectoryTime);
       assertTrue(success);
 
       SO3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(simulationTestHelper, chest);
-      desiredChestOrientations[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-      desiredChestAngularVelocities[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+      desiredChestOrientations[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+      desiredChestAngularVelocities[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
 
       success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
@@ -716,8 +717,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          double time = so3Trajectory.getTaskspaceTrajectoryPoints().get(expectedTrajectoryPointIndex).getTime();
          SO3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, simulationTestHelper, chest);
          assertEquals(time, controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
-         desiredChestOrientations[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-         desiredChestAngularVelocities[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+         desiredChestOrientations[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+         desiredChestAngularVelocities[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
 
          timeInState = Math.max(time, timeInState);
 
@@ -733,8 +734,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       previousTimeInState = timeInState;
 
       SO3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(simulationTestHelper, chest);
-      desiredChestOrientations[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-      desiredChestAngularVelocities[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+      desiredChestOrientations[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+      desiredChestAngularVelocities[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
 
       success = simulationTestHelper.simulateNow(timePerWaypoint * numberOfTrajectoryPoints + 0.5);
       assertTrue(success);
@@ -825,8 +826,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          double time = so3Trajectory.getTaskspaceTrajectoryPoints().get(expectedTrajectoryPointIndex).getTime();
          SO3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(trajectoryPointIndex + 1, simulationTestHelper, chest);
          assertEquals(time, controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
-         desiredChestOrientations[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-         desiredChestAngularVelocities[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+         desiredChestOrientations[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+         desiredChestAngularVelocities[expectedTrajectoryPointIndex].epsilonEquals(controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
 
          timeInState = Math.max(time, timeInState);
 
@@ -842,8 +843,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       previousTimeInState = timeInState;
 
       SO3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(simulationTestHelper, chest);
-      desiredChestOrientations[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getOrientationCopy(), EPSILON_FOR_DESIREDS);
-      desiredChestAngularVelocities[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getAngularVelocityCopy(), EPSILON_FOR_DESIREDS);
+      desiredChestOrientations[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getOrientation(), EPSILON_FOR_DESIREDS);
+      desiredChestAngularVelocities[numberOfTrajectoryPoints - 1].epsilonEquals(controllerTrajectoryPoint.getAngularVelocity(), EPSILON_FOR_DESIREDS);
 
       success = simulationTestHelper.simulateNow(timePerWaypoint * numberOfTrajectoryPoints + 0.5);
       assertTrue(success);
@@ -1646,24 +1647,24 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
       simpleSO3TrajectoryPoint.setTime(scs.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
-      simpleSO3TrajectoryPoint.setOrientation(EndToEndTestTools.findQuaternion(orientationTrajectoryName, orientationName, suffix, scs));
-      simpleSO3TrajectoryPoint.setAngularVelocity(EndToEndTestTools.findVector3D(orientationTrajectoryName, angularVelocityName, suffix, scs));
+      simpleSO3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) EndToEndTestTools.findQuaternion(orientationTrajectoryName, orientationName, suffix, scs));
+      simpleSO3TrajectoryPoint.getAngularVelocity().set(EndToEndTestTools.findVector3D(orientationTrajectoryName, angularVelocityName, suffix, scs));
       return simpleSO3TrajectoryPoint;
    }
 
    public static SO3TrajectoryPoint findCurrentDesiredTrajectoryPoint(YoVariableHolder scs, RigidBodyBasics chest)
    {
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
-      simpleSO3TrajectoryPoint.setOrientation(EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), scs));
-      simpleSO3TrajectoryPoint.setAngularVelocity(EndToEndTestTools.findFeedbackControllerDesiredAngularVelocity(chest.getName(), scs));
+      simpleSO3TrajectoryPoint.getOrientation().set((Orientation3DReadOnly) EndToEndTestTools.findFeedbackControllerDesiredOrientation(chest.getName(), scs));
+      simpleSO3TrajectoryPoint.getAngularVelocity().set(EndToEndTestTools.findFeedbackControllerDesiredAngularVelocity(chest.getName(), scs));
       return simpleSO3TrajectoryPoint;
    }
 
    public static void assertControlErrorIsLow(YoVariableHolder scs, RigidBodyBasics chest, double errorTolerance)
    {
       Vector3D error = findControlErrorRotationVector(scs, chest);
-      boolean isErrorLow = error.length() <= errorTolerance;
-      assertTrue(isErrorLow, "Error: " + error.length());
+      boolean isErrorLow = error.norm() <= errorTolerance;
+      assertTrue(isErrorLow, "Error: " + error.norm());
    }
 
    public static void assertSingleWaypointExecuted(FrameQuaternion desiredOrientation, YoVariableHolder scs, RigidBodyBasics body, String prefix)

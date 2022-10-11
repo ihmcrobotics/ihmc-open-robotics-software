@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -46,7 +47,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    private final FramePoint3DBasics currentPosition;
    private final FrameVector3DBasics currentVelocity;
    private final FrameVector3DBasics currentAcceleration;
-   private final YoPolynomial3D subTrajectory;
+   private final Polynomial3D subTrajectory;
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
@@ -79,7 +80,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
 
       registerFrameChangeables(currentPosition, currentVelocity, currentAcceleration);
 
-      subTrajectory = new YoPolynomial3D(namePrefix, 4, registry);
+      subTrajectory = new Polynomial3D(4);
 
       for (int i = 0; i < maximumNumberOfWaypoints; i++)
       {
@@ -219,13 +220,6 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
 
       currentWaypointIndex.set(0);
-
-      if (numberOfWaypoints.getIntegerValue() == 1)
-      {
-         subTrajectory.setConstant(waypoints.get(0).getPosition());
-      }
-      else
-         initializeSubTrajectory(0);
    }
 
    private void initializeSubTrajectory(int waypointIndex)
@@ -245,24 +239,16 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       }
 
       currentTrajectoryTime.set(time);
-      boolean changedSubTrajectory = false;
 
       if (time < waypoints.get(currentWaypointIndex.getIntegerValue()).getTime())
       {
          currentWaypointIndex.set(0);
-         changedSubTrajectory = true;
       }
 
       while (currentWaypointIndex.getIntegerValue() < numberOfWaypoints.getIntegerValue() - 2
-            && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
+             && time >= waypoints.get(currentWaypointIndex.getIntegerValue() + 1).getTime())
       {
          currentWaypointIndex.increment();
-         changedSubTrajectory = true;
-      }
-
-      if (changedSubTrajectory)
-      {
-         initializeSubTrajectory(currentWaypointIndex.getIntegerValue());
       }
 
       int secondWaypointIndex = Math.min(currentWaypointIndex.getValue() + 1, numberOfWaypoints.getValue() - 1);
@@ -292,6 +278,8 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          return;
       }
 
+      // Initialize the segment trajectory, in case the index or waypoints have changed
+      subTrajectory.setCubicDirectly(end.getTime() - start.getTime(), start.getPosition(), start.getLinearVelocity(), end.getPosition(), end.getLinearVelocity());
       double subTrajectoryTime = MathTools.clamp(time - start.getTime(), 0.0, end.getTime() - start.getTime());
       subTrajectory.compute(subTrajectoryTime);
 

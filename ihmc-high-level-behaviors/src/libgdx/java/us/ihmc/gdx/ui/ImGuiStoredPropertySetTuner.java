@@ -16,7 +16,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeSet;
 
 public class ImGuiStoredPropertySetTuner extends ImGuiPanel
@@ -54,8 +53,8 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       PathTools.walkFlat(saveFileDirectory, (path, pathType) ->
       {
          String fileName = path.getFileName().toString();
-         String prefix = storedPropertySet.getUncapitalizedClassName();
-         String extension = ".ini";
+         String prefix = storedPropertySet.getCapitalizedClassName();
+         String extension = ".json";
          if (pathType == BasicPathVisitor.PathType.FILE && fileName.startsWith(prefix) && fileName.endsWith(extension))
          {
             versions.add(fileName.replaceAll(extension, "").substring(prefix.length()));
