@@ -6,6 +6,7 @@ import org.apache.commons.text.WordUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
@@ -196,6 +197,7 @@ public class StoredPropertySetJavaGenerator
                     subsequentPathToJavaFolder);
 
       FileTools.write(primaryJavaFile.getFilePath(), primaryJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      LogTools.info("Generated successfully: {}", primaryJavaFile.getFilePath());
 
       String basicsJavaFileContents =
       """
@@ -213,6 +215,7 @@ public class StoredPropertySetJavaGenerator
       """.formatted(clazz.getPackage().getName(), clazz.getSimpleName(), getParameterSetterStrings());
 
       FileTools.write(basicsJavaFile.getFilePath(), basicsJavaFileContents.getBytes(), WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      LogTools.info("Generated successfully: {}", basicsJavaFile.getFilePath());
 
       String readOnlyJavaFileContents =
       """
@@ -235,6 +238,7 @@ public class StoredPropertySetJavaGenerator
                       readOnlyJavaFileContents.getBytes(),
                       WriteOption.TRUNCATE,
                       DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      LogTools.info("Generated successfully: {}", readOnlyJavaFile.getFilePath());
    }
 
    private String getParameterKeysStrings()
