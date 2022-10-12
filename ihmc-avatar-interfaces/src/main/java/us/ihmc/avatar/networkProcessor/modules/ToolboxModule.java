@@ -192,7 +192,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       if (!startYoVariableServer)
          return;
 
-      DataServerSettings yoVariableServerSettings = getYoVariableServerSettings();
+      DataServerSettings yoVariableServerSettings = createYoVariableServerSettings();
 
       new Thread(() ->
       {
@@ -242,9 +242,26 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       }, name + "ToolboxYoVariableServer").start();
    }
 
-   public DataServerSettings getYoVariableServerSettings()
+   public DataServerSettings createYoVariableServerSettings()
    {
-      return new DataServerSettings(false);
+      return createYoVariableServerSettings(false);
+   }
+
+   public DataServerSettings createYoVariableServerSettings(boolean logSession)
+   {
+      // Start with a higher port than the default to reduce conflicts with other servers
+      // that don't have non-busy port searching functionality.
+      return createYoVariableServerSettings(logSession, DataServerSettings.DEFAULT_PORT + 1);
+   }
+
+   /**
+    * A toolbox module will start with a port and increment the port number if it is already taken.
+    */
+   public DataServerSettings createYoVariableServerSettings(boolean logSession, int startingPort)
+   {
+      boolean autoDiscoverable = DataServerSettings.DEFAULT_AUTODISCOVERABLE;
+      String videoStreamIdentifier = null;
+      return new DataServerSettings(logSession, autoDiscoverable, startingPort, videoStreamIdentifier);
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)

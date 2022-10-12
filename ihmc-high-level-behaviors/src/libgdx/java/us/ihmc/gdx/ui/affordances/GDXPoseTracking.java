@@ -151,8 +151,8 @@ public class GDXPoseTracking
    private static double maxVx = 0.5;  // m/s
    private static double maxVy = 0.2;  // m/s
    private static double maxVyaw = Math.PI / 10.0;  // rad/s
-   private ImDouble alpha = new ImDouble(0.12);
-   private ImDouble beta = new ImDouble(0.03);
+   private ImDouble alpha = new ImDouble(0.5);
+   private ImDouble beta = new ImDouble(0.25);
    private ImDouble gamma = new ImDouble(Math.PI / 10.0);
    private final double yawDotTopLimit = Math.PI / 6.0;
    private final double yawDotBottomLimit = Math.PI / 20.0;
@@ -258,8 +258,8 @@ public class GDXPoseTracking
       if (activated)
       {
          // NOTE: scale these somehow to account for (transferTime + swingTime)
-         maxVx = alpha.get() * (1/teleoperationParameters.getSwingTime() + 1/teleoperationParameters.getTransferTime());
-         maxVy = beta.get() * (1/teleoperationParameters.getSwingTime() + 1/teleoperationParameters.getTransferTime());
+         maxVx = alpha.get() * (1 / (teleoperationParameters.getSwingTime() + teleoperationParameters.getTransferTime()));
+         maxVy = beta.get() * (1 / (teleoperationParameters.getSwingTime() + teleoperationParameters.getTransferTime()));
          // NOTE: scale yawDot
          maxVyaw = EuclidCoreTools.clamp(gamma.get() * teleoperationParameters.getTurnAggressiveness(), yawDotBottomLimit, yawDotTopLimit);
 

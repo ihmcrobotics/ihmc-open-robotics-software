@@ -11,7 +11,6 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
@@ -120,6 +119,7 @@ public class GDXImGuiBasedUI
    }
    private Theme theme = Theme.LIGHT;
    private Path themeFilePath;
+   private final String shadePrefix = "shade=";
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -229,10 +229,27 @@ public class GDXImGuiBasedUI
       if (Files.exists(themeFilePath))
       {
          List<String> lines = FileTools.readAllLines(themeFilePath, DefaultExceptionHandler.PROCEED_SILENTLY);
-         String firstLine = lines.get(0);
+         int numberOfLines = lines.size();
+         String firstLine = "";
+         String secondLine = "";
+         if (numberOfLines > 0)
+            firstLine = lines.get(0);
+         if (numberOfLines > 1)
+            secondLine = lines.get(1);
          for (Theme theme : Theme.values())
             if (firstLine.contains(theme.name()))
                setTheme(theme);
+         try
+         {
+            if (!secondLine.isEmpty())
+            {
+               backgroundShade.set(Float.parseFloat(secondLine.substring(shadePrefix.length())));
+               setBackgroundShade(backgroundShade.get());
+            }
+         }
+         catch (Exception ignored)
+         {
+         }
       }
    }
 
@@ -321,6 +338,7 @@ public class GDXImGuiBasedUI
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
+         float previousShade = backgroundShade.get();
          if (ImGuiTools.volatileInputFloat(labels.get("Background shade"), backgroundShade))
          {
             setBackgroundShade(backgroundShade.get());
@@ -337,10 +355,13 @@ public class GDXImGuiBasedUI
             if (i < Theme.values().length - 1)
                ImGui.sameLine();
          }
-         if (theme != previousTheme)
+         if (theme != previousTheme || previousShade != backgroundShade.get())
          {
             FileTools.ensureFileExists(themeFilePath, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-            FileTools.writeAllLines(List.of("theme=" + theme.name()), themeFilePath, WriteOption.TRUNCATE, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            FileTools.writeAllLines(List.of("theme=" + theme.name() + "\n" + shadePrefix + backgroundShade),
+                                    themeFilePath,
+                                    WriteOption.TRUNCATE,
+                                    DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
          }
          ImGui.popItemWidth();
          ImGui.endMenu();

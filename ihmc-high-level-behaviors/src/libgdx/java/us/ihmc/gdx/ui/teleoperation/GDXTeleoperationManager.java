@@ -93,7 +93,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
-   private final ImBoolean joystickOn = new ImBoolean(false);
+   private boolean isPlacingFootstep = false;
 
    public GDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
@@ -295,6 +295,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
       syncedRobot.update();
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
+      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep();
+      if (isPlacingFootstep != isCurrentlyPlacingFootstep)
+         baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
+      isPlacingFootstep = isCurrentlyPlacingFootstep;
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
@@ -646,5 +650,10 @@ public class GDXTeleoperationManager extends ImGuiPanel
    public GDXTeleoperationParameters getTeleoperationParameters()
    {
       return teleoperationParameters;
+   }
+
+   public GDXManualFootstepPlacement getManualFootstepPlacement()
+   {
+      return manualFootstepPlacement;
    }
 }

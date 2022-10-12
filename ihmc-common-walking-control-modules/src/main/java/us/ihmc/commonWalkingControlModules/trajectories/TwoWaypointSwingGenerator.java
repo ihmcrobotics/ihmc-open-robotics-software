@@ -478,12 +478,12 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       double distance;
       if (crossOver)
       {
-         distance = minDistanceToStance.getDoubleValue() + xyDistanceToStance.length();
+         distance = minDistanceToStance.getDoubleValue() + xyDistanceToStance.norm();
          xyDistanceToStance.negate();
       }
       else
       {
-         distance = minDistanceToStance.getDoubleValue() - xyDistanceToStance.length();
+         distance = minDistanceToStance.getDoubleValue() - xyDistanceToStance.norm();
       }
 
       if (distance < 0.0)
@@ -622,8 +622,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
       waypointDataToPack.setToNaN(trajectoryFrame);
       waypointDataToPack.setTime(waypointTime);
-      waypointDataToPack.setPosition(waypointPositions.get(waypointIndex));
-      waypointDataToPack.setLinearVelocity(tempWaypointVelocity);
+      waypointDataToPack.getPosition().set(waypointPositions.get(waypointIndex));
+      waypointDataToPack.getLinearVelocity().set(tempWaypointVelocity);
    }
 
    /**

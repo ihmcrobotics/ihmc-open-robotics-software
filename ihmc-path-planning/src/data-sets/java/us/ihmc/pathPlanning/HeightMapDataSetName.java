@@ -4,7 +4,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.io.*;

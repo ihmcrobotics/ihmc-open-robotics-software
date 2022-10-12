@@ -34,43 +34,29 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXPathControlRingGizmo implements RenderableProvider
 {
-   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.6f);
-   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.5f);
-   public static final Color YELLOW_HIGHLIGHT = new Color().fromHsv(61.5f, 0.783f, 0.892f);
-   public static final Color DISC_NORMAL_COLOR = LIGHT_GRAY;
-   public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
-   public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY;
-   public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
-   public static final Color POSITIVE_X_NORMAL_COLOR = Color.ORANGE;
-   public static final Color POSITIVE_X_HIGHLIGHTED_COLOR = Color.YELLOW;
-
-   static
-   {
-      DISC_NORMAL_COLOR.a = 0.7f;
-      ARROW_NORMAL_COLOR.a = 0.7f;
-      POSITIVE_X_NORMAL_COLOR.a = 0.7f;
-
-      DISC_HIGHLIGHTED_COLOR.a = 0.9f;
-      ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
-      POSITIVE_X_HIGHLIGHTED_COLOR.a = 0.9f;
-   }
+   public static final Color DISC_COLOR = GDXGizmoTools.CENTER_DEFAULT_COLOR;
+   public static final Color X_ARROW_COLOR = GDXGizmoTools.X_AXIS_DEFAULT_COLOR;
+   public static final Color Y_ARROW_COLOR = GDXGizmoTools.Y_AXIS_DEFAULT_COLOR;
 
    private final double QUARTER_TURN = Math.PI / 2.0;
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
-   private final ImFloat discThickness = new ImFloat(0.014f);
+   private final ImFloat discThickness = new ImFloat(0.03f);
    private final ImFloat arrowWidth = new ImFloat(0.257f);
    private final ImFloat arrowHeight = new ImFloat(0.137f);
    private final ImFloat arrowSpacing = new ImFloat(0.079f);
-   private Material normalDiscMaterial;
-   private Material normalArrowMaterial;
-   private Material highlightedDiscMaterial;
-   private Material highlightedArrowMaterial;
+   private final ImFloat arrowTailWidthRatio = new ImFloat(0.5f);
+   private final ImFloat arrowTailLengthRatio = new ImFloat(1.0f);
+   private Material normalMaterial;
+   private Material highlightedMaterial;
    private DynamicGDXModel discModel = new DynamicGDXModel();
    private DynamicGDXModel positiveXArrowModel = new DynamicGDXModel();
    private DynamicGDXModel positiveYArrowModel = new DynamicGDXModel();
    private DynamicGDXModel negativeXArrowModel = new DynamicGDXModel();
    private DynamicGDXModel negativeYArrowModel = new DynamicGDXModel();
+   private final RigidBodyTransform xArrowTailTransform = new RigidBodyTransform();
+   private final RigidBodyTransform yArrowTailTransform = new RigidBodyTransform();
+   private final RigidBodyTransform temporaryTailTransform = new RigidBodyTransform();
    private final Point3D closestCollision = new Point3D();
    private int closestCollisionSelection = -1;
    private double closestCollisionDistance;
@@ -80,8 +66,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
-   private final DiscreteIsoscelesTriangularPrismRayIntersection negativeXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
-   private final DiscreteIsoscelesTriangularPrismRayIntersection negativeYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
+   private final BoxRayIntersection negativeXArrowIntersection = new BoxRayIntersection();
+   private final BoxRayIntersection negativeYArrowIntersection = new BoxRayIntersection();
    private final FramePose3D framePose3D = new FramePose3D();
    private final FramePose3D tempFramePose3D = new FramePose3D();
    /**
@@ -134,82 +120,68 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    {
       this.camera3D = camera3D;
 
-      normalDiscMaterial = new Material();
-      normalDiscMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
-      normalDiscMaterial.set(new BlendingAttribute(true, DISC_NORMAL_COLOR.a));
-      normalArrowMaterial = new Material();
-      normalArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
-      normalArrowMaterial.set(new BlendingAttribute(true, ARROW_NORMAL_COLOR.a));
-      highlightedDiscMaterial = new Material();
-      highlightedDiscMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
-      highlightedDiscMaterial.set(new BlendingAttribute(true, DISC_HIGHLIGHTED_COLOR.a));
-      highlightedArrowMaterial = new Material();
-      highlightedArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
-      highlightedArrowMaterial.set(new BlendingAttribute(true, ARROW_HIGHLIGHTED_COLOR.a));
-
-      // OFFSET gizmo z height to make visible above ground.
-      transformToWorld.appendTranslation(0.0f, 0.0f, 0.05f);
-      double gizmoZHeight = transformToWorld.getTranslationZ();
-
+      normalMaterial = createAlphaPaletteMaterial(GDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
+      highlightedMaterial = createAlphaPaletteMaterial(GDXGizmoTools.X_AXIS_SELECTED_DEFAULT_COLOR.a);
       discModel.setMesh(meshBuilder ->
       {
          meshBuilder.addHollowCylinder(discThickness.get(),
                                        discOuterRadius.get(),
                                        discInnerRadius.get(),
-                                       new Point3D(0.0, 0.0, gizmoZHeight-discThickness.get() / 2.0),
-                                       DISC_NORMAL_COLOR);
+                                       new Point3D(0.0, 0.0, 0.0),
+                                       DISC_COLOR);
       });
       positiveXArrowModel.setMesh(meshBuilder ->
       {
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, gizmoZHeight),
-                                                 new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), POSITIVE_X_NORMAL_COLOR);
+                                                 new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
+                                                 new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
+                                                 X_ARROW_COLOR);
       });
       positiveYArrowModel.setMesh(meshBuilder ->
       {
          meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
                                                  arrowHeight.get(),
                                                  discThickness.get(),
-                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), gizmoZHeight),
+                                                 new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
                                                  new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
-                                                 ARROW_NORMAL_COLOR);
+                                                 Y_ARROW_COLOR);
       });
       negativeXArrowModel.setMesh(meshBuilder ->
       {
-         meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
-                                                 arrowHeight.get(),
-                                                 discThickness.get(),
-                                                 new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, gizmoZHeight),
-                                                 new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                                 ARROW_NORMAL_COLOR);
+         float arrowLength = arrowTailLengthRatio.get() * arrowHeight.get();
+         xArrowTailTransform.getTranslation().set(-discOuterRadius.get() - arrowSpacing.get() - (arrowLength / 2.0), 0.0, discThickness.get() / 2.0);
+         xArrowTailTransform.getRotation().setYawPitchRoll(QUARTER_TURN, 0.0, 0.0);
+         meshBuilder.addBox(arrowTailWidthRatio.get() * arrowWidth.get(),
+                            arrowLength,
+                            discThickness.get(),
+                            xArrowTailTransform.getTranslation(),
+                            xArrowTailTransform.getRotation(),
+                            X_ARROW_COLOR);
       });
       negativeYArrowModel.setMesh(meshBuilder ->
       {
-         meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
-                                                 arrowHeight.get(),
-                                                 discThickness.get(),
-                                                 new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), gizmoZHeight),
-                                                 new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
-                                                 ARROW_NORMAL_COLOR);
+         float arrowLength = arrowTailLengthRatio.get() * arrowHeight.get();
+         yArrowTailTransform.getTranslation().set(0.0, -discOuterRadius.get() - arrowSpacing.get() - (arrowLength / 2.0), discThickness.get() / 2.0);
+         yArrowTailTransform.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
+         meshBuilder.addBox(arrowTailWidthRatio.get() * arrowWidth.get(),
+                            arrowLength,
+                            discThickness.get(),
+                            yArrowTailTransform.getTranslation(),
+                            yArrowTailTransform.getRotation(),
+                            Y_ARROW_COLOR);
       });
       
       recreateGraphics();
    }
 
-   public void changeForwardArrowColor(Color color)
+   private Material createAlphaPaletteMaterial(float alpha)
    {
-      positiveXArrowModel.invalidateMesh();
-      positiveXArrowModel.setMesh(meshBuilder ->
-                                  {
-                                     meshBuilder.addIsoscelesTriangularPrism(arrowWidth.get(),
-                                                                             arrowHeight.get(),
-                                                                             discThickness.get(),
-                                                                             new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, transformToWorld.getTranslationZ()),
-                                                                             new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                                                             color);
-                                  });
+      Material material = new Material();
+      material.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
+      material.set(new BlendingAttribute(true, alpha));
+      return material;
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -402,7 +374,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       closestCollisionSelection = -1;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transformToWorld);
+      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
@@ -416,7 +388,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          positiveXArrowIntersection.setup(arrowWidth.get(),
                                           arrowHeight.get(),
                                           discThickness.get(),
-                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
+                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
                                           transformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
@@ -430,7 +402,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
          positiveYArrowIntersection.setup(arrowWidth.get(),
                                           arrowHeight.get(),
                                           discThickness.get(),
-                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
+                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
                                           transformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
@@ -441,33 +413,35 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             closestCollisionSelection = 2;
             closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
          }
-         negativeXArrowIntersection.setup(arrowWidth.get(),
-                                          arrowHeight.get(),
-                                          discThickness.get(),
-                                          new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, 0.0),
-                                          new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                          transformToWorld);
-         distance = negativeXArrowIntersection.intersect(pickRay, 100);
-         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         temporaryTailTransform.set(xArrowTailTransform);
+         transformToWorld.transform(temporaryTailTransform);
+         boolean intersects = negativeXArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
+                                                                   arrowTailLengthRatio.get() * arrowHeight.get(),
+                                                                   discThickness.get(),
+                                                                   temporaryTailTransform,
+                                                                   pickRay);
+         distance = negativeXArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
+         if (intersects && distance < closestCollisionDistance)
          {
             negativeXArrowIntersects = true;
             closestCollisionDistance = distance;
             closestCollisionSelection = 3;
-            closestCollision.set(negativeXArrowIntersection.getClosestIntersection());
+            closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
          }
-         negativeYArrowIntersection.setup(arrowWidth.get(),
-                                          arrowHeight.get(),
-                                          discThickness.get(),
-                                          new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), 0.0),
-                                          new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
-                                          transformToWorld);
-         distance = negativeYArrowIntersection.intersect(pickRay, 100);
-         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         temporaryTailTransform.set(yArrowTailTransform);
+         transformToWorld.transform(temporaryTailTransform);
+         intersects = negativeYArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
+                                                           arrowTailLengthRatio.get() * arrowHeight.get(),
+                                                           discThickness.get(),
+                                                           temporaryTailTransform,
+                                                           pickRay);
+         distance = negativeYArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
+         if (intersects && distance < closestCollisionDistance)
          {
             negativeYArrowIntersects = true;
             closestCollisionDistance = distance;
             closestCollisionSelection = 4;
-            closestCollision.set(negativeYArrowIntersection.getClosestIntersection());
+            closestCollision.set(negativeYArrowIntersection.getFirstIntersectionToPack());
          }
       }
 
@@ -477,11 +451,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private void updateMaterialHighlighting()
    {
       boolean prior = highlightingEnabled && isGizmoHovered;
-      discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
-      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
-      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
+      discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(prior && closestCollisionSelection == 3 ? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(prior && closestCollisionSelection == 4 ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -506,6 +480,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow width"), arrowWidth.getData(), 0.001f, 0.0f, 1000.0f);
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow height"), arrowHeight.getData(), 0.001f, 0.0f, 1000.0f);
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow spacing"), arrowSpacing.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow tail width ratio"), arrowTailWidthRatio.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow tail length ratio"), arrowTailLengthRatio.getData(), 0.001f, 0.0f, 1000.0f);
       ImGui.popItemWidth();
 
       if (proportionsChanged)
@@ -514,7 +490,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       updateTransforms();
    }
 
-   public void recreateGraphics()
+   private void recreateGraphics()
    {
       updateMaterialHighlighting();
       discModel.invalidateMesh();
@@ -537,12 +513,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       }
    }
 
-   private Pose3DReadOnly getPose3D()
-   {
-      return framePose3D;
-   }
-
-   public FramePose3D getFramePose3D()
+   public Pose3DReadOnly getPose3D()
    {
       return framePose3D;
    }
