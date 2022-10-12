@@ -10,7 +10,7 @@ public class StoredPropertySetTestParameters extends StoredPropertySet implement
 {
    public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
    public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-java-toolkit/src/test/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-java-toolkit/src/test/java";
+   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-java-toolkit/src/test/generated-java";
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 

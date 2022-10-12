@@ -10,21 +10,50 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
 {
    public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
    public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-sensor-processing/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-sensor-processing/src/main/java";
+   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-sensor-processing/src/main/generated-java";
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   /**
+    * Resolution of the height map grid
+    */
    public static final DoubleStoredPropertyKey gridResolutionXY = keys.addDoubleKey("Grid resolution XY");
+   /**
+    * Length of the side of the square height map grid
+    */
    public static final DoubleStoredPropertyKey gridSizeXY = keys.addDoubleKey("Grid size XY");
+   /**
+    * Max z relative to robot mid foot z. Points above this threshold are ignored.
+    */
    public static final DoubleStoredPropertyKey maxZ = keys.addDoubleKey("Max Z");
+   /**
+    * When calibrated on flat ground, this is the average standard deviation observed
+    * for a grid cell.
+    */
    public static final DoubleStoredPropertyKey nominalStandardDeviation = keys.addDoubleKey("Nominal standard deviation");
    public static final IntegerStoredPropertyKey maxPointsPerCell = keys.addIntegerKey("Max points per cell");
+   /**
+    * If a grid cell is at height h, points below (h - s * m) are ignored, and points
+    * above (h + s * m) will cause the cell to throw out old data and reset. where s
+    * is getNominalStandardDeviation() and m is this value.
+    */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
 
    public HeightMapParameters()
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+      this("");
+   }
+
+   public HeightMapParameters(String versionSpecifier)
+   {
+      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
       load();
+   }
+
+   public HeightMapParameters(StoredPropertySetReadOnly other)
+   {
+      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      set(other);
    }
 
    public static void main(String[] args)
