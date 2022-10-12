@@ -241,6 +241,11 @@ void ProMP::set_ridge_factor(double ridge_factor)
 	_ridge_factor = ridge_factor;
 }
 
+double ProMP::get_mean_demo_time_mod() const
+{
+	return 0;
+}
+
 void ProMP::set_conditioning_ridge_factor(double ridge_factor)
 {
 	_conditioning_ridge_factor = ridge_factor;

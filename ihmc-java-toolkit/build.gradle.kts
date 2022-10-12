@@ -19,6 +19,7 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("com.google.guava:guava:18.0")
    api("org.reflections:reflections:0.10.2")
+   api("org.apache.commons:commons-text:1.10.0")
 
    api("us.ihmc:ihmc-commons:0.31.0")
    api("us.ihmc:log-tools:0.6.3")

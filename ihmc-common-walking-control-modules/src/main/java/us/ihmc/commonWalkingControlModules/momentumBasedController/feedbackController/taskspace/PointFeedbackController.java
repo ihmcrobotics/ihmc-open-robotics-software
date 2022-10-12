@@ -120,13 +120,18 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final int controllerIndex;
    private int currentCommandId;
 
-   public PointFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
+   public PointFeedbackController(RigidBodyBasics endEffector,
+                                  WholeBodyControlCoreToolbox ccToolbox,
+                                  FeedbackControllerToolbox fbToolbox,
                                   YoRegistry parentRegistry)
    {
       this(endEffector, 0, ccToolbox, fbToolbox, parentRegistry);
    }
 
-   public PointFeedbackController(RigidBodyBasics endEffector, int controllerIndex, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
+   public PointFeedbackController(RigidBodyBasics endEffector,
+                                  int controllerIndex,
+                                  WholeBodyControlCoreToolbox ccToolbox,
+                                  FeedbackControllerToolbox fbToolbox,
                                   YoRegistry parentRegistry)
    {
       this.endEffector = endEffector;
@@ -153,29 +158,29 @@ public class PointFeedbackController implements FeedbackControllerInterface
       String endEffectorName = endEffector.getName();
       registry = new YoRegistry(appendIndex(endEffectorName, controllerIndex) + "PointFBController");
       dt = ccToolbox.getControlDT();
-      gains = fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, computeIntegralTerm);
+      gains = fbToolbox.getOrCreatePositionGains(endEffector, controllerIndex, computeIntegralTerm, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
-      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex);
+      controlFrame = fbToolbox.getOrCreateControlFrame(endEffector, controllerIndex, true);
 
       isEnabled = new YoBoolean(appendIndex(endEffectorName, controllerIndex) + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, DESIRED, isEnabled);
-      yoCurrentPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, CURRENT, isEnabled);
-      yoErrorPosition = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, POSITION, isEnabled);
+      yoDesiredPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, DESIRED, isEnabled, true);
+      yoCurrentPosition = fbToolbox.getOrCreatePositionData(endEffector, controllerIndex, CURRENT, isEnabled, true);
+      yoErrorPosition = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, POSITION, isEnabled, false);
 
       if (computeIntegralTerm)
-         yoErrorPositionIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled);
+         yoErrorPositionIntegrated = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR_INTEGRATED, POSITION, isEnabled, false);
       else
          yoErrorPositionIntegrated = null;
 
-      yoDesiredLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_VELOCITY, isEnabled);
+      yoDesiredLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_VELOCITY, isEnabled, true);
 
       if (ccToolbox.isEnableInverseDynamicsModule() || ccToolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, LINEAR_VELOCITY, isEnabled);
-         yoErrorLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, LINEAR_VELOCITY, isEnabled);
+         yoCurrentLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, LINEAR_VELOCITY, isEnabled, true);
+         yoErrorLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, LINEAR_VELOCITY, isEnabled, false);
          DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
          if (breakFrequency != null)
          {
@@ -185,7 +190,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                                                                            LINEAR_VELOCITY,
                                                                                            dt,
                                                                                            breakFrequency,
-                                                                                           isEnabled);
+                                                                                           isEnabled,
+                                                                                           false);
          }
          else
          {
@@ -194,17 +200,28 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
-            yoDesiredLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_ACCELERATION, isEnabled);
-            yoFeedForwardLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, LINEAR_ACCELERATION, isEnabled);
-            yoFeedbackLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, Type.FEEDBACK, LINEAR_ACCELERATION, isEnabled);
+            yoDesiredLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_ACCELERATION, isEnabled, true);
+            yoFeedForwardLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector,
+                                                                                controllerIndex,
+                                                                                FEEDFORWARD,
+                                                                                LINEAR_ACCELERATION,
+                                                                                isEnabled,
+                                                                                false);
+            yoFeedbackLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector,
+                                                                             controllerIndex,
+                                                                             Type.FEEDBACK,
+                                                                             LINEAR_ACCELERATION,
+                                                                             isEnabled,
+                                                                             false);
             rateLimitedFeedbackLinearAcceleration = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
                                                                                                  controllerIndex,
                                                                                                  FEEDBACK,
                                                                                                  LINEAR_ACCELERATION,
                                                                                                  dt,
                                                                                                  maximumRate,
-                                                                                                 isEnabled);
-            yoAchievedLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, Type.ACHIEVED, LINEAR_ACCELERATION, isEnabled);
+                                                                                                 isEnabled,
+                                                                                                 false);
+            yoAchievedLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, Type.ACHIEVED, LINEAR_ACCELERATION, isEnabled, true);
          }
          else
          {
@@ -217,16 +234,17 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
          if (ccToolbox.isEnableVirtualModelControlModule())
          {
-            yoDesiredLinearForce = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_FORCE, isEnabled);
-            yoFeedForwardLinearForce = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, LINEAR_FORCE, isEnabled);
-            yoFeedbackLinearForce = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, Type.FEEDBACK, LINEAR_FORCE, isEnabled);
+            yoDesiredLinearForce = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_FORCE, isEnabled, true);
+            yoFeedForwardLinearForce = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, LINEAR_FORCE, isEnabled, false);
+            yoFeedbackLinearForce = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, Type.FEEDBACK, LINEAR_FORCE, isEnabled, false);
             rateLimitedFeedbackLinearForce = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
                                                                                           controllerIndex,
                                                                                           FEEDBACK,
                                                                                           LINEAR_FORCE,
                                                                                           dt,
                                                                                           maximumRate,
-                                                                                          isEnabled);
+                                                                                          isEnabled,
+                                                                                          false);
          }
          else
          {
@@ -256,15 +274,16 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       if (ccToolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDBACK, LINEAR_VELOCITY, isEnabled);
-         yoFeedForwardLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, LINEAR_VELOCITY, isEnabled);
+         yoFeedbackLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDBACK, LINEAR_VELOCITY, isEnabled, false);
+         yoFeedForwardLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, LINEAR_VELOCITY, isEnabled, false);
          rateLimitedFeedbackLinearVelocity = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
                                                                                           controllerIndex,
                                                                                           FEEDBACK,
                                                                                           LINEAR_VELOCITY,
                                                                                           dt,
                                                                                           maximumRate,
-                                                                                          isEnabled);
+                                                                                          isEnabled,
+                                                                                          false);
       }
       else
       {

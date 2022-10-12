@@ -2,95 +2,19 @@ package us.ihmc.promp.test;
 
 import us.ihmc.promp.*;
 import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static us.ihmc.promp.Trajectory.infer_closest_trajectory;
 import static us.ihmc.promp.global.promp.EigenMatrixXd;
-import static us.ihmc.promp.presets.PrompInfoMapper.EigenVectorXd;
+import static us.ihmc.promp.presets.ProMPInfoMapper.EigenVectorXd;
 
 public class LearnAndUpdateProMPExample
 {
-   private static void loadLibraries() throws IOException
-   {
-      // We need to disable javacpp from trying to automatically load libraries.
-      // Otherwise, it will try to load them by name when they aren't in the library path
-      // (LD_LIBRARY_PATH on Linux).
-      //
-      // The approach taken here is to use System.load to load each library by explicit
-      // absolute path on disk.
-      System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
-
-      List<String> libraryFiles = new ArrayList<>();
-      libraryFiles.add("libpromp.so");
-      libraryFiles.add("libjnipromp.so");
-
-      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/src/main/resources");
-      for (String libraryFile : libraryFiles)
-      {
-         System.load(new WorkspaceFile(resourcesDirectory, libraryFile).getFilePath().toAbsolutePath().normalize().toString());
-      }
-   }
-
-   private static void saveAsCSV(EigenMatrixXd dataMatrix, String fileName)
-   {
-      List<String[]> dataLines = new ArrayList<>();
-      for (int i = 0; i < dataMatrix.rows(); i++)
-      {
-         String[] stringLine = new String[(int) dataMatrix.cols()];
-         for (int j = 0; j < dataMatrix.cols(); j++)
-            stringLine[j] = "" + dataMatrix.coeff(i, j);
-         dataLines.add(stringLine);
-      }
-      WorkspaceDirectory fileDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
-      String fileDirAbs = fileDirectory.getDirectoryPath().toAbsolutePath().toString();
-      File csvFile = new File(fileDirAbs + fileName);
-      try (PrintWriter writer = new PrintWriter(csvFile))
-      {
-         dataLines.stream().map(s -> convertToCSV(s)).forEach(writer::println);
-      }
-      catch (IOException e)
-      {
-         e.printStackTrace();
-      }
-   }
-
-   private static String convertToCSV(String[] data)
-   {
-      return Stream.of(data).collect(Collectors.joining(","));
-   }
-
-   private static void printMatrix(EigenMatrixXd matrix, String name)
-   {
-      System.out.println(name);
-      for (int row = 0; row < matrix.rows(); row++)
-      {
-         for (int col = 0; col < matrix.cols(); col++)
-         {
-            System.out.print(matrix.coeff(row, col) + " ");
-         }
-         System.out.println();
-      }
-      System.out.println();
-   }
-
    public static void main(String[] args)
    {
-      try
-      {
-         loadLibraries();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      ProMPNativeLibrary.load();
       /*
        * Load training and test trajectories
        */
@@ -146,15 +70,15 @@ public class LearnAndUpdateProMPExample
       TrajectoryVector demoTestTrajectories = testingTrajectories.trajectories();
       for (int i = 0; i < demoTrajectories.size(); i++)
       {
-         saveAsCSV(demoTrajectories.get(i).matrix(), ("/demo" + (i + 1) + ".csv"));
+         ProMPUtil.saveAsCSV(demoTrajectories.get(i).matrix(), ("/demo" + (i + 1) + ".csv"));
       }
       for (int i = 0; i < demoTestTrajectories.size(); i++)
       {
-         saveAsCSV(demoTestTrajectories.get(i).matrix(), ("/test" + (i + 1) + ".csv"));
+         ProMPUtil.saveAsCSV(demoTestTrajectories.get(i).matrix(), ("/test" + (i + 1) + ".csv"));
       }
-      saveAsCSV(meanTrajectory, "/mean.csv");
-      saveAsCSV(stdDeviationTrajectory, "/stdDeviation.csv");
-      saveAsCSV(covarianceTrajectory, "/covariance.csv");
+      ProMPUtil.saveAsCSV(meanTrajectory, "/mean.csv");
+      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/stdDeviation.csv");
+      ProMPUtil.saveAsCSV(covarianceTrajectory, "/covariance.csv");
 
       /*
        * Select a demo trajectory and infer modulation of ProMP based on that demo
@@ -184,8 +108,8 @@ public class LearnAndUpdateProMPExample
       EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
       System.out.println("Inferred timestep: " + inferredTimesteps);
 
-      saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
-      saveAsCSV(stdDeviationTrajectoryModulated, "/stdDeviationModulated.csv");
+      ProMPUtil.saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
+      ProMPUtil.saveAsCSV(stdDeviationTrajectoryModulated, "/stdDeviationModulated.csv");
       // update the time modulation of the ProMP object with estimated value
       System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
       myProMP.update_time_modulation((double) myProMP.get_traj_length() / inferredTimesteps);
@@ -215,9 +139,12 @@ public class LearnAndUpdateProMPExample
       // condition goal
       conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps() - 1;
       System.out.print("Conditioning timestep: " + conditioningTimestep);
-      System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " +
-                         demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 1) + " " +
-                         demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 2));
+      System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " + demoTestTrajectories.get(0)
+                                                                                                                                           .matrix()
+                                                                                                                                           .coeff(
+                                                                                                                                                 conditioningTimestep,
+                                                                                                                                                 1) + " "
+                         + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 2));
       for (int i = 0; i < viaPoint.size(); i++)
          viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
       myProMP.condition_goal(viaPoint, viaPointStdDeviation);
@@ -225,7 +152,7 @@ public class LearnAndUpdateProMPExample
       EigenMatrixXd meanTrajectoryConditioned = myProMP.generate_trajectory();
       EigenMatrixXd stdDeviationTrajectoryConditioned = myProMP.gen_traj_std_dev(inferredTimesteps);
 
-      saveAsCSV(meanTrajectoryConditioned, "/meanConditioned.csv");
-      saveAsCSV(stdDeviationTrajectoryConditioned, "/stdDeviationConditioned.csv");
+      ProMPUtil.saveAsCSV(meanTrajectoryConditioned, "/meanConditioned.csv");
+      ProMPUtil.saveAsCSV(stdDeviationTrajectoryConditioned, "/stdDeviationConditioned.csv");
    }
 }

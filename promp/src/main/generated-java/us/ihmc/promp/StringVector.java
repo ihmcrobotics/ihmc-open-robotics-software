@@ -8,7 +8,7 @@ import org.bytedeco.javacpp.annotation.*;
 
 import static us.ihmc.promp.global.promp.*;
 
-@Name("std::vector<std::string>") @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
+@Name("std::vector<std::string>") @Properties(inherit = us.ihmc.promp.presets.ProMPInfoMapper.class)
 public class StringVector extends Pointer {
     static { Loader.load(); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */

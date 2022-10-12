@@ -8,7 +8,7 @@ import org.bytedeco.javacpp.annotation.*;
 
 import static us.ihmc.promp.global.promp.*;
 
-@NoOffset @Name("std::tuple<int,Eigen::VectorXd,Eigen::MatrixXd>") @Properties(inherit = us.ihmc.promp.presets.PrompInfoMapper.class)
+@NoOffset @Name("std::tuple<int,Eigen::VectorXd,Eigen::MatrixXd>") @Properties(inherit = us.ihmc.promp.presets.ProMPInfoMapper.class)
 public class IntVectorMatrixTuple extends Pointer {
     static { Loader.load(); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
