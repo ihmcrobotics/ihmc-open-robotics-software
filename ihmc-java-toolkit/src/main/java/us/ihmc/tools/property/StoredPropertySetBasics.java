@@ -40,5 +40,5 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    String getCurrentVersionSuffix();
 
-   String getUncapitalizedClassName();
+   String getCapitalizedClassName();
 }

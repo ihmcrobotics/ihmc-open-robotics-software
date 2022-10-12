@@ -3,7 +3,6 @@ package us.ihmc.sensorProcessing.heightMap;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.util.Random;
 
