@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class WholeBodyControllerCore
 {
-   private static final boolean DEBUG = false;
+   public static boolean REDUCE_YOVARIABLES = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
@@ -93,22 +93,21 @@ public class WholeBodyControllerCore
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       FloatingJointBasics rootJoint = toolbox.getRootJoint();
 
-      if (DEBUG)
+      if (REDUCE_YOVARIABLES)
+      {
+         if (rootJoint != null)
+            rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
+         else
+            rootJointDesiredConfigurationData = null;
+         jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
+      }
+      else
       {
          if (rootJoint != null)
             rootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
          else
             rootJointDesiredConfigurationData = null;
          jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
-      }
-      else
-      {
-
-         if (rootJoint != null)
-            rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
-         else
-            rootJointDesiredConfigurationData = null;
-         jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder();
       }
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;

@@ -2,9 +2,7 @@ package us.ihmc.promp.test;
 
 import us.ihmc.promp.*;
 import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,37 +14,9 @@ import static us.ihmc.promp.global.promp.EigenMatrixXd;
  */
 public class InferSpeedTrajectoryExample
 {
-   private static void loadLibraries() throws IOException
-   {
-      // We need to disable javacpp from trying to automatically load libraries.
-      // Otherwise, it will try to load them by name when they aren't in the library path
-      // (LD_LIBRARY_PATH on Linux).
-      //
-      // The approach taken here is to use System.load to load each library by explicit
-      // absolute path on disk.
-      System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
-
-      List<String> libraryFiles = new ArrayList<>();
-      libraryFiles.add("libpromp.so");
-      libraryFiles.add("libjnipromp.so");
-
-      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/src/main/resources");
-      for (String libraryFile : libraryFiles)
-      {
-         System.load(new WorkspaceFile(resourcesDirectory, libraryFile).getFilePath().toAbsolutePath().normalize().toString());
-      }
-   }
-
    public static void main(String[] args)
    {
-      try
-      {
-         loadLibraries();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      ProMPNativeLibrary.load();
 
       WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
       String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();

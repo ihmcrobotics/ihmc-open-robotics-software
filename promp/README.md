@@ -70,7 +70,7 @@ If you make any changes to the C++ code, you should re-generate the Java binding
 the shared library files required at runtime (.so/.dll/.dylib) as well as the mapped Java code in `src/main/generated-java`.
 
 ### Linux
-To generate the Java bindings for Linux, you should utilize Docker and the Docker build script in the root directory, `generateJavaMappingsDocker.sh`.
+To generate the Java bindings and shared libraries, for Linux, you should utilize Docker and the Docker build script in the root directory, `generateJavaMappingsDocker.sh`.
 Using the Docker build script/the Docker image, you will ensure that the native libraries it produces are compatible with older distros (Ubuntu 20.04; glibc 2.31).
 
 Before running the Docker build script, ensure your user can access Docker functions (normally, it's root-only access).
@@ -81,7 +81,11 @@ $ newgrp docker
 ```
 
 ### Windows
-TODO
+To generate the Java bindings and shared libraries for Windows, you should utilize the build script in the root directory, `generateJavaMappings.bat`.
+This script assumes you have a few things installed:
+- Visual Studio 2022
+- CMake
+- JDK 17
 
 ## Python module
 
@@ -112,5 +116,3 @@ gen_covariance = my_promp.generate_trajectory_covariance()
 ## Acknowledgments
 
 The development of this software is partially supported by [the European Project H2020 An.Dy](http://andy-project.eu/).
-
-
