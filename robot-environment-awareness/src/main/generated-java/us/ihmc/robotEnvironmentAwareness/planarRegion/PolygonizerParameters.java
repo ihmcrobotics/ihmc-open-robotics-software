@@ -10,7 +10,7 @@ public class PolygonizerParameters extends StoredPropertySet implements Polygoni
 {
    public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
    public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "robot-environment-awareness/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "robot-environment-awareness/src/main/java";
+   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "robot-environment-awareness/src/main/generated-java";
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 

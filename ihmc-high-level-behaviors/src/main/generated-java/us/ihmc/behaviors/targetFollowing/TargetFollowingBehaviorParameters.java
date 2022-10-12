@@ -10,7 +10,7 @@ public class TargetFollowingBehaviorParameters extends StoredPropertySet impleme
 {
    public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
    public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-high-level-behaviors/src/main/resources";
-   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-high-level-behaviors/src/main/java";
+   public static final String SUBSEQUENT_PATH_TO_JAVA_FOLDER = "ihmc-high-level-behaviors/src/main/generated-java";
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
@@ -20,8 +20,19 @@ public class TargetFollowingBehaviorParameters extends StoredPropertySet impleme
 
    public TargetFollowingBehaviorParameters()
    {
-      super(keys, TargetFollowingBehaviorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+      this("");
+   }
+
+   public TargetFollowingBehaviorParameters(String versionSpecifier)
+   {
+      super(keys, TargetFollowingBehaviorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
       load();
+   }
+
+   public TargetFollowingBehaviorParameters(StoredPropertySetReadOnly other)
+   {
+      super(keys, TargetFollowingBehaviorParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      set(other);
    }
 
    public static void main(String[] args)
