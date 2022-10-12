@@ -30,10 +30,10 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 )
 public class ProMPInfoMapper implements InfoMapper
 {
-   static
-   {
-      Loader.checkVersion("org.bytedeco", "promp");
-   }
+//   static
+//   {
+//      Loader.checkVersion("org.bytedeco", "promp");
+//   }
 
    public void map(InfoMap infoMap)
    {
