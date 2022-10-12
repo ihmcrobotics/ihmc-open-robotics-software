@@ -1,0 +1,6 @@
+{
+  "title" : "Stored property set generator test",
+  "The first boolean property" : false,
+  "The first double property" : 0.5,
+  "The first integer property" : 3
+}

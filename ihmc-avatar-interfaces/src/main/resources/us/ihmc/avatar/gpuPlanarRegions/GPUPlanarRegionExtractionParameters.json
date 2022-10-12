@@ -1,0 +1,22 @@
+{
+  "title" : "GPU planar region extraction parameters",
+  "Merge distance threshold" : 0.008,
+  "Merge angular threshold" : 0.82,
+  "Filter disparity threshold" : 2000.0,
+  "Patch size" : 4,
+  "Dead pixel filter patch size" : 1,
+  "Focal length X pixels" : 0.0,
+  "Focal length Y pixels" : 0.0,
+  "Principal offset X pixels" : 0.0,
+  "Principal offset Y pixels" : 0.0,
+  "Early gaussian blur" : true,
+  "Use filtered image" : true,
+  "Use SVD normals" : true,
+  "SVD reduction factor" : 20,
+  "Gaussian size" : 16,
+  "Gaussian sigma" : 6.0,
+  "Search depth limit" : 37000,
+  "Region min patches" : 700,
+  "Boundary min patches" : 20,
+  "Region growth factor" : 0.0
+}
