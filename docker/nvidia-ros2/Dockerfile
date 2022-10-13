@@ -1,6 +1,6 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware with ROS 2.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia-ros2
-# Current version: 0.3
+# Current version: 0.4
 # This file is mostly taken from https://github.com/osrf/docker_images/blob/master/ros/rolling/ubuntu/focal/ros-core/Dockerfile
 # We aren't yet sure how to get around copying this code.
 FROM ihmcrobotics/nvidia:0.5
@@ -35,6 +35,10 @@ USER robotlab
 WORKDIR /home/robotlab
 
 ENV ROS_DOMAIN_ID 15
+
+# Add a bash function to make setting and persisting the domain ID easier
+COPY --chown=robotlab:robotlab setDomainID.sh setDomainID.sh
+RUN echo "source setDomainID.sh"  >> .bashrc
 
 COPY --chown=robotlab:robotlab ihmc_interfaces ihmc_interfaces
 RUN mkdir -p colcon_ws/src \
