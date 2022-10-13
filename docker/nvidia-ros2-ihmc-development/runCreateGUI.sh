@@ -17,4 +17,4 @@ docker run \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
     --name perception \
-    ihmcrobotics/nvidia-ros2-ihmc-development:0.1
+    ihmcrobotics/nvidia-ros2-ihmc-development:0.3

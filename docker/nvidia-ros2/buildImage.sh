@@ -8,7 +8,7 @@ set -o xtrace
 rm -rf ihmc_interfaces
 cp -r ../../ihmc-interfaces/src/main/messages/ihmc_interfaces .
 
-docker build --tag ihmcrobotics/nvidia-ros2:0.3 .
+docker build --tag ihmcrobotics/nvidia-ros2:0.4 .
 
 # Clean up
 rm -rf ihmc_interfaces

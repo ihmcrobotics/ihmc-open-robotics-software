@@ -20,4 +20,4 @@ docker run \
     --volume $DOCKER_JETBRAINS_CONFIG_HOME:/home/robotlab/.config/JetBrains:rw \
     --volume $DOCKER_WORKSPACE:/home/robotlab/dev/workspace:rw \
     --volume /usr/share/fonts:/usr/share/fonts \
-    ihmcrobotics/nvidia-ros2-ide:0.1 pycharm
+    ihmcrobotics/nvidia-ros2-ide:0.3 pycharm
