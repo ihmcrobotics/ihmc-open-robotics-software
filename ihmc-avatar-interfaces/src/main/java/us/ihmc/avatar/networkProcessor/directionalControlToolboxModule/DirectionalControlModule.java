@@ -3,13 +3,8 @@ package us.ihmc.avatar.networkProcessor.directionalControlToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.*;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -111,6 +106,11 @@ public class DirectionalControlModule extends ToolboxModule
       {
          if (steppingController != null)
             steppingController.updateFootstepStatusMessage(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (steppingController != null)
+            steppingController.updateHighLevelStateChangeStatus(s.takeNextData());
       });
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, s ->
       {

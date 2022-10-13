@@ -11,16 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.DirectionalControlConfigurationMessage;
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.*;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
@@ -300,6 +292,14 @@ public class DirectionalControlController extends ToolboxController
                                                      message.getActualFootOrientationInWorld()));
          }
       });
+   }
+
+   public void updateHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage message)
+   {
+      queuedTasksToProcess.add(() ->
+                               {
+                                  continuousStepGenerator.consumeHighLevelStateChangeStatus(message);
+                               });
    }
 
    public void updatePlanarRegionsListMessage(PlanarRegionsListMessage message)
