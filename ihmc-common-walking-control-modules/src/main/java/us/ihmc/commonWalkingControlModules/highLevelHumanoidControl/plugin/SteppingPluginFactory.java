@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -14,6 +15,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 public interface SteppingPluginFactory extends HighLevelHumanoidControllerPluginFactory
 {
    StepGeneratorCommandInputManager getStepGeneratorCommandInputManager();
+
+   void setFootStepAdjustment(FootstepAdjustment footstepAdjustment);
 
    @Override
    default SteppingPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
