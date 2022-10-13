@@ -6,6 +6,10 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.function.*;
 
+/**
+ * Syncs ImGui data with external data, provided as a StoredProperty or a Supplier and Consumer.
+ * The user can rely on the data always being in sync due to the design of the access method.
+ */
 public class ImBooleanWrapper
 {
    private final ImBoolean imBoolean = new ImBoolean();
@@ -24,6 +28,12 @@ public class ImBooleanWrapper
       this.wrappedValueSetter = wrappedValueSetter;
    }
 
+   /**
+    * This access method is used for rendering ImGui widgets with the ImGui
+    * type provided to the given Consumer. This way, this class can ensure it
+    * is synced to the external data before and after the widget is rendered
+    * and modified by the ImGui user.
+    */
    public void accessImBoolean(Consumer<ImBoolean> imBooleanConsumer)
    {
       // This basic set has no effects to just set it even if the values are the same
