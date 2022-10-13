@@ -7,7 +7,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class JoystickBasedSteppingPlugin implements HighLevelHumanoidControllerPlugin
+public class JoystickBasedSteppingPlugin implements SteppingPlugin
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final MutableObject<HighLevelControllerName> latestHighLevelControllerStatus = new MutableObject<>(null);

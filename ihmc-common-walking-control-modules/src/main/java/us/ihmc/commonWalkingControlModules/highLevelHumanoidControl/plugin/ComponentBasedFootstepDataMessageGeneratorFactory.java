@@ -3,15 +3,12 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -24,7 +21,7 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLevelHumanoidControllerPluginFactory
+public class ComponentBasedFootstepDataMessageGeneratorFactory implements SteppingPluginFactory
 {
    private final OptionalFactoryField<YoRegistry> registryField = new OptionalFactoryField<>("registry");
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScriptField = new OptionalFactoryField<>("useHeadingAndVelocityScript", false);
@@ -74,41 +71,28 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       this.headingAndVelocityEvaluationScriptParametersField.set(headingAndVelocityEvaluationScriptParameters);
    }
 
-   public StepGeneratorCommandInputManager setCSGCommandInputManager()
+   public StepGeneratorCommandInputManager setStepGeneratorCommandInputManager()
    {
       StepGeneratorCommandInputManager csgCommandInputManager = new StepGeneratorCommandInputManager();
-      setCSGCommandInputManager(csgCommandInputManager);
+      setStepGeneratorCommandInputManager(csgCommandInputManager);
       return csgCommandInputManager;
    }
 
-   public void setCSGCommandInputManager(StepGeneratorCommandInputManager commandInputManager)
+   public void setStepGeneratorCommandInputManager(StepGeneratorCommandInputManager commandInputManager)
    {
       this.csgCommandInputManagerField.set(commandInputManager);
    }
 
-   public StepGeneratorCommandInputManager getCSGCommandInputManager()
+   @Override
+   public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
       if (csgCommandInputManagerField.hasValue())
          return csgCommandInputManagerField.get();
       else
-         return setCSGCommandInputManager();
+         return setStepGeneratorCommandInputManager();
    }
 
    @Override
-   public ComponentBasedFootstepDataMessageGenerator buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
-   {
-      HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
-
-      return buildPlugin(controllerToolbox.getReferenceFrames(),
-                         controllerToolbox.getControlDT(),
-                         controllerFactoryHelper.getWalkingControllerParameters(),
-                         controllerFactoryHelper.getStatusMessageOutputManager(),
-                         controllerFactoryHelper.getCommandInputManager(),
-                         controllerToolbox.getYoGraphicsListRegistry(),
-                         controllerToolbox.getContactableFeet(),
-                         controllerToolbox.getYoTime() );
-   }
-
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
                                                                  double updateDT,
                                                                  WalkingControllerParameters walkingControllerParameters,

@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Con
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHumanoidControllerPlugin
+public class ComponentBasedFootstepDataMessageGenerator implements SteppingPlugin
 {
    private final YoRegistry registry;
    private final ContinuousStepGenerator continuousStepGenerator;
@@ -36,6 +36,7 @@ public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHuma
       return registry;
    }
 
+   @Override
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
       continuousStepGenerator.setFootstepAdjustment(footstepAdjustment);

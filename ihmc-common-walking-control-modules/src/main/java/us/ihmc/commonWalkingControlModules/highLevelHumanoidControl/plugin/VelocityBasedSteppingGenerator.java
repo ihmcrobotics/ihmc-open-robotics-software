@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DirectionalControlMessenger;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -15,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class VelocityBasedSteppingGenerator implements HighLevelHumanoidControllerPlugin
+public class VelocityBasedSteppingGenerator implements SteppingPlugin
 {
    private final static Vector2DReadOnly zero2D = new Vector2D();
 
@@ -112,6 +113,11 @@ public class VelocityBasedSteppingGenerator implements HighLevelHumanoidControll
             counter++;
          }
       }
+   }
+
+   @Override
+   public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
+   {
    }
 
    /**
