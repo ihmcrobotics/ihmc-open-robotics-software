@@ -43,6 +43,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.SteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.VelocityBasedSteppingGeneratorFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -390,18 +392,33 @@ public class SCS2AvatarSimulationFactory
    private void setupStepGeneratorThread()
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
-      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-      if (useHeadingAndVelocityScript.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript.get());
-      else
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
-      if (headingAndVelocityEvaluationScriptParameters.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
-      if (heightMapForFootstepZ.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
 
-      stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory,
+      SteppingPluginFactory steppingFactory;
+      if (useHeadingAndVelocityScript.hasValue() || headingAndVelocityEvaluationScriptParameters.hasValue())
+      {
+         ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+         componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
+         if (useHeadingAndVelocityScript.hasValue())
+            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript.get());
+         else
+            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
+         if (headingAndVelocityEvaluationScriptParameters.hasValue())
+            componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
+         if (heightMapForFootstepZ.hasValue())
+            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+
+         steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
+      }
+      else
+      {
+         VelocityBasedSteppingGeneratorFactory velocityBasedSteppingGeneratorFactory = new VelocityBasedSteppingGeneratorFactory();
+         if (heightMapForFootstepZ.hasValue())
+            velocityBasedSteppingGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+
+         steppingFactory = velocityBasedSteppingGeneratorFactory;
+      }
+
+      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),

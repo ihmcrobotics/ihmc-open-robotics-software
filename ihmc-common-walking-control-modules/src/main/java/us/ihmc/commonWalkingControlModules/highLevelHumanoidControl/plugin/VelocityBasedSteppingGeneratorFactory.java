@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.DirectionalControlInputMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DirectionalControlMessenger;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -47,6 +48,11 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
    public void setStepGeneratorCommandInputManager(StepGeneratorCommandInputManager commandInputManager)
    {
       this.csgCommandInputManagerField.set(commandInputManager);
+   }
+
+   @Override
+   public void setFootStepAdjustment(FootstepAdjustment footstepAdjustment)
+   {
    }
 
    @Override

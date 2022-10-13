@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,6 +28,13 @@ public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
    public void setFastWalkingInputParameters(VelocityBasedSteppingParameters parameters)
    {
       velocityPluginFactory.setSteppingParameters(parameters);
+   }
+
+   @Override
+   public void setFootStepAdjustment(FootstepAdjustment footstepAdjustment)
+   {
+      csgPluginFactory.setFootStepAdjustment(footstepAdjustment);
+      velocityPluginFactory.setFootStepAdjustment(footstepAdjustment);
    }
 
    @Override
