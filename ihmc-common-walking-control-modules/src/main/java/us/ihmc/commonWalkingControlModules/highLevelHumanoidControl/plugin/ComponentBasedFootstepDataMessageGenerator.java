@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHumanoidControllerPlugin
@@ -35,8 +36,8 @@ public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHuma
       return registry;
    }
 
-   public ContinuousStepGenerator getContinuousStepGenerator()
+   public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
    {
-      return continuousStepGenerator;
+      continuousStepGenerator.setFootstepAdjustment(footstepAdjustment);
    }
 }

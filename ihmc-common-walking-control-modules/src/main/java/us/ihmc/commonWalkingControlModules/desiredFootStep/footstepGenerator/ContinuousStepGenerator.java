@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -32,6 +33,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -68,6 +70,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * should be done <b>every step</b> via {@link #notifyFootstepStarted()} and
  * {@link #notifyFootstepCompleted(RobotSide)}, or
  * {@link #consumeFootstepStatus(FootstepStatusMessage)}.
+ * <li><u>This generator also needs to be informed of the current state of the high level controller:</u><br>
+ * The can be handle automatically by setting it up with
+ * {@link #setHighLevelStateChangeStatusListener(StatusMessageOutputManager)}. Otherwise, the notifications
+ * should be done <b>every state change</b> via {@link #consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage)}.
  * <li><u>Protocol for submitting footsteps to the controller:</u><br>
  * This can be done via {@link #setFootstepMessenger(FootstepMessenger)}.
  * <li><u>Protocol to obtain the desired forward/lateral velocity and desired turning
@@ -89,8 +95,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * See {@link #setNumberOfFootstepsToPlan(int)}.
  * <li><u>Method for adjusting footstep height, pitch, and roll:</u><br>
  * Default is behavior is to adjust footsteps based on the current support foot pose. To change this
- * behavior, see {@link #setFootstepAdjustment(FootstepAdjustment)},
- * {@link #setHeightMapBasedFootstepAdjustment(HeightMap)}, and
+ * behavior, see {@link #setFootstepAdjustment(FootstepAdjustment)} and
  * {@link #setSupportFootBasedFootstepAdjustment(boolean)}.
  * <li><u>Method for indicating step validity and providing alternative steps for invalid
  * ones:</u><br>
@@ -136,7 +141,6 @@ public class ContinuousStepGenerator implements Updatable
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
-   private DirectionalControlMessenger directionalControlMessenger;
    private StopWalkingMessenger stopWalkingMessenger;
    private StartWalkingMessenger startWalkingMessenger;
    private List<FootstepAdjustment> footstepAdjustments = new ArrayList<>();
@@ -148,6 +152,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
+   private final MutableObject<HighLevelControllerName> latestHighLevelControllerStatus = new MutableObject<>(null);
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
    private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
 
@@ -197,6 +202,9 @@ public class ContinuousStepGenerator implements Updatable
 
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
+
+      if (latestHighLevelControllerStatus.getValue() != HighLevelControllerName.WALKING)
+         walk.set(false);
 
       if (!walk.getValue())
       {
@@ -545,6 +553,16 @@ public class ContinuousStepGenerator implements Updatable
          notifyFootstepStarted();
    }
 
+   public void setHighLevelStateChangeStatusListener(StatusMessageOutputManager statusMessageOutputManager)
+   {
+      statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, this::consumeHighLevelStateChangeStatus);
+   }
+
+   public void consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage statusMessage)
+   {
+      latestHighLevelControllerStatus.setValue(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
+   }
+
    /**
     * Configures internal parameters for the step durations and step reach.
     *
@@ -603,16 +621,6 @@ public class ContinuousStepGenerator implements Updatable
    public void setFootstepMessenger(FootstepMessenger footstepMessenger)
    {
       this.footstepMessenger = footstepMessenger;
-   }
-
-   /**
-    * Sets the protocol for sending desired velocities to the controller.
-    *
-    * @param footstepMessenger the callback used to send footsteps.
-    */
-   public void setDirectionalControlMessenger(DirectionalControlMessenger directionalControlMessenger)
-   {
-      this.directionalControlMessenger = directionalControlMessenger;
    }
 
    /**

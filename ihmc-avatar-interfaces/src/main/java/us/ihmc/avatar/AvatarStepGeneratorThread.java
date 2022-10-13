@@ -33,7 +33,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
 
-   private final ComponentBasedFootstepDataMessageGenerator csg;
+   private final ComponentBasedFootstepDataMessageGenerator continuousStepGeneratorPlugin;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
@@ -45,7 +45,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
-   private CommandInputManager csgCommandInputManager;
+   private final CommandInputManager csgCommandInputManager;
 
    public AvatarStepGeneratorThread(ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
@@ -72,20 +72,19 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       csgCommandInputManager = csgPluginFactory.getCSGCommandInputManager().getCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      csg = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
-                                         drcRobotModel.getStepGeneratorDT(),
-                                         drcRobotModel.getWalkingControllerParameters(),
-                                         walkingOutputManager,
-                                         walkingCommandInputManager,
-                                         null,
-                                         null,
-                                         csgTime);
-      csgRegistry.addChild(csg.getRegistry());
+      continuousStepGeneratorPlugin = csgPluginFactory.buildPlugin(humanoidReferenceFrames,
+                                                                   drcRobotModel.getStepGeneratorDT(),
+                                                                   drcRobotModel.getWalkingControllerParameters(),
+                                                                   walkingOutputManager,
+                                                                   walkingCommandInputManager,
+                                                                   null,
+                                                                   null,
+                                                                   csgTime);
+      csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
 
-      this.planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(csg.getContinuousStepGenerator(),
-                                                                         drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
+      this.planarRegionFootstepSnapper = new PlanarRegionFootstepSnapper(drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
                                                                          csgRegistry);
-      csg.getContinuousStepGenerator().setFootstepAdjustment(planarRegionFootstepSnapper);
+      continuousStepGeneratorPlugin.setFootstepAdjustment(planarRegionFootstepSnapper);
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
 
@@ -132,7 +131,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 
          consumePlanarRegions();
 
-         csg.update(csgTime.getValue());
+         continuousStepGeneratorPlugin.update(csgTime.getValue());
          humanoidRobotContextData.setPerceptionRan(true);
       }
       catch (Exception e)

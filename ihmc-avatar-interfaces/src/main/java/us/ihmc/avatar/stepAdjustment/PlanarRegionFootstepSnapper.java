@@ -44,15 +44,13 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final GarbageFreePlanarRegionListPolygonSnapper snapper = new GarbageFreePlanarRegionListPolygonSnapper();
 
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
-   private final ContinuousStepGenerator continuousStepGenerator;
 
    private final YoConstraintOptimizerParameters wiggleParameters;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
-   public PlanarRegionFootstepSnapper(ContinuousStepGenerator continuousStepGenerator, SteppingParameters steppingParameters, YoRegistry parentRegistry)
+   public PlanarRegionFootstepSnapper(SteppingParameters steppingParameters, YoRegistry parentRegistry)
    {
-      this.continuousStepGenerator = continuousStepGenerator;
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
 
@@ -97,7 +95,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPoseToPack)
    {
       footstepAtSameHeightAsStanceFoot.getPosition().set(footstepPose.getPosition());
-      footstepAtSameHeightAsStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
+      footstepAtSameHeightAsStanceFoot.setZ(stanceFootPose.getZ());
       footstepAtSameHeightAsStanceFoot.getOrientation().set(footstepPose.getOrientation());
 
       if (steppableRegionsList.isEmpty())

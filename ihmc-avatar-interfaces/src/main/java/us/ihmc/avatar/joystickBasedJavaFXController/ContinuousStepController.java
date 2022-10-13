@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -311,6 +312,11 @@ public class ContinuousStepController
                                                   footstepStatus.getActualFootPositionInWorld(),
                                                   footstepStatus.getActualFootOrientationInWorld()));
       }
+   }
+
+   public void consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage statusMessage)
+   {
+      continuousStepGenerator.consumeHighLevelStateChangeStatus(statusMessage);
    }
 
    public void consumePlanarRegionsListMessage(PlanarRegionsListMessage message)
