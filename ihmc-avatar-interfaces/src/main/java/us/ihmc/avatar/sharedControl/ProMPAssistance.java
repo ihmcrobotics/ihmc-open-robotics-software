@@ -66,51 +66,41 @@ public class ProMPAssistance
          if(bodyPart.equals("RightHand")){
             dofs.replaceAll(dof -> dof + 7L);
          }
+         TrajectoryGroup trainingTrajectories = new TrajectoryGroup();
+         //training filelist
+         StringVector fileListStringVectorTraining = new StringVector();
+         fileListTraining.forEach(fileListStringVectorTraining::push_back);
+         SizeTVector doFsSizeTVector = new SizeTVector();
+         dofs.forEach(doFsSizeTVector::push_back);
+         // load the training trajectories from the csv files
+         trainingTrajectories.load_csv_trajectories(fileListStringVectorTraining, doFsSizeTVector);
+         // make all training trajectories have the same length
+         int meanLengthTraining = (int) trainingTrajectories.normalize_length();
+         learnedProMPs.put(bodyPart+bodyPartsGeometry.get(bodyPart),new ProMP(trainingTrajectories, 20)); // default 20 rbf functions seems to generalize well
       }
-
-      TrajectoryGroup trainingTrajectories = new TrajectoryGroup();
-      //training filelist
-      StringVector fileListStringVectorTraining = new StringVector();
-      fileListTraining.forEach(fileListStringVectorTraining::push_back);
-      SizeTVector doFsSizeTVector = new SizeTVector();
-      dofs.forEach(doFsSizeTVector::push_back);
-      // load the training trajectories from the csv files
-      trainingTrajectories.load_csv_trajectories(fileListStringVectorTraining, doFsSizeTVector);
-      // make all training trajectories have the same length
-      int meanLengthTraining = (int) trainingTrajectories.normalize_length();
-//      learnedProMPs.add(new ProMP(trainingTrajectories, 20)); // default 20 rbf functions seems to generalize well
    }
 
-//   public void updateTaskSpeed(String taskName, List<Pose3DReadOnly> observedFrameTrajectory){
-//      EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory);
-//      TrajectoryVector demoTrajectories = trainingTrajectories.trajectories();
-//      // infer the new speed for the ProMP based on observed (portion of) trajectory
-//      int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
-//      System.out.println("Inferred closest demo to current observation: " + (demo + 1));
-//
-//      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
-//      int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
-//      // generate ProMP mean trajectory with new time modulation
-//      PrompInfoMapper.EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
-//      PrompInfoMapper.EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
-//      System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
-//      System.out.println("Inferred timestep: " + inferredTimesteps);
-//
-//      saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
-//      saveAsCSV(stdDeviationTrajectoryModulated, "/stdDeviationModulated.csv");
-//      // update the time modulation of the ProMP object with estimated value
-//      System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
-//      myProMP.update_time_modulation((double) myProMP.get_traj_length() / inferredTimesteps);
-//      System.out.println("New ProMp timestep: " + myProMP.get_traj_length());
-//   }
-//
-//   /* transform trajectory from list of points to matrix */
-//   private EigenMatrixXd toEigenMatrix(List<Pose3DReadOnly> frameList)
-//   {
-//      EigenMatrixXd matrix = new EigenMatrixXd(frameList.size(),);
-//      for (int i=0; i<frameList.size(); i++)
-//         for (int j=0; j<matrix.cols(); j++)
-//            matrix.apply(i, j).put(row, col);
-//      return matrix;
-//   }
+   public void updateTaskSpeed(List<HashMap<String, Pose3DReadOnly>> observedFrameTrajectories){
+      EigenMatrixXd observedTrajectories = toEigenMatrix(observedFrameTrajectories);
+      TrajectoryVector demoTrajectories = trainingTrajectories.trajectories();
+      // infer what training demo is the closest to the observed trajectory
+      int demo = infer_closest_trajectory(observedTrajectories, demoTrajectories);
+      System.out.println("Inferred closest demo to current observation: " + (demo + 1));
+      // infer the new speed for the ProMP based on observed (portion of) trajectory
+      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectories, 0.25, 4.0, 30);
+      int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
+      // update the time modulation of the learned ProMPs with estimated value
+      for (ProMP proMPBodyPart : learnedProMPs.values())
+         proMPBodyPart.update_time_modulation((double) proMPBodyPart.get_traj_length() / inferredTimesteps);
+   }
+
+   /* transform trajectory from list of frameName-points to matrix */
+   private EigenMatrixXd toEigenMatrix(List<HashMap<String, Pose3DReadOnly>> frameList)
+   {
+      EigenMatrixXd matrix = new EigenMatrixXd(frameList.size(),);
+      for (int i=0; i<frameList.size(); i++)
+         for (int j=0; j<matrix.cols(); j++)
+            matrix.apply(i, j).put(frameList.get(i).);
+      return matrix;
+   }
 }
