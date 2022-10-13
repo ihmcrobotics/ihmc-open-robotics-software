@@ -25,9 +25,9 @@ public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
       velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
    }
 
-   public void setFastWalkingInputParameters(VelocityBasedSteppingParameters parameters)
+   public void setVelocitySteppingInputParameters(VelocityBasedSteppingParameters parameters)
    {
-      velocityPluginFactory.setSteppingParameters(parameters);
+      velocityPluginFactory.setInputParameters(parameters);
    }
 
    @Override

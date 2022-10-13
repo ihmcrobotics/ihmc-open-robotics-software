@@ -31,7 +31,7 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
    private final YoBoolean ignoreWalkInputProvider = new YoBoolean("ignoreWalkInputProvider" + variableNameSuffix, registry);
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
-   private final VelocityBasedSteppingParameters parameters;
+   private final YoVelocityBasedSteppingParameters inputParameters = new YoVelocityBasedSteppingParameters("FSG", registry);
 
    private final YoInteger numberOfTicksBeforeSubmittingCommands = new YoInteger("numberOfTicksBeforeSubmittingFootsteps" + variableNameSuffix, registry);
 
@@ -39,9 +39,9 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
 
    private final MutableObject<HighLevelControllerName> latestHighLevelControllerStatus = new MutableObject<>(null);
 
-   public VelocityBasedSteppingGenerator(VelocityBasedSteppingParameters inputParameters)
+   public void setInputParameters(VelocityBasedSteppingParameters parameters)
    {
-      this.parameters = inputParameters;
+      inputParameters.set(parameters);
    }
 
    @Override
@@ -80,25 +80,25 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
       if (desiredVelocityProvider.isUnitVelocity())
       {
          if (desiredVelocityX > 0)
-            desiredVelocityX = parameters.getMaxDesiredForwardVelocity() * MathTools.clamp(desiredVelocityX, 1.0);
+            desiredVelocityX = inputParameters.getMaxDesiredForwardVelocity() * MathTools.clamp(desiredVelocityX, 1.0);
          else
-            desiredVelocityX = parameters.getMaxDesiredBackwardVelocity() * MathTools.clamp(desiredVelocityX, 1.0);
+            desiredVelocityX = inputParameters.getMaxDesiredBackwardVelocity() * MathTools.clamp(desiredVelocityX, 1.0);
 
-         desiredVelocityY = parameters.getMaxDesiredLateralVelocity() * MathTools.clamp(desiredVelocityY, 1.0);
+         desiredVelocityY = inputParameters.getMaxDesiredLateralVelocity() * MathTools.clamp(desiredVelocityY, 1.0);
       }
       else
       {
-         desiredVelocityX = MathTools.clamp(desiredVelocityX, -parameters.getMaxDesiredBackwardVelocity(), parameters.getMaxDesiredForwardVelocity());
-         desiredVelocityY = MathTools.clamp(desiredVelocityY, parameters.getMaxDesiredLateralVelocity());
+         desiredVelocityX = MathTools.clamp(desiredVelocityX, -inputParameters.getMaxDesiredBackwardVelocity(), inputParameters.getMaxDesiredForwardVelocity());
+         desiredVelocityY = MathTools.clamp(desiredVelocityY, inputParameters.getMaxDesiredLateralVelocity());
       }
 
       if (desiredTurningVelocityProvider.isUnitVelocity())
       {
-         turningVelocity = parameters.getMaxDesiredTurningVelocity() * MathTools.clamp(turningVelocity, 1.0);
+         turningVelocity = inputParameters.getMaxDesiredTurningVelocity() * MathTools.clamp(turningVelocity, 1.0);
       }
       else
       {
-         turningVelocity = MathTools.clamp(turningVelocity, parameters.getMaxDesiredTurningVelocity());
+         turningVelocity = MathTools.clamp(turningVelocity, inputParameters.getMaxDesiredTurningVelocity());
       }
 
       if (walk.getValue() && directionalControlMessenger != null)

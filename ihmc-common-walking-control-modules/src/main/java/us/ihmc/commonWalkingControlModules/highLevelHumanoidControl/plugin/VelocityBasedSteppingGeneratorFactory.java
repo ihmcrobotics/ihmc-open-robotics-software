@@ -20,13 +20,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFactory
 {
    private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("registry");
-   private final RequiredFactoryField<VelocityBasedSteppingParameters> steppingParametersField = new RequiredFactoryField<>("steppingParameters");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
-
-   public void setSteppingParameters(VelocityBasedSteppingParameters parameters)
-   {
-      steppingParametersField.set(parameters);
-   }
+   private final OptionalFactoryField<VelocityBasedSteppingParameters> inputParametersField = new OptionalFactoryField<>("inputParametersField");
 
    public void setRegistry()
    {
@@ -36,6 +31,11 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
    public void setRegistry(String name)
    {
       registryField.set(new YoRegistry(name));
+   }
+
+   public void setInputParameters(VelocityBasedSteppingParameters parameters)
+   {
+      inputParametersField.set(parameters);
    }
 
    public StepGeneratorCommandInputManager setStepGeneratorCommandInputManager()
@@ -79,7 +79,7 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      VelocityBasedSteppingGenerator fastWalkingJoystickPlugin = new VelocityBasedSteppingGenerator(steppingParametersField.get());
+      VelocityBasedSteppingGenerator fastWalkingJoystickPlugin = new VelocityBasedSteppingGenerator();
 
       fastWalkingJoystickPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
 
@@ -101,6 +101,8 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
       fastWalkingJoystickPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       fastWalkingJoystickPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       fastWalkingJoystickPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+      if (inputParametersField.hasValue())
+         fastWalkingJoystickPlugin.setInputParameters(inputParametersField.get());
       walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                     commandInputManager::setHighLevelStateChangeStatusMessage);
 

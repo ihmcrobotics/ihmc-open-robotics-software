@@ -18,6 +18,7 @@ public interface SteppingPluginFactory extends HighLevelHumanoidControllerPlugin
 
    void setFootStepAdjustment(FootstepAdjustment footstepAdjustment);
 
+
    @Override
    default SteppingPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
