@@ -85,8 +85,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final double totalRobotMass;
    private final boolean computeIntegralTerm;
 
-   public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-                                         YoRegistry parentRegistry)
+   public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox, YoRegistry parentRegistry)
    {
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       centroidalMomentumHandler = toolbox.getCentroidalMomentumRateCalculator();
@@ -98,43 +97,46 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          computeIntegralTerm = true;
 
       dt = toolbox.getControlDT();
-      gains = feedbackControllerToolbox.getOrCreateCenterOfMassGains(computeIntegralTerm);
+      gains = feedbackControllerToolbox.getOrCreateCenterOfMassGains(computeIntegralTerm, true);
       YoDouble maximumRate = gains.getYoMaximumFeedbackRate();
 
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getOrCreateCenterOfMassPositionData(DESIRED, isEnabled);
-      yoCurrentPosition = feedbackControllerToolbox.getOrCreateCenterOfMassPositionData(CURRENT, isEnabled);
-      yoErrorPosition = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR, POSITION, isEnabled);
+      yoDesiredPosition = feedbackControllerToolbox.getOrCreateCenterOfMassPositionData(DESIRED, isEnabled, true);
+      yoCurrentPosition = feedbackControllerToolbox.getOrCreateCenterOfMassPositionData(CURRENT, isEnabled, true);
+      yoErrorPosition = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR, POSITION, isEnabled, false);
 
-      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR_INTEGRATED, POSITION, isEnabled)
+      yoErrorPositionIntegrated = computeIntegralTerm
+            ? feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR_INTEGRATED, POSITION, isEnabled, false)
             : null;
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_VELOCITY, isEnabled);
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_VELOCITY, isEnabled, true);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(CURRENT, LINEAR_VELOCITY, isEnabled);
-         yoErrorLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR, LINEAR_VELOCITY, isEnabled);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(CURRENT, LINEAR_VELOCITY, isEnabled, true);
+         yoErrorLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR, LINEAR_VELOCITY, isEnabled, false);
          DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(FeedbackControllerToolbox.centerOfMassName);
          if (breakFrequency != null)
             yoFilteredErrorLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassAlphaFilteredVectorData(ERROR,
                                                                                                                      LINEAR_VELOCITY,
                                                                                                                      dt,
                                                                                                                      breakFrequency,
-                                                                                                                     isEnabled);
+                                                                                                                     isEnabled,
+                                                                                                                     false);
          else
             yoFilteredErrorLinearVelocity = null;
 
-         yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_ACCELERATION, isEnabled);
-         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDFORWARD, LINEAR_ACCELERATION, isEnabled);
-         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDBACK, LINEAR_ACCELERATION, isEnabled);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_ACCELERATION, isEnabled, true);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDFORWARD, LINEAR_ACCELERATION, isEnabled, false);
+         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDBACK, LINEAR_ACCELERATION, isEnabled, false);
          rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassRateLimitedVectorData(FEEDBACK,
                                                                                                                         LINEAR_ACCELERATION,
                                                                                                                         dt,
                                                                                                                         maximumRate,
-                                                                                                                        isEnabled);
-         yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ACHIEVED, LINEAR_ACCELERATION, isEnabled);
+                                                                                                                        isEnabled,
+                                                                                                                        false);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ACHIEVED, LINEAR_ACCELERATION, isEnabled, true);
       }
       else
       {
@@ -151,13 +153,14 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDBACK, LINEAR_VELOCITY, isEnabled);
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDFORWARD, LINEAR_VELOCITY, isEnabled);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDBACK, LINEAR_VELOCITY, isEnabled, false);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(FEEDFORWARD, LINEAR_VELOCITY, isEnabled, false);
          rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassRateLimitedVectorData(FEEDBACK,
                                                                                                                     LINEAR_VELOCITY,
                                                                                                                     dt,
                                                                                                                     maximumRate,
-                                                                                                                    isEnabled);
+                                                                                                                    isEnabled,
+                                                                                                                    false);
       }
       else
       {

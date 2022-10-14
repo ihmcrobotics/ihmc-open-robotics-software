@@ -1,14 +1,10 @@
 #!/bin/bash
-# Uncomment for debugging this script
+# Immediately exit on any errors.
+set -e
+# Print commands as they are run.
 set -o xtrace
 
-# Make sure it works one way or the other to reduce possible errors
-if (( EUID == 0 )); then
-    echo "Run without sudo." 1>&2
-    exit 1
-fi
-
-sudo -u root docker run \
+docker run \
     --tty \
     --interactive \
     --rm \
@@ -17,4 +13,4 @@ sudo -u root docker run \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
-    ihmcrobotics/nvidia:0.4 bash
+    ihmcrobotics/nvidia:0.5 bash
