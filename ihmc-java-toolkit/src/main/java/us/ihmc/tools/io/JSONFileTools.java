@@ -172,9 +172,9 @@ public class JSONFileTools
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)
    {
-      FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
       {
+         FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
          ObjectNode root = objectMapper.createObjectNode();
