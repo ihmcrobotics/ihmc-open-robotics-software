@@ -61,7 +61,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -112,7 +112,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+      current_alignment += ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.getCdrSerializedSize(data.getDefaultStepConstraints(), current_alignment);
 
@@ -147,7 +147,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_7(data.getOffsetFootstepsHeightWithExecutionError());
 
-      controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.write(data.getDefaultStepConstraints(), cdr);
       cdr.write_type_7(data.getShouldCheckForReachability());
 
@@ -174,7 +174,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setOffsetFootstepsHeightWithExecutionError(cdr.read_type_7());
       	
-      controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
       controller_msgs.msg.dds.StepConstraintsListMessagePubSubType.read(data.getDefaultStepConstraints(), cdr);	
       data.setShouldCheckForReachability(cdr.read_type_7());
       	
@@ -194,7 +194,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_7("are_footsteps_adjustable", data.getAreFootstepsAdjustable());
       ser.write_type_7("offset_footsteps_with_execution_error", data.getOffsetFootstepsWithExecutionError());
       ser.write_type_7("offset_footsteps_height_with_execution_error", data.getOffsetFootstepsHeightWithExecutionError());
-      ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.write_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
       ser.write_type_a("default_step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getDefaultStepConstraints());
 
@@ -214,7 +214,7 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setAreFootstepsAdjustable(ser.read_type_7("are_footsteps_adjustable"));
       data.setOffsetFootstepsWithExecutionError(ser.read_type_7("offset_footsteps_with_execution_error"));
       data.setOffsetFootstepsHeightWithExecutionError(ser.read_type_7("offset_footsteps_height_with_execution_error"));
-      ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+      ser.read_type_a("queueing_properties", new ihmc_common_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
       ser.read_type_a("default_step_constraints", new controller_msgs.msg.dds.StepConstraintsListMessagePubSubType(), data.getDefaultStepConstraints());
 

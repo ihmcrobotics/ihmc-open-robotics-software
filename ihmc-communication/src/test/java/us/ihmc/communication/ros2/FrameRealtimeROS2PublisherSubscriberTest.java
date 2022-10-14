@@ -4,20 +4,15 @@ import java.io.IOException;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import controller_msgs.msg.dds.RobotFrameData;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Subscription;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.ros2.RealtimeROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Subscription;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 public class FrameRealtimeROS2PublisherSubscriberTest
 {

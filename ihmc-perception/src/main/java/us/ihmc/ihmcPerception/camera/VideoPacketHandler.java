@@ -1,7 +1,7 @@
 package us.ihmc.ihmcPerception.camera;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

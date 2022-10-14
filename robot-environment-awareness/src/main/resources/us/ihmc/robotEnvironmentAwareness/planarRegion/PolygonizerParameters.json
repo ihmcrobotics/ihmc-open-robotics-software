@@ -1,0 +1,10 @@
+{
+  "title" : "PolygonizerParameters",
+  "Concave hull threshold" : 0.15,
+  "Min number of nodes" : 10,
+  "Shallow angle threshold" : 0.0174533,
+  "Peak angle threshold" : 2.96706,
+  "Length threshold" : 0.05,
+  "Depth threshold" : 0.1,
+  "Cut narrow passage" : true
+}

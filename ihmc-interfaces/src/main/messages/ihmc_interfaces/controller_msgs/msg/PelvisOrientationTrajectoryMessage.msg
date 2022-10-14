@@ -14,4 +14,4 @@ bool force_execution false
 # Whether the pelvis orientation is allowed to be controlled by the user when the robot is walking.
 bool enable_user_pelvis_control_during_walking false
 # The orientation trajectory information.
-SO3TrajectoryMessage so3_trajectory
+ihmc_common_msgs/SO3TrajectoryMessage so3_trajectory

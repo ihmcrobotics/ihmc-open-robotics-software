@@ -18,7 +18,7 @@ bool force_execution
 int8 robot_side
 
 # The taskspace trajectory information.
-controller_msgs/SE3TrajectoryMessage taskspace_trajectory_message
+ihmc_common_msgs/SE3TrajectoryMessage taskspace_trajectory_message
 
 # The jointspace trajectory information.
 # The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.

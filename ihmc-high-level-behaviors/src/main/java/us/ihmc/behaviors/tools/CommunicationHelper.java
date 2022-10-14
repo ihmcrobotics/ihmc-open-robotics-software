@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools;
 
-import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;

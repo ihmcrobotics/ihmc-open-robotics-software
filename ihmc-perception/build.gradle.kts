@@ -14,6 +14,7 @@ plugins {
 ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
+   javaDirectory("slam-wrapper", "generated-java")
    configurePublications()
 }
 
@@ -22,7 +23,7 @@ mainDependencies {
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:ihmc-native-library-loader:1.3.1")
+   api("us.ihmc:ihmc-native-library-loader:2.0.1")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -77,6 +78,11 @@ javacvDependencies {
    apiBytedecoNatives("ffmpeg", "5.0-")
 }
 
+slamWrapperDependencies {
+   apiBytedecoNatives("javacpp")
+   api("us.ihmc:ihmc-java-toolkit:source")
+}
+
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
    apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
@@ -109,6 +115,12 @@ visualizersDependencies {
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+}
+
+tasks.create("generateMappings", Exec::class)
+{
+   workingDir = file("src/slam-wrapper/cpp")
+   commandLine = listOf("./generate-java-mappings-docker.sh")
 }
 
 

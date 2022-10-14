@@ -1,10 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.heightMapSnapThreshold;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {

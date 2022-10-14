@@ -3,9 +3,14 @@ package us.ihmc.quadrupedUI;
 import java.util.List;
 
 import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import perception_msgs.msg.dds.VideoPacket;
+import quadruped_msgs.msg.dds.QuadrupedBodyTrajectoryMessage;
+import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
+import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -66,7 +71,7 @@ public class QuadrupedUIMessagerAPI
    private static final TopicTheme Type = apiFactory.createTopicTheme("Type");
 
    private static final TypedTopicTheme<Boolean> Reset = apiFactory.createTypedTopicTheme("Reset");
-   private static final TypedTopicTheme<RobotConfigurationData> RobotConfigurationData = apiFactory.createTypedTopicTheme("RobotConfigurationData");
+   private static final TypedTopicTheme<controller_msgs.msg.dds.RobotConfigurationData> RobotConfigurationData = apiFactory.createTypedTopicTheme("RobotConfigurationData");
    private static final TypedTopicTheme<FullQuadrupedRobotModel> RobotModel = apiFactory.createTypedTopicTheme("RobotModel");
    private static final TypedTopicTheme<HighLevelControllerName> ControllerState = apiFactory.createTypedTopicTheme("ControllerState");
    private static final TypedTopicTheme<QuadrupedSteppingStateEnum> SteppingState = apiFactory.createTypedTopicTheme("SteppingState");

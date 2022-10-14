@@ -1,11 +1,11 @@
 package us.ihmc.gdx.ui.interactable;
 
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.ui.GDX3DPanel;
 import us.ihmc.gdx.ui.affordances.GDXInteractableFrameModel;
@@ -32,7 +32,7 @@ public class GDXInteractableRealsenseL515
 
    private void create(GDX3DPanel panel3D, ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify)
    {
-      GDXModelInstance l515SensorModel = new GDXModelInstance(GDXModelLoader.load("environmentObjects/l515Sensor/L515Sensor.g3dj"));
+      ModelData l515SensorModel = GDXModelLoader.loadModelData("environmentObjects/l515Sensor/L515Sensor.g3dj");
       interactableFrameModel.create(referenceFrameToRepresent, transformToParentToModify, panel3D, l515SensorModel, this::calculateClosestCollision);
    }
 
