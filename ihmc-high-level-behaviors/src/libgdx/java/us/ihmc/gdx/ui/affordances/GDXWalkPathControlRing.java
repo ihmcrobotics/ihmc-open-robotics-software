@@ -51,7 +51,6 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private final GDXPathControlRingGizmo footstepPlannerGoalGizmo = new GDXPathControlRingGizmo();
    private boolean selected = false;
    private boolean modified = false;
-   private boolean newlyModified = false;
    private boolean mouseRingPickSelected;
    private GDX3DPanel panel3D;
    private GDXTeleoperationParameters teleoperationParameters;
@@ -368,7 +367,6 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
    private void becomeModified()
    {
       modified = true;
-      newlyModified = true;
       walkFacingDirection.set(Axis3D.Z, 0.0);
       updateStuff();
       queueFootstepPlan();
