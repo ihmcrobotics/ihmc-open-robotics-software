@@ -1,14 +1,9 @@
 package us.ihmc.gdx.ui;
 
 import com.badlogic.gdx.graphics.Color;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
-import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -16,28 +11,19 @@ import us.ihmc.gdx.logging.PerceptionLoggerPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXBuildingConstructor;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
-import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
-import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.Activator;
-import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.RosTools;
 
 import java.net.URISyntaxException;
 
 public class PerceptionVisualizerUI
 {
    private PerceptionLoggerPanel loggerPanel;
-
-   private PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
-   private PlanarRegionsList regionsUpdate = new PlanarRegionsList();
 
    private GDXImGuiBasedUI baseUI;
    private ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
@@ -70,7 +56,7 @@ public class PerceptionVisualizerUI
             loggerPanel = new PerceptionLoggerPanel("Perception Logger");
             baseUI.getImGuiPanelManager().addPanel(loggerPanel);
 
-            globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
+            globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
 
             globalVisualizersUI.addVisualizer(new GDXROS2BigDepthVideoVisualizer("L515 Depth",
                                                                                  DomainFactory.PubSubImplementation.FAST_RTPS,
@@ -161,34 +147,6 @@ public class PerceptionVisualizerUI
             ros2Node.destroy();
          }
       });
-   }
-
-   public void regionsCallback(PlanarRegionsListMessage regions)
-   {
-      this.regionsUpdate = PlanarRegionMessageConverter.convertToPlanarRegionsList(regions);
-   }
-
-   public void setupPlanarRegionSLAM(ROS2Node ros2Node)
-   {
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MAPSENSE_REGIONS, this::regionsCallback);
-      new PeriodicPlanarRegionPublisher(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, 0.001f, () -> realsensePlanarRegionSLAM.update(regionsUpdate)).start();
-   }
-
-   public GDXHighLevelDepthSensorSimulator createOusterLidar(RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
-   {
-      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createOusterLidar(null, () -> 0L);
-      highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
-      highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
-      highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
-      return highLevelDepthSensorSimulator;
-   }
-
-   private GDXHighLevelDepthSensorSimulator createSimulatedL515(RosNodeInterface ros1Node)
-   {
-      GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator = GDXSimulatedSensorFactory.createRealsenseL515(null, () -> 0L);
-      highLevelDepthSensorSimulator.setupForROS1Depth(ros1Node, RosTools.MAPSENSE_DEPTH_IMAGE, RosTools.MAPSENSE_DEPTH_CAMERA_INFO);
-      highLevelDepthSensorSimulator.setupForROS1Color(ros1Node, RosTools.L515_VIDEO, RosTools.L515_COLOR_CAMERA_INFO);
-      return highLevelDepthSensorSimulator;
    }
 
    public static void main(String[] args) throws URISyntaxException
