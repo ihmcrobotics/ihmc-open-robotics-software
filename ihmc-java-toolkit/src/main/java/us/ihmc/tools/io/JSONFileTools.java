@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
+import static java.util.Objects.isNull;
+
 public class JSONFileTools
 {
    public static void loadWithClasspathDefault(Path settingsPath,
@@ -172,9 +174,12 @@ public class JSONFileTools
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)
    {
-      try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
+      if (!isNull(settingsPath.getParent()))
       {
          FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
+      try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
+      {
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
          ObjectNode root = objectMapper.createObjectNode();
