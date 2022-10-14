@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -123,12 +123,12 @@ public class OneWaypointSwingGenerator implements SwingGenerator
    {
       if (trajectoryType == TrajectoryType.CUSTOM && waypoints == null)
       {
-         PrintTools.warn("Received no waypoints but trajectory type is custom. Using default trajectory.");
+         LogTools.warn("Received no waypoints but trajectory type is custom. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && waypoints.size() != numberWaypoints)
       {
-         PrintTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
+         LogTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else
@@ -310,7 +310,7 @@ public class OneWaypointSwingGenerator implements SwingGenerator
 
       waypointDataToPack.setToNaN(worldFrame);
       waypointDataToPack.setTime(waypointTime);
-      waypointDataToPack.setPosition(waypointPositions.get(waypointIndex));
-      waypointDataToPack.setLinearVelocity(tempWaypointVelocity);
+      waypointDataToPack.getPosition().set(waypointPositions.get(waypointIndex));
+      waypointDataToPack.getLinearVelocity().set(tempWaypointVelocity);
    }
 }

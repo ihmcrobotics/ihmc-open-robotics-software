@@ -1,10 +1,8 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces;
 
-public interface TrajectoryPointBasics
+public interface TrajectoryPointBasics extends TrajectoryPointReadOnly
 {
-   abstract void setTime(double time);
-
-   abstract double getTime();
+   void setTime(double time);
 
    default void addTimeOffset(double timeOffsetToAdd)
    {

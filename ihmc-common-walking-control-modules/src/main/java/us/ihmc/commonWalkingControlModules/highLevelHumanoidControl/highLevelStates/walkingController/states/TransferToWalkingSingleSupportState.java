@@ -50,6 +50,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
+   // This flag indicates whether or not its the first tick in the transfer state. This is used to avoid double-computing some of the calls.
+   private boolean firstTickInState = true;
+
    public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
                                               WalkingMessageHandler walkingMessageHandler,
                                               TouchdownErrorCompensator touchdownErrorCompensator,
@@ -163,7 +166,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       RobotSide swingSide = transferToSide.getOppositeSide();
-      feetManager.updateSwingTrajectoryPreview(swingSide);
+      if (!firstTickInState)
+         feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
@@ -192,6 +196,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
          tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
          feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), tempAngularVelocity.getY(), toeOffDuration);
       }
+
+      firstTickInState = false;
    }
 
    private void updateWalkingTrajectoryPath()
@@ -210,6 +216,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void onEntry()
    {
+      firstTickInState = true;
+
       if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdForSlowTransfer.getValue())
       {
          walkingMessageHandler.peekTiming(0, footstepTimings[0]);
@@ -236,6 +244,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onExit(timeInState);
 
+      firstTickInState = true;
       balanceManager.minimizeAngularMomentumRateZ(false);
    }
 
