@@ -1,9 +1,11 @@
 package us.ihmc.promp.presets;
 
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.javacpp.annotation.*;
+import org.bytedeco.javacpp.annotation.ByRef;
+import org.bytedeco.javacpp.annotation.Name;
+import org.bytedeco.javacpp.annotation.Platform;
+import org.bytedeco.javacpp.annotation.Properties;
 import org.bytedeco.javacpp.tools.Info;
 import org.bytedeco.javacpp.tools.InfoMap;
 import org.bytedeco.javacpp.tools.InfoMapper;
@@ -30,11 +32,6 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 )
 public class ProMPInfoMapper implements InfoMapper
 {
-   static
-   {
-      Loader.checkVersion("org.bytedeco", "promp");
-   }
-
    public void map(InfoMap infoMap)
    {
       infoMap.put(new Info("promp::TrajectoryGroup::normalize_length").javaText("public native long normalize_length();"));
