@@ -1,6 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.application.Platform;
 import org.junit.jupiter.api.*;

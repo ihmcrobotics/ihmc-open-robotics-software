@@ -24,13 +24,13 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
    /**
             * Properties for queueing commands.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public DesiredAccelerationsMessage()
    {
       desired_joint_accelerations_ = new us.ihmc.idl.IDLSequence.Double (100, "type_6");
 
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
    }
 
    public DesiredAccelerationsMessage(DesiredAccelerationsMessage other)
@@ -44,7 +44,7 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
       sequence_id_ = other.sequence_id_;
 
       desired_joint_accelerations_.set(other.desired_joint_accelerations_);
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
 
    /**
@@ -75,7 +75,7 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
    /**
             * Properties for queueing commands.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }

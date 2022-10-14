@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;

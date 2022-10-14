@@ -1,6 +1,6 @@
 package us.ihmc.atlas.jfxvisualizer;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.jboss.netty.buffer.ChannelBuffer;

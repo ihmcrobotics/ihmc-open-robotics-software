@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.heightMap;
 
-import controller_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.robotics.heightMap.HeightMapData;
+import perception_msgs.msg.dds.HeightMapMessage;
 
 public class HeightMapMessageTools
 {

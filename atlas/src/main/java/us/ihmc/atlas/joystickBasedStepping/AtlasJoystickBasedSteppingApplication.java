@@ -1,6 +1,6 @@
 package us.ihmc.atlas.joystickBasedStepping;
 
-import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
+import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;

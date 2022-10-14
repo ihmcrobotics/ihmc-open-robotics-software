@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import controller_msgs.msg.dds.RobotFrameData;
+import ihmc_common_msgs.msg.dds.RobotFrameData;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
