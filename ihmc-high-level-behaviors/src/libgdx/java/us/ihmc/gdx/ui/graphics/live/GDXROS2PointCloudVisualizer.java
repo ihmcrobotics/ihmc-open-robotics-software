@@ -133,7 +133,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, pointCloudRenderer.getVertexBuffer());
+      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 7, pointCloudRenderer.getVertexBuffer());
       pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 

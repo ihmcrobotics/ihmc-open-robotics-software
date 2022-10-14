@@ -132,33 +132,35 @@ public class ROS2PointCloudProvider
    public int updateFusedPointCloudNumberOfPoints()
    {
       FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
-      decompressionInputDirectBuffer.rewind();
-      int numberOfBytes = fusedMessage.getScan().size();
-      decompressionInputDirectBuffer.limit(numberOfBytes);
-      for (int i = 0; i < numberOfBytes; i++)
+      if (fusedMessage!=null)
       {
-         decompressionInputDirectBuffer.put(fusedMessage.getScan().get(i));
+         decompressionInputDirectBuffer.rewind();
+         int numberOfBytes = fusedMessage.getScan().size();
+         decompressionInputDirectBuffer.limit(numberOfBytes);
+         for (int i = 0; i < numberOfBytes; i++)
+         {
+            decompressionInputDirectBuffer.put(fusedMessage.getScan().get(i));
+         }
+         decompressionInputDirectBuffer.flip();
+         decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
+         // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
+         lz4Decompressor.decompress(decompressionInputDirectBuffer, decompressedOpenCLIntBuffer.getBackingDirectByteBuffer());
+         decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
+
+         latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
+
+         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
+         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointsPerSegment);
+
+         parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
+         decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
+
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressedOpenCLIntBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
+         openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
+         pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
       }
-      decompressionInputDirectBuffer.flip();
-      decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
-      // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
-      lz4Decompressor.decompress(decompressionInputDirectBuffer, decompressedOpenCLIntBuffer.getBackingDirectByteBuffer());
-      decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
-
-      latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
-
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize);
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
-
-      parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-      decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
-
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressedOpenCLIntBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-      openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
-      pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 
       return totalNumberOfPoints;
    }
@@ -213,9 +215,6 @@ public class ROS2PointCloudProvider
             return latestStereoVisionMessage.getNumberOfPoints();
          };
       }
-      return xyzRGBASizeFloatBuffer->
-      {
-         return 0;
-      };
+      return xyzRGBASizeFloatBuffer-> 0;
    }
 }

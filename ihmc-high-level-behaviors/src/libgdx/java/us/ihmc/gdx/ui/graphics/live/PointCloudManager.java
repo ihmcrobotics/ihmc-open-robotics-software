@@ -25,15 +25,15 @@ public class PointCloudManager
       if (pointCloudVisualizer.isActive())
       {
          pointCloudVisualizer.update();
-         if (pointCloudProvider.hasFusedPointCloud())
-         {
+//         if (pointCloudProvider.hasFusedPointCloud())
+//         {
             pointCloudVisualizer.updateMeshFastest(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
             pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
-         }
-         else
-         {
-            pointCloudVisualizer.updateMeshFastest(pointCloudProvider.updateAndGetBufferConsumer());
-         }
+//         }
+//         else
+//         {
+//            pointCloudVisualizer.updateMeshFastest(pointCloudProvider.updateAndGetBufferConsumer());
+//         }
       }
    }
 

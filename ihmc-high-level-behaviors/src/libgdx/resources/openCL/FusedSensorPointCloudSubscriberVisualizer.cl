@@ -12,7 +12,7 @@ kernel void unpackPointCloud(global float* parameters,
    int inputIntsPerPoint = 4;
    int inputStartIndex = n * inputIntsPerPoint;
 
-   int floatsPerVertex = 8;
+   int floatsPerVertex = 7;
    int currentSegmentStart = latestSegmentIndex * pointsPerSegment * floatsPerVertex;
    int pointCloudStartIndex = currentSegmentStart + n * floatsPerVertex;
 

@@ -217,7 +217,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void updateMeshFastest()
    {
-      updateMeshFastest(getVertexBuffer().position() / 8);
+      updateMeshFastest(getVertexBuffer().position() / 7);
    }
 
    public void updateMeshFastest(int numberOfPoints)
@@ -236,7 +236,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
             floatBuffer.put(Float.NaN);
             floatBuffer.put(Float.NaN);
             floatBuffer.put(Float.NaN);
-            floatBuffer.put(1.0f);
             floatBuffer.put(1.0f);
             floatBuffer.put(1.0f);
             floatBuffer.put(1.0f);
