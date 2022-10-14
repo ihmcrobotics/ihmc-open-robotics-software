@@ -2,7 +2,6 @@ package us.ihmc.gdx.ui.graphics.live;
 
 import com.badlogic.gdx.graphics.Color;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import imgui.type.ImFloat;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
@@ -12,7 +11,6 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
-import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -215,6 +213,9 @@ public class ROS2PointCloudProvider
             return latestStereoVisionMessage.getNumberOfPoints();
          };
       }
-      return null;
+      return xyzRGBASizeFloatBuffer->
+      {
+         return 0;
+      };
    }
 }

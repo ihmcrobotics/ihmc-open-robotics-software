@@ -162,8 +162,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
             latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
 
             parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
-            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize.get());
-            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointsPerSegment);
 
             parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
             decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
@@ -183,7 +182,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
             int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
-               float size = pointSize.get();
+//               float size = pointSize.get();
                LidarPointCloudCompression.decompressPointCloud(latestLidarScanMessage.getScan(), numberOfScanPoints, (i, x, y, z) ->
                {
                   xyzRGBASizeFloatBuffer.put((float) x);
@@ -193,7 +192,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
                   xyzRGBASizeFloatBuffer.put(color.g);
                   xyzRGBASizeFloatBuffer.put(color.b);
                   xyzRGBASizeFloatBuffer.put(color.a);
-                  xyzRGBASizeFloatBuffer.put(size);
+//                  xyzRGBASizeFloatBuffer.put(size);
                });
 
                return numberOfScanPoints;
@@ -203,7 +202,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
          StereoVisionPointCloudMessage latestStereoVisionMessage = latestStereoVisionMessageReference.getAndSet(null);
          if (latestStereoVisionMessage != null)
          {
-            float size = pointSize.get();
+//            float size = pointSize.get();
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
                StereoPointCloudCompression.decompressPointCloud(latestStereoVisionMessage, (x, y, z) ->
@@ -217,7 +216,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
                      xyzRGBASizeFloatBuffer.put(color.g);
                      xyzRGBASizeFloatBuffer.put(color.b);
                      xyzRGBASizeFloatBuffer.put(color.a);
-                     xyzRGBASizeFloatBuffer.put(size);
+//                     xyzRGBASizeFloatBuffer.put(size);
                   }
                   catch (BufferOverflowException e)
                   {

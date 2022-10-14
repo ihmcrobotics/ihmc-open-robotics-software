@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
@@ -141,6 +142,7 @@ public class GDXShadowManager
       shadows.bind(textureNum);
       program.setUniformi("u_shadows", textureNum);
       program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
+      program.setUniformf("u_pointSize", 0.01f);
       program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
       program.setUniformf("u_antiAliasing", antiAliasing);
       program.setUniformf("u_ambientLight", ambientLight);

@@ -6,39 +6,39 @@ import us.ihmc.ros2.ROS2Topic;
 public class PointCloudManager
 {
    private final ROS2PointCloudProvider pointCloudProvider;
-   private final GDXROS2PointCloudVisualizer2 visualizer2;
+   private final GDXPointCloudVisualizer pointCloudVisualizer;
 
    public PointCloudManager(ROS2Node ros2Node, ROS2Topic<?> topic, String visualizerTitle, int pointsPerSegment, int numberOfSegments)
    {
       pointCloudProvider = new ROS2PointCloudProvider(ros2Node,topic, pointsPerSegment, numberOfSegments);
-      visualizer2 = new GDXROS2PointCloudVisualizer2(visualizerTitle, topic.getName(), pointsPerSegment, numberOfSegments);
+      pointCloudVisualizer = new GDXPointCloudVisualizer(visualizerTitle, topic.getName(), pointsPerSegment, numberOfSegments);
    }
 
    public void create()
    {
-      visualizer2.create();
-      pointCloudProvider.create(visualizer2.getVertexBuffer());
+      pointCloudVisualizer.create();
+      pointCloudProvider.create(pointCloudVisualizer.getVertexBuffer());
    }
 
    public void update()
    {
-      if (visualizer2.isActive())
+      if (pointCloudVisualizer.isActive())
       {
-         visualizer2.update();
+         pointCloudVisualizer.update();
          if (pointCloudProvider.hasFusedPointCloud())
          {
-            visualizer2.updateMeshFastest(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
+            pointCloudVisualizer.updateMeshFastest(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
+            pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
          }
          else
          {
-            visualizer2.updateMeshFastest(pointCloudProvider.updateAndGetBufferConsumer());
+            pointCloudVisualizer.updateMeshFastest(pointCloudProvider.updateAndGetBufferConsumer());
          }
-         visualizer2.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
       }
    }
 
-   public GDXROS2PointCloudVisualizer2 getGDXROS2PointCloudVisualizer2()
+   public GDXPointCloudVisualizer getGDXPointCloudVisualizer()
    {
-      return visualizer2;
+      return pointCloudVisualizer;
    }
 }
