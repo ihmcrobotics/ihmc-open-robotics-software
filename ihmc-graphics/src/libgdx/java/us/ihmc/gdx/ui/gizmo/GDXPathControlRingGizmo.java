@@ -76,9 +76,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private final RigidBodyTransform transformToParent;
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
-   private final RigidBodyTransform controlRingTransformToWorld = new RigidBodyTransform();
-   private final FramePose3D controlRingPose = new FramePose3D();
-   private final FramePose3D tempFramePose3D = new FramePose3D();
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private GDXFocusBasedCamera camera3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
@@ -259,7 +257,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             }
             else // yaw dragging
             {
-               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, controlRingTransformToWorld))
+               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
                {
                   tempFramePose3D.setToZero(gizmoFrame);
                   tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -337,7 +335,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       updateTransforms();
 
       GDXTools.toEuclid(camera3D.position, cameraPosition);
-      distanceToCamera = cameraPosition.distance(controlRingPose.getPosition());
+      distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
       if (lastDistanceToCamera != distanceToCamera)
       {
          lastDistanceToCamera = distanceToCamera;
@@ -356,14 +354,14 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       tempFramePose3D.changeFrame(parentReferenceFrame);
       tempFramePose3D.get(transformToParent);
       gizmoFrame.update();
-      controlRingPose.setToZero(gizmoFrame);
-      controlRingPose.changeFrame(ReferenceFrame.getWorldFrame());
-      controlRingPose.get(controlRingTransformToWorld);
-      GDXTools.toGDX(controlRingTransformToWorld, discModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(controlRingTransformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(controlRingTransformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(controlRingTransformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
+      framePose3D.setToZero(gizmoFrame);
+      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      framePose3D.get(transformToWorld);
+      GDXTools.toGDX(transformToWorld, discModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -517,7 +515,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    public Pose3DReadOnly getPose3D()
    {
-      return controlRingPose;
+      return framePose3D;
    }
 
    // TODO: Make this transform the ground truth and give the pose as needed only
