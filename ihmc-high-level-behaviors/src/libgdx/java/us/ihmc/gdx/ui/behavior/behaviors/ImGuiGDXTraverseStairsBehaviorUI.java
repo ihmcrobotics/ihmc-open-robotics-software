@@ -15,9 +15,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -102,11 +100,9 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
-                                           FootstepPlannerParameterKeys.keys,
                                            () -> helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings()));
       SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("_Stairs");
       swingPlannerParameterTuner.create(swingPlannerParameters,
-                                        SwingPlannerParameterKeys.keys,
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
    }
 
