@@ -9,9 +9,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -26,6 +24,7 @@ import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegion;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtraction;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.avatar.gpuPlanarRegions.GPURegionRing;
+import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
@@ -44,32 +43,14 @@ public class GDXGPUPlanarRegionExtractionUI
    private final ImBoolean enabled = new ImBoolean(false);
    private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
    private final SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(new SimpleGPUHeightMapParameters());
-   private final ImFloat mergeDistanceThreshold = new ImFloat();
-   private final ImFloat mergeAngularThreshold = new ImFloat();
-   private final ImFloat filterDisparityThreshold = new ImFloat();
-   private final ImInt desiredPatchSize = new ImInt();
-   private final ImInt patchSize = new ImInt(desiredPatchSize.get());
-   private final ImInt deadPixelFilterPatchSize = new ImInt();
-   private final ImFloat focalLengthXPixels = new ImFloat();
-   private final ImFloat focalLengthYPixels = new ImFloat();
-   private final ImFloat principalOffsetXPixels = new ImFloat();
-   private final ImFloat principalOffsetYPixels = new ImFloat();
-   private final ImBoolean earlyGaussianBlur = new ImBoolean();
-   private final ImBoolean useFilteredImage = new ImBoolean();
-   private final ImBoolean useSVDNormals = new ImBoolean();
-   private final ImInt svdReductionFactor = new ImInt();
-   private final ImInt gaussianSize = new ImInt();
-   private final ImFloat gaussianSigma = new ImFloat();
-   private final ImInt searchDepthLimit = new ImInt();
-   private final ImInt regionMinPatches = new ImInt();
-   private final ImInt boundaryMinPatches = new ImInt();
+   private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
+   private final ImInt appliedPatchSize = new ImInt(gpuPlanarRegionExtraction.getParameters().getPatchSize());
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
    private final ImBoolean render3DHeightMap = new ImBoolean(false);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
-   private final ImFloat regionGrowthFactor = new ImFloat();
    private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
    private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
    private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
@@ -118,6 +99,9 @@ public class GDXGPUPlanarRegionExtractionUI
       gpuPlanarRegionExtraction.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
 //      simpleGPUHeightMapUpdater.create(imageWidth, imageHeight, sourceDepthByteBufferOfFloats, fx, fy, cx, cy);
       simpleGPUHeightMapUpdater.create(imageWidth, imageHeight, gpuPlanarRegionExtraction.getFilteredDepthImage().getBackingDirectByteBuffer(), fx, fy, cx, cy);
+
+      gpuRegionParametersTuner = new ImGuiStoredPropertySetTuner(gpuPlanarRegionExtraction.getParameters().getTitle());
+      gpuRegionParametersTuner.create(gpuPlanarRegionExtraction.getParameters());
 
       setImGuiWidgetsFromParameters();
 
@@ -303,10 +287,10 @@ public class GDXGPUPlanarRegionExtractionUI
                                                         .ptr(gpuPlanarRegionExtraction.getImageHeight() - row, column).getFloat();
                      tempFramePoint.setIncludingFrame(cameraFrame, column, row, z);
                      ProjectionTools.projectDepthPixelToIHMCZUp3D(tempFramePoint,
-                                                                  principalOffsetXPixels.get(),
-                                                                  principalOffsetYPixels.get(),
-                                                                  focalLengthXPixels.get(),
-                                                                  focalLengthYPixels.get());
+                                                                  gpuPlanarRegionExtraction.getParameters().getPrincipalOffsetXPixels(),
+                                                                  gpuPlanarRegionExtraction.getParameters().getPrincipalOffsetYPixels(),
+                                                                  gpuPlanarRegionExtraction.getParameters().getFocalLengthXPixels(),
+                                                                  gpuPlanarRegionExtraction.getParameters().getFocalLengthYPixels());
                      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
                      boundaryPointCloud.putVertex(tempFramePoint);
                   }
@@ -345,30 +329,18 @@ public class GDXGPUPlanarRegionExtractionUI
       numberOfBoundaryVerticesPlot.render((float) gpuPlanarRegionExtraction.getNumberOfBoundaryPatchesInWholeImage());
       boundaryMaxSearchDepthPlot.render((float) gpuPlanarRegionExtraction.getBoundaryMaxSearchDepth());
 
-      ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
-      ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
-      ImGui.sliderFloat(labels.get("Gaussian sigma"), gaussianSigma.getData(), 0.23f, 10.0f);
-      if (ImGui.sliderInt(labels.get("Patch size"), desiredPatchSize.getData(), 2, 20))
+      boolean anyParameterChanged = gpuRegionParametersTuner.renderImGuiWidgets();
+
+      if (anyParameterChanged && gpuRegionParametersTuner.changed(GPUPlanarRegionExtractionParameters.patchSize))
       {
-         if (desiredPatchSize.get() != patchSize.get()
-          && imageWidth % desiredPatchSize.get() == 0
-          && imageHeight % desiredPatchSize.get() == 0)
+         if (gpuPlanarRegionExtraction.getParameters().getPatchSize() != appliedPatchSize.get()
+          && imageWidth % gpuPlanarRegionExtraction.getParameters().getPatchSize() == 0
+          && imageHeight % gpuPlanarRegionExtraction.getParameters().getPatchSize() == 0)
          {
-            patchSize.set(desiredPatchSize.get());
+            appliedPatchSize.set(gpuPlanarRegionExtraction.getParameters().getPatchSize());
             gpuPlanarRegionExtraction.setPatchSizeChanged(true);
          }
       }
-      ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
-      ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
-      ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
-      ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
-      ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
-      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 4000);
-      ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
-      ImGui.inputFloat(labels.get("Filter disparity threshold"), filterDisparityThreshold);
-      ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
-      ImGui.checkbox(labels.get("Use SVD normals"), useSVDNormals);
-      ImGui.sliderInt(labels.get("SVD reduction factor"), svdReductionFactor.getData(), 1, 100);
       svdDurationPlot.render((float) gpuPlanarRegionExtraction.getMaxSVDSolveTime());
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
@@ -376,10 +348,6 @@ public class GDXGPUPlanarRegionExtractionUI
       ImGui.checkbox(labels.get("Render 3D height map"), render3DHeightMap);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
-      ImGui.sliderFloat(labels.get("Focal length X (px)"), focalLengthXPixels.getData(), -1000.0f, 1000.0f);
-      ImGui.sliderFloat(labels.get("Focal length Y (px)"), focalLengthYPixels.getData(), -1000.0f, 1000.0f);
-      ImGui.sliderFloat(labels.get("Principal offset X (px)"), principalOffsetXPixels.getData(), -imageWidth, imageWidth);
-      ImGui.sliderFloat(labels.get("Principal offset Y (px)"), principalOffsetYPixels.getData(), -imageHeight, imageHeight);
 
       ImGui.sliderFloat("Edge Length Threshold", edgeLengthTresholdSlider.getData(), 0, 0.5f);
       ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 0.3f);
@@ -401,33 +369,14 @@ public class GDXGPUPlanarRegionExtractionUI
    public void setImGuiWidgetsFromParameters()
    {
       GPUPlanarRegionExtractionParameters parameters = gpuPlanarRegionExtraction.getParameters();
-      mergeDistanceThreshold.set((float) parameters.getMergeDistanceThreshold());
-      mergeAngularThreshold.set((float) parameters.getMergeAngularThreshold());
-      filterDisparityThreshold.set((float) parameters.getFilterDisparityThreshold());
-      desiredPatchSize.set(parameters.getPatchSize());
-      patchSize.set(parameters.getPatchSize());
-      deadPixelFilterPatchSize.set(parameters.getDeadPixelFilterPatchSize());
-      focalLengthXPixels.set((float) parameters.getFocalLengthXPixels());
-      focalLengthYPixels.set((float) parameters.getFocalLengthYPixels());
-      principalOffsetXPixels.set((float) parameters.getPrincipalOffsetXPixels());
-      principalOffsetYPixels.set((float) parameters.getPrincipalOffsetYPixels());
-      earlyGaussianBlur.set(parameters.getEarlyGaussianBlur());
-      useFilteredImage.set(parameters.getUseFilteredImage());
-      useSVDNormals.set(parameters.getUseSVDNormals());
-      svdReductionFactor.set(parameters.getSVDReductionFactor());
-      gaussianSize.set(parameters.getGaussianSize());
-      gaussianSigma.set((float) parameters.getGaussianSigma());
-      searchDepthLimit.set(parameters.getSearchDepthLimit());
-      regionMinPatches.set(parameters.getRegionMinPatches());
-      boundaryMinPatches.set(parameters.getBoundaryMinPatches());
-      regionGrowthFactor.set((float) parameters.getRegionGrowthFactor());
+      appliedPatchSize.set(parameters.getPatchSize());
 
       ConcaveHullFactoryParameters concaveHullFactoryParameters = gpuPlanarRegionExtraction.getConcaveHullFactoryParameters();
       edgeLengthTresholdSlider.set((float) concaveHullFactoryParameters.getEdgeLengthThreshold());
       triangulationToleranceSlider.set((float) concaveHullFactoryParameters.getTriangulationTolerance());
       maxNumberOfIterationsSlider.set(concaveHullFactoryParameters.getMaxNumberOfIterations());
-      removeAllTrianglesWithTwoBorderEdgesChecked.set(concaveHullFactoryParameters.doRemoveAllTrianglesWithTwoBorderEdges());
-      allowSplittingConcaveHullChecked.set(concaveHullFactoryParameters.isSplittingConcaveHullAllowed());
+      removeAllTrianglesWithTwoBorderEdgesChecked.set(concaveHullFactoryParameters.getRemoveAllTrianglesWithTwoBorderEdges());
+      allowSplittingConcaveHullChecked.set(concaveHullFactoryParameters.getAllowSplittingConcaveHull());
 
       PolygonizerParameters polygonizerParameters = gpuPlanarRegionExtraction.getPolygonizerParameters();
       concaveHullThresholdSlider.set((float) polygonizerParameters.getConcaveHullThreshold());
@@ -442,25 +391,7 @@ public class GDXGPUPlanarRegionExtractionUI
    private void setParametersFromImGuiWidgets()
    {
       GPUPlanarRegionExtractionParameters parameters = gpuPlanarRegionExtraction.getParameters();
-      parameters.setMergeDistanceThreshold(mergeDistanceThreshold.get());
-      parameters.setMergeAngularThreshold(mergeAngularThreshold.get());
-      parameters.setFilterDisparityThreshold(filterDisparityThreshold.get());
-      parameters.setPatchSize(patchSize.get());
-      parameters.setDeadPixelFilterPatchSize(deadPixelFilterPatchSize.get());
-      parameters.setFocalLengthXPixels(focalLengthXPixels.get());
-      parameters.setFocalLengthYPixels(focalLengthYPixels.get());
-      parameters.setPrincipalOffsetXPixels(principalOffsetXPixels.get());
-      parameters.setPrincipalOffsetYPixels(principalOffsetYPixels.get());
-      parameters.setEarlyGaussianBlur(earlyGaussianBlur.get());
-      parameters.setUseFilteredImage(useFilteredImage.get());
-      parameters.setUseSVDNormals(useSVDNormals.get());
-      parameters.setSVDReductionFactor(svdReductionFactor.get());
-      parameters.setGaussianSize(gaussianSize.get());
-      parameters.setGaussianSigma(gaussianSigma.get());
-      parameters.setSearchDepthLimit(searchDepthLimit.get());
-      parameters.setRegionMinPatches(regionMinPatches.get());
-      parameters.setBoundaryMinPatches(boundaryMinPatches.get());
-      parameters.setRegionGrowthFactor(regionGrowthFactor.get());
+      parameters.setPatchSize(appliedPatchSize.get());
 
       ConcaveHullFactoryParameters concaveHullFactoryParameters = gpuPlanarRegionExtraction.getConcaveHullFactoryParameters();
       concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());

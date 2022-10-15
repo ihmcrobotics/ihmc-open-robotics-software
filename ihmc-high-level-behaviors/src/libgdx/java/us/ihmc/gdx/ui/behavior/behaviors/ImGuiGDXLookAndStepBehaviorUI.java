@@ -15,9 +15,7 @@ import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -141,17 +139,15 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    {
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
-                                       LookAndStepBehaviorParameters.keys,
                                        () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
       stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
-                                           FootstepPlannerParameterKeys.keys,
                                            () -> helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings()));
 
       SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
-      swingPlannerParameterTuner.create(swingPlannerParameters, SwingPlannerParameterKeys.keys,
+      swingPlannerParameterTuner.create(swingPlannerParameters,
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
