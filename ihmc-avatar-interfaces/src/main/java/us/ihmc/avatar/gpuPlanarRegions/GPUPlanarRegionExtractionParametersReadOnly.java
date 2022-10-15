@@ -4,6 +4,10 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
 
+/**
+ * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+ * and run the main in super to regenerate.
+ */
 public interface GPUPlanarRegionExtractionParametersReadOnly extends StoredPropertySetReadOnly
 {
    default double getMergeDistanceThreshold()

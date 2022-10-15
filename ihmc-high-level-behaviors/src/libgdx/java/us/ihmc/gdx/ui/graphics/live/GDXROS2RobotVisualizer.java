@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXFocusBasedCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -37,6 +36,11 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private String chestName;
 
+   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   {
+      this(null, robotModel, syncedRobot, () -> null);
+   }
+
    public GDXROS2RobotVisualizer(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
       this(baseUI, robotModel, syncedRobot, () -> null);
@@ -63,7 +67,8 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
    public void create()
    {
       super.create();
-      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
+      if (baseUI != null)
+         baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());

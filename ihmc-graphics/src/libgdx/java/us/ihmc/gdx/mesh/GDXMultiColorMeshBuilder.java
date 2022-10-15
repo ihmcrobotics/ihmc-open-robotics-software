@@ -94,6 +94,22 @@ public class GDXMultiColorMeshBuilder
    }
 
    /**
+    * Add a box to this builder.
+    *
+    * @param lx     box length along the x-axis.
+    * @param ly     box length along the y-axis.
+    * @param lz     box length along the z-axis.
+    * @param offset coordinate of the box center. Not modified.
+    * @param orientation axis-angle describing the box orientation with respect to world. Not
+    *                    modified.
+    * @param color  color of the box. Color accuracy depends on the color palette in use.
+    */
+   public void addBox(float lx, float ly, float lz, Tuple3DReadOnly offset, Orientation3DReadOnly orientation, Color color)
+   {
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), offset, orientation, color);
+   }
+
+   /**
     * Add a cone to this builder. Its axis is aligned with the z-axis and its top is the vertex with
     * the highest z value in its local coordinate system.
     *

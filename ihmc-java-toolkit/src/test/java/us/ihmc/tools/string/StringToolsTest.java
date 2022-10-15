@@ -32,4 +32,21 @@ public class StringToolsTest
       uppercaseLetters = StringTools.getEveryUppercaseLetter(string);
       assertTrue(uppercaseLetters.equals("DDFHHHDSRTRDFHNUYFRYJJ"));
    }
+
+   @Test
+   public void testCasingMethods()
+   {
+      assertEquals("snake", StringTools.titleToSnakeCase("Snake"));
+      assertEquals("snake_case", StringTools.titleToSnakeCase("Snake Case"));
+      assertEquals("snake_case_blep", StringTools.titleToSnakeCase("snake case BLEP"));
+      assertEquals("sfu_ai2_1_!!", StringTools.titleToSnakeCase("     sfu ai2 1    !!"));
+      assertEquals("kebab", StringTools.titleToKebabCase("Kebab"));
+      assertEquals("kebab-case", StringTools.titleToKebabCase("Kebab Case"));
+      assertEquals("hellokebab-case", StringTools.titleToKebabCase("HELLOKebab Case"));
+      assertEquals("hello-kebab-case", StringTools.titleToKebabCase(" HELLO Kebab Case"));
+      assertEquals("MeepMan", StringTools.titleToPascalCase("meep man"));
+      assertEquals("meepMan", StringTools.titleToCamelCase("meep man"));
+      assertEquals("camelCase", StringTools.titleToCamelCase("Camel case"));
+      assertEquals("gpuPlanarRegions", StringTools.titleToCamelCase("GPU planar regions"));
+   }
 }

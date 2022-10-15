@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -259,8 +258,8 @@ public class SwingTrajectoryCalculator
       double liftOffVelocity = swingTrajectoryParameters.getMinLiftOffVerticalVelocity() / (Math.min(1.0, swingDuration.getDoubleValue()));
       initialLinearVelocity.setZ(Math.max(liftOffVelocity, initialLinearVelocity.getZ()));
 
-      initialLinearVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
-      initialAngularVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
+      initialLinearVelocity.clipToMaxNorm(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      initialAngularVelocity.clipToMaxNorm(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
@@ -402,10 +401,10 @@ public class SwingTrajectoryCalculator
       {
          // In this case our swing trajectory contains the touchdown so we should use those values to be continuous.
          FrameSE3TrajectoryPoint lastPoint = swingWaypoints.getLast();
-         lastPoint.getPositionIncludingFrame(finalPosition);
-         lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
-         lastPoint.getOrientationIncludingFrame(finalOrientation);
-         lastPoint.getAngularVelocity(finalAngularVelocity);
+         finalPosition.setIncludingFrame(lastPoint.getPosition());
+         finalLinearVelocity.setIncludingFrame(lastPoint.getLinearVelocity());
+         finalOrientation.setIncludingFrame(lastPoint.getOrientation());
+         finalAngularVelocity.set(lastPoint.getAngularVelocity());
       }
    }
 
