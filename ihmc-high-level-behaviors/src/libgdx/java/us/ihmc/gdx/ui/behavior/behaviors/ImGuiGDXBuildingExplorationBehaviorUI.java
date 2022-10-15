@@ -62,7 +62,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
    public void create(GDXImGuiBasedUI baseUI)
    {
       parameters = new BuildingExplorationBehaviorParameters();
-      parameterTuner.create(parameters, BuildingExplorationBehaviorParameters.keys, () -> helper.publish(Parameters, parameters.getAllAsStrings()));
+      parameterTuner.create(parameters, () -> helper.publish(Parameters, parameters.getAllAsStrings()));
       goalAffordance.create(goalPose ->
       {
          helper.publish(Goal, goalPose);
