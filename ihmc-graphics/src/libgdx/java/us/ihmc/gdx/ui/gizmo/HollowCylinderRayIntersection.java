@@ -19,7 +19,7 @@ public class HollowCylinderRayIntersection
    private final Point3D closestCollisionPoint = new Point3D();
    private double innerRadius;
 
-   public void setup(double length, double outerRadius, double innerRadius, double zOffset, RigidBodyTransformReadOnly transform)
+   public void update(double length, double outerRadius, double innerRadius, double zOffset, RigidBodyTransformReadOnly transform)
    {
       this.innerRadius = innerRadius;
       cylinder.setToZero();
