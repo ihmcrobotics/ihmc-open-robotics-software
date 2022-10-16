@@ -1,5 +1,6 @@
 package us.ihmc.gdx.perception;
 
+import boofcv.struct.image.Planar;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
@@ -28,8 +30,13 @@ import java.util.List;
 
 public class GDXPlanarRegionSLAMDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final String path = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/0000.txt";
+   private final GDXPlanarRegionsGraphic graphic = new GDXPlanarRegionsGraphic();
+
    private Activator nativesLoadedActivator;
+   private PlanarRegionsList regions;
+
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    public GDXPlanarRegionSLAMDemo()
    {
@@ -41,18 +48,28 @@ public class GDXPlanarRegionSLAMDemo
          {
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
+            regions = loadRegions(path);
+
+            graphic.generateMeshes(regions);
+            graphic.update();
+
+            baseUI.getPrimaryScene().addRenderableProvider(graphic);
+
             baseUI.create();
          }
 
          @Override
          public void render()
          {
-            super.render();
+            baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
          }
 
          @Override
          public void dispose()
          {
+            baseUI.dispose();
+            graphic.destroy();
             super.dispose();
          }
       });
@@ -148,7 +165,7 @@ public class GDXPlanarRegionSLAMDemo
       return listToReturn;
    }
 
-   public static void main(String[] args)
+   public PlanarRegionsList loadRegions(String path)
    {
       PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
@@ -160,15 +177,16 @@ public class GDXPlanarRegionSLAMDemo
       concaveHullFactoryParameters.setMaxNumberOfIterations(5000);
       concaveHullFactoryParameters.setTriangulationTolerance(0.0);
 
-      String path = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/0000.txt";
       PlanarRegionsList regions = loadMapsensePlanarRegionsFromFile(new File(path), polygonizerParameters, concaveHullFactoryParameters);
 
-      for(PlanarRegion region : regions.getPlanarRegionsAsList())
+      for (PlanarRegion region : regions.getPlanarRegionsAsList())
          LogTools.info("Regions: {}", region.getConcaveHullSize());
+
+      return regions;
    }
 
-   //public static void main(String[] args)
-   //{
-   //   new GDXPlanarRegionSLAMDemo();
-   //}
+   public static void main(String[] args)
+   {
+      new GDXPlanarRegionSLAMDemo();
+   }
 }
