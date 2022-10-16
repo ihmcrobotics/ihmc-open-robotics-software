@@ -38,7 +38,7 @@ public class GDXInteractableRealsenseL515
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
    {
-      cylinderIntersection.setup(0.028, 0.031, offset, Axis3D.X, interactableFrameModel.getReferenceFrame());
+      cylinderIntersection.update(0.028, 0.031, offset, Axis3D.X, interactableFrameModel.getReferenceFrame());
       return cylinderIntersection.intersect(mousePickRay);
    }
 

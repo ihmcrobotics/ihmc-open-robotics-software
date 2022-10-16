@@ -374,8 +374,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       closestCollisionSelection = -1;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
-                                       controlRingTransformToWorld);
+      hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
+                                        controlRingTransformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
@@ -386,11 +386,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       }
       if (showArrows)
       {
-         positiveXArrowIntersection.setup(arrowWidth.get(),
-                                          arrowHeight.get(),
-                                          discThickness.get(),
-                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
-                                          new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
+         positiveXArrowIntersection.update(arrowWidth.get(),
+                                           arrowHeight.get(),
+                                           discThickness.get(),
+                                           new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
+                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -399,11 +399,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             closestCollisionSelection = 1;
             closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
          }
-         positiveYArrowIntersection.setup(arrowWidth.get(),
-                                          arrowHeight.get(),
-                                          discThickness.get(),
-                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
-                                          new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
+         positiveYArrowIntersection.update(arrowWidth.get(),
+                                           arrowHeight.get(),
+                                           discThickness.get(),
+                                           new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
+                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
