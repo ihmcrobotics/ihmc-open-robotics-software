@@ -123,7 +123,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
 
                   simpleGPUHeightMapParameters = new SimpleGPUHeightMapParameters();
                   ImGuiStoredPropertySetTuner heightMapParameterTuner = new ImGuiStoredPropertySetTuner("Height Map Parameters");
-                  heightMapParameterTuner.create(simpleGPUHeightMapParameters, SimpleGPUHeightMapParameters.keys, () -> { });
+                  heightMapParameterTuner.create(simpleGPUHeightMapParameters, () -> { });
                   baseUI.getImGuiPanelManager().addPanel(heightMapParameterTuner);
                   simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(simpleGPUHeightMapParameters);
                   simpleGPUHeightMapUpdater.create(ouster.getLowLevelSimulator().getImageWidth(),

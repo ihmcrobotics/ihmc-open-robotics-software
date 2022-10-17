@@ -4,6 +4,10 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters.*;
 
+/**
+ * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+ * and run the main in super to regenerate.
+ */
 public interface ConcaveHullFactoryParametersReadOnly extends StoredPropertySetReadOnly
 {
    default double getEdgeLengthThreshold()
@@ -11,12 +15,12 @@ public interface ConcaveHullFactoryParametersReadOnly extends StoredPropertySetR
       return get(edgeLengthThreshold);
    }
 
-   default boolean doRemoveAllTrianglesWithTwoBorderEdges()
+   default boolean getRemoveAllTrianglesWithTwoBorderEdges()
    {
       return get(removeAllTrianglesWithTwoBorderEdges);
    }
 
-   default boolean isSplittingConcaveHullAllowed()
+   default boolean getAllowSplittingConcaveHull()
    {
       return get(allowSplittingConcaveHull);
    }
