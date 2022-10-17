@@ -15,31 +15,8 @@ public class FFMPEGVideoPlaybackManager
    private long previousBaseUnitsTimestamp;
    private boolean isPaused = true;
    private boolean treatAsStream;
-   private final Runnable playbackRunnable = new Runnable()
-   {
-      final Throttler throttler = new Throttler();
-
-      @Override
-      public void run()
-      {
-         double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
-
-         while (!isPaused)
-         {
-            long returnCode = file.getNextFrame();
-
-            if (returnCode == -1) //EOF
-            {
-               isPaused = true;
-               break;
-            }
-
-            previousBaseUnitsTimestamp = returnCode;
-
-            throttler.waitAndRun(period);
-         }
-      }
-   };
+   private final Throttler throttler = new Throttler();
+   private final Runnable playbackThreadRunnable = this::playbackThread;
    private Thread currentPlaybackThread;
 
    public FFMPEGVideoPlaybackManager(String file)
@@ -70,9 +47,29 @@ public class FFMPEGVideoPlaybackManager
       if (!isPaused)
          return;
 
-      currentPlaybackThread = ThreadTools.startAThread(playbackRunnable, "Video playback");
+      currentPlaybackThread = ThreadTools.startAThread(playbackThreadRunnable, "Video playback");
 
       isPaused = false;
+   }
+
+   private void playbackThread()
+   {
+      double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
+
+      while (!isPaused)
+      {
+         long returnCode = file.getNextFrame();
+
+         if (returnCode == -1) //EOF
+         {
+            isPaused = true;
+            break;
+         }
+
+         previousBaseUnitsTimestamp = returnCode;
+
+         throttler.waitAndRun(period);
+      }
    }
 
    public void pause()
