@@ -14,6 +14,7 @@ public class FFMPEGVideoPlaybackManager
    private final AVRational timeBase;
    private long previousBaseUnitsTimestamp;
    private boolean isPaused = true;
+   private boolean treatAsStream;
    private final Runnable playbackRunnable = new Runnable()
    {
       final Throttler throttler = new Throttler();
@@ -47,6 +48,8 @@ public class FFMPEGVideoPlaybackManager
       timeBase = this.file.getTimeBase();
 
       image = new BytedecoImage(getWidth(), getHeight(), opencv_core.CV_8UC4, this.file.getFrameDataBuffer());
+
+      treatAsStream = this.file.getDuration() < 0;
    }
 
    public void seek(long milliseconds)
@@ -87,6 +90,10 @@ public class FFMPEGVideoPlaybackManager
       {
          LogTools.error(ex);
       }
+   }
+
+   public boolean hasDuration() {
+      return !treatAsStream;
    }
 
    public long getVideoDurationInMillis()

@@ -123,25 +123,28 @@ public class GDXFFMPEGPlaybackDemo
 
             if (video != null)
             {
-               //FFMPEG freaks out of you seek to the end but there isn't a great way to fix that
-               if (ImGui.sliderInt("##videoProgress", location.getData(), 0, (int) (video.getVideoDurationInMillis())))
+               if (video.hasDuration())
                {
-                  isScrubbing = true;
-                  wasPausedBeforeScrub = video.isPaused();
-                  video.pause();
-               }
-               else
-               {
-                  if (isScrubbing)
+                  //FFMPEG freaks out of you seek to the end but there isn't a great way to fix that
+                  if (ImGui.sliderInt("##videoProgress", location.getData(), 0, (int) (video.getVideoDurationInMillis())))
                   {
-                     video.seek(location.get());
-                     if (!wasPausedBeforeScrub)
-                        video.play();
-
-                     isScrubbing = false;
+                     isScrubbing = true;
+                     wasPausedBeforeScrub = video.isPaused();
+                     video.pause();
                   }
                   else
-                     location.set((int) video.getCurrentTimestampInMillis());
+                  {
+                     if (isScrubbing)
+                     {
+                        video.seek(location.get());
+                        if (!wasPausedBeforeScrub)
+                           video.play();
+
+                        isScrubbing = false;
+                     }
+                     else
+                        location.set((int) video.getCurrentTimestampInMillis());
+                  }
                }
 
                if (ImGui.button("Play"))
@@ -149,15 +152,19 @@ public class GDXFFMPEGPlaybackDemo
                ImGui.sameLine();
                if (ImGui.button("Pause"))
                   video.pause();
-               ImGui.sameLine();
-               ImGui.text(video.getCurrentTimestampInMillis() / 1000 + "s of " + video.getVideoDurationInMillis() / 1000 + 's');
 
-               ImGui.inputInt("##SeekBox", manualSeekLocation);
-               ImGui.sameLine();
-               if (ImGui.button("Seek"))
+               if (video.hasDuration())
                {
-                  location.set(manualSeekLocation.get());
-                  video.seek(location.get());
+                  ImGui.sameLine();
+                  ImGui.text(video.getCurrentTimestampInMillis() / 1000 + "s of " + video.getVideoDurationInMillis() / 1000 + 's');
+
+                  ImGui.inputInt("##SeekBox", manualSeekLocation);
+                  ImGui.sameLine();
+                  if (ImGui.button("Seek"))
+                  {
+                     location.set(manualSeekLocation.get());
+                     video.seek(location.get());
+                  }
                }
             }
          }
