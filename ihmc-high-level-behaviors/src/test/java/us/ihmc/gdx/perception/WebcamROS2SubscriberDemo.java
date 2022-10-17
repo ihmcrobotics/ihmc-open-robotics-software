@@ -12,12 +12,14 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
+import us.ihmc.gdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.gdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.gdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Activator;
@@ -36,6 +38,8 @@ public class WebcamROS2SubscriberDemo
 //   private ImGuiVideoPanel videoPanel;
    private GDXCVImagePanel cvImagePanel;
    private final ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
+   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Network transmission duration");
+   private final ImPlotStopwatchPlot decodeDurationPlot = new ImPlotStopwatchPlot("Decode duration");
    private final ImPlotFrequencyPlot transferFrequencyPlot = new ImPlotFrequencyPlot("Transfer frequency");
    private final ImPlotFrequencyPlot uiUpdateFrequencyPlot = new ImPlotFrequencyPlot("UI update frequency");
    private final ImPlotStopwatchPlot copyBytesDurationPlot = new ImPlotStopwatchPlot("Copy bytes duration");
@@ -147,6 +151,9 @@ public class WebcamROS2SubscriberDemo
                {
                   synchronized (syncObject)
                   {
+                     delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(),
+                                                                 videoPacket.getAcquisitionTimeAdditionalNanos()));
+
                      IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
                      imageEncodedTByteArrayList.toArray(messageDataHeapArray);
                      messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
@@ -157,7 +164,10 @@ public class WebcamROS2SubscriberDemo
                   }
 
                   // imdecode takes the longest by far out of all this stuff
+                  decodeDurationPlot.start();
                   opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+                  decodeDurationPlot.stop();
+
                   opencv_imgproc.cvtColor(inputYUVI420Mat, cvImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
                }
 
@@ -182,9 +192,11 @@ public class WebcamROS2SubscriberDemo
       {
          ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
          receiveFrequencyPlot.renderImGuiWidgets();
-         transferFrequencyPlot.renderImGuiWidgets();
-         copyBytesDurationPlot.renderImGuiWidgets();
-         uiUpdateFrequencyPlot.renderImGuiWidgets();
+         delayPlot.renderImGuiWidgets();
+         decodeDurationPlot.renderImGuiWidgets();
+//         transferFrequencyPlot.renderImGuiWidgets();
+//         copyBytesDurationPlot.renderImGuiWidgets();
+//         uiUpdateFrequencyPlot.renderImGuiWidgets();
       }
    }
 

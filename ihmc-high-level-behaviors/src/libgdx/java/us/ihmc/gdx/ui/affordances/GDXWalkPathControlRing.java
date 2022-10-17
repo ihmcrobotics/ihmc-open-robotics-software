@@ -320,6 +320,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerRequest.setStartFootPoses(leftStanceFootPose, rightStanceFootPose);
       footstepPlannerRequest.setGoalFootPoses(leftGoalFootPose, rightGoalFootPose);
       footstepPlannerRequest.setAssumeFlatGround(true);
+      footstepPlannerRequest.setSnapGoalSteps(false);
       footstepPlannerRequest.setRequestId(footstepPlannerId.getAndIncrement());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
       footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());

@@ -288,7 +288,7 @@ public class GDXFocusBasedCamera extends Camera
    {
       if (inputEnabled)
       {
-         float tpf = Gdx.app.getGraphics().getDeltaTime();
+         float deltaTime = Gdx.app.getGraphics().getDeltaTime();
 
          if (libGDXInputMode)
          {
@@ -303,46 +303,58 @@ public class GDXFocusBasedCamera extends Camera
          }
 
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+         boolean shiftHeld = ImGui.getIO().getKeyShift();
          if(ctrlHeld)
          {
+            double zoomAmount = 5.0 * deltaTime;
+            double orbitAmount = 500.0 * deltaTime;
+            if (shiftHeld)
+            {
+               zoomAmount *= 0.2;
+               orbitAmount *= 0.2;
+            }
+
             if (isEPressed)
-               zoom -= 0.1;
+               zoom -= zoomAmount;
             if (isCPressed)
-               zoom += 0.1;
+               zoom += zoomAmount;
             if (isAPressed)
-               longitude += longitudeSpeed * 2.0;
+               longitude += longitudeSpeed * orbitAmount;
             if (isDPressed)
-               longitude -= longitudeSpeed * 2.0;
+               longitude -= longitudeSpeed * orbitAmount;
             if (isSPressed)
-               latitude += latitudeSpeed * 2.0;
+               latitude += latitudeSpeed * orbitAmount;
             if (isWPressed)
-               latitude -= latitudeSpeed * 2.0;
+               latitude -= latitudeSpeed * orbitAmount;
          }
          else
          {
+            double translateAmount = translateSpeedFactor * zoom * deltaTime;
+            if (shiftHeld)
+               translateAmount *= 0.2;
             if (isWPressed)
             {
-               focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+               focusPointPose.appendTranslation(translateAmount, 0.0, 0.0);
             }
             if (isSPressed)
             {
-               focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+               focusPointPose.appendTranslation(-translateAmount, 0.0, 0.0);
             }
             if (isAPressed)
             {
-               focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
+               focusPointPose.appendTranslation(0.0, translateAmount, 0.0);
             }
             if (isDPressed)
             {
-               focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
+               focusPointPose.appendTranslation(0.0, -translateAmount, 0.0);
             }
             if (isQPressed)
             {
-               focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
+               focusPointPose.appendTranslation(0.0, 0.0, translateAmount);
             }
             if (isZPressed)
             {
-               focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
+               focusPointPose.appendTranslation(0.0, 0.0, -translateAmount);
             }
          }
          updateCameraPose();
@@ -392,11 +404,6 @@ public class GDXFocusBasedCamera extends Camera
    public void dispose()
    {
       focusPointModel.dispose();
-   }
-
-   private double getTranslateSpeedFactor()
-   {
-      return translateSpeedFactor * zoom;
    }
 
    public ReferenceFrame getCameraFrame()
