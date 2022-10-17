@@ -16,8 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Consumer;
 
-import static java.util.Objects.isNull;
-
 public class JSONFileTools
 {
    public static void loadWithClasspathDefault(Path settingsPath,
