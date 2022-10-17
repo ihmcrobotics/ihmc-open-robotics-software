@@ -37,6 +37,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -267,7 +268,7 @@ public class GDXTools
       gdxRotationMatrix.val[Matrix4.M22] = (float) euclidRotationMatrix.getM22();
    }
 
-   public static void toGDX(us.ihmc.euclid.tuple4D.Quaternion euclidQuaternion, Quaternion gdxQuaternion)
+   public static void toGDX(QuaternionReadOnly euclidQuaternion, Quaternion gdxQuaternion)
    {
       gdxQuaternion.x = euclidQuaternion.getX32();
       gdxQuaternion.y = euclidQuaternion.getY32();

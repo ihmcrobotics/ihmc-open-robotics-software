@@ -10,15 +10,15 @@ public class DiscreteArrowRayIntersection
    private final DiscreteConeRayIntersection coneRayIntersection = new DiscreteConeRayIntersection();
    private final Point3D intersection = new Point3D();
 
-   public void setupShapes(double arrowBodyLength,
-                           double arrowBodyRadius,
-                           double arrowHeadRadius,
-                           double arrowHeadLength,
-                           double zOffset,
-                           RigidBodyTransformReadOnly transform)
+   public void update(double arrowBodyLength,
+                      double arrowBodyRadius,
+                      double arrowHeadRadius,
+                      double arrowHeadLength,
+                      double zOffset,
+                      RigidBodyTransformReadOnly transform)
    {
-      cylinderIntersection.setup(arrowBodyLength, arrowBodyRadius, zOffset, transform);
-      coneRayIntersection.setupCone(arrowHeadRadius, arrowHeadLength, zOffset + Math.signum(zOffset) * 0.5 * arrowBodyLength, transform);
+      cylinderIntersection.update(arrowBodyLength, arrowBodyRadius, zOffset, transform);
+      coneRayIntersection.update(arrowHeadRadius, arrowHeadLength, zOffset + Math.signum(zOffset) * 0.5 * arrowBodyLength, transform);
    }
 
    public double intersect(Line3DReadOnly pickRay, int resolution, boolean collideArrowHead)
