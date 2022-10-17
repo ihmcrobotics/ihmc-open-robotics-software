@@ -17,7 +17,7 @@ import us.ihmc.tools.thread.Activator;
 import java.nio.ByteOrder;
 import java.util.Random;
 
-public class GDXFFMPEGvp9LoggingDemo
+public class GDXFFMPEGMP4LoggingDemo
 {
    public static final int WIDTH = 256;
    public static final int HEIGHT = 256;
@@ -29,9 +29,9 @@ public class GDXFFMPEGvp9LoggingDemo
    private BytedecoImage image;
    private final boolean lossless = true;
    private final int framerate = 30;
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + ".webm",
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + ".mp4",
                                                                                             avutil.AV_PIX_FMT_RGBA,
-                                                                                            lossless ? avutil.AV_PIX_FMT_GBRP : avutil.AV_PIX_FMT_YUV420P,
+                                                                                            avutil.AV_PIX_FMT_YUV420P,
                                                                                             lossless,
                                                                                             framerate,
                                                                                             400000);
@@ -39,7 +39,7 @@ public class GDXFFMPEGvp9LoggingDemo
    final byte[] data = new byte[4];
    int index = 0;
 
-   public GDXFFMPEGvp9LoggingDemo()
+   public GDXFFMPEGMP4LoggingDemo()
    {
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -119,6 +119,6 @@ public class GDXFFMPEGvp9LoggingDemo
 
    public static void main(String[] args)
    {
-      new GDXFFMPEGvp9LoggingDemo();
+      new GDXFFMPEGMP4LoggingDemo();
    }
 }
