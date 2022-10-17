@@ -1,12 +1,13 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameEuclideanWaypoint;
-import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -52,39 +53,15 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    }
 
    @Override
-   public FramePoint3DReadOnly getPosition()
+   public FixedFramePoint3DBasics getPosition()
    {
       return euclideanWaypoint.getPosition();
    }
 
    @Override
-   public void setPosition(double x, double y, double z)
-   {
-      euclideanWaypoint.setPosition(x, y, z);
-   }
-
-   @Override
-   public FrameVector3DReadOnly getLinearVelocity()
+   public FixedFrameVector3DBasics getLinearVelocity()
    {
       return euclideanWaypoint.getLinearVelocity();
-   }
-
-   @Override
-   public void setLinearVelocity(double x, double y, double z)
-   {
-      euclideanWaypoint.setLinearVelocity(x, y, z);
-   }
-
-   @Override
-   public void applyTransform(Transform transform)
-   {
-      euclideanWaypoint.applyTransform(transform);
-   }
-
-   @Override
-   public void applyInverseTransform(Transform transform)
-   {
-      euclideanWaypoint.applyInverseTransform(transform);
    }
 
    @Override
@@ -122,9 +99,25 @@ public class YoFrameEuclideanTrajectoryPoint implements FrameEuclideanTrajectory
    }
 
    @Override
+   public int hashCode()
+   {
+      return EuclidHashCodeTools.toIntHashCode(getTime(), getPosition(), getLinearVelocity());
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+         return true;
+      else if (object instanceof FrameEuclideanTrajectoryPointReadOnly)
+         return equals((FrameEuclideanTrajectoryPointReadOnly) object);
+      else
+         return false;
+   }
+
+   @Override
    public String toString()
    {
-      return "Euclidean trajectory point: (time = " + WaypointToStringTools.formatTime(getTime()) + ", "
-            + WaypointToStringTools.waypointToString(euclideanWaypoint) + ")";
+      return toString(EuclidCoreIOTools.DEFAULT_FORMAT);
    }
 }

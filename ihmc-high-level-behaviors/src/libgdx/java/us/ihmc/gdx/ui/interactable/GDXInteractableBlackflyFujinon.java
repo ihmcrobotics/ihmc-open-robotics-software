@@ -109,7 +109,7 @@ public class GDXInteractableBlackflyFujinon
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
    {
-      cylinderIntersection.setup(0.08, 0.03, new Point3D(-0.03, 0.0, 0.0), Axis3D.X, interactableFrameModel.getReferenceFrame());
+      cylinderIntersection.update(0.08, 0.03, new Point3D(-0.03, 0.0, 0.0), Axis3D.X, interactableFrameModel.getReferenceFrame());
       return cylinderIntersection.intersect(mousePickRay);
    }
 

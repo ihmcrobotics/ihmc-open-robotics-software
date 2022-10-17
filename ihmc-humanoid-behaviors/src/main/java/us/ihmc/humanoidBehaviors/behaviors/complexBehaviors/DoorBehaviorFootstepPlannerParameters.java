@@ -27,13 +27,11 @@ public class DoorBehaviorFootstepPlannerParameters extends StoredPropertySet imp
    /** Use this to update and fix the INI file */
    public static void main(String[] args)
    {
-      new DoorBehaviorFootstepPlannerParameters();
-
-//      StoredPropertySet storedPropertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-//                                                                  DoorBehaviorFootstepPlannerParameters.class,
-//                                                                  PROJECT_NAME,
-//                                                                  PATH_TO_RESOURCES);
-//      storedPropertySet.loadUnsafe();
-//      storedPropertySet.save();
+      StoredPropertySet storedPropertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
+                                                                  DoorBehaviorFootstepPlannerParameters.class,
+                                                                  PROJECT_NAME,
+                                                                  PATH_TO_RESOURCES);
+      storedPropertySet.loadUnsafe();
+      storedPropertySet.save();
    }
 }

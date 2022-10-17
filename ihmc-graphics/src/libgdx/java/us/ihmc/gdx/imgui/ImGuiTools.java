@@ -349,6 +349,11 @@ public class ImGuiTools
       return box;
    }
 
+   public static float getUsableWindowWidth()
+   {
+      return ImGui.getWindowWidth() - 32.0f;
+   }
+
    private static void initializeUserMappedKeys()
    {
       spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
