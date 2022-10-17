@@ -34,14 +34,14 @@ public class StoredPropertySetTest
       StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
       storedPropertySet.load();
 
-      assertFalse(storedPropertySet.get(keyOne));
+      assertEquals(false, storedPropertySet.get(keyOne));
       assertEquals(0.1, storedPropertySet.get(keyTwo));
       assertEquals(5, storedPropertySet.get(keyThree));
 
       storedPropertySet.updateBackingSaveFile("Version2");
       storedPropertySet.load();
 
-      assertTrue(storedPropertySet.get(keyOne));
+      assertEquals(true, storedPropertySet.get(keyOne));
       assertEquals(4.3, storedPropertySet.get(keyTwo));
       assertEquals(1, storedPropertySet.get(keyThree));
 
@@ -52,7 +52,7 @@ public class StoredPropertySetTest
       storedPropertySet.save();
       storedPropertySet.load();
 
-      assertFalse(storedPropertySet.get(keyOne));
+      assertEquals(false, storedPropertySet.get(keyOne));
       assertEquals(0.4, storedPropertySet.get(keyTwo));
       assertEquals(27, storedPropertySet.get(keyThree));
    }
