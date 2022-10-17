@@ -1,6 +1,7 @@
 package us.ihmc.tools.property;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.log.LogTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -100,5 +101,53 @@ public class StoredPropertySetTest
       storedPropertySet2.load();
 
       assertFalse(storedPropertySet.equals(storedPropertySet2));
+   }
+
+   @Test
+   public void testLoadingStoredPropertySetGeneratorTest()
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+   }
+
+   @Test
+   public void testToFromString()
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.toString());
+      boolean originalBoolean = storedPropertySetTestParameters.getTheFirstBooleanProperty();
+      LogTools.info(originalBoolean);
+      double originalDouble = storedPropertySetTestParameters.getTheFirstDoubleProperty();
+      LogTools.info(originalDouble);
+      int originalInteger = storedPropertySetTestParameters.getTheFirstIntegerProperty();
+      LogTools.info(originalInteger);
+      storedPropertySetTestParameters.setFromColonCommaString(storedPropertySetTestParameters.toString());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      assertEquals(originalBoolean, storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      assertEquals(originalDouble, storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      assertEquals(originalInteger, storedPropertySetTestParameters.getTheFirstIntegerProperty());
+   }
+
+   public static void main(String[] args)
+   {
+      StoredPropertySetTestParameters storedPropertySetTestParameters = new StoredPropertySetTestParameters();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      storedPropertySetTestParameters.load();
+      LogTools.info(storedPropertySetTestParameters.getTheFirstBooleanProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstDoubleProperty());
+      LogTools.info(storedPropertySetTestParameters.getTheFirstIntegerProperty());
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.load();
+      storedPropertySetTestParameters.save();
+      storedPropertySetTestParameters.save();
    }
 }
