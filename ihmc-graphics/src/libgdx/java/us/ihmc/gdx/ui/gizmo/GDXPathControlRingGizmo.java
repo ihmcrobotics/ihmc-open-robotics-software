@@ -68,15 +68,15 @@ public class GDXPathControlRingGizmo implements RenderableProvider
    private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final BoxRayIntersection negativeXArrowIntersection = new BoxRayIntersection();
    private final BoxRayIntersection negativeYArrowIntersection = new BoxRayIntersection();
-   private final FramePose3D framePose3D = new FramePose3D();
-   private final FramePose3D tempFramePose3D = new FramePose3D();
    /**
     * The main, source, true, base transform that this thing represents.
     */
    private final RigidBodyTransform transformToParent;
    private ReferenceFrame parentReferenceFrame;
    private ReferenceFrame gizmoFrame;
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform controlRingTransformToWorld = new RigidBodyTransform();
+   private final FramePose3D controlRingPose = new FramePose3D();
+   private final FramePose3D tempFramePose3D = new FramePose3D();
    private GDXFocusBasedCamera camera3D;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform transformFromKeyboardTransformationToWorld = new RigidBodyTransform();
@@ -257,7 +257,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             }
             else // yaw dragging
             {
-               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transformToWorld))
+               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, controlRingPose))
                {
                   tempFramePose3D.setToZero(gizmoFrame);
                   tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -335,7 +335,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       updateTransforms();
 
       GDXTools.toEuclid(camera3D.position, cameraPosition);
-      distanceToCamera = cameraPosition.distance(framePose3D.getPosition());
+      distanceToCamera = cameraPosition.distance(controlRingPose.getPosition());
       if (lastDistanceToCamera != distanceToCamera)
       {
          lastDistanceToCamera = distanceToCamera;
@@ -354,14 +354,14 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       tempFramePose3D.changeFrame(parentReferenceFrame);
       tempFramePose3D.get(transformToParent);
       gizmoFrame.update();
-      framePose3D.setToZero(gizmoFrame);
-      framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-      framePose3D.get(transformToWorld);
-      GDXTools.toGDX(transformToWorld, discModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(transformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
+      controlRingPose.setToZero(gizmoFrame);
+      controlRingPose.changeFrame(ReferenceFrame.getWorldFrame());
+      controlRingPose.get(controlRingTransformToWorld);
+      GDXTools.toGDX(controlRingTransformToWorld, discModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(controlRingTransformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(controlRingTransformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(controlRingTransformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -374,7 +374,8 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       closestCollisionSelection = -1;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0, transformToWorld);
+      hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
+                                        controlRingTransformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
@@ -385,12 +386,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
       }
       if (showArrows)
       {
-         positiveXArrowIntersection.setup(arrowWidth.get(),
-                                          arrowHeight.get(),
-                                          discThickness.get(),
-                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
-                                          new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                          transformToWorld);
+         positiveXArrowIntersection.update(arrowWidth.get(),
+                                           arrowHeight.get(),
+                                           discThickness.get(),
+                                           new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
+                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -399,12 +399,11 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             closestCollisionSelection = 1;
             closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
          }
-         positiveYArrowIntersection.setup(arrowWidth.get(),
-                                          arrowHeight.get(),
-                                          discThickness.get(),
-                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
-                                          new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
-                                          transformToWorld);
+         positiveYArrowIntersection.update(arrowWidth.get(),
+                                           arrowHeight.get(),
+                                           discThickness.get(),
+                                           new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
+                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
@@ -414,7 +413,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
          }
          temporaryTailTransform.set(xArrowTailTransform);
-         transformToWorld.transform(temporaryTailTransform);
+         controlRingTransformToWorld.transform(temporaryTailTransform);
          boolean intersects = negativeXArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
                                                                    arrowTailLengthRatio.get() * arrowHeight.get(),
                                                                    discThickness.get(),
@@ -429,7 +428,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
             closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
          }
          temporaryTailTransform.set(yArrowTailTransform);
-         transformToWorld.transform(temporaryTailTransform);
+         controlRingTransformToWorld.transform(temporaryTailTransform);
          intersects = negativeYArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
                                                            arrowTailLengthRatio.get() * arrowHeight.get(),
                                                            discThickness.get(),
@@ -515,7 +514,7 @@ public class GDXPathControlRingGizmo implements RenderableProvider
 
    public Pose3DReadOnly getPose3D()
    {
-      return framePose3D;
+      return controlRingPose;
    }
 
    // TODO: Make this transform the ground truth and give the pose as needed only
