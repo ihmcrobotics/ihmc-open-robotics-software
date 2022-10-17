@@ -21,9 +21,14 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.HDF5Manager;
 import us.ihmc.perception.HDF5Tools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.sessionVisualizer.jfx.managers.BackgroundExecutorManager;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
@@ -40,13 +45,8 @@ public class PerceptionDataLogger
    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
    private final HDF5Manager h5;
 
-   private final BigVideoPacket videoPacket = new BigVideoPacket();
-   private final SampleInfo depthSampleInfo = new SampleInfo();
-
-   private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
-   private final SampleInfo ousterSampleInfo = new SampleInfo();
-
    private final ROS2Node ros2Node;
+   private final RealtimeROS2Node realtimeROS2Node;
 
    private final byte[] messageDataHeapArray = new byte[25000000];
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
@@ -55,8 +55,16 @@ public class PerceptionDataLogger
    private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
 
    private int pointCloudCount = 0;
+   private int depthMapCount = 0;
 
+   private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
    private LidarScanMessage lidarScanMessage = new LidarScanMessage();
+
+   private final BigVideoPacket videoPacket = new BigVideoPacket();
+   private final BigVideoPacket depthVideoPacket = new BigVideoPacket();
+
+   private final SampleInfo ousterSampleInfo = new SampleInfo();
+   private final SampleInfo depthSampleInfo = new SampleInfo();
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                   getClass(),
@@ -83,27 +91,39 @@ public class PerceptionDataLogger
          h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
       }
 
-      ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "logger");
+      // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
+      ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_logger_node");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
 
+      // Add callback for Ouster scans
       new IHMCROS2Callback<>(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN.withType(LidarScanMessage.class), this::logLidarScanMessage);
+
+      // Add callback for Robot Configuration Data
       new IHMCROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
-//      new ROS2Callback<>()
 
-//      "D435 Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420
+      // Add callback for L515 Depth maps
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.L515_DEPTH, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+      {
+            depthVideoPacket.getData().resetQuick();
+            subscriber.takeNextData(depthVideoPacket, depthSampleInfo);
+            logDepthMap(depthVideoPacket);
+      });
 
-      //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH.withType(BigVideoPacket.class), this::logDepthMap);
+      realtimeROS2Node.spin();
+
+      //      "D435 Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420
+
       //      new ROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), this::logBigVideoPacket);
       //      new IHMCROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
       //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
       //      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
-
 
       executorService.scheduleAtFixedRate(this::collectStatistics, 0, 10, TimeUnit.MILLISECONDS);
    }
 
    public void collectStatistics()
    {
-      LogTools.info("Collecting Statistics");
+//      LogTools.info("Collecting Statistics");
    }
 
    public void logRobotConfigurationData(RobotConfigurationData data)
@@ -128,9 +148,7 @@ public class PerceptionDataLogger
    public void logDepthMap(BigVideoPacket packet)
    {
       LogTools.info("Depth Map Received.");
-      //      convertBigVideoPacketToMat(videoPacket, depthMap);
-      //      HDF5Tools.storeDepthMap(h5.getGroup("/chest_l515/depth/image_rect_raw/"), depthMessageCounter, depthMap);
-      //      depthMessageCounter += 1;
+      storeDepthMap("/chest_l515/depth/image_compressed/", packet);
    }
 
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
@@ -165,6 +183,27 @@ public class PerceptionDataLogger
       opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
 
       HDF5Tools.storeCompressedImage(h5.getGroup("/ihmc/logger/camera/"), compressedImageCounter, jpegImageBytePointer);
+   }
+
+   public void storeDepthMap(String namespace, BigVideoPacket message)
+   {
+      Group group = h5.getGroup(namespace);
+      executor.executeInBackground(() ->
+                                   {
+                                      synchronized (this)
+                                      {
+                                         LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
+                                         depthMapCount = (int) h5.getCount(namespace);
+
+                                         IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
+                                         imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+//                                         messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
+//                                         messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
+
+                                         HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, message.getData().size());
+                                         LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
+                                      }
+                                   });
    }
 
    public void storePointCloud(String namespace, LidarScanMessage message)
