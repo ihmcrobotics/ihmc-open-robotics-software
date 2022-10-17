@@ -29,7 +29,7 @@ public class GDXFFMPEGOpenH264LoggingDemo
    private BytedecoImage image;
    private final boolean lossless = true;
    private final int framerate = 30;
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper("FFMPEGLoggingDemo.h264",
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + ".h264",
                                                                                             avutil.AV_PIX_FMT_RGBA,
                                                                                             avutil.AV_PIX_FMT_YUV420P,
                                                                                             lossless,
