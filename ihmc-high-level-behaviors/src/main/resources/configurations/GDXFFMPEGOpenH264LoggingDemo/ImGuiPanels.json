@@ -1,7 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "3D View" : true,
+    "3D View" : false,
     "Image" : true,
     "Sample Image" : true,
     "VR Settings" : false,
