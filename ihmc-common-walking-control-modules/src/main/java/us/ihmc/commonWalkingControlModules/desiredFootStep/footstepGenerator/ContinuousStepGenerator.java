@@ -38,6 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -45,6 +46,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -146,6 +148,9 @@ public class ContinuousStepGenerator implements Updatable
    private List<FootstepAdjustment> footstepAdjustments = new ArrayList<>();
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
+
+   private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
+   private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
@@ -298,6 +303,9 @@ public class ContinuousStepGenerator implements Updatable
          double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
          turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
       }
+
+      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
+      this.desiredTurningVelocity.set(turningVelocity);
 
       for (int i = footsteps.size(); i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
@@ -461,9 +469,7 @@ public class ContinuousStepGenerator implements Updatable
     */
    public void setYoComponentProviders()
    {
-      DoubleParameter desiredTurningVelocity = new DoubleParameter("desiredTurningVelocity" + variableNameSuffix, registry, 0.0);
-      YoFrameVector2D desiredVelocity = new YoFrameVector2D("desiredVelocity" + variableNameSuffix, worldFrame, registry);
-      setDesiredTurningVelocityProvider(() -> desiredTurningVelocity.getValue());
+      setDesiredTurningVelocityProvider(desiredTurningVelocity::getValue);
       setDesiredVelocityProvider(() -> desiredVelocity);
    }
 

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -9,6 +11,9 @@ import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
 {
@@ -21,8 +26,8 @@ public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
       this.csgPluginFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
       this.velocityPluginFactory = new VelocityBasedSteppingGeneratorFactory();
 
-      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
-      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
+//      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
+//      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
    }
 
    public void setVelocitySteppingInputParameters(VelocityBasedSteppingParameters parameters)
@@ -70,7 +75,24 @@ public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
                                                                                            contactableFeet,
                                                                                            timeProvider);
 
-      JoystickBasedSteppingPlugin joystickBasedSteppingPlugin = new JoystickBasedSteppingPlugin(csgFootstepGenerator, fastWalkingPlugin);
+      csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
+      csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
+      csgFootstepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+
+      fastWalkingPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
+      fastWalkingPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
+      fastWalkingPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+
+      walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
+                                                                    commandInputManager::setHighLevelStateChangeStatusMessage);
+
+      List<Updatable> updatables = new ArrayList<>();
+      updatables.add(commandInputManager);
+
+      //this is probably not the way the class was intended to be modified.
+      commandInputManager.setCSG(csgFootstepGenerator.getContinuousStepGenerator());
+
+      JoystickBasedSteppingPlugin joystickBasedSteppingPlugin = new JoystickBasedSteppingPlugin(csgFootstepGenerator, fastWalkingPlugin, updatables);
       joystickBasedSteppingPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
 
       return joystickBasedSteppingPlugin;

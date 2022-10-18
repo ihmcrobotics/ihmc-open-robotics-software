@@ -2,16 +2,21 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.List;
 
 public class VelocityBasedSteppingGenerator implements SteppingPlugin
 {
@@ -32,11 +37,21 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
    private final YoVelocityBasedSteppingParameters inputParameters = new YoVelocityBasedSteppingParameters("FSG", registry);
 
+   private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
+   private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
+
    private final YoInteger numberOfTicksBeforeSubmittingCommands = new YoInteger("numberOfTicksBeforeSubmittingFootsteps" + variableNameSuffix, registry);
 
    private BooleanProvider walkInputProvider;
 
    private final MutableObject<HighLevelControllerName> latestHighLevelControllerStatus = new MutableObject<>(null);
+
+   private final List<Updatable> updatables;
+
+   public VelocityBasedSteppingGenerator(List<Updatable> updatables)
+   {
+      this.updatables = updatables;
+   }
 
    public void setInputParameters(VelocityBasedSteppingParameters parameters)
    {
@@ -54,6 +69,11 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
    @Override
    public void update(double time)
    {
+      for (int i = 0; i < updatables.size(); i++)
+      {
+         updatables.get(i).update(time);
+      }
+
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
 
@@ -108,6 +128,9 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
       {
          turningVelocity = MathTools.clamp(turningVelocity, inputParameters.getMaxDesiredTurningVelocity());
       }
+
+      this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
+      this.desiredTurningVelocity.set(turningVelocity);
 
       if (walk.getValue() && directionalControlMessenger != null)
       {
