@@ -5,15 +5,17 @@ import imgui.type.ImInt;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.perception.PlanarRegionRegistration;
 
-public class PlanarRegionSLAMPanel extends ImGuiPanel
+public class PlanarRegionRegistrationPanel extends ImGuiPanel
 {
    private ImInt index = new ImInt();
 
    private PlanarRegionRegistration planarRegionRegistration;
 
-   public PlanarRegionSLAMPanel(String panelName)
+   public PlanarRegionRegistrationPanel(String panelName, PlanarRegionRegistration icp)
    {
       super(panelName);
+      setRenderMethod(this::renderImGuiWidgets);
+      planarRegionRegistration = icp;
    }
 
    public void renderImGuiWidgets()
@@ -24,11 +26,5 @@ public class PlanarRegionSLAMPanel extends ImGuiPanel
          planarRegionRegistration.update();
       }
    }
-
-   public void setModule(PlanarRegionRegistration icp)
-   {
-      planarRegionRegistration = icp;
-   }
-
 
 }
