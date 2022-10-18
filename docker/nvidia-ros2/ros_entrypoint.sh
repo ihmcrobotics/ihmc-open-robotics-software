@@ -1,11 +1,10 @@
 #!/bin/bash
 # Immediately exit on any errors.
 set -e
-# Print commands as they are run.
-set -o xtrace
 
 # Setup the ROS environment.
 source "/opt/ros/$ROS_DISTRO/setup.bash"
+source colcon_ws/install/setup.bash
 
 # Takes any command line arguments passed to ros_entrypoint.sh and execs them as a command.
 # The intention is basically "Do everything in this .sh script, then in the same shell
