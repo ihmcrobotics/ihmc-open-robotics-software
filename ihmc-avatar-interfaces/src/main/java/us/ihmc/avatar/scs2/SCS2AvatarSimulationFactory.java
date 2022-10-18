@@ -43,6 +43,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.SteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.VelocityBasedSteppingGeneratorFactory;
 import us.ihmc.communication.ROS2Tools;
@@ -394,16 +395,16 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
       SteppingPluginFactory steppingFactory;
-      if (useHeadingAndVelocityScript.hasValue() || headingAndVelocityEvaluationScriptParameters.hasValue())
+      boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
+      HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParameters.hasValue() ?
+            headingAndVelocityEvaluationScriptParameters.get() : null;
+      if (useHeadingAndVelocityScript || parameters != null)
       {
          ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
          componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-         if (useHeadingAndVelocityScript.hasValue())
-            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript.get());
-         else
-            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
-         if (headingAndVelocityEvaluationScriptParameters.hasValue())
-            componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
+         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
+         if (parameters != null)
+            componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
          if (heightMapForFootstepZ.hasValue())
             componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
 
@@ -411,7 +412,7 @@ public class SCS2AvatarSimulationFactory
       }
       else
       {
-         VelocityBasedSteppingGeneratorFactory velocityBasedSteppingGeneratorFactory = new VelocityBasedSteppingGeneratorFactory();
+         JoystickBasedSteppingPluginFactory velocityBasedSteppingGeneratorFactory = new JoystickBasedSteppingPluginFactory();
          if (heightMapForFootstepZ.hasValue())
             velocityBasedSteppingGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
 
@@ -881,5 +882,10 @@ public class SCS2AvatarSimulationFactory
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
+   }
+
+   public AvatarStepGeneratorThread getStepGeneratorThread()
+   {
+      return stepGeneratorThread;
    }
 }

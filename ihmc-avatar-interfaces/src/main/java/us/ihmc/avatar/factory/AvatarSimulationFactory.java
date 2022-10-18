@@ -25,8 +25,8 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.SteppingPluginFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.VelocityBasedSteppingGeneratorFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -312,12 +312,14 @@ public class AvatarSimulationFactory
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       SteppingPluginFactory steppingFactory;
-      if (useHeadingAndVelocityScript.hasValue() || headingAndVelocityEvaluationScriptParameters.hasValue())
+      boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
+
+      if (useHeadingAndVelocityScript || headingAndVelocityEvaluationScriptParameters.hasValue())
       {
          ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
          componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-         if (useHeadingAndVelocityScript.hasValue())
-            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript.get());
+         if (useHeadingAndVelocityScript)
+            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
          else
             componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
          if (headingAndVelocityEvaluationScriptParameters.hasValue())
@@ -329,7 +331,7 @@ public class AvatarSimulationFactory
       }
       else
       {
-         VelocityBasedSteppingGeneratorFactory velocityBasedSteppingGeneratorFactory = new VelocityBasedSteppingGeneratorFactory();
+         JoystickBasedSteppingPluginFactory velocityBasedSteppingGeneratorFactory = new JoystickBasedSteppingPluginFactory();
          if (footstepAdjustment.hasValue())
             velocityBasedSteppingGeneratorFactory.setFootStepAdjustment(footstepAdjustment.get());
 

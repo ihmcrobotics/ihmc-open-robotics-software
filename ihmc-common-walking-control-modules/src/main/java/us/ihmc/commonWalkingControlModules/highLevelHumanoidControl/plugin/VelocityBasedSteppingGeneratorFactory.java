@@ -1,13 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import controller_msgs.msg.dds.DirectionalControlInputMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DirectionalControlMessenger;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StartWalkingMessenger;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -101,10 +106,31 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
       fastWalkingJoystickPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       fastWalkingJoystickPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       fastWalkingJoystickPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
-      if (inputParametersField.hasValue())
-         fastWalkingJoystickPlugin.setInputParameters(inputParametersField.get());
       walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                     commandInputManager::setHighLevelStateChangeStatusMessage);
+
+      fastWalkingJoystickPlugin.setStopWalkingMessenger(new StopWalkingMessenger()
+      {
+         private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+
+         @Override
+         public void submitStopWalkingRequest()
+         {
+            walkingCommandInputManager.submitMessage(message);
+         }
+      });
+      fastWalkingJoystickPlugin.setStartWalkingMessenger(new StartWalkingMessenger()
+      {
+         private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(false);
+
+         @Override
+         public void submitStartWalkingRequest()
+         {
+            walkingCommandInputManager.submitMessage(message);
+         }
+      });
+      if (inputParametersField.hasValue())
+         fastWalkingJoystickPlugin.setInputParameters(inputParametersField.get());
 
       FactoryTools.disposeFactory(this);
 
