@@ -7,10 +7,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGenerator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.SteppingPlugin;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.SteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -47,7 +44,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final YoBoolean runCSG = new YoBoolean("RunCSG", csgRegistry);
 
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
-   private final CommandInputManager csgCommandInputManager;
+   private final StepGeneratorCommandInputManager csgCommandInputManager;
 
    public AvatarStepGeneratorThread(SteppingPluginFactory pluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
@@ -71,7 +68,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
-      csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager().getCommandInputManager();
+      csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,
@@ -146,13 +143,13 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    {
       if (csgCommandInputManager != null)
       {
-         if (csgCommandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+         if (csgCommandInputManager.getCommandInputManager().isNewCommandAvailable(PlanarRegionsListCommand.class))
          {
-            PlanarRegionsListCommand commands = csgCommandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
+            PlanarRegionsListCommand commands = csgCommandInputManager.getCommandInputManager().pollNewestCommand(PlanarRegionsListCommand.class);
             planarRegionFootstepSnapper.setPlanarRegions(commands);
          }
 
-         csgCommandInputManager.clearCommands(PlanarRegionsListCommand.class);
+         csgCommandInputManager.getCommandInputManager().clearCommands(PlanarRegionsListCommand.class);
       }
    }
 
@@ -179,4 +176,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       return humanoidRobotContextData;
    }
 
+   public StepGeneratorCommandInputManager getCsgCommandInputManager()
+   {
+      return csgCommandInputManager;
+   }
 }

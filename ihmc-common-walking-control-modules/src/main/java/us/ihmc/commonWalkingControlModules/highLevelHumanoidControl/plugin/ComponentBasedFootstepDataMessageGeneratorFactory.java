@@ -123,13 +123,11 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Steppi
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
       {
          private final PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
-         private final FootstepDataListMessage emptyFootstepMessage = new FootstepDataListMessage();
 
          @Override
          public void submitStopWalkingRequest()
          {
             walkingCommandInputManager.submitMessage(message);
-            walkingCommandInputManager.submitMessage(emptyFootstepMessage);
          }
       });
       continuousStepGenerator.setStartWalkingMessenger(new StartWalkingMessenger()

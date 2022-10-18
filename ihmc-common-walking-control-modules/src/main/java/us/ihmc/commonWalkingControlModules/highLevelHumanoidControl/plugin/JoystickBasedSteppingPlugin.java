@@ -32,7 +32,7 @@ public class JoystickBasedSteppingPlugin implements SteppingPlugin
    @Override
    public void update(double time)
    {
-      if (latestHighLevelControllerStatus.getValue() != HighLevelControllerName.CUSTOM1 || latestHighLevelControllerStatus.getValue() != HighLevelControllerName.WALKING)
+      if (latestHighLevelControllerStatus.getValue() != HighLevelControllerName.CUSTOM1 && latestHighLevelControllerStatus.getValue() != HighLevelControllerName.WALKING)
          return;
 
       stepGenerator.update(time);

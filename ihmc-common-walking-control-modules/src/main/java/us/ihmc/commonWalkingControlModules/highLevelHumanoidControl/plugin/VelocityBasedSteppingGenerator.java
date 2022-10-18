@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.apache.commons.lang3.mutable.MutableObject;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DirectionalControlMessenger;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -23,6 +20,8 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private DirectionalControlMessenger directionalControlMessenger;
+   private StopWalkingMessenger stopWalkingMessenger;
+   private StartWalkingMessenger startWalkingMessenger;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -63,8 +62,17 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
 
       if (!walk.getValue())
       {
+         if (stopWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
+         {
+            stopWalkingMessenger.submitStopWalkingRequest();
+         }
+
          walkPreviousValue.set(false);
          return;
+      }
+      else if (startWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
+      {
+         startWalkingMessenger.submitStartWalkingRequest();
       }
 
       if (walk.getValue() != walkPreviousValue.getValue())
@@ -113,6 +121,8 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
             counter++;
          }
       }
+
+      walkPreviousValue.set(walk.getBooleanValue());
    }
 
    @Override
@@ -149,6 +159,26 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
    {
       this.desiredVelocityProvider = desiredVelocityProvider;
+   }
+
+   /**
+    * Sets the protocol for stop walking requests to the controller.
+    *
+    * @param stopWalkingMessenger the callback used to send requests.
+    */
+   public void setStopWalkingMessenger(StopWalkingMessenger stopWalkingMessenger)
+   {
+      this.stopWalkingMessenger = stopWalkingMessenger;
+   }
+
+   /**
+    * Sets the protocol for start walking requests to the controller.
+    *
+    * @param startWalkingMessenger the callback used to send requests.
+    */
+   public void setStartWalkingMessenger(StartWalkingMessenger startWalkingMessenger)
+   {
+      this.startWalkingMessenger = startWalkingMessenger;
    }
 
    /**
