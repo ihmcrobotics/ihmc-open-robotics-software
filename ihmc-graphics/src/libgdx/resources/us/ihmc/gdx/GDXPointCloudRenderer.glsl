@@ -3,13 +3,13 @@
 
 layout(location = 0) in vec3 a_position;
 layout(location = 1) in vec4 a_color;
+layout(location = 2) in float a_size;
 
 out vec4 v_color;
 
 uniform mat4 u_viewTrans;
 uniform mat4 u_projTrans;
 uniform float u_screenWidth;
-uniform float u_pointSize;
 uniform sampler2D u_diffuseTexture;
 uniform int u_multiColor;
 
@@ -31,7 +31,7 @@ void main()
 	// In VR, this value should be 0 but isn't for either the right or left eyes. Smoking gun. Not sure yet. TODO: Fix
 	float shouldBeZeroButIsntSometimes = u_screenWidth * projectedSpriteCornerZero.x / projectedSpriteCornerZero.w;
 
-	vec4 projectedSpriteCorner = u_projTrans * vec4(u_pointSize, u_pointSize, pointInCameraFrame.z, pointInCameraFrame.w);
+	vec4 projectedSpriteCorner = u_projTrans * vec4(a_size, a_size, pointInCameraFrame.z, pointInCameraFrame.w);
 	float projectedSize = u_screenWidth * projectedSpriteCorner.x / projectedSpriteCorner.w;
 	if (shouldBeZeroButIsntSometimes >= 0.0)
 	{

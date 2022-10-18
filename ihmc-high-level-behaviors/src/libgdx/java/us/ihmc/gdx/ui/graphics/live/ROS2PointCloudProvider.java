@@ -76,7 +76,7 @@ public class ROS2PointCloudProvider
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 7, vertexBuffer);
+      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, vertexBuffer);
       pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
@@ -150,7 +150,8 @@ public class ROS2PointCloudProvider
          latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
 
          parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
-         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointsPerSegment);
+         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize);
+         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
 
          parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
          decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);

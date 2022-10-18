@@ -23,14 +23,18 @@ public class GDXPointCloudRenderer implements RenderableProvider
 {
    private Renderable renderable;
    private float[] vertices;
-   private static float pointSize = 0.01f;
 
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
                                                                                               3,
                                                                                               ShaderProgram.POSITION_ATTRIBUTE),
                                                                           new VertexAttribute(VertexAttributes.Usage.ColorUnpacked,
                                                                                               4,
-                                                                                              ShaderProgram.COLOR_ATTRIBUTE));
+                                                                                              ShaderProgram.COLOR_ATTRIBUTE),
+                                                                          new VertexAttribute(VertexAttributes.Usage.Generic,
+                                                                                              1,
+                                                                                              GL41.GL_FLOAT,
+                                                                                              false,
+                                                                                              "a_size"));
    private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
    private final GDXUniform screenWidthUniform = GDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
    {
@@ -40,11 +44,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final GDXUniform multiColorUniform = GDXUniform.createGlobalUniform("u_multiColor", (shader, inputID, renderable, combinedAttributes) ->
    {
       shader.set(inputID, multiColor);
-   });
-
-   private final GDXUniform pointSizeUniform = GDXUniform.createGlobalUniform("u_pointSize", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, pointSize);
    });
 
    private RecyclingArrayList<Point3D32> pointsToRender;
@@ -95,7 +94,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
       shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
       shader.registerUniform(screenWidthUniform);
       shader.registerUniform(multiColorUniform);
-      shader.registerUniform(pointSizeUniform);
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
    }
@@ -217,7 +215,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void updateMeshFastest()
    {
-      updateMeshFastest(getVertexBuffer().position() / 7);
+      updateMeshFastest(getVertexBuffer().position() / 8);
    }
 
    public void updateMeshFastest(int numberOfPoints)

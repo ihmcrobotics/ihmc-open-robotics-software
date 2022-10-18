@@ -24,11 +24,8 @@ public class PointCloudManager
    {
       if (pointCloudVisualizer.isActive())
       {
-         pointCloudVisualizer.update();
-//         if (pointCloudProvider.hasFusedPointCloud())
-//         {
-            pointCloudVisualizer.updateMeshFastest(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
-            pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
+         pointCloudVisualizer.setTotalNumberOfPoints(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
+         pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
 //         }
 //         else
 //         {

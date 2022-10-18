@@ -25,7 +25,7 @@ public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer implements Rende
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final int pointsPerSegment;
    private final int numberOfSegments;
-   private final int totalNumberOfPoints;
+   private int totalNumberOfPoints;
    private final Color color = new Color();
    private final String topicName;
    private int latestSegmentIndex;
@@ -46,13 +46,14 @@ public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer implements Rende
       pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
    }
 
-//   @Override
-//   public void update()
-//   {
-//      super.update();
-//   }
+   @Override
+   public void update()
+   {
+      super.update();
+      updateMeshFastest();
+   }
 
-   public void updateMeshFastest(int totalNumberOfPoints)
+   public void updateMeshFastest()
    {
       pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
    }
@@ -90,5 +91,10 @@ public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer implements Rende
    public void setLatestSegmentIndex(int latestSegmentIndex)
    {
       this.latestSegmentIndex = latestSegmentIndex;
+   }
+
+   public void setTotalNumberOfPoints(int totalNumberOfPoints)
+   {
+      this.totalNumberOfPoints = totalNumberOfPoints;
    }
 }
