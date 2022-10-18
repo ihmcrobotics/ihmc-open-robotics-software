@@ -91,8 +91,6 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 
       VelocityBasedSteppingPlugin fastWalkingJoystickPlugin = new VelocityBasedSteppingPlugin(updatables);
 
-      fastWalkingJoystickPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
-
       fastWalkingJoystickPlugin.setDirectionalControlMessenger(new DirectionalControlMessenger()
       {
          private final DirectionalControlInputMessage message = new DirectionalControlInputMessage();

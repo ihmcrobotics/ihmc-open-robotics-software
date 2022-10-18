@@ -72,10 +72,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * should be done <b>every step</b> via {@link #notifyFootstepStarted()} and
  * {@link #notifyFootstepCompleted(RobotSide)}, or
  * {@link #consumeFootstepStatus(FootstepStatusMessage)}.
- * <li><u>This generator also needs to be informed of the current state of the high level controller:</u><br>
- * The can be handle automatically by setting it up with
- * {@link #setHighLevelStateChangeStatusListener(StatusMessageOutputManager)}. Otherwise, the notifications
- * should be done <b>every state change</b> via {@link #consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage)}.
  * <li><u>Protocol for submitting footsteps to the controller:</u><br>
  * This can be done via {@link #setFootstepMessenger(FootstepMessenger)}.
  * <li><u>Protocol to obtain the desired forward/lateral velocity and desired turning
@@ -157,7 +153,6 @@ public class ContinuousStepGenerator implements Updatable
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
-   private final MutableObject<HighLevelControllerName> latestHighLevelControllerStatus = new MutableObject<>(null);
    private final MutableObject<FootstepStatus> latestStatusReceived = new MutableObject<>(null);
    private final MutableObject<RobotSide> footstepCompletionSide = new MutableObject<>(null);
 
@@ -207,9 +202,6 @@ public class ContinuousStepGenerator implements Updatable
 
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
-
-      if (latestHighLevelControllerStatus.getValue() != HighLevelControllerName.WALKING)
-         walk.set(false);
 
       if (!walk.getValue())
       {
@@ -557,16 +549,6 @@ public class ContinuousStepGenerator implements Updatable
          notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
       else if (status == FootstepStatus.STARTED)
          notifyFootstepStarted();
-   }
-
-   public void setHighLevelStateChangeStatusListener(StatusMessageOutputManager statusMessageOutputManager)
-   {
-      statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, this::consumeHighLevelStateChangeStatus);
-   }
-
-   public void consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage statusMessage)
-   {
-      latestHighLevelControllerStatus.setValue(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
    }
 
    /**

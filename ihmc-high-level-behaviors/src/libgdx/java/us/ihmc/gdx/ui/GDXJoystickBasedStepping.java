@@ -138,13 +138,6 @@ public class GDXJoystickBasedStepping
             }
          });
       });
-      controllerHelper.subscribeToControllerViaCallback(HighLevelStateChangeStatusMessage.class, stateChangeMessage ->
-      {
-         queuedTasksToProcess.add(() ->
-                                  {
-                                     continuousStepGenerator.consumeHighLevelStateChangeStatus(stateChangeMessage);
-                                  });
-      });
       syncedRobot.addRobotConfigurationDataReceivedCallback(robotConfigurationData ->
       {
          RobotMotionStatus newStatus = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus());
