@@ -78,8 +78,9 @@ public class FFMPEGLogger
       this.formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
       this.encoderAVPixelFormat = encoderPixelFormat;
 
-      encoderFormatConversionNecessary = sourceAVPixelFormat != encoderAVPixelFormat && !(sourceAVPixelFormat == avutil.AV_PIX_FMT_RGBA && encoderPixelFormat
-                                                                                                                                           == avutil.AV_PIX_FMT_RGB0); //No conversion for RGBA>RGB0
+      // No conversion for RGBA -> RGB0
+      boolean isJustAlphaToNonAlpha = sourceAVPixelFormat == avutil.AV_PIX_FMT_RGBA && encoderPixelFormat == avutil.AV_PIX_FMT_RGB0;
+      encoderFormatConversionNecessary = sourceAVPixelFormat != encoderAVPixelFormat && !isJustAlphaToNonAlpha;
 
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 
