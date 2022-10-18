@@ -294,14 +294,6 @@ public class DirectionalControlController extends ToolboxController
       });
    }
 
-   public void updateHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage message)
-   {
-      queuedTasksToProcess.add(() ->
-                               {
-                                  continuousStepGenerator.consumeHighLevelStateChangeStatus(message);
-                               });
-   }
-
    public void updatePlanarRegionsListMessage(PlanarRegionsListMessage message)
    {
       planarRegionsListMessage.set(message);

@@ -135,10 +135,6 @@ public class StepGeneratorJavaFXController
                                                     controllerOutputTopic,
                                                     s -> queuedTasksToProcess.add(() -> continuousStepController.consumeFootstepStatus(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    HighLevelStateChangeStatusMessage.class,
-                                                    controllerOutputTopic,
-                                                    s -> queuedTasksToProcess.add(() -> continuousStepController.consumeHighLevelStateChangeStatus(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
                                                     REACommunicationProperties.outputTopic,
                                                     s -> queuedTasksToProcess.add(() -> continuousStepController.consumePlanarRegionsListMessage(s.takeNextData())));

@@ -116,7 +116,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
             continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
       }
       continuousStepGenerator.setFootstepStatusListener(walkingStatusMessageOutputManager);
-      continuousStepGenerator.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
       continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()

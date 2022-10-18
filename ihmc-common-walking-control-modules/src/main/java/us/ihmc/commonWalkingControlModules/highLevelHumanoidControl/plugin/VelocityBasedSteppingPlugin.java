@@ -1,14 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -44,8 +40,6 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
 
    private BooleanProvider walkInputProvider;
 
-   private final MutableObject<HighLevelControllerName> latestHighLevelControllerStatus = new MutableObject<>(null);
-
    private final List<Updatable> updatables;
 
    public VelocityBasedSteppingPlugin(List<Updatable> updatables)
@@ -76,9 +70,6 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
 
       if (!ignoreWalkInputProvider.getBooleanValue() && walkInputProvider != null)
          walk.set(walkInputProvider.getValue());
-
-      if (latestHighLevelControllerStatus.getValue() != HighLevelControllerName.CUSTOM1)
-         walk.set(false);
 
       if (!walk.getValue())
       {
@@ -212,15 +203,5 @@ public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
    public void setDirectionalControlMessenger(DirectionalControlMessenger directionalControlMessenger)
    {
       this.directionalControlMessenger = directionalControlMessenger;
-   }
-
-   public void setHighLevelStateChangeStatusListener(StatusMessageOutputManager statusMessageOutputManager)
-   {
-      statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, this::consumeHighLevelStateChangeStatus);
-   }
-
-   public void consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage statusMessage)
-   {
-      latestHighLevelControllerStatus.setValue(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
    }
 }

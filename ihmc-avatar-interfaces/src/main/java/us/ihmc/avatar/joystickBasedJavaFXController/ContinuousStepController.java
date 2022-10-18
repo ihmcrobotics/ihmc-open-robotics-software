@@ -314,11 +314,6 @@ public class ContinuousStepController
       }
    }
 
-   public void consumeHighLevelStateChangeStatus(HighLevelStateChangeStatusMessage statusMessage)
-   {
-      continuousStepGenerator.consumeHighLevelStateChangeStatus(statusMessage);
-   }
-
    public void consumePlanarRegionsListMessage(PlanarRegionsListMessage message)
    {
       if (message == null)

@@ -107,11 +107,6 @@ public class DirectionalControlModule extends ToolboxModule
          if (steppingController != null)
             steppingController.updateFootstepStatusMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator, s ->
-      {
-         if (steppingController != null)
-            steppingController.updateHighLevelStateChangeStatus(s.takeNextData());
-      });
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, s ->
       {
          if (steppingController != null)
