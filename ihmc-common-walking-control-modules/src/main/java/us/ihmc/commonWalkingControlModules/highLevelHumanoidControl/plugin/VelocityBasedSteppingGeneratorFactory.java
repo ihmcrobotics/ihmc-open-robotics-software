@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DirectionalControlMessenger;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StartWalkingMessenger;
@@ -21,6 +22,9 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFactory
 {
@@ -84,7 +88,9 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      VelocityBasedSteppingGenerator fastWalkingJoystickPlugin = new VelocityBasedSteppingGenerator();
+      List<Updatable> updatables = new ArrayList<>();
+
+      VelocityBasedSteppingGenerator fastWalkingJoystickPlugin = new VelocityBasedSteppingGenerator(updatables);
 
       fastWalkingJoystickPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
 
@@ -102,12 +108,16 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
             walkingCommandInputManager.submitMessage(message);
          }
       });
-      StepGeneratorCommandInputManager commandInputManager = csgCommandInputManagerField.get();
-      fastWalkingJoystickPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
-      fastWalkingJoystickPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
-      fastWalkingJoystickPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
-      walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
-                                                                    commandInputManager::setHighLevelStateChangeStatusMessage);
+      if (csgCommandInputManagerField.hasValue())
+      {
+         StepGeneratorCommandInputManager commandInputManager = csgCommandInputManagerField.get();
+         fastWalkingJoystickPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
+         fastWalkingJoystickPlugin.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
+         fastWalkingJoystickPlugin.setWalkInputProvider(commandInputManager.createWalkInputProvider());
+         walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, commandInputManager::setHighLevelStateChangeStatusMessage);
+
+         updatables.add(commandInputManager);
+      }
 
       fastWalkingJoystickPlugin.setStopWalkingMessenger(new StopWalkingMessenger()
       {

@@ -71,6 +71,7 @@ public class StepGeneratorCommandInputManager implements Updatable
          isUnitVelocities = command.isUnitVelocities();
          walk = command.isWalk();
       }
+      commandInputManager.clearCommands(ContinuousStepGeneratorInputCommand.class);
 
       if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorParametersCommand.class))
       {
@@ -85,6 +86,7 @@ public class StepGeneratorCommandInputManager implements Updatable
             continuousStepGenerator.setStepWidths(parameters.getDefaultStepWidth(), parameters.getMinStepWidth(), parameters.getMaxStepWidth());
          }
       }
+      commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
 
       if (!isOpen)
          walk = false;
