@@ -15,16 +15,16 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
+public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPluginFactory
 {
    private final ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory;
-   private final VelocityBasedSteppingGeneratorFactory velocityPluginFactory;
+   private final VelocityBasedSteppingPluginFactory velocityPluginFactory;
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
 
    public JoystickBasedSteppingPluginFactory()
    {
       this.csgPluginFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
-      this.velocityPluginFactory = new VelocityBasedSteppingGeneratorFactory();
+      this.velocityPluginFactory = new VelocityBasedSteppingPluginFactory();
 
 //      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
 //      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
@@ -66,14 +66,14 @@ public class JoystickBasedSteppingPluginFactory implements SteppingPluginFactory
                                                                                                      yoGraphicsListRegistry,
                                                                                                      contactableFeet,
                                                                                                      timeProvider);
-      VelocityBasedSteppingGenerator fastWalkingPlugin = velocityPluginFactory.buildPlugin(referenceFrames,
-                                                                                           updateDT,
-                                                                                           walkingControllerParameters,
-                                                                                           walkingStatusMessageOutputManager,
-                                                                                           walkingCommandInputManager,
-                                                                                           yoGraphicsListRegistry,
-                                                                                           contactableFeet,
-                                                                                           timeProvider);
+      VelocityBasedSteppingPlugin fastWalkingPlugin = velocityPluginFactory.buildPlugin(referenceFrames,
+                                                                                        updateDT,
+                                                                                        walkingControllerParameters,
+                                                                                        walkingStatusMessageOutputManager,
+                                                                                        walkingCommandInputManager,
+                                                                                        yoGraphicsListRegistry,
+                                                                                        contactableFeet,
+                                                                                        timeProvider);
 
       csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
       csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());

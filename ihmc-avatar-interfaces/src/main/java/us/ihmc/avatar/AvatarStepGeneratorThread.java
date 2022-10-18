@@ -32,7 +32,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 {
    private final YoRegistry csgRegistry = new YoRegistry("csgRegistry");
 
-   private final SteppingPlugin continuousStepGeneratorPlugin;
+   private final HumanoidSteppingPlugin continuousStepGeneratorPlugin;
    private final FullHumanoidRobotModel fullRobotModel;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
@@ -46,7 +46,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
    private final PlanarRegionFootstepSnapper planarRegionFootstepSnapper;
    private final StepGeneratorCommandInputManager csgCommandInputManager;
 
-   public AvatarStepGeneratorThread(SteppingPluginFactory pluginFactory,
+   public AvatarStepGeneratorThread(HumanoidSteppingPluginFactory pluginFactory,
                                     HumanoidRobotContextDataFactory contextDataFactory,
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,

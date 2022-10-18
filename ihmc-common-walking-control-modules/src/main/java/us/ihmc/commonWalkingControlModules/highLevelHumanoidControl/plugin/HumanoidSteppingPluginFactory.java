@@ -12,7 +12,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public interface SteppingPluginFactory extends HighLevelHumanoidControllerPluginFactory
+public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControllerPluginFactory
 {
    StepGeneratorCommandInputManager getStepGeneratorCommandInputManager();
 
@@ -20,7 +20,7 @@ public interface SteppingPluginFactory extends HighLevelHumanoidControllerPlugin
 
 
    @Override
-   default SteppingPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
+   default HumanoidSteppingPlugin buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
 
@@ -34,12 +34,12 @@ public interface SteppingPluginFactory extends HighLevelHumanoidControllerPlugin
                          controllerToolbox.getYoTime());
    }
 
-   SteppingPlugin buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
-                              double updateDT,
-                              WalkingControllerParameters walkingControllerParameters,
-                              StatusMessageOutputManager walkingStatusMessageOutputManager,
-                              CommandInputManager walkingCommandInputManager,
-                              YoGraphicsListRegistry yoGraphicsListRegistry,
-                              SideDependentList<? extends ContactableBody> contactableFeet,
-                              DoubleProvider timeProvider);
+   HumanoidSteppingPlugin buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+                                      double updateDT,
+                                      WalkingControllerParameters walkingControllerParameters,
+                                      StatusMessageOutputManager walkingStatusMessageOutputManager,
+                                      CommandInputManager walkingCommandInputManager,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      SideDependentList<? extends ContactableBody> contactableFeet,
+                                      DoubleProvider timeProvider);
 }

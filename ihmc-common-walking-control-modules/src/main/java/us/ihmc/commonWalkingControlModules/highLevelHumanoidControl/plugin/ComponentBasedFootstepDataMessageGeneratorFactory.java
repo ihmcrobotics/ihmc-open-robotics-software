@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -21,7 +20,7 @@ import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ComponentBasedFootstepDataMessageGeneratorFactory implements SteppingPluginFactory
+public class ComponentBasedFootstepDataMessageGeneratorFactory implements HumanoidSteppingPluginFactory
 {
    private final OptionalFactoryField<YoRegistry> registryField = new OptionalFactoryField<>("registry");
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScriptField = new OptionalFactoryField<>("useHeadingAndVelocityScript", false);

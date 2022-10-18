@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import controller_msgs.msg.dds.DirectionalControlInputMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -26,7 +25,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFactory
+public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPluginFactory
 {
    private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("registry");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
@@ -74,14 +73,14 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
    }
 
    @Override
-   public VelocityBasedSteppingGenerator buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
-                                                     double updateDT,
-                                                     WalkingControllerParameters walkingControllerParameters,
-                                                     StatusMessageOutputManager walkingStatusMessageOutputManager,
-                                                     CommandInputManager walkingCommandInputManager,
-                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                     SideDependentList<? extends ContactableBody> contactableFeet,
-                                                     DoubleProvider timeProvider)
+   public VelocityBasedSteppingPlugin buildPlugin(CommonHumanoidReferenceFrames referenceFrames,
+                                                  double updateDT,
+                                                  WalkingControllerParameters walkingControllerParameters,
+                                                  StatusMessageOutputManager walkingStatusMessageOutputManager,
+                                                  CommandInputManager walkingCommandInputManager,
+                                                  YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                  SideDependentList<? extends ContactableBody> contactableFeet,
+                                                  DoubleProvider timeProvider)
    {
       if (!registryField.hasBeenSet())
          setRegistry();
@@ -90,7 +89,7 @@ public class VelocityBasedSteppingGeneratorFactory implements SteppingPluginFact
 
       List<Updatable> updatables = new ArrayList<>();
 
-      VelocityBasedSteppingGenerator fastWalkingJoystickPlugin = new VelocityBasedSteppingGenerator(updatables);
+      VelocityBasedSteppingPlugin fastWalkingJoystickPlugin = new VelocityBasedSteppingPlugin(updatables);
 
       fastWalkingJoystickPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);
 
