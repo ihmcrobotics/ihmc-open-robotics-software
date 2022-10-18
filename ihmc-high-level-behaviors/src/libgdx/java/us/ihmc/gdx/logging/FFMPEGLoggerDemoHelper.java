@@ -186,6 +186,7 @@ public class FFMPEGLoggerDemoHelper
       expectedVideoLength = expectedVideoLengthStopwatch.totalElapsed();
 
       logger.stop();
+      logger = null;
       finalizing = false;
    }
 
