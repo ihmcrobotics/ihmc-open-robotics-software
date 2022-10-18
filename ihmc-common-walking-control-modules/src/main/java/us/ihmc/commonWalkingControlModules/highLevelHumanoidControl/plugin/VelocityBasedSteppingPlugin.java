@@ -18,7 +18,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-public class VelocityBasedSteppingGenerator implements SteppingPlugin
+public class VelocityBasedSteppingPlugin implements HumanoidSteppingPlugin
 {
    private final static Vector2DReadOnly zero2D = new Vector2D();
 
@@ -48,7 +48,7 @@ public class VelocityBasedSteppingGenerator implements SteppingPlugin
 
    private final List<Updatable> updatables;
 
-   public VelocityBasedSteppingGenerator(List<Updatable> updatables)
+   public VelocityBasedSteppingPlugin(List<Updatable> updatables)
    {
       this.updatables = updatables;
    }

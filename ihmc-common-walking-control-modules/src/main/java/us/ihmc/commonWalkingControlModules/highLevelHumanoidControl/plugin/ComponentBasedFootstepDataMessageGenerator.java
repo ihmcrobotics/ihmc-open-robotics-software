@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ComponentBasedFootstepDataMessageGenerator implements SteppingPlugin
+public class ComponentBasedFootstepDataMessageGenerator implements HumanoidSteppingPlugin
 {
    private final YoRegistry registry;
    private final ContinuousStepGenerator continuousStepGenerator;
