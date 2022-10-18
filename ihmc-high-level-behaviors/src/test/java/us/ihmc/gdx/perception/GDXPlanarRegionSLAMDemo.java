@@ -2,7 +2,7 @@ package us.ihmc.gdx.perception;
 
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.perception.PlanarRegionSLAMPanel;
+import us.ihmc.gdx.ui.perception.PlanarRegionRegistrationPanel;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.PlanarRegionRegistration;
@@ -14,14 +14,14 @@ public class GDXPlanarRegionSLAMDemo
 
    private Activator nativesLoadedActivator;
    private PlanarRegionRegistration planeToPlaneICP;
-   private PlanarRegionSLAMPanel slamPanel;
+   private PlanarRegionRegistrationPanel slamPanel;
 
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    public GDXPlanarRegionSLAMDemo()
    {
 
-      slamPanel = new PlanarRegionSLAMPanel("SLAM Module");
+
 
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -29,22 +29,28 @@ public class GDXPlanarRegionSLAMDemo
          public void create()
          {
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
+            baseUI.create();
 
             planeToPlaneICP = new PlanarRegionRegistration();
+            slamPanel = new PlanarRegionRegistrationPanel("SLAM Module", planeToPlaneICP);
 
             graphic.generateMeshes(planeToPlaneICP.getCurrentRegions());
             graphic.update();
 
             baseUI.getPrimaryScene().addRenderableProvider(graphic);
             baseUI.getImGuiPanelManager().addPanel(slamPanel);
-
-            baseUI.create();
          }
 
          @Override
          public void render()
          {
-            graphic.generateMeshes(planeToPlaneICP.getCurrentRegions());
+            if(planeToPlaneICP.modified())
+            {
+               graphic.clear();
+               graphic.generateMeshes(planeToPlaneICP.getCurrentRegions());
+               graphic.update();
+               planeToPlaneICP.setModified(false);
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

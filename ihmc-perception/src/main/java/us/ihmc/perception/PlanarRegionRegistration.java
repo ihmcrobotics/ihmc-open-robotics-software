@@ -23,6 +23,7 @@ import java.util.List;
 public class PlanarRegionRegistration
 {
    private int frameIndex = 0;
+   private boolean modified = false;
 
    private PlanarRegionsList currentRegions;
    private PlanarRegionsList previousRegions;
@@ -36,7 +37,7 @@ public class PlanarRegionRegistration
 
    public void incrementIndex()
    {
-      frameIndex++;
+      frameIndex += 20;
    }
 
    public void update()
@@ -44,6 +45,7 @@ public class PlanarRegionRegistration
       String fileName = String.format("%1$4s", frameIndex).replace(' ', '0') + ".txt";
       LogTools.info("Loading File: {}", fileName);
       currentRegions = loadRegions(regionFilePath + fileName, frameIndex);
+      this.modified = true;
    }
 
    public static String getValue(BufferedReader reader, String key) throws IOException
@@ -154,6 +156,16 @@ public class PlanarRegionRegistration
          LogTools.info("Regions: {}", region.getConcaveHullSize());
 
       return regions;
+   }
+
+   public boolean modified()
+   {
+      return modified;
+   }
+
+   public void setModified(boolean modified)
+   {
+      this.modified = modified;
    }
 
    public PlanarRegionsList getCurrentRegions()
