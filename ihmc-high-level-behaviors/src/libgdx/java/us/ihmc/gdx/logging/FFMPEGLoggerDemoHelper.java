@@ -132,6 +132,9 @@ public class FFMPEGLoggerDemoHelper
 
    private void loggingThread()
    {
+      //Use custom logging class with different behavior than the default if specified.
+      //This uses reflection so that it can use an alternate class from another part of the codebase which uses open-robotics-software as a dependency
+      //Examples of why this may be done include using different FFMPEG libraries, or introducing a totally different pipeline for video processing
       if (loggerClass != FFMPEGLogger.class)
       {
          try
