@@ -87,27 +87,69 @@ public class LearnAndUpdateProMPExample
       // see timesteps of selected demo trajectory
       long timestepDemo = demoTestTrajectories.get(0).timesteps();
       System.out.println("timestepDemo: " + timestepDemo);
-
       // infer the new speed for the ProMP based on observed portion of demo trajectory
+      //----------------------------- Default way --------------------------------------------------
       int observedTimesteps = (int) timestepDemo / 3;
       // build observed matrix from demo test 1
       EigenMatrixXd observedTrajectory = new EigenMatrixXd(observedTimesteps, (int) meanTrajectory.cols());
       for (int i = 0; i < observedTrajectory.rows(); i++)
          for (int j = 0; j < observedTrajectory.cols(); j++)
             observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
-      //esitmate the demo training trajectory closest to observed data
+      //estimate the demo training trajectory closest to observed data
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       System.out.println("Inferred closest demo to current observation: " + (demo + 1));
       // infer the speed of the esitmated demo training trajectory that best matches the observed data
       double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
-      // The desired timesteps are given but the actual timesteps of the demo trajectory and the inferred speed
+      // The desired timesteps are given by the actual timesteps of the demo trajectory and the inferred speed
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       // generate ProMP mean trajectory with new time modulation
       EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
       EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
       System.out.println("Inferred timestep: " + inferredTimesteps);
-
+      //--------------------------------!Alternative way ------------------------------------------
+      //      // infer the new speed for the ProMP based on observed portion of demo trajectory (goal available)
+      //      int observedTimesteps = (int) timestepDemo / 3;
+      //      // build observed matrix from demo test 1
+      //      EigenMatrixXd observedTrajectory = new EigenMatrixXd(observedTimesteps, (int) meanTrajectory.cols());
+      //      for (int i = 0; i < observedTrajectory.rows(); i++)
+      //         for (int j = 0; j < observedTrajectory.cols(); j++)
+      //            observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
+      //      //create copy of promp
+      //      // NOTE. we do not want to condition a ProMP that will be modulated afterwards, this will likely corrupt the model
+      //      ProMP myCopyProMP = new ProMP(trainingTrajectories, n_rbf);
+      //     //update copy ProMP with conditioning operation according to oberseved goal
+      //      EigenMatrixXd viaPointStdDeviation = new EigenMatrixXd(dofs.size(), dofs.size());
+      //      for (int i = 0; i < viaPointStdDeviation.rows(); i++)
+      //      {
+      //         for (int j = 0; j < viaPointStdDeviation.cols(); j++)
+      //         {
+      //            if (i == j)
+      //               viaPointStdDeviation.apply(i, j).put(0.00001); // Preferably keep std low. Lower std -> higher precision but less damping
+      //            else
+      //               viaPointStdDeviation.apply(i, j).put(0);
+      //         }
+      //      }
+      //      // condition goal of demo 1
+      //      myCopyProMP.set_conditioning_ridge_factor(0.0001);
+      //      EigenVectorXd viaPoint = new EigenVectorXd(dofs.size());
+      //      int conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps() - 1;
+      //      for (int i = 0; i < viaPoint.size(); i++)
+      //         viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
+      //      myCopyProMP.condition_goal(viaPoint, viaPointStdDeviation);
+      //      EigenMatrixXd meanTrajectoryCopyConditioned = myCopyProMP.generate_trajectory();
+      //      Trajectory trajectoryMeanCopyConditioned = new Trajectory(meanTrajectoryCopyConditioned, 1.0);
+      //      // infer the speed of the estimated demo training trajectory that best matches the observed data
+      //      double inferredSpeed = trajectoryMeanCopyConditioned.infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      //      System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
+      //      // The desired timesteps are given by the actual timesteps of the demo trajectory and the inferred speed
+      //      int inferredTimesteps = (int) (trajectoryMeanCopyConditioned.timesteps() / inferredSpeed);
+      //      // generate ProMP mean trajectory with new time modulation
+      //      EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
+      //      EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
+      //      System.out.println("Inferred timestep: " + inferredTimesteps);
+      //      ProMPUtil.saveAsCSV(meanTrajectoryCopyConditioned, "/meanPreModulated.csv");
+      //-----------------------------------------------------------------------------------
       ProMPUtil.saveAsCSV(meanTrajectoryModulated, "/meanModulated.csv");
       ProMPUtil.saveAsCSV(stdDeviationTrajectoryModulated, "/stdDeviationModulated.csv");
       // update the time modulation of the ProMP object with estimated value
