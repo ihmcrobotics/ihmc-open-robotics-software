@@ -171,11 +171,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
 
       if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
-         selected = true;
-         modified = true;
-         walkFacingDirection.set(Axis3D.Z, 0.0);
-         updateStuff();
-         queueFootstepPlan();
+         becomeModified();
       }
       if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
       {
@@ -320,6 +316,7 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerRequest.setStartFootPoses(leftStanceFootPose, rightStanceFootPose);
       footstepPlannerRequest.setGoalFootPoses(leftGoalFootPose, rightGoalFootPose);
       footstepPlannerRequest.setAssumeFlatGround(true);
+      footstepPlannerRequest.setSnapGoalSteps(false);
       footstepPlannerRequest.setRequestId(footstepPlannerId.getAndIncrement());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
       footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
@@ -341,6 +338,39 @@ public class GDXWalkPathControlRing implements PathTypeStepParameters
       {
          plannerToUse = 2;
       }
+
+      ImGui.text("Control ring:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Deleted"), !selected && !modified))
+      {
+         delete();
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Modified"), !selected && modified))
+      {
+         selected = false;
+         if (!modified)
+         {
+            becomeModified();
+         }
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Selected"), selected && modified))
+      {
+         selected = true;
+         if (!modified)
+         {
+            becomeModified();
+         }
+      }
+   }
+
+   private void becomeModified()
+   {
+      modified = true;
+      walkFacingDirection.set(Axis3D.Z, 0.0);
+      updateStuff();
+      queueFootstepPlan();
    }
 
    private void renderTooltips()

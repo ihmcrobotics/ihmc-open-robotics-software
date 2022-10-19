@@ -1,36 +1,28 @@
 package us.ihmc.gdx.ui;
 
 import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
-import imgui.type.ImInt;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.imgui.*;
 import us.ihmc.tools.property.*;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.TreeSet;
 
 public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private StoredPropertySetBasics storedPropertySet;
-   private StoredPropertyKeyList keys;
    private Runnable onParametersUpdatedCallback;
+   private final Runnable onParametersUpdatedCallbackAndMore = this::onParametersUpdatedCallbackAndMore;
+   private boolean anyParameterChanged = false;
    private final TreeSet<String> versions = new TreeSet<>();
 
-   private record ValueRange(float min, float max) { }
-
-   private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
-   private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
-   private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
+   private final ArrayList<ImGuiStoredPropertySetWidget> imGuiWidgetRenderers = new ArrayList<>();
+   private final HashMap<StoredPropertyKey<?>, ImGuiStoredPropertySetWidget> imGuiWidgetRendererMap = new HashMap<>();
 
    public ImGuiStoredPropertySetTuner(String name)
    {
@@ -38,15 +30,14 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       setRenderMethod(this::renderImGuiWidgets);
    }
 
-   public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys)
+   public void create(StoredPropertySetBasics storedPropertySet)
    {
-      create(storedPropertySet, keys, () -> { });
+      create(storedPropertySet, () -> { });
    }
 
-   public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, Runnable onParametersUpdatedCallback)
+   public void create(StoredPropertySetBasics storedPropertySet, Runnable onParametersUpdatedCallback)
    {
       this.storedPropertySet = storedPropertySet;
-      this.keys = keys;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
 
       Path saveFileDirectory = storedPropertySet.findSaveFileDirectory();
@@ -68,33 +59,40 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          storedPropertySet.load();
       }
 
-      for (StoredPropertyKey<?> propertyKey : keys.keys())
+      for (StoredPropertyKey<?> propertyKey : storedPropertySet.getKeyList().keys())
       {
-         // Add supported types here
-         if (propertyKey.getType().equals(Double.class))
+         ImGuiStoredPropertySetWidget widget;
+         if (propertyKey instanceof DoubleStoredPropertyKey doubleKey)
          {
-            DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
-            doubleValues.put(key, new ImDouble(storedPropertySet.get(key)));
+            String format = "%.6f";
+            double step = 0.01;
+            double stepFast = 0.5;
+            widget = new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, onParametersUpdatedCallbackAndMore);
          }
-         else if (propertyKey.getType().equals(Integer.class))
+         else if (propertyKey instanceof IntegerStoredPropertyKey integerKey)
          {
-            IntegerStoredPropertyKey key = (IntegerStoredPropertyKey) propertyKey;
-            integerValues.put(key, new ImInt(storedPropertySet.get(key)));
+            int step = 1;
+            widget = new ImGuiStoredPropertySetIntegerWidget(storedPropertySet, integerKey, step, onParametersUpdatedCallbackAndMore);
          }
-         else if (propertyKey.getType().equals(Boolean.class))
+         else if (propertyKey instanceof BooleanStoredPropertyKey booleanKey)
          {
-            BooleanStoredPropertyKey key = (BooleanStoredPropertyKey) propertyKey;
-            booleanValues.put(key, new ImBoolean(storedPropertySet.get(key)));
+            widget = new ImGuiStoredPropertySetBooleanWidget(storedPropertySet, booleanKey, onParametersUpdatedCallbackAndMore);
          }
          else
          {
             throw new RuntimeException("Please implement spinner for type: " + propertyKey.getType());
          }
+         imGuiWidgetRenderers.add(widget);
+         imGuiWidgetRendererMap.put(propertyKey, widget);
       }
    }
 
-   public void renderImGuiWidgets()
+   /**
+    * @return if any parameter changed by the ImGui user
+    */
+   public boolean renderImGuiWidgets()
    {
+      ImGui.text(storedPropertySet.getTitle());
       ImGui.text("Version:");
       if (versions.size() > 1)
       {
@@ -113,12 +111,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.text(storedPropertySet.getCurrentVersionSuffix());
       }
 
-      //      ImGuiInputTextFlags. // TODO: Mess with various flags
-      ImGui.pushItemWidth(150.0f);
-      for (StoredPropertyKey<?> propertyKey : keys.keys())
-      {
-         renderAPropertyTuner(propertyKey);
-      }
       if (ImGui.button("Load"))
       {
          load();
@@ -128,95 +120,47 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
       {
          storedPropertySet.save();
       }
+
+      ImGui.text("(Ctrl + click sliders to set exact and unbounded value.)");
+
+      for (ImGuiStoredPropertySetWidget widget : imGuiWidgetRenderers)
+      {
+         widget.render();
+      }
+
+      boolean returnAnyChanged = anyParameterChanged;
+      anyParameterChanged = false;
+      return returnAnyChanged;
    }
 
-   public void renderAPropertyTuner(StoredPropertyKey<?> propertyKey)
+   public boolean changed(StoredPropertyKey<?> key)
    {
-      if (propertyKey.getType().equals(Double.class))
-      {
-         renderADoublePropertyTuner(propertyKey, 0.01, 0.5);
-      }
-      else if (propertyKey.getType().equals(Integer.class))
-      {
-         renderAnIntegerPropertyTuner(propertyKey, 1);
-      }
-      else if (propertyKey.getType().equals(Boolean.class))
-      {
-         if (ImGui.checkbox(propertyKey.getTitleCasedName(), booleanValues.get(propertyKey)))
-         {
-            BooleanStoredPropertyKey key = (BooleanStoredPropertyKey) propertyKey;
-            storedPropertySet.set(key, booleanValues.get(key).get());
-            onParametersUpdatedCallback.run();
-         }
-      }
+      return imGuiWidgetRendererMap.get(key).changed();
    }
 
-   public void renderADoublePropertyTuner(StoredPropertyKey<?> propertyKey, double step, double stepFast)
+   public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey doubleKey,
+                                                                double step,
+                                                                double stepFast,
+                                                                String unitString,
+                                                                String format)
    {
-      renderADoublePropertyTuner(propertyKey, step, stepFast, Double.NaN, Double.NaN, false, null, "%.6f");
+      return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, doubleKey, step, stepFast, format, unitString, onParametersUpdatedCallback);
    }
 
-   public void renderADoublePropertyTuner(StoredPropertyKey<?> propertyKey,
-                                          double step,
-                                          double stepFast,
-                                          double min,
-                                          double max,
-                                          boolean fancyLabel,
-                                          String unitString,
-                                          String format)
+   public ImGuiStoredPropertySetDoubleWidget createDoubleSlider(DoubleStoredPropertyKey key, double min, double max)
    {
-      String label = fancyLabel ? labels.get(unitString, propertyKey.getTitleCasedName()) : propertyKey.getTitleCasedName();
-      if (fancyLabel)
-      {
-         ImGui.text(propertyKey.getTitleCasedName() + ":");
-         ImGui.sameLine();
-         ImGui.pushItemWidth(100.0f);
-      }
-
-      if (ImGuiTools.volatileInputDouble(label, doubleValues.get(propertyKey), step, stepFast, format))
-      {
-         DoubleStoredPropertyKey key = (DoubleStoredPropertyKey) propertyKey;
-         if (!Double.isNaN(min))
-            doubleValues.get(key).set(MathTools.clamp(doubleValues.get(key).get(), min, max));
-         storedPropertySet.set(key, doubleValues.get(key).get());
-         onParametersUpdatedCallback.run();
-      }
-      if (fancyLabel)
-      {
-         ImGui.popItemWidth();
-      }
+      return new ImGuiStoredPropertySetDoubleWidget(storedPropertySet, key, min, max, onParametersUpdatedCallback);
    }
 
-   private void renderAnIntegerPropertyTuner(StoredPropertyKey<?> propertyKey, int step)
+   private void onParametersUpdatedCallbackAndMore()
    {
-      if (ImGuiTools.volatileInputInt(propertyKey.getTitleCasedName(), integerValues.get(propertyKey), step))
-      {
-         IntegerStoredPropertyKey key = (IntegerStoredPropertyKey) propertyKey;
-         storedPropertySet.set(key, integerValues.get(key).get());
-         onParametersUpdatedCallback.run();
-      }
-   }
-
-   public ImGuiStoredPropertySetDoubleSlider createDoubleSlider(DoubleStoredPropertyKey key, double min, double max)
-   {
-      return new ImGuiStoredPropertySetDoubleSlider(key, storedPropertySet, min, max, onParametersUpdatedCallback);
+      anyParameterChanged = true;
+      onParametersUpdatedCallback.run();
    }
 
    private void load()
    {
       storedPropertySet.load();
-      for (Map.Entry<DoubleStoredPropertyKey, ImDouble> entry : doubleValues.entrySet())
-      {
-         entry.getValue().set(storedPropertySet.get(entry.getKey()));
-      }
-      for (Map.Entry<IntegerStoredPropertyKey, ImInt> entry : integerValues.entrySet())
-      {
-         entry.getValue().set(storedPropertySet.get(entry.getKey()));
-      }
-      for (Map.Entry<BooleanStoredPropertyKey, ImBoolean> entry : booleanValues.entrySet())
-      {
-         entry.getValue().set(storedPropertySet.get(entry.getKey()));
-      }
 
       onParametersUpdatedCallback.run();
    }
@@ -224,8 +168,6 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
    public <T> void changeParameter(StoredPropertyKey<T> key, T value)
    {
       storedPropertySet.set(key, value);
-      // TODO: experimental . . .
-      doubleValues.get((DoubleStoredPropertyKey) key).set((double)value);
       onParametersUpdatedCallback.run();
    }
 }
