@@ -238,6 +238,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
             floatBuffer.put(1.0f);
             floatBuffer.put(1.0f);
             floatBuffer.put(1.0f);
+            floatBuffer.put(1.0f);
          }
 
          floatBuffer.position(0);
