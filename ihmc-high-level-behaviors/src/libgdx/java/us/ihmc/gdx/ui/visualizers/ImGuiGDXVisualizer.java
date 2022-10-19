@@ -67,4 +67,9 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
    {
 
    }
+
+   public String getTitle()
+   {
+      return title;
+   }
 }

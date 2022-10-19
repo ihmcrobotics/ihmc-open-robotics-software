@@ -66,7 +66,7 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
          }
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isActive());
-         if (visualizer.isActive())
+         if (visualizer.isActive() && !visualizer.getTitle().toLowerCase().contains("mvc"))
          {
             visualizer.update();
          }

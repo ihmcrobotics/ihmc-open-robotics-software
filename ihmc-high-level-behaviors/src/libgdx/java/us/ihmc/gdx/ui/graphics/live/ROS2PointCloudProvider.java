@@ -124,15 +124,10 @@ public class ROS2PointCloudProvider
       return latestSegmentIndex;
    }
 
-   public boolean hasFusedPointCloud()
-   {
-      return latestFusedSensorHeadPointCloudMessageReference.getAndSet(null) != null;
-   }
-
    public int updateFusedPointCloudNumberOfPoints()
    {
       FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
-      if (fusedMessage!=null)
+      if (fusedMessage != null)
       {
          decompressionInputDirectBuffer.rewind();
          int numberOfBytes = fusedMessage.getScan().size();

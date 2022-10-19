@@ -16,7 +16,7 @@ import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import java.nio.FloatBuffer;
 import java.util.function.Function;
 
-public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer implements RenderableProvider
+public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer
 {
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
@@ -50,7 +50,7 @@ public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer implements Rende
    public void update()
    {
       super.update();
-      updateMeshFastest();
+//      updateMeshFastest();
    }
 
    public void updateMeshFastest()

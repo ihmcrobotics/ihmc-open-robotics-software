@@ -24,8 +24,10 @@ public class PointCloudManager
    {
       if (pointCloudVisualizer.isActive())
       {
+         pointCloudVisualizer.update();
          pointCloudVisualizer.setTotalNumberOfPoints(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
          pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
+         pointCloudVisualizer.updateMeshFastest();
 //         }
 //         else
 //         {
@@ -37,5 +39,10 @@ public class PointCloudManager
    public GDXPointCloudVisualizer getGDXPointCloudVisualizer()
    {
       return pointCloudVisualizer;
+   }
+
+   public ROS2PointCloudProvider getPointCloudProvider()
+   {
+      return pointCloudProvider;
    }
 }
