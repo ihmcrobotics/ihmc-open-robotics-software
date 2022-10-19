@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
@@ -20,6 +20,7 @@ import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
+import us.ihmc.avatar.StepGeneratorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
@@ -43,8 +44,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -308,8 +309,8 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = outputWriterFactory.get()
-                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
+      simulationOutputWriter = outputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
+                                                               robot.getControllerManager().getControllerOutput());
    }
 
    private void setupStateEstimationThread()
@@ -395,8 +396,9 @@ public class SCS2AvatarSimulationFactory
 
       HumanoidSteppingPluginFactory steppingFactory;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
-      HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParameters.hasValue() ?
-            headingAndVelocityEvaluationScriptParameters.get() : null;
+      HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParameters.hasValue()
+            ? headingAndVelocityEvaluationScriptParameters.get()
+            : null;
       if (useHeadingAndVelocityScript || parameters != null)
       {
          ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
@@ -441,11 +443,11 @@ public class SCS2AvatarSimulationFactory
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator",
-                                                                      stepGeneratorThread,
-                                                                      stepGeneratorDivisor,
-                                                                      simulationDT.get(),
-                                                                      masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
+                                                                         stepGeneratorThread,
+                                                                         stepGeneratorDivisor,
+                                                                         simulationDT.get(),
+                                                                         masterFullRobotModel);
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
