@@ -13,6 +13,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sharedControl.ProMPAssistant;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -45,6 +46,8 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class GDXVRKinematicsStreamingMode
 {
    private final DRCRobotModel robotModel;
@@ -73,6 +76,8 @@ public class GDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
+   private final ProMPAssistant proMPAssistant = new ProMPAssistant();
+   private final ImBoolean sharedControlActive = new ImBoolean(false);
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -200,7 +205,7 @@ public class GDXVRKinematicsStreamingMode
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
-            {
+            {  //TODO edit this part to include other robot parts (e.g., feet, head?)
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
@@ -209,6 +214,13 @@ public class GDXVRKinematicsStreamingMode
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
+               else if (sharedControlActive.get())
+               {
+                  if(proMPAssistant.readyToPack())
+                     proMPAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                  else
+                     proMPAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+               }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
