@@ -21,8 +21,8 @@ public class ControllerTask extends HumanoidRobotControlTask
    private final ThreadTimer timer;
    private final YoLong ticksBehindScheduled;
 
-   private final List<Runnable> taskThreadRunnables = new ArrayList<>();
-   private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
+   protected final List<Runnable> taskThreadRunnables = new ArrayList<>();
+   protected final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
    public ControllerTask(String prefix, AvatarControllerThreadInterface controllerThread, long divisor, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
    {
