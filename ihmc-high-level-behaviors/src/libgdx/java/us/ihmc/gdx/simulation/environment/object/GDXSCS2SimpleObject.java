@@ -164,7 +164,7 @@ public class GDXSCS2SimpleObject
     */
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
    {
-      stepCheckIsPointInsideAlgorithm.setup(boundingSphere.getRadius(), boundingSphere.getPosition());
+      stepCheckIsPointInsideAlgorithm.update(boundingSphere.getRadius(), boundingSphere.getPosition());
       return !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(pickRay, 100, isPointInside, intersectionToPack, false));
    }
 

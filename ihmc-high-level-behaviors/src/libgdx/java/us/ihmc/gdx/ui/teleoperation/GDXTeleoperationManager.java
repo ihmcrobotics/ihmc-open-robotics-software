@@ -17,14 +17,13 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.ImGuiStoredPropertySetDoubleSlider;
+import us.ihmc.gdx.ui.ImGuiStoredPropertySetDoubleWidget;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.*;
 import us.ihmc.gdx.ui.collidables.GDXRobotCollisionModel;
@@ -64,9 +63,9 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final GDXTeleoperationParameters teleoperationParameters;
    private final ImGuiStoredPropertySetTuner teleoperationParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation Parameters");
-   private ImGuiStoredPropertySetDoubleSlider swingTimeSlider;
-   private ImGuiStoredPropertySetDoubleSlider turnAggressivenessSlider;
-   private ImGuiStoredPropertySetDoubleSlider transferTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
+   private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private final GDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final GDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
@@ -94,6 +93,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
    private GDXLiveRobotPartInteractable pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
    private final boolean interactableExists;
+   private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
 
    public GDXTeleoperationManager(String robotRepoName,
@@ -179,13 +179,13 @@ public class GDXTeleoperationManager extends ImGuiPanel
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
-      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(),
-                                             FootstepPlannerParameterKeys.keys,
-                                             footstepPlanning::plan);
-      teleoperationParametersTuner.create(teleoperationParameters, GDXTeleoperationParameters.keys);
+      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), footstepPlanning::plan);
+      teleoperationParametersTuner.create(teleoperationParameters);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.transferTime, 0.3, 2.5);
       turnAggressivenessSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.turnAggressiveness, 0.0, 10.0);
+
+      trajectoryTimeSlider = teleoperationParametersTuner.createDoubleSlider(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, "s", "%.2f");
 
       interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, teleoperationParameters, footstepPlanning.getFootstepPlannerParameters());
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
@@ -422,7 +422,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       swingTimeSlider.render();
       transferTimeSlider.render();
       turnAggressivenessSlider.render();
-      teleoperationParametersTuner.renderADoublePropertyTuner(GDXTeleoperationParameters.trajectoryTime, 0.1, 0.5, 0.0, 30.0, true, "s", "%.2f");
+      trajectoryTimeSlider.render();
 
       ImGui.checkbox(labels.get("Show footstep planner parameter tuner"), footstepPlanningParametersTuner.getIsShowing());
       ImGui.checkbox(labels.get("Show teleoperation parameter tuner"), teleoperationParametersTuner.getIsShowing());

@@ -20,10 +20,10 @@ public class DiscreteConeRayIntersection
    private double arrowHeadRadius;
    private double arrowHeadLength;
 
-   public void setupCone(double coneBaseRadius,
-                         double coneHeight,
-                         double zOffset,
-                         RigidBodyTransformReadOnly transform)
+   public void update(double coneBaseRadius,
+                      double coneHeight,
+                      double zOffset,
+                      RigidBodyTransformReadOnly transform)
    {
       this.arrowHeadRadius = coneBaseRadius;
       this.arrowHeadLength = coneHeight;
@@ -37,7 +37,7 @@ public class DiscreteConeRayIntersection
          boundingSphereRadius = coneBaseRadius / Math.sin(Math.atan(2.0 * coneBaseRadius / coneHeight));
       else
          boundingSphereRadius = 0.5 * coneHeight;
-      boundingSphereIntersection.setup(boundingSphereRadius, zOffset + Math.signum(zOffset) * 0.5 * coneHeight, transform);
+      boundingSphereIntersection.update(boundingSphereRadius, zOffset + Math.signum(zOffset) * 0.5 * coneHeight, transform);
    }
 
    public double intersect(Line3DReadOnly pickRay, int resolution)

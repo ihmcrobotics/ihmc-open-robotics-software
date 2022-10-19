@@ -22,12 +22,12 @@ public class EllipsoidRayIntersection
    private final FrameVector3D pickRayFrameDirection = new FrameVector3D();
    private boolean intersects = false;
 
-   public void setup(double radiusX,
-                     double radiusY,
-                     double radiusZ,
-                     Point3DReadOnly positionToParent,
-                     Orientation3DReadOnly orientationToParent,
-                     ReferenceFrame parentFrame)
+   public void update(double radiusX,
+                      double radiusY,
+                      double radiusZ,
+                      Point3DReadOnly positionToParent,
+                      Orientation3DReadOnly orientationToParent,
+                      ReferenceFrame parentFrame)
    {
       ellipsoid.setToZero();
       ellipsoid.setRadiusX(radiusX);

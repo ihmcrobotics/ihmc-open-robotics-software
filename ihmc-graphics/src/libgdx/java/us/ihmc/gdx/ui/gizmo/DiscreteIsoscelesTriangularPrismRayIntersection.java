@@ -29,12 +29,12 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
    private final Point3D closestIntersection = new Point3D();
    private final Point3D candidatePlaneIntersection = new Point3D();
 
-   public void setup(double triangleWidth,
-                     double triangleHeight,
-                     double prismThickness,
-                     Tuple3DReadOnly offset,
-                     Orientation3DReadOnly orientation,
-                     RigidBodyTransformReadOnly transform)
+   public void update(double triangleWidth,
+                      double triangleHeight,
+                      double prismThickness,
+                      Tuple3DReadOnly offset,
+                      Orientation3DReadOnly orientation,
+                      RigidBodyTransformReadOnly transform)
    {
       shapeTransformToWorld.set(transform);
       shapeTransformToWorld.appendTranslation(offset);

@@ -14,17 +14,17 @@ public class CapsuleRayIntersection
 
    private final FramePoint3D tempSphereCenter = new FramePoint3D();
 
-   public void setup(double radius, double length, Point3DReadOnly position, UnitVector3DReadOnly axis, ReferenceFrame frameAfterJoint)
+   public void update(double radius, double length, Point3DReadOnly position, UnitVector3DReadOnly axis, ReferenceFrame frameAfterJoint)
    {
-      cylinderIntersection.setup(length, radius, position, axis, frameAfterJoint);
+      cylinderIntersection.update(length, radius, position, axis, frameAfterJoint);
 
       tempSphereCenter.setIncludingFrame(frameAfterJoint, cylinderIntersection.getCylinder().getTopCenter());
       tempSphereCenter.changeFrame(ReferenceFrame.getWorldFrame());
-      sphereIntersectionPositiveEnd.setup(radius, tempSphereCenter);
+      sphereIntersectionPositiveEnd.update(radius, tempSphereCenter);
 
       tempSphereCenter.setIncludingFrame(frameAfterJoint, cylinderIntersection.getCylinder().getBottomCenter());
       tempSphereCenter.changeFrame(ReferenceFrame.getWorldFrame());
-      sphereIntersectionNegativeEnd.setup(radius, tempSphereCenter);
+      sphereIntersectionNegativeEnd.update(radius, tempSphereCenter);
 
 //      EuclidGeometryTools.distanceFromPoint3DToLineSegment3D() // TODO: Is there a simpler way to do capsule ray intersection?
    }
