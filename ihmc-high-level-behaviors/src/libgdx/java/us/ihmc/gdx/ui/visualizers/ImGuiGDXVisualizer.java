@@ -34,8 +34,11 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
+      ImGui.checkbox(labels.getHidden(title + "Subscription"), isSubscribed);
+      ImGuiTools.previousWidgetTooltip("toggle subscription");
+      ImGui.sameLine();
       ImGui.checkbox(labels.get(title), active);
-      ImGui.checkbox(labels.get("Subscription"), isSubscribed);
+      ImGuiTools.previousWidgetTooltip("toggle rendering");
    }
 
    public void update()
