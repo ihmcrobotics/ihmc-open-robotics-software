@@ -21,7 +21,7 @@ import us.ihmc.tools.thread.Activator;
 
 import java.net.URISyntaxException;
 
-public class PerceptionVisualizerUI
+public class GDXPerceptionVisualizerUI
 {
    private PerceptionLoggerPanel loggerPanel;
 
@@ -39,7 +39,7 @@ public class PerceptionVisualizerUI
 
    private Activator nativesLoadedActivator;
 
-   public PerceptionVisualizerUI()
+   public GDXPerceptionVisualizerUI()
    {
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
@@ -87,7 +87,8 @@ public class PerceptionVisualizerUI
                                                                               ROS2Tools.D435_COLORED_POINT_CLOUD,
                                                                               pointsPerSegment,
                                                                               numberOfSegments));
-            int os0128Multiplier = 2;
+
+            int os0128Multiplier = 1;
             pointsPerSegment = 131072 * os0128Multiplier;
             numberOfSegments = 1;
             globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("Ouster Point Cloud",
@@ -95,6 +96,7 @@ public class PerceptionVisualizerUI
                                                                               ROS2Tools.OUSTER_POINT_CLOUD,
                                                                               pointsPerSegment,
                                                                               numberOfSegments));
+
             videoVisualizer = new GDXROS2VideoVisualizer("Primary Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
             globalVisualizersUI.addVisualizer(videoVisualizer);
 
@@ -151,7 +153,7 @@ public class PerceptionVisualizerUI
 
    public static void main(String[] args) throws URISyntaxException
    {
-      new PerceptionVisualizerUI();
+      new GDXPerceptionVisualizerUI();
    }
 }
 
