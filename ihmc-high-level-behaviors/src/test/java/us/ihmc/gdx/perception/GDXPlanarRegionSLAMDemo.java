@@ -21,8 +21,6 @@ public class GDXPlanarRegionSLAMDemo
    public GDXPlanarRegionSLAMDemo()
    {
 
-
-
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
