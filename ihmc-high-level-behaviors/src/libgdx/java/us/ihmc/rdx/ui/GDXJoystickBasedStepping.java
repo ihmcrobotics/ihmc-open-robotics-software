@@ -118,7 +118,7 @@ public class GDXJoystickBasedStepping
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
    }
 
-   public void create(GDXImGuiBasedUI baseUI, ROS2ControllerHelper controllerHelper, ROS2SyncedRobotModel syncedRobot)
+   public void create(RDXBaseUI baseUI, ROS2ControllerHelper controllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
       this.controllerHelper = controllerHelper;
       this.syncedRobot = syncedRobot;

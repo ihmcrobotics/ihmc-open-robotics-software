@@ -9,7 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.simulation.environment.object.objects.door.GDXDoorObject;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -48,7 +48,7 @@ public class GDXDoorSimulator
       }
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
    }
 

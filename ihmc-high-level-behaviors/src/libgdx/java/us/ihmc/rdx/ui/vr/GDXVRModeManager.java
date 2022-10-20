@@ -13,7 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.GDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.GDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.missionControl.processes.RestartableJavaProcess;
 import us.ihmc.rdx.vr.GDXVRContext;
@@ -36,7 +36,7 @@ public class GDXVRModeManager
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
    private final Notification showFloatVideoPanelNotification = new Notification();
 
-   public void create(GDXImGuiBasedUI baseUI,
+   public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
                       ROS2ControllerHelper controllerHelper,
                       RestartableJavaProcess kinematicsStreamingToolboxProcess)

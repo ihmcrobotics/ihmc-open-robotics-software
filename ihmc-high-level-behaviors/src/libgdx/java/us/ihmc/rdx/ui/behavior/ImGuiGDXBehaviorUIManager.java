@@ -19,7 +19,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
@@ -116,7 +116,7 @@ public class ImGuiGDXBehaviorUIManager
       imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI);
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       ImNodesTools.initialize();
 

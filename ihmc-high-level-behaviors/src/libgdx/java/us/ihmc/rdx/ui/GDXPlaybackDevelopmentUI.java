@@ -18,7 +18,7 @@ public class GDXPlaybackDevelopmentUI
 
    private final String WINDOW_NAME = "Playback Development UI";
 
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
 
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
 
@@ -31,7 +31,7 @@ public class GDXPlaybackDevelopmentUI
    public GDXPlaybackDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
    }
 
    public void launch()

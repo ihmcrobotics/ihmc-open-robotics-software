@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.behavior;
 
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 
 public class ImGuiGDXRootBehaviorUI extends ImGuiGDXBehaviorUIInterface
@@ -13,7 +13,7 @@ public class ImGuiGDXRootBehaviorUI extends ImGuiGDXBehaviorUIInterface
    }
 
    @Override
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
 
    }

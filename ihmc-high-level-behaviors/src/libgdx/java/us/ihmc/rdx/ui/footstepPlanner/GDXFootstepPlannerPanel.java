@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -64,7 +64,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       addChild(goalGizmo.createTunerPanel(getClass().getSimpleName()));
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       goalGizmo.create(baseUI.getPrimary3DPanel().getCamera3D());
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(goalGizmo::calculate3DViewPick);

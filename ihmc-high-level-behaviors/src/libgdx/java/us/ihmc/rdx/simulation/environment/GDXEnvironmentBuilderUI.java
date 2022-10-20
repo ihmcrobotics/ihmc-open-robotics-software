@@ -1,15 +1,15 @@
 package us.ihmc.rdx.simulation.environment;
 
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGui3DViewInputDebugger;
 
 public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                              "Environment Builder");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                  "Environment Builder");
    private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 

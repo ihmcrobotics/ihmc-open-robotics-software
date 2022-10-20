@@ -11,7 +11,7 @@ import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.GDXSimulatedSensorFactory;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
@@ -24,9 +24,9 @@ import java.util.ArrayList;
 
 public class GDXArUcoCodeDetectionDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final Activator nativesLoadedActivator;
    private GDXEnvironmentBuilder environmentBuilder;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();

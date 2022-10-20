@@ -11,7 +11,7 @@ import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
@@ -26,7 +26,7 @@ public class GDXFFMPEGWebcamLoggingDemo
 {
    private static final String WEBCAM_FILE = System.getProperty("webcam.file");
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final boolean lossless = false;
    private final int framerate = 15;

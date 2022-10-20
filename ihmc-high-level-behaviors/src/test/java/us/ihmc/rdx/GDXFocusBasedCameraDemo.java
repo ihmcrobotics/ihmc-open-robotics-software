@@ -5,14 +5,14 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.tools.GDXModelBuilder;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.GDXReferenceFrameGraphic;
 
 public class GDXFocusBasedCameraDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private GDXFocusBasedCamera focusBasedCamera;
    private final Vector3D tempVector = new Vector3D();
    private GDXReferenceFrameGraphic cameraFrameGraphic;

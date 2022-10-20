@@ -5,15 +5,15 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.simulation.environment.object.objects.LabFloorDefinition;
 import us.ihmc.rdx.simulation.environment.object.objects.door.DoorDefinition;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.UnitConversions;
 
 public class GDXSCS2BulletPhysicsDoorDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final GDXSCS2BulletSimulationSession scs2SimulationSession = new GDXSCS2BulletSimulationSession();
 
    public GDXSCS2BulletPhysicsDoorDemo()

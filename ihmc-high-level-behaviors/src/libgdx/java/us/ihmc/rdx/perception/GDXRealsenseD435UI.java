@@ -6,7 +6,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.GDXInteractableRealsenseD435;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.BytedecoImage;
@@ -22,9 +22,9 @@ import java.nio.ByteOrder;
 
 public class GDXRealsenseD435UI
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private GDXInteractableRealsenseD435 d435Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());

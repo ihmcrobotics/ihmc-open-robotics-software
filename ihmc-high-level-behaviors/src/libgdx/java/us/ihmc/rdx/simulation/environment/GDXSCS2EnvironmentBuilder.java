@@ -28,7 +28,7 @@ import us.ihmc.rdx.simulation.environment.object.GDXSCS2EnvironmentObject;
 import us.ihmc.rdx.simulation.environment.object.GDXSCS2EnvironmentObjectFactory;
 import us.ihmc.rdx.simulation.environment.object.GDXSCS2EnvironmentObjectLibrary;
 import us.ihmc.rdx.ui.GDX3DPanel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
@@ -68,7 +68,7 @@ public class GDXSCS2EnvironmentBuilder extends ImGuiPanel
       addChild(poseGizmoTunerPanel);
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       // TODO: Implement hiding the real environment to emulate real world operation
       panel3D.getScene().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.MODEL);

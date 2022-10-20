@@ -22,7 +22,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.GDXTeleoperationParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -37,13 +37,13 @@ public class GDXInteractableFootstepPlan implements RenderableProvider
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RecyclingArrayList<GDXInteractableFootstep> footsteps = new RecyclingArrayList<>(this::newPlannedFootstep);
    private GDXInteractableFootstep selectedFootstep;
-   private GDXImGuiBasedUI baseUI;
+   private RDXBaseUI baseUI;
    private CommunicationHelper communicationHelper;
    private ROS2SyncedRobotModel syncedRobot;
    private GDXFootstepChecker stepChecker;
    private GDXTeleoperationParameters teleoperationParameters;
 
-   public void create(GDXImGuiBasedUI baseUI,
+   public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
                       GDXTeleoperationParameters teleoperationParameters,

@@ -20,7 +20,7 @@ import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.tools.GDXModelInstance;
 import us.ihmc.rdx.tools.GDXModelLoader;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
@@ -47,7 +47,7 @@ public class GDXInteractableFootstep
    private boolean flashingFootStepsColorHigh = false;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
 
-   public GDXInteractableFootstep(GDXImGuiBasedUI baseUI, RobotSide footstepSide, int index)
+   public GDXInteractableFootstep(RDXBaseUI baseUI, RobotSide footstepSide, int index)
    {
       this.footstepSide = footstepSide;
 
@@ -75,12 +75,12 @@ public class GDXInteractableFootstep
       }
    }
 
-   public GDXInteractableFootstep(GDXImGuiBasedUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
+   public GDXInteractableFootstep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex)
    {
       updateFromPlannedStep(baseUI,plannedFootstep,footstepIndex);
    }
 
-   public void updateFromPlannedStep(GDXImGuiBasedUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex )
+   public void updateFromPlannedStep(RDXBaseUI baseUI, PlannedFootstep plannedFootstep, int footstepIndex )
    {
       this.footstepSide = plannedFootstep.getRobotSide();
       if (footstepSide.equals(RobotSide.LEFT))
@@ -320,7 +320,7 @@ public class GDXInteractableFootstep
    /**
     * TODO: Evaluate the use of this method.
     */
-   public void copyFrom(GDXImGuiBasedUI baseUI, GDXInteractableFootstep manuallyPlacedFootstep)
+   public void copyFrom(RDXBaseUI baseUI, GDXInteractableFootstep manuallyPlacedFootstep)
    {
       this.footstepIndexText = manuallyPlacedFootstep.footstepIndexText;
       this.footstepModelInstance = manuallyPlacedFootstep.footstepModelInstance;

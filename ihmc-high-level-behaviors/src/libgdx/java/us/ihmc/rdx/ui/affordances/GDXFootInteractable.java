@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.affordances;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,7 +14,7 @@ public class GDXFootInteractable extends GDXLiveRobotPartInteractable
    }
 
    public GDXFootInteractable(RobotSide side,
-                              GDXImGuiBasedUI baseUI,
+                              RDXBaseUI baseUI,
                               GDXRobotCollisionLink collisionLink,
                               DRCRobotModel robotModel,
                               FullHumanoidRobotModel fullRobotModel)

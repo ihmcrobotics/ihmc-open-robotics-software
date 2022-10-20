@@ -6,14 +6,14 @@ import us.ihmc.rdx.GDXFocusBasedCamera;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.GDXReferenceFrameGraphic;
 
 public class GDXGizmoDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
 
    private GDXFocusBasedCamera focusBasedCamera;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();

@@ -11,7 +11,7 @@ import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.ui.GDX3DPanel;
 import us.ihmc.rdx.ui.GDX3DPanelToolbarButton;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.tools.string.StringTools;
 
@@ -19,10 +19,10 @@ import java.time.LocalDateTime;
 
 public class GDXImGuiBasedUIDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources",
-                                                              "Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  "Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
    private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");

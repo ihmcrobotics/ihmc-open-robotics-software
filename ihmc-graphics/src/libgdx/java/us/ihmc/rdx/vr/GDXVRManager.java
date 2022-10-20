@@ -13,7 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.GDX3DScene;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -65,7 +65,7 @@ public class GDXVRManager
     * TODO: This thread has to be a multiple of the parent (240?)
     * TODO: If the rest of the app is too slow, can we run this one faster?
     */
-   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DScene scene)
+   public void pollEventsAndRender(RDXBaseUI baseUI, GDX3DScene scene)
    {
       boolean posesReady = pollEvents(baseUI);
       if (posesReady && isVRReady())
@@ -81,7 +81,7 @@ public class GDXVRManager
       }
    }
 
-   private boolean pollEvents(GDXImGuiBasedUI baseUI)
+   private boolean pollEvents(RDXBaseUI baseUI)
    {
       boolean posesReadyThisFrame = false;
       if (vrEnabled.get())

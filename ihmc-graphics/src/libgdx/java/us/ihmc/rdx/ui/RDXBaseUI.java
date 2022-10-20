@@ -63,7 +63,7 @@ import java.util.function.Consumer;
  *
  * It is recommended that in every class, the methods that exist in them mapping to the above are defined in the class in that order.
  *
- * Additionally, the update() is only called first if you code according to this in the Lwjgl3ApplicationAdapter provided to GDXImGuiBasedUI:
+ * Additionally, the update() is only called first if you code according to this in the Lwjgl3ApplicationAdapter provided to RDXBaseUI:
  *
  * <pre>
  * &#64;Override
@@ -77,7 +77,7 @@ import java.util.function.Consumer;
  * </pre>
  *
  */
-public class GDXImGuiBasedUI
+public class RDXBaseUI
 {
    public static final int ANTI_ALIASING = 2;
 
@@ -121,12 +121,12 @@ public class GDXImGuiBasedUI
    private Path themeFilePath;
    private final String shadePrefix = "shade=";
 
-   public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
       this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
    }
 
-   public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   public RDXBaseUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
    {
       this.windowTitle = windowTitle;
 

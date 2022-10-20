@@ -10,7 +10,7 @@ import com.jme3.math.Plane;
 import com.jme3.math.Vector3f;
 import com.jme3.system.NativeLibraryLoader;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.io.File;
@@ -19,7 +19,7 @@ public class GDXJMEBulletPhysicsDemo
 {
    String directoryNameToAssumePresent = "ihmc-open-robotics-software";
    String subsequentPathToResourceFolder = "ihmc-high-level-behaviors/src/test/resources";
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), directoryNameToAssumePresent, subsequentPathToResourceFolder);
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), directoryNameToAssumePresent, subsequentPathToResourceFolder);
 
    public GDXJMEBulletPhysicsDemo()
    {

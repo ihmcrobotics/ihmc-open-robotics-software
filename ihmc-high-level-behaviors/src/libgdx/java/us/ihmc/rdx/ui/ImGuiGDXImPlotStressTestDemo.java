@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ImGuiGDXImPlotStressTestDemo
 {
    private final String WINDOW_NAME = "ImPlot Stress Test";
-   private GDXImGuiBasedUI baseUI;
+   private RDXBaseUI baseUI;
    private AtomicInteger numPlotsToShow = new AtomicInteger(50);
    private final Timer timer = new Timer();
    private final double[] xs = new double[500];
@@ -27,7 +27,7 @@ public class ImGuiGDXImPlotStressTestDemo
    public ImGuiGDXImPlotStressTestDemo()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
    }
 
    public void launch()

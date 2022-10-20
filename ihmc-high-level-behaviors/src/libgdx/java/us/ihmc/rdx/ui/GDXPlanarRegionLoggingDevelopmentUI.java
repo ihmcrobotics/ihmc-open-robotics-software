@@ -15,7 +15,7 @@ public class GDXPlanarRegionLoggingDevelopmentUI
 
    private final String WINDOW_NAME = "Planar Region Logging Development UI";
 
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
 
    private ImGuiGDXPlanarRegionLoggingPanel panel;
 
@@ -25,7 +25,7 @@ public class GDXPlanarRegionLoggingDevelopmentUI
    public GDXPlanarRegionLoggingDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
       timer = new Timer();
       rand = new Random();
    }

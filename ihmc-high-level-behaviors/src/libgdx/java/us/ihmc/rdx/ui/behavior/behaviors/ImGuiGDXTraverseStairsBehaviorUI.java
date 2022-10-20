@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
@@ -93,7 +93,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
    }
 
    @Override
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);

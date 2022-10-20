@@ -14,7 +14,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.GDX3DPanel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -46,7 +46,7 @@ public class GDXFootstepChecker
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
 
-   public GDXFootstepChecker(GDXImGuiBasedUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
+   public GDXFootstepChecker(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();

@@ -10,7 +10,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.simulation.BoxRobotDefinition;
 import us.ihmc.rdx.simulation.SlopeGroundDefinition;
 import us.ihmc.rdx.simulation.scs2.GDXSCS2BulletSimulationSession;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
@@ -29,9 +29,9 @@ import java.util.Random;
 
 public class GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final GDXSCS2BulletSimulationSession physicsSimulator = new GDXSCS2BulletSimulationSession();
 
    public GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo()

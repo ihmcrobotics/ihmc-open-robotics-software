@@ -22,7 +22,7 @@ import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.GDXSimulatedSensorFactory;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.affordances.GDXSelectablePose3DGizmo;
@@ -45,7 +45,7 @@ import java.util.List;
 
 public class GDXGPUHeightMapBodyPathPlanningDemo
 {
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private Activator nativesLoadedActivator;
    private GDXHighLevelDepthSensorSimulator ouster;
@@ -68,7 +68,7 @@ public class GDXGPUHeightMapBodyPathPlanningDemo
    private final ImBoolean updateHeightMap = new ImBoolean(true);
    private HeightMapMessage heightMapMessage;
 
-   public GDXGPUHeightMapBodyPathPlanningDemo(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel)
+   public GDXGPUHeightMapBodyPathPlanningDemo(RDXBaseUI baseUI, DRCRobotModel robotModel)
    {
       this.baseUI = baseUI;
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()

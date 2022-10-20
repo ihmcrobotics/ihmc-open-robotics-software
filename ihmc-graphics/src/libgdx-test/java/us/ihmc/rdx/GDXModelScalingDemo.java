@@ -7,16 +7,16 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXModelInstanceScaler;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 
 public class GDXModelScalingDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-graphics/src/libgdx-test/resources",
-                                                              "Scaling Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-graphics/src/libgdx-test/resources",
+                                                  "Scaling Demo");
    private final ImFloat scale = new ImFloat(1.0f);
    private boolean changed = false;
    private GDXPose3DGizmo gizmo;

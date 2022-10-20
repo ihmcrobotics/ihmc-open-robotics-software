@@ -3,15 +3,15 @@ package us.ihmc.rdx;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import us.ihmc.rdx.imgui.GDX3DSituatedImGuiPanel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 
 public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources",
-                                                              "3DSituatedPanelsDemo");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  "3DSituatedPanelsDemo");
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private final GDXPose3DGizmo poseGizmo2 = new GDXPose3DGizmo();
    private GDX3DSituatedImGuiPanel situatedImGuiPanel;

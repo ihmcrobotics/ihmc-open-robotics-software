@@ -11,7 +11,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
@@ -25,7 +25,7 @@ import java.nio.ByteOrder;
 public class GDXFFMPEGL515DepthLoggingDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final boolean lossless = false;
    private final int framerate = 15;
    private final int bitrate = 1450000;

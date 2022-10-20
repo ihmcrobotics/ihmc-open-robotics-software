@@ -17,7 +17,7 @@ import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.rdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -25,10 +25,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class GDXVRDepthSensorDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources",
-                                                              "VR Depth Sensor Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  "VR Depth Sensor Demo");
    private ModelInstance cylinder;
    private boolean moveWithController = true;
    private final Matrix4 tempTransform = new Matrix4();

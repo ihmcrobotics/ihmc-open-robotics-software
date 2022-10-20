@@ -10,7 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
@@ -25,9 +25,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class GDXBlackflyUI
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private SpinnakerBlackfly blackfly;
    private AtomicBoolean doImageAcquisition;

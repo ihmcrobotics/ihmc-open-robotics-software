@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.GDXSpatialVectorArrows;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
@@ -31,7 +31,7 @@ public class GDXHandInteractable extends GDXLiveRobotPartInteractable
    }
 
    public GDXHandInteractable(RobotSide side,
-                              GDXImGuiBasedUI baseUI,
+                              RDXBaseUI baseUI,
                               GDXRobotCollisionLink collisionLink,
                               DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,

@@ -19,7 +19,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.GDXInteractableRealsenseL515;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.perception.*;
@@ -33,9 +33,9 @@ import java.nio.ByteOrder;
 public class GDXRealsenseL515UI
 {
    private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F1121365");
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private GDXInteractableRealsenseL515 l515Interactable;
    private YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());

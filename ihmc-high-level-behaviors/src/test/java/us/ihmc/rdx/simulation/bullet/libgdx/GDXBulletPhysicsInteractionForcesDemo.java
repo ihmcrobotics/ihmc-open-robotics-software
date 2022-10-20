@@ -25,7 +25,7 @@ import us.ihmc.rdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.rdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.yo.ImPlotYoPlot;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,9 +40,9 @@ import java.util.ArrayList;
  */
 public class GDXBulletPhysicsInteractionForcesDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
    private final ImFloat blockTransparency = new ImFloat(0.2f);
 

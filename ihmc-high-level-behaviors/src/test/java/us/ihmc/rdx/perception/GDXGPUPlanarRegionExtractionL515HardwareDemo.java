@@ -5,7 +5,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.perception.BytedecoImage;
@@ -17,9 +17,9 @@ import us.ihmc.tools.thread.Activator;
 
 public class GDXGPUPlanarRegionExtractionL515HardwareDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private Activator nativesLoadedActivator;
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RealSenseHardwareManager realSenseHardwareManager;

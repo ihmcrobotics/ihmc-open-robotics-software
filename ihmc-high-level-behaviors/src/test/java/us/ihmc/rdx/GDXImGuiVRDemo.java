@@ -8,17 +8,17 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.GDXModelBuilder;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.rdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXImGuiVRDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources",
-                                                              "VR Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  "VR Demo");
    private GDXReferenceFrameGraphic headsetZUpFrameGraphic;
    private GDXReferenceFrameGraphic headsetZBackFrameGraphic;
    private GDXReferenceFrameGraphic leftControllerZUpFrameGraphic;

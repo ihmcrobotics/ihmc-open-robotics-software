@@ -26,7 +26,7 @@ public class GDXLoggingDevelopmentUI
    private final int MAX_TICK_LENGTH = 1000000; //Buffer/log length
    private final int TICK_PERIOD = 200; //Measured in ms
 
-   private GDXImGuiBasedUI baseUI;
+   private RDXBaseUI baseUI;
 
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
 
@@ -58,7 +58,7 @@ public class GDXLoggingDevelopmentUI
    public GDXLoggingDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
 
       random = new Random();
 
