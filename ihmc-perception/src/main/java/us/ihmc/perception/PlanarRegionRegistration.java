@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -30,7 +31,8 @@ public class PlanarRegionRegistration
    private PlanarRegionsList currentRegions;
    private PlanarRegionsList previousRegions;
 
-   private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";
+//   private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";
+   private String regionFilePath = "/home/bmishra/Workspace/Code/MapSenseROS/Extras/Regions/Archive/Set_06_Circle/";
    ;
 
    public PlanarRegionRegistration()
@@ -65,6 +67,54 @@ public class PlanarRegionRegistration
                     matches.size());
 
       this.modified = true;
+   }
+
+   public static RigidBodyTransform registerRegionsPointToPlane(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, HashMap<Integer, Integer> matches)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+
+      int totalNumOfBoundaryPoints = 0;
+      for (int i = 0; i < matches.size(); i++)
+      {
+         totalNumOfBoundaryPoints += currentRegions.getPlanarRegionsAsList().get(matches.get(i)).getConcaveHullSize();
+      }
+      DMatrixRMaj A = new DMatrixRMaj(totalNumOfBoundaryPoints, 6);
+      DMatrixRMaj b = new DMatrixRMaj(totalNumOfBoundaryPoints);
+
+      int i = 0;
+      for (int m = 0; m < matches.size(); m++)
+      {
+         PlanarRegion currentRegion = currentRegions.getPlanarRegionsAsList().get(matches.get(m));
+         for (int n = 0; n < currentRegion.getConcaveHullSize(); n++)
+         {
+            Point3D latestPoint = currentRegion.getConcaveHullVertex(n);
+            Eigen::Vector3f correspondingMapCentroid = _previousRegionsZUp[matches.get(m).first]->GetCenter();
+            Eigen::Vector3f correspondingMapNormal = _previousRegionsZUp[matches.get(m).first]->GetNormal();
+            Eigen::Vector3f cross = latestPoint.cross(correspondingMapNormal);
+            A(i, 0) = cross(0);
+            A(i, 1) = cross(1);
+            A(i, 2) = cross(2);
+            A(i, 3) = correspondingMapNormal(0);
+            A(i, 4) = correspondingMapNormal(1);
+            A(i, 5) = correspondingMapNormal(2);
+            b(i) = -(latestPoint - correspondingMapCentroid).dot(correspondingMapNormal);
+            i++;
+         }
+      }
+
+      printf("PlanarICP: (A:(%d, %d), b:(%d))\n", A.rows(), A.cols(), b.rows());
+
+      Eigen::VectorXf solution(6);
+      solution = A.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(b);
+      eulerAnglesToReference = Eigen::Vector3d((double) solution(0), (double) solution(1), (double) solution(2));
+      translationToReference = Eigen::Vector3d((double) solution(3), (double) solution(4), (double) solution(5));
+
+      printf("ICP Result: Rotation(%.2lf, %.2lf, %.2lf) Translation(%.2lf, %.2lf, %.2lf)\n", eulerAnglesToReference.x(), eulerAnglesToReference.y(),
+             eulerAnglesToReference.z(), translationToReference.x(), translationToReference.y(), translationToReference.z());
+
+      /* Update relative and total transform from current sensor pose to map frame. Required for initial value for landmarks observed in current pose. */
+      _sensorPoseRelative.SetAnglesAndTranslation(eulerAnglesToReference, translationToReference);
+      _sensorToMapTransform.MultiplyRight(_sensorPoseRelative);
    }
 
    public static String getValue(BufferedReader reader, String key) throws IOException
