@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.LinearCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
@@ -225,6 +226,9 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       return new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                     centerOfMassStateProvider,
+                                                    robotModel.getWalkingControllerParameters().createCapturePointCalculator(centerOfMassStateProvider,
+                                                                                                                             fullRobotModel.getElevator(),
+                                                                                                                             gravityZ),
                                                     referenceFrames,
                                                     footSwitches,
                                                     null,

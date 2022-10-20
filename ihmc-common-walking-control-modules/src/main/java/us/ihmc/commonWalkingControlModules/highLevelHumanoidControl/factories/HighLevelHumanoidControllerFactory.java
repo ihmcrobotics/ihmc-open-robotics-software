@@ -499,6 +499,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                                  centerOfMassStateProvider,
+                                                                 walkingControllerParameters.createCapturePointCalculator(centerOfMassStateProvider,
+                                                                                                                          fullRobotModel.getElevator(),
+                                                                                                                          gravityZ),
                                                                  referenceFrames,
                                                                  footSwitches,
                                                                  wristForceSensors,

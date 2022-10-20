@@ -159,6 +159,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel,
                                              CenterOfMassStateProvider centerOfMassStateProvider,
+                                             CapturePointCalculator capturePointCalculator,
                                              CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<? extends FootSwitchInterface> footSwitches,
                                              SideDependentList<ForceSensorDataReadOnly> wristForceSensors,
@@ -186,7 +187,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
-      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+      this.capturePointCalculator = capturePointCalculator;
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 

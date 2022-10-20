@@ -12,11 +12,15 @@ import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslat
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.LinearCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
@@ -661,6 +665,13 @@ public abstract class WalkingControllerParameters
    public abstract ICPControllerParameters getICPControllerParameters();
 
    public abstract StepAdjustmentParameters getStepAdjustmentParameters();
+
+   public CapturePointCalculator createCapturePointCalculator(CenterOfMassStateProvider centerOfMassStateProvider,
+                                                              RigidBodyBasics elevator,
+                                                              double gravityZ)
+   {
+      return new LinearCapturePointCalculator(centerOfMassStateProvider);
+   }
 
    /**
     * Get the maximum leg length for the singularity avoidance control module.

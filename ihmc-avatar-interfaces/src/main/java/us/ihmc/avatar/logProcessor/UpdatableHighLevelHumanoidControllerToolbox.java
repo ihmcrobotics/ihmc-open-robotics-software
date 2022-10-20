@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.LinearCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -34,6 +36,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs,
                                                       FullHumanoidRobotModel fullRobotModel,
                                                       CenterOfMassStateProvider centerOfMassStateProvider,
+                                                      CapturePointCalculator capturePointCalculator,
                                                       CommonHumanoidReferenceFrames referenceFrames,
                                                       SideDependentList<FootSwitchInterface> footSwitches,
                                                       SideDependentList<ForceSensorDataReadOnly> wristForceSensors,
@@ -49,6 +52,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    {
       super(fullRobotModel,
             centerOfMassStateProvider,
+            capturePointCalculator,
             referenceFrames,
             footSwitches,
             wristForceSensors,

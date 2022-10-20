@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.LinearCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -45,7 +45,6 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -94,7 +93,7 @@ public class SimpleLinearMomentumRateControlModule
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
    private final FramePoint2D capturePoint = new FramePoint2D();
-   private final CapturePointCalculator capturePointCalculator;
+   private final LinearCapturePointCalculator capturePointCalculator;
 
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
@@ -202,7 +201,7 @@ public class SimpleLinearMomentumRateControlModule
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
-      capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, elevator);
+      capturePointCalculator = new LinearCapturePointCalculator(centerOfMassFrame, elevator);
       DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
                                                                                                                        controlDT);
       capturePointVelocity = new FilteredVelocityYoFrameVector2d("capturePointVelocity", "", capturePointVelocityAlpha, controlDT, registry, worldFrame);

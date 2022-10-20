@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.LinearCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightController;
@@ -140,6 +141,7 @@ public class LinearMomentumRateControlModule
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
+   private final YoBoolean useOnlyCoP = new YoBoolean("useOnlyCoP", registry);
    private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final ReferenceFrame midFootZUpFrame;
@@ -204,7 +206,7 @@ public class LinearMomentumRateControlModule
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
-      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
+      capturePointCalculator = walkingControllerParameters.createCapturePointCalculator(centerOfMassStateProvider, elevator, gravityZ);
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
       comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
@@ -382,6 +384,8 @@ public class LinearMomentumRateControlModule
       success = success && computeDesiredLinearMomentumRateOfChange();
 
       selectionMatrix.setToLinearSelectionOnly();
+      selectionMatrix.selectLinearX(useOnlyCoP.getBooleanValue());
+      selectionMatrix.selectLinearY(useOnlyCoP.getBooleanValue());
       selectionMatrix.selectLinearZ(controlHeightWithMomentum);
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);

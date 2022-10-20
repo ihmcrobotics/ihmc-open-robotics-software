@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.LinearCapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -200,6 +201,9 @@ public class HumanoidKinematicsSimulation
 
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                                  centerOfMassStateProvider,
+                                                                 robotModel.getWalkingControllerParameters().createCapturePointCalculator(centerOfMassStateProvider,
+                                                                                                                                          fullRobotModel.getElevator(),
+                                                                                                                                          GRAVITY_Z),
                                                                  referenceFrames,
                                                                  footSwitches,
                                                                  null,

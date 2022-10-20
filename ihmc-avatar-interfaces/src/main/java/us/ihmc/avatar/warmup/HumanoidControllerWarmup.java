@@ -271,6 +271,9 @@ public abstract class HumanoidControllerWarmup
 
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
                                                                  centerOfMassStateProvider,
+                                                                 walkingControllerParameters.createCapturePointCalculator(centerOfMassStateProvider,
+                                                                                                                          fullRobotModel.getElevator(),
+                                                                                                                          gravityZ),
                                                                  referenceFrames,
                                                                  footSwitches,
                                                                  null,
