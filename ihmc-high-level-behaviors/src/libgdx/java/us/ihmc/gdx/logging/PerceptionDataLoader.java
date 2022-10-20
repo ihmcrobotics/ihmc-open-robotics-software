@@ -26,6 +26,11 @@ public class PerceptionDataLoader
       HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points);
    }
 
+   public void loadCompressedPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
+   {
+      HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points);
+   }
+
    public void loadImage(String namespace, int index, Mat mat)
    {
       HDF5Tools.loadImage(hdf5Manager.getGroup(namespace), index, mat);

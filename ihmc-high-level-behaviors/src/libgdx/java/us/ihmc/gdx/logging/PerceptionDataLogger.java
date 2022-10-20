@@ -23,12 +23,10 @@ import us.ihmc.perception.HDF5Manager;
 import us.ihmc.perception.HDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.sessionVisualizer.jfx.managers.BackgroundExecutorManager;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
@@ -43,7 +41,7 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 public class PerceptionDataLogger
 {
    static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5";
-   private final HDF5Manager h5;
+   private final HDF5Manager hdf5Manager;
 
    private final ROS2Node ros2Node;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -85,13 +83,13 @@ public class PerceptionDataLogger
       {
 
          LogTools.info("Creating HDF5 File: " + FILE_NAME);
-         h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
-         h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
+         hdf5Manager = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
+         hdf5Manager.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
       }
       else
       {
          LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
-         h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
+         hdf5Manager = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
       }
 
       // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
@@ -99,7 +97,7 @@ public class PerceptionDataLogger
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
 
       // Add callback for Ouster scans
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN.withType(LidarScanMessage.class), this::logLidarScanMessage);
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.OUSTER_POINT_CLOUD.withType(FusedSensorHeadPointCloudMessage.class), this::logLidarScanMessage);
 
       // Add callback for Robot Configuration Data
       new IHMCROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
@@ -140,12 +138,12 @@ public class PerceptionDataLogger
       storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
    }
 
-   public void logLidarScanMessage(LidarScanMessage message)
+   public void logLidarScanMessage(FusedSensorHeadPointCloudMessage message)
    {
       LogTools.info("OUSTER POINT CLOUD Received.");
 
-      lidarScanMessage.set(message);
-      storePointCloud("/os_cloud_node/points/", lidarScanMessage);
+      ousterCloudPacket.set(message);
+      storePointCloud("/os_cloud_node/points/", ousterCloudPacket);
    }
 
    public void logDepthMap(BigVideoPacket packet)
@@ -185,18 +183,18 @@ public class PerceptionDataLogger
 
       opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
 
-      HDF5Tools.storeCompressedImage(h5.getGroup("/ihmc/logger/camera/"), compressedImageCounter, jpegImageBytePointer);
+      HDF5Tools.storeCompressedImage(hdf5Manager.getGroup("/ihmc/logger/camera/"), compressedImageCounter, jpegImageBytePointer);
    }
 
    public void storeDepthMap(String namespace, BigVideoPacket message)
    {
-      Group group = h5.getGroup(namespace);
+      Group group = hdf5Manager.getGroup(namespace);
       executor.executeInBackground(() ->
                                    {
                                       synchronized (this)
                                       {
                                          LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
-                                         depthMapCount = (int) h5.getCount(namespace);
+                                         depthMapCount = (int) hdf5Manager.getCount(namespace);
 
                                          IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
                                          imageEncodedTByteArrayList.toArray(messageDataHeapArray);
@@ -211,33 +209,14 @@ public class PerceptionDataLogger
 
    public void storePointCloud(String namespace, LidarScanMessage message)
    {
-      Group group = h5.getGroup(namespace);
-
-      //      int numberOfScanPoints = message.getNumberOfPoints();
-      //      ArrayList<Float> pointFloats = new ArrayList<>();
-      //
-      //
-      //      LogTools.info("Compressed Message Size: {}", message.getScan().size());
-      //
-      //      LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfScanPoints, (i, x, y, z) ->
-      //      {
-      //         pointFloats.add((float) x);
-      //         pointFloats.add((float) y);
-      //         pointFloats.add((float) z);
-      //      });
-      //
-      //      ArrayList<Float> buffer = h5.getBuffer(namespace);
-      //      buffer.addAll(pointFloats);
-      //
-      //      ArrayList<Float> data = new ArrayList<>(buffer);
-      //      h5.resetBuffer(namespace);
+      Group group = hdf5Manager.getGroup(namespace);
 
       executor.executeInBackground(() ->
                                    {
                                       synchronized (this)
                                       {
                                          LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
-                                         pointCloudCount = (int) h5.getCount(namespace);
+                                         pointCloudCount = (int) hdf5Manager.getCount(namespace);
                                          HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
                                          LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
 
@@ -246,25 +225,40 @@ public class PerceptionDataLogger
                                    });
    }
 
-   //    HDF5Tools.storeMatrix(h5.getGroup(namespace), h5.getBuffer(namespace, array.length).data);
+   public void storePointCloud(String namespace, FusedSensorHeadPointCloudMessage message)
+   {
+      Group group = hdf5Manager.getGroup(namespace);
+
+      executor.executeInBackground(() ->
+                                   {
+                                      synchronized (this)
+                                      {
+                                         LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
+                                         pointCloudCount = (int) hdf5Manager.getCount(namespace);
+                                         HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
+                                         LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
+                                      }
+                                   });
+   }
+
    public void storeFloatArray(String namespace, float[] array)
    {
-      Group group = h5.getGroup(namespace);
+      Group group = hdf5Manager.getGroup(namespace);
       Float[] objectArray = ArrayUtils.toObject(array);
-      ArrayList<Float> buffer = h5.getBuffer(namespace);
+      ArrayList<Float> buffer = hdf5Manager.getBuffer(namespace);
       buffer.addAll(Arrays.asList(objectArray));
 
-      int bufferSize = h5.getBufferIndex(namespace) / array.length;
+      int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
       LogTools.info("Buffer Index: {} {}", bufferSize, HDF5Manager.MAX_BUFFER_SIZE - 1);
       if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
       {
          LogTools.info("Thread Store Triggered");
          ArrayList<Float> data = new ArrayList<>(buffer);
-         h5.resetBuffer(namespace);
+         hdf5Manager.resetBuffer(namespace);
 
          executor.executeInBackground(() ->
                                       {
-                                         long count = h5.getCount(namespace);
+                                         long count = hdf5Manager.getCount(namespace);
                                          LogTools.info("Storing Buffer: {}", count);
                                          HDF5Tools.storeFloatArray2D(group, count, data, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                                          LogTools.info("Done Storing Buffer: {}", count);
