@@ -6,7 +6,7 @@ import org.abego.treelayout.Configuration;
 import org.abego.treelayout.NodeExtentProvider;
 import org.abego.treelayout.TreeLayout;
 import org.abego.treelayout.util.DefaultTreeForTreeLayout;
-import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
+import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -17,28 +17,28 @@ public class ImNodesAbegoAutoLayout
    private final HashMap<Integer, ImVec2> nodeSizeMap = new HashMap<>();
    private int nodeIndex = 0;
 
-   public void layoutNodes(ImGuiGDXBehaviorUIInterface tree)
+   public void layoutNodes(RDXBehaviorUIInterface tree)
    {
-      DefaultTreeForTreeLayout<ImGuiGDXBehaviorUIInterface> treeForLayout = new DefaultTreeForTreeLayout<>(tree);
+      DefaultTreeForTreeLayout<RDXBehaviorUIInterface> treeForLayout = new DefaultTreeForTreeLayout<>(tree);
       constructAbegoTree(tree, treeForLayout);
 
-      TreeLayout<ImGuiGDXBehaviorUIInterface> layout = new TreeLayout<ImGuiGDXBehaviorUIInterface>(treeForLayout, new NodeExtentProvider<ImGuiGDXBehaviorUIInterface>()
+      TreeLayout<RDXBehaviorUIInterface> layout = new TreeLayout<RDXBehaviorUIInterface>(treeForLayout, new NodeExtentProvider<RDXBehaviorUIInterface>()
       {
 
          @Override
-         public double getWidth(ImGuiGDXBehaviorUIInterface gdxBehaviorUIInterface)
+         public double getWidth(RDXBehaviorUIInterface gdxBehaviorUIInterface)
          {
             int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
             return nodeSizeMap.get(index).x;
          }
 
          @Override
-         public double getHeight(ImGuiGDXBehaviorUIInterface gdxBehaviorUIInterface)
+         public double getHeight(RDXBehaviorUIInterface gdxBehaviorUIInterface)
          {
             int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
             return nodeSizeMap.get(index).y;
          }
-      }, new Configuration<ImGuiGDXBehaviorUIInterface>()
+      }, new Configuration<RDXBehaviorUIInterface>()
       {
          @Override
          public Location getRootLocation()
@@ -59,14 +59,14 @@ public class ImNodesAbegoAutoLayout
          }
 
          @Override
-         public double getGapBetweenNodes(ImGuiGDXBehaviorUIInterface node1, ImGuiGDXBehaviorUIInterface node2)
+         public double getGapBetweenNodes(RDXBehaviorUIInterface node1, RDXBehaviorUIInterface node2)
          {
             return 25;
          }
       });
 
-      Map<ImGuiGDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
-      for (ImGuiGDXBehaviorUIInterface node : map.keySet())
+      Map<RDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
+      for (RDXBehaviorUIInterface node : map.keySet())
       {
          int index = getIndexOfNode(node, tree);
          Rectangle2D.Double pos = map.get(node);
@@ -76,19 +76,19 @@ public class ImNodesAbegoAutoLayout
    }
 
 
-   private int getIndexOfNode(ImGuiGDXBehaviorUIInterface node, ImGuiGDXBehaviorUIInterface tree)
+   private int getIndexOfNode(RDXBehaviorUIInterface node, RDXBehaviorUIInterface tree)
    {
       nodeIndex = tree.generateUID();
       return getIndexOfNodeInternal(node, tree);
    }
 
-   private int getIndexOfNodeInternal(ImGuiGDXBehaviorUIInterface node, ImGuiGDXBehaviorUIInterface root)
+   private int getIndexOfNodeInternal(RDXBehaviorUIInterface node, RDXBehaviorUIInterface root)
    {
       if (root.equals(node))
          return nodeIndex;
       else
       {
-         for (ImGuiGDXBehaviorUIInterface child : root.getUIChildren())
+         for (RDXBehaviorUIInterface child : root.getUIChildren())
          {
             nodeIndex++;
             int val = getIndexOfNodeInternal(node, child);
@@ -101,12 +101,12 @@ public class ImNodesAbegoAutoLayout
       return -1;
    }
 
-   private void constructAbegoTree(ImGuiGDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<ImGuiGDXBehaviorUIInterface> layout)
+   private void constructAbegoTree(RDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<RDXBehaviorUIInterface> layout)
    {
       if (tree == null)
          return;
 
-      for (ImGuiGDXBehaviorUIInterface child : tree.getUIChildren())
+      for (RDXBehaviorUIInterface child : tree.getUIChildren())
       {
          layout.addChild(tree, child);
          constructAbegoTree(child, layout);

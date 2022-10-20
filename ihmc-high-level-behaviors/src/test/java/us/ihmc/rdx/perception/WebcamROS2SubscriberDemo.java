@@ -36,7 +36,7 @@ public class WebcamROS2SubscriberDemo
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
 //   private ImGuiVideoPanel videoPanel;
-   private GDXCVImagePanel cvImagePanel;
+   private RDXCVImagePanel cvImagePanel;
    private final ImPlotFrequencyPlot receiveFrequencyPlot = new ImPlotFrequencyPlot("Receive frequency");
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Network transmission duration");
    private final ImPlotStopwatchPlot decodeDurationPlot = new ImPlotStopwatchPlot("Decode duration");
@@ -62,7 +62,7 @@ public class WebcamROS2SubscriberDemo
    public WebcamROS2SubscriberDemo()
    {
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
-      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
@@ -100,7 +100,7 @@ public class WebcamROS2SubscriberDemo
                   baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
 
 
-                  cvImagePanel = new GDXCVImagePanel("Video1", 1920, 1080);
+                  cvImagePanel = new RDXCVImagePanel("Video1", 1920, 1080);
                   baseUI.getImGuiPanelManager().addPanel(cvImagePanel.getVideoPanel());
 
                   baseUI.getPerspectiveManager().reloadPerspective();

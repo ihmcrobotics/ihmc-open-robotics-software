@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.yo;
 
 import imgui.extension.implot.ImPlot;
-import us.ihmc.rdx.simulation.scs2.GDXYoManager;
+import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 import us.ihmc.rdx.ui.tools.ImPlotTools;
 import us.ihmc.scs2.sharedMemory.BufferSample;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
@@ -26,7 +26,7 @@ public class ImPlotYoBufferDoublePlotLine extends ImPlotYoBufferPlotLineBasics
    }
 
    @Override
-   public void setupLinkedVariable(GDXYoManager yoManager)
+   public void setupLinkedVariable(RDXYoManager yoManager)
    {
       if (linkedYoDoubleVariable == null)
       {

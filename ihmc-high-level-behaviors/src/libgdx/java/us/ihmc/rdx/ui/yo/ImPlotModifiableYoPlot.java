@@ -4,7 +4,7 @@ import imgui.internal.ImGui;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.simulation.scs2.GDXYoManager;
+import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.variable.*;
 
@@ -20,13 +20,13 @@ public class ImPlotModifiableYoPlot
    private final ImGuiYoVariableSearchPanel imGuiYoVariableSearchPanel;
    private final ImPlotModifiableYoPlotPanel imPlotModifiableYoPlotPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final GDXYoManager yoManager;
+   private final RDXYoManager yoManager;
    private boolean requestedVariable = false;
    private final Consumer<ImPlotModifiableYoPlot> removeSelf;
 
    public ImPlotModifiableYoPlot(ImGuiYoVariableSearchPanel imGuiYoVariableSearchPanel,
                                  ImPlotModifiableYoPlotPanel imPlotModifiableYoPlotPanel,
-                                 GDXYoManager yoManager,
+                                 RDXYoManager yoManager,
                                  Consumer<ImPlotModifiableYoPlot> removeSelf)
    {
       this.imGuiYoVariableSearchPanel = imGuiYoVariableSearchPanel;

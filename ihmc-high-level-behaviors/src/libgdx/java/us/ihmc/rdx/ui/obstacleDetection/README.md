@@ -1,4 +1,4 @@
-Documentation for GDXObstacleDetectionUI:
+Documentation for RDXObstacleDetectionUI:
 
 This is the visualization class for java, it should cooperate with another C++ code to obtain the bounding box,
 road point cloud and obstacle point cloud. For C++ code, please refer to https://github.com/Joechencc/lidar_obstacle_detection/blob/main/README.md

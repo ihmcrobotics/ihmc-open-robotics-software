@@ -66,7 +66,7 @@ public class WebcamROS2PublisherDemo
    public WebcamROS2PublisherDemo()
    {
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
-      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
