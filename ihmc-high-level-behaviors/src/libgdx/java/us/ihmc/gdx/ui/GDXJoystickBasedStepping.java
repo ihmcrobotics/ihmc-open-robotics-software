@@ -326,11 +326,11 @@ public class GDXJoystickBasedStepping
       footstepPlanGraphic.getRenderables(renderables, pool);
    }
 
-   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
-      adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
+      adjustedBasedOnStanceFoot.setZ(stanceFootPose.getZ());
       adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
       
       adjustedFootstep.set(adjustedBasedOnStanceFoot);
