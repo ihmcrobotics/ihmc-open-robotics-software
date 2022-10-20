@@ -12,7 +12,7 @@ public class ImGui3DViewInputDebugger
    private ImGuiPlot deltaYPlot;
    private ImGuiPlot scrolledYPlot;
 
-   public void create(GDX3DPanel panel3D)
+   public void create(RDX3DPanel panel3D)
    {
       panel3D.addImGui3DViewInputProcessor(input ->
       {

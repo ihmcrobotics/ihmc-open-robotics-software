@@ -32,6 +32,6 @@ public class EuclidModelInstance extends ModelInstance
       tempPose.set(offsetTransform);
       tempPose.applyTransform(userTransform);
       tempPose.get(tempRigidBodyTransform);
-      GDXTools.toGDX(tempRigidBodyTransform, transform);
+      LibGDXTools.toGDX(tempRigidBodyTransform, transform);
    }
 }

@@ -1,6 +1,0 @@
-package us.ihmc.rdx.ui.vr;
-
-public enum GDXVRMode
-{
-   INPUTS_DISABLED, FOOTSTEP_PLACEMENT, JOYSTICK_WALKING, WHOLE_BODY_IK_STREAMING
-}

@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.yo;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.simulation.scs2.GDXYoManager;
+import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -14,12 +14,12 @@ public class ImPlotModifiableYoPlotPanel extends ImGuiPanel
    private final ImPlotPlotPanelLayout layout = new ImPlotPlotPanelLayout();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiYoVariableSearchPanel yoVariableSearchPanel;
-   private final GDXYoManager yoManager;
+   private final RDXYoManager yoManager;
    private final Consumer<ImPlotModifiableYoPlotPanel> removeSelf;
 
    public ImPlotModifiableYoPlotPanel(String panelName,
                                       ImGuiYoVariableSearchPanel yoVariableSearchPanel,
-                                      GDXYoManager yoManager,
+                                      RDXYoManager yoManager,
                                       Consumer<ImPlotModifiableYoPlotPanel> removeSelf)
    {
       super(panelName, null, false, true);

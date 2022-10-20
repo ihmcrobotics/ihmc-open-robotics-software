@@ -35,7 +35,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.utils.GdxTest;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.tools.GDXApplicationCreator;
+import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 
 public class ShadowMappingTest extends GdxTest {
 	PerspectiveCamera cam;
@@ -120,7 +120,7 @@ public class ShadowMappingTest extends GdxTest {
 	public static void main(String[] args)
 	{
 		ShadowMappingTest shadowMappingTest = new ShadowMappingTest();
-		GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+		LibGDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
 		{
 			@Override
 			public void create()

@@ -15,17 +15,17 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.imgui.GDXImGuiWindowAndDockSystem;
+import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
 import us.ihmc.rdx.imgui.ImGuiPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.GDXInputMode;
-import us.ihmc.rdx.sceneManager.GDX3DScene;
-import us.ihmc.rdx.sceneManager.GDX3DSceneTools;
-import us.ihmc.rdx.sceneManager.GDXSceneLevel;
-import us.ihmc.rdx.tools.GDXApplicationCreator;
-import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.vr.GDXVRManager;
+import us.ihmc.rdx.input.RDXInputMode;
+import us.ihmc.rdx.sceneManager.RDX3DScene;
+import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXApplicationCreator;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.vr.RDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
@@ -48,8 +48,8 @@ import java.util.function.Consumer;
  *
  * loop:
  *     update()
- *     calculateVRPick(GDXVRContext)
- *     processVRInput(GDXVRContext)
+ *     calculateVRPick(RDXVRContext)
+ *     processVRInput(RDXVRContext)
  *     calculate3DViewPick(ImGui3DViewInput)
  *     process3DViewInput(ImGui3DViewInput)
  *     renderImGuiWidgets()
@@ -86,12 +86,12 @@ public class RDXBaseUI
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
    private GLProfiler glProfiler;
-   private final GDX3DScene primaryScene = new GDX3DScene();
-   private final GDX3DPanel primary3DPanel;
-   private final ArrayList<GDX3DPanel> additional3DPanels = new ArrayList<>();
-   private final GDXVRManager vrManager = new GDXVRManager();
-   private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-//   private final GDXLinuxGUIRecorder guiRecorder;
+   private final RDX3DScene primaryScene = new RDX3DScene();
+   private final RDX3DPanel primary3DPanel;
+   private final ArrayList<RDX3DPanel> additional3DPanels = new ArrayList<>();
+   private final RDXVRManager vrManager = new RDXVRManager();
+   private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
+//   private final RDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
@@ -107,10 +107,10 @@ public class RDXBaseUI
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(true);
-   private final ImFloat backgroundShade = new ImFloat(GDX3DSceneTools.CLEAR_COLOR);
-   private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
+   private final ImFloat backgroundShade = new ImFloat(RDX3DSceneTools.CLEAR_COLOR);
+   private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
-   private final GDXImGuiPerspectiveManager perspectiveManager;
+   private final RDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;
    private double isoZoomOut = 0.7;
    private enum Theme
@@ -137,8 +137,8 @@ public class RDXBaseUI
                                                        classForLoading,
                                                        configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
-      perspectiveManager = new GDXImGuiPerspectiveManager(classForLoading,
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
+      perspectiveManager = new RDXImGuiPerspectiveManager(classForLoading,
                                                           directoryNameToAssumePresent,
                                                           subsequentPathToResourceFolder,
                                                           configurationExtraPath,
@@ -163,7 +163,7 @@ public class RDXBaseUI
       perspectiveManager.getSaveListeners().add(this::saveApplicationSettings);
       perspectiveManager.applyPerspectiveDirectory();
 
-//      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
+//      guiRecorder = new RDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
 //      Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
 
@@ -173,10 +173,10 @@ public class RDXBaseUI
 //         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
       }
 
-      primary3DPanel = new GDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
+      primary3DPanel = new RDX3DPanel(VIEW_3D_WINDOW_NAME, ANTI_ALIASING, true);
    }
 
-   public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
+   public void launchRDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
       AtomicReference<Integer> windowWidth = new AtomicReference<>(800);
       AtomicReference<Integer> windowHeight = new AtomicReference<>(600);
@@ -187,25 +187,25 @@ public class RDXBaseUI
       });
 
       LogTools.info("Launching GDX application");
-      GDXApplicationCreator.launchGDXApplication(applicationAdapter, windowTitle, windowWidth.get(), windowHeight.get());
+      LibGDXApplicationCreator.launchGDXApplication(applicationAdapter, windowTitle, windowWidth.get(), windowHeight.get());
    }
 
    public void create()
    {
-      create(GDXSceneLevel.MODEL, GDXSceneLevel.VIRTUAL);
+      create(RDXSceneLevel.MODEL, RDXSceneLevel.VIRTUAL);
    }
 
-   public void create(GDXSceneLevel... sceneLevels)
+   public void create(RDXSceneLevel... sceneLevels)
    {
       LogTools.info("Creating...");
-      GDXTools.printGLVersion();
+      LibGDXTools.printGLVersion();
 
-      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
-         glProfiler = GDXTools.createGLProfiler();
+      if (LibGDXTools.ENABLE_OPENGL_DEBUGGER)
+         glProfiler = LibGDXTools.createGLProfiler();
 
       primaryScene.create(sceneLevels);
       primaryScene.addDefaultLighting();
-      primary3DPanel.create(GDXInputMode.ImGui, glProfiler, primaryScene);
+      primary3DPanel.create(RDXInputMode.ImGui, glProfiler, primaryScene);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(primary3DPanel.getImGuiPanel());
       primary3DPanel.getImGuiPanel().getIsShowing().set(true);
 
@@ -219,7 +219,7 @@ public class RDXBaseUI
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
       vrManager.create();
-      primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
       primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
       imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
@@ -259,7 +259,7 @@ public class RDXBaseUI
       Gdx.graphics.setTitle(windowTitle);
       imGuiWindowAndDockSystem.beforeWindowManagement();
       primary3DPanel.render();
-      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.render();
       }
@@ -305,29 +305,29 @@ public class RDXBaseUI
             ImGui.getIO().setFontGlobalScale(imguiFontScale.get());
          }
          ImGui.separator();
-         boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.GROUND_TRUTH);
+         boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
          if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
          {
             if (renderingGroundTruthEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.GROUND_TRUTH);
+               primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.GROUND_TRUTH);
             else
-               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.GROUND_TRUTH);
+               primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
          }
-         boolean renderingModelEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.MODEL);
+         boolean renderingModelEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.MODEL);
          if (ImGui.checkbox(labels.get("Render Model Environment"), renderingModelEnvironment))
          {
             if (renderingModelEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.MODEL);
+               primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
             else
-               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.MODEL);
+               primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.MODEL);
          }
-         boolean renderingVirtualEnvironment = primaryScene.getSceneLevelsToRender().contains(GDXSceneLevel.VIRTUAL);
+         boolean renderingVirtualEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.VIRTUAL);
          if (ImGui.checkbox(labels.get("Render Virtual Environment"), renderingVirtualEnvironment))
          {
             if (renderingVirtualEnvironment)
-               primaryScene.getSceneLevelsToRender().remove(GDXSceneLevel.VIRTUAL);
+               primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.VIRTUAL);
             else
-               primaryScene.getSceneLevelsToRender().add(GDXSceneLevel.VIRTUAL);
+               primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
          if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
          {
@@ -408,9 +408,9 @@ public class RDXBaseUI
       primaryScene.dispose();
    }
 
-   public void add3DPanel(GDX3DPanel panel3D)
+   public void add3DPanel(RDX3DPanel panel3D)
    {
-      panel3D.create(GDXInputMode.ImGui, glProfiler, primaryScene);
+      panel3D.create(RDXInputMode.ImGui, glProfiler, primaryScene);
       panel3D.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D.getImGuiPanel());
       additional3DPanels.add(panel3D);
@@ -444,27 +444,27 @@ public class RDXBaseUI
       return imGuiWindowAndDockSystem.getPanelManager();
    }
 
-   public GDXImGuiPerspectiveManager getPerspectiveManager()
+   public RDXImGuiPerspectiveManager getPerspectiveManager()
    {
       return perspectiveManager;
    }
 
-   public GDX3DScene getPrimaryScene()
+   public RDX3DScene getPrimaryScene()
    {
       return primaryScene;
    }
 
-   public GDX3DPanel getPrimary3DPanel()
+   public RDX3DPanel getPrimary3DPanel()
    {
       return primary3DPanel;
    }
 
-   public GDXVRManager getVRManager()
+   public RDXVRManager getVRManager()
    {
       return vrManager;
    }
 
-   public GDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
+   public RDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
    {
       return imGuiWindowAndDockSystem;
    }
@@ -483,7 +483,7 @@ public class RDXBaseUI
    {
       this.middleClickOrbit.set(useMiddleClickViewOrbit);
       primary3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
-      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.getCamera3D().setUseMiddleClickViewOrbit(useMiddleClickViewOrbit);
       }
@@ -493,7 +493,7 @@ public class RDXBaseUI
    {
       this.backgroundShade.set(backgroundShade);
       primary3DPanel.setBackgroundShade(backgroundShade);
-      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.setBackgroundShade(backgroundShade);
       }
@@ -503,7 +503,7 @@ public class RDXBaseUI
    {
       this.modelSceneMouseCollisionEnabled.set(modelSceneMouseCollisionEnabled);
       primary3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
-      for (GDX3DPanel additional3DPanel : additional3DPanels)
+      for (RDX3DPanel additional3DPanel : additional3DPanels)
       {
          additional3DPanel.setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled);
       }

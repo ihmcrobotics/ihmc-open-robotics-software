@@ -3,7 +3,7 @@ package us.ihmc.rdx.input;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.sceneManager.GDX2DOrthographicCamera;
+import us.ihmc.rdx.sceneManager.RDX2DOrthographicCamera;
 
 import java.util.function.Supplier;
 
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  */
 public class ImGui2DViewInput
 {
-   private final GDX2DOrthographicCamera camera;
+   private final RDX2DOrthographicCamera camera;
    private final Supplier<Float> viewportSizeXSupplier;
    private final Supplier<Float> viewportSizeYSupplier;
    private final ImGuiMouseDragData mouseDragDataLeft = new ImGuiMouseDragData(ImGuiMouseButton.Left);
@@ -27,7 +27,7 @@ public class ImGui2DViewInput
    private float mouseWheelDelta;
    private boolean initialized = false;
 
-   public ImGui2DViewInput(GDX2DOrthographicCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
+   public ImGui2DViewInput(RDX2DOrthographicCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
    {
       this.camera = camera;
       this.viewportSizeXSupplier = viewportSizeXSupplier;

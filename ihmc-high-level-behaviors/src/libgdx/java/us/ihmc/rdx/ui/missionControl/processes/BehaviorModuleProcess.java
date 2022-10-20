@@ -4,7 +4,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
+import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
@@ -18,14 +18,14 @@ public class BehaviorModuleProcess extends RestartableMissionControlProcess
    private final ImInt messagerMode;
    private final ImBoolean enableROS1;
    // TODO: GUI selection
-   private ImGuiGDXBehaviorUIRegistry behaviorRegistry;
+   private RDXBehaviorUIRegistry behaviorRegistry;
    private BehaviorModule behaviorModule;
 
    public BehaviorModuleProcess(Supplier<DRCRobotModel> robotModelSupplier,
                                 ImInt ros2Mode,
                                 ImInt messagerMode,
                                 ImBoolean enableROS1,
-                                ImGuiGDXBehaviorUIRegistry behaviorRegistry)
+                                RDXBehaviorUIRegistry behaviorRegistry)
    {
       this.robotModelSupplier = robotModelSupplier;
       this.ros2Mode = ros2Mode;
@@ -52,7 +52,7 @@ public class BehaviorModuleProcess extends RestartableMissionControlProcess
       behaviorModule = null;
    }
 
-   public void setBehaviorRegistry(ImGuiGDXBehaviorUIRegistry behaviorRegistry)
+   public void setBehaviorRegistry(RDXBehaviorUIRegistry behaviorRegistry)
    {
       this.behaviorRegistry = behaviorRegistry;
    }

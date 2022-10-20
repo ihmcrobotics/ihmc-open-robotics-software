@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui.behaviors;
 
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
+import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 
-public class ExampleSimpleNodeInterface extends ImGuiGDXBehaviorUIInterface
+public class ExampleSimpleNodeInterface extends RDXBehaviorUIInterface
 {
    public ExampleSimpleNodeInterface(String name)
    {

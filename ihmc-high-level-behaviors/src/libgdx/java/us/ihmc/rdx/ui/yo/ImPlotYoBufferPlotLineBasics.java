@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.yo;
 import imgui.extension.implot.ImPlot;
 import imgui.internal.ImGui;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.simulation.scs2.GDXYoManager;
+import us.ihmc.rdx.simulation.scs2.RDXYoManager;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.function.Consumer;
@@ -26,7 +26,7 @@ public abstract class ImPlotYoBufferPlotLineBasics implements ImPlotPlotLine
       this.removeSelf = removeSelf;
    }
 
-   public abstract void setupLinkedVariable(GDXYoManager yoManager);
+   public abstract void setupLinkedVariable(RDXYoManager yoManager);
 
    protected abstract void plot(String labelID);
 

@@ -1,7 +1,7 @@
 package us.ihmc.rdx;
 
 import com.badlogic.gdx.graphics.Color;
-import us.ihmc.rdx.GDXPointCloudRenderer.ColorProvider;
+import us.ihmc.rdx.RDXPointCloudRenderer.ColorProvider;
 
 import java.util.ArrayList;
 

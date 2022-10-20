@@ -12,8 +12,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDX3DPanel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDX3DPanel;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
  */
 public class ImGui3DViewInput
 {
-   private final GDX3DPanel panel;
+   private final RDX3DPanel panel;
    private final ImGuiMouseDragData mouseDragDataLeft = new ImGuiMouseDragData(ImGuiMouseButton.Left);
    private final ImGuiMouseDragData mouseDragDataRight = new ImGuiMouseDragData(ImGuiMouseButton.Right);
    private final ImGuiMouseDragData mouseDragDataMiddle = new ImGuiMouseDragData(ImGuiMouseButton.Middle);
@@ -45,7 +45,7 @@ public class ImGui3DViewInput
    private final FramePoint3D pickPoint = new FramePoint3D();
    private double lastZCollision;
 
-   public ImGui3DViewInput(GDX3DPanel panel)
+   public ImGui3DViewInput(RDX3DPanel panel)
    {
       this.panel = panel;
    }
@@ -90,8 +90,8 @@ public class ImGui3DViewInput
 
          gdxDirection.sub(gdxOrigin).nor();
 
-         GDXTools.toEuclid(gdxOrigin, pickRayInWorld.getPoint());
-         GDXTools.toEuclid(gdxDirection, pickRayInWorld.getDirection());
+         LibGDXTools.toEuclid(gdxOrigin, pickRayInWorld.getPoint());
+         LibGDXTools.toEuclid(gdxDirection, pickRayInWorld.getDirection());
       }
 
       return pickRayInWorld;

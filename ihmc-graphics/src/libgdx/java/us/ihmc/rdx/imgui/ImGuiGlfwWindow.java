@@ -7,7 +7,7 @@ import imgui.type.ImInt;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.rdx.ui.GDXImGuiPerspectiveManager;
+import us.ihmc.rdx.ui.RDXImGuiPerspectiveManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
@@ -29,8 +29,8 @@ public class ImGuiGlfwWindow
    private final Stopwatch runTime = new Stopwatch().start();
    private String[] iconPaths = null;
    private final GlfwWindowForImGui glfwWindowForImGui;
-   private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-   private final GDXImGuiPerspectiveManager perspectiveManager;
+   private final RDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
+   private final RDXImGuiPerspectiveManager perspectiveManager;
    private final ImBoolean vsync = new ImBoolean(true);
    private final ImInt maxFrameRate = new ImInt(240);
 
@@ -48,9 +48,9 @@ public class ImGuiGlfwWindow
                                                        classForLoading,
                                                        configurationExtraPath);
 
-      imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
+      imGuiWindowAndDockSystem = new RDXImGuiWindowAndDockSystem();
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
-      perspectiveManager = new GDXImGuiPerspectiveManager(classForLoading,
+      perspectiveManager = new RDXImGuiPerspectiveManager(classForLoading,
                                                           directoryNameToAssumePresent,
                                                           subsequentPathToResourceFolder,
                                                           configurationExtraPath,
@@ -199,7 +199,7 @@ public class ImGuiGlfwWindow
       return imGuiWindowAndDockSystem.getPanelManager();
    }
 
-   public GDXImGuiWindowAndDockSystem getImGuiDockSystem()
+   public RDXImGuiWindowAndDockSystem getImGuiDockSystem()
    {
       return imGuiWindowAndDockSystem;
    }

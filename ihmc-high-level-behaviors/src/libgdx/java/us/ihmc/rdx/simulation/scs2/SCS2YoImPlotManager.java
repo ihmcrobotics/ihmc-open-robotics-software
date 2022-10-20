@@ -9,7 +9,7 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiPerspectiveManager;
+import us.ihmc.rdx.ui.RDXImGuiPerspectiveManager;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.rdx.ui.yo.*;
 import us.ihmc.log.LogTools;
@@ -26,14 +26,14 @@ import java.util.Iterator;
 public class SCS2YoImPlotManager
 {
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
-   private GDXYoManager yoManager;
+   private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
    private ImGuiPanel parentPanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridFile configurationFile;
 
-   public void create(GDXImGuiPerspectiveManager perspectiveManager, GDXYoManager yoManager, ImGuiPanel parentPanel)
+   public void create(RDXImGuiPerspectiveManager perspectiveManager, RDXYoManager yoManager, ImGuiPanel parentPanel)
    {
       this.yoManager = yoManager;
       this.parentPanel = parentPanel;
