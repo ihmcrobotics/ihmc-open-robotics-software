@@ -12,7 +12,7 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParamete
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
@@ -59,7 +59,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInt
    }
 
    @Override
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       parameters = new BuildingExplorationBehaviorParameters();
       parameterTuner.create(parameters, () -> helper.publish(Parameters, parameters.getAllAsStrings()));

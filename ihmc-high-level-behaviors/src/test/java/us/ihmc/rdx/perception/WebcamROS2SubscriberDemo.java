@@ -10,7 +10,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
@@ -29,10 +29,10 @@ import us.ihmc.tools.thread.ZeroCopySwapReference;
 public class WebcamROS2SubscriberDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources",
-                                                              "ROS 2 Webcam Subscriber");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  "ROS 2 Webcam Subscriber");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
 //   private ImGuiVideoPanel videoPanel;

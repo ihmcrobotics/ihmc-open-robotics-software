@@ -6,7 +6,7 @@ import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.GDX3DPanel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.GDX3DSituatedImagePanel;
 import us.ihmc.rdx.ui.graphics.live.GDXROS2BigVideoVisualizer;
@@ -15,7 +15,7 @@ import us.ihmc.pubsub.DomainFactory;
 
 public class GDXARDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;

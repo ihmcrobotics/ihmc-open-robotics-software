@@ -22,7 +22,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.ui.GDX3DPanelToolbarButton;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.*;
@@ -52,7 +52,7 @@ import java.util.List;
  */
 public class GDXTeleoperationManager extends ImGuiPanel
 {
-   GDXImGuiBasedUI baseUI;
+   RDXBaseUI baseUI;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final CommunicationHelper communicationHelper;
@@ -172,7 +172,7 @@ public class GDXTeleoperationManager extends ImGuiPanel
       }
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       this.baseUI = baseUI;
       desiredRobot.create();

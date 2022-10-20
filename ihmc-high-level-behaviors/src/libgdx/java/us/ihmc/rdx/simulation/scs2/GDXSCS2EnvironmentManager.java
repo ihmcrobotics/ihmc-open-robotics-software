@@ -11,7 +11,7 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -30,7 +30,7 @@ public class GDXSCS2EnvironmentManager
    private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
    private boolean useVelocityAndHeadingScript;
-   private GDXImGuiBasedUI baseUI;
+   private RDXBaseUI baseUI;
    private int recordFrequency;
    private DRCRobotModel robotModel;
    private CommunicationMode ros2CommunicationMode;
@@ -43,12 +43,12 @@ public class GDXSCS2EnvironmentManager
    private final StatelessNotification destroyedNotification = new StatelessNotification();
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
 
-   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
+   public void create(RDXBaseUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode)
    {
       create(baseUI, robotModel, ros2CommunicationMode, 0.3, 0.0, 0.0);
    }
 
-   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, double initialYaw, double initialX, double initialY)
+   public void create(RDXBaseUI baseUI, DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, double initialYaw, double initialX, double initialY)
    {
       this.baseUI = baseUI;
       this.robotModel = robotModel;

@@ -2,12 +2,12 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 
 public class GDXParameterTunerDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private ImGuiStoredPropertySetTuner parametersTuner;
 
    public GDXParameterTunerDemo()

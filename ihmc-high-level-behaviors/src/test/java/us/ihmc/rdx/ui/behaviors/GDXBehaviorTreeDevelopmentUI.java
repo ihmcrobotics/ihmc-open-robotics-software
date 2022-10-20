@@ -6,7 +6,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.GDXModelBuilder;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.ImGuiImNodesBehaviorTreeUI;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
@@ -18,7 +18,7 @@ public class GDXBehaviorTreeDevelopmentUI
 {
    private final String WINDOW_NAME = "Behavior Tree Development UI";
 
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
 
    private final ImGuiImNodesBehaviorTreeUI treePanel;
    private final BehaviorTreeControlFlowNode tree;
@@ -34,7 +34,7 @@ public class GDXBehaviorTreeDevelopmentUI
    public GDXBehaviorTreeDevelopmentUI()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "atlas-user-interface", "src/libgdx/resources", WINDOW_NAME);
+      baseUI = new RDXBaseUI(getClass(), "atlas-user-interface", "src/libgdx/resources", WINDOW_NAME);
 
       timer = new Timer();
 

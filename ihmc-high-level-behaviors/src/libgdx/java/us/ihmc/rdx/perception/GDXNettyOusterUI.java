@@ -14,7 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.tools.GDXModelLoader;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.GDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.perception.BytedecoTools;
@@ -28,7 +28,7 @@ import java.nio.ByteOrder;
 
 public class GDXNettyOusterUI
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private final Activator nativesLoadedActivator;
    private NettyOuster ouster;
    private GDXCVImagePanel imagePanel;

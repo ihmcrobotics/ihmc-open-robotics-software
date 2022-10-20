@@ -9,7 +9,7 @@ import us.ihmc.rdx.GDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.GDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
 {
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier;
@@ -41,12 +41,12 @@ public class GDXROS2RobotVisualizer extends GDXMultiBodyGraphic
       this(null, robotModel, syncedRobot, () -> null);
    }
 
-   public GDXROS2RobotVisualizer(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   public GDXROS2RobotVisualizer(RDXBaseUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
       this(baseUI, robotModel, syncedRobot, () -> null);
    }
 
-   public GDXROS2RobotVisualizer(GDXImGuiBasedUI baseUI,
+   public GDXROS2RobotVisualizer(RDXBaseUI baseUI,
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot,
                                  Supplier<GDXFocusBasedCamera> cameraForTrackingSupplier)

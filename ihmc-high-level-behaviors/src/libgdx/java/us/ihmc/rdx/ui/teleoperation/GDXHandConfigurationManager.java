@@ -12,7 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.GDXIconTexture;
 import us.ihmc.rdx.ui.GDX3DPanelToolbarButton;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,7 +28,7 @@ public class GDXHandConfigurationManager
    private RobotSide toolbarSelectedSide = RobotSide.LEFT;
    private final SideDependentList<IHMCROS2Input<HandSakeStatusMessage>> sakeStatuses = new SideDependentList<>();
 
-   public void create(GDXImGuiBasedUI baseUI, CommunicationHelper communicationHelper)
+   public void create(RDXBaseUI baseUI, CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
 

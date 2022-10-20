@@ -8,7 +8,7 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.tools.GDXApplicationCreator;
 import us.ihmc.rdx.tools.GDXModelBuilder;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.live.GDXROS1BoxVisualizer;
 import us.ihmc.rdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -19,10 +19,10 @@ import us.ihmc.utilities.ros.publisher.RosTunningParamPublisher;
 public class GDXObstacleDetectionUI
 {
    public static final String APPLICATION_NAME = "Object Detection UI";
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                              APPLICATION_NAME);
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                  APPLICATION_NAME);
    ImFloat tunableParameter1 = new ImFloat(0.1f);
    ImFloat tunableParameter2 = new ImFloat(0.1f);
    ImFloat tunableParameter3 = new ImFloat(0.1f);

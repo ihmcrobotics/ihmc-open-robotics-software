@@ -20,7 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.simulation.environment.object.objects.door.GDXDoorObject;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -82,7 +82,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
    }
 
    @Override
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       door = new GDXDoorObject();
 

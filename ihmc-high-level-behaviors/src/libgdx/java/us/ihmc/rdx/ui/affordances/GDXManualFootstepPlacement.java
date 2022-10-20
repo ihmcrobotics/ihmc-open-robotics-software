@@ -21,7 +21,7 @@ import us.ihmc.rdx.tools.GDXIconTexture;
 import us.ihmc.rdx.ui.GDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.GDXTools;
 import us.ihmc.rdx.ui.GDX3DPanel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayDeque;
@@ -35,7 +35,7 @@ public class GDXManualFootstepPlacement implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private GDXInteractableFootstep footstepBeingPlaced;
    private int footstepIndex = -1;
-   private GDXImGuiBasedUI baseUI;
+   private RDXBaseUI baseUI;
    private RobotSide currentFootStepSide;
    private GDXFootstepChecker stepChecker;
    private ImGui3DViewInput latestInput;
@@ -47,7 +47,7 @@ public class GDXManualFootstepPlacement implements RenderableProvider
 
    private GDXIconTexture feetIcon;
 
-   public void create(GDXImGuiBasedUI baseUI, GDXInteractableFootstepPlan footstepPlan)
+   public void create(RDXBaseUI baseUI, GDXInteractableFootstepPlan footstepPlan)
    {
       this.baseUI = baseUI;
       this.footstepPlan = footstepPlan;

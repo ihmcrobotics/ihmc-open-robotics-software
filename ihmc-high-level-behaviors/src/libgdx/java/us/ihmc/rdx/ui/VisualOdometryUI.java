@@ -7,11 +7,11 @@ import java.net.URISyntaxException;
 public class VisualOdometryUI
 {
 
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
 
    public VisualOdometryUI()
    {
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Visual Odometry UI");
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Visual Odometry UI");
 
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {

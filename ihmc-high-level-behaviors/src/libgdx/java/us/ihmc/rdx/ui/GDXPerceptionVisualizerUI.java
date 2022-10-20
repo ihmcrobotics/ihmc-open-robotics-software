@@ -37,7 +37,7 @@ public class GDXPerceptionVisualizerUI
    private PlanarRegionsList regionsUpdate = new PlanarRegionsList();
    //    private final GDXHighLevelDepthSensorSimulator simulatedDepthSensor;
 
-   private final GDXImGuiBasedUI baseUI;
+   private final RDXBaseUI baseUI;
    private final ImGuiMapSenseConfigurationPanel mapsenseConfigurationUI;
    private final ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
    private final GDXEnvironmentBuilder environmentBuilder;
@@ -60,7 +60,7 @@ public class GDXPerceptionVisualizerUI
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
       RosMainNode ros1Node = new RosMainNode(NetworkParameters.getROSURI(), "PerceptionVisualizer");
 
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
       mapsenseConfigurationUI = new ImGuiMapSenseConfigurationPanel(ros1Node, ros2Node);
 
       globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();

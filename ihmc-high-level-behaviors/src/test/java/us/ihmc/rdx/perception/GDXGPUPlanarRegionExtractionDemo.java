@@ -7,7 +7,7 @@ import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.GDXSimulatedSensorFactory;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.perception.BytedecoTools;
@@ -15,9 +15,9 @@ import us.ihmc.tools.thread.Activator;
 
 public class GDXGPUPlanarRegionExtractionDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private Activator nativesLoadedActivator;
    private GDXHighLevelDepthSensorSimulator l515;
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;

@@ -20,7 +20,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
@@ -90,7 +90,7 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
    }
 
    @Override
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       targetFollowingParameterTuner.create(targetFollowingParameters,
                                            () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));

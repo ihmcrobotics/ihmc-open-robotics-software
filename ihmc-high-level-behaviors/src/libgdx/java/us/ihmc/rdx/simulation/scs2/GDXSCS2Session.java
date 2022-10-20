@@ -14,7 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.GDXRenderableAdapter;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
@@ -65,12 +65,12 @@ public class GDXSCS2Session
       dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create(RDXBaseUI baseUI)
    {
       create(baseUI, controlPanel);
    }
 
-   public void create(GDXImGuiBasedUI baseUI, ImGuiPanel panel)
+   public void create(RDXBaseUI baseUI, ImGuiPanel panel)
    {
       yoManager.startSession(session); // TODO: Add to controls?
 
@@ -303,7 +303,7 @@ public class GDXSCS2Session
       changeDT();
    }
 
-   public void destroy(GDXImGuiBasedUI baseUI)
+   public void destroy(RDXBaseUI baseUI)
    {
       baseUI.getPrimaryScene().removeRenderableAdapter(renderables);
 

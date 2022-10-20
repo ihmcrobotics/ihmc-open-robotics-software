@@ -16,16 +16,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.GDXReferenceFrameGraphic;
 
 public class GDXOusterBlackflyProjectionTest
 {
 
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final GDXPose3DGizmo ousterPointInWorldGizmo = new GDXPose3DGizmo(ReferenceFrame.getWorldFrame());
    private RigidBodyTransform userTransformToParent;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());

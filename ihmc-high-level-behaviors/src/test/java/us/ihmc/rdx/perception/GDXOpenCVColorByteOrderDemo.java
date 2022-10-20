@@ -10,7 +10,7 @@ import us.ihmc.rdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.perception.BytedecoImage;
 
@@ -18,9 +18,9 @@ import java.nio.ByteOrder;
 
 public class GDXOpenCVColorByteOrderDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
 
    private GDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final GDXPose3DGizmo sensorPoseGizmo = new GDXPose3DGizmo();

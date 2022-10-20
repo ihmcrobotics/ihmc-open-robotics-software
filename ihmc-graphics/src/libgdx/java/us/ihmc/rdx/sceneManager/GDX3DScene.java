@@ -19,7 +19,7 @@ import us.ihmc.rdx.lighting.GDXShadowManager;
 import us.ihmc.rdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.*;
 
@@ -56,7 +56,7 @@ public class GDX3DScene
       shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
       shadowsDisabledEnvironment.set(shadowsDisabledDirectionalLights);
 
-      shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING, ambientLight);
+      shadowManager = new GDXShadowManager(RDXBaseUI.ANTI_ALIASING, ambientLight);
    }
 
    public void preRender(Camera camera)

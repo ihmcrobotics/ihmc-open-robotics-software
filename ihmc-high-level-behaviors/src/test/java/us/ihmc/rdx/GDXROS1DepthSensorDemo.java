@@ -5,7 +5,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.rdx.sceneManager.GDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.tools.GDXModelBuilder;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.live.GDXROS1VideoVisualizer;
 import us.ihmc.rdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
@@ -14,10 +14,10 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class GDXROS1DepthSensorDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources",
-                                                              getClass().getSimpleName());
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources",
+                                                  getClass().getSimpleName());
    private ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
    private GDXHighLevelDepthSensorSimulator l515;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();

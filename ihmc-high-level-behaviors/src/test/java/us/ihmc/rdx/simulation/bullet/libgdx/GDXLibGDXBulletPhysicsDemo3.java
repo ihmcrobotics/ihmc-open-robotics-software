@@ -15,15 +15,15 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.rdx.tools.GDXModelBuilder;
 import us.ihmc.rdx.tools.GDXTools;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 import java.util.Random;
 
 public class GDXLibGDXBulletPhysicsDemo3
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final GDXBulletPhysicsManager bulletPhysicsManager = new GDXBulletPhysicsManager();
    private final ImBoolean simulate = new ImBoolean(false);
    private final Vector3 tempVector = new Vector3();

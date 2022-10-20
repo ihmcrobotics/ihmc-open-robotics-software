@@ -7,13 +7,13 @@ import us.ihmc.rdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.rdx.simulation.environment.object.objects.GDXMultiBodySnakeObject;
 import us.ihmc.rdx.simulation.environment.object.objects.door.GDXDoorObject;
-import us.ihmc.rdx.ui.GDXImGuiBasedUI;
+import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class GDXPhysicsEnvironmentDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
-                                                              "ihmc-open-robotics-software",
-                                                              "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
+                                                  "ihmc-open-robotics-software",
+                                                  "ihmc-high-level-behaviors/src/test/resources");
    private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
 
    public GDXPhysicsEnvironmentDemo()
