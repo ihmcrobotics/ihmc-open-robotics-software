@@ -10,6 +10,7 @@ import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class PlanarRegionRegistration
@@ -28,10 +30,12 @@ public class PlanarRegionRegistration
    private PlanarRegionsList currentRegions;
    private PlanarRegionsList previousRegions;
 
-   private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";;
+   private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";
+   ;
 
    public PlanarRegionRegistration()
    {
+      previousRegions = new PlanarRegionsList();
       currentRegions = loadRegions(regionFilePath + "0000.txt", 0);
    }
 
@@ -44,7 +48,22 @@ public class PlanarRegionRegistration
    {
       String fileName = String.format("%1$4s", frameIndex).replace(' ', '0') + ".txt";
       LogTools.info("Loading File: {}", fileName);
+
+      if (currentRegions.getNumberOfPlanarRegions() != 0)
+      {
+         previousRegions.clear();
+         previousRegions.addPlanarRegionsList(currentRegions);
+      }
+
       currentRegions = loadRegions(regionFilePath + fileName, frameIndex);
+
+      HashMap<Integer, Integer> matches = PlanarRegionSLAMTools.findPlanarRegionMatches(previousRegions, currentRegions, 0.1f, 0.5f);
+
+      LogTools.info("Previous: {} Current: {} Matches: {}",
+                    previousRegions.getPlanarRegion(0).getConcaveHullSize(),
+                    currentRegions.getPlanarRegion(0).getConcaveHullSize(),
+                    matches.size());
+
       this.modified = true;
    }
 
