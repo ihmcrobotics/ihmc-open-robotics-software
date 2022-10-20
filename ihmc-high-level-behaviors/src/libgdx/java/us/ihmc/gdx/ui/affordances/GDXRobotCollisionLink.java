@@ -179,7 +179,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       pickResult.reset();
       if (shape instanceof Sphere3DReadOnly sphere)
       {
-         sphereRayIntersection.setup(sphere.getRadius(), sphere.getPosition());
+         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition());
          if (sphereRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(input.getPickRayInWorld().getPoint().distance(sphereRayIntersection.getFirstIntersectionToPack()));
@@ -191,7 +191,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          Point3DReadOnly position = capsule.getPosition();
          double length = capsule.getLength();
          double radius = capsule.getRadius();
-         capsuleIntersection.setup(radius, length, position, axis, frameAfterJointToUse);
+         capsuleIntersection.update(radius, length, position, axis, frameAfterJointToUse);
          if (capsuleIntersection.intersect(pickRayInWorld))
          {
             pickResult.addPickCollision(capsuleIntersection.getDistanceToCollision(input.getPickRayInWorld()));
@@ -215,7 +215,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       }
       else if (shape instanceof Cylinder3DReadOnly cylinder)
       {
-         cylinderRayIntersection.setup(cylinder.getLength(), cylinder.getRadius(), cylinder.getPosition(), cylinder.getAxis(), frameAfterJointToUse);
+         cylinderRayIntersection.update(cylinder.getLength(), cylinder.getRadius(), cylinder.getPosition(), cylinder.getAxis(), frameAfterJointToUse);
          double intersection = cylinderRayIntersection.intersect(input.getPickRayInWorld());
          if (!Double.isNaN(intersection))
          {
@@ -224,12 +224,12 @@ public class GDXRobotCollisionLink implements RenderableProvider
       }
       else if (shape instanceof Ellipsoid3DReadOnly ellipsoid)
       {
-         ellipsoidRayIntersection.setup(ellipsoid.getRadiusX(),
-                                        ellipsoid.getRadiusY(),
-                                        ellipsoid.getRadiusZ(),
-                                        ellipsoid.getPosition(),
-                                        ellipsoid.getOrientation(),
-                                        frameAfterJointToUse);
+         ellipsoidRayIntersection.update(ellipsoid.getRadiusX(),
+                                         ellipsoid.getRadiusY(),
+                                         ellipsoid.getRadiusZ(),
+                                         ellipsoid.getPosition(),
+                                         ellipsoid.getOrientation(),
+                                         frameAfterJointToUse);
          if (ellipsoidRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(ellipsoidRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));

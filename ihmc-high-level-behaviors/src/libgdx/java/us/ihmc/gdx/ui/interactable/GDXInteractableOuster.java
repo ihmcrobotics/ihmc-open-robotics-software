@@ -35,7 +35,7 @@ public class GDXInteractableOuster
 
    private double calculateClosestCollision(Line3DReadOnly mousePickRay)
    {
-      cylinderIntersection.setup(0.0734, 0.04, -0.0372, interactableFrameModel.getReferenceFrame().getTransformToWorldFrame());
+      cylinderIntersection.update(0.0734, 0.04, -0.0372, interactableFrameModel.getReferenceFrame().getTransformToWorldFrame());
       return cylinderIntersection.intersect(mousePickRay);
    }
 
