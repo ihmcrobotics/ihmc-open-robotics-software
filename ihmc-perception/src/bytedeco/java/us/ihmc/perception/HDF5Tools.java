@@ -17,7 +17,7 @@ import static org.bytedeco.hdf5.global.hdf5.*;
 
 public class HDF5Tools
 {
-   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
    static final String DATASET_NAME = "/os_cloud_node/points/0";
 
    static final int PCD_POINT_SIZE = 3;
@@ -180,7 +180,7 @@ public class HDF5Tools
    }
 
    public static void main(String[] args) {
-      String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.h5";
+      String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
       H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
 
       ArrayList<String> topicNames = HDF5Tools.getTopicNames(file);

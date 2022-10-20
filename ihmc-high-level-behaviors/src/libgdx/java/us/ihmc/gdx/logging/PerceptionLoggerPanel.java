@@ -15,7 +15,7 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    private ArrayList<String> topicNames = new ArrayList<>();
    private ArrayList<Integer> topicObjectCounts = new ArrayList<>();
 
-   static final String PERCEPTION_LOG_FILE = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
+   static final String PERCEPTION_LOG_FILE = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5";
 
    private String currentTopic;
 
@@ -26,10 +26,10 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    {
       super(panelName);
       loader = new PerceptionDataLoader(PERCEPTION_LOG_FILE);
-      topicNames = HDF5Tools.getTopicNames(loader.getH5().getFile());
+      topicNames = HDF5Tools.getTopicNames(loader.getHDF5Manager().getFile());
       for (String topic : topicNames)
       {
-         topicObjectCounts.add((int) loader.getH5().getCount(topic));
+         topicObjectCounts.add((int) loader.getHDF5Manager().getCount(topic));
       }
       setRenderMethod(this::renderImguiWidgets);
    }

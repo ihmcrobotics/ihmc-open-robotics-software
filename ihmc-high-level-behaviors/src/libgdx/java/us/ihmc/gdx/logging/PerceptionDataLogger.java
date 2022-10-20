@@ -42,11 +42,13 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 
 public class PerceptionDataLogger
 {
-   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.h5";
+   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5";
    private final HDF5Manager h5;
 
    private final ROS2Node ros2Node;
    private final RealtimeROS2Node realtimeROS2Node;
+
+   private final CommunicationMode communicationMode;
 
    private final byte[] messageDataHeapArray = new byte[25000000];
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
@@ -76,6 +78,7 @@ public class PerceptionDataLogger
 
    public PerceptionDataLogger()
    {
+      communicationMode = CommunicationMode.INTERPROCESS;
 
       File f = new File(FILE_NAME);
       if (!f.exists() && !f.isDirectory())
@@ -92,7 +95,7 @@ public class PerceptionDataLogger
       }
 
       // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
-      ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_logger_node");
+      ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception_logger_node");
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
 
       // Add callback for Ouster scans
