@@ -89,8 +89,8 @@ public class RDXHandConfigurationManager
       shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
 
       // NOTE: need to set runnable here to send armTrajectory command >>
-      double[] jointAngles = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-      boolean[] invert = new boolean[]{false, false, false, false, false, false, false};
+      double[] jointAngles = new double[] {-0.88898, 0.22107, -0.23184, -2.45045, -0.41040, -0.02667, -3.04774};
+      boolean[] invert = new boolean[] {false, true, true, false, true, false, false};
 
       Consumer<RobotSide> armTrajectoryRunnable = robotSide ->
       {
