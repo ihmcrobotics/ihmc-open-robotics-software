@@ -31,7 +31,6 @@ public class GDXPerceptionVisualizerUI
    private GDXEnvironmentBuilder environmentBuilder;
    private GDXBuildingConstructor buildingConstructor;
 
-   private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(200000, Point3D32::new);
    private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
 
    private GDXROS2BigVideoVisualizer blackflyRightVisualizer;
@@ -52,8 +51,11 @@ public class GDXPerceptionVisualizerUI
          @Override
          public void create()
          {
+            pointCloudRenderer.create(400000);
+            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
 
             loggerPanel = new PerceptionLoggerPanel("Perception Logger");
+            loggerPanel.setPointCloudRenderer(pointCloudRenderer);
             baseUI.getImGuiPanelManager().addPanel(loggerPanel);
 
             globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
@@ -118,8 +120,6 @@ public class GDXPerceptionVisualizerUI
             baseUI.getPrimaryScene().addRenderableProvider(buildingConstructor::getRealRenderables, GDXSceneLevel.MODEL);
 
             globalVisualizersUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
-            pointCloudRenderer.create(200000);
          }
 
          @Override
@@ -129,11 +129,8 @@ public class GDXPerceptionVisualizerUI
             {
                globalVisualizersUI.update();
 
-               pointCloudRenderer.setPointsToRender(pointsToRender, Color.BLUE);
-               if (!pointsToRender.isEmpty())
-               {
-                  pointCloudRenderer.updateMesh();
-               }
+
+//               pointCloudRenderer.updateMeshFastest();
 
                baseUI.renderBeforeOnScreenUI();
                baseUI.renderEnd();

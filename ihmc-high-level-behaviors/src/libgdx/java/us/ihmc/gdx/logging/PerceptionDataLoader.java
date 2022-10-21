@@ -9,9 +9,11 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public class PerceptionDataLoader
 {
@@ -36,6 +38,8 @@ public class PerceptionDataLoader
    private int pointsPerSegment = 131072 * os0128Multiplier;
    private int numberOfSegments = 1;
 
+   private FloatBuffer hostPointCloudBuffer;
+
    public PerceptionDataLoader(String filePath)
    {
       this.filePath = filePath;
@@ -46,11 +50,13 @@ public class PerceptionDataLoader
       openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
 
+      hostPointCloudBuffer = FloatBuffer.allocate(pointsPerSegment * 8);
+
       parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, pointCloudRenderer.getVertexBuffer());
+      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, hostPointCloudBuffer);
       pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
@@ -59,10 +65,13 @@ public class PerceptionDataLoader
       HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points);
    }
 
-   public void loadCompressedPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
+   public FloatBuffer loadCompressedPointCloud(String namespace, int index)
    {
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+
+      LogTools.info("Byte Array: {} {} {}", compressedByteArray[0], compressedByteArray[1], compressedByteArray[2]);
+
       ByteBuffer compressedByteBuffer = ByteBuffer.wrap(compressedByteArray);
 
       int numberOfBytes = compressedByteArray.length;
@@ -70,10 +79,10 @@ public class PerceptionDataLoader
       lz4Decompressor.decompress(compressedByteBuffer, decompressedOpenCLIntBuffer.getBackingDirectByteBuffer());
       decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
 
-      latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
+//      latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
 
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize.get());
+      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, 0);
+      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, 0.5f);
       parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
 
       parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
@@ -85,8 +94,7 @@ public class PerceptionDataLoader
       openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 
-      pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
-
+      return hostPointCloudBuffer;
    }
 
    public void loadImage(String namespace, int index, Mat mat)

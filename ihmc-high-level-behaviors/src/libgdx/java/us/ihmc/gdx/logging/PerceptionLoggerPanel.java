@@ -8,9 +8,11 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.HDF5Tools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 public class PerceptionLoggerPanel extends ImGuiPanel
@@ -20,7 +22,6 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    private PerceptionDataLoader loader;
    private GDXPointCloudRenderer pointCloudRenderer;
 
-   private final RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(200000, Point3D32::new);
    private ArrayList<String> topicNames = new ArrayList<>();
    private ArrayList<Integer> topicObjectCounts = new ArrayList<>();
 
@@ -38,11 +39,6 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    {
       super(panelName);
 
-      pointCloudRenderer = new GDXPointCloudRenderer();
-
-      pointCloudRenderer.create(400000);
-//      baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, GDXSceneLevel.MODEL);
-
       loader = new PerceptionDataLoader(PERCEPTION_LOG_FILE);
       topicNames = HDF5Tools.getTopicNames(loader.getHDF5Manager().getFile());
       for (String topic : topicNames)
@@ -50,6 +46,11 @@ public class PerceptionLoggerPanel extends ImGuiPanel
          topicObjectCounts.add((int) loader.getHDF5Manager().getCount(topic));
       }
       setRenderMethod(this::renderImguiWidgets);
+   }
+
+   public void setPointCloudRenderer(GDXPointCloudRenderer pclRenderer)
+   {
+      this.pointCloudRenderer = pclRenderer;
    }
 
    public void renderImguiWidgets()
@@ -63,7 +64,12 @@ public class PerceptionLoggerPanel extends ImGuiPanel
       ImGui.sliderInt("Object Index", objectIndex.getData(), 0, 10);
       if(ImGui.button("Load Next"))
       {
-         loader.loadCompressedPointCloud("/os_cloud_node/points", objectIndex.get(), points);
+         FloatBuffer pointsBuffer = loader.loadCompressedPointCloud("/os_cloud_node/points", objectIndex.get());
+
+         LogTools.info("Float Buffer: {} {} {}", pointsBuffer.get(0), pointsBuffer.get(1), pointsBuffer.get(2));
+
+         pointCloudRenderer.getVertexBuffer().put(pointsBuffer);
+         pointCloudRenderer.updateMeshFastest();
       }
    }
 
