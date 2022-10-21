@@ -22,6 +22,7 @@ import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -114,6 +115,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    private void queueRenderFusedSensorHeadPointCloud(FusedSensorHeadPointCloudMessage message)
    {
+      LogTools.info("PointCloud Received: Segment Index: {}", message.getSegmentIndex());
       frequencyPlot.recordEvent();
       latestFusedSensorHeadPointCloudMessageReference.set(message);
    }
