@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
-public class RDXWholeBodyDesiredIKManager
+public class RDXArmManager
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final DRCRobotModel robotModel;
@@ -31,23 +31,21 @@ public class RDXWholeBodyDesiredIKManager
    private final RDXTeleoperationParameters teleoperationParameters;
 
    private final ArmJointName[] armJointNames;
-   private HandDataType handPoseDataTypeToSend = HandDataType.JOINT_ANGLES;
+   private RDXArmControlMode armControlMode = RDXArmControlMode.JOINT_ANGLES;
+   private boolean armControlModeChanged = false;
+   private final SideDependentList<double[]> armHomes = new SideDependentList<>();
+   private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
 
    private final SideDependentList<RDXArmDesiredIKManager> armManagers = new SideDependentList<>(RDXArmDesiredIKManager::new);
 
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
 
-   private enum HandDataType
-   {
-      JOINT_ANGLES, POSE_WORLD, POSE_CHEST
-   }
-
-   public RDXWholeBodyDesiredIKManager(DRCRobotModel robotModel,
-                                       ROS2SyncedRobotModel syncedRobot,
-                                       FullHumanoidRobotModel desiredRobot,
-                                       ROS2ControllerHelper ros2Helper,
-                                       RDXTeleoperationParameters teleoperationParameters)
+   public RDXArmManager(DRCRobotModel robotModel,
+                        ROS2SyncedRobotModel syncedRobot,
+                        FullHumanoidRobotModel desiredRobot,
+                        ROS2ControllerHelper ros2Helper,
+                        RDXTeleoperationParameters teleoperationParameters)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
@@ -55,6 +53,20 @@ public class RDXWholeBodyDesiredIKManager
       this.ros2Helper = ros2Helper;
       this.teleoperationParameters = teleoperationParameters;
       armJointNames = robotModel.getJointMap().getArmJointNames();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         armHomes.put(side,
+                      new double[] {0.5,
+                                    side.negateIfRightSide(0.0),
+                                    side.negateIfRightSide(-0.5),
+                                    -1.0,
+                                    side.negateIfRightSide(0.0),
+                                    0.000,
+                                    side.negateIfLeftSide(0.0)});
+      }
+      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
+      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
    }
 
    public void create()
@@ -126,29 +138,59 @@ public class RDXWholeBodyDesiredIKManager
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Arm setpoints:");
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Joint angles"), handPoseDataTypeToSend == HandDataType.JOINT_ANGLES))
+      ImGui.text("Arms:");
+      for (RobotSide side : RobotSide.values)
       {
-         handPoseDataTypeToSend = HandDataType.JOINT_ANGLES;
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        armHomes.get(side));
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+      }
+      ImGui.text("Door avoidance arms:");
+      for (RobotSide side : RobotSide.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         {
+            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                        teleoperationParameters.getTrajectoryTime(),
+                                                                                                        doorAvoidanceArms.get(side));
+            ros2Helper.publishToController(armTrajectoryMessage);
+         }
+      }
+
+      armControlModeChanged = false;
+      ImGui.text("Arm & hand control mode:");
+      if (ImGui.radioButton(labels.get("Joint angles (DDogleg)"), armControlMode == RDXArmControlMode.JOINT_ANGLES))
+      {
+         armControlModeChanged = true;
+         armControlMode = RDXArmControlMode.JOINT_ANGLES;
+      }
+      ImGui.text("Hand pose only:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("World"), armControlMode == RDXArmControlMode.POSE_WORLD))
+      {
+         armControlModeChanged = true;
+         armControlMode = RDXArmControlMode.POSE_WORLD;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Pose World"), handPoseDataTypeToSend == HandDataType.POSE_WORLD))
+      if (ImGui.radioButton(labels.get("Chest"), armControlMode == RDXArmControlMode.POSE_CHEST))
       {
-         handPoseDataTypeToSend = HandDataType.POSE_WORLD;
+         armControlModeChanged = true;
+         armControlMode = RDXArmControlMode.POSE_CHEST;
       }
-      ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Pose Chest"), handPoseDataTypeToSend == HandDataType.POSE_CHEST))
-      {
-         handPoseDataTypeToSend = HandDataType.POSE_CHEST;
-      }
+
    }
 
    public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
    {
       Runnable runnable = () ->
       {
-         if (handPoseDataTypeToSend == HandDataType.JOINT_ANGLES)
+         if (armControlMode == RDXArmControlMode.JOINT_ANGLES)
          {
             double[] jointAngles = new double[armJointNames.length];
             int i = -1;
@@ -163,12 +205,12 @@ public class RDXWholeBodyDesiredIKManager
                                                                                                         jointAngles);
             ros2Helper.publishToController(armTrajectoryMessage);
          }
-         else if (handPoseDataTypeToSend == HandDataType.POSE_WORLD || handPoseDataTypeToSend == HandDataType.POSE_CHEST)
+         else if (armControlMode == RDXArmControlMode.POSE_WORLD || armControlMode == RDXArmControlMode.POSE_CHEST)
          {
             FramePose3D desiredControlFramePose = armManagers.get(robotSide).getDesiredControlFramePose();
 
             ReferenceFrame frame;
-            if (handPoseDataTypeToSend == HandDataType.POSE_WORLD)
+            if (armControlMode == RDXArmControlMode.POSE_WORLD)
             {
                frame = ReferenceFrame.getWorldFrame();
             }
@@ -200,5 +242,10 @@ public class RDXWholeBodyDesiredIKManager
       {
          armManagers.get(side).setDesiredToCurrent();
       }
+   }
+
+   public RDXArmControlMode getArmControlMode()
+   {
+      return armControlMode;
    }
 }

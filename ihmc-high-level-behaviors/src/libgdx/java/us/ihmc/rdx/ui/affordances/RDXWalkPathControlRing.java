@@ -50,6 +50,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
    private boolean selected = false;
    private boolean modified = false;
+   private boolean newlyModified = false;
    private boolean mouseRingPickSelected;
    private RDX3DPanel panel3D;
    private RDXTeleoperationParameters teleoperationParameters;
@@ -247,7 +248,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          {
             planFootstepsUsingTurnWalkTurnPlanner();
          }
-         else
+         else if (plannerToUse == 2)
          {
             planFootstepsUsingTurnStraightTurnFootstepGenerator();
          }
@@ -370,6 +371,13 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       walkFacingDirection.set(Axis3D.Z, 0.0);
       updateStuff();
       queueFootstepPlan();
+   }
+
+   public boolean checkIsNewlyModified()
+   {
+      boolean newlyModifiedReturn = newlyModified;
+      newlyModified = false;
+      return newlyModifiedReturn;
    }
 
    private void renderTooltips()
