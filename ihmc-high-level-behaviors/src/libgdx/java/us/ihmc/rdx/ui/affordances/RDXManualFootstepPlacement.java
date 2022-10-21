@@ -250,7 +250,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
    }
 
-   public boolean checkIsModeNewlyActivated()
+   public boolean pollIsModeNewlyActivated()
    {
       boolean modeNewlyActivatedReturn = modeNewlyActivated;
       modeNewlyActivated = false;

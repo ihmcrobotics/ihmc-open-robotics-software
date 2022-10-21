@@ -366,7 +366,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       }
    }
 
-   public boolean checkIsNewlyModified()
+   public boolean pollIsNewlyModified()
    {
       boolean newlyModifiedReturn = newlyModified;
       newlyModified = false;

@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -315,13 +314,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
          }
       }
 
-      if (walkPathControlRing.checkIsNewlyModified())
+      if (walkPathControlRing.pollIsNewlyModified())
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
          interactableFootstepPlan.clear();
       }
 
-      if (manualFootstepPlacement.checkIsModeNewlyActivated())
+      if (manualFootstepPlacement.pollIsModeNewlyActivated())
       {
          legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
       }
