@@ -77,7 +77,7 @@ public class RDXInteractableBlackflyFujinon
       if (renderFrustum.get())
       {
          interactableFrameModel.getReferenceFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         LibGDXTools.toGDX(tempTransform, tempMatrix4);
+         LibGDXTools.toLibGDX(tempTransform, tempMatrix4);
 
          camera.near = (float) frustimNear;
          camera.far = frustumFar.get();

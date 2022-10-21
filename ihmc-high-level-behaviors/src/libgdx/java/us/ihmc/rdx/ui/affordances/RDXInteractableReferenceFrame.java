@@ -69,8 +69,8 @@ public class RDXInteractableReferenceFrame
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       tempFramePose.get(tempTransform);
 
-      LibGDXTools.toGDX(tempTransform, referenceFrameGraphic.transform);
-      LibGDXTools.toGDX(tempTransform, highlightReferenceFrameGraphic.transform);
+      LibGDXTools.toLibGDX(tempTransform, referenceFrameGraphic.transform);
+      LibGDXTools.toLibGDX(tempTransform, highlightReferenceFrameGraphic.transform);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

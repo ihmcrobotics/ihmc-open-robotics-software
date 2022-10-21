@@ -125,7 +125,7 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
          manualTargetAffordance.setGoalPoseNoCallbacks(latestTargetPoseFromBehavior);
       }
 
-      LibGDXTools.toGDX(targetApproachPoseReference.get(), tempTransform, targetApproachPoseGraphic.transform);
+      LibGDXTools.toLibGDX(targetApproachPoseReference.get(), tempTransform, targetApproachPoseGraphic.transform);
       lookAndStepUI.update();
    }
 

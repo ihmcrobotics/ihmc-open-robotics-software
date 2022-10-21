@@ -42,7 +42,7 @@ public class RDXIHMCLabEnvironment implements RenderableProvider
       modelInstances.add(floorInstance);
       pose.set(new Point3D(0.0f, 0.0f, 0.0f), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
       pose.get(transform);
-      LibGDXTools.toGDX(transform, floorInstance.transform);
+      LibGDXTools.toLibGDX(transform, floorInstance.transform);
 
 //      ModelInstance smallCinderBlockInstance = new ModelInstance(smallCinderBlockModel);
 //      modelInstances.add(smallCinderBlockInstance);

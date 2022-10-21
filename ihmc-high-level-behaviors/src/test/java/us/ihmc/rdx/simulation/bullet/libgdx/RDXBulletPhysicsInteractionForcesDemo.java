@@ -210,7 +210,7 @@ public class RDXBulletPhysicsInteractionForcesDemo
                   LibGDXTools.toEuclid(pointOnB, pointOnBEuclid);
                   arrowTransform.set(arrowOrientation, pointOnBEuclid);
                   ModelInstance arrow = arrowsOnB.add();
-                  LibGDXTools.toGDX(arrowTransform, arrow.transform);
+                  LibGDXTools.toLibGDX(arrowTransform, arrow.transform);
 //                  arrow.transform.setToRotationRad(normalOnB, 0.0f);
 //                  arrow.transform.translate(pointOnB);
 

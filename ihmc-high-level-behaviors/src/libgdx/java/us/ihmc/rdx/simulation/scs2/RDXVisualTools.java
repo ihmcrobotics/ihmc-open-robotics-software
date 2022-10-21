@@ -150,6 +150,6 @@ public class RDXVisualTools
       if (colorDefinition == null)
          return defaultValue;
       else
-         return LibGDXTools.toGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
+         return LibGDXTools.toLibGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
    }
 }
