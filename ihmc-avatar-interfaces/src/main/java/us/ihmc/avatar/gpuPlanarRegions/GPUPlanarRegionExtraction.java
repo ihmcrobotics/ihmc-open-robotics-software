@@ -150,7 +150,7 @@ public class GPUPlanarRegionExtraction
 
    public void processROS1DepthImage(Image image)
    {
-      // See us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer.decodeUsingOpenCV
+      // See us.ihmc.rdx.ui.graphics.live.GDXROS1VideoVisualizer.decodeUsingOpenCV
       //      if (inputDepthImageMat == null)
       //      {
       //         String encoding = image.getEncoding();
