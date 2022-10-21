@@ -141,8 +141,8 @@ public abstract class AvatarPushRecoveryStandingTest
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       forceDirection.normalize();
-      double magnitude = 100.0;
-      double duration = 1.0;
+      double magnitude = 55.0;
+      double duration = 3.0;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
 
@@ -429,6 +429,8 @@ public abstract class AvatarPushRecoveryStandingTest
                                                         new Vector3D(0, 0, getPushPositionZHeightInChestFrame()));
       simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
+      simulationTestHelper.setKeepSCSUp(true);
+
       if (scriptName != null && !scriptName.isEmpty())
       {
          assertTrue(simulationTestHelper.simulateNow(0.001));
@@ -441,7 +443,7 @@ public abstract class AvatarPushRecoveryStandingTest
       //      enable.set(enablePushRecoveryControlModule);
       YoBoolean enableOnFailure = (YoBoolean) simulationTestHelper.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
                                                                                 "enablePushRecoveryOnFailure");
-      enableOnFailure.set(enablePushRecoveryOnFailure);
+//      enableOnFailure.set(enablePushRecoveryOnFailure);
       currentHighLevelState = (YoEnum<HighLevelControllerName>) simulationTestHelper.findVariable("highLevelControllerNameCurrentState");
 
       for (RobotSide robotSide : RobotSide.values)

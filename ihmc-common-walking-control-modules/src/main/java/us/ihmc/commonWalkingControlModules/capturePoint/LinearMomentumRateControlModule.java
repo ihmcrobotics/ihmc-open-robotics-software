@@ -100,6 +100,7 @@ public class LinearMomentumRateControlModule
 
    private final FramePoint2D capturePoint = new FramePoint2D();
    private final CapturePointCalculator capturePointCalculator;
+   private final LinearCapturePointCalculator linearCapturePointCalculator;
 
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
@@ -121,6 +122,7 @@ public class LinearMomentumRateControlModule
 
    private final FramePoint3D cmp3d = new FramePoint3D();
    private final FrameVector3D linearMomentumRateOfChange = new FrameVector3D();
+   private final FrameVector3D angularMomentumRateOfChange = new FrameVector3D();
 
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
@@ -137,12 +139,13 @@ public class LinearMomentumRateControlModule
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+   private final YoFramePoint2D yoLinearCapturePoint = new YoFramePoint2D("linearCapturePoint", worldFrame, registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
    private final YoBoolean useOnlyCoP = new YoBoolean("useOnlyCoP", registry);
-   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 0.0);
+   private final DoubleParameter centerOfPressureWeight = new DoubleParameter("CenterOfPressureObjectiveWeight", registry, 100.0);
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
    private final ReferenceFrame midFootZUpFrame;
 
@@ -200,6 +203,8 @@ public class LinearMomentumRateControlModule
                                                                      controlDT,
                                                                      worldFrame);
 
+      useOnlyCoP.set(true);
+
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       midFootZUpFrame = referenceFrames.getMidFootZUpGroundFrame();
       centerOfMass = new FramePoint3D(centerOfMassFrame);
@@ -207,6 +212,7 @@ public class LinearMomentumRateControlModule
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
       capturePointCalculator = walkingControllerParameters.createCapturePointCalculator(centerOfMassStateProvider, elevator, gravityZ);
+      linearCapturePointCalculator = new LinearCapturePointCalculator(centerOfMassStateProvider);
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
       comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
@@ -221,10 +227,12 @@ public class LinearMomentumRateControlModule
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition linearCapturePointViz = new YoGraphicPosition("Linear Capture Point", yoLinearCapturePoint, 0.0075, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", capturePointViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", linearCapturePointViz.createArtifact());
       }
       yoDesiredCMP.setToNaN();
       yoAchievedCMP.setToNaN();
@@ -381,14 +389,20 @@ public class LinearMomentumRateControlModule
       yoCenterOfMass.setFromReferenceFrame(centerOfMassFrame);
       yoCapturePoint.set(capturePoint);
 
+      linearCapturePointCalculator.compute(capturePoint, omega0);
+      yoLinearCapturePoint.set(capturePoint);
+
       success = success && computeDesiredLinearMomentumRateOfChange();
+      boolean includeAngularMomentum = computeDesiredAngularMomentumRateOfChange();
 
       selectionMatrix.setToLinearSelectionOnly();
-      selectionMatrix.selectLinearX(useOnlyCoP.getBooleanValue());
-      selectionMatrix.selectLinearY(useOnlyCoP.getBooleanValue());
+      selectionMatrix.selectLinearX(!useOnlyCoP.getBooleanValue());
+      selectionMatrix.selectLinearY(!useOnlyCoP.getBooleanValue());
       selectionMatrix.selectLinearZ(controlHeightWithMomentum);
+//      selectionMatrix.selectAngularX(useOnlyCoP.getBooleanValue() && includeAngularMomentum);
+//      selectionMatrix.selectAngularY(useOnlyCoP.getBooleanValue() && includeAngularMomentum);
       selectionMatrix.selectAngularZ(minimizingAngularMomentumRateZ.getValue());
-      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
+      momentumRateCommand.setMomentumRate(angularMomentumRateOfChange, linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, desiredLinearMomentumRateWeight);
 
@@ -543,6 +557,26 @@ public class LinearMomentumRateControlModule
       linearMomentumRateOfChange.changeFrame(worldFrame);
 
       return success;
+   }
+
+   private boolean computeDesiredAngularMomentumRateOfChange()
+   {
+      if (desiredCMP.distanceSquared(desiredCoP) < 1e-3)
+      {
+         angularMomentumRateOfChange.setToZero();
+         return false;
+      }
+      else
+      {
+         double denominator = totalMass * (gravityZ + desiredCoMHeightAcceleration);
+         double tauY = denominator * (desiredCMP.getX() - desiredCoP.getX());
+         double tauX = denominator * (desiredCoP.getY() - desiredCMP.getY());
+
+         angularMomentumRateOfChange.setToZero();
+         angularMomentumRateOfChange.setX(tauX);
+         angularMomentumRateOfChange.setY(tauY);
+         return true;
+      }
    }
 
    private static boolean checkInputs(FramePoint2DReadOnly capturePoint,
