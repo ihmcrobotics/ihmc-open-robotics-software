@@ -11,11 +11,10 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
-import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -66,7 +65,7 @@ public class ROS2PointCloudProvider
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
       decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
-      pointCloud = new PointCloud(1, totalNumberOfPoints * 8, 8);
+      pointCloud = new PointCloud(pointsPerSegment, 8);
       subscribe();
    }
 
@@ -164,17 +163,6 @@ public class ROS2PointCloudProvider
 
          pointCloud.setData(pointCloudVertexBuffer.getBytedecoFloatBufferPointer(), pointsPerSegment * 8);
 
-//         pointCloudVertexBuffer.get
-
-         String str = "xyzrgbas";
-         System.out.print("\n");
-         for (long i = 0; i < totalNumberOfPoints;++i)
-         {
-            System.out.print(str.charAt((int) (i % str.length())) + ": " + pointCloudVertexBuffer.getBytedecoFloatBufferPointer().get(i) + ",");
-            if (i % str.length() == 0)
-               System.out.print("\n");
-//            LogTools.info(str.charAt(i % str.length()) + " pointcloud data: {}", pointCloudVertexBuffer.getBytedecoFloatBufferPointer().get(i));
-         }
          return true;
       }
 

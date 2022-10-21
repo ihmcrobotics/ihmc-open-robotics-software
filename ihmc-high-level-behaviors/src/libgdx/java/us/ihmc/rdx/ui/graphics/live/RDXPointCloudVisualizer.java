@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class RDXPointCloudVisualizer extends RDXVisualizer
 {
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImGuiFrequencyPlot frequencyPlot;
    private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -29,8 +29,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    private final String topicName;
    private int latestSegmentIndex;
 
-<<<<<<< Updated upstream:ihmc-high-level-behaviors/src/libgdx/java/us/ihmc/rdx/ui/graphics/live/RDXPointCloudVisualizer.java
-   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments)
+   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments, ImGuiFrequencyPlot plot)
    {
       super(title + " (ROS 2)");
       this.pointsPerSegment = pointsPerSegment;
