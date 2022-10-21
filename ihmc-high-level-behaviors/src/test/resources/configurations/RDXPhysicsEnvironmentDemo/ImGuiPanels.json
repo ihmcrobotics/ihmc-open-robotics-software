@@ -1,0 +1,8 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Environment###java.lang.Class:Environment" : true,
+    "Pose3D Gizmo Tuner (RDXEnvironmentBuilder)" : false,
+    "VR Thread Debugger" : false
+  }
+}
