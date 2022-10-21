@@ -14,10 +14,13 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.function.Consumer;
+import static us.ihmc.robotics.robotSide.RobotSide.LEFT;
+import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 
 public class RDXHandConfigurationManager
 {
@@ -89,22 +92,26 @@ public class RDXHandConfigurationManager
       shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
 
       // NOTE: need to set runnable here to send armTrajectory command >>
-      double[] jointAngles = new double[] {-0.88898, 0.22107, -0.23184, -2.45045, -0.41040, -0.02667, -3.04774};
+      double[] leftJointAngles = new double[] {-1.01951, 0.72311, -1.29244, -1.26355, -0.51712, -0.04580, -0.00659};
+      double[] rightJointAngles = new double[7];
       boolean[] invert = new boolean[] {false, true, true, false, true, false, false};
+
+      for (int i = 0; i < leftJointAngles.length; i++)
+      {
+         rightJointAngles[i] = (invert[i] ? -1.0 : 1.0) * leftJointAngles[i];
+      }
+
+      SideDependentList<double[]> armJointAngles = new SideDependentList<>();
+      armJointAngles.put(LEFT, leftJointAngles);
+      armJointAngles.put(RIGHT, rightJointAngles);
 
       Consumer<RobotSide> armTrajectoryRunnable = robotSide ->
       {
-         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-         armTrajectoryMessage.setEnableDirectPositionControl(true);
+         LogTools.info("Calling arm pose, side: " + robotSide);
 
          double trajectoryTime = 3.0;
-         for (int i = 0; i < jointAngles.length; i++)
-         {
-            OneDoFJointTrajectoryMessage trajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
-            TrajectoryPoint1DMessage point = trajectoryMessage.getTrajectoryPoints().add();
-            point.setTime(trajectoryTime);
-            point.setPosition((invert[i] ? -1.0 : 1.0) * jointAngles[i]);
-         }
+         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, armJointAngles.get(robotSide));
+         armTrajectoryMessage.setEnableDirectPositionControl(true);
          communicationHelper.publishToController(armTrajectoryMessage);
       };
       shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
