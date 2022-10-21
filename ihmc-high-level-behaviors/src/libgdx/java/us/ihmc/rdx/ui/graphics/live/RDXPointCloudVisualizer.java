@@ -1,24 +1,23 @@
-package us.ihmc.gdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.live;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
-import us.ihmc.gdx.GDXPointCloudRenderer;
-import us.ihmc.gdx.imgui.ImGuiPlot;
-import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 
 import java.nio.FloatBuffer;
 import java.util.function.Function;
 
-public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer
+public class RDXPointCloudVisualizer extends RDXVisualizer
 {
-   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
@@ -30,7 +29,7 @@ public class GDXPointCloudVisualizer extends ImGuiGDXVisualizer
    private final String topicName;
    private int latestSegmentIndex;
 
-   public GDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments)
+   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments)
    {
       super(title + " (ROS 2)");
       this.pointsPerSegment = pointsPerSegment;

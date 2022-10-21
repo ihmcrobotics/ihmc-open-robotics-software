@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.graphics.live;
+package us.ihmc.rdx.ui.graphics.live;
 
 import com.badlogic.gdx.graphics.Color;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
