@@ -17,7 +17,6 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.gdx.GDX3DSituatedText;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.input.ImGui3DViewPickResult;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
@@ -129,7 +128,7 @@ public class GDXInteractableFootstep
       selectablePose3DGizmo.calculate3DViewPick(input);
 
       StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
-      stepCheckIsPointInsideAlgorithm.setup(boundingSphere.getRadius(), boundingSphere.getPosition());
+      stepCheckIsPointInsideAlgorithm.update(boundingSphere.getRadius(), boundingSphere.getPosition());
 
       Function<Point3DReadOnly, Boolean> isPointInside = boundingSphere::isPointInside;
       boolean pickIntersected = !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(input.getPickRayInWorld(), 100, isPointInside));

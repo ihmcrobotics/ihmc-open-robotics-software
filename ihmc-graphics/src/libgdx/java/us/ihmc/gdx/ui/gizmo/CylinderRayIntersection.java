@@ -22,7 +22,7 @@ public class CylinderRayIntersection
    private final Point3D secondIntersectionToPack = new Point3D();
    private boolean intersects = false;
 
-   public void setup(double length, double radius, Point3DReadOnly position, UnitVector3DReadOnly axis, ReferenceFrame referenceFrame)
+   public void update(double length, double radius, Point3DReadOnly position, UnitVector3DReadOnly axis, ReferenceFrame referenceFrame)
    {
       referenceFrame.getTransformToDesiredFrame(cylinderToWorldTransform, ReferenceFrame.getWorldFrame());
       cylinderFrame.update();
@@ -32,7 +32,7 @@ public class CylinderRayIntersection
       cylinder.getAxis().set(axis);
    }
 
-   public void setup(double length, double radius, double zOffset, RigidBodyTransformReadOnly transformToWorld)
+   public void update(double length, double radius, double zOffset, RigidBodyTransformReadOnly transformToWorld)
    {
       cylinderToWorldTransform.set(transformToWorld);
       cylinderFrame.update();

@@ -490,7 +490,7 @@ public class WalkingMessageHandler
          isPausedWithSteps.set(false);
       }
 
-      if (isPausedWithSteps.getValue())
+      if (isWalkingPaused.getValue() || isPausedWithSteps.getValue())
       {
          return 0;
       }

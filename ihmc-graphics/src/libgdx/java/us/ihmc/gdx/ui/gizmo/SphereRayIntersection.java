@@ -15,12 +15,12 @@ public class SphereRayIntersection
    private final Point3D secondIntersectionToPack = new Point3D();
    private boolean intersects = false;
 
-   public void setup(double radius, RigidBodyTransformReadOnly transform)
+   public void update(double radius, RigidBodyTransformReadOnly transform)
    {
-      setup(radius, 0.0, transform);
+      update(radius, 0.0, transform);
    }
 
-   public void setup(double radius, double zOffset, RigidBodyTransformReadOnly transform)
+   public void update(double radius, double zOffset, RigidBodyTransformReadOnly transform)
    {
       sphere.setToZero();
       sphere.setRadius(radius);
@@ -28,7 +28,7 @@ public class SphereRayIntersection
       sphere.applyTransform(transform);
    }
 
-   public void setup(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
+   public void update(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
    {
       sphere.setToZero();
       sphere.setRadius(radius);
@@ -36,7 +36,7 @@ public class SphereRayIntersection
       sphere.applyTransform(transform);
    }
 
-   public void setup(double radius, Point3DReadOnly positionInWorld)
+   public void update(double radius, Point3DReadOnly positionInWorld)
    {
       sphere.setToZero();
       sphere.setRadius(radius);

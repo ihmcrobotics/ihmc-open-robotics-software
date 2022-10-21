@@ -11,6 +11,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.string.StringTools;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -352,6 +353,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       if (jsonResourceExists())
       {
+         LogTools.info("Loading parameters from resource: {}/{}", classForLoading.getPackageName().replaceAll("\\.", "/"), saveFileNameJSON);
          JSONFileTools.loadFromClasspath(classForLoading, workspaceJSONFile.getPathForResourceLoadingPathFiltered(), node ->
          {
             if (node instanceof ObjectNode objectNode)
@@ -455,7 +457,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
             Properties properties = new Properties();
             InputStream streamForLoading = workspaceLegacyINIFile.getClasspathResourceAsStream();
 
-            LogTools.info("Loading parameters from {}", legacyFileNameINI);
+            LogTools.info("Loading parameters from resource: {}/{}", classForLoading.getPackageName().replaceAll("\\.", "/"), legacyFileNameINI);
             properties.load(streamForLoading);
 
             for (StoredPropertyKey<?> key : keys.keys())
@@ -503,10 +505,18 @@ public class StoredPropertySet implements StoredPropertySetBasics
    public void save()
    {
       Path fileForSaving = findFileForSaving();
-      LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
       if (workspaceDirectory.isFileAccessAvailable())
       {
+         LogTools.info(StringTools.format("Saving parameters to workspace: {}/{}/{}/{}",
+                                          directoryNameToAssumePresent,
+                                          subsequentPathToResourceFolder,
+                                          classForLoading.getPackageName().replaceAll("\\.", "/"),
+                                          saveFileNameJSON));
          FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      }
+      else
+      {
+         LogTools.info("Saving parameters to working directory: {}", fileForSaving);
       }
       JSONFileTools.save(fileForSaving, jsonRootObjectNode ->
       {
