@@ -169,17 +169,13 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerGoalGizmo.process3DViewInput(input, selected);
       mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
 
-      if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
+      if (mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
-         becomeModified();
+         becomeModified(true);
       }
       if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
       {
          selected = false;
-      }
-      if (modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
-      {
-         selected = true;
       }
 
       if (modified)
@@ -348,29 +344,26 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Modified"), !selected && modified))
       {
-         selected = false;
-         if (!modified)
-         {
-            becomeModified();
-         }
+         becomeModified(false);
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Selected"), selected && modified))
       {
-         selected = true;
-         if (!modified)
-         {
-            becomeModified();
-         }
+         becomeModified(true);
       }
    }
 
-   private void becomeModified()
+   public void becomeModified(boolean selected)
    {
-      modified = true;
-      walkFacingDirection.set(Axis3D.Z, 0.0);
-      updateStuff();
-      queueFootstepPlan();
+      this.selected = selected;
+      if (!modified)
+      {
+         modified = true;
+         newlyModified = true;
+         walkFacingDirection.set(Axis3D.Z, 0.0);
+         updateStuff();
+         queueFootstepPlan();
+      }
    }
 
    public boolean checkIsNewlyModified()
