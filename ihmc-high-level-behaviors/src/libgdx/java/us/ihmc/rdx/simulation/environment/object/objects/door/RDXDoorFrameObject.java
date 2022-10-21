@@ -59,13 +59,13 @@ public class RDXDoorFrameObject extends RDXEnvironmentObject
 
       Matrix4 tempTransform = new Matrix4();
       btCompoundShape btCompoundShape = new btCompoundShape();
-      LibGDXTools.toGDX(nearOriginFramePostOrigin, tempTransform);
+      LibGDXTools.toLibGDX(nearOriginFramePostOrigin, tempTransform);
       btCompoundShape.addChildShape(tempTransform, new btBoxShape(new Vector3(0.0889f / 2.0f, 0.0889f / 2.0f, 2.159f / 2.0f)));
-      LibGDXTools.toGDX(nearOriginSupportBoardOrigin, tempTransform);
+      LibGDXTools.toLibGDX(nearOriginSupportBoardOrigin, tempTransform);
       btCompoundShape.addChildShape(tempTransform, new btBoxShape(new Vector3(1.016f / 2.0f, 0.0381f / 2.0f, 0.0889f / 2.0f)));
-      LibGDXTools.toGDX(farFramePostOrigin, tempTransform);
+      LibGDXTools.toLibGDX(farFramePostOrigin, tempTransform);
       btCompoundShape.addChildShape(tempTransform, new btBoxShape(new Vector3(0.0889f / 2.0f, 0.0889f / 2.0f, 2.159f / 2.0f)));
-      LibGDXTools.toGDX(farSupportBoardOrigin, tempTransform);
+      LibGDXTools.toLibGDX(farSupportBoardOrigin, tempTransform);
       btCompoundShape.addChildShape(tempTransform, new btBoxShape(new Vector3(1.016f / 2.0f, 0.0381f / 2.0f, 0.0889f / 2.0f)));
 
       setBtCollisionShape(btCompoundShape);

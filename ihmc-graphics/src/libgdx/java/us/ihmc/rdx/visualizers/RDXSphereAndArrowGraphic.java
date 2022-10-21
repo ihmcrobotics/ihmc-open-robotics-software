@@ -31,16 +31,16 @@ public class RDXSphereAndArrowGraphic
 
    public void setToPose(Pose3DReadOnly pose)
    {
-      LibGDXTools.toGDX(pose, tempTransform, sphere.transform);
-      LibGDXTools.toGDX(pose, tempTransform, arrow.transform);
+      LibGDXTools.toLibGDX(pose, tempTransform, sphere.transform);
+      LibGDXTools.toLibGDX(pose, tempTransform, arrow.transform);
       cleared = false;
    }
 
    public void setToTransform(RigidBodyTransformReadOnly transform)
    {
       tempTransform.set(transform);
-      LibGDXTools.toGDX(tempTransform, sphere.transform);
-      LibGDXTools.toGDX(tempTransform, arrow.transform);
+      LibGDXTools.toLibGDX(tempTransform, sphere.transform);
+      LibGDXTools.toLibGDX(tempTransform, arrow.transform);
       cleared = false;
    }
 

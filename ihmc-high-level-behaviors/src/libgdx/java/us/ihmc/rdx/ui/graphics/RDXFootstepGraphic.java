@@ -74,7 +74,7 @@ public class RDXFootstepGraphic implements RenderableProvider
 
    public void setPose(Pose3DReadOnly pose)
    {
-      LibGDXTools.toGDX(pose, tempTransform, modelInstance.transform);
+      LibGDXTools.toLibGDX(pose, tempTransform, modelInstance.transform);
    }
 
    @Override

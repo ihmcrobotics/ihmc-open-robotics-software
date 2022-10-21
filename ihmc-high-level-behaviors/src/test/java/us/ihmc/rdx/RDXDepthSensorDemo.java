@@ -36,7 +36,7 @@ public class RDXDepthSensorDemo
             transformToWorld.getRotation().appendPitchRotation(Math.toRadians(90.0));
             transformToWorld.getTranslation().add(0.0f, -0.5f, 2.0f);
             Matrix4 gdxTransform = new Matrix4();
-            LibGDXTools.toGDX(transformToWorld, gdxTransform);
+            LibGDXTools.toLibGDX(transformToWorld, gdxTransform);
             depthSensorSimulator.setCameraWorldTransform(gdxTransform);
          }
 

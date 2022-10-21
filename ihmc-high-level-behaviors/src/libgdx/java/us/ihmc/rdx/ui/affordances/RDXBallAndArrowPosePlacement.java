@@ -112,14 +112,14 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          else // placing orientation
          {
             LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
-            LibGDXTools.toGDX(tempSpherePosition, arrow.transform);
+            LibGDXTools.toLibGDX(tempSpherePosition, arrow.transform);
 
             tempRotationVector.set(pickPointInWorld);
             tempRotationVector.sub(tempSpherePosition);
 
             double yaw = Math.atan2(tempRotationVector.getY(), tempRotationVector.getX());
             arrowRotationMatrix.setToYawOrientation(yaw);
-            LibGDXTools.toGDX(arrowRotationMatrix, arrow.transform);
+            LibGDXTools.toLibGDX(arrowRotationMatrix, arrow.transform);
 
             goalPoseForReading.set(tempSpherePosition, arrowRotationMatrix);
 
@@ -257,9 +257,9 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       }
       else
       {
-         LibGDXTools.toGDX(pose.getPosition(), sphere.transform);
+         LibGDXTools.toLibGDX(pose.getPosition(), sphere.transform);
          goalZOffset.set((float) pose.getZ());
-         LibGDXTools.toGDX(pose, tempTransform, arrow.transform);
+         LibGDXTools.toLibGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
    }

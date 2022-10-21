@@ -45,7 +45,7 @@ public class RDXReferenceFrameGraphic extends RDXModelInstance
    {
       framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       framePose3D.get(rigidBodyTransform);
-      LibGDXTools.toGDX(rigidBodyTransform, transform);
+      LibGDXTools.toLibGDX(rigidBodyTransform, transform);
    }
 
    public void dispose()

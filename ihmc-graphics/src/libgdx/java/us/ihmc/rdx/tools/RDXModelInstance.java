@@ -41,17 +41,17 @@ public class RDXModelInstance extends ModelInstance
    public void setTransformToReferenceFrame(ReferenceFrame referenceFrame)
    {
       referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      LibGDXTools.toGDX(tempTransform, transform);
+      LibGDXTools.toLibGDX(tempTransform, transform);
    }
 
    public void setTransformToWorldFrame(RigidBodyTransform transformToWorldFrame)
    {
-      LibGDXTools.toGDX(transformToWorldFrame, transform);
+      LibGDXTools.toLibGDX(transformToWorldFrame, transform);
    }
 
    public void setPoseInWorldFrame(Pose3DReadOnly pose)
    {
-      LibGDXTools.toGDX(pose, tempTransform, transform);
+      LibGDXTools.toLibGDX(pose, tempTransform, transform);
    }
 
    public void setTransparency(float transparency)
@@ -66,7 +66,7 @@ public class RDXModelInstance extends ModelInstance
 
    public void setColor(ColorDefinition color)
    {
-      Color colorGDX = LibGDXTools.toGDX(color);
+      Color colorGDX = LibGDXTools.toLibGDX(color);
       setDiffuseColor(colorGDX);
       if (colorGDX.a < 1.0f)
       {
