@@ -113,6 +113,9 @@ public class OpenCLManager
       LogTools.info("Loading OpenCL program: {}", programPath);
       String sourceAsString = OpenCLTools.readFile(programPath);
 
+      // Support loading from CRLF (Windows) checkouts
+      sourceAsString = sourceAsString.replaceAll("\\r\\n", "\n");
+
       /* Create Kernel program from the read in source */
       int count = 1;
       _cl_program program = clCreateProgramWithSource(context,
