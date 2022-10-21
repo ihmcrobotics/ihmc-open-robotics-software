@@ -30,7 +30,7 @@ public class RDXLeftJerseyBarrierObject extends RDXEnvironmentObject
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
      setCollisionModel(meshBuilder ->
                         {
-                           Color color = LibGDXTools.toGDX(YoAppearance.LightSkyBlue());
+                           Color color = LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue());
                            meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
                            meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
                         });

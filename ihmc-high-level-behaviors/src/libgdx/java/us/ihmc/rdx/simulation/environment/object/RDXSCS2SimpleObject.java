@@ -137,7 +137,7 @@ public class RDXSCS2SimpleObject
       {
          setCollisionModel(meshBuilder ->
          {
-            Color color = LibGDXTools.toGDX(YoAppearance.LightSkyBlue());
+            Color color = LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue());
             if (collisionGeometryObject instanceof Box3D)
             {
                Box3D box3D = (Box3D) collisionGeometryObject;
@@ -226,10 +226,10 @@ public class RDXSCS2SimpleObject
       collisionModelFrame.update();
 
       placementFramePose.setFromReferenceFrame(realisticModelFrame);
-      LibGDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
+      LibGDXTools.toLibGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
-      LibGDXTools.toGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
+      LibGDXTools.toLibGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
       if (collisionGeometryObject.getPose() == null)
       {
          if (collisionGeometryObject instanceof Sphere3D)

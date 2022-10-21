@@ -39,7 +39,7 @@ public class RDXDoorPushHandleRightFiducialStaticHandleObject extends RDXEnviron
       getBoundingSphere().getPosition().set(getCollisionShapeOffset().getTranslation());
       setCollisionModel(meshBuilder ->
       {
-         Color color = LibGDXTools.toGDX(collisionMeshColor);
+         Color color = LibGDXTools.toLibGDX(collisionMeshColor);
          meshBuilder.addBox((float) lengthX + 0.001, (float) widthY + 0.001, (float) heightZ + 0.001, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
       });

@@ -183,7 +183,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
             textFramePose.getPosition().addY(textHeight / 4.0);
             textFramePose.getPosition().addX(-textHeight / 2.0);
             textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
+            LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
             footstepIndexText.scale((float) textHeight);
             textRenderables.add(footstepIndexText);
 
@@ -193,7 +193,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
                textFramePose.changeFrame(footstepFrame);
                textFramePose.getPosition().subY(0.12);
                textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               LibGDXTools.toGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelInstance().transform);
+               LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelInstance().transform);
                footstepListDescriptionText.scale((float) textHeight);
                textRenderables.add(footstepListDescriptionText);
             }
