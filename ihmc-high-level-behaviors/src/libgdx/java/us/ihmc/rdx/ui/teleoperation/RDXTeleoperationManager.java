@@ -92,7 +92,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final ImString tempImGuiText = new ImString(1000);
    private RDXLiveRobotPartInteractable pelvisInteractable;
    private final RDXWalkPathControlRing walkPathControlRing = new RDXWalkPathControlRing();
-   private final boolean interactableExists;
+   private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
 
@@ -159,8 +159,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new RDXFootstepPlanning(robotModel, syncedRobot);
 
-      interactableExists = robotSelfCollisionModel != null;
-      if (interactableExists)
+      interactablesAvailable = robotSelfCollisionModel != null;
+      if (interactablesAvailable)
       {
          selfCollisionModel = new RDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new RDXRobotCollisionModel(robotEnvironmentCollisionModel);
@@ -197,7 +197,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
@@ -313,7 +313,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.update(interactableFootstepPlan);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             wholeBodyDesiredIKManager.update(handInteractables);
 
@@ -343,7 +343,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (!manualFootstepPlacement.isPlacingFootstep())
             walkPathControlRing.calculate3DViewPick(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
@@ -369,7 +369,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          if (!manualFootstepPlacement.isPlacingFootstep())
             walkPathControlRing.process3DViewInput(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             environmentCollisionModel.process3DViewInput(input);
 
@@ -460,7 +460,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          desiredRobot.setDesiredToCurrent();
       }
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          wholeBodyDesiredIKManager.renderImGuiWidgets();
          ImGui.checkbox("Interactables enabled", interactablesEnabled);
@@ -589,7 +589,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesEnabled.get())
       {
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (showSelfCollisionMeshes.get())
             {
