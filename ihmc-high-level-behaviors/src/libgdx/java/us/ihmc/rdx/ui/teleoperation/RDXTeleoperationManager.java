@@ -461,6 +461,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                footInteractables.get(side).delete();
             for (RobotSide side : handInteractables.sides())
                handInteractables.get(side).delete();
+            legControlMode = RDXLegControlMode.DISABLED;
          }
       }
 
