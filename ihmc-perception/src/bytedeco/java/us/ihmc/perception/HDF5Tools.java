@@ -59,6 +59,19 @@ public class HDF5Tools
       }
    }
 
+   public static byte[] loadByteArray(Group group, int index)
+   {
+      DataSet dataset = group.openDataSet(String.valueOf(index));
+      byte[] byteArray = new byte[extractShape(dataset, 0)];
+
+      BytePointer p = new BytePointer(byteArray);
+      dataset.read(p, PredType.NATIVE_UINT8());
+      p.get(byteArray);
+
+      return byteArray;
+   }
+
+
    public static void loadImage(Group group, int index, Mat mat)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));

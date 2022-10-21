@@ -1,24 +1,57 @@
 package us.ihmc.gdx.logging;
 
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
+import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
+import org.bytedeco.opencl._cl_kernel;
+import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.perception.HDF5Manager;
-import us.ihmc.perception.HDF5Tools;
+import us.ihmc.perception.*;
+
+import java.nio.ByteBuffer;
 
 public class PerceptionDataLoader
 {
    private HDF5Manager hdf5Manager;
 
+   private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
+
+   private int latestSegmentIndex = -1;
+
+   private OpenCLManager openCLManager;
+   private _cl_program openCLProgram;
+   private _cl_kernel unpackPointCloudKernel;
+   private OpenCLFloatBuffer pointCloudVertexBuffer;
+   private OpenCLIntBuffer decompressedOpenCLIntBuffer;
+   private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
+
    private int index = 0;
 
    private String filePath;
+
+   private int os0128Multiplier = 2;
+   private int pointsPerSegment = 131072 * os0128Multiplier;
+   private int numberOfSegments = 1;
 
    public PerceptionDataLoader(String filePath)
    {
       this.filePath = filePath;
       hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+
+      openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
+      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
+
+      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
+      parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
+      decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
+      decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
+      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, pointCloudRenderer.getVertexBuffer());
+      pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
@@ -28,7 +61,32 @@ public class PerceptionDataLoader
 
    public void loadCompressedPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
    {
-      HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points);
+      Group group = hdf5Manager.getGroup(namespace);
+      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+      ByteBuffer compressedByteBuffer = ByteBuffer.wrap(compressedByteArray);
+
+      int numberOfBytes = compressedByteArray.length;
+
+      lz4Decompressor.decompress(compressedByteBuffer, decompressedOpenCLIntBuffer.getBackingDirectByteBuffer());
+      decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
+
+      latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
+
+      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
+      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize.get());
+      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
+
+      parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
+      decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
+
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressedOpenCLIntBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
+      openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
+      pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+
+      pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
+
    }
 
    public void loadImage(String namespace, int index, Mat mat)
