@@ -503,13 +503,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       handManager.renderImGuiWidgets();
 
-//      desiredRobot.renderImGuiWidgets();
-//      ImGui.sameLine();
-//      if (ImGui.button(labels.get("Set Desired To Current")))
-//      {
-//         armManager.setDesiredToCurrent();
-//         desiredRobot.setDesiredToCurrent();
-//      }
+      if (ImGui.button(labels.get("Set Desired To Current")))
+      {
+         armManager.setDesiredToCurrent();
+         desiredRobot.setDesiredToCurrent();
+      }
 
       if (interactablesAvailable)
       {
