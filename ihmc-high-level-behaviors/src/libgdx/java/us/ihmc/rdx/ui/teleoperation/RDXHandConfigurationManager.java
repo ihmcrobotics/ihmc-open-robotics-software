@@ -1,8 +1,7 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandSakeDesiredCommandMessage;
-import controller_msgs.msg.dds.HandSakeStatusMessage;
+import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -17,6 +16,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.function.Consumer;
 
 public class RDXHandConfigurationManager
 {
@@ -73,6 +74,50 @@ public class RDXHandConfigurationManager
       closeHandButton.loadAndSetIcon("icons/closeGripper.jpg");
       closeHandButton.setTooltipText("Close hand");
       closeHandButton.setOnPressed(() -> closeCommands.get(toolbarSelectedSide).run());
+
+      RDXIconTexture homeIcon = new RDXIconTexture("icons/home.png");
+      RDX3DPanelToolbarButton armHomeButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      armHomeButton.setIcon(homeIcon);
+      armHomeButton.setTooltipText("left/right arm home pose");
+      armHomeButton.setOnPressed(() -> publishArmHomeCommand(toolbarSelectedSide));
+
+
+      // NOTE: temporary method to test shield holding
+      RDX3DPanelToolbarButton shieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      RDXIconTexture shieldIcon = new RDXIconTexture("icons/shield.png");
+      shieldButton.setIcon(shieldIcon);
+      shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
+
+      // NOTE: need to set runnable here to send armTrajectory command >>
+      double[] jointAngles = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+      boolean[] invert = new boolean[]{false, false, false, false, false, false, false};
+
+      Consumer<RobotSide> armTrajectoryRunnable = robotSide ->
+      {
+         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+         armTrajectoryMessage.setEnableDirectPositionControl(true);
+
+         double trajectoryTime = 3.0;
+         for (int i = 0; i < jointAngles.length; i++)
+         {
+            OneDoFJointTrajectoryMessage trajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+            TrajectoryPoint1DMessage point = trajectoryMessage.getTrajectoryPoints().add();
+            point.setTime(trajectoryTime);
+            point.setPosition((invert[i] ? -1.0 : 1.0) * jointAngles[i]);
+         }
+         communicationHelper.publishToController(armTrajectoryMessage);
+      };
+      shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
+   }
+
+   public void publishArmHomeCommand(RobotSide side)
+   {
+      double trajectoryTime = 3.5;
+      GoHomeMessage homeArm = new GoHomeMessage();
+      homeArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
+      homeArm.setRobotSide(side.toByte());
+      homeArm.setTrajectoryTime(trajectoryTime);
+      communicationHelper.publishToController(homeArm);
    }
 
    public void setupForSakeHands()
