@@ -47,7 +47,7 @@ public class RDXColorTexturesDemo
 
             ModelInstance coloredSphere = RDXModelBuilder.buildModelInstance(meshBuilder ->
             {
-               meshBuilder.addSphere(0.5, new Point3D(4.0, 4.0, 0.0), LibGDXTools.toGDX(YoAppearance.LightSkyBlue()));
+               meshBuilder.addSphere(0.5, new Point3D(4.0, 4.0, 0.0), LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue()));
             }, "ColoredSphere");
             sceneManager.addModelInstance(coloredSphere);
 

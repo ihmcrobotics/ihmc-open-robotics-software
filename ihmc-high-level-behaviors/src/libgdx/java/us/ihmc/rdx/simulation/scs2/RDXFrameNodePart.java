@@ -42,7 +42,7 @@ public class RDXFrameNodePart
       try
       {
          RigidBodyTransform transformToRoot = modelFrame.getTransformToRoot();
-         LibGDXTools.toGDX(transformToRoot, modelInstance.transform);
+         LibGDXTools.toLibGDX(transformToRoot, modelInstance.transform);
       }
       catch (NotARotationMatrixException e) // TODO: Why do we get this sometimes?
       {

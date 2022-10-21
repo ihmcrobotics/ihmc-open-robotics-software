@@ -36,7 +36,7 @@ public class RDXRobotCollisionModel
       collidables = robotCollisionModel.getRobotCollidables(rootBody);
       for (Collidable collidable : collidables)
       {
-         RDXRobotCollisionLink collisionLink = new RDXRobotCollisionLink(collidable, LibGDXTools.toGDX(color));
+         RDXRobotCollisionLink collisionLink = new RDXRobotCollisionLink(collidable, LibGDXTools.toLibGDX(color));
          collisionLinks.add(collisionLink);
       }
    }

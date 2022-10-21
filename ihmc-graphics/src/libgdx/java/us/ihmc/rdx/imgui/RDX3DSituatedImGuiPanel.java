@@ -322,7 +322,7 @@ public class RDX3DSituatedImGuiPanel
       plane.setToZero();
       plane.getNormal().set(Axis3D.X);
       plane.applyTransform(transform);
-      LibGDXTools.toGDX(transform, modelInstance.transform);
+      LibGDXTools.toLibGDX(transform, modelInstance.transform);
       centerXThroughZUpFrame.update();
    }
 

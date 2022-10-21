@@ -55,10 +55,10 @@ public class LibGDXTools
 
    public static void syncLogLevelWithLogTools()
    {
-      Gdx.app.setLogLevel(toGDX(LogTools.getLevel()));
+      Gdx.app.setLogLevel(toLibGDX(LogTools.getLevel()));
    }
 
-   public static int toGDX(Level log4jLevel)
+   public static int toLibGDX(Level log4jLevel)
    {
       int gdxLogLevel = 2;
       switch (log4jLevel.getStandardLevel())
@@ -82,7 +82,7 @@ public class LibGDXTools
       return gdxLogLevel;
    }
 
-   public static void toGDX(AffineTransform euclidAffine, Matrix4 gdxAffineToPack)
+   public static void toLibGDX(AffineTransform euclidAffine, Matrix4 gdxAffineToPack)
    {
       gdxAffineToPack.val[Matrix4.M00] = (float) euclidAffine.getM00();
       gdxAffineToPack.val[Matrix4.M01] = (float) euclidAffine.getM01();
@@ -128,7 +128,7 @@ public class LibGDXTools
                                            gdxAffine.val[Matrix4.M22]);
    }
 
-   public static void toGDX(RigidBodyTransform rigidBodyTransform, Matrix4 gdxAffineToPack)
+   public static void toLibGDX(RigidBodyTransform rigidBodyTransform, Matrix4 gdxAffineToPack)
    {
       gdxAffineToPack.val[Matrix4.M00] = (float) rigidBodyTransform.getM00();
       gdxAffineToPack.val[Matrix4.M01] = (float) rigidBodyTransform.getM01();
@@ -144,7 +144,7 @@ public class LibGDXTools
       gdxAffineToPack.val[Matrix4.M23] = (float) rigidBodyTransform.getM23();
    }
 
-   public static void toGDX(HmdMatrix44 openVRProjectionMatrix, Matrix4 gdxProjectionMatrixToPack)
+   public static void toLibGDX(HmdMatrix44 openVRProjectionMatrix, Matrix4 gdxProjectionMatrixToPack)
    {
       FloatBuffer openVRValueBuffer = openVRProjectionMatrix.m();
       gdxProjectionMatrixToPack.val[0] = openVRValueBuffer.get(0);
@@ -165,7 +165,7 @@ public class LibGDXTools
       gdxProjectionMatrixToPack.val[15] = openVRValueBuffer.get(15);
    }
 
-   public static void toGDX(HmdMatrix34 openVRRigidBodyTransform, Matrix4 gdxAffineToPack)
+   public static void toLibGDX(HmdMatrix34 openVRRigidBodyTransform, Matrix4 gdxAffineToPack)
    {
       FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
       gdxAffineToPack.val[0] = openVRValueBuffer.get(0);
@@ -255,7 +255,7 @@ public class LibGDXTools
       rigidBodyTransform.getTranslation().setZ(gdxAffine.val[Matrix4.M23]);
    }
 
-   public static void toGDX(RotationMatrix euclidRotationMatrix, Matrix4 gdxRotationMatrix)
+   public static void toLibGDX(RotationMatrix euclidRotationMatrix, Matrix4 gdxRotationMatrix)
    {
       gdxRotationMatrix.val[Matrix4.M00] = (float) euclidRotationMatrix.getM00();
       gdxRotationMatrix.val[Matrix4.M01] = (float) euclidRotationMatrix.getM01();
@@ -268,7 +268,7 @@ public class LibGDXTools
       gdxRotationMatrix.val[Matrix4.M22] = (float) euclidRotationMatrix.getM22();
    }
 
-   public static void toGDX(QuaternionReadOnly euclidQuaternion, Quaternion gdxQuaternion)
+   public static void toLibGDX(QuaternionReadOnly euclidQuaternion, Quaternion gdxQuaternion)
    {
       gdxQuaternion.x = euclidQuaternion.getX32();
       gdxQuaternion.y = euclidQuaternion.getY32();
@@ -281,17 +281,17 @@ public class LibGDXTools
       euclidQuaternion.set(gdxQuaternion.x, gdxQuaternion.y, gdxQuaternion.z, gdxQuaternion.w);
    }
 
-   public static Vector3 toGDX(Tuple3DReadOnly euclidTuple)
+   public static Vector3 toLibGDX(Tuple3DReadOnly euclidTuple)
    {
       return new Vector3(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
    }
 
-   public static Vector2 toGDX(Tuple2DReadOnly euclidTuple)
+   public static Vector2 toLibGDX(Tuple2DReadOnly euclidTuple)
    {
       return new Vector2(euclidTuple.getX32(), euclidTuple.getY32());
    }
 
-   public static void toGDX(Tuple3DReadOnly euclidTuple, Vector3 gdxVector3)
+   public static void toLibGDX(Tuple3DReadOnly euclidTuple, Vector3 gdxVector3)
    {
       gdxVector3.set(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
    }
@@ -313,23 +313,23 @@ public class LibGDXTools
                       gdxAffine.val[Matrix4.M23]);
    }
 
-   public static void toGDX(Point3DReadOnly euclidPoint, Matrix4 gdxAffine)
+   public static void toLibGDX(Point3DReadOnly euclidPoint, Matrix4 gdxAffine)
    {
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
    }
 
-   public static void toGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
+   public static void toLibGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
    {
       euclidPose.get(tempTransform);
-      toGDX(tempTransform, gdxAffine);
+      toLibGDX(tempTransform, gdxAffine);
    }
 
-   public static void toGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
+   public static void toLibGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
    {
       gdxColor.set((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
    }
 
-   public static Color toGDX(javafx.scene.paint.Color javaFXColor)
+   public static Color toLibGDX(javafx.scene.paint.Color javaFXColor)
    {
       return new Color((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
    }
@@ -353,21 +353,21 @@ public class LibGDXTools
       return new Color().fromHsv((float) hue, (float) saturation, (float) value);
    }
 
-   public static Color toGDX(AppearanceDefinition appearanceDefinition)
+   public static Color toLibGDX(AppearanceDefinition appearanceDefinition)
    {
       Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-      toGDX(appearanceDefinition, gdxColor);
+      toLibGDX(appearanceDefinition, gdxColor);
       return gdxColor;
    }
 
-   public static Color toGDX(ColorDefinition colorDefinition)
+   public static Color toLibGDX(ColorDefinition colorDefinition)
    {
       Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-      toGDX(colorDefinition, gdxColor);
+      toLibGDX(colorDefinition, gdxColor);
       return gdxColor;
    }
 
-   public static void toGDX(ColorDefinition colorDefinition, Color gdxColor)
+   public static void toLibGDX(ColorDefinition colorDefinition, Color gdxColor)
    {
       gdxColor.r = (float) colorDefinition.getRed();
       gdxColor.g = (float) colorDefinition.getGreen();
@@ -375,7 +375,7 @@ public class LibGDXTools
       gdxColor.a = (float) colorDefinition.getAlpha();
    }
 
-   public static void toGDX(Vector3 bulletColor, Color gdxColor)
+   public static void toLibGDX(Vector3 bulletColor, Color gdxColor)
    {
       gdxColor.r = bulletColor.x;
       gdxColor.g = bulletColor.y;
@@ -383,17 +383,17 @@ public class LibGDXTools
       gdxColor.a = 1.0f;
    }
 
-   public static Color toGDX(double red, double green, double blue, double alpha)
+   public static Color toLibGDX(double red, double green, double blue, double alpha)
    {
       return new Color((float) red, (float) green, (float) blue, (float) alpha);
    }
 
-   public static void toGDX(float[] imColor, Color gdxColor)
+   public static void toLibGDX(float[] imColor, Color gdxColor)
    {
       gdxColor.set(imColor[0], imColor[1], imColor[2], imColor[3]);
    }
 
-   public static void toGDX(AppearanceDefinition appearanceDefinition, Color gdxColor)
+   public static void toLibGDX(AppearanceDefinition appearanceDefinition, Color gdxColor)
    {
       gdxColor.r = appearanceDefinition.getColor().getX();
       gdxColor.g = appearanceDefinition.getColor().getY();

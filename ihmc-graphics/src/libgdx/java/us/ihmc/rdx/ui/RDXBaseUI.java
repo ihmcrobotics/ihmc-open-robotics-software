@@ -108,7 +108,7 @@ public class RDXBaseUI
    private final ImBoolean middleClickOrbit = new ImBoolean(false);
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(true);
    private final ImFloat backgroundShade = new ImFloat(RDX3DSceneTools.CLEAR_COLOR);
-   private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toGDX(LogTools.getLevel()));
+   private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImFloat imguiFontScale = new ImFloat(1.0f);
    private final RDXImGuiPerspectiveManager perspectiveManager;
    private long renderIndex = 0;

@@ -229,7 +229,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    public void getTransformZUpToWorld(Matrix4 transform)
    {
       xForwardZUpControllerFrame.getTransformToDesiredFrame(tempRigidBodyTransform, ReferenceFrame.getWorldFrame());
-      LibGDXTools.toGDX(tempRigidBodyTransform, transform);
+      LibGDXTools.toLibGDX(tempRigidBodyTransform, transform);
    }
 
    public Pose3DReadOnly getXForwardZUpPose()
