@@ -14,6 +14,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -30,8 +32,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private final int numberOfJoints;
    private final double[] jointsHomeConfiguration;
-   private final YoBoolean directPositionControlMode;
    private final JointDesiredOutputList jointDesiredOutputList;
+
+   private final BooleanParameter defaultDirectPositionControlMode;
+   private final YoBoolean directPositionControlMode;
 
    public RigidBodyJointspaceControlState(String bodyName, OneDoFJointBasics[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
          YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoRegistry parentRegistry)
@@ -39,10 +43,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
 
-      directPositionControlMode = new YoBoolean(bodyName + "DirectPositionControlMode", parentRegistry);
-
-      // TODO switch back to default false after testing
-      directPositionControlMode.set(true);
+      defaultDirectPositionControlMode = new BooleanParameter(bodyName + "DefaultDirectPositionControlMode", parentRegistry, false);
+      directPositionControlMode = new YoBoolean("DirectPositionControlMode", parentRegistry);
 
       jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
@@ -211,6 +213,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public void onEntry()
    {
+      setEnableDirectJointPositionControl(defaultDirectPositionControlMode.getValue() && jointControlHelper.hasLowLevelJointGains());
    }
 
    @Override
@@ -232,13 +235,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    public void setEnableDirectJointPositionControl(boolean enable)
    {
-      if (jointControlHelper.hasLowLevelJointGains())
-      {
-         this.directPositionControlMode.set(enable);
-      }
-      else
-      {
-         this.directPositionControlMode.set(false);
-      }
+      directPositionControlMode.set(enable && jointControlHelper.hasLowLevelJointGains());
    }
 }

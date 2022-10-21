@@ -26,9 +26,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    /**
             * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
             * jointspace position control and the controller will not use the arms for balance.
-            * TODO switch to false by default after testing
             */
-   public boolean enable_direct_position_control_ = true;
+   public boolean enable_direct_position_control_;
    /**
             * Specifies the side of the robot that will execute the trajectory.
             */
@@ -98,7 +97,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    /**
             * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
             * jointspace position control and the controller will not use the arms for balance.
-            * TODO switch to false by default after testing
             */
    public void setEnableDirectPositionControl(boolean enable_direct_position_control)
    {
@@ -107,7 +105,6 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    /**
             * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
             * jointspace position control and the controller will not use the arms for balance.
-            * TODO switch to false by default after testing
             */
    public boolean getEnableDirectPositionControl()
    {

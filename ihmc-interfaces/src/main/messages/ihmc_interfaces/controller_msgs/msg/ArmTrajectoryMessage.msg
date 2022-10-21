@@ -13,8 +13,7 @@ bool force_execution false
 
 # If true and the robot has low-level gains for the arms, this trajectory is executed in direct
 # jointspace position control and the controller will not use the arms for balance.
-# TODO switch to false by default after testing
-bool enable_direct_position_control true
+bool enable_direct_position_control false
 
 # Specifies the side of the robot that will execute the trajectory.
 byte robot_side 255
