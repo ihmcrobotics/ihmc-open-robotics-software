@@ -11,6 +11,8 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -51,6 +53,8 @@ public class ROS2PointCloudProvider
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final PointCloud pointCloud;
 
    public ROS2PointCloudProvider(ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
    {
@@ -62,6 +66,7 @@ public class ROS2PointCloudProvider
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
       decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
+      pointCloud = new PointCloud(1, totalNumberOfPoints * 8, 8);
       subscribe();
    }
 
@@ -96,7 +101,7 @@ public class ROS2PointCloudProvider
 
    private void queueRenderFusedSensorHeadPointCloud(FusedSensorHeadPointCloudMessage message)
    {
-      //      frequencyPlot.recordEvent();
+      frequencyPlot.recordEvent();
       latestFusedSensorHeadPointCloudMessageReference.set(message);
    }
 
@@ -124,7 +129,7 @@ public class ROS2PointCloudProvider
       return latestSegmentIndex;
    }
 
-   public int updateFusedPointCloudNumberOfPoints()
+   public boolean updateFusedPointCloudNumberOfPoints()
    {
       FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
       if (fusedMessage != null)
@@ -156,9 +161,24 @@ public class ROS2PointCloudProvider
          openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
          openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
          pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+
+         pointCloud.setData(pointCloudVertexBuffer.getBytedecoFloatBufferPointer(), pointsPerSegment * 8);
+
+//         pointCloudVertexBuffer.get
+
+         String str = "xyzrgbas";
+         System.out.print("\n");
+         for (long i = 0; i < totalNumberOfPoints;++i)
+         {
+            System.out.print(str.charAt((int) (i % str.length())) + ": " + pointCloudVertexBuffer.getBytedecoFloatBufferPointer().get(i) + ",");
+            if (i % str.length() == 0)
+               System.out.print("\n");
+//            LogTools.info(str.charAt(i % str.length()) + " pointcloud data: {}", pointCloudVertexBuffer.getBytedecoFloatBufferPointer().get(i));
+         }
+         return true;
       }
 
-      return totalNumberOfPoints;
+      return false;
    }
 
    public Function<FloatBuffer, Integer> updateAndGetBufferConsumer()
@@ -212,5 +232,15 @@ public class ROS2PointCloudProvider
          };
       }
       return xyzRGBASizeFloatBuffer-> 0;
+   }
+
+   public ImGuiFrequencyPlot getFrequencyPlot()
+   {
+      return frequencyPlot;
+   }
+
+   public PointCloud getPointCloud()
+   {
+      return pointCloud;
    }
 }

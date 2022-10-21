@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.graphics.live;
 
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -25,9 +26,20 @@ public class PointCloudManager
       if (pointCloudVisualizer.isActive())
       {
          pointCloudVisualizer.update();
-         pointCloudVisualizer.setTotalNumberOfPoints(pointCloudProvider.updateFusedPointCloudNumberOfPoints());
-         pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
-         pointCloudVisualizer.updateMeshFastest();
+         if (pointCloudProvider.updateFusedPointCloudNumberOfPoints())
+         {
+            pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
+            pointCloudVisualizer.updatePointCloud(pointCloudProvider.getPointCloud());
+            pointCloudVisualizer.updateMeshFastest();
+            String str = "xyzrgbas";
+            System.out.print("\n");
+            for (int i = 0; i < 100;++i)
+            {
+               System.out.print(str.charAt(i % str.length()) + ": " + pointCloudVisualizer.getVertexBuffer().get(i) + ",");
+               if (i % str.length() == 0)
+                  System.out.print("\n");
+            }
+         }
 //         }
 //         else
 //         {

@@ -29,6 +29,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    private final String topicName;
    private int latestSegmentIndex;
 
+<<<<<<< Updated upstream:ihmc-high-level-behaviors/src/libgdx/java/us/ihmc/rdx/ui/graphics/live/RDXPointCloudVisualizer.java
    public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments)
    {
       super(title + " (ROS 2)");
@@ -36,6 +37,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
       this.numberOfSegments = numberOfSegments;
       totalNumberOfPoints = pointsPerSegment * numberOfSegments;
       this.topicName = topicName;
+      frequencyPlot = plot;
    }
 
    @Override
@@ -43,6 +45,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    {
       super.create();
       pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
+      pointCloudRenderer.getVertexBuffer().limit(3256320);
    }
 
    @Override
@@ -71,13 +74,24 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
       ImGui.pushItemWidth(30.0f);
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
       ImGui.popItemWidth();
-//      frequencyPlot.renderImGuiWidgets();
+      frequencyPlot.renderImGuiWidgets();
       segmentIndexPlot.render(latestSegmentIndex);
    }
 
    public FloatBuffer getVertexBuffer()
    {
       return pointCloudRenderer.getVertexBuffer();
+   }
+
+   public void updatePointCloud(PointCloud pointCloud)
+   {
+//       = pointCloud.getData();
+      for (int i = 0; i < 50; ++i)
+      {
+         System.out.println(pointCloud.getData()[i]);
+      }
+      pointCloudRenderer.getVertexBuffer().put(pointCloud.getData());
+
    }
 
    @Override
