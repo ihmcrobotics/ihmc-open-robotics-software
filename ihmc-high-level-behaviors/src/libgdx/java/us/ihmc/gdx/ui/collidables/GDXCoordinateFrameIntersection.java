@@ -43,7 +43,7 @@ public class GDXCoordinateFrameIntersection
          double arrowHeadLength = 0.10 * length;
          double zOffset = 0.5 * arrowBodyLength;
          DiscreteArrowRayIntersection arrowIntersection = arrows.get(axis);
-         arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
+         arrowIntersection.update(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
          double distance = arrowIntersection.intersect(pickRay, 100, true);
 
          if (!Double.isNaN(distance) && Double.isNaN(closestCollisionDistance))

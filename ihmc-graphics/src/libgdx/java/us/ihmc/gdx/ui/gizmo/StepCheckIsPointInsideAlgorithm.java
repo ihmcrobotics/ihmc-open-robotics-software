@@ -12,19 +12,19 @@ public class StepCheckIsPointInsideAlgorithm
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final Point3D interpolatedPoint = new Point3D();
 
-   public void setup(double radius, RigidBodyTransformReadOnly transform)
+   public void update(double radius, RigidBodyTransformReadOnly transform)
    {
-      boundingSphereIntersection.setup(radius, transform);
+      boundingSphereIntersection.update(radius, transform);
    }
 
-   public void setup(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
+   public void update(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
    {
-      boundingSphereIntersection.setup(radius, offset, transform);
+      boundingSphereIntersection.update(radius, offset, transform);
    }
 
-   public void setup(double radius, Point3DReadOnly positionInWorld)
+   public void update(double radius, Point3DReadOnly positionInWorld)
    {
-      boundingSphereIntersection.setup(radius, positionInWorld);
+      boundingSphereIntersection.update(radius, positionInWorld);
    }
 
    public double intersect(Line3DReadOnly pickRay, int resolution, Function<Point3DReadOnly, Boolean> isPointInside)

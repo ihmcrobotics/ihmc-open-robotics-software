@@ -10,13 +10,13 @@ public class DiscreteTorusRayIntersection
    private final Torus3D torus = new Torus3D();
    private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
 
-   public void setupTorus(double radius, double tubeRadius, RigidBodyTransformReadOnly transform)
+   public void update(double radius, double tubeRadius, RigidBodyTransformReadOnly transform)
    {
       torus.setToZero();
       torus.setRadii(radius, tubeRadius);
       torus.applyTransform(transform);
 
-      stepCheckIsPointInsideAlgorithm.setup(radius + tubeRadius, transform);
+      stepCheckIsPointInsideAlgorithm.update(radius + tubeRadius, transform);
    }
 
    public double intersect(Line3DReadOnly pickRay, int resolution)
