@@ -2,11 +2,13 @@ package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.JointGainsHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -30,12 +32,14 @@ public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaB
    private boolean firstTick = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
 
    private final JointGainsHandle[] jointGainsHandles = new JointGainsHandle[jointNames.length];
    private final PositionJointHandle[] positionJointHandles = new PositionJointHandle[jointNames.length];
 
    private final YoDouble desiredJointStiffness = new YoDouble("desiredJointStiffness", registry);
    private final YoDouble desiredJointDamping = new YoDouble("desiredJointDamping", registry);
+   private YoVariableServer yoVariableServer;
 
    public ValkyrieJointGainsTestController()
    {
@@ -54,8 +58,7 @@ public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaB
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();double estimatorDT = robotModel.getEstimatorDT();
 
-      YoVariableServer yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
-
+      yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
       yoVariableServer.start();
    }
 
@@ -77,5 +80,7 @@ public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaB
          jointGainsHandles[i].setStiffness(desiredJointStiffness.getDoubleValue());
          jointGainsHandles[i].setDamping(desiredJointDamping.getDoubleValue());
       }
+
+      yoVariableServer.update(monotonicTimeProvider.getTimestamp());
    }
 }
