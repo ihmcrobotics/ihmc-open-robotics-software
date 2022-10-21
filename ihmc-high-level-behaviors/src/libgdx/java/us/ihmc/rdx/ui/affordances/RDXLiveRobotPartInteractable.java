@@ -68,7 +68,7 @@ public class RDXLiveRobotPartInteractable
       selectablePose3DGizmo.calculate3DViewPick(input);
    }
 
-   public void process3DViewInput(ImGui3DViewInput input)
+   public boolean process3DViewInput(ImGui3DViewInput input)
    {
       isMouseHovering = false;
       for (RDXRobotCollisionLink collisionLink : collisionLinks)
@@ -151,6 +151,7 @@ public class RDXLiveRobotPartInteractable
       {
          onSpacePressed.run();
       }
+      return becomesModified;
    }
 
    private void ensureMutlipleFramesAreSetup()

@@ -35,6 +35,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
    private int footstepIndex = -1;
+   private boolean modeNewlyActivated = false;
    private RDXBaseUI baseUI;
    private RobotSide currentFootStepSide;
    private RDXFootstepChecker stepChecker;
@@ -44,7 +45,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean renderTooltip = false;
    private final ArrayDeque<RDXInteractableFootstep> newlyPlacedFootsteps = new ArrayDeque<>();
    private final FramePose3D tempFramePose = new FramePose3D();
-
    private RDXIconTexture feetIcon;
 
    public void create(RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan)
@@ -163,22 +163,19 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       createNewFootStep(currentFootStepSide);
    }
 
-   public boolean renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
 //      ImGui.text("Manual footstep placement:");
-      boolean modeActivated = false;
       ImGui.image(feetIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
       {
-         modeActivated = true;
          createNewFootStep(RobotSide.LEFT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: R");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Right")) || ImGui.isKeyPressed('T'))
       {
-         modeActivated = true;
          createNewFootStep(RobotSide.RIGHT);
       }
       ImGuiTools.previousWidgetTooltip("Keybind: T");
@@ -188,7 +185,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          exitPlacement();
       }
       ImGuiTools.previousWidgetTooltip("Keybind: Escape");
-      return modeActivated;
    }
 
    private void renderTooltips()
@@ -237,6 +233,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
+      modeNewlyActivated = true;
       RigidBodyTransform latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
 
@@ -251,6 +248,13 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       tempFramePose.getOrientation().set(new RotationMatrix(latestFootstepYaw, 0.0, 0.0));
       tempFramePose.get(footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().getTransformToParent());
       footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
+   }
+
+   public boolean checkIsModeNewlyActivated()
+   {
+      boolean modeNewlyActivatedReturn = modeNewlyActivated;
+      modeNewlyActivated = false;
+      return modeNewlyActivatedReturn;
    }
 
    /**

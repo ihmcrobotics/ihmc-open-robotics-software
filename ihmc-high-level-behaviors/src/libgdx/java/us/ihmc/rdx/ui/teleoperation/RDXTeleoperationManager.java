@@ -71,7 +71,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final RDXFootstepPlanning footstepPlanning;
-   private RDXLegControlMode legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+   private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
    private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
    private final RDXInteractableFootstepPlan interactableFootstepPlan = new RDXInteractableFootstepPlan();
@@ -318,6 +318,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (walkPathControlRing.checkIsNewlyModified())
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+         interactableFootstepPlan.clear();
+      }
+
+      if (manualFootstepPlacement.checkIsModeNewlyActivated())
+      {
+         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
       }
 
       if (legControlMode != RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
@@ -343,6 +349,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
          manualFootstepPlacement.exitPlacement();
       }
 
+      if (legControlMode == RDXLegControlMode.DISABLED)
+      {
+         interactableFootstepPlan.clear();
+      }
+
       manualFootstepPlacement.update();
       interactableFootstepPlan.update();
       if (interactableFootstepPlan.getFootsteps().size() > 0)
@@ -350,6 +361,17 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
+
+      boolean allAreDeleted = pelvisInteractable.isDeleted();
+      for (RobotSide side : handInteractables.sides())
+      {
+         allAreDeleted &= handInteractables.get(side).isDeleted();
+      }
+      for (RobotSide side : footInteractables.sides())
+      {
+         allAreDeleted &= footInteractables.get(side).isDeleted();
+      }
+      desiredRobot.setActive(!allAreDeleted);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -392,7 +414,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
             pelvisInteractable.process3DViewInput(input);
             for (RobotSide side : footInteractables.sides())
             {
-               footInteractables.get(side).process3DViewInput(input);
+               if (footInteractables.get(side).process3DViewInput(input))
+               {
+                  legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+               }
             }
             for (RobotSide side : handInteractables.sides())
             {
@@ -426,6 +451,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
          ImGui.sameLine();
          if (ImGui.button(labels.get("Delete all")))
          {
+            footstepsSentToControllerGraphic.clear();
+            ballAndArrowMidFeetPosePlacement.clear();
+            manualFootstepPlacement.exitPlacement();
+            interactableFootstepPlan.clear();
             walkPathControlRing.delete();
             pelvisInteractable.delete();
             for (RobotSide side : footInteractables.sides())
@@ -438,18 +467,19 @@ public class RDXTeleoperationManager extends ImGuiPanel
       ImGui.separator();
 
       ImGui.text("Leg control mode: " + legControlMode.name());
+      if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
+      {
+         legControlMode = RDXLegControlMode.DISABLED;
+      }
+      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
       {
          legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
       }
-      ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == RDXLegControlMode.PATH_CONTROL_RING))
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-      }
-      if (ImGui.radioButton(labels.get("Joystick walking"), legControlMode == RDXLegControlMode.JOYSTICK_WALKING))
-      {
-         legControlMode = RDXLegControlMode.JOYSTICK_WALKING;
+         walkPathControlRing.becomeModified(true);
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
@@ -457,8 +487,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
       }
 
-      if (manualFootstepPlacement.renderImGuiWidgets())
-         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      manualFootstepPlacement.renderImGuiWidgets();
 
       if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
@@ -467,15 +496,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       walkPathControlRing.renderImGuiWidgets();
 
       interactableFootstepPlan.renderImGuiWidgets();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete All")))
-      {
-         footstepsSentToControllerGraphic.clear();
-         ballAndArrowMidFeetPosePlacement.clear();
-         manualFootstepPlacement.exitPlacement();
-         interactableFootstepPlan.clear();
-         walkPathControlRing.delete();
-      }
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
       ImGui.separator();
@@ -493,15 +513,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (interactablesAvailable)
       {
          armManager.renderImGuiWidgets();
-         if (ImGui.button(labels.get("Delete all")))
-         {
-            walkPathControlRing.delete();
-            pelvisInteractable.delete();
-            for (RobotSide side : footInteractables.sides())
-               footInteractables.get(side).delete();
-            for (RobotSide side : handInteractables.sides())
-               handInteractables.get(side).delete();
-         }
 
          ImGui.text("Pelvis:");
          ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
@@ -538,17 +549,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
                legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
             }
          }
-
-         boolean allAreDeleted = pelvisInteractable.isDeleted();
-         for (RobotSide side : handInteractables.sides())
-         {
-            allAreDeleted &= handInteractables.get(side).isDeleted();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            allAreDeleted &= footInteractables.get(side).isDeleted();
-         }
-         desiredRobot.setActive(!allAreDeleted);
 
          ImGui.separator();
 
