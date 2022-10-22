@@ -2,10 +2,16 @@ package us.ihmc.rdx.ui;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.logging.PerceptionLoggerPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
+import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.ui.graphics.live.*;
+import us.ihmc.rdx.ui.visualizers.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Activator;
@@ -16,13 +22,13 @@ public class RDXPerceptionVisualizerUI
 {
    private PerceptionLoggerPanel loggerPanel;
 
-   private GDXImGuiBasedUI baseUI;
-   private ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
+   private RDXBaseUI baseUI;
+   private RDXGlobalVisualizersPanel globalVisualizersUI;
 
-   private GDXEnvironmentBuilder environmentBuilder;
-   private GDXBuildingConstructor buildingConstructor;
+   private RDXEnvironmentBuilder environmentBuilder;
+   private RDXBuildingConstructor buildingConstructor;
 
-   private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
    private RDXROS2BigVideoVisualizer blackflyRightVisualizer;
    private RDXROS2VideoVisualizer videoVisualizer;
@@ -34,8 +40,8 @@ public class RDXPerceptionVisualizerUI
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
-      globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
-      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
+      globalVisualizersUI = new RDXGlobalVisualizersPanel();
+      baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -93,17 +99,15 @@ public class RDXPerceptionVisualizerUI
             videoVisualizer = new RDXROS2VideoVisualizer("Primary Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
             globalVisualizersUI.addVisualizer(videoVisualizer);
 
-            environmentBuilder = new GDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
-            buildingConstructor = new GDXBuildingConstructor(baseUI.getPrimary3DPanel());
+            environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
+            buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             baseUI.create();
-<<<<<<<HEAD:
-         ihmc - high - level - behaviors / src / libgdx / java / us / ihmc / gdx / ui / GDXPerceptionVisualizerUI.java
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
 
             environmentBuilder.create();
             environmentBuilder.loadEnvironment("DemoPullDoor.json");

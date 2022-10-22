@@ -71,7 +71,7 @@ public class RDXSimulatedRobot
       return robotDefinition;
    }
 
-   public GDXRigidBody getRootBody()
+   public RDXRigidBody getRootBody()
    {
       return rootBody;
    }
