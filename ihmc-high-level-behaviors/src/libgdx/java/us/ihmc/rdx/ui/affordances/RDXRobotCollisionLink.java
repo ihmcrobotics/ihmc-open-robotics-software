@@ -43,8 +43,8 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private CylinderRayIntersection cylinderRayIntersection;
    private EllipsoidRayIntersection ellipsoidRayIntersection;
    private BoxRayIntersection boxRayIntersection;
-   private RDXModelInstance coordinateFrame;
-   private boolean useOverrideTransform = false;
+   private RDXModelInstance collisionShapeCoordinateFrameGraphic;
+   private boolean isDetached = false;
    private final RigidBodyTransform detachedTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame detachedFrameAfterJoint;
    private final ReferenceFrame detachedShapeFrame;
@@ -152,30 +152,30 @@ public class RDXRobotCollisionLink implements RenderableProvider
       }, rigidBodyName));
       LibGDXTools.setTransparency(collisionModelInstance, color.a);
 
-      coordinateFrame = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.15));
+      collisionShapeCoordinateFrameGraphic = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.15));
    }
 
    public void update()
    {
-      if (useOverrideTransform)
+      if (isDetached)
       {
          detachedFrameAfterJoint.update();
          detachedShapeFrame.update();
          collisionModelInstance.setTransformToReferenceFrame(detachedShapeFrame);
-         coordinateFrame.setTransformToReferenceFrame(detachedShapeFrame);
+         collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(detachedShapeFrame);
       }
       else
       {
          collisionShapeFrame.update();
          collisionModelInstance.setTransformToReferenceFrame(collisionShapeFrame);
-         coordinateFrame.setTransformToReferenceFrame(collisionShapeFrame);
+         collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(collisionShapeFrame);
       }
    }
 
    public void calculatePick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      ReferenceFrame frameAfterJointToUse = useOverrideTransform ? detachedShapeFrame : frameAfterJoint;
+      ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
       pickResult.reset();
       if (shape instanceof Sphere3DReadOnly sphere)
       {
@@ -200,7 +200,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
       else if (shape instanceof Box3DReadOnly box)
       {
          boxPose.setToZero(frameAfterJointToUse);
-         if (!useOverrideTransform)
+         if (!isDetached)
             boxPose.set(box.getPose());
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          boxPose.get(boxCenterToWorldTransform);
@@ -257,12 +257,12 @@ public class RDXRobotCollisionLink implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       collisionModelInstance.getRenderables(renderables, pool);
-      coordinateFrame.getRenderables(renderables, pool);
+      collisionShapeCoordinateFrameGraphic.getRenderables(renderables, pool);
    }
 
    public RigidBodyTransform setOverrideTransform(boolean useOverrideTransform)
    {
-      this.useOverrideTransform = useOverrideTransform;
+      this.isDetached = useOverrideTransform;
       return detachedTransformToWorld;
    }
 
