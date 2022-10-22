@@ -12,6 +12,7 @@ public class RDXPlanarRegionSLAMDemo
 {
    private final RDXPlanarRegionsGraphic graphic = new RDXPlanarRegionsGraphic();
 
+
    private Activator nativesLoadedActivator;
    private PlanarRegionRegistration planeToPlaneICP;
    private PlanarRegionRegistrationPanel slamPanel;

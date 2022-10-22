@@ -1,15 +1,10 @@
 package us.ihmc.perception;
 
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -43,17 +38,10 @@ public class PlanarRegionRegistration
    private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";
    //private String regionFilePath = "/home/bmishra/Workspace/Code/MapSenseROS/Extras/Regions/Archive/Set_06_Circle/";
 
-
-
    public PlanarRegionRegistration()
    {
       previousRegions = new PlanarRegionsList();
       currentRegions = loadRegions(regionFilePath + "0000.txt", 0);
-   }
-
-   public void incrementIndex()
-   {
-      frameIndex += 20;
    }
 
    public void update()
@@ -70,7 +58,6 @@ public class PlanarRegionRegistration
       currentRegions = loadRegions(regionFilePath + fileName, frameIndex);
 
       HashMap<Integer, Integer> matches = PlanarRegionSLAMTools.findPlanarRegionMatches(previousRegions, currentRegions, 0.1f, 0.5f);
-
       RigidBodyTransform transform = registerRegionsToMap(previousRegions, currentRegions, matches);
 
       LogTools.info("Previous: {} Current: {} Matches: {}",
@@ -79,6 +66,11 @@ public class PlanarRegionRegistration
                     matches.size());
 
       this.modified = true;
+   }
+
+   public void incrementIndex()
+   {
+      frameIndex += 20;
    }
 
    public static RigidBodyTransform registerRegionsToMap(PlanarRegionsList previousRegions, PlanarRegionsList currentRegions, HashMap<Integer, Integer> matches)
@@ -104,12 +96,14 @@ public class PlanarRegionRegistration
             Quaternion orientation = new Quaternion();
             currentRegion.getTransformToLocal().get(orientation, origin);
 
-            Point3D latestPoint = PolygonizerTools.toPointInWorld(currentRegion.getConcaveHullVertex(n).getX(), currentRegion.getConcaveHullVertex(n).getX(), origin, orientation);
+            Point3D latestPoint = PolygonizerTools.toPointInWorld(currentRegion.getConcaveHullVertex(n).getX(),
+                                                                  currentRegion.getConcaveHullVertex(n).getX(),
+                                                                  origin,
+                                                                  orientation);
             Vector3D latestPointVector = new Vector3D(latestPoint);
 
             Point3D correspondingMapCentroid = new Point3D();
             previousRegion.getOrigin(correspondingMapCentroid);
-
 
             Vector3D correspondingMapNormal = new Vector3D();
             previousRegion.getNormal(correspondingMapNormal);
@@ -134,29 +128,29 @@ public class PlanarRegionRegistration
 
       LogTools.info("PlanarICP: (A:({}, {}), b:({}))\n", A.getNumRows(), A.getNumCols(), b.getNumRows());
 
-
       LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.qr(A.numRows, A.numCols);
-      if( !solver.setA(A) ) {
+      if (!solver.setA(A))
+      {
          throw new IllegalArgumentException("Singular matrix");
       }
 
-      if( solver.quality() <= 1e-8 )
+      if (solver.quality() <= 1e-8)
       {
          throw new IllegalArgumentException("Nearly singular matrix");
       }
 
-      DMatrixRMaj solution = new DMatrixRMaj(6,1);
+      DMatrixRMaj solution = new DMatrixRMaj(6, 1);
       solver.solve(b, solution);
 
-//      eulerAnglesToReference = Eigen::Vector3d((double) solution(0), (double) solution(1), (double) solution(2));
-//      translationToReference = Eigen::Vector3d((double) solution(3), (double) solution(4), (double) solution(5));
+      //      eulerAnglesToReference = Eigen::Vector3d((double) solution(0), (double) solution(1), (double) solution(2));
+      //      translationToReference = Eigen::Vector3d((double) solution(3), (double) solution(4), (double) solution(5));
 
       LogTools.info("ICP Result: Rotation({}}, {}}, {}})", solution.get(0), solution.get(1), solution.get(2));
-      LogTools.info( "Translation({}}, {}}, {}})", solution.get(3), solution.get(4), solution.get(5));
+      LogTools.info("Translation({}}, {}}, {}})", solution.get(3), solution.get(4), solution.get(5));
 
       /* Update relative and total transform from current sensor pose to map frame. Required for initial value for landmarks observed in current pose. */
-//      _sensorPoseRelative.SetAnglesAndTranslation(eulerAnglesToReference, translationToReference);
-//      _sensorToMapTransform.MultiplyRight(_sensorPoseRelative);
+      //      _sensorPoseRelative.SetAnglesAndTranslation(eulerAnglesToReference, translationToReference);
+      //      _sensorToMapTransform.MultiplyRight(_sensorPoseRelative);
 
       return transformToReturn;
    }
