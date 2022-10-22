@@ -293,7 +293,7 @@ public class RDXVRContext
             if (modelInstance != null)
             {
                modelInstance.getRenderables(renderables, pool);
-               controller.getSelectionSphere().getRenderables(renderables, pool);
+               controller.getPickPoseSphere().getRenderables(renderables, pool);
             }
          }
       }

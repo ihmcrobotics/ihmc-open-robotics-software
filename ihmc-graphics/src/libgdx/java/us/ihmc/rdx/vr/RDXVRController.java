@@ -65,10 +65,20 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final ReferenceFrame xForwardZUpControllerFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
-   private final FramePose3D selectionSphereFramePose = new FramePose3D();
-   private final RigidBodyTransform selectionSphereTransformToControllerFrame = new RigidBodyTransform();
-   private final ImGuiRigidBodyTransformTuner selectionSphereTransformTuner = new ImGuiRigidBodyTransformTuner(selectionSphereTransformToControllerFrame);
-   private RDXModelInstance selectionSphere;
+   /**
+    * A "pick" pose in the sense of mouse picking, or colliding with the scene for selection and
+    * interaction purposes. The point is just in front of the controller and represented as a little
+    * sphere so the user knows where it is. Unlike a mouse, it's not just a point, but a full pose
+    * which can be used to incorporate orientation into selection and interaction as well. Also,
+    * picking with a mouse is usually done by casting a ray into the scene, perpendicular to the
+    * monitor. However, in VR, we are not so constrained. However, we will have a ray option for the VR
+    * controller as well, as it is also convenient to not have to travel to the thing you are
+    * selecting or interacting with.
+    */
+   private final FramePose3D pickPoseFramePose = new FramePose3D();
+   private final RigidBodyTransform pickPoseTransformToControllerFrame = new RigidBodyTransform();
+   private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseTransformToControllerFrame);
+   private RDXModelInstance pickPoseSphere;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -80,9 +90,9 @@ public class RDXVRController extends RDXVRTrackedDevice
                                                                                 getDeviceYUpZBackFrame(),
                                                                                 controllerYBackZLeftXRightToXForwardZUp);
 
-      selectionSphereTransformToControllerFrame.getTranslation().setX(0.029);
-      selectionSphereTransformToControllerFrame.getTranslation().setY(side.negateIfLeftSide(0.020));
-      selectionSphereTransformToControllerFrame.getTranslation().setZ(-0.017);
+      pickPoseTransformToControllerFrame.getTranslation().setX(0.029);
+      pickPoseTransformToControllerFrame.getTranslation().setY(side.negateIfLeftSide(0.020));
+      pickPoseTransformToControllerFrame.getTranslation().setZ(-0.017);
    }
 
    public void initSystem()
@@ -127,14 +137,14 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       if (isConnected())
       {
-         if (selectionSphere == null)
+         if (pickPoseSphere == null)
          {
-            selectionSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
+            pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
          }
 
-         selectionSphereFramePose.setIncludingFrame(xForwardZUpControllerFrame, selectionSphereTransformToControllerFrame);
-         selectionSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         selectionSphere.setPoseInWorldFrame(selectionSphereFramePose);
+         pickPoseFramePose.setIncludingFrame(xForwardZUpControllerFrame, pickPoseTransformToControllerFrame);
+         pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         pickPoseSphere.setPoseInWorldFrame(pickPoseFramePose);
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -153,12 +163,12 @@ public class RDXVRController extends RDXVRTrackedDevice
 
    public void renderImGuiTunerWidgets()
    {
-      selectionSphereTransformTuner.renderTunerWithYawPitchRoll(0.001);
+      pickPoseTransformTuner.renderTunerWithYawPitchRoll(0.001);
    }
 
-   public RDXModelInstance getSelectionSphere()
+   public RDXModelInstance getPickPoseSphere()
    {
-      return selectionSphere;
+      return pickPoseSphere;
    }
 
    public InputDigitalActionData getClickTriggerActionData()
@@ -247,8 +257,8 @@ public class RDXVRController extends RDXVRTrackedDevice
       }
    }
 
-   public FramePose3DReadOnly getSelectionPose()
+   public FramePose3DReadOnly getPickPointPose()
    {
-      return selectionSphereFramePose;
+      return pickPoseFramePose;
    }
 }
