@@ -2,8 +2,8 @@ package us.ihmc.gdx.ui.perception;
 
 import imgui.ImGui;
 import imgui.type.ImInt;
-import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.perception.PlanarRegionRegistration;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 
 public class PlanarRegionRegistrationPanel extends ImGuiPanel
 {
@@ -20,11 +20,10 @@ public class PlanarRegionRegistrationPanel extends ImGuiPanel
 
    public void renderImGuiWidgets()
    {
-      if(ImGui.button("Next"))
+      if (ImGui.button("Next"))
       {
          planarRegionRegistration.incrementIndex();
          planarRegionRegistration.update();
       }
    }
-
 }
