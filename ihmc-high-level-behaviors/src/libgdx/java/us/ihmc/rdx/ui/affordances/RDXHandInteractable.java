@@ -71,8 +71,11 @@ public class RDXHandInteractable extends RDXLiveRobotPartInteractable
       contextMenuName = side + " Hand Context Menu";
    }
 
+   @Override
    public void update()
    {
+      super.update();
+
       if (wristWrenchArrows != null)
       {
          // RDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);
