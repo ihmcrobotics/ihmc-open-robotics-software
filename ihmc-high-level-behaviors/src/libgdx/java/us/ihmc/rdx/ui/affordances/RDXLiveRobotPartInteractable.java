@@ -69,6 +69,11 @@ public class RDXLiveRobotPartInteractable
       controlReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
    }
 
+   public void update()
+   {
+      ensureMutlipleFramesAreSetup();
+   }
+
    public void processVRInput(RDXVRContext vrContext)
    {
       isVRHovering = false;
@@ -196,8 +201,6 @@ public class RDXLiveRobotPartInteractable
    {
       if (hasMultipleFrames)
       {
-         ensureMutlipleFramesAreSetup();
-
          tempTransform.set(controlToCollisionTransform);
          selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
          for (RDXRobotCollisionLink collisionLink : collisionLinks)
@@ -218,8 +221,6 @@ public class RDXLiveRobotPartInteractable
 
    private void updateUnmodifiedButHovered()
    {
-      ensureMutlipleFramesAreSetup();
-
       if (hasMultipleFrames)
       {
          highlightModel.setPose(controlFrame.getTransformToWorldFrame(), controlToGraphicTransform);
