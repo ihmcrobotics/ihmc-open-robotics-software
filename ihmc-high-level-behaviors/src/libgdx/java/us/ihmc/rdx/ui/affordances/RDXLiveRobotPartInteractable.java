@@ -16,7 +16,9 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 
@@ -42,6 +44,7 @@ public class RDXLiveRobotPartInteractable
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
    public void create(RDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, RDX3DPanel panel3D)
    {
@@ -66,19 +69,58 @@ public class RDXLiveRobotPartInteractable
       controlReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
    }
 
-   public void calculateVRPick(RDXVRContext vrContext)
-   {
-
-   }
-
    public void processVRInput(RDXVRContext vrContext)
    {
       isVRHovering = false;
+
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            //            controller.getSelectionPose()
+            for (RDXRobotCollisionLink collisionLink : collisionLinks)
+            {
+               isVRHovering |= collisionLink.getVRPickSelected(side);
+            }
+
+            boolean triggerDown = controller.getClickTriggerActionData().bState();
+            boolean triggerNewlyDown = triggerDown && controller.getClickTriggerActionData().bChanged();
+            boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && isVRHovering;
+            boolean unmodifiedButHovered = !modified && isVRHovering;
+
+            if (dragReferenceFrame.get(side) == null)
+            {
+               dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
+            }
+
+            if (unmodifiedButHovered)
+            {
+               updateUnmodifiedButHovered();
+            }
+
+            updateModifiedButNotSelectedHovered(modifiedButNotSelectedHovered);
+
+            if (isVRHovering && triggerNewlyDown)
+            {
+               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
+                                                                                               controller.getPickPoseFrame());
+               dragReferenceFrame.get(side).getReferenceFrame().update();
+
+               if (!modified)
+               {
+                  onBecomesModified();
+               }
+            }
+
+            if (isVRHovering && triggerDown)
+            {
+               dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
+                                                                                           ReferenceFrame.getWorldFrame());
+            }
+
+            if (modified)
+            {
+               updateModified();
+            }
          });
       }
    }
@@ -93,7 +135,7 @@ public class RDXLiveRobotPartInteractable
       isMouseHovering = false;
       for (RDXRobotCollisionLink collisionLink : collisionLinks)
       {
-         isMouseHovering |= collisionLink.getPickSelected();
+         isMouseHovering |= collisionLink.getMousePickSelected();
       }
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
@@ -117,16 +159,7 @@ public class RDXLiveRobotPartInteractable
 
       if (unmodifiedButHovered)
       {
-         ensureMutlipleFramesAreSetup();
-
-         if (hasMultipleFrames)
-         {
-            highlightModel.setPose(controlFrame.getTransformToWorldFrame(), controlToGraphicTransform);
-         }
-         else
-         {
-            highlightModel.setPose(controlFrame.getTransformToWorldFrame());
-         }
+         updateUnmodifiedButHovered();
       }
 
       if (becomesModified)
@@ -134,6 +167,21 @@ public class RDXLiveRobotPartInteractable
          onBecomesModified();
       }
 
+      updateModifiedButNotSelectedHovered(modifiedButNotSelectedHovered);
+
+      if (modified)
+      {
+         updateModified();
+      }
+
+      if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
+      {
+         onSpacePressed.run();
+      }
+   }
+
+   private void updateModifiedButNotSelectedHovered(boolean modifiedButNotSelectedHovered)
+   {
       if (modifiedButNotSelectedHovered)
       {
          highlightModel.setTransparency(0.7);
@@ -142,34 +190,43 @@ public class RDXLiveRobotPartInteractable
       {
          highlightModel.setTransparency(0.5);
       }
+   }
 
-      if (modified)
+   private void updateModified()
+   {
+      if (hasMultipleFrames)
       {
-         if (hasMultipleFrames)
-         {
-            ensureMutlipleFramesAreSetup();
+         ensureMutlipleFramesAreSetup();
 
-            tempTransform.set(controlToCollisionTransform);
-            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
-            for (RDXRobotCollisionLink collisionLink : collisionLinks)
-            {
-               collisionLink.setDetachedTransform(true).set(tempTransform);
-            }
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
-         }
-         else
+         tempTransform.set(controlToCollisionTransform);
+         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
+         for (RDXRobotCollisionLink collisionLink : collisionLinks)
          {
-            for (RDXRobotCollisionLink collisionLink : collisionLinks)
-            {
-               collisionLink.setDetachedTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
-            }
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+            collisionLink.setDetachedTransform(true).set(tempTransform);
          }
+         highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
       }
-
-      if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
+      else
       {
-         onSpacePressed.run();
+         for (RDXRobotCollisionLink collisionLink : collisionLinks)
+         {
+            collisionLink.setDetachedTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+         }
+         highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+      }
+   }
+
+   private void updateUnmodifiedButHovered()
+   {
+      ensureMutlipleFramesAreSetup();
+
+      if (hasMultipleFrames)
+      {
+         highlightModel.setPose(controlFrame.getTransformToWorldFrame(), controlToGraphicTransform);
+      }
+      else
+      {
+         highlightModel.setPose(controlFrame.getTransformToWorldFrame());
       }
    }
 
@@ -237,7 +294,11 @@ public class RDXLiveRobotPartInteractable
          controlReferenceFrameGraphic.getRenderables(renderables, pool);
       }
 
-      if (modified || isMouseHovering)
+      boolean anyCollisionLinkHovered = false;
+      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+         anyCollisionLinkHovered |= collisionLink.getAnyPickSelected();
+
+      if (modified || anyCollisionLinkHovered)
       {
          highlightModel.getRenderables(renderables, pool);
       }

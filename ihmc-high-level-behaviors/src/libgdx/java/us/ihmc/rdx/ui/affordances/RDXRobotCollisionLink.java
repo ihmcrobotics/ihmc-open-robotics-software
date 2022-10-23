@@ -29,6 +29,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXRobotCollisionLink implements RenderableProvider
 {
@@ -42,7 +43,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private final MovingReferenceFrame frameAfterJoint;
    private String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private final RDXVRPickResult vrPickResult = new RDXVRPickResult();
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private CylinderRayIntersection cylinderRayIntersection;
@@ -55,7 +56,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private final ReferenceFrame detachedShapeFrame;
    private boolean pickSelected = false;
    private boolean mousePickSelected = false;
-   private boolean vrPickSelected = false;
+   private final SideDependentList<Boolean> vrPickSelected = new SideDependentList<>(false, false);
 
    public RDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
@@ -157,17 +158,18 @@ public class RDXRobotCollisionLink implements RenderableProvider
             LogTools.warn("Shape not handled: {}", shape);
          }
       }, rigidBodyName));
-      LibGDXTools.setTransparency(collisionModelInstance, color.a);
+      LibGDXTools.setOpacity(collisionModelInstance, color.a);
 
       collisionShapeCoordinateFrameGraphic = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.15));
    }
 
    public void update()
    {
-      boolean newPickSelected = vrPickSelected || mousePickSelected;
-      if (newPickSelected != pickSelected)
-         LibGDXTools.setTransparency(collisionModelInstance, pickSelected ? 1.0f : 0.4f);
-      pickSelected = newPickSelected;
+      pickSelected = mousePickSelected;
+      for (RobotSide side : RobotSide.values)
+         pickSelected |= vrPickSelected.get(side);
+
+      collisionModelInstance.setOpacity(pickSelected ? 1.0f : 0.4f);
 
       if (isDetached)
       {
@@ -186,10 +188,10 @@ public class RDXRobotCollisionLink implements RenderableProvider
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      vrPickResult.reset();
       ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
       for (RobotSide side : RobotSide.values)
       {
+         vrPickResult.get(side).reset();
          vrContext.getController(side).runIfConnected(controller ->
          {
             vrPickPose.setIncludingFrame(controller.getPickPointPose());
@@ -199,7 +201,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
                shape.setReferenceFrame(frameAfterJointToUse);
                if (shape.isPointInside(vrPickPose.getPosition()))
                {
-                  vrPickResult.addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
+                  vrPickResult.get(side).addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
                }
             }
             catch (UnsupportedOperationException unsupportedOperationException)
@@ -207,16 +209,19 @@ public class RDXRobotCollisionLink implements RenderableProvider
                unsupportedOperationException.printStackTrace();
             }
          });
-      }
-      if (vrPickResult.getPickCollisionWasAddedSinceReset())
-      {
-         vrContext.addPickResult(vrPickResult);
+         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+         {
+            vrContext.addPickResult(side, vrPickResult.get(side));
+         }
       }
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      vrPickSelected = vrContext.getSelectedPick() == vrPickResult;
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickSelected.set(side, vrContext.getSelectedPick().get(side) == vrPickResult.get(side));
+      }
    }
 
    public void calculatePick(ImGui3DViewInput input)
@@ -311,9 +316,19 @@ public class RDXRobotCollisionLink implements RenderableProvider
       return detachedTransformToWorld;
    }
 
-   public boolean getPickSelected()
+   public boolean getAnyPickSelected()
    {
       return pickSelected;
+   }
+
+   public boolean getMousePickSelected()
+   {
+      return mousePickSelected;
+   }
+
+   public boolean getVRPickSelected(RobotSide side)
+   {
+      return vrPickSelected.get(side);
    }
 
    public String getRigidBodyName()

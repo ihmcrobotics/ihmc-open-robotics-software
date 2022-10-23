@@ -2,33 +2,33 @@ package us.ihmc.rdx.vr;
 
 public class RDXVRPickResult
 {
-   private double distanceToCamera = Double.POSITIVE_INFINITY;
+   private double distanceToControllerPickPoint = Double.POSITIVE_INFINITY;
 
    public void reset()
    {
-      distanceToCamera = Double.POSITIVE_INFINITY;
+      distanceToControllerPickPoint = Double.POSITIVE_INFINITY;
    }
 
-   public void addPickCollision(double distanceToCamera)
+   public void addPickCollision(double distanceToControllerPickPoint)
    {
-      if (distanceToCamera < this.distanceToCamera)
+      if (distanceToControllerPickPoint < this.distanceToControllerPickPoint)
       {
-         this.distanceToCamera = distanceToCamera;
+         this.distanceToControllerPickPoint = distanceToControllerPickPoint;
       }
    }
 
    public boolean getPickCollisionWasAddedSinceReset()
    {
-      return distanceToCamera < Double.POSITIVE_INFINITY;
+      return distanceToControllerPickPoint < Double.POSITIVE_INFINITY;
    }
 
-   public void setDistanceToCamera(double distanceToCamera)
+   public void setDistanceToControllerPickPoint(double distanceToControllerPickPoint)
    {
-      this.distanceToCamera = distanceToCamera;
+      this.distanceToControllerPickPoint = distanceToControllerPickPoint;
    }
 
-   public double getDistanceToCamera()
+   public double getDistanceToControllerPickPoint()
    {
-      return distanceToCamera;
+      return distanceToControllerPickPoint;
    }
 }

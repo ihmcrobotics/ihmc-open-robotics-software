@@ -401,7 +401,7 @@ public class LibGDXTools
       gdxColor.a = 1.0f - (float) appearanceDefinition.getTransparency();
    }
 
-   public static void setTransparency(ModelInstance modelInstance, float opacity)
+   public static void setOpacity(ModelInstance modelInstance, float opacity)
    {
       for (Material material : modelInstance.materials)
       {
@@ -409,7 +409,7 @@ public class LibGDXTools
       }
    }
 
-   public static void setTransparency(Model model, float opacity)
+   public static void setOpacity(Model model, float opacity)
    {
       for (Material material : model.materials)
       {
