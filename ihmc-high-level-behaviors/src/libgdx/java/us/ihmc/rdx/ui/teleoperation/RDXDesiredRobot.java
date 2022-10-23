@@ -6,9 +6,6 @@ import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.SCS2DefinitionMissingTools;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -51,16 +48,6 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       MaterialDefinition material = new MaterialDefinition(ghostColor);
       SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-
-      // NOTE: kneeJoint (CrossFourBarJoint) separate from robotDefinition. We iterate through the kneeJoints separately below.
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         CrossFourBarJointDefinition kneeJoint = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(robotModel.getJointMap()
-                                                                                                                            .getLegJointName(robotSide,
-                                                                                                                                             LegJointName.KNEE_PITCH));
-         kneeJoint.getBodyBC().getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
-         kneeJoint.getBodyDA().getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material));
-      }
       loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), true);
    }
 
