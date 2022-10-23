@@ -44,6 +44,7 @@ public class RDXLiveRobotPartInteractable
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
    private boolean isVRHovering;
+   private boolean isVRDragging = false;
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
    public void create(RDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, RDX3DPanel panel3D)
@@ -72,6 +73,15 @@ public class RDXLiveRobotPartInteractable
    public void update()
    {
       ensureMutlipleFramesAreSetup();
+
+      if (modified && !selectablePose3DGizmo.isSelected() && (isMouseHovering || isVRHovering))
+      {
+         highlightModel.setTransparency(0.7);
+      }
+      else
+      {
+         highlightModel.setTransparency(0.5);
+      }
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -82,50 +92,50 @@ public class RDXLiveRobotPartInteractable
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
+            boolean isHovering = false;
             for (RDXRobotCollisionLink collisionLink : collisionLinks)
             {
-               isVRHovering |= collisionLink.getVRPickSelected(side);
+               isHovering |= collisionLink.getVRPickSelected(side);
             }
+            isVRHovering |= isHovering;
 
             boolean triggerDown = controller.getClickTriggerActionData().bState();
             boolean triggerNewlyDown = triggerDown && controller.getClickTriggerActionData().bChanged();
-            boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && isVRHovering;
-            boolean unmodifiedButHovered = !modified && isVRHovering;
+            boolean triggerNewlyUp = !triggerDown && controller.getClickTriggerActionData().bChanged();
 
             if (dragReferenceFrame.get(side) == null)
             {
                dragReferenceFrame.put(side, new ModifiableReferenceFrame(controller.getPickPoseFrame()));
             }
 
-            if (unmodifiedButHovered)
+            if (!modified && isHovering)
             {
                updateUnmodifiedButHovered();
             }
 
-            updateModifiedButNotSelectedHovered(modifiedButNotSelectedHovered);
-
-            if (isVRHovering && triggerNewlyDown)
+            if (isHovering && triggerNewlyDown)
             {
-               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
-                                                                                               controller.getPickPoseFrame());
-               dragReferenceFrame.get(side).getReferenceFrame().update();
-
                if (!modified)
                {
                   onBecomesModified();
                }
+
+               selectablePose3DGizmo.getPoseGizmo().getGizmoFrame().getTransformToDesiredFrame(dragReferenceFrame.get(side).getTransformToParent(),
+                                                                                               controller.getPickPoseFrame());
+               dragReferenceFrame.get(side).getReferenceFrame().update();
+               isVRDragging = true;
             }
 
-            if (isVRHovering && triggerDown)
+            if (isVRDragging)
             {
                dragReferenceFrame.get(side).getReferenceFrame().getTransformToDesiredFrame(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(),
                                                                                            ReferenceFrame.getWorldFrame());
-            }
-
-            if (modified)
-            {
+               selectablePose3DGizmo.getPoseGizmo().updateTransforms();
                updateModified();
             }
+
+            if (triggerNewlyUp)
+               isVRDragging = false;
          });
       }
    }
@@ -153,7 +163,6 @@ public class RDXLiveRobotPartInteractable
       boolean unmodifiedButHovered = !modified && isMouseHovering;
       boolean becomesModified = unmodifiedButHovered && isClickedOn;
       boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
-      boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && isMouseHovering;
 
       if (isDeletedThisFrame)
       {
@@ -172,8 +181,6 @@ public class RDXLiveRobotPartInteractable
          onBecomesModified();
       }
 
-      updateModifiedButNotSelectedHovered(modifiedButNotSelectedHovered);
-
       if (modified)
       {
          updateModified();
@@ -182,18 +189,6 @@ public class RDXLiveRobotPartInteractable
       if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
       {
          onSpacePressed.run();
-      }
-   }
-
-   private void updateModifiedButNotSelectedHovered(boolean modifiedButNotSelectedHovered)
-   {
-      if (modifiedButNotSelectedHovered)
-      {
-         highlightModel.setTransparency(0.7);
-      }
-      else
-      {
-         highlightModel.setTransparency(0.5);
       }
    }
 
@@ -254,6 +249,7 @@ public class RDXLiveRobotPartInteractable
          collisionLink.setDetachedTransform(true);
       }
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
+      selectablePose3DGizmo.getPoseGizmo().updateTransforms();
    }
 
    public void renderImGuiWidgets()
