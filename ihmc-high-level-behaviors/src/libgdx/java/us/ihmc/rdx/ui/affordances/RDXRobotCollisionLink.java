@@ -260,9 +260,9 @@ public class RDXRobotCollisionLink implements RenderableProvider
       collisionShapeCoordinateFrameGraphic.getRenderables(renderables, pool);
    }
 
-   public RigidBodyTransform setOverrideTransform(boolean useOverrideTransform)
+   public RigidBodyTransform setDetachedTransform(boolean isDetached)
    {
-      this.isDetached = useOverrideTransform;
+      this.isDetached = isDetached;
       return detachedTransformToWorld;
    }
 
