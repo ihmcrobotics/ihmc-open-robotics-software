@@ -15,6 +15,7 @@ ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
    javaDirectory("slam-wrapper", "generated-java")
+   javaDirectory("mapsense-wrapper", "generated-java")
    configurePublications()
 }
 
@@ -76,6 +77,11 @@ javacvDependencies {
 }
 
 slamWrapperDependencies {
+   apiBytedecoNatives("javacpp")
+   api("us.ihmc:ihmc-java-toolkit:source")
+}
+
+mapsenseWrapperDependencies {
    apiBytedecoNatives("javacpp")
    api("us.ihmc:ihmc-java-toolkit:source")
 }

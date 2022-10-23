@@ -8,6 +8,8 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/modules/" ${CMAKE_MODULE_PATH})
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 # set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
+set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
+set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
 
 find_package(OpenCV REQUIRED)
 find_package(OpenCL REQUIRED)
@@ -58,20 +60,46 @@ set(MS_SOURCES
 )
 
 
-add_executable(MapsenseHeadless ${MS_SOURCES})
-target_link_libraries(MapsenseHeadless
-    tbb
-    Eigen3::Eigen
-    ${OpenCV_LIBS}
-    /usr/lib/x86_64-linux-gnu/libOpenCL.so
+# add_executable(MapsenseHeadless ${MS_SOURCES})
+# target_link_libraries(MapsenseHeadless
+#     tbb
+#     Eigen3::Eigen
+#     ${OpenCV_LIBS}
+#     /usr/lib/x86_64-linux-gnu/libOpenCL.so
+#  #   eigen
+# )
+# target_include_directories(MapsenseHeadless PUBLIC
+    
+#     /usr/include/
+
+#     feature_detection/
+#     geometry/
+#     launcher/
+#     opencl/
+# )
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++  MapsenseWrapper ++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+set(MSW_SOURCES
+    external/mapsense_external.h
+    external/mapsense_external.cpp
+)
+
+add_library(mapsense-wrapper SHARED ${MSW_SOURCES})
+
+target_link_libraries(mapsense-wrapper
+    # gtsam
  #   eigen
 )
-target_include_directories(MapsenseHeadless PUBLIC
-    
-    /usr/include/
 
-    feature_detection/
-    geometry/
-    launcher/
-    opencl/
+target_include_directories(mapsense-wrapper PUBLIC
+    # cpp/mapsense/
+    external/
 )
+
+install(TARGETS mapsense-wrapper
+        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+install(FILES ${MSW_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
