@@ -25,7 +25,10 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.gizmo.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXRobotCollisionLink implements RenderableProvider
 {
@@ -34,10 +37,12 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private final ReferenceFrame collisionShapeFrame;
    private final FramePose3D boxPose = new FramePose3D();
    private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
-   private final FrameShape3DReadOnly shape;
+   private final FrameShape3DBasics shape;
+   private final FramePose3D vrPickPose = new FramePose3D();
    private final MovingReferenceFrame frameAfterJoint;
    private String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private final RDXVRPickResult vrPickResult = new RDXVRPickResult();
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private CylinderRayIntersection cylinderRayIntersection;
@@ -49,6 +54,8 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private final ReferenceFrame detachedFrameAfterJoint;
    private final ReferenceFrame detachedShapeFrame;
    private boolean pickSelected = false;
+   private boolean mousePickSelected = false;
+   private boolean vrPickSelected = false;
 
    public RDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
@@ -74,7 +81,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
                                 String rigidBodyName,
                                 Color color)
    {
-      this.shape = shape;
+      this.shape = (FrameShape3DBasics) shape; // Need isPointInside
       this.frameAfterJoint = frameAfterJoint;
       this.rigidBodyName = rigidBodyName;
       // TODO update every frame
@@ -157,6 +164,11 @@ public class RDXRobotCollisionLink implements RenderableProvider
 
    public void update()
    {
+      boolean newPickSelected = vrPickSelected || mousePickSelected;
+      if (newPickSelected != pickSelected)
+         LibGDXTools.setTransparency(collisionModelInstance, pickSelected ? 1.0f : 0.4f);
+      pickSelected = newPickSelected;
+
       if (isDetached)
       {
          detachedFrameAfterJoint.update();
@@ -170,6 +182,41 @@ public class RDXRobotCollisionLink implements RenderableProvider
          collisionModelInstance.setTransformToReferenceFrame(collisionShapeFrame);
          collisionShapeCoordinateFrameGraphic.setTransformToReferenceFrame(collisionShapeFrame);
       }
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      vrPickResult.reset();
+      ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            vrPickPose.setIncludingFrame(controller.getPickPointPose());
+            vrPickPose.changeFrame(frameAfterJointToUse);
+            try
+            {
+               shape.setReferenceFrame(frameAfterJointToUse);
+               if (shape.isPointInside(vrPickPose.getPosition()))
+               {
+                  vrPickResult.addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
+               }
+            }
+            catch (UnsupportedOperationException unsupportedOperationException)
+            {
+               unsupportedOperationException.printStackTrace();
+            }
+         });
+      }
+      if (vrPickResult.getPickCollisionWasAddedSinceReset())
+      {
+         vrContext.addPickResult(vrPickResult);
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      vrPickSelected = vrContext.getSelectedPick() == vrPickResult;
    }
 
    public void calculatePick(ImGui3DViewInput input)
@@ -246,11 +293,9 @@ public class RDXRobotCollisionLink implements RenderableProvider
       }
    }
 
-   // Happens after update
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      pickSelected = input.getClosestPick() == pickResult;
-      LibGDXTools.setTransparency(collisionModelInstance, pickSelected ? 1.0f : 0.4f);
+      mousePickSelected = input.getClosestPick() == pickResult;
    }
 
    @Override

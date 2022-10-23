@@ -9,6 +9,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.affordances.RDXRobotCollisionLink;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 
@@ -46,6 +47,22 @@ public class RDXRobotCollisionModel
       for (RDXRobotCollisionLink collisionLink : collisionLinks)
       {
          collisionLink.update();
+      }
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      {
+         collisionLink.calculateVRPick(vrContext);
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      {
+         collisionLink.processVRInput(vrContext);
       }
    }
 
