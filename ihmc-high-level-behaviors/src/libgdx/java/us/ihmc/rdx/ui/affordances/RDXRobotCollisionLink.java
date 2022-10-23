@@ -231,7 +231,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
       pickResult.reset();
       if (shape instanceof Sphere3DReadOnly sphere)
       {
-         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition());
+         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition(), frameAfterJointToUse);
          if (sphereRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(input.getPickRayInWorld().getPoint().distance(sphereRayIntersection.getFirstIntersectionToPack()));
