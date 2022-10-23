@@ -15,6 +15,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
@@ -39,6 +41,7 @@ public class RDXLiveRobotPartInteractable
    private RDXReferenceFrameGraphic controlReferenceFrameGraphic;
    private boolean isMouseHovering;
    private final Notification contextMenuNotification = new Notification();
+   private boolean isVRHovering;
 
    public void create(RDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, RDX3DPanel panel3D)
    {
@@ -61,6 +64,23 @@ public class RDXLiveRobotPartInteractable
       selectablePose3DGizmo.create(panel3D);
       graphicReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
       controlReferenceFrameGraphic = new RDXReferenceFrameGraphic(0.2);
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      isVRHovering = false;
+      for (RobotSide side : RobotSide.values)
+      {
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            //            controller.getSelectionPose()
+         });
+      }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)

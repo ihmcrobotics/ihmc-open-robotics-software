@@ -34,6 +34,7 @@ import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -267,6 +268,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
             }
          }
 
+         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
@@ -336,7 +339,39 @@ public class RDXTeleoperationManager extends ImGuiPanel
       }
    }
 
-   public void calculate3DViewPick(ImGui3DViewInput input)
+   private void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (interactablesEnabled.get())
+      {
+         if (interactableExists)
+         {
+            environmentCollisionModel.calculateVRPick(vrContext);
+         }
+      }
+   }
+
+   private void processVRInput(RDXVRContext vrContext)
+   {
+      pelvisInteractable.processVRInput(vrContext);
+      for (RobotSide side : footInteractables.sides())
+      {
+         footInteractables.get(side).processVRInput(vrContext);
+      }
+      for (RobotSide side : handInteractables.sides())
+      {
+         handInteractables.get(side).processVRInput(vrContext);
+      }
+
+      if (interactablesEnabled.get())
+      {
+         if (interactableExists)
+         {
+            environmentCollisionModel.processVRInput(vrContext);
+         }
+      }
+   }
+
+   private void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
@@ -362,7 +397,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    }
 
    // This happens after update.
-   public void process3DViewInput(ImGui3DViewInput input)
+   private void process3DViewInput(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
