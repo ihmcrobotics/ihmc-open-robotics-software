@@ -84,7 +84,7 @@ public class RDXROS1OdometryVisualizer extends RDXROS1Visualizer implements Rend
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
          modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1);
-         LibGDXTools.toGDX(framePose, tempTransform, modelInstance.transform);
+         LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
          poseModels.clear();
          poseModels.add(modelInstance);
       };

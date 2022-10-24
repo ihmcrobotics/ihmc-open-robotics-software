@@ -193,7 +193,7 @@ public class RDXFocusBasedCamera extends Camera
       focusPointAxisAngle.set(Axis3D.Z, -longitude);
       focusPointPose.getOrientation().set(focusPointAxisAngle);
 
-      LibGDXTools.toGDX(focusPointPose.getPosition(), focusPointSphere.nodes.get(0).translation);
+      LibGDXTools.toLibGDX(focusPointPose.getPosition(), focusPointSphere.nodes.get(0).translation);
       focusPointSphere.nodes.get(0).scale.set((float) (0.0035 * zoom), (float) (0.0035 * zoom), (float) (0.0035 * zoom));
       focusPointSphere.calculateTransforms();
 
@@ -207,9 +207,9 @@ public class RDXFocusBasedCamera extends Camera
       euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
       cameraPose.getOrientation().transform(euclidUp);
 
-      LibGDXTools.toGDX(cameraPose.getPosition(), position);
-      LibGDXTools.toGDX(euclidDirection, direction);
-      LibGDXTools.toGDX(euclidUp, up);
+      LibGDXTools.toLibGDX(cameraPose.getPosition(), position);
+      LibGDXTools.toLibGDX(euclidDirection, direction);
+      LibGDXTools.toLibGDX(euclidUp, up);
 
       cameraPose.get(transformToParent);
       cameraFrame.update();
@@ -393,9 +393,9 @@ public class RDXFocusBasedCamera extends Camera
       euclidUp.setIncludingFrame(ReferenceFrame.getWorldFrame(), Axis3D.Z);
       cameraPose.getOrientation().transform(euclidUp);
 
-      LibGDXTools.toGDX(cameraPose.getPosition(), position);
-      LibGDXTools.toGDX(euclidDirection, direction);
-      LibGDXTools.toGDX(euclidUp, up);
+      LibGDXTools.toLibGDX(cameraPose.getPosition(), position);
+      LibGDXTools.toLibGDX(euclidDirection, direction);
+      LibGDXTools.toLibGDX(euclidUp, up);
 
       cameraPose.get(transformToParent);
       cameraFrame.update();

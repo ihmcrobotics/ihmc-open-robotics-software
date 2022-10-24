@@ -30,7 +30,7 @@ public class RDXPointLightObject extends RDXEnvironmentObject
 
       setCollisionModel(meshBuilder ->
       {
-         Color color = LibGDXTools.toGDX(YoAppearance.LightSkyBlue());
+         Color color = LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addSphere(0.11f, color);
       });
       setCollisionGeometryObject(collisionBox);

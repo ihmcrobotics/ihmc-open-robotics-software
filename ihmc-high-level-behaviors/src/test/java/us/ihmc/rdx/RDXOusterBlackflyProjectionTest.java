@@ -111,7 +111,7 @@ public class RDXOusterBlackflyProjectionTest
             pointOnCMOSPlane.setIncludingFrame(ReferenceFrame.getWorldFrame(), -focalLength.get(), -focalLength.get() * yaw2, focalLength.get() * pitch2);
 //            pointOnCMOSPlane.setIncludingFrame(userReferenceFrame, 0.0, 0.0, -focalLength.get());
 //            pointOnCMOSPlane.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toGDX(pointOnCMOSPlane, pointOnCMOSGraphic.transform);
+            LibGDXTools.toLibGDX(pointOnCMOSPlane, pointOnCMOSGraphic.transform);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

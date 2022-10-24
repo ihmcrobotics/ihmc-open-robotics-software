@@ -29,12 +29,12 @@ public class RDXSimulatedTerrainObject
          for (RDXVisualModelInstance terrainModelInstance : RDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
          {
             visualModelInstances.add(terrainModelInstance);
-            LibGDXTools.toGDX(terrainModelInstance.getLocalTransform(), terrainModelInstance.transform);
+            LibGDXTools.toLibGDX(terrainModelInstance.getLocalTransform(), terrainModelInstance.transform);
          }
          for (RDXVisualModelInstance terrainCollisionModelInstance : RDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
          {
             collisionModelInstances.add(terrainCollisionModelInstance);
-            LibGDXTools.toGDX(terrainCollisionModelInstance.getLocalTransform(), terrainCollisionModelInstance.transform);
+            LibGDXTools.toLibGDX(terrainCollisionModelInstance.getLocalTransform(), terrainCollisionModelInstance.transform);
          }
       });
    }

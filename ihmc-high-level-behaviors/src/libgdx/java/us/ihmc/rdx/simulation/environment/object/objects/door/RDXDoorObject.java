@@ -68,7 +68,7 @@ public class RDXDoorObject extends RDXEnvironmentObject
       frameCollider.setCollisionShape(doorFrameObject.getBtCollisionShape());
       Matrix4 worldTransform = new Matrix4();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-      LibGDXTools.toGDX(rigidBodyTransform, worldTransform);
+      LibGDXTools.toLibGDX(rigidBodyTransform, worldTransform);
       frameCollider.setWorldTransform(worldTransform);
       frameCollider.setFriction(1.0f);
       addMultiBodyCollisionShape(bulletPhysicsManager, frameCollider); // TODO: Store and remove
@@ -155,7 +155,7 @@ public class RDXDoorObject extends RDXEnvironmentObject
       LibGDXTools.toEuclid(tempGDXTransform, tempTransform);
       tempTransform.appendTranslation(panelOffsetOfPivotFromParentCenterOfMass.x, panelOffsetOfPivotFromParentCenterOfMass.y, panelOffsetOfPivotFromParentCenterOfMass.z);
       tempTransform.appendTranslation(panelOffsetOfCenterOfMassFromPivot.x, panelOffsetOfCenterOfMassFromPivot.y, panelOffsetOfCenterOfMassFromPivot.z);
-      LibGDXTools.toGDX(tempTransform, tempGDXTransform);
+      LibGDXTools.toLibGDX(tempTransform, tempGDXTransform);
       panelCollider.setWorldTransform(tempGDXTransform);
       tempTransform2.set(doorPanelObject.getBulletCollisionOffset());
       tempTransform2.invert();

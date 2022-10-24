@@ -99,7 +99,7 @@ public class RDXInteractableFrameModel
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       tempFramePose.get(tempTransform);
 
-      LibGDXTools.toGDX(tempTransform, modelInstance.transform);
+      LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
       highlightModelInstance.setPose(tempTransform);
    }
 

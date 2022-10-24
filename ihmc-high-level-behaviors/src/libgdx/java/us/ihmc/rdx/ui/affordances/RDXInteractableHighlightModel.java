@@ -40,7 +40,7 @@ public class RDXInteractableHighlightModel implements RenderableProvider
 
    public void setPose(RigidBodyTransform transformToWorld)
    {
-      LibGDXTools.toGDX(transformToWorld, scaledModelInstance.getPoseTransform());
+      LibGDXTools.toLibGDX(transformToWorld, scaledModelInstance.getPoseTransform());
    }
 
    public void setTransparency(double transparency)
