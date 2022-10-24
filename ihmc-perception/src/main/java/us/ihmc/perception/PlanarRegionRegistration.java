@@ -6,6 +6,7 @@ import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -13,6 +14,8 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
@@ -34,6 +37,7 @@ import java.util.List;
 
 public class PlanarRegionRegistration
 {
+   private SlamWrapper.FactorGraphExternal factorGraph;
    private int frameIndex = 0;
    private boolean modified = false;
 
@@ -47,8 +51,11 @@ public class PlanarRegionRegistration
 
    public PlanarRegionRegistration()
    {
+      factorGraph = new SlamWrapper.FactorGraphExternal();
       previousRegions = new PlanarRegionsList();
       currentRegions = loadRegions(regionFilePath + "0000.txt", 0);
+
+      factorGraph.addPriorPoseFactor(1, new float[]{0,0,0,0,0,0});
    }
 
    public void incrementIndex()
@@ -72,6 +79,17 @@ public class PlanarRegionRegistration
       HashMap<Integer, Integer> matches = PlanarRegionSLAMTools.findPlanarRegionMatches(previousRegions, currentRegions, 0.1f, 0.5f);
 
       RigidBodyTransform transform = registerRegionsToMap(previousRegions, currentRegions, matches);
+
+      Vector3DBasics translation = transform.getTranslation();
+
+      Tuple3DBasics eulerAngles = new Point3D();
+      transform.getRotation().getEuler(eulerAngles);
+
+      factorGraph.addOdometryFactor(new float[]{translation.getX32(), translation.getY32(), translation.getZ32(), eulerAngles.getX32(), eulerAngles.getY32(), eulerAngles.getZ32()},2);
+
+      // TODO: Convert to world frame and insert the initial value
+
+      factorGraph.optimize();
 
       LogTools.info("Previous: {} Current: {} Matches: {}",
                     previousRegions.getPlanarRegion(0).getConcaveHullSize(),

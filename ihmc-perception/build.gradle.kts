@@ -47,6 +47,8 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
+
+   api("us.ihmc:ihmc-perception-slam-wrapper:source")
 }
 
 openpnpDependencies {

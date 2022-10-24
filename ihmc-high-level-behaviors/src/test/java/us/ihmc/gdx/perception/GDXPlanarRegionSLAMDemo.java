@@ -26,7 +26,8 @@ public class GDXPlanarRegionSLAMDemo
          @Override
          public void create()
          {
-            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
+            nativesLoadedActivator = BytedecoTools.loadGTSAMNativesOnAThread();
+
             baseUI.create();
 
             planeToPlaneICP = new PlanarRegionRegistration();
@@ -42,7 +43,7 @@ public class GDXPlanarRegionSLAMDemo
          @Override
          public void render()
          {
-            if(planeToPlaneICP.modified())
+            if (planeToPlaneICP.modified())
             {
                graphic.clear();
                graphic.generateMeshes(planeToPlaneICP.getCurrentRegions());
