@@ -9,6 +9,7 @@ ihmc {
    loadProductProperties("../product.properties")
    
    configureDependencyResolution()
+   javaDirectory("test", "generated-java")
    configurePublications()
 }
 
