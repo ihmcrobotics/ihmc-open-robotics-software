@@ -35,6 +35,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private RDXInteractableFootstep footstepBeingPlaced;
    private int footstepIndex = -1;
+   private boolean modeNewlyActivated = false;
    private RDXBaseUI baseUI;
    private RobotSide currentFootStepSide;
    private RDXFootstepChecker stepChecker;
@@ -44,7 +45,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private boolean renderTooltip = false;
    private final ArrayDeque<RDXInteractableFootstep> newlyPlacedFootsteps = new ArrayDeque<>();
    private final FramePose3D tempFramePose = new FramePose3D();
-
    private RDXIconTexture feetIcon;
 
    public void create(RDXBaseUI baseUI, RDXInteractableFootstepPlan footstepPlan)
@@ -99,7 +99,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
          footstepBeingPlaced.getBoundingSphere().getPosition().set(pickPointInWorld.getX(), pickPointInWorld.getY(), pickPointInWorld.getZ());
 
-         // NOTE: changing yaw while placing the step (not yet placed) engaged when control held and scrolling the mouse wheel.
+         // Adjust footstep yaw while placing with Ctrl + Mouse Scroll Up/Down
          double deltaYaw = 0.0;
          boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
          if (ctrlHeld)
@@ -136,11 +136,11 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                           currentFootStepSide,
                                           footstepPlan.getFootsteps().size());
 
-         //Get the warnings and flash if the footstep's placement isn't okay
+         // Get the warnings and flash if the footstep's placement isn't okay
          ArrayList<BipedalFootstepPlannerNodeRejectionReason> temporaryReasons = stepChecker.getReasons();
          footstepBeingPlaced.flashFootstepWhenBadPlacement(temporaryReasons.get(temporaryReasons.size() - 1));
 
-         // when left button clicked and released.
+         // When left button clicked and released.
          if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
          {
             placeFootstep();
@@ -166,7 +166,6 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void renderImGuiWidgets()
    {
 //      ImGui.text("Manual footstep placement:");
-
       ImGui.image(feetIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Left")) || ImGui.isKeyPressed('R'))
@@ -234,13 +233,14 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
    public void createNewFootStep(RobotSide footstepSide)
    {
+      modeNewlyActivated = true;
       RigidBodyTransform latestFootstepTransform = footstepPlan.getLastFootstepTransform(footstepSide.getOppositeSide());
       double latestFootstepYaw = latestFootstepTransform.getRotation().getYaw();
 
       footstepBeingPlaced = new RDXInteractableFootstep(baseUI, footstepSide, footstepIndex);
       currentFootStepSide = footstepSide;
 
-      //set the yaw of the new footstep to the yaw of the previous footstep
+      // Set the yaw of the new footstep to the yaw of the previous footstep
       tempFramePose.setToZero(ReferenceFrame.getWorldFrame());
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       LibGDXTools.toEuclid(new Matrix4(), rigidBodyTransform);
@@ -250,9 +250,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       footstepBeingPlaced.getSelectablePose3DGizmo().getPoseGizmo().updateTransforms();
    }
 
-   /*
-   Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
-   Does NOT return footsteps that you already walked on
+   public boolean pollIsModeNewlyActivated()
+   {
+      boolean modeNewlyActivatedReturn = modeNewlyActivated;
+      modeNewlyActivated = false;
+      return modeNewlyActivatedReturn;
+   }
+
+   /**
+    * Returns future footstep currently being placed. If you are not placing a footstep currently, it will return last footstep from list.
+    * Does NOT return footsteps that you already walked on.
     */
    public RDXInteractableFootstep getFootstepBeingPlacedOrLastFootstepPlaced()
    {

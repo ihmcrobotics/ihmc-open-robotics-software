@@ -50,6 +50,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
    private boolean selected = false;
    private boolean modified = false;
+   private boolean newlyModified = false;
    private boolean mouseRingPickSelected;
    private RDX3DPanel panel3D;
    private RDXTeleoperationParameters teleoperationParameters;
@@ -77,7 +78,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
    private final AxisAngle walkFacingDirection = new AxisAngle();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private int plannerToUse = 0;
+   private RDXFootstepPlanningAlgorithm footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.A_STAR;
    private TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
    private TurnStraightTurnFootstepGenerator turnStraightTurnFootstepGenerator;
@@ -168,17 +169,13 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerGoalGizmo.process3DViewInput(input, selected);
       mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
 
-      if (!modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
+      if (mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
-         becomeModified();
+         becomeModified(true);
       }
       if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
       {
          selected = false;
-      }
-      if (modified && mouseRingPickSelected && leftMouseReleasedWithoutDrag)
-      {
-         selected = true;
       }
 
       if (modified)
@@ -236,20 +233,24 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    {
       footstepPlanningThread.clearQueueAndExecute(() ->
       {
-         if (plannerToUse == 0)
+         switch (footstepPlanningAlgorithm)
          {
-            planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
-                                          new Pose3D(rightStanceFootPose),
-                                          new Pose3D(leftGoalFootPose),
-                                          new Pose3D(rightGoalFootPose));
-         }
-         else if (plannerToUse == 1)
-         {
-            planFootstepsUsingTurnWalkTurnPlanner();
-         }
-         else
-         {
-            planFootstepsUsingTurnStraightTurnFootstepGenerator();
+            case A_STAR ->
+            {
+               planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
+                                             new Pose3D(rightStanceFootPose),
+                                             new Pose3D(leftGoalFootPose),
+                                             new Pose3D(rightGoalFootPose));
+
+            }
+            case TURN_WALK_TURN ->
+            {
+               planFootstepsUsingTurnWalkTurnPlanner();
+            }
+            case TURN_STRAIGHT_TURN ->
+            {
+               planFootstepsUsingTurnStraightTurnFootstepGenerator();
+            }
          }
       });
    }
@@ -323,19 +324,19 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.radioButton(labels.get("A* Planner"), plannerToUse == 0))
+      if (ImGui.radioButton(labels.get("A* Planner"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.A_STAR))
       {
-         plannerToUse = 0;
+         footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.A_STAR;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Turn Walk Turn"), plannerToUse == 1))
+      if (ImGui.radioButton(labels.get("Turn Walk Turn"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.TURN_WALK_TURN))
       {
-         plannerToUse = 1;
+         footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.TURN_WALK_TURN;
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Turn Straight Turn"), plannerToUse == 2))
+      if (ImGui.radioButton(labels.get("Turn Straight Turn"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.TURN_STRAIGHT_TURN))
       {
-         plannerToUse = 2;
+         footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.TURN_STRAIGHT_TURN;
       }
 
       ImGui.text("Control ring:");
@@ -347,29 +348,33 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Modified"), !selected && modified))
       {
-         selected = false;
-         if (!modified)
-         {
-            becomeModified();
-         }
+         becomeModified(false);
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Selected"), selected && modified))
       {
-         selected = true;
-         if (!modified)
-         {
-            becomeModified();
-         }
+         becomeModified(true);
       }
    }
 
-   private void becomeModified()
+   public void becomeModified(boolean selected)
    {
-      modified = true;
-      walkFacingDirection.set(Axis3D.Z, 0.0);
-      updateStuff();
-      queueFootstepPlan();
+      this.selected = selected;
+      if (!modified)
+      {
+         modified = true;
+         newlyModified = true;
+         walkFacingDirection.set(Axis3D.Z, 0.0);
+         updateStuff();
+         queueFootstepPlan();
+      }
+   }
+
+   public boolean pollIsNewlyModified()
+   {
+      boolean newlyModifiedReturn = newlyModified;
+      newlyModified = false;
+      return newlyModifiedReturn;
    }
 
    private void renderTooltips()
