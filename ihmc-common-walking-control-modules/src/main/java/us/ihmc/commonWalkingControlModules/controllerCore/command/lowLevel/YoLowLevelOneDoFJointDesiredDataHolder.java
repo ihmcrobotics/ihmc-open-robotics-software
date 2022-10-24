@@ -60,12 +60,6 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutpu
    }
 
    @Override
-   public JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointReadOnly joint)
-   {
-      return getJointDesiredOutputFromHash(joint.hashCode());
-   }
-
-   @Override
    public JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode)
    {
       return lowLevelJointDataMap.get(jointHashCode);

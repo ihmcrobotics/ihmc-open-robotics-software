@@ -1,98 +1,81 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.commons.thread.ThreadTools;
 
-   public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
+public abstract class DRCObstacleCourseStandingYawedTest implements MultiRobotTestInterface
+{
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+
+   @BeforeEach
+   public void showMemoryUsageBeforeTest()
    {
-      private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-
-      private DRCSimulationTestHelper drcSimulationTestHelper;
-
-      @BeforeEach
-      public void showMemoryUsageBeforeTest()
-      {
-         MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      }
-
-      @AfterEach
-      public void destroySimulationAndRecycleMemory()
-      {
-         if (simulationTestingParameters.getKeepSCSUp())
-         {
-            ThreadTools.sleepForever();
-         }
-
-         // Do this here in case a test fails. That way the memory will be recycled.
-         if (drcSimulationTestHelper != null)
-         {
-            drcSimulationTestHelper.destroySimulation();
-            drcSimulationTestHelper = null;
-         }
-
-         MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-      }
-
-
-      @Test
-      public void testStandingYawed() throws SimulationExceededMaximumTimeException
-      {
-         BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
-         DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
-
-         drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-         drcSimulationTestHelper.setStartingLocation(selectedLocation);
-         drcSimulationTestHelper.createSimulation("DRCWalkingOntoRocksTest");
-
-         SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
-         ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
-
-         setupCameraForWalkingOntoRocks(simulationConstructionSet);
-
-         ThreadTools.sleep(1000);
-         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-
-         drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-         drcSimulationTestHelper.checkNothingChanged();
-
-         assertTrue(success);
-
-         Point3D center = new Point3D(-2.179104505087052E-6, 2.050336483387291, 0.7874231497270643);
-         Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-         BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-         drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
-
-
-         BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-      }
-
-
-      private void setupCameraForWalkingOntoRocks(SimulationConstructionSet scs)
-      {
-         Point3D cameraFix = new Point3D(0.1, 3.2, 0.5);
-         Point3D cameraPosition = new Point3D(-2.8, 4.8, 1.5);
-
-         drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-      }
-
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
    }
+
+   @AfterEach
+   public void destroySimulationAndRecycleMemory()
+   {
+      // Do this here in case a test fails. That way the memory will be recycled.
+      if (simulationTestHelper != null)
+      {
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
+      }
+
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   @Test
+   public void testStandingYawed() 
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
+
+      setupCameraForWalkingOntoRocks();
+
+      boolean success = simulationTestHelper.simulateNow(2.0);
+
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 1);
+//      simulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(-2.179104505087052E-6, 2.050336483387291, 0.7874231497270643);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   private void setupCameraForWalkingOntoRocks()
+   {
+      Point3D cameraFix = new Point3D(0.1, 3.2, 0.5);
+      Point3D cameraPosition = new Point3D(-2.8, 4.8, 1.5);
+
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
+   }
+}

@@ -161,7 +161,7 @@ public class CommandConsumerWithDelayBuffers
       PriorityQueue<Command<?, ?>> priorityQueue = priorityQueues.get(command.getClass());
       if(priorityQueue.size() >= NUMBER_OF_COMMANDS_TO_QUEUE)
       {
-         LogTools.error("Tried to add {} to the delay queue, but the queue was full. Try increasing the queue size", command.getClass().getSimpleName());
+//         LogTools.error("Tried to add {} to the delay queue, but the queue was full. Try increasing the queue size", command.getClass().getSimpleName());
          return;
       }
       RecyclingArrayList<? extends Command<?, ?>> recyclingArrayList = queuedCommands.get(command.getClass());
@@ -241,5 +241,13 @@ public class CommandConsumerWithDelayBuffers
    {
       clearDelayQueue(commandClassToFlush);
       commandInputManager.clearCommands(commandClassToFlush);
+   }
+
+   public void clearAllCommands()
+   {
+      for(int i = 0; i < listOfSupportedCommands.size(); i++)
+      {
+         clearDelayQueue(listOfSupportedCommands.get(i));
+      }
    }
 }

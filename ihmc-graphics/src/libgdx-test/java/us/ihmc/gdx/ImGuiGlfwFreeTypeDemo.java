@@ -31,8 +31,8 @@ public class ImGuiGlfwFreeTypeDemo
    public ImGuiGlfwFreeTypeDemo()
    {
       imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(), "ihmc-open-robotics-software", "ihmc-graphics/src/libgdx-test/resources");
-      imGuiGlfwWindow.getPanelManager().addPrimaryPanel("Window");
-      imGuiGlfwWindow.run(this::configure, this::render, this::dispose);
+      imGuiGlfwWindow.getPanelManager().addSelfManagedPanel("Window");
+      imGuiGlfwWindow.run(null, this::configure, this::render, this::dispose);
 
       fontsFlags.set(fontsFlags.get() + ImGuiFreeTypeBuilderFlags.LightHinting);
    }

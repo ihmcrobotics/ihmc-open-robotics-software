@@ -3,6 +3,7 @@ package us.ihmc.avatar;
 import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,22 +11,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
+import us.ihmc.avatar.testTools.scs2.SCS2RewindabilityVerifier;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.ControllerFailureException;
-import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationRunner.SimulationRewindabilityVerifier;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -51,130 +43,136 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
    }
 
    @Test
-   public void testCanRewindAndGoForward() throws UnreasonableAccelerationException
+   public void testCanRewindAndGoForward()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       int numberOfSteps = 100;
-      SimulationConstructionSet scs = setupScs();
-      scs.simulateOneRecordStepNow();
-      scs.simulateOneRecordStepNow();
+      SCS2AvatarTestingSimulation simulationTestHelper = setupSimulation();
+      simulationTestHelper.start();
+      simulationTestHelper.simulateOneBufferRecordPeriodNow();
+      simulationTestHelper.simulateOneBufferRecordPeriodNow();
 
       for (int i = 0; i < numberOfSteps; i++)
       {
-         scs.simulateOneRecordStepNow();
-         scs.simulateOneRecordStepNow();
-         scs.stepBackwardNow();
+         simulationTestHelper.simulateOneBufferRecordPeriodNow();
+         simulationTestHelper.simulateOneBufferRecordPeriodNow();
+         simulationTestHelper.stepBufferIndexBackward();
       }
 
-      scs.closeAndDispose();
+      simulationTestHelper.finishTest();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Test
-   public void testRunsTheSameWayTwice() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException, ControllerFailureException
+   public void testRunsTheSameWayTwice()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      SimulationConstructionSet scs1 = setupScs();
-      SimulationConstructionSet scs2 = setupScs();
-      ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
-      SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
-      BlockingSimulationRunner blockingSimulationRunner1 = new BlockingSimulationRunner(scs1, 1000.0);
-      BlockingSimulationRunner blockingSimulationRunner2 = new BlockingSimulationRunner(scs2, 1000.0);
-      YoBoolean walk1 = (YoBoolean) scs1.findVariable("walkCSG");
-      YoBoolean walk2 = (YoBoolean) scs2.findVariable("walkCSG");
+      SCS2AvatarTestingSimulation simulationTestHelper1 = setupSimulation();
+      SCS2AvatarTestingSimulation simulationTestHelper2 = setupSimulation();
+      simulationTestHelper1.start();
+      simulationTestHelper2.start();
+      List<String> exceptions = createVariableNamesStringsToIgnore();
+      SCS2RewindabilityVerifier checker = new SCS2RewindabilityVerifier(simulationTestHelper1, simulationTestHelper2, exceptions);
+      YoBoolean walk1 = (YoBoolean) simulationTestHelper1.findVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) simulationTestHelper2.findVariable("walkCSG");
       double standingTimeDuration = 1.0;
       double walkingTimeDuration = 4.0;
-      initiateWalkingMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner1, walk1);
-      initiateWalkingMotion(standingTimeDuration, walkingTimeDuration, blockingSimulationRunner2, walk2);
-      ArrayList<VariableDifference> variableDifferences = checker.verifySimulationsAreSameToStart();
+      initiateWalkingMotion(standingTimeDuration, walkingTimeDuration, simulationTestHelper1, walk1);
+      initiateWalkingMotion(standingTimeDuration, walkingTimeDuration, simulationTestHelper2, walk2);
+      List<VariableDifference> variableDifferences = checker.verifySimulationsAreSameToStart();
       if (!variableDifferences.isEmpty())
       {
          System.err.println("variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
-         if (simulationTestingParameters.getKeepSCSUp())
-            ThreadTools.sleepForever();
          fail("Found Variable Differences!\n variableDifferences: \n" + VariableDifference.allVariableDifferencesToString(variableDifferences));
       }
 
-      scs1.closeAndDispose();
-      scs2.closeAndDispose();
+      simulationTestHelper1.finishTest();
+      simulationTestHelper2.finishTest();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Disabled
    @Test
-   public void testRewindabilityWithSimpleFastMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   public void testRewindabilityWithSimpleFastMethod()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       double totalTimeBeforeWalking = 2.0;
       double totalTimeAfterWalking = 4.0;
-      SimulationConstructionSet scs1 = setupScs();
-      SimulationConstructionSet scs2 = setupScs();
-      double timePerTick = scs1.getTimePerRecordTick();
+      SCS2AvatarTestingSimulation simulationTestHelper1 = setupSimulation();
+      SCS2AvatarTestingSimulation simulationTestHelper2 = setupSimulation();
+      simulationTestHelper1.start();
+      simulationTestHelper2.start();
+      double timePerTick = simulationTestHelper1.getTimePerRecordTick();
       int numberTicksBeforeWalking = (int) Math.round(totalTimeBeforeWalking / timePerTick);
 
       // Get past the initialization hump.
       int numTicksToStartComparingAt = 2;
       int numberTicksAfterWalking = (int) Math.round(totalTimeAfterWalking / timePerTick);
-      ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
-      SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
+      List<String> exceptions = createVariableNamesStringsToIgnore();
+      SCS2RewindabilityVerifier checker = new SCS2RewindabilityVerifier(simulationTestHelper1, simulationTestHelper2, exceptions);
       double maxDifferenceAllowed = 1e-14;
-      ArrayList<VariableDifference> variableDifferences = new ArrayList<VariableDifference>();
+      ArrayList<VariableDifference> variableDifferences = new ArrayList<>();
       int numTicksToSimulateAhead = 1;
-      checker.checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt, numberTicksBeforeWalking, numTicksToSimulateAhead, maxDifferenceAllowed,
-              variableDifferences);
+      checker.checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt,
+                                                   numberTicksBeforeWalking,
+                                                   numTicksToSimulateAhead,
+                                                   maxDifferenceAllowed,
+                                                   variableDifferences);
 
       // checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksBeforeWalking, maxDifferenceAllowed, variableDifferences);
       checkForVariableDifferences(variableDifferences);
-      YoBoolean walk1 = (YoBoolean) scs1.findVariable("walkCSG");
-      YoBoolean walk2 = (YoBoolean) scs2.findVariable("walkCSG");
+      YoBoolean walk1 = (YoBoolean) simulationTestHelper1.findVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) simulationTestHelper2.findVariable("walkCSG");
       walk1.set(true);
       walk2.set(true);
       numTicksToSimulateAhead = 1;
 
       // Must be greater than zero since the footstep provider stuff is not rewindable...
       numTicksToStartComparingAt = 1;
-      checker.checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt, numberTicksAfterWalking, numTicksToSimulateAhead, maxDifferenceAllowed,
-              variableDifferences);
+      checker.checkRewindabilityWithRigorousMethod(numTicksToStartComparingAt,
+                                                   numberTicksAfterWalking,
+                                                   numTicksToSimulateAhead,
+                                                   maxDifferenceAllowed,
+                                                   variableDifferences);
 
       // checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksAfterWalking, maxDifferenceAllowed, variableDifferences);
       checkForVariableDifferences(variableDifferences);
 
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
-      scs1.closeAndDispose();
-      scs2.closeAndDispose();
+      simulationTestHelper1.finishTest();
+      simulationTestHelper2.finishTest();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @Disabled
    @Test
-   public void testRewindabilityWithSlowerMoreExtensiveMethod() throws UnreasonableAccelerationException, SimulationExceededMaximumTimeException
+   public void testRewindabilityWithSlowerMoreExtensiveMethod()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       double totalTimeBeforeWalking = 2.0;
       double totalTimeAfterWalking = 4.0;
-      SimulationConstructionSet scs1 = setupScs();
-      SimulationConstructionSet scs2 = setupScs();
-      double timePerTick = scs1.getTimePerRecordTick();
+      SCS2AvatarTestingSimulation simulationTestHelper1 = setupSimulation();
+      SCS2AvatarTestingSimulation simulationTestHelper2 = setupSimulation();
+      simulationTestHelper1.start();
+      simulationTestHelper2.start();
+      double timePerTick = simulationTestHelper1.getTimePerRecordTick();
       int numberTicksBeforeWalking = (int) Math.round(totalTimeBeforeWalking / timePerTick);
 
       // Get past the initialization hump.
       int numTicksToStartComparingAt = 2;
       int numberTicksAfterWalking = (int) Math.round(totalTimeAfterWalking / timePerTick);
-      ArrayList<String> exceptions = DRCSimulationTestHelper.createVariableNamesStringsToIgnore();
-      SimulationRewindabilityVerifier checker = new SimulationRewindabilityVerifier(scs1, scs2, exceptions);
+      List<String> exceptions = createVariableNamesStringsToIgnore();
+      SCS2RewindabilityVerifier checker = new SCS2RewindabilityVerifier(simulationTestHelper1, simulationTestHelper2, exceptions);
       double maxDifferenceAllowed = 1e-14;
-      ArrayList<VariableDifference> variableDifferences = new ArrayList<VariableDifference>();
+      ArrayList<VariableDifference> variableDifferences = new ArrayList<>();
 
       // checker.checkRewindabilityWithSimpleMethod(numTicksToStartComparingAt, numberTicksBeforeWalking, maxDifferenceAllowed, variableDifferences);
-      checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksBeforeWalking,
-              maxDifferenceAllowed, variableDifferences);
+      checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt,
+                                                                                     numberTicksBeforeWalking,
+                                                                                     maxDifferenceAllowed,
+                                                                                     variableDifferences);
       checkForVariableDifferences(variableDifferences);
-      YoBoolean walk1 = (YoBoolean) scs1.findVariable("walkCSG");
-      YoBoolean walk2 = (YoBoolean) scs2.findVariable("walkCSG");
+      YoBoolean walk1 = (YoBoolean) simulationTestHelper1.findVariable("walkCSG");
+      YoBoolean walk2 = (YoBoolean) simulationTestHelper2.findVariable("walkCSG");
       walk1.set(true);
       walk2.set(true);
 
@@ -182,17 +180,14 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       numTicksToStartComparingAt = 1;
 
       // checker.checkRewindabilityWithSimpleMethod(numTicksToStartComparingAt, numberTicksAfterWalking, maxDifferenceAllowed, variableDifferences);
-      checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt, numberTicksAfterWalking, maxDifferenceAllowed,
-              variableDifferences);
+      checker.checkRewindabilityUsingIndividualVariableChangesAndTrackingStackTraces(numTicksToStartComparingAt,
+                                                                                     numberTicksAfterWalking,
+                                                                                     maxDifferenceAllowed,
+                                                                                     variableDifferences);
       checkForVariableDifferences(variableDifferences);
 
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
-      scs1.closeAndDispose();
-      scs2.closeAndDispose();
+      simulationTestHelper1.finishTest();
+      simulationTestHelper2.finishTest();
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -207,48 +202,50 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       }
    }
 
-   private SimulationConstructionSet setupScs()
+   private SCS2AvatarTestingSimulation setupSimulation()
    {
-      boolean useVelocityAndHeadingScript = true;
-      boolean cheatWithGroundHeightAtForFootstep = false;
-      GroundProfile3D groundProfile = new FlatGroundProfile();
+      FlatGroundEnvironment environment = new FlatGroundEnvironment();
       DRCRobotModel robotModel = getRobotModel();
-      DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
-      scsInitialSetup.setRunMultiThreaded(false);
-      DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
-                                                               useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel);
-      SimulationConstructionSet scs = drcFlatGroundWalkingTrack.getSimulationConstructionSet();
-      setupCameraForUnitTest(scs);
 
-      return scs;
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = new SCS2AvatarTestingSimulationFactory(robotModel, environment);
+      simulationTestHelperFactory.setDefaultHighLevelHumanoidControllerFactory(true, new HeadingAndVelocityEvaluationScriptParameters());
+      simulationTestHelperFactory.setup(simulationTestingParameters);
+      simulationTestHelperFactory.setRunMultiThreaded(false);
+      SCS2AvatarTestingSimulation simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.setCameraFocusPosition(0.6, 0.4, 1.1);
+      simulationTestHelper.setCameraPosition(-0.15, 10.0, 3.0);
+      return simulationTestHelper;
    }
 
-   private void setupCameraForUnitTest(SimulationConstructionSet scs)
-   {
-      CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
-      cameraConfiguration.setCameraFix(0.6, 0.4, 1.1);
-      cameraConfiguration.setCameraPosition(-0.15, 10.0, 3.0);
-      cameraConfiguration.setCameraTracking(true, true, true, false);
-      cameraConfiguration.setCameraDolly(true, true, true, false);
-      scs.setupCamera(cameraConfiguration);
-      scs.selectCamera("testCamera");
-   }
-
-   private DRCGuiInitialSetup createGUIInitialSetup()
-   {
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false, simulationTestingParameters);
-
-      return guiInitialSetup;
-   }
-
-   private void initiateWalkingMotion(double standingTimeDuration, double walkingTimeDuration, BlockingSimulationRunner runner, YoBoolean walk)
-           throws SimulationExceededMaximumTimeException, ControllerFailureException
+   private void initiateWalkingMotion(double standingTimeDuration, double walkingTimeDuration, SCS2AvatarTestingSimulation runner, YoBoolean walk)
    {
       walk.set(false);
-      runner.simulateAndBlock(standingTimeDuration);
+      runner.simulateNow(standingTimeDuration);
       walk.set(true);
-      runner.simulateAndBlock(walkingTimeDuration);
+      runner.simulateNow(walkingTimeDuration);
+   }
+
+   public static List<String> createVariableNamesStringsToIgnore()
+   {
+      List<String> exceptions = new ArrayList<String>();
+      exceptions.add("nano");
+      exceptions.add("milli");
+      exceptions.add("Timer");
+      exceptions.add("startTime");
+      exceptions.add("actualEstimatorDT");
+      exceptions.add("nextExecutionTime");
+      exceptions.add("totalDelay");
+      exceptions.add("lastEstimatorClockStartTime");
+      exceptions.add("lastControllerClockTime");
+      exceptions.add("controllerStartTime");
+      exceptions.add("actualControlDT");
+      exceptions.add("timePassed");
+
+      //    exceptions.add("gc_");
+      //    exceptions.add("toolFrame");
+      //    exceptions.add("ef_");
+      //    exceptions.add("kp_");
+
+      return exceptions;
    }
 }

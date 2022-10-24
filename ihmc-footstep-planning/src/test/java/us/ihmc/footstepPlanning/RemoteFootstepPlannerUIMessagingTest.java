@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
-import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -128,7 +128,7 @@ public class RemoteFootstepPlannerUIMessagingTest
             @Override
             public void start(Stage stage) throws Exception
             {
-               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+               ui = FootstepPlannerUI.createUI(stage, (SharedMemoryJavaFXMessager) messager);
                ui.show();
             }
 
@@ -360,7 +360,6 @@ public class RemoteFootstepPlannerUIMessagingTest
          Assertions.assertTrue(rightFootGoalPose.epsilonEquals(rightFootGoalPoseReference.get(), epsilon), "rightFootGoalPose values aren't equal");
          assertEquals("Timeouts aren't equal.", timeout, timeoutReference.getAndSet(null), epsilon);
          assertEquals("Perform A* search flags aren't equal.", performAStarSearch, performAStarSearchReference.getAndSet(null));
-         assertEquals("Plan body path flags aren't equal.", planBodyPath, planBodyPathReference.getAndSet(null));
          assertEquals("Initial support sides aren't equal.", robotSide, robotSideReference.getAndSet(null));
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
@@ -454,7 +453,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
       AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId);
       AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic);
-      AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathData);
       AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPosition);
       AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientation);
 
@@ -507,19 +505,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertEquals("Planner Ids aren't equal.", planId, receivedPlanIdReference.getAndSet(null), epsilon);
          assertEquals("Planner results aren't equal.", result, plannerResultReference.getAndSet(null));
          EuclidCoreTestTools.assertPoint3DGeometricallyEquals("Low level goal position results aren't equal.", lowLevelGoalPosition, lowLevelPositionGoalReference.getAndSet(null), epsilon);
-         EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
-         List<? extends Pose3DReadOnly> bodyPathResult = bodyPathReference.getAndSet(null);
-         assertEquals("Body path size results aren't equal.", bodyPath.size(), bodyPathResult.size());
-         for (int i = 0; i < bodyPath.size(); i++)
-         {
-            EuclidCoreTestTools
-                  .assertPoint3DGeometricallyEquals("Body path waypoint " + i + " results aren't equal.", bodyPath.get(i).getPosition(),
-                                                    bodyPathResult.get(i).getPosition(), epsilon);
-            EuclidCoreTestTools
-                  .assertQuaternionGeometricallyEquals("Body path waypoint " + i + " results aren't equal.", bodyPath.get(i).getOrientation(),
-                                                    bodyPathResult.get(i).getOrientation(), epsilon);
-         }
-
+         EuclidCoreTestTools.assertOrientation3DGeometricallyEquals("Low level goal orientation results aren't equal.", lowLevelGoalOrientation, lowLevelOrientationGoalReference.getAndSet(null), epsilon);
 
          for (int i = 0; i < 100; i++)
             ThreadTools.sleep(10);

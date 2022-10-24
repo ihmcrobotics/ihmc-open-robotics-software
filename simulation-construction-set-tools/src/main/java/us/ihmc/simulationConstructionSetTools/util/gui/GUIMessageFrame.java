@@ -28,10 +28,10 @@ public class GUIMessageFrame
 
    private final JFrame messageWindow;
    private final JTabbedPane jTabbedPane;
+   private final JCheckBox lockBox;
 
    private final int errorMessagePanelIndex, outMessagePanelIndex, parameterMessagePanelIndex;
 
-   private final JCheckBox lockBox = new JCheckBox("Lock Focus");
    private boolean locked = false;
    private int lastMessagePanel = 0;
 
@@ -40,12 +40,13 @@ public class GUIMessageFrame
    private static GUIMessageFrame elvis;
 
    public GUIMessageFrame(String messageWindowName)
-   {      
+   {
 
       if (SHOW_GUI_MESSAGE_FRAME)
       {
          messageWindow = new JFrame(messageWindowName);
          jTabbedPane = new JTabbedPane();
+         lockBox = new JCheckBox("Lock Focus");
 
          messageWindow.getContentPane().setLayout(new BorderLayout());
          messageWindow.getContentPane().add(jTabbedPane); // ,BorderLayout.CENTER);
@@ -61,7 +62,8 @@ public class GUIMessageFrame
                {
                   locked = false;
                   jTabbedPane.setSelectedIndex(lastMessagePanel);
-               } else
+               }
+               else
                {
                   locked = true;
                }
@@ -96,15 +98,16 @@ public class GUIMessageFrame
             messageWindow.setVisible(true);
 
       }
-      
+
       else
       {
          this.parameterMessagePanelIndex = 0;
          this.outMessagePanelIndex = 0;
          this.errorMessagePanelIndex = 0;
-         
+
          this.messageWindow = null;
          this.jTabbedPane = null;
+         this.lockBox = null;
       }
    }
 
@@ -117,7 +120,6 @@ public class GUIMessageFrame
 
       return elvis;
    }
-
 
    public void appendOutMessage(String outMessage)
    {
@@ -138,7 +140,7 @@ public class GUIMessageFrame
    {
       JOptionPane.showMessageDialog(messageWindow, error, "Error", JOptionPane.ERROR_MESSAGE);
    }
-   
+
    public void popupWarningMessage(String warning)
    {
       JOptionPane.showMessageDialog(messageWindow, warning, "Warning", JOptionPane.WARNING_MESSAGE);
@@ -191,7 +193,8 @@ public class GUIMessageFrame
          if (checkIndex != -1)
          {
             throw new RuntimeException("This name is already taken: " + name);
-         } else
+         }
+         else
             jTabbedPane.addTab(name, ret);
 
          int integerValueToReturn = jTabbedPane.indexOfTab(name);
@@ -217,38 +220,37 @@ public class GUIMessageFrame
          gUIMessagePanel.clear();
       }
    }
-   
+
    public void save(String filename)
    {
       File file = new File(filename);
       save(file);
    }
-   
-   
+
    public void save(File file)
    {
       PrintWriter printWriter;
-      
+
       try
       {
          printWriter = new PrintWriter(file);
-      } 
+      }
       catch (FileNotFoundException fileNotFoundException)
       {
          PrintTools.error(fileNotFoundException.getMessage() + "\n" + file);
          return;
       }
-      
-//      printWriter.println(listOfPanels.size());
-      
+
+      //      printWriter.println(listOfPanels.size());
+
       for (int panelIndex = 0; panelIndex < listOfPanels.size(); panelIndex++)
       {
          GUIMessagePanel guiMessagePanel = (GUIMessagePanel) jTabbedPane.getComponentAt(panelIndex);
-         
+
          PrintTools.debug(guiMessagePanel.toString());
-         
+
          String name = guiMessagePanel.getName();
-         
+
          printWriter.println(name);
          printWriter.println("{\\StartGUIMessagePanelText}");
          String text = guiMessagePanel.getText();
@@ -256,7 +258,7 @@ public class GUIMessageFrame
          printWriter.println("{\\EndGUIMessagePanelText}");
 
       }
-      
+
       printWriter.flush();
       printWriter.close();
    }

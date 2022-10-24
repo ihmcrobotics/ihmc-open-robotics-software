@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.Image32;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.Image32;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

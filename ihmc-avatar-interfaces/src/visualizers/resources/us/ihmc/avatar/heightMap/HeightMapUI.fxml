@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+
+    <center>
+        <SplitPane dividerPositions="0.6" orientation="VERTICAL" BorderPane.alignment="CENTER">
+            <items>
+                <BorderPane/>
+                <AnchorPane>
+                    <children>
+                        <fx:include fx:id="heightMapParametersUI" source="HeightMapParametersUI.fxml" />
+                    </children>
+                </AnchorPane>
+            </items>
+        </SplitPane>
+    </center>
+
+</BorderPane>

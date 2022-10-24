@@ -34,7 +34,7 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final DoubleStoredPropertyKey goalSatisfactionRadius = keys.addDoubleKey("Goal satisfaction radius");
    public static final DoubleStoredPropertyKey goalSatisfactionOrientationDelta = keys.addDoubleKey("Goal satisfaction orientation delta");
    public static final DoubleStoredPropertyKey planHorizon = keys.addDoubleKey("Plan horizon");
-   public static final DoubleStoredPropertyKey footstepPlannerTimeout = keys.addDoubleKey("Footstep planner timeout");
+   public static final DoubleStoredPropertyKey footstepPlannerTimeoutWhileStopped = keys.addDoubleKey("Footstep planner timeout while stopped");
    public static final DoubleStoredPropertyKey planarRegionsExpiration = keys.addDoubleKey("Planar regions expiration");
    public static final DoubleStoredPropertyKey waitTimeAfterPlanFailed = keys.addDoubleKey("Wait time after plan failed");
    public static final IntegerStoredPropertyKey numberOfStepsToTryToPlan = keys.addIntegerKey("Number of steps to try to plan");

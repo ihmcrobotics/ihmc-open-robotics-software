@@ -32,13 +32,13 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
          simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      simulationTestHelper.simulateAndWait(7.0);
+      simulationTestHelper.simulateNow(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
@@ -51,23 +51,23 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
          simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      simulationTestHelper.simulateAndWait(7.0);
+      simulationTestHelper.simulateNow(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
 
-      simulationTestHelper.simulateAndWait(1.0);
+      simulationTestHelper.simulateNow(1.0);
 
       for (RobotSide robotSide : RobotSide.values)
          simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN));
 
-      simulationTestHelper.simulateAndWait(7.0);
+      simulationTestHelper.simulateNow(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN, epsilon);
@@ -80,13 +80,13 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
       simulationTestHelper.start();
 
-      boolean success = simulationTestHelper.simulateAndWait(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
          simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      simulationTestHelper.simulateAndWait(7.0);
+      simulationTestHelper.simulateNow(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
@@ -94,7 +94,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       for (RobotSide robotSide : RobotSide.values)
          simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN_FINGERS));
 
-      simulationTestHelper.simulateAndWait(7.0);
+      simulationTestHelper.simulateNow(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN_FINGERS, epsilon);
@@ -112,7 +112,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper.finishTest();
          simulationTestHelper = null;
       }
 

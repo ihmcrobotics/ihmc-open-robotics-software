@@ -51,19 +51,19 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       testHelper.publishToController(AvatarRandomTestMessages.nextArmTrajectoryMessage(random, trajectoryTime, RobotSide.LEFT, robot));
       testHelper.publishToController(AvatarRandomTestMessages.nextArmTrajectoryMessage(random, trajectoryTime, RobotSide.RIGHT, robot));
 
-      Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.25));
+      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.LEFT, trajectoryTime));
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.ARM, RobotSide.RIGHT, trajectoryTime));
 
-      Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.25));
+      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
-      AvatarCommonAsserts.assertDesiredArmPositions(leftHome, RobotSide.LEFT, robot, testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredArmPositions(rightHome, RobotSide.RIGHT, robot, testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.LEFT, robot, testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.RIGHT, robot, testHelper.getControllerRegistry(), 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmPositions(leftHome, RobotSide.LEFT, robot, testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmPositions(rightHome, RobotSide.RIGHT, robot, testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.LEFT, robot, testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredArmVelocitiesZero(RobotSide.RIGHT, robot, testHelper, 1.0e-10);
 
-      Assert.assertTrue(testHelper.simulateAndWait(2.0));
+      Assert.assertTrue(testHelper.simulateNow(2.0));
 
       AvatarCommonAsserts.assertArmPositions(leftHome, RobotSide.LEFT, robot, Math.toRadians(15.0));
       AvatarCommonAsserts.assertArmPositions(rightHome, RobotSide.RIGHT, robot, Math.toRadians(15.0));
@@ -74,22 +74,22 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
       createSimulation();
 
       double trajectoryTime = 0.5;
-      MovingReferenceFrame pelvisZUpFrame = testHelper.getReferenceFrames().getPelvisZUpFrame();
+      MovingReferenceFrame pelvisZUpFrame = testHelper.getControllerReferenceFrames().getPelvisZUpFrame();
       FullHumanoidRobotModel robot = testHelper.getControllerFullRobotModel();
       FrameQuaternion chestHome = new FrameQuaternion(pelvisZUpFrame, getChestHome(getRobotModel(), robot).getOrientation());
 
       testHelper.publishToController(AvatarRandomTestMessages.nextChestTrajectoryMessage(random, trajectoryTime, pelvisZUpFrame, robot));
 
-      Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.25));
+      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.CHEST, trajectoryTime));
 
-      Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.25));
+      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.25));
 
-      AvatarCommonAsserts.assertDesiredChestOrientation(chestHome, robot, testHelper.getControllerRegistry(), 1.0e-6);
-      AvatarCommonAsserts.assertDesiredChestAngularVelocityZero(robot, testHelper.getControllerRegistry(), 1.0e-6);
+      AvatarCommonAsserts.assertDesiredChestOrientation(chestHome, robot, testHelper, 1.0e-6);
+      AvatarCommonAsserts.assertDesiredChestAngularVelocityZero(robot, testHelper, 1.0e-6);
 
-      Assert.assertTrue(testHelper.simulateAndWait(2.0));
+      Assert.assertTrue(testHelper.simulateNow(2.0));
 
       AvatarCommonAsserts.assertChestOrientation(chestHome, robot, Math.toRadians(1.0));
    }
@@ -103,17 +103,17 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
       testHelper.publishToController(AvatarRandomTestMessages.nextPelvisTrajectoryMessage(random, trajectoryTime, robot, 0.1, Math.toRadians(30.0)));
 
-      Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 0.5));
+      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 0.5));
 
       testHelper.publishToController(HumanoidMessageTools.createGoHomeMessage(HumanoidBodyPart.PELVIS, trajectoryTime));
 
-      Assert.assertTrue(testHelper.simulateAndWait(trajectoryTime + 1.0));
+      Assert.assertTrue(testHelper.simulateNow(trajectoryTime + 1.0));
 
-      FrameQuaternion pelvisHomeOrientation = new FrameQuaternion(testHelper.getReferenceFrames().getMidFeetZUpFrame());
-      AvatarCommonAsserts.assertDesiredPelvisOrientation(pelvisHomeOrientation, robot, testHelper.getControllerRegistry(), 1.0e-3);
-      AvatarCommonAsserts.assertDesiredPelvisAngularVelocityZero(robot, testHelper.getControllerRegistry(), 1.0e-6);
-      AvatarCommonAsserts.assertDesiredPelvisHeightOffsetZero(testHelper.getControllerRegistry(), 1.0e-10);
-      AvatarCommonAsserts.assertDesiredICPOffsetZero(testHelper.getControllerRegistry(), 1.0e-3);
+      FrameQuaternion pelvisHomeOrientation = new FrameQuaternion(testHelper.getControllerReferenceFrames().getMidFeetZUpFrame());
+      AvatarCommonAsserts.assertDesiredPelvisOrientation(pelvisHomeOrientation, robot, testHelper, 1.0e-3);
+      AvatarCommonAsserts.assertDesiredPelvisAngularVelocityZero(robot, testHelper, 1.0e-6);
+      AvatarCommonAsserts.assertDesiredPelvisHeightOffsetZero(testHelper, 1.0e-10);
+      AvatarCommonAsserts.assertDesiredICPOffsetZero(testHelper, 1.0e-3);
    }
 
    private static double[] getArmHome(DRCRobotModel robotModel, RobotSide robotSide, FullHumanoidRobotModel robot)
@@ -157,11 +157,13 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
 
    private void createSimulation() throws SimulationExceededMaximumTimeException
    {
-      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(), new FlatGroundEnvironment(), simulationTestingParameters);
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                         new FlatGroundEnvironment(),
+                                                                                                                         simulationTestingParameters);
       factory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       testHelper = factory.createAvatarTestingSimulation();
       testHelper.start();
-      Assert.assertTrue(testHelper.simulateAndWait(0.25));
+      Assert.assertTrue(testHelper.simulateNow(0.25));
    }
 
    @BeforeEach
@@ -176,7 +178,7 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
    {
       if (testHelper != null)
       {
-         testHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         testHelper.finishTest();
          testHelper = null;
       }
 

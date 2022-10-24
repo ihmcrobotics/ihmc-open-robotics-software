@@ -2,9 +2,14 @@ package us.ihmc.footstepPlanning;
 
 public enum BodyPathPlanningResult
 {
+   PLANNING,
    FOUND_SOLUTION,
+   TIMED_OUT_BEFORE_SOLUTION,
    NO_PATH_EXISTS,
-   EXCEPTION;
+   INVALID_GOAL,
+   MAXIMUM_ITERATIONS_REACHED,
+   EXCEPTION,
+   HALTED;
 
    public static final BodyPathPlanningResult[] values = values();
 
@@ -18,6 +23,11 @@ public enum BodyPathPlanningResult
          default:
             return false;
       }
+   }
+
+   public boolean terminalResult()
+   {
+      return this != PLANNING;
    }
 
    public byte toByte()

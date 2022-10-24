@@ -28,12 +28,12 @@ public class GDXIHMCLabEnvironment implements RenderableProvider
 
    public void create()
    {
-      labFloorModel = GDXModelLoader.loadG3DModel("labFloor/LabFloor.g3dj");
-      smallCinderBlockModel = GDXModelLoader.loadG3DModel("SmallCinderBlockRough.g3dj");
-      mediumCinderBlockModel = GDXModelLoader.loadG3DModel("MediumCinderBlockRough.g3dj");
-      largeCinderBlockModel = GDXModelLoader.loadG3DModel("LargeCinderBlockRough.g3dj");
-      doorModel = GDXModelLoader.loadG3DModel("DoorOnly.g3dj");
-      doorFrameModel = GDXModelLoader.loadG3DModel("DoorFrame.g3dj");
+      labFloorModel = GDXModelLoader.load("labFloor/LabFloor.g3dj");
+      smallCinderBlockModel = GDXModelLoader.load("SmallCinderBlockRough.g3dj");
+      mediumCinderBlockModel = GDXModelLoader.load("MediumCinderBlockRough.g3dj");
+      largeCinderBlockModel = GDXModelLoader.load("LargeCinderBlockRough.g3dj");
+      doorModel = GDXModelLoader.load("DoorOnly.g3dj");
+      doorFrameModel = GDXModelLoader.load("DoorFrame.g3dj");
 
       Pose3D pose = new Pose3D();
       RigidBodyTransform transform = new RigidBodyTransform();

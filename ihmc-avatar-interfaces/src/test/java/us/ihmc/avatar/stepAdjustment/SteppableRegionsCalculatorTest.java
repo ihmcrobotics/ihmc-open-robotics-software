@@ -54,10 +54,17 @@ public class SteppableRegionsCalculatorTest
       }
    }
 
+   public SteppableRegionsCalculator getSteppableRegionsCalculator()
+   {
+      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      calculator.setRemoveSteppableAreaCloseToObstacles(true);
+      return calculator;
+   }
+
    @Test
    public void testEasyJustGround()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -87,7 +94,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithABlock()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       if (visualize)
          createUI();
@@ -138,10 +145,10 @@ public class SteppableRegionsCalculatorTest
          ui.submitStepConstraintRegionsToVisualizer(constraintRegions);
       }
 
-      ConcavePolygon2D expectedHole = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                         blockRegion,
-                                                                                         extrusionDistanceCalculator,
-                                                                                         Math.cos(orthogonalAngle));
+      ConcavePolygon2D expectedHole = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                              blockRegion,
+                                                                                                              extrusionDistanceCalculator,
+                                                                                                              Math.cos(orthogonalAngle));
 
       List<ConcavePolygon2D> holes = new ArrayList<>();
       holes.add(expectedHole);
@@ -171,7 +178,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithWallThatSplitsInHalf()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -249,7 +256,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithABlockBelow()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -301,7 +308,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithBlockThatCrops()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -337,10 +344,10 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(listOfRegions);
 
-      ConcavePolygon2D obstacle = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                     blockRegion,
-                                                                                     extrusionDistanceCalculator,
-                                                                                     Math.cos(orthogonalAngle));
+      ConcavePolygon2D obstacle = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                          blockRegion,
+                                                                                                          extrusionDistanceCalculator,
+                                                                                                          Math.cos(orthogonalAngle));
 
       ConcavePolygon2D groundConcavePOlygon = new ConcavePolygon2D(groundPolygon);
       ConcavePolygon2DBasics croppedGroundPolygon = PolygonClippingAndMerging.removeAreaInsideClip(obstacle, groundConcavePOlygon).get(0);
@@ -365,7 +372,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testEasyGroundWithBlockThatMergesWithAHole()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -410,14 +417,14 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(listOfRegions);
 
-      ConcavePolygon2D obstacle1 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                      blockRegion,
-                                                                                      extrusionDistanceCalculator,
-                                                                                      Math.cos(orthogonalAngle));
-      ConcavePolygon2D obstacle2 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                      blockRegion2,
-                                                                                      extrusionDistanceCalculator,
-                                                                                      Math.cos(orthogonalAngle));
+      ConcavePolygon2D obstacle1 = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                           blockRegion,
+                                                                                                           extrusionDistanceCalculator,
+                                                                                                           Math.cos(orthogonalAngle));
+      ConcavePolygon2D obstacle2 = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                           blockRegion2,
+                                                                                                           extrusionDistanceCalculator,
+                                                                                                           Math.cos(orthogonalAngle));
 
       ConcavePolygon2D obstacle = new ConcavePolygon2D();
       PolygonClippingAndMerging.merge(obstacle1, obstacle2, obstacle);
@@ -484,7 +491,7 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testSplitThatTurnsHoleIntoAClip()
    {
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -532,14 +539,14 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(listOfRegions);
 
-      ConcavePolygon2D wallObstacle = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                         wallRegion,
-                                                                                         extrusionDistanceCalculator,
-                                                                                         Math.cos(orthogonalAngle));
-      ConcavePolygon2D holeObstacle = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                         blockRegion,
-                                                                                         extrusionDistanceCalculator,
-                                                                                         Math.cos(orthogonalAngle));
+      ConcavePolygon2D wallObstacle = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                              wallRegion,
+                                                                                                              extrusionDistanceCalculator,
+                                                                                                              Math.cos(orthogonalAngle));
+      ConcavePolygon2D holeObstacle = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                              blockRegion,
+                                                                                                              extrusionDistanceCalculator,
+                                                                                                              Math.cos(orthogonalAngle));
 
       List<ConcavePolygon2DBasics> groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle, new ConcavePolygon2D(groundPolygon));
       ConcavePolygon2DBasics groundConcavePolygon1 = PolygonClippingAndMerging.removeAreaInsideClip(holeObstacle, groundConcavePolygons.get(0)).get(0);
@@ -581,7 +588,7 @@ public class SteppableRegionsCalculatorTest
       if (visualize)
          createUI();
 
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -629,14 +636,14 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(listOfRegions);
 
-      ConcavePolygon2D wallObstacle1 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                          wallRegion1,
-                                                                                          extrusionDistanceCalculator,
-                                                                                          Math.cos(orthogonalAngle));
-      ConcavePolygon2D wallObstacle2 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                          wallRegion2,
-                                                                                          extrusionDistanceCalculator,
-                                                                                          Math.cos(orthogonalAngle));
+      ConcavePolygon2D wallObstacle1 = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                               wallRegion1,
+                                                                                                               extrusionDistanceCalculator,
+                                                                                                               Math.cos(orthogonalAngle));
+      ConcavePolygon2D wallObstacle2 = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                               wallRegion2,
+                                                                                                               extrusionDistanceCalculator,
+                                                                                                               Math.cos(orthogonalAngle));
 
       List<ConcavePolygon2DBasics> groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle2, new ConcavePolygon2D(groundPolygon));
       groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle1, groundConcavePolygons.get(0));
@@ -702,10 +709,10 @@ public class SteppableRegionsCalculatorTest
       PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
       double orthogonalAngle = Math.toRadians(75.0);
 
-      ConcavePolygon2D extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                      blockRegion,
-                                                                                      extrusionDistanceCalculator,
-                                                                                      Math.cos(orthogonalAngle));
+      ConcavePolygon2D extrusion = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                           blockRegion,
+                                                                                                           extrusionDistanceCalculator,
+                                                                                                           Math.cos(orthogonalAngle));
 
       double angleDistance = extrusionDistance1 * Math.sqrt(2) / 2.0;
 
@@ -748,7 +755,7 @@ public class SteppableRegionsCalculatorTest
       groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
       blockRegion = new PlanarRegion(blockTransform, blockPolygon);
 
-      extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+      extrusion = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
 
       angleDistance = extrusionDistance2 * Math.sqrt(2) / 2.0;
 
@@ -819,10 +826,10 @@ public class SteppableRegionsCalculatorTest
       PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
       double orthogonalAngle = Math.toRadians(75.0);
 
-      ConcavePolygon2D extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                      blockRegion,
-                                                                                      extrusionDistanceCalculator,
-                                                                                      Math.cos(orthogonalAngle));
+      ConcavePolygon2D extrusion = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                           blockRegion,
+                                                                                                           extrusionDistanceCalculator,
+                                                                                                           Math.cos(orthogonalAngle));
 
       double angleDistance = extrusionDistance1 * Math.sqrt(2) / 2.0;
 
@@ -865,7 +872,7 @@ public class SteppableRegionsCalculatorTest
       groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
       blockRegion = new PlanarRegion(blockTransform, blockPolygon);
 
-      extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+      extrusion = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
 
       angleDistance = extrusionDistance2 * Math.sqrt(2) / 2.0;
 
@@ -930,10 +937,10 @@ public class SteppableRegionsCalculatorTest
       PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
       double orthogonalAngle = Math.toRadians(75.0);
 
-      ConcavePolygon2D extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                      blockRegion,
-                                                                                      extrusionDistanceCalculator,
-                                                                                      Math.cos(orthogonalAngle));
+      ConcavePolygon2D extrusion = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion,
+                                                                                                           blockRegion,
+                                                                                                           extrusionDistanceCalculator,
+                                                                                                           Math.cos(orthogonalAngle));
 
       double angleDistance = extrusionDistance1 * Math.sqrt(2) / 2.0;
 
@@ -974,7 +981,7 @@ public class SteppableRegionsCalculatorTest
       groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
       blockRegion = new PlanarRegion(blockTransform, blockPolygon);
 
-      extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+      extrusion = SteppableRegionsCalculator.extrudePlanarRegionToCreateObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
 
       angleDistance = extrusionDistance2 * Math.sqrt(2) / 2.0;
 
@@ -1066,7 +1073,7 @@ public class SteppableRegionsCalculatorTest
       double canEasilyStepOverHeight = 0.1;
       double orthogonalAngle = Math.toRadians(75.0);
 
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       calculator.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottoms);
       calculator.setCanEasilyStepOverHeight(canEasilyStepOverHeight);
@@ -1138,7 +1145,7 @@ public class SteppableRegionsCalculatorTest
       if (visualize)
          createUI();
 
-      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoRegistry("test"));
+      SteppableRegionsCalculator calculator = getSteppableRegionsCalculator();
 
       FramePoint3D dummyStanceFoot = new FramePoint3D();
       dummyStanceFoot.setToNaN();

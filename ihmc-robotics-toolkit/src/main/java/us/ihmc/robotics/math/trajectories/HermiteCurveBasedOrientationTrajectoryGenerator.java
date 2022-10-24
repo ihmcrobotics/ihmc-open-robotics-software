@@ -112,8 +112,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
       currentOrientation = new YoMutableFrameQuaternion(name + currentOrientationName, "", registry, trajectoryFrame);
       currentAngularVelocity = new YoMutableFrameVector3D(name + currentAngularVelocityName, "", registry, trajectoryFrame);
-      currentAngularAcceleration = new YoMutableFrameVector3D(name + currentAngularAccelerationName, "", registry,
-                                                                                                   trajectoryFrame);
+      currentAngularAcceleration = new YoMutableFrameVector3D(name + currentAngularAccelerationName, "", registry, trajectoryFrame);
 
       registerFrameChangeables(initialOrientation, initialAngularVelocity);
       registerFrameChangeables(finalOrientation, finalAngularVelocity);
@@ -126,6 +125,27 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       }
 
       parentRegistry.addChild(registry);
+   }
+
+   public void clear()
+   {
+      currentTime.setToNaN();
+      trajectoryTime.setToNaN();
+      for (int i = 1; i <= 3; i++)
+      {
+         cumulativeBeziers[i].setToNaN();
+         cumulativeBeziersDot[i].setToNaN();
+         cumulativeBeziersDDot[i].setToNaN();
+      }
+
+      initialOrientation.setToNaN();
+      initialAngularVelocity.setToNaN();
+      finalOrientation.setToNaN();
+      finalAngularVelocity.setToNaN();
+
+      currentOrientation.setToNaN();
+      currentAngularVelocity.setToNaN();
+      currentAngularAcceleration.setToNaN();
    }
 
    public void setTrajectoryTime(double duration)
@@ -198,14 +218,14 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       //TODO: Clean this up by making an initialSO3Waypoint, finalSO3Waypoint as YoFrameSO3Waypoints.
       setTrajectoryTime(finalFrameSO3Waypoint.getTime() - initialFrameSO3Waypoint.getTime());
 
-      initialFrameSO3Waypoint.getOrientationIncludingFrame(tempFrameOrientation);
-      initialFrameSO3Waypoint.getAngularVelocityIncludingFrame(tempFrameVector);
+      tempFrameOrientation.setIncludingFrame(initialFrameSO3Waypoint.getOrientation());
+      tempFrameVector.setIncludingFrame(initialFrameSO3Waypoint.getAngularVelocity());
 
       initialOrientation.set(tempFrameOrientation);
       initialAngularVelocity.set(tempFrameVector);
 
-      finalFrameSO3Waypoint.getOrientationIncludingFrame(tempFrameOrientation);
-      finalFrameSO3Waypoint.getAngularVelocityIncludingFrame(tempFrameVector);
+      tempFrameOrientation.setIncludingFrame(finalFrameSO3Waypoint.getOrientation());
+      tempFrameVector.setIncludingFrame(finalFrameSO3Waypoint.getAngularVelocity());
 
       finalOrientation.set(tempFrameOrientation);
       finalAngularVelocity.set(tempFrameVector);
@@ -223,8 +243,8 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    }
 
    /**
-    * Before Initializing the isSolvable() method should be called to confirm that the limit
-    * conditions are within the bounds
+    * Before Initializing the isSolvable() method should be called to confirm that the limit conditions
+    * are within the bounds
     */
    @Override
    public void initialize()
@@ -265,7 +285,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       if (numberOfRevolutions.getIntegerValue() != 0)
       {
          delta.set(controlRotations[2]);
-         if (delta.lengthSquared() > 1.0e-10)
+         if (delta.normSquared() > 1.0e-10)
          {
             delta.normalize();
             delta.scale(numberOfRevolutions.getIntegerValue() * 2.0 * Math.PI);
@@ -535,7 +555,6 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
    {
       return currentAngularAcceleration;
    }
-
 
    @Override
    public String toString()

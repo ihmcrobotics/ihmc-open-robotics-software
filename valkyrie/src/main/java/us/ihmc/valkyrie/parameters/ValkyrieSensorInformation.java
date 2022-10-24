@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
@@ -170,6 +172,15 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    private static final String leftTrunkIMUSensor = "leftTorsoImu";
    private static final String rearPelvisIMUSensor = "pelvisRearImu";
    private static final String middlePelvisIMUSensor = "pelvisMiddleImu";
+
+   private static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
+   static
+   {
+      // TODO: Move this stuff to a file so it can be tuned and saved
+      transformChestToL515DepthCamera.setIdentity();
+      transformChestToL515DepthCamera.getTranslation().set(0.275000, 0.052000, 0.140000);
+      transformChestToL515DepthCamera.getRotation().setYawPitchRoll(0.010000, 1.151900, 0.045000);
+   }
 
    private static final HashMap<String, Integer> imuUSBSerialIds = new HashMap<>();
    static
@@ -419,6 +430,18 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    public String getMiddlePelvisIMUSensor()
    {
       return middlePelvisIMUSensor;
+   }
+
+   @Override
+   public RigidBodyTransform getSteppingCameraTransform()
+   {
+      return transformChestToL515DepthCamera;
+   }
+
+   @Override
+   public ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
    }
 
    @Override

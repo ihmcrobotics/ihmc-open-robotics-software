@@ -9,13 +9,19 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -33,7 +39,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -58,8 +63,10 @@ public class LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
+      private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
+      private final Timer heightMapExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private BehaviorTaskSuppressor suppressor;
@@ -133,6 +140,12 @@ public class LookAndStepBodyPathPlanningTask
          mapRegionsExpirationTimer.reset();
       }
 
+      public void acceptHeightMap(HeightMapMessage heightMapMessage)
+      {
+         heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
+         heightMapExpirationTimer.reset();
+      }
+
       public void acceptGoal(Pose3DReadOnly goal)
       {
          reset();
@@ -175,7 +188,7 @@ public class LookAndStepBodyPathPlanningTask
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
 
-         neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
+         // neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
          if (suppressor.evaulateShouldAccept())
          {
@@ -248,8 +261,15 @@ public class LookAndStepBodyPathPlanningTask
       return new MutablePair<>(result, bodyPathPlanner.getWaypoints());// takes about 0.1s
    }
 
+//   private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithHeightMapPlanner()
+//   {
+//
+//   }
+
    private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithFlatGround()
    {
+      double proximityForTurning = 0.25;
+
       // calculate and send body path plan
       FramePose3D leftFootPoseTemp = new FramePose3D();
       leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
@@ -260,8 +280,31 @@ public class LookAndStepBodyPathPlanningTask
       Pose3D start = new Pose3D();
       start.interpolate(leftFootPoseTemp, rightFootPoseTemp, 0.5);
 
+      Vector3D goalDirection = new Vector3D();
+      goalDirection.sub(goal.getPosition(), start.getPosition());
+      double goalDistance = goalDirection.length();
+
+      goalDirection.scale(proximityForTurning / goalDirection.length());
+      double heading = BodyPathPlannerTools.calculateHeading(new Vector2D(goalDirection));
+
+
+      Pose3D poseNearStart = new Pose3D();
+      poseNearStart.getPosition().set(start.getPosition());
+      poseNearStart.getPosition().add(goalDirection);
+      poseNearStart.getOrientation().setToYawOrientation(heading);
+
+      Pose3D poseNearGoal = new Pose3D();
+      poseNearGoal.getPosition().set(goal.getPosition());
+      poseNearGoal.getPosition().sub(goalDirection);
+      poseNearGoal.getOrientation().setToYawOrientation(heading);
+
       List<Pose3DReadOnly> waypoints = new ArrayList<>();
       waypoints.add(start);
+      if (goalDistance > 2.0 * proximityForTurning)
+      {
+         waypoints.add(poseNearStart);
+         waypoints.add(poseNearGoal);
+      }
       waypoints.add(goal);
 
       return new MutablePair<>(BodyPathPlanningResult.FOUND_SOLUTION, waypoints);

@@ -86,6 +86,32 @@ public class ProcessTools
       return spawnString;
    }
 
+   public static String execSimpleCommand(String command)
+   {
+      Runtime runtime = Runtime.getRuntime();
+      try
+      {
+         Process process = runtime.exec(command);
+         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+
+         StringBuilder output = new StringBuilder();
+         int read;
+         while ((read = bufferedReader.read()) > -1)
+         {
+            output.append((char) read);
+         }
+
+         process.waitFor();
+
+         return output.toString();
+      }
+      catch (IOException |InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+      return null;
+   }
+
    public static PrintStream createJansiFilteredStream(Path outputFile) throws IOException
    {
       return new PrintStream(Files.newOutputStream(outputFile));

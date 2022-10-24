@@ -9,7 +9,7 @@ import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 public class JoystickUpdater implements Runnable
 {
@@ -105,7 +105,7 @@ public class JoystickUpdater implements Runnable
                   catch (ConcurrentModificationException e)
                   {
                      // Some listeners might not be notified.
-                     PrintTools.error(this, e.getMessage());
+                     LogTools.error(this, e.getMessage());
                   }
                }
 

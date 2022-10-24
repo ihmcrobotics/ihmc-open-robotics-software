@@ -48,6 +48,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -58,9 +60,11 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (700000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (7000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       return current_alignment - initial_alignment;
@@ -85,6 +89,9 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getSensorOrientation(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -107,6 +114,9 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += (data.getColors().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -119,6 +129,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getSensorPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getSensorOrientation(), cdr);
+      cdr.write_type_7(data.getIsDataLocalToSensor());
+
       cdr.write_type_6(data.getSensorPoseConfidence());
 
       cdr.write_type_6(data.getPointCloudConfidence());
@@ -128,13 +140,15 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_2(data.getNumberOfPoints());
 
-      if(data.getPointCloud().size() <= 2000000)
+      if(data.getPointCloud().size() <= 20000000)
       cdr.write_type_e(data.getPointCloud());else
           throw new RuntimeException("point_cloud field exceeds the maximum length");
 
-      if(data.getColors().size() <= 700000)
+      if(data.getColors().size() <= 7000000)
       cdr.write_type_e(data.getColors());else
           throw new RuntimeException("colors field exceeds the maximum length");
+
+      cdr.write_type_7(data.getLz4Compressed());
 
    }
 
@@ -146,6 +160,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getSensorPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getSensorOrientation(), cdr);	
+      data.setIsDataLocalToSensor(cdr.read_type_7());
+      	
       data.setSensorPoseConfidence(cdr.read_type_6());
       	
       data.setPointCloudConfidence(cdr.read_type_6());
@@ -157,6 +173,8 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       	
       cdr.read_type_e(data.getPointCloud());	
       cdr.read_type_e(data.getColors());	
+      data.setLz4Compressed(cdr.read_type_7());
+      	
 
    }
 
@@ -169,6 +187,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());
 
+      ser.write_type_7("is_data_local_to_sensor", data.getIsDataLocalToSensor());
       ser.write_type_6("sensor_pose_confidence", data.getSensorPoseConfidence());
       ser.write_type_6("point_cloud_confidence", data.getPointCloudConfidence());
       ser.write_type_a("point_cloud_center", new geometry_msgs.msg.dds.PointPubSubType(), data.getPointCloudCenter());
@@ -177,6 +196,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_2("number_of_points", data.getNumberOfPoints());
       ser.write_type_e("point_cloud", data.getPointCloud());
       ser.write_type_e("colors", data.getColors());
+      ser.write_type_7("lz4_compressed", data.getLz4Compressed());
    }
 
    @Override
@@ -188,6 +208,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
 
       ser.read_type_a("sensor_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getSensorOrientation());
 
+      data.setIsDataLocalToSensor(ser.read_type_7("is_data_local_to_sensor"));
       data.setSensorPoseConfidence(ser.read_type_6("sensor_pose_confidence"));
       data.setPointCloudConfidence(ser.read_type_6("point_cloud_confidence"));
       ser.read_type_a("point_cloud_center", new geometry_msgs.msg.dds.PointPubSubType(), data.getPointCloudCenter());
@@ -196,6 +217,7 @@ public class StereoVisionPointCloudMessagePubSubType implements us.ihmc.pubsub.T
       data.setNumberOfPoints(ser.read_type_2("number_of_points"));
       ser.read_type_e("point_cloud", data.getPointCloud());
       ser.read_type_e("colors", data.getColors());
+      data.setLz4Compressed(ser.read_type_7("lz4_compressed"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.StereoVisionPointCloudMessage src, controller_msgs.msg.dds.StereoVisionPointCloudMessage dest)

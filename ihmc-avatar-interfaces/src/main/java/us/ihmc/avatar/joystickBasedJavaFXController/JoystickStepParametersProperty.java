@@ -21,7 +21,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
    private final DoubleField defaultStepWidth = new DoubleField(JoystickStepParameters::getDefaultStepWidth, JoystickStepParameters::setDefaultStepWidth);
    private final DoubleField minStepWidth = new DoubleField(JoystickStepParameters::getMinStepWidth, JoystickStepParameters::setMinStepWidth);
    private final DoubleField maxStepWidth = new DoubleField(JoystickStepParameters::getMaxStepWidth, JoystickStepParameters::setMaxStepWidth);
-   private final DoubleField turnStepWidth = new DoubleField(JoystickStepParameters::getTurnStepWidth, JoystickStepParameters::setTurnStepWidth);
    private final DoubleField turnMaxAngleInward = new DoubleField(JoystickStepParameters::getTurnMaxAngleInward, JoystickStepParameters::setTurnMaxAngleInward);
    private final DoubleField turnMaxAngleOutward = new DoubleField(JoystickStepParameters::getTurnMaxAngleOutward,
                                                                    JoystickStepParameters::setTurnMaxAngleOutward);
@@ -71,11 +70,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       bindFieldBidirectionalToNumberProperty(property, maxStepWidth);
    }
 
-   public void bindBidirectionalTurnStepWidth(Property<? extends Number> property)
-   {
-      bindFieldBidirectionalToNumberProperty(property, turnStepWidth);
-   }
-
    public void bindBidirectionalTurnMaxAngleInward(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, turnMaxAngleInward);
@@ -105,7 +99,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       private double swingDuration, transferDuration;
       private double maxStepLength;
       private double defaultStepWidth, minStepWidth, maxStepWidth;
-      private double turnStepWidth, turnMaxAngleInward, turnMaxAngleOutward;
+      private double turnMaxAngleInward, turnMaxAngleOutward;
 
       public JoystickStepParameters()
       {
@@ -133,7 +127,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          defaultStepWidth = steppingParameters.getInPlaceWidth();
          minStepWidth = steppingParameters.getMinStepWidth();
          maxStepWidth = steppingParameters.getMaxStepWidth();
-         turnStepWidth = steppingParameters.getTurningStepWidth();
          turnMaxAngleInward = steppingParameters.getMaxAngleTurnInwards();
          turnMaxAngleOutward = steppingParameters.getMaxAngleTurnOutwards();
       }
@@ -149,7 +142,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          defaultStepWidth = other.defaultStepWidth;
          minStepWidth = other.minStepWidth;
          maxStepWidth = other.maxStepWidth;
-         turnStepWidth = other.turnStepWidth;
          turnMaxAngleInward = other.turnMaxAngleInward;
          turnMaxAngleOutward = other.turnMaxAngleOutward;
       }
@@ -192,11 +184,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       public void setMaxStepWidth(double maxStepWidth)
       {
          this.maxStepWidth = maxStepWidth;
-      }
-
-      public void setTurnStepWidth(double turnStepWidth)
-      {
-         this.turnStepWidth = turnStepWidth;
       }
 
       public void setTurnMaxAngleInward(double turnMaxAngleInward)
@@ -249,11 +236,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          return maxStepWidth;
       }
 
-      public double getTurnStepWidth()
-      {
-         return turnStepWidth;
-      }
-
       public double getTurnMaxAngleInward()
       {
          return turnMaxAngleInward;
@@ -275,7 +257,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          parsed.setDefaultStepWidth(extractDoubleProperty(properties, "DefaultStepWidth", defaultParameters.getDefaultStepWidth()));
          parsed.setMinStepWidth(extractDoubleProperty(properties, "MinStepWidth", defaultParameters.getMinStepWidth()));
          parsed.setMaxStepWidth(extractDoubleProperty(properties, "MaxStepWidth", defaultParameters.getMaxStepWidth()));
-         parsed.setTurnStepWidth(extractDoubleProperty(properties, "TurnStepWidth", defaultParameters.getTurnStepWidth()));
          parsed.setTurnMaxAngleInward(extractDoubleProperty(properties, "TurnMaxAngleInward", defaultParameters.getTurnMaxAngleInward()));
          parsed.setTurnMaxAngleOutward(extractDoubleProperty(properties, "TurnMaxAngleOutward", defaultParameters.getTurnMaxAngleOutward()));
          return parsed;
@@ -302,7 +283,6 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          properties.put("DefaultStepWidth", Double.toString(parametersToExport.getDefaultStepWidth()));
          properties.put("MinStepWidth", Double.toString(parametersToExport.getMinStepWidth()));
          properties.put("MaxStepWidth", Double.toString(parametersToExport.getMaxStepWidth()));
-         properties.put("TurnStepWidth", Double.toString(parametersToExport.getTurnStepWidth()));
          properties.put("TurnMaxAngleInward", Double.toString(parametersToExport.getTurnMaxAngleInward()));
          properties.put("TurnMaxAngleOutward", Double.toString(parametersToExport.getTurnMaxAngleOutward()));
          return properties;
@@ -313,8 +293,8 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       {
          return "number of fixed footsteps: " + numberOfFixedFootsteps + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
                + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength + ", default step width: " + defaultStepWidth
-               + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth + ", turn step width: " + turnStepWidth + ", turn max angle inward: "
-               + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
+               + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth + ", turn max angle inward: " + turnMaxAngleInward
+               + ", turn max angle outward: " + turnMaxAngleOutward;
       }
    }
 }

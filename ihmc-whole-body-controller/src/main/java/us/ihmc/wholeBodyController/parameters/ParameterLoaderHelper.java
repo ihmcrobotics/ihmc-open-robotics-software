@@ -60,7 +60,7 @@ public class ParameterLoaderHelper
             reader = new XmlParameterReader(debugLoading, registry.getName(), parameterFile);
             if (overwriteFile != null)
             {
-               reader.overwrite(overwriteFile);
+               reader.readAndOverwrite(overwriteFile);
             }
             loadAndCheckStatistics(registry, reader, printWarnings);
          }

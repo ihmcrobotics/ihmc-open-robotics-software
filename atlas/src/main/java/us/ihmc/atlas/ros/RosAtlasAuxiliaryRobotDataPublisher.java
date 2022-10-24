@@ -4,7 +4,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import controller_msgs.msg.dds.AtlasAuxiliaryRobotData;
+import atlas_msgs.msg.dds.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorPacketEnum;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosBoolPublisher;

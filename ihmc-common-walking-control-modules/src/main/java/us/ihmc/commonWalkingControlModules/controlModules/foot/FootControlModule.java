@@ -7,12 +7,11 @@ import java.util.Arrays;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.YoPartialFootholdModuleParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOff.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -27,7 +26,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -90,7 +88,6 @@ public class FootControlModule
    private final YoBoolean resetFootPolygon;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-   private final UnloadedAnkleControlModule ankleControlModule;
 
    private final DoubleProvider maxWeightFractionPerFoot;
    private final DoubleProvider minWeightFractionPerFoot;
@@ -111,7 +108,7 @@ public class FootControlModule
                             PIDSE3GainsReadOnly toeOffFootControlGains,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
-                            FootholdRotationParameters footholdRotationParameters,
+                            YoPartialFootholdModuleParameters footholdRotationParameters,
                             SupportStateParameters supportStateParameters,
                             DoubleProvider minWeightFractionPerFoot,
                             DoubleProvider maxWeightFractionPerFoot,
@@ -156,17 +153,6 @@ public class FootControlModule
 
       requestExploration = new YoBoolean(namePrefix + "RequestExploration", registry);
       resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
-
-      AnkleIKSolver ankleIKSolver = walkingControllerParameters.getAnkleIKSolver();
-      if (ankleIKSolver != null)
-      {
-         FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-         ankleControlModule = new UnloadedAnkleControlModule(fullRobotModel, robotSide, ankleIKSolver, registry);
-      }
-      else
-      {
-         ankleControlModule = null;
-      }
 
       this.maxWeightFractionPerFoot = maxWeightFractionPerFoot;
       this.minWeightFractionPerFoot = minWeightFractionPerFoot;
@@ -254,7 +240,12 @@ public class FootControlModule
 
    public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, double swingTime)
    {
-      swingState.setAdjustedFootstepAndTime(adjustedFootstep, swingTime);
+      setAdjustedFootstepAndTime(adjustedFootstep, null, null, swingTime);
+   }
+
+   public void setAdjustedFootstepAndTime(Footstep adjustedFootstep, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration, double swingTime)
+   {
+      swingState.setAdjustedFootstepAndTime(adjustedFootstep,finalCoMVelocity, finalCoMAcceleration, swingTime);
    }
 
    public void requestTouchdownForDisturbanceRecovery()
@@ -308,9 +299,9 @@ public class FootControlModule
    public void initializeSwingTrajectoryPreview(Footstep footstep, double swingDuration)
    {
       SwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.setSwingDuration(swingDuration);
       swingTrajectoryCalculator.setInitialConditionsToCurrent();
       swingTrajectoryCalculator.setFootstep(footstep);
-      swingTrajectoryCalculator.setSwingDuration(swingDuration);
       swingTrajectoryCalculator.setShouldVisualize(false);
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(true);
    }
@@ -348,11 +339,6 @@ public class FootControlModule
          footControlHelper.getPartialFootholdControlModule().reset();
 
       stateMachine.doAction();
-
-      if (ankleControlModule != null)
-      {
-         ankleControlModule.compute(stateMachine.getCurrentStateKey(), stateMachine.getCurrentState());
-      }
    }
 
    // Used to restart the current state reseting the current state time
@@ -470,10 +456,6 @@ public class FootControlModule
    {
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
-      if (ankleControlModule != null)
-      {
-         inverseDynamicsCommandList.addCommand(ankleControlModule.getInverseDynamicsCommand());
-      }
       if (maxWrenchCommand != null && stateMachine.getCurrentStateKey().isLoadBearing())
       {
          inverseDynamicsCommandList.addCommand(maxWrenchCommand);
@@ -489,10 +471,6 @@ public class FootControlModule
 
    public JointDesiredOutputListReadOnly getJointDesiredData()
    {
-      if (ankleControlModule != null)
-      {
-         return ankleControlModule.getJointDesiredOutputList();
-      }
       return null;
    }
 

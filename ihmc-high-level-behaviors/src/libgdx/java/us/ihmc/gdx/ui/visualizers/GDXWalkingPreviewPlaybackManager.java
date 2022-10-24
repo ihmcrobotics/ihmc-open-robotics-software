@@ -1,21 +1,21 @@
 package us.ihmc.gdx.ui.visualizers;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.ROS2Input;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GDXWalkingPreviewPlaybackManager
 {
-   private final ROS2Input<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
+   private final IHMCROS2Input<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
    // frames per call to handle()
    private final int playbackSpeed = 1;
 
@@ -125,7 +125,7 @@ public class GDXWalkingPreviewPlaybackManager
          previewModelOneDoFJoints[i].setQ(jointAngles.get(i));
       }
 
-      previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
+      previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootPosition());
       previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
    }
 }

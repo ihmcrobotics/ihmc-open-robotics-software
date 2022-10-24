@@ -18,9 +18,21 @@ import us.ihmc.robotics.robotSide.SegmentDependentList;
 public class DefaultFootContactPoints<E extends Enum<E> & RobotSegment<E>> implements FootContactPoints<E>
 {
    private final E[] robotSegments;
+   private int nContactPointsX;
+   private int nContactPointsY;
+   
    public DefaultFootContactPoints(E[] robotSegments)
    {
       this.robotSegments = robotSegments;
+      nContactPointsX = 2;
+      nContactPointsY = 2;
+   }
+
+   public DefaultFootContactPoints(E[] robotSegments, int nSimContactPointsX, int nSimContactPointsY)
+   {
+      this.robotSegments = robotSegments;
+      this.nContactPointsX = nSimContactPointsX;
+      this.nContactPointsY = nSimContactPointsY;
    }
 
    @Override
@@ -35,9 +47,6 @@ public class DefaultFootContactPoints<E extends Enum<E> & RobotSegment<E>> imple
          String parentJointName = jointMap.getJointBeforeFootName(segment);
 
          //SCS Sim contactPoints
-         int nContactPointsX = 2;
-         int nContactPointsY = 2;
-
          double dx = 1.01 * footLength / (nContactPointsX - 1.0);
          double xOffset = 1.01 * footLength / 2.0;
 

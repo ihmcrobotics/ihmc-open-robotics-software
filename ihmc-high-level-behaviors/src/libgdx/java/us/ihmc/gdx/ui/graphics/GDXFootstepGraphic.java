@@ -11,7 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -54,7 +54,7 @@ public class GDXFootstepGraphic implements RenderableProvider
                                    0.0);
       }
 
-      modelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      modelInstance = GDXModelBuilder.buildModelInstance(meshBuilder ->
       {
          meshBuilder.addMultiLine(vertices, 0.01, color, true);
       }, "footstepGraphic" + INDEX.getAndIncrement());

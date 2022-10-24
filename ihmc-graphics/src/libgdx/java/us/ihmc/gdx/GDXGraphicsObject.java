@@ -93,14 +93,13 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
       {
          String modelFileName = graphics3DAddModelFile.getFileName();
 
-         String modifiedFileName = GDXModelLoader.modifyFileName(modelFileName);
-         if (modifiedFileName == null)
+         if (modelFileName == null)
             return;
 
-         Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
+         Model model = GDXModelLoader.load(modelFileName);
          if (model == null)
          {
-            LogTools.warn("Could not load {}", modifiedFileName);
+            LogTools.warn("Could not load {}", modelFileName);
             return;
          }
          models.add(model);

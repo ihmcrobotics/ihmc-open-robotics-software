@@ -24,7 +24,7 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    /**
             * Frame information for this message.
             */
-   public controller_msgs.msg.dds.FrameInformation frame_information_;
+   public ihmc_common_msgs.msg.dds.FrameInformation frame_information_;
    /**
             * Flag that tells the controller whether the use of a custom control frame is requested.
             */
@@ -37,14 +37,14 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    /**
             * Properties for queueing trajectories.
             */
-   public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
+   public ihmc_common_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public WrenchTrajectoryMessage()
    {
       wrench_trajectory_points_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage> (50, new controller_msgs.msg.dds.WrenchTrajectoryPointMessagePubSubType());
-      frame_information_ = new controller_msgs.msg.dds.FrameInformation();
+      frame_information_ = new ihmc_common_msgs.msg.dds.FrameInformation();
       control_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      queueing_properties_ = new controller_msgs.msg.dds.QueueableMessage();
+      queueing_properties_ = new ihmc_common_msgs.msg.dds.QueueableMessage();
 
    }
 
@@ -59,11 +59,11 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
       sequence_id_ = other.sequence_id_;
 
       wrench_trajectory_points_.set(other.wrench_trajectory_points_);
-      controller_msgs.msg.dds.FrameInformationPubSubType.staticCopy(other.frame_information_, frame_information_);
+      ihmc_common_msgs.msg.dds.FrameInformationPubSubType.staticCopy(other.frame_information_, frame_information_);
       use_custom_control_frame_ = other.use_custom_control_frame_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.control_frame_pose_, control_frame_pose_);
-      controller_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
+      ihmc_common_msgs.msg.dds.QueueableMessagePubSubType.staticCopy(other.queueing_properties_, queueing_properties_);
    }
 
    /**
@@ -94,7 +94,7 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    /**
             * Frame information for this message.
             */
-   public controller_msgs.msg.dds.FrameInformation getFrameInformation()
+   public ihmc_common_msgs.msg.dds.FrameInformation getFrameInformation()
    {
       return frame_information_;
    }
@@ -128,7 +128,7 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
    /**
             * Properties for queueing trajectories.
             */
-   public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
+   public ihmc_common_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
    }

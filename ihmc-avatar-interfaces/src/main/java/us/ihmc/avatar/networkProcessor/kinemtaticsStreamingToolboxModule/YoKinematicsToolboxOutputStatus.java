@@ -2,7 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import java.util.Arrays;
 
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -100,7 +100,7 @@ public class YoKinematicsToolboxOutputStatus
          desiredJointVelocities[i].set(status.getDesiredJointVelocities().get(i));
       }
 
-      desiredRootJointPose.set(status.getDesiredRootTranslation(), status.getDesiredRootOrientation());
+      desiredRootJointPose.set(status.getDesiredRootPosition(), status.getDesiredRootOrientation());
       desiredRootJointVelocity.set(status.getDesiredRootAngularVelocity(), status.getDesiredRootLinearVelocity());
    }
 
@@ -160,7 +160,7 @@ public class YoKinematicsToolboxOutputStatus
          desiredJointVelocities[i].set(qd);
       }
 
-      desiredRootJointVelocity.getLinearPart().sub(current.getDesiredRootTranslation(), current.getDesiredRootTranslation());
+      desiredRootJointVelocity.getLinearPart().sub(current.getDesiredRootPosition(), current.getDesiredRootPosition());
       desiredRootJointVelocity.getLinearPart().scale(1.0 / duration);
       desiredRootJointPose.getOrientation().inverseTransform(desiredRootJointVelocity.getLinearPart());
       quaternionDot.sub(current.getDesiredRootOrientation(), previous.getDesiredRootOrientation());
@@ -186,7 +186,7 @@ public class YoKinematicsToolboxOutputStatus
          status.getDesiredJointVelocities().add((float) desiredJointVelocities[i].getValue());
       }
 
-      status.getDesiredRootTranslation().set(desiredRootJointPose.getPosition());
+      status.getDesiredRootPosition().set(desiredRootJointPose.getPosition());
       status.getDesiredRootOrientation().set(desiredRootJointPose.getOrientation());
       status.getDesiredRootLinearVelocity().set(desiredRootJointVelocity.getLinearPart());
       status.getDesiredRootAngularVelocity().set(desiredRootJointVelocity.getAngularPart());

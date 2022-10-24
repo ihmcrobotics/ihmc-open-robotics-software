@@ -41,6 +41,11 @@ public class LinearMomentumRateControlModuleInput
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
 
    /**
+    * The desired capture point at teh end of the current state that the ICP controller should track.
+    */
+   private final FramePoint2D desiredCapturePointAtEndOfState = new FramePoint2D();
+
+   /**
     * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
     * plan.
     */
@@ -61,6 +66,8 @@ public class LinearMomentumRateControlModuleInput
     * Specifies whether the momentum module should use the pelvis height control command or the CoM height control command.
     */
    private boolean usePelvisHeightCommand;
+
+   private boolean hasHeightCommand = true;
 
    /**
     * Contains the feedback command information for the center of mass height. Used to compute the necessary vertical momentum.
@@ -137,9 +144,24 @@ public class LinearMomentumRateControlModuleInput
       return desiredCapturePointVelocity;
    }
 
+   public void setDesiredCapturePointAtEndOfState(FramePoint2DReadOnly desiredCapturePointAtEndOfState)
+   {
+      this.desiredCapturePointAtEndOfState.setIncludingFrame(desiredCapturePointAtEndOfState);
+   }
+
+   public FramePoint2D getDesiredCapturePointAtEndOfState()
+   {
+      return desiredCapturePointAtEndOfState;
+   }
+
    public void setUsePelvisHeightCommand(boolean usePelvisHeightCommand)
    {
       this.usePelvisHeightCommand = usePelvisHeightCommand;
+   }
+
+   public void setHasHeightCommand(boolean hasHeightCommand)
+   {
+      this.hasHeightCommand = hasHeightCommand;
    }
 
    public void setPelvisHeightControlCommand(PointFeedbackControlCommand heightControlCommand)
@@ -150,6 +172,11 @@ public class LinearMomentumRateControlModuleInput
    public void setCenterOfMassHeightControlCommand(CenterOfMassFeedbackControlCommand heightControlCommand)
    {
       this.comHeightControlCommand.set(heightControlCommand);
+   }
+
+   public boolean getHasHeightCommand()
+   {
+      return hasHeightCommand;
    }
 
    public boolean getUsePelvisHeightCommand()
@@ -246,6 +273,7 @@ public class LinearMomentumRateControlModuleInput
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
+      desiredCapturePointAtEndOfState.setIncludingFrame(other.desiredCapturePointAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
@@ -253,6 +281,7 @@ public class LinearMomentumRateControlModuleInput
       keepCoPInsideSupportPolygon = other.keepCoPInsideSupportPolygon;
       minimizeAngularMomentumRateZ = other.minimizeAngularMomentumRateZ;
       setUsePelvisHeightCommand(other.getUsePelvisHeightCommand());
+      setHasHeightCommand(other.getHasHeightCommand());
       setPelvisHeightControlCommand(other.getPelvisHeightControlCommand());
       setCenterOfMassHeightControlCommand(other.getCenterOfMassHeightControlCommand());
       for (RobotSide robotSide : RobotSide.values)
@@ -275,6 +304,8 @@ public class LinearMomentumRateControlModuleInput
             return false;
          if (!desiredCapturePointVelocity.equals(other.desiredCapturePointVelocity))
             return false;
+         if (!desiredCapturePointAtEndOfState.equals(other.desiredCapturePointAtEndOfState))
+            return false;
          if (!perfectCMP.equals(other.perfectCMP))
             return false;
          if (!perfectCoP.equals(other.perfectCoP))
@@ -288,6 +319,8 @@ public class LinearMomentumRateControlModuleInput
          if (keepCoPInsideSupportPolygon ^ other.keepCoPInsideSupportPolygon)
             return false;
          if (minimizeAngularMomentumRateZ ^ other.minimizeAngularMomentumRateZ)
+            return false;
+         if (hasHeightCommand ^ other.hasHeightCommand)
             return false;
          if (usePelvisHeightCommand ^ other.usePelvisHeightCommand)
             return false;

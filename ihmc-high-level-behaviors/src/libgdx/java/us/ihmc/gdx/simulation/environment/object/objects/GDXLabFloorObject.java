@@ -17,7 +17,7 @@ public class GDXLabFloorObject extends GDXEnvironmentObject
    public GDXLabFloorObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/labFloor/LabFloor.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/labFloor/LabFloor.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 0.3;

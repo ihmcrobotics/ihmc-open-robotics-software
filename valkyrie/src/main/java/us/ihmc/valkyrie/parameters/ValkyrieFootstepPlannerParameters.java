@@ -5,12 +5,25 @@ import us.ihmc.tools.property.StoredPropertySet;
 
 public class ValkyrieFootstepPlannerParameters extends StoredPropertySet implements FootstepPlannerParametersBasics
 {
+   public static final String PROJECT_NAME = "ihmc-open-robotics-software";
+   public static final String PATH_TO_RESOURCES = "valkyrie/src/main/resources";
+
    public ValkyrieFootstepPlannerParameters()
    {
-      this("ihmc-open-robotics-software", "valkyrie/src/main/resources");
+      this("");
+   }
+
+   public ValkyrieFootstepPlannerParameters(String fileNameSuffix)
+   {
+      this(PROJECT_NAME, PATH_TO_RESOURCES, fileNameSuffix);
    }
 
    public ValkyrieFootstepPlannerParameters(String projectName, String pathToResources)
+   {
+      this(projectName, pathToResources, "");
+   }
+
+   public ValkyrieFootstepPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
       super(FootstepPlannerParameterKeys.keys, ValkyrieFootstepPlannerParameters.class, projectName, pathToResources);
 

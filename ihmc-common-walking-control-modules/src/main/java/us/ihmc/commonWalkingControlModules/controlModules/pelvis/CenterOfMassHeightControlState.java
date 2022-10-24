@@ -248,9 +248,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassTrajectoryGenerator.setSupportLeg(supportLeg);
    }
 
-   private void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesToPack, boolean isInDoubleSupport)
+   private void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesToPack)
    {
-      centerOfMassTrajectoryGenerator.solve(comHeightPartialDerivativesToPack, isInDoubleSupport);
    }
 
    private final FramePoint3D desiredPosition = new FramePoint3D();
@@ -282,7 +281,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                        double omega0,
                                        FeetManager feetManager)
    {
-      solve(comHeightPartialDerivatives, isInDoubleSupport);
+      centerOfMassTrajectoryGenerator.solve(comHeightPartialDerivatives);
       statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
 
       comPosition.setToZero(centerOfMassFrame);
@@ -343,7 +342,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
-      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataBeforeSmoothing.getComHeightJerk());
+      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightJerk());
 
       if (feetManager != null)
       {

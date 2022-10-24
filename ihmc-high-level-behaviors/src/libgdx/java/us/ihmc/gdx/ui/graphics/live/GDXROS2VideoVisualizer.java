@@ -1,69 +1,106 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
-import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import imgui.internal.ImGui;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoPanel;
-import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
+import us.ihmc.idl.IDLSequence;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
-
-public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
+public class GDXROS2VideoVisualizer extends GDXOpenCVVideoVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<VideoPacket> topic;
-   private final ResettableExceptionHandlingExecutorService threadQueue;
-   private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
-   private Pixmap pixmap;
-   private Texture texture;
-   private final ImGuiVideoPanel videoPanel;
+   private final ROS2VideoFormat format;
 
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
-//   private Triple<ByteBuffer, Integer, Integer> decompressedImage;
-   private BufferedImage decompressedImage;
-   private DetectedFiducialPacket latestDetectedFiducial;
-//   private BufferedImage bufferedImage;
+   private Mat input16UC1Mat;
+   private Mat input8UC1Mat;
+   private Mat bgr8Mat;
+   private final byte[] messageDataHeapArray = new byte[25000000];
+   private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
+   private Mat inputJPEGMat;
+   private Mat inputYUVI420Mat;
 
-   public GDXROS2VideoVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
+   public GDXROS2VideoVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> topic, ROS2VideoFormat format)
    {
-      super(title);
+      super(title + " (ROS 2)", topic.getName(), false);
       this.ros2Node = ros2Node;
       this.topic = topic;
-      threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-      new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::acceptMessage);
-      videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic.getName()), false);
-   }
-
-   public void addFiducialSubscription(ROS2Topic<DetectedFiducialPacket> fiducialTopic)
-   {
-      new IHMCROS2Callback<>(ros2Node, fiducialTopic, detectedFiducialPacket -> latestDetectedFiducial = detectedFiducialPacket);
+      this.format = format;
+      new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), message -> doReceiveMessageOnThread(() -> acceptMessage(message)));
    }
 
    private void acceptMessage(VideoPacket videoPacket)
    {
-      frequencyPlot.recordEvent();
-      if (isActive())
+      byte[] dataArray = videoPacket.getData().toArray();
+      BytePointer dataBytePointer = new BytePointer(dataArray);
+      if (format == ROS2VideoFormat.JPEGYUVI420)
       {
-         threadQueue.clearQueueAndExecute(() ->
+         if (inputJPEGMat == null)
          {
-//            decompressedImage = jpegDecompressor.decompressJPEGDataToBGR8ByteBuffer(videoPacket.getData().toArray());
-            decompressedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
-         });
+            inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+            inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+         }
+
+         IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
+         imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+         messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
+         messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
+
+         inputJPEGMat.cols(imageEncodedTByteArrayList.size());
+         inputJPEGMat.data(messageEncodedBytePointer);
+
+         // imdecode takes the longest by far out of all this stuff
+         opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+      }
+      else // if (format == ROS2VideoFormat.CV16UC1)
+      {
+         if (input16UC1Mat == null)
+         {
+            int imageHeight = videoPacket.getImageHeight();
+            int imageWidth = videoPacket.getImageWidth();
+            input16UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+            input8UC1Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+         }
+
+         input16UC1Mat.data(dataBytePointer);
+
+         BytedecoOpenCVTools.clampTo8BitUnsignedChar(input16UC1Mat, input8UC1Mat, 0.0, 255.0);
+      }
+
+      synchronized (this)
+      {
+         int imageWidth;
+         int imageHeight;
+         if (format == ROS2VideoFormat.JPEGYUVI420)
+         {
+            // YUV I420 has 1.5 times the height of the image
+            imageWidth = inputYUVI420Mat.cols();
+            imageHeight = (int) (inputYUVI420Mat.rows() / 1.5f);
+         }
+         else
+         {
+            imageWidth = input16UC1Mat.cols();
+            imageHeight = input16UC1Mat.rows();
+         }
+
+         updateImageDimensions(imageWidth, imageHeight);
+
+         if (format == ROS2VideoFormat.JPEGYUVI420)
+         {
+            opencv_imgproc.cvtColor(inputYUVI420Mat, getRGBA8Mat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+         }
+         else
+         {
+            opencv_imgproc.cvtColor(input8UC1Mat, getRGBA8Mat(), opencv_imgproc.COLOR_GRAY2RGBA);
+         }
       }
    }
 
@@ -72,109 +109,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      frequencyPlot.renderImGuiWidgets();
-   }
-
-   int i = 0;
-
-   @Override
-   public void update()
-   {
-      super.update();
-      if (isActive())
-      {
-//         Triple<ByteBuffer, Integer, Integer> image = decompressedImage; // store the latest one here
-         BufferedImage image = decompressedImage; // store the latest one here
-
-         if (image != null)
-         {
-//            ByteBuffer buffer = image.getLeft();
-//            int width = image.getMiddle();
-//            int height = image.getRight();
-            WritableRaster raster = image.getRaster();
-            byte[] buffer = ((DataBufferByte) raster.getDataBuffer()).getData();
-            int width = image.getWidth();
-            int height = image.getHeight();
-
-            DetectedFiducialPacket currentFiducial = this.latestDetectedFiducial;
-            if (currentFiducial != null)
-            {
-//               if (bufferedImage == null)
-//               {
-//                  bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-//               }
-//               WritableRaster raster = image.getRaster();
-//               DataBufferByte dataBuffer = (DataBufferByte) raster.getDataBuffer();
-//               raster.setDataElements(0, 0, width, height, buffer);
-//               System.arraycopy(buffer.array(), 0, dataBuffer.getData(), 0, width * height);
-
-               Graphics2D graphics = image.createGraphics();
-               graphics.setColor(Color.RED);
-               graphics.setStroke(new BasicStroke(5.0f));
-               graphics.setFont(new Font("TimesRoman", Font.PLAIN, 20));
-
-               int nPoints = currentFiducial.getBounds().size();
-               int[] xPoints = new int[nPoints];
-               int[] yPoints = new int[nPoints];
-               for (int j = 0; j < currentFiducial.getBounds().size(); j++)
-               {
-                  xPoints[j] = (int) Math.round(currentFiducial.getBounds().get(j).getX());
-                  yPoints[j] = (int) Math.round(currentFiducial.getBounds().get(j).getY());
-
-                  if (j == 0)
-                  {
-                     graphics.drawString("" + currentFiducial.getFiducialId(), xPoints[j], yPoints[j]);
-                  }
-               }
-
-               graphics.drawPolygon(xPoints, yPoints, nPoints);
-
-//               raster.getDataElements(0, 0, width, height, buffer);
-//               System.arraycopy(dataBuffer.getData(), 0, buffer.array(), 0, width * height);
-            }
-
-
-            if (texture == null || texture.getWidth() < width || texture.getHeight() < height)
-            {
-               if (texture != null)
-               {
-                  texture.dispose();
-                  pixmap.dispose();
-               }
-
-               pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
-               texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-
-               videoPanel.setTexture(texture);
-            }
-
-            // unpack BGR
-            for (int y = 0; y < height; y++)
-            {
-               for (int x = 0; x < width; x++)
-               {
-                  int i = (y * width + x) * 3;
-//                  int b = Byte.toUnsignedInt(buffer.get(i + 0));
-//                  int g = Byte.toUnsignedInt(buffer.get(i + 1));
-//                  int r = Byte.toUnsignedInt(buffer.get(i + 2));
-                  int b = Byte.toUnsignedInt(buffer[i + 0]);
-                  int g = Byte.toUnsignedInt(buffer[i + 1]);
-                  int r = Byte.toUnsignedInt(buffer[i + 2]);
-                  int a = 255;
-                  int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-                  pixmap.drawPixel(x, y, rgb8888);
-               }
-            }
-
-            texture.draw(pixmap, 0, 0);
-            decompressedImage = null;
-         }
-      }
-   }
-
-   @Override
-   public ImGuiVideoPanel getPanel()
-   {
-      return videoPanel;
+      if (getHasReceivedOne())
+         getFrequencyPlot().renderImGuiWidgets();
    }
 }

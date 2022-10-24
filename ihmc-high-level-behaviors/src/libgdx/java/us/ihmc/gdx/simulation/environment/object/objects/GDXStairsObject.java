@@ -17,7 +17,7 @@ public class GDXStairsObject extends GDXEnvironmentObject
    public GDXStairsObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/stairs/Stairs.g3dj");
+      Model realisticModel = GDXModelLoader.load("environmentObjects/stairs/Stairs.g3dj");
       setRealisticModel(realisticModel);
 
       double sizeX = 1.475;

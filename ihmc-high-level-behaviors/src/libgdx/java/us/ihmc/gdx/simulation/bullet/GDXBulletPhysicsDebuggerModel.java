@@ -3,6 +3,7 @@ package us.ihmc.gdx.simulation.bullet;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.tools.GDXModifiableMultiColorMeshModel;
 
 public class GDXBulletPhysicsDebuggerModel
@@ -10,9 +11,14 @@ public class GDXBulletPhysicsDebuggerModel
    private ModelInstance modelInstance;
    private final GDXModifiableMultiColorMeshModel modelBuilder = new GDXModifiableMultiColorMeshModel();
 
-   public void addLine(Vector3 from, Vector3 to, Vector3 color)
+   public void addLineGDX(Vector3 from, Vector3 to, Color color)
    {
-      modelBuilder.getMeshBuilder().addLine(from.x, from.y, from.z, to.x, to.y, to.z, 0.002f, new Color(color.x, color.y, color.z, 1.0f));
+      modelBuilder.getMeshBuilder().addLine(from.x, from.y, from.z, to.x, to.y, to.z, 0.002f, color);
+   }
+
+   public void addLineEuclid(Tuple3DReadOnly from, Tuple3DReadOnly to, Color color)
+   {
+      modelBuilder.getMeshBuilder().addLine(from, to, 0.002f, color);
    }
 
    public void begin()

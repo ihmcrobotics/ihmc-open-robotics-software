@@ -1,21 +1,21 @@
 package us.ihmc.avatar.stepConstraintModule;
 
-import javafx.application.Application;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-public class StepConstraintViewerApplication extends Application
+public class StepConstraintViewerApplication extends ApplicationNoModule
 {
    private static StepConstraintCalculatorViewer ui;
    private static SharedMemoryJavaFXMessager messager;
@@ -84,7 +84,7 @@ public class StepConstraintViewerApplication extends Application
       messager.submitMessage(StepConstraintCalculatorViewerAPI.StepConstraintRegionData, stepConstraintRegionList);
    }
 
-   public void submitObstacleExtrusions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusions)
+   public void submitObstacleExtrusions(HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> obstacleExtrusions)
    {
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ObstacleExtrusionsData, obstacleExtrusions);
    }
@@ -104,7 +104,7 @@ public class StepConstraintViewerApplication extends Application
       messager.submitMessage(StepConstraintCalculatorViewerAPI.MaskedRegionsData, new PlanarRegionsList(maskedRegions));
    }
 
-   public void submitMaskedRegionsObstacleExtrusions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> extrusions)
+   public void submitMaskedRegionsObstacleExtrusions(HashMap<RegionInWorldInterface<?>, List<ConcavePolygon2DBasics>> extrusions)
    {
       messager.submitMessage(StepConstraintCalculatorViewerAPI.MaskedRegionsObstacleExtrusionsData, extrusions);
    }

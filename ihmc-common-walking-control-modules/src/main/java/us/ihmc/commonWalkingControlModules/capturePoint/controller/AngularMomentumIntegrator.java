@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -33,7 +32,7 @@ public class AngularMomentumIntegrator
 
    private final double controlDT;
 
-   public AngularMomentumIntegrator(String prefix, ICPOptimizationParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoRegistry registry)
+   public AngularMomentumIntegrator(String prefix, ICPControllerParameters icpOptimizationParameters, ICPControlGainsReadOnly feedbackGains, double controlDT, YoRegistry registry)
    {
       this.controlDT = controlDT;
       this.feedbackGains = feedbackGains;

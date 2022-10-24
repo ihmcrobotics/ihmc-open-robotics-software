@@ -24,7 +24,8 @@ public enum BipedalFootstepPlannerNodeRejectionReason
    WIGGLE_CONSTRAINT_NOT_MET,
    SWING_HEIGHT_TOO_LARGE,
    SWING_REACH_TOO_LARGE,
-   REACHABILITY_CHECK;
+   REACHABILITY_CHECK,
+   RMS_ERROR_TOO_HIGH;
 
    public static final BipedalFootstepPlannerNodeRejectionReason[] values = values();
 

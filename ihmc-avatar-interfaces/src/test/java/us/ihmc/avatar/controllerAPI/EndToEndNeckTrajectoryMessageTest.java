@@ -12,7 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -24,11 +25,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTestInterface
@@ -37,7 +38,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @Test
    public void testSingleWaypoint() throws Exception
@@ -47,14 +48,14 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       double trajectoryTime = 0.5;
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -81,14 +82,12 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          }
       }
 
-      drcSimulationTestHelper.publishToController(armTrajectoryMessage);
+      simulationTestHelper.publishToController(armTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+      success = simulationTestHelper.simulateNow(1.0 + trajectoryTime);
       assertTrue(success);
 
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
-      assertSingleWaypointExecuted(neckJoints, desiredJointPositions, desiredJointVelcoties, epsilon, scs);
+      assertSingleWaypointExecuted(neckJoints, desiredJointPositions, desiredJointVelcoties, epsilon, simulationTestHelper);
    }
 
    @Test
@@ -100,20 +99,18 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
 
       YoRegistry testRegistry = new YoRegistry("testStreaming");
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoRegistry(testRegistry);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
+      simulationTestHelper.getRootRegistry().addChild(testRegistry);
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      boolean success = simulationTestHelper.simulateNow(1.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       YoDouble startTime = new YoDouble("startTime", testRegistry);
-      YoDouble yoTime = drcSimulationTestHelper.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
-                                               .getYoTime();
+      YoDouble yoTime = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getYoTime();
       startTime.set(yoTime.getValue());
       YoDouble trajectoryTime = new YoDouble("trajectoryTime", testRegistry);
       trajectoryTime.set(2.0);
@@ -142,7 +139,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          desiredNeckJointVelocities[i] = qDDesired;
       }
 
-      drcSimulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
+      simulationTestHelper.addRobotControllerOnControllerThread(new RobotController()
       {
          @Override
          public void initialize()
@@ -183,7 +180,7 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
             NeckTrajectoryMessage message = HumanoidMessageTools.createNeckTrajectoryMessage(0.0, qDesireds, qDDesireds, null);
             message.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(ExecutionMode.STREAM.toByte());
             message.getJointspaceTrajectory().getQueueingProperties().setStreamIntegrationDuration(0.01);
-            drcSimulationTestHelper.publishToController(message);
+            simulationTestHelper.publishToController(message);
          }
 
          @Override
@@ -205,14 +202,14 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
          }
       });
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue());
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue());
       assertTrue(success);
 
       double desiredEpsilon = 5.0e-3;
       double trackingEpsilon = 5.0e-2;
 
-      double[] controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, scs);
-      double[] controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, scs);
+      double[] controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, simulationTestHelper);
+      double[] controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, simulationTestHelper);
 
       for (int i = 0; i < neckJoints.length; i++)
       {
@@ -239,15 +236,15 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
                             + Math.abs(controllerDesiredVelocities[i] - neckJoints[i].getQd()));
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
+      success = simulationTestHelper.simulateNow(0.5 * trajectoryTime.getValue() + 1.5);
 
       assertTrue(success);
 
       desiredEpsilon = 1.0e-7;
       trackingEpsilon = 5.0e-3;
 
-      controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, scs);
-      controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, scs);
+      controllerDesiredPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, simulationTestHelper);
+      controllerDesiredVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, simulationTestHelper);
 
       for (int i = 0; i < neckJoints.length; i++)
       {
@@ -275,11 +272,14 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   public static void assertSingleWaypointExecuted(OneDoFJointBasics[] neckJoints, double[] desiredJointPositions, double[] desiredJointVelcoties,
-                                                   double epsilon, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(OneDoFJointBasics[] neckJoints,
+                                                   double[] desiredJointPositions,
+                                                   double[] desiredJointVelcoties,
+                                                   double epsilon,
+                                                   YoVariableHolder yoVariableHolder)
    {
-      double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, scs);
-      double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, scs);
+      double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(neckJoints, yoVariableHolder);
+      double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(neckJoints, yoVariableHolder);
 
       assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
       assertArrayEquals(desiredJointVelcoties, controllerDesiredJointVelocities, epsilon);
@@ -311,16 +311,11 @@ public abstract class EndToEndNeckTrajectoryMessageTest implements MultiRobotTes
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");

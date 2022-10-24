@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseEveryBuildTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground")
 public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBuildTest
@@ -30,14 +29,14 @@ public class AtlasObstacleCourseEveryBuildTest extends DRCObstacleCourseEveryBui
    
    @Override
    @Test
-   public void testSimpleFlatGroundScript() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScript()
    {
       super.testSimpleFlatGroundScript();
    }
    
    @Override
    @Test
-   public void testWalkingUpToRampWithLongSteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpToRampWithLongSteps()
    {
       super.testWalkingUpToRampWithLongSteps();
    }

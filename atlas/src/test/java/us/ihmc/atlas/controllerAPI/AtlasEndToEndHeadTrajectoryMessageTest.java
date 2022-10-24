@@ -9,7 +9,6 @@ import us.ihmc.avatar.controllerAPI.EndToEndHeadTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajectoryMessageTest
 {
@@ -18,7 +17,7 @@ public class AtlasEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajecto
    @Tag("controller-api")
    @Override
    @Test
-   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
+   public void testSingleWaypoint()
    {
       super.testSingleWaypoint();
    }
@@ -26,7 +25,7 @@ public class AtlasEndToEndHeadTrajectoryMessageTest extends EndToEndHeadTrajecto
    @Tag("controller-api-slow-3")
    @Override
    @Test
-   public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
+   public void testLookingLeftAndRight()
    {
       super.testLookingLeftAndRight();
    }

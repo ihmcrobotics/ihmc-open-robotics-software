@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -22,11 +23,9 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,7 +53,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final VisibilityGraphsParametersBasics visibilityGraphParameters;
    final AtomicBoolean isBeingReset = new AtomicBoolean();
    final AtomicReference<Boolean> operatorReviewEnabledInput;
-   final AtomicReference<RobotSide> lastStanceSide;
    final LookAndStepImminentStanceTracker imminentStanceTracker;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
@@ -101,13 +99,9 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
       helper.subscribeViaCallback(LOOK_AND_STEP_PARAMETERS, parameters ->
       {
-         List<String> values = Arrays.asList(parameters.getStrings().toStringArray());
-
-         if (!lookAndStepParameters.getAllAsStrings().equals(values))
-         {
-            statusLogger.info("Accepting new look and step parameters");
-            lookAndStepParameters.setAllFromStrings(values);
-         }
+         StoredPropertySetMessageTools.copyToStoredPropertySet(parameters,
+                                                               lookAndStepParameters,
+                                                               () -> statusLogger.info("Accepting new look and step parameters"));
       });
       helper.subscribeViaCallback(FootstepPlannerParameters, parameters ->
       {
@@ -130,7 +124,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
-      lastStanceSide = new AtomicReference<>();
       imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
       controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
@@ -167,6 +160,10 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
          {
             footstepPlanning.acceptFootstepCompleted();
+         }
+         else
+         {
+            footstepPlanning.acceptFootstepStarted(status);
          }
       });
 

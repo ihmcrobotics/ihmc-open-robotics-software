@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx.behaviors;
 
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;

@@ -132,20 +132,17 @@ public class LookAndStepLocalizationTask
       imminentMidFeetPose.appendRotation(toZUp);
 
       // find closest point along body path plan
-      Point3D closestPointAlongPath = new Point3D();
-      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, imminentMidFeetPose.getPosition(), closestPointAlongPath);
+      Pose3D closestPoseAlongPath = new Pose3D();
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPoseAlongPath(bodyPathPlan, imminentMidFeetPose.getPosition(), closestPoseAlongPath);
 
-      Pose3D imminentPoseAlongPath = new Pose3D(imminentMidFeetPose);
-      imminentPoseAlongPath.getPosition().set(closestPointAlongPath);
-      uiPublisher.publishToUI(ClosestPointForUI, imminentPoseAlongPath);
+      uiPublisher.publishToUI(ClosestPointForUI, closestPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
-      double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
+      double distanceToExactGoal = imminentMidFeetPose.getPosition().distanceXY(terminalGoal.getPosition());
       boolean reachedGoalZone = distanceToExactGoal < lookAndStepParameters.getGoalSatisfactionRadius();
       double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(imminentMidFeetPose.getYaw(), terminalGoal.getYaw()));
       reachedGoalZone &= yawToExactGoal < lookAndStepParameters.getGoalSatisfactionOrientationDelta();
 
-      statusLogger.info(StringTools.format("Imminent pose: {}", StringTools.zUpPoseString(imminentPoseAlongPath)));
       statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
                                            FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
                                            lookAndStepParameters.getGoalSatisfactionRadius(),
@@ -178,7 +175,7 @@ public class LookAndStepLocalizationTask
       else
       {
          didFootstepPlanningOnceToEnsureSomeProgress = true;
-         LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
+         LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPoseAlongPath,
                                                                                                   closestSegmentIndex,
                                                                                                   imminentMidFeetPose,
                                                                                                   bodyPathPlan);

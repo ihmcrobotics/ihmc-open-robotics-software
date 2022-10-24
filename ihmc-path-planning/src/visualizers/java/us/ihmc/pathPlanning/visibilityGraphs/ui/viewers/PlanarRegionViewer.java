@@ -90,6 +90,11 @@ public class PlanarRegionViewer
       executorService.shutdownNow();
    }
 
+   public void clear()
+   {
+      graphicsToRender.set(new ArrayList<>());
+   }
+
    public void buildMeshAndMaterialOnThread(PlanarRegionsList planarRegionsList)
    {
       executorService.submit(() -> buildMeshAndMaterial(planarRegionsList));

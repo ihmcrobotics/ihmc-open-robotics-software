@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.buildingExploration;
 
-import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
+import perception_msgs.msg.dds.DetectedFiducialPacket;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;

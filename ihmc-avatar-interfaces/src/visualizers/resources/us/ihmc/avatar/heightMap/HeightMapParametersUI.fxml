@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.heightMap.HeightMapParametersUIController" prefHeight="400">
+    <left>
+        <GridPane vgap="3">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="149.0" />
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="10.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+            </rowConstraints>
+
+            <Button onAction="#saveParameters" text="Save Parameters" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Button onAction="#loadFile" text="Load File" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+            <Label text="Grid Center X" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label text="Grid Center Y" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <Spinner fx:id="gridCenterX" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Spinner fx:id="gridCenterY" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Button onAction="#loadFile" text="Reset center" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <Button onAction="#export" text="Export" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+            <Button onAction="#importHeightMap" text="Import" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+
+            <Label text="Publish freq" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+            <Spinner fx:id="publishFreq" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+
+            <Label text="Enable updates" GridPane.columnIndex="0" GridPane.rowIndex="8" />
+            <CheckBox fx:id="enableUpdates" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+
+            <Button text="Clear" fx:id="clear" prefWidth="120.0" GridPane.rowIndex="9" onAction="#clear" />
+
+            <Label text="Max height" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+            <Spinner fx:id="maxHeight" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+
+            <Label text="X Position" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+            <Spinner fx:id="xPosition" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+
+            <Label text="Y Position" GridPane.columnIndex="0" GridPane.rowIndex="12" />
+            <Spinner fx:id="yPosition" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+
+            <Label text="Z Position" GridPane.columnIndex="0" GridPane.rowIndex="13" />
+            <Spinner fx:id="zPosition" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="13" />
+
+        </GridPane>
+    </left>
+    <center>
+        <TableView fx:id="parameterTable"/>
+    </center>
+</BorderPane>

@@ -5,12 +5,9 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPQPInput;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**

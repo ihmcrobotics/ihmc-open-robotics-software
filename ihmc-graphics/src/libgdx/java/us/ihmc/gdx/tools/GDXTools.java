@@ -3,10 +3,15 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelMeshPart;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
@@ -270,6 +275,11 @@ public class GDXTools
       gdxQuaternion.w = euclidQuaternion.getS32();
    }
 
+   public static void toEuclid(Quaternion gdxQuaternion, us.ihmc.euclid.tuple4D.Quaternion euclidQuaternion)
+   {
+      euclidQuaternion.set(gdxQuaternion.x, gdxQuaternion.y, gdxQuaternion.z, gdxQuaternion.w);
+   }
+
    public static Vector3 toGDX(Tuple3DReadOnly euclidTuple)
    {
       return new Vector3(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
@@ -364,9 +374,22 @@ public class GDXTools
       gdxColor.a = (float) colorDefinition.getAlpha();
    }
 
+   public static void toGDX(Vector3 bulletColor, Color gdxColor)
+   {
+      gdxColor.r = bulletColor.x;
+      gdxColor.g = bulletColor.y;
+      gdxColor.b = bulletColor.z;
+      gdxColor.a = 1.0f;
+   }
+
    public static Color toGDX(double red, double green, double blue, double alpha)
    {
       return new Color((float) red, (float) green, (float) blue, (float) alpha);
+   }
+
+   public static void toGDX(float[] imColor, Color gdxColor)
+   {
+      gdxColor.set(imColor[0], imColor[1], imColor[2], imColor[3]);
    }
 
    public static void toGDX(AppearanceDefinition appearanceDefinition, Color gdxColor)
@@ -377,19 +400,102 @@ public class GDXTools
       gdxColor.a = 1.0f - (float) appearanceDefinition.getTransparency();
    }
 
-   public static void setTransparency(ModelInstance modelInstance, float transparency)
+   public static void setTransparency(ModelInstance modelInstance, float opacity)
    {
-      modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
+      for (Material material : modelInstance.materials)
+      {
+         setOpacity(material, opacity);
+      }
    }
 
-   public static void setTransparency(Model model, float transparency)
+   public static void setTransparency(Model model, float opacity)
    {
-      model.materials.get(0).set(new BlendingAttribute(true, transparency));
+      for (Material material : model.materials)
+      {
+         setOpacity(material, opacity);
+      }
+   }
+
+   public static void setOpacity(Material material, float opacity)
+   {
+      if (opacity < 1.0f)
+      {
+         material.set(new BlendingAttribute(true, opacity));
+      }
+      else
+      {
+         material.remove(BlendingAttribute.Type);
+      }
    }
 
    public static void setDiffuseColor(ModelInstance modelInstance, Color color)
    {
-      modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(color));
+      for (Material material : modelInstance.materials)
+      {
+         material.set(ColorAttribute.createDiffuse(color));
+      }
+   }
+
+   public static long countVertices(ModelInstance modelInstance)
+   {
+      return countVertices(modelInstance.model);
+   }
+
+   public static long countVertices(Model model)
+   {
+      long numberOfVertices = 0;
+      for (int i = 0; i < model.meshes.size; i++)
+      {
+         numberOfVertices += model.meshes.get(i).getNumVertices();
+      }
+      return numberOfVertices;
+   }
+
+   public static long countVertices(ModelData modelData)
+   {
+      long numberOfVertices = 0;
+      for (int i = 0; i < modelData.meshes.size; i++)
+      {
+         ModelMesh modelMesh = modelData.meshes.get(i);
+         long floatsPerVertex = calculateFloatsPerVertex(modelMesh);
+         numberOfVertices += modelMesh.vertices.length / floatsPerVertex;
+      }
+      return numberOfVertices;
+   }
+
+   public static int calculateFloatsPerVertex(ModelMesh modelMesh)
+   {
+      int vertexSize = 0;
+      for (int j = 0; j < modelMesh.attributes.length; j++) {
+         VertexAttribute attribute = modelMesh.attributes[j];
+         vertexSize += attribute.getSizeInBytes();
+      }
+      return vertexSize / Float.BYTES;
+   }
+
+   public static ModelMeshPart findModelMeshPart(ModelData modelData, String meshPartId)
+   {
+      for (ModelMesh mesh : modelData.meshes)
+         for (ModelMeshPart part : mesh.parts)
+            if (part.id.equals(meshPartId))
+               return part;
+      return null;
+   }
+
+   public static ModelMesh findMeshContainingPart(ModelData modelData, String meshPartId)
+   {
+      for (ModelMesh mesh : modelData.meshes)
+         for (ModelMeshPart part : mesh.parts)
+            if (part.id.equals(meshPartId))
+               return mesh;
+      return null;
+   }
+
+   public static void setFloatVertexPosition(float[] vertices, int floatsPerVertex, int vertexIndex, Tuple3DReadOnly position)
+   {
+      vertices[floatsPerVertex * vertexIndex]     = position.getX32();
+      vertices[floatsPerVertex * vertexIndex + 1] = position.getY32();
+      vertices[floatsPerVertex * vertexIndex + 2] = position.getZ32();
    }
 
    public static void printShaderLog(String shaderPath, ShaderProgram shaderProgram)
@@ -582,6 +688,9 @@ public class GDXTools
    public static Pair<String, String> loadCombinedShader(String pathForLoadingFromClasspath)
    {
       String combinedString = Gdx.files.classpath(pathForLoadingFromClasspath).readString();
+
+      // Support loading from CRLF checkouts
+      combinedString = combinedString.replaceAll("\\r\\n", "\n");
 
       String vertexMacro = "#type vertex\n";
       int vertexBegin = combinedString.indexOf(vertexMacro);

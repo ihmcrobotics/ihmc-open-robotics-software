@@ -16,7 +16,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVeloci
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
@@ -36,7 +40,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public WholeBodySetpointParameters getStandPrepParameters()
    {
-      return null;
+      return new AtlasStandPrepSetpoints(jointMap);
    }
 
    @Override
@@ -50,9 +54,44 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          case DO_NOTHING_BEHAVIOR:
          case FALLING_STATE:
             return getDesiredJointBehaviorForDoNothing();
+         case STAND_PREP_STATE:
+         case STAND_READY:
+         case STAND_TRANSITION_STATE:
+            return getDesiredJointBehaviorForHangingAround();
          default:
             throw new RuntimeException("Implement a desired joint behavior for the high level state " + state);
       }
+   }
+
+   private List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorForHangingAround()
+   {
+      if (runningOnRealRobot)
+         return null;
+
+      List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, JointDesiredControlMode.POSITION, 500.0, 50.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, JointDesiredControlMode.POSITION, 500.0, 50.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, JointDesiredControlMode.POSITION, 500.0, 50.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, JointDesiredControlMode.POSITION, 100.0, 50.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, JointDesiredControlMode.POSITION, 40.0, 10.0);
+      configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, JointDesiredControlMode.POSITION, 40.0, 10.0);
+
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+      configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, JointDesiredControlMode.POSITION, 1500.0, 150.0);
+
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, JointDesiredControlMode.POSITION, 250.0, 25.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, JointDesiredControlMode.POSITION, 500.0, 50.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, JointDesiredControlMode.POSITION, 250.0, 25.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, JointDesiredControlMode.POSITION, 50.0, 10.0);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, JointDesiredControlMode.POSITION, 3.0, 0.5);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, JointDesiredControlMode.POSITION, 3.0, 0.5);
+      configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SECOND_WRIST_PITCH, JointDesiredControlMode.POSITION, 3.0, 0.5);
+
+      configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, JointDesiredControlMode.POSITION, 50.0, 10.0);
+
+      return behaviors;
    }
 
    @Override
@@ -180,7 +219,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public double getTimeToMoveInStandPrep()
    {
-      return 0;
+      return 0.5;
    }
 
    @Override
@@ -192,7 +231,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public double getTimeInStandTransition()
    {
-      return 0;
+      return 1.0;
    }
 
    @Override
@@ -313,30 +352,46 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       return integrationSettings;
    }
 
-   public static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap, SpineJointName jointName,
-                                        JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
+                                        HumanoidJointNameMap jointMap,
+                                        SpineJointName jointName,
+                                        JointDesiredControlMode controlMode,
+                                        double stiffness,
+                                        double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
    }
 
-   public static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap, NeckJointName jointName,
-                                        JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
+                                        HumanoidJointNameMap jointMap,
+                                        NeckJointName jointName,
+                                        JointDesiredControlMode controlMode,
+                                        double stiffness,
+                                        double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
    }
 
-   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
-                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
+                                                 HumanoidJointNameMap jointMap,
+                                                 LegJointName jointName,
+                                                 JointDesiredControlMode controlMode,
+                                                 double stiffness,
+                                                 double damping)
    {
       configureSymmetricBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping, Double.POSITIVE_INFINITY);
    }
 
-   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
-                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
+                                                 HumanoidJointNameMap jointMap,
+                                                 LegJointName jointName,
+                                                 JointDesiredControlMode controlMode,
+                                                 double stiffness,
+                                                 double damping,
                                                  double maxVelocityError)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
@@ -344,8 +399,12 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
-   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
-                                                 ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors,
+                                                 HumanoidJointNameMap jointMap,
+                                                 ArmJointName jointName,
+                                                 JointDesiredControlMode controlMode,
+                                                 double stiffness,
+                                                 double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));

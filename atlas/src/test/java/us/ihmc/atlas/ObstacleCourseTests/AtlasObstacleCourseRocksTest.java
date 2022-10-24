@@ -9,7 +9,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseRocksTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
 {
@@ -29,7 +28,7 @@ public class AtlasObstacleCourseRocksTest extends DRCObstacleCourseRocksTest
    @Tag("humanoid-obstacle")
    @Override
    @Test
-   public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
+   public void testWalkingOntoRocks()
    {
       super.testWalkingOntoRocks();
    }

@@ -14,13 +14,14 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -29,25 +30,22 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.QuadTreeFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -56,7 +54,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private final boolean VISUALIZE = simulationTestingParameters.getKeepSCSUp();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -67,27 +65,22 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (VISUALIZE)
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
    // The default height seems to be a bit too low for the ramp
-//   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
+   //   private final ComHeightPacket comHeightPacket = new ComHeightPacket(0.05, 1.0);
    private final Random random = new Random(165163L);
 
    @Test
-   public void testWalkingUpRampUsingSnapFootsteps() throws SimulationExceededMaximumTimeException
+   public void testWalkingUpRampUsingSnapFootsteps()
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       doUpRampTest();
@@ -95,33 +88,34 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       Point3D center = new Point3D(7.579638943201888, 0.020725665285290903, 1.46537366331119);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
-      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void doUpRampTest() throws SimulationExceededMaximumTimeException
+   private void doUpRampTest()
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.RAMP_BOTTOM;
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation("DRCRampSnapFootstepsTest");
+      DefaultCommonAvatarEnvironment environment = new DefaultCommonAvatarEnvironment();
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                             environment,
+                                                                                                                                             simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(selectedLocation.getStartingLocationOffset());
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+      //      drcSimulationTestHelper.send(comHeightPacket);
 
-//      drcSimulationTestHelper.send(comHeightPacket);
-
-      setupCameraForWalkingOverRamp(scs);
+      setupCameraForWalkingOverRamp();
       ThreadTools.sleep(1000);
 
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel();
+      boolean success = simulationTestHelper.simulateNow(2.0);
+      //      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
-      FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
+      FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp();
 
-      ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
+      //      ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
 
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
       FrameQuaternion tempFrameOrientation = new FrameQuaternion();
@@ -138,7 +132,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          footstepData.getOrientation().set(tempFrameOrientation);
       }
 
-      vidualizeCorruptedFootsteps(corruptedFootstepDataList, scs);
+      vidualizeCorruptedFootsteps(corruptedFootstepDataList);
 
       ArrayList<Footstep> corruptedFootstepList = new ArrayList<>();
       for (int i = 0; i < corruptedFootstepDataList.getFootstepDataList().size(); i++)
@@ -173,15 +167,21 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       BoundingBox2D footstepContainer = new BoundingBox2D(boundingBoxMin, boundingBoxMax);
 
-      us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnvironment().getTerrainObject3D().getHeightMapIfAvailable();
+      us.ihmc.graphicsDescription.HeightMap inputHeightMap = environment.getTerrainObject3D().getHeightMapIfAvailable();
       double resolution = 0.02;
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       int maxSameHeightPointsPerNode = 20;
       double maxAllowableXYDistanceForAPointToBeConsideredClose = 0.2;
       int maxNodes = 1000000;
-      HeightMapWithPoints heightMap = createHeightMap(inputHeightMap, footstepContainer, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode,
-            maxAllowableXYDistanceForAPointToBeConsideredClose, maxNodes, scs);
+      HeightMapWithPoints heightMap = createHeightMap(inputHeightMap,
+                                                      footstepContainer,
+                                                      resolution,
+                                                      heightThreshold,
+                                                      quadTreeMaxMultiLevelZChangeToFilterNoise,
+                                                      maxSameHeightPointsPerNode,
+                                                      maxAllowableXYDistanceForAPointToBeConsideredClose,
+                                                      maxNodes);
 
       SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
       double maskSafetyBuffer = 0.01;
@@ -203,42 +203,43 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       }
 
       // Send footsteps to controller
-      drcSimulationTestHelper.publishToController(snappedFootstepDataList);
+      simulationTestHelper.publishToController(snappedFootstepDataList);
 
       // Check for success
-      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(16.0);
+      success = success && simulationTestHelper.simulateNow(16.0);
 
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
 
-      drcSimulationTestHelper.checkNothingChanged();
+      // simulationTestHelper.checkNothingChanged();
       assertTrue(success);
    }
 
-   private void vidualizeCorruptedFootsteps(FootstepDataListMessage corruptedFootstepDataList, SimulationConstructionSet scs)
+   private void vidualizeCorruptedFootsteps(FootstepDataListMessage corruptedFootstepDataList)
    {
       if (!VISUALIZE)
          return;
 
       List<FootstepDataMessage> dataList = corruptedFootstepDataList.getFootstepDataList();
+      VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
+      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Red());
+
       for (int i = 0; i < dataList.size(); i++)
       {
          FootstepDataMessage footstepData = dataList.get(i);
-         Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-         staticLinkGraphics.translate(new Vector3D(footstepData.getLocation()));
-         RotationMatrix rotationMatrix = new RotationMatrix();
-         rotationMatrix.set(footstepData.getOrientation());
-         staticLinkGraphics.rotate(rotationMatrix);
-         staticLinkGraphics.addCoordinateSystem(0.15, YoAppearance.Red());
-         scs.addStaticLinkGraphics(staticLinkGraphics);
+         visualFactory.identity();
+         visualFactory.appendTranslation(footstepData.getLocation());
+         visualFactory.appendRotation(footstepData.getOrientation());
+         visualFactory.addCoordinateSystem(0.15, material);
       }
+      simulationTestHelper.addStaticVisuals(visualFactory.getVisualDefinitions());
    }
 
-   private void setupCameraForWalkingOverRamp(SimulationConstructionSet scs)
+   private void setupCameraForWalkingOverRamp()
    {
       Point3D cameraFix = new Point3D(5.0, -0.2, 0.89);
       Point3D cameraPosition = new Point3D(5.0, 7.8, 1.6);
 
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+      simulationTestHelper.setCamera(cameraFix, cameraPosition);
    }
 
    private SimpleFootstepSnapper createSimpleFootstepSnapper()
@@ -256,9 +257,14 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return footstepSnapper;
    }
 
-   public HeightMapWithPoints createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution, double heightThreshold,
-         double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
-         int maxNodes, SimulationConstructionSet scs)
+   public HeightMapWithPoints createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap,
+                                              BoundingBox2D testingRange,
+                                              double resolution,
+                                              double heightThreshold,
+                                              double quadTreeMaxMultiLevelZChangeToFilterNoise,
+                                              int maxSameHeightPointsPerNode,
+                                              double maxAllowableXYDistanceForAPointToBeConsideredClose,
+                                              int maxNodes)
    {
       double minX = testingRange.getMinPoint().getX();
       double maxX = testingRange.getMaxPoint().getX();
@@ -266,6 +272,9 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       double maxY = testingRange.getMaxPoint().getY();
 
       ArrayList<Point3D> listOfPoints = new ArrayList<Point3D>();
+
+      VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
+      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Blue());
 
       for (double x = minX; x < maxX; x = x + resolution)
       {
@@ -276,21 +285,33 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
             if (VISUALIZE)
             {
-               Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-               staticLinkGraphics.translate(new Vector3D(x, y, z + 0.001));
-               staticLinkGraphics.addCube(0.002, 0.002, 0.002, YoAppearance.Blue());
-               scs.addStaticLinkGraphics(staticLinkGraphics);
+               visualFactory.identity();
+               visualFactory.appendTranslation(x, y, z + 0.001);
+               visualFactory.addBox(0.002, 0.002, 0.002, material);
             }
          }
       }
 
-      return createHeightMap(listOfPoints, testingRange, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxSameHeightPointsPerNode,
-            maxAllowableXYDistanceForAPointToBeConsideredClose, maxNodes);
+      simulationTestHelper.addStaticVisuals(visualFactory.getVisualDefinitions());
+
+      return createHeightMap(listOfPoints,
+                             testingRange,
+                             resolution,
+                             heightThreshold,
+                             quadTreeMaxMultiLevelZChangeToFilterNoise,
+                             maxSameHeightPointsPerNode,
+                             maxAllowableXYDistanceForAPointToBeConsideredClose,
+                             maxNodes);
    }
 
-   public HeightMapWithPoints createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2D testingRange, double resolution, double heightThreshold,
-         double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
-         int maxNodes)
+   public HeightMapWithPoints createHeightMap(ArrayList<Point3D> listOfPoints,
+                                              BoundingBox2D testingRange,
+                                              double resolution,
+                                              double heightThreshold,
+                                              double quadTreeMaxMultiLevelZChangeToFilterNoise,
+                                              int maxSameHeightPointsPerNode,
+                                              double maxAllowableXYDistanceForAPointToBeConsideredClose,
+                                              int maxNodes)
    {
       double minX = testingRange.getMinPoint().getX();
       double maxX = testingRange.getMaxPoint().getX();
@@ -298,8 +319,12 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       double maxY = testingRange.getMaxPoint().getY();
 
       Box bounds = new Box(minX, minY, maxX, maxY);
-      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise,
-            maxSameHeightPointsPerNode, maxAllowableXYDistanceForAPointToBeConsideredClose, -1);
+      QuadTreeForGroundParameters quadTreeParameters = new QuadTreeForGroundParameters(resolution,
+                                                                                       heightThreshold,
+                                                                                       quadTreeMaxMultiLevelZChangeToFilterNoise,
+                                                                                       maxSameHeightPointsPerNode,
+                                                                                       maxAllowableXYDistanceForAPointToBeConsideredClose,
+                                                                                       -1);
       QuadTreeForGroundHeightMap heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
       for (Point3D point : listOfPoints)
@@ -310,25 +335,14 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return heightMap;
    }
 
-   private FootstepDataListMessage createFootstepsForWalkingUpRamp(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   private FootstepDataListMessage createFootstepsForWalkingUpRamp()
    {
-      double[][][] footstepLocationsAndOrientations = new double[][][] {
-            { { 3.00, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 3.35,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 3.73, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 4.10,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 4.48, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 4.86,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 5.25, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 5.63,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 6.01, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 6.40,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 6.79, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 7.17,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 7.56, -0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } },
-            { { 7.56,  0.1, 0.0}, { 0.0, 0.0, 0.0, 1 } } };
+      Pose3D[] footstepPoses = {new Pose3D(3.00, -0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(3.35, 0.1, 0.0, 0.0, 0.0, 0.0),
+            new Pose3D(3.73, -0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(4.10, 0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(4.48, -0.1, 0.0, 0.0, 0.0, 0.0),
+            new Pose3D(4.86, 0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(5.25, -0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(5.63, 0.1, 0.0, 0.0, 0.0, 0.0),
+            new Pose3D(6.01, -0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(6.40, 0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(6.79, -0.1, 0.0, 0.0, 0.0, 0.0),
+            new Pose3D(7.17, 0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(7.56, -0.1, 0.0, 0.0, 0.0, 0.0), new Pose3D(7.56, 0.1, 0.0, 0.0, 0.0, 0.0)};
 
-      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.RIGHT, footstepLocationsAndOrientations.length);
-      return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+      return EndToEndTestTools.generateFootstepsFromPose3Ds(RobotSide.RIGHT, footstepPoses);
    }
 }

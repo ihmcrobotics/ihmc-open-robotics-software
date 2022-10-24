@@ -3,6 +3,11 @@ package us.ihmc.gdx.imgui;
 import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
 
+/**
+ * This class makes the panels smaller when you undock them because otherwise it's
+ * difficult to move them around and re-dock them. It also makes the panel's initial size
+ * to be smallish.
+ */
 public class ImGuiPanelSizeHandler
 {
    private int firstTimeWidth = 300;

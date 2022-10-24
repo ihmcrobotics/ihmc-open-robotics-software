@@ -17,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToStandingPushRecoveryState extends PushRecoveryState
 {
@@ -75,7 +74,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
 
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
+   private final FramePoint2D desiredCoP = new FramePoint2D();
 
    public void switchToPointToeOffIfAlreadyInLine()
    {
@@ -88,8 +87,8 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes) && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
-         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), desiredCoP);
+         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, desiredCoP);
       }
    }
 
@@ -168,7 +167,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+         extraToeOffHeight = feetManager.getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
             .createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);

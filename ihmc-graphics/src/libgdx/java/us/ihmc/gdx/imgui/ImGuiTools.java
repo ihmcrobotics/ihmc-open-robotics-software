@@ -3,7 +3,13 @@ package us.ihmc.gdx.imgui;
 import com.badlogic.gdx.Input;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
+import imgui.internal.ImGuiContext;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
@@ -19,9 +25,9 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.lwjgl.opengl.GL41.glClear;
-import static org.lwjgl.opengl.GL41.glClearColor;
-
+/**
+ * Clean up to have lots of different font sizes available by number.
+ */
 public class ImGuiTools
 {
    private static final AtomicInteger GLOBAL_WIDGET_INDEX = new AtomicInteger();
@@ -30,6 +36,9 @@ public class ImGuiTools
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
+   private static ImFont consoleFont;
+   private static ImFont smallFont;
+   private static ImFont mediumFont;
    private static ImFont bigFont;
    private static ImFont nodeFont;
 
@@ -41,6 +50,35 @@ public class ImGuiTools
    private static int downArrowKey;
    private static int leftArrowKey;
    private static int rightArrowKey;
+   private static ImFontAtlas fontAtlas;
+
+   public static long createContext()
+   {
+      return ImGui.createContext().ptr;
+   }
+
+   public static long createContext(ImFontAtlas fontAtlas)
+   {
+      return ImGui.createContext(fontAtlas).ptr;
+   }
+
+   public static long getCurrentContext()
+   {
+      return ImGui.getCurrentContext().ptr;
+   }
+
+   public static void setCurrentContext(long context)
+   {
+      ImGuiContext contextHolder = ImGui.getCurrentContext();
+      contextHolder.ptr = context;
+      ImGui.setCurrentContext(contextHolder);
+   }
+
+   public static void initializeColorStyle()
+   {
+      if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
+         ImGui.styleColorsLight();
+   }
 
    public static int nextWidgetIndex()
    {
@@ -49,8 +87,66 @@ public class ImGuiTools
 
    public static void glClearDarkGray()
    {
-      glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-      glClear(GL41.GL_COLOR_BUFFER_BIT);
+      GL41.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT);
+   }
+
+   public static boolean volatileInputInt(String label, ImInt imInt)
+   {
+      return volatileInputInt(label, imInt, 1);
+   }
+
+   public static boolean volatileInputInt(String label, ImInt imInt, int step)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputInt(label, imInt, step, 100, inputTextFlags);
+   }
+
+   public static boolean volatileInputFloat(String label, ImFloat imFloat)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputFloat(label, imFloat, 0, 0, "%.3f", inputTextFlags);
+   }
+
+   public static boolean volatileInputFloat(String label, ImFloat imFloat, float step)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputFloat(label, imFloat, step, 0, "%.3f", inputTextFlags);
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble)
+   {
+      return volatileInputDouble(label, imDouble, 0, 0);
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast)
+   {
+      return volatileInputDouble(label, imDouble, step, stepFast, "%.6f");
+   }
+
+   public static boolean volatileInputDouble(String label, ImDouble imDouble, double step, double stepFast, String format)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputDouble(label, imDouble, step, stepFast, format, inputTextFlags);
+   }
+
+   public static boolean inputText(String label, ImString text)
+   {
+      int flags = ImGuiInputTextFlags.None;
+      flags += ImGuiInputTextFlags.CallbackResize;
+      return ImGui.inputText(label, text, flags);
+   }
+
+   public static void previousWidgetTooltip(String tooltipText)
+   {
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip(tooltipText);
+      }
    }
 
    public static String uniqueLabel(String label)
@@ -73,13 +169,20 @@ public class ImGuiTools
       return "###" + thisObject.getClass().getName() + ":" + label;
    }
 
+   public static ImFont setupFonts(ImGuiIO io)
+   {
+      return setupFonts(io, 1);
+   }
+
    /**
     * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
     * and ImGuiGlfwFreeTypeDemo in this project
     */
-   public static ImFont setupFonts(ImGuiIO io)
+   public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig consoleFontConfig = new ImFontConfig();
+      final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
       final ImFontConfig nodeFontConfig = new ImFontConfig();
 
@@ -97,10 +200,11 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      consoleFontConfig.setFontBuilderFlags(fontsFlags);
+      mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
       nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
-      ImFont fontToReturn;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
       String fontDir;
@@ -114,7 +218,10 @@ public class ImGuiTools
       if (Files.exists(segoeui))
       {
          fontConfig.setName("segoeui.ttf, 16px");
-         fontToReturn = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
+
+         fontConfig.setName("segoeui.ttf, 20px");
+         mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
 
          bigFontConfig.setName("segoeui.ttf, 38px");
          bigFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 38.0f, bigFontConfig);
@@ -125,13 +232,35 @@ public class ImGuiTools
       else
       {
          fontConfig.setName("DejaVuSans.ttf, 13px");
-         fontToReturn = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+
+         fontConfig.setName("DejaVuSans.ttf, 17px");
+         mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
 
          bigFontConfig.setName("DejaVuSans.ttf, 32px");
          bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
 
          nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
          nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
+      }
+      Path lucidaConsole = Paths.get(fontDir, "lucon.ttf");
+
+      ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
+      glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());
+      glyphRangesBuilder.addRanges(new short[] {0x2500, 0x257F, 0}); // Box drawing https://www.compart.com/en/unicode/block/U+2500
+      glyphRangesBuilder.addRanges(new short[] {0x2580, 0x259F, 0}); // Block elements https://www.compart.com/en/unicode/block/U+2580
+      glyphRangesBuilder.addRanges(new short[] {0x25A0, 0x25FF, 0}); // Geometric shapes https://www.compart.com/en/unicode/block/U+25A0
+      short[] glyphRanges = glyphRangesBuilder.buildRanges();
+
+      if (Files.exists(lucidaConsole))
+      {
+         consoleFontConfig.setName("lucon.ttf, 12px");
+         consoleFont = io.getFonts().addFontFromFileTTF(lucidaConsole.toAbsolutePath().toString(), 12.0f, consoleFontConfig, glyphRanges);
+      }
+      else
+      {
+         consoleFontConfig.setName("dejaVu/DejaVuSansMono.ttf, 12px");
+         consoleFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSansMono.ttf"), 12.0f, consoleFontConfig, glyphRanges);
       }
 //      fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
@@ -143,21 +272,49 @@ public class ImGuiTools
 
       nodeFont.setScale(0.5f);
 
-      ImGui.getIO().getFonts().build();
+      fontAtlas = ImGui.getIO().getFonts();
+      fontAtlas.build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
+      consoleFontConfig.destroy();
+      mediumFontConfig.destroy();
       bigFontConfig.destroy();
       nodeFontConfig.destroy();
 
-      return fontToReturn;
+      if (fontSizeLevel == 2)
+         return mediumFont;
+      if (fontSizeLevel == 3)
+         return bigFont;
+
+      return smallFont;
    }
 
    public static ImFont getBigFont() {
       return bigFont;
    }
 
+   public static ImFont getMediumFont()
+   {
+      return mediumFont;
+   }
+
+   public static ImFont getSmallFont()
+   {
+      return smallFont;
+   }
+
    public static ImFont getNodeFont() {
       return nodeFont;
+   }
+
+   public static ImFont getConsoleFont()
+   {
+      return consoleFont;
+   }
+
+   public static ImFontAtlas getFontAtlas()
+   {
+      return fontAtlas;
    }
 
    public static byte[] loadFromResources(final String fileName)

@@ -7,12 +7,11 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.roughTerrainWalking.DRCSwingTrajectoryTest;
+import us.ihmc.avatar.roughTerrainWalking.HumanoidSwingTrajectoryTest;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-rough-terrain-slow")
-public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
+public class AtlasSwingTrajectoryTest extends HumanoidSwingTrajectoryTest
 {
    @Override
    public DRCRobotModel getRobotModel()
@@ -28,28 +27,28 @@ public class AtlasSwingTrajectoryTest extends DRCSwingTrajectoryTest
 
    @Override
    @Test
-   public void testMultipleHeightFootsteps() throws SimulationExceededMaximumTimeException
+   public void testMultipleHeightFootsteps()
    {
       super.testMultipleHeightFootsteps();
    }
 
    @Override
    @Test
-   public void testNegativeSwingHeight() throws SimulationExceededMaximumTimeException
+   public void testNegativeSwingHeight()
    {
       super.testNegativeSwingHeight();
    }
 
    @Override
    @Test
-   public void testReallyHighFootstep() throws SimulationExceededMaximumTimeException
+   public void testReallyHighFootstep()
    {
       super.testReallyHighFootstep();
    }
 
    @Override
    @Test
-   public void testSelfCollisionAvoidance() throws SimulationExceededMaximumTimeException
+   public void testSelfCollisionAvoidance()
    {
       super.testSelfCollisionAvoidance();
    }

@@ -1,5 +1,8 @@
 package us.ihmc.atlas.networkProcessor.footstepPostProcessing;
 
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -45,6 +48,30 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
             return parametersBasics;
          }
       };
+   }
+
+   @Tag("humanoid-obstacle-2")
+   @Override
+   @Test
+   public void testWalkingOffOfMediumPlatform()
+   {
+      super.testWalkingOffOfMediumPlatform();
+   }
+
+   @Tag("humanoid-obstacle-2")
+   @Override
+   @Test
+   public void testSwingOverPlanarRegions()
+   {
+      super.testSwingOverPlanarRegions();
+   }
+
+   @Tag("humanoid-obstacle-2")
+   @Override
+   @Test
+   public void testWalkingOnStraightForwardLines()
+   {
+      super.testWalkingOnStraightForwardLines();
    }
 
    @Override

@@ -1,38 +1,44 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
 import us.ihmc.simulationConstructionSetTools.util.perturbance.GroundContactPointsSlipper;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class SlipOnNextStepPerturber extends ModularRobotController
+public class SlipOnNextStepPerturber implements Controller
 {
+   private final YoRegistry registry;
+   private final List<Controller> subControllers = new ArrayList<Controller>();
    private final GroundContactPointsSlipper groundContactPointsSlipper;
    private final List<GroundContactPoint> groundContactPoints;
 
-   private final FloatingRootJointRobot robot;
+   private final Robot robot;
 
    private final YoEnum<SlipState> slipState;
    private final YoBoolean slipNextStep;
    private final YoDouble slipAfterTimeDelta, touchdownTimeForSlip;
    private final YoFrameVector3D amountToSlipNextStep;
    private final YoFrameYawPitchRoll rotationToSlipNextStep;
+   private final DoubleProvider time;
 
-   public SlipOnNextStepPerturber(HumanoidFloatingRootJointRobot robot, RobotSide robotSide)
+   public SlipOnNextStepPerturber(DoubleProvider time, Robot robot, RobotSide robotSide, String footName)
    {
-      super(robotSide.getCamelCaseNameForStartOfExpression() + "SlipOnEachStepPerturber");
+      this.time = time;
+      registry = new YoRegistry(robotSide.getCamelCaseNameForStartOfExpression() + "SlipOnEachStepPerturber");
 
       String sideString = robotSide.getCamelCaseNameForStartOfExpression();
       this.robot = robot;
@@ -45,25 +51,25 @@ public class SlipOnNextStepPerturber extends ModularRobotController
       slipState = new YoEnum<SlipState>(sideString + "SlipState", registry, SlipState.class);
       slipState.set(SlipState.NOT_SLIPPING);
 
-      groundContactPoints = robot.getFootGroundContactPoints(robotSide);
-      
+      groundContactPoints = robot.getRigidBody(footName).getParentJoint().getAuxialiryData().getGroundContactPoints();
+
       groundContactPointsSlipper = new GroundContactPointsSlipper(robotSide.getLowerCaseName());
       groundContactPointsSlipper.addGroundContactPoints(groundContactPoints);
       groundContactPointsSlipper.setPercentToSlipPerTick(0.05);
 
-      this.addRobotController(groundContactPointsSlipper);
+      subControllers.add(groundContactPointsSlipper);
    }
 
    public void setPercentToSlipPerTick(double percentToSlipPerTick)
    {
       groundContactPointsSlipper.setPercentToSlipPerTick(percentToSlipPerTick);
    }
-   
+
    public void setSlipAfterStepTimeDelta(double slipAfterTimeDelta)
    {
       this.slipAfterTimeDelta.set(slipAfterTimeDelta);
    }
-   
+
    public void setSlipNextStep(boolean slipNextStep)
    {
       this.slipNextStep.set(slipNextStep);
@@ -73,26 +79,26 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    {
       this.amountToSlipNextStep.set(amountToSlipNextStep);
    }
-   
-   public void setRotationToSlipNextStep(double yaw, double pitch, double roll) 
+
+   public void setRotationToSlipNextStep(double yaw, double pitch, double roll)
    {
       rotationToSlipNextStep.setYawPitchRoll(yaw, pitch, roll);
    }
 
    public void doControl()
    {
-      super.doControl();
+      subControllers.forEach(Controller::doControl);
 
       switch (slipState.getEnumValue())
       {
-         case NOT_SLIPPING :
+         case NOT_SLIPPING:
          {
             if (footTouchedDown())
             {
                if (slipNextStep.getBooleanValue())
                {
                   slipState.set(SlipState.TOUCHED_DOWN);
-                  touchdownTimeForSlip.set(robot.getTime());
+                  touchdownTimeForSlip.set(time.getValue());
                }
                else // Wait till foot lift back up before allowing a slip.
                {
@@ -103,9 +109,9 @@ public class SlipOnNextStepPerturber extends ModularRobotController
             break;
          }
 
-         case TOUCHED_DOWN :
+         case TOUCHED_DOWN:
          {
-            if (robot.getTime() > touchdownTimeForSlip.getDoubleValue() + slipAfterTimeDelta.getDoubleValue())
+            if (time.getValue() > touchdownTimeForSlip.getDoubleValue() + slipAfterTimeDelta.getDoubleValue())
             {
                slipState.set(SlipState.SLIPPING);
                startSlipping(amountToSlipNextStep, rotationToSlipNextStep.getYawPitchRoll());
@@ -114,7 +120,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
             break;
          }
 
-         case SLIPPING :
+         case SLIPPING:
          {
             if (groundContactPointsSlipper.isDoneSlipping())
             {
@@ -124,7 +130,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
             break;
          }
 
-         case DONE_SLIPPING :
+         case DONE_SLIPPING:
          {
             if (footLiftedUp())
             {
@@ -135,7 +141,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
          }
       }
    }
-   
+
    private void startSlipping(Vector3DReadOnly slipAmount, double[] yawPitchRoll)
    {
       groundContactPointsSlipper.setDoSlip(true);
@@ -148,7 +154,7 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    {
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
-         if (groundContactPoint.isInContact())
+         if (groundContactPoint.getInContact().getValue())
             return true;
       }
 
@@ -159,12 +165,15 @@ public class SlipOnNextStepPerturber extends ModularRobotController
    {
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
-         if (groundContactPoint.isInContact())
+         if (groundContactPoint.getInContact().getValue())
             return false;
       }
 
       return true;
    }
 
-   private enum SlipState {NOT_SLIPPING, TOUCHED_DOWN, SLIPPING, DONE_SLIPPING}
+   private enum SlipState
+   {
+      NOT_SLIPPING, TOUCHED_DOWN, SLIPPING, DONE_SLIPPING
+   }
 }

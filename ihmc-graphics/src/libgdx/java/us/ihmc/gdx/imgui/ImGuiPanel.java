@@ -10,6 +10,7 @@ import us.ihmc.log.LogTools;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ImGuiPanel extends ImGuiPanelSizeHandler
 {
@@ -18,6 +19,8 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    private final ImBoolean isShowing;
    private final boolean hasMenuBar;
    private final TreeSet<ImGuiPanel> children = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
+   private final ConcurrentLinkedQueue<ImGuiPanel> removalQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<ImGuiPanel> additionQueue = new ConcurrentLinkedQueue<>();
 
    private int lastDockID = -1;
 
@@ -50,23 +53,27 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    }
    /* package-private */ void renderMenuItem(String indent)
    {
-      if (isTogglable())
-      {
-         ImGui.menuItem(indent + panelName, "", isShowing);
+      ImGui.menuItem(indent + panelName, "", isShowing);
 
-         for (ImGuiPanel child : children)
-         {
-            child.renderMenuItem(indent + "\t");
-         }
+      for (ImGuiPanel child : children)
+      {
+         child.renderMenuItem(indent + "\t");
       }
    }
 
    /* package-private */ void renderPanelAndChildren(ImGuiDockspacePanel justClosedPanel)
    {
-      if (isTogglable() && isShowing.get())
+      while (!removalQueue.isEmpty())
+         children.remove(removalQueue.poll());
+      while (!additionQueue.isEmpty())
+         children.add(additionQueue.poll());
+
+      if (isShowing.get() && render != null)
       {
          handleSizeBeforeBegin();
-         int windowFlags = hasMenuBar ? ImGuiWindowFlags.MenuBar : ImGuiWindowFlags.None;
+         int windowFlags = ImGuiWindowFlags.None;
+         if (hasMenuBar)
+            windowFlags |= ImGuiWindowFlags.MenuBar;
          ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
@@ -97,6 +104,16 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       children.add(child);
    }
 
+   public void queueRemoveChild(ImGuiPanel panel)
+   {
+      removalQueue.add(panel);
+
+   }
+   public void queueAddChild(ImGuiPanel panel)
+   {
+      additionQueue.add(panel);
+   }
+
    /* package-private */ void load(Map.Entry<String, JsonNode> panelEntry)
    {
       if (panelName.equals(panelEntry.getKey()))
@@ -112,10 +129,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
 
    /* package-private */ void save(ObjectNode anchorJSON)
    {
-      if (isTogglable())
-      {
-         anchorJSON.put(panelName, isShowing.get());
-      }
+      anchorJSON.put(panelName, isShowing.get());
 
       for (ImGuiPanel child : children)
       {
@@ -128,11 +142,6 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       this.render = render;
    }
 
-   public boolean isTogglable()
-   {
-      return render != null;
-   }
-
    public ImBoolean getIsShowing()
    {
       return isShowing;
@@ -141,5 +150,10 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    public String getPanelName()
    {
       return panelName;
+   }
+
+   public TreeSet<ImGuiPanel> getChildren()
+   {
+      return children;
    }
 }

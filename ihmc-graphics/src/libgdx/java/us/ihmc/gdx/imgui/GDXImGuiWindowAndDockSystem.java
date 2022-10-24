@@ -2,27 +2,24 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.ImFont;
-import imgui.ImGuiIO;
-import imgui.ImGuiStyle;
+import imgui.*;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
-import imgui.internal.ImGui;
 import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -38,8 +35,10 @@ public class GDXImGuiWindowAndDockSystem
    public static final String IMGUI_SETTINGS_INI_FILE_NAME = "ImGuiSettings.ini";
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+   private long context;
    private String glslVersion; // TODO: ?
    private long windowHandle;
+   private int fontSizeLevel = 1;
    private ImFont imFont;
    private int dockspaceId;
    private final ImString newDockPanelName = new ImString("", 100);
@@ -90,7 +89,8 @@ public class GDXImGuiWindowAndDockSystem
       // }
       // GL.createCapabilities();
 
-      ImGui.createContext();
+      context = ImGuiTools.createContext();
+      ImGuiTools.setCurrentContext(context);
 
       if (GDXTools.ENABLE_OPENGL_DEBUGGER)
          debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
@@ -105,9 +105,8 @@ public class GDXImGuiWindowAndDockSystem
       io.setConfigViewportsNoDecoration(false);
       io.setConfigDockingTransparentPayload(false);
 
-      if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
-         ImGui.styleColorsLight();
-      imFont = ImGuiTools.setupFonts(io);
+      ImGuiTools.initializeColorStyle();
+      imFont = ImGuiTools.setupFonts(io, fontSizeLevel);
 
       // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
       if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
@@ -123,12 +122,14 @@ public class GDXImGuiWindowAndDockSystem
 
    public void beforeWindowManagement()
    {
+      ImGuiTools.setCurrentContext(context);
+
       if (isFirstRenderCall)
       {
          loadUserConfigurationWithDefaultFallback();
       }
 
-      GDX3DSceneTools.glClearGray(0.3f);
+      ImGuiTools.glClearDarkGray();
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
@@ -200,17 +201,22 @@ public class GDXImGuiWindowAndDockSystem
    public boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       boolean success = false;
-      Path file = configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-            ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
-      if (Files.exists(file))
+      imGuiSettingsFile.setMode(configurationLocation.toHybridResourceMode());
+      if (imGuiSettingsFile.isInputStreamAvailable())
       {
-         LogTools.info("Loading ImGui settings from {}", file.toString());
-         ImGui.loadIniSettingsFromDisk(file.toString());
+         LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getLocationOfResourceForReading());
+         InputStream classpathResourceAsStream = imGuiSettingsFile.getClasspathResourceAsStream();
+         if (classpathResourceAsStream == null)
+         {
+            throw new RuntimeException("Classpath resource stream is null!");
+         }
+         String iniContentsAsString = ResourceTools.readResourceToString(classpathResourceAsStream);
+         ImGui.loadIniSettingsFromMemory(iniContentsAsString);
          success = true;
 
-         Path fileForDockspacePanels = configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-               ? panelsFile.getWorkspaceFile() : panelsFile.getExternalFile();
-         JSONFileTools.load(fileForDockspacePanels, jsonNode ->
+         panelsFile.setMode(configurationLocation.toHybridResourceMode());
+         LogTools.info("Loading ImGui panels settings from {}", panelsFile.getLocationOfResourceForReading());
+         JSONFileTools.load(panelsFile.getInputStream(), jsonNode ->
          {
             JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
             if (dockspacePanelsNode != null)
@@ -244,8 +250,8 @@ public class GDXImGuiWindowAndDockSystem
 
    public void saveConfiguration(ImGuiConfigurationLocation saveConfigurationLocation)
    {
-      Path saveFile = saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
-            ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
+      imGuiSettingsFile.setMode(saveConfigurationLocation.toHybridResourceMode());
+      Path saveFile = imGuiSettingsFile.getFileForWriting();
       String settingsPathString = saveFile.toString();
       LogTools.info("Saving ImGui settings to {}", settingsPathString);
       FileTools.ensureDirectoryExists(saveFile.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -261,15 +267,10 @@ public class GDXImGuiWindowAndDockSystem
 
          panelManager.saveConfiguration(root);
       };
-      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
-      {
-         JSONFileTools.save(panelsFile.getWorkspaceFile(), rootConsumer);
-      }
-      else
-      {
-         LogTools.info("Saving ImGui windows settings to {}", panelsFile.getExternalFile().toString());
-         JSONFileTools.save(panelsFile.getExternalFile(), rootConsumer);
-      }
+
+      panelsFile.setMode(saveConfigurationLocation.toHybridResourceMode());
+      LogTools.info("Saving ImGui panel settings to {}", panelsFile.getFileForWriting().toString());
+      JSONFileTools.save(panelsFile.getFileForWriting(), rootConsumer);
    }
 
    public void afterWindowManagement()
@@ -298,15 +299,13 @@ public class GDXImGuiWindowAndDockSystem
       ImGui.render();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
 
-      if (imgui.ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+      if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
+      {
          final long backupWindowPtr = glfwGetCurrentContext();
-         imgui.ImGui.updatePlatformWindows();
-         imgui.ImGui.renderPlatformWindowsDefault();
+         ImGui.updatePlatformWindows();
+         ImGui.renderPlatformWindowsDefault();
          glfwMakeContextCurrent(backupWindowPtr);
       }
-
-      glfwSwapBuffers(windowHandle);
-      glfwPollEvents();
 
       isFirstRenderCall = false;
    }
@@ -329,6 +328,11 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiPanelManager getPanelManager()
    {
       return panelManager;
+   }
+
+   public void setFontSizeLevel(int fontSizeLevel)
+   {
+      this.fontSizeLevel = fontSizeLevel;
    }
 
    public ImFont getImFont()

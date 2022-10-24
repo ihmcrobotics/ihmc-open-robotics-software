@@ -12,6 +12,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -86,7 +87,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       dampingConstant = 0.3;
    }
 
-   public boolean solve(RigidBodyTransform desiredTransform)
+   public boolean solve(RigidBodyTransformReadOnly desiredTransform)
    {
       currentBest = Double.MAX_VALUE;
       iterationNumber = 0;
@@ -107,7 +108,7 @@ public class KinematicSolver implements InverseKinematicsCalculator
       return desiredReached;
    }
 
-   private void calculateErrorTransform(RigidBodyTransform transformShoulderToDesired)
+   private void calculateErrorTransform(RigidBodyTransformReadOnly transformShoulderToDesired)
    {
       jacobian.getEndEffector().getBodyFixedFrame().getTransformToDesiredFrame(transformShoulderToEndEffector, jacobian.getBaseFrame());
       transformEndEffectorToShoulder.setAndInvert(transformShoulderToEndEffector);

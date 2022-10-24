@@ -9,7 +9,6 @@ import us.ihmc.avatar.controllerAPI.EndToEndSpineJointTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJointTrajectoryMessageTest
 {
@@ -18,7 +17,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
+   public void testSingleWaypoint()
    {
       super.testSingleWaypoint();
    }
@@ -26,7 +25,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testSwitchingBetweenControlModes() throws SimulationExceededMaximumTimeException
+   public void testSwitchingBetweenControlModes()
    {
       super.testSwitchingBetweenControlModes();
    }
@@ -34,7 +33,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testDesiredsAreContinuous() throws SimulationExceededMaximumTimeException
+   public void testDesiredsAreContinuous()
    {
       super.testDesiredsAreContinuous();
    }
@@ -42,7 +41,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testMultipleWaypoints() throws SimulationExceededMaximumTimeException
+   public void testMultipleWaypoints()
    {
       super.testMultipleWaypoints();
    }
@@ -50,7 +49,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testLongMessage() throws SimulationExceededMaximumTimeException
+   public void testLongMessage()
    {
       super.testLongMessage();
    }
@@ -58,7 +57,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-2")
    @Override
    @Test
-   public void testMessageQueuing() throws SimulationExceededMaximumTimeException
+   public void testMessageQueuing()
    {
       super.testMessageQueuing();
    }
@@ -66,7 +65,7 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
    @Tag("controller-api-slow-2")
    @Override
    @Test
-   public void testMessageWithDifferentTrajectoryLengthsPerJoint() throws SimulationExceededMaximumTimeException
+   public void testMessageWithDifferentTrajectoryLengthsPerJoint()
    {
       super.testMessageWithDifferentTrajectoryLengthsPerJoint();
    }

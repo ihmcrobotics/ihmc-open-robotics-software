@@ -1,19 +1,27 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import java.io.IOException;
+
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedPhysicalProperties;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedSensorInformation;
-import us.ihmc.exampleSimulations.genericQuadruped.parameters.*;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedControllerCoreOptimizationSettings;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDCMPlannerParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedDefaultInitialPosition;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedFallDetectionParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedHighLevelControllerParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedPrivilegedConfigurationParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedSitDownParameters;
+import us.ihmc.exampleSimulations.genericQuadruped.parameters.GenericQuadrupedStateEstimatorParameters;
 import us.ihmc.exampleSimulations.genericQuadruped.simulation.GenericQuadrupedGroundContactParameters;
 import us.ihmc.quadrupedBasics.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInformation;
-import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.quadrupedRobotics.model.QuadrupedInitialPositionParameters;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.output.SimulatedQuadrupedOutputWriter;
+import us.ihmc.quadrupedRobotics.parameters.QuadrupedFallDetectionParameters;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedPrivilegedConfigurationParameters;
 import us.ihmc.quadrupedRobotics.planning.trajectory.DCMPlannerParameters;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
@@ -22,14 +30,12 @@ import us.ihmc.quadrupedRobotics.simulation.QuadrupedSimulationFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.OutputWriter;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-
-import java.io.IOException;
 
 public class GenericQuadrupedSimulationFactory
 {
@@ -39,12 +45,11 @@ public class GenericQuadrupedSimulationFactory
    private static final double SIMULATION_GRAVITY = -9.81;
    private static final boolean USE_STATE_ESTIMATOR = false;
    private static final int RECORD_FREQUENCY = (int) (0.01 / SIMULATION_DT);
-   private static final boolean SHOW_PLOTTER = true;
    private static final boolean USE_TRACK_AND_DOLLY = false;
 
    private QuadrupedSimulationFactory simulationFactory = new QuadrupedSimulationFactory();
 
-   public SimulationConstructionSet createSimulation() throws IOException
+   public SimulationConstructionSet2 createSimulation() throws IOException
    {
       QuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
       QuadrupedPhysicalProperties physicalProperties = new GenericQuadrupedPhysicalProperties();
@@ -60,10 +65,15 @@ public class GenericQuadrupedSimulationFactory
       QuadrupedFallDetectionParameters fallDetectionParameters = new GenericQuadrupedFallDetectionParameters();
 
       FullQuadrupedRobotModel fullRobotModel = modelFactory.createFullRobotModel();
-      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDefinition());
+      RobotDefinition robotDefinition = modelFactory.getRobotDefinition();
+      QuadrupedSimulationFactory.setRobotDefinitionInitialJointStates(initialPositionParameters,
+                                                                      modelFactory.getQuadrupedJointNames(),
+                                                                      modelFactory::getSDFNameForJointName,
+                                                                      robotDefinition);
+
+      Robot sdfRobot = new Robot(robotDefinition, SimulationConstructionSet2.inertialFrame);
       ControllerCoreOptimizationSettings controllerCoreOptimizationSettings = new GenericQuadrupedControllerCoreOptimizationSettings(fullRobotModel.getTotalMass());
 
-      SensorTimestampHolder timestampProvider = new GenericQuadrupedTimestampProvider(sdfRobot);
       QuadrantDependentList<Double> kneeTorqueTouchdownDetectionThreshold = new QuadrantDependentList<>(20.0, 20.0, 20.0, 20.0);
       QuadrantDependentList<Double> kneeTorqueTouchdownForSureDetectionThreshold = new QuadrantDependentList<>(75.0, 75.0, 75.0, 75.0);
 
@@ -83,19 +93,15 @@ public class GenericQuadrupedSimulationFactory
       simulationFactory.setKneeTorqueTouchdownForSureDetectionThreshold(kneeTorqueTouchdownForSureDetectionThreshold);
       simulationFactory.setSCSParameters(scsParameters);
       simulationFactory.setOutputWriter(outputWriter);
-      simulationFactory.setShowPlotter(SHOW_PLOTTER);
       simulationFactory.setUseTrackAndDolly(USE_TRACK_AND_DOLLY);
-      simulationFactory.setInitialPositionParameters(initialPositionParameters);
       simulationFactory.setFullRobotModel(fullRobotModel);
       simulationFactory.setControllerCoreOptimizationSettings(controllerCoreOptimizationSettings);
       simulationFactory.setPhysicalProperties(physicalProperties);
-      simulationFactory.setTimestampHolder(timestampProvider);
       simulationFactory.setUseStateEstimator(USE_STATE_ESTIMATOR);
       simulationFactory.setStateEstimatorParameters(stateEstimatorParameters);
       simulationFactory.setSensorInformation(sensorInformation);
       simulationFactory.setJointDesiredOutputList(jointDesiredOutputList);
       simulationFactory.setReferenceFrames(referenceFrames);
-      simulationFactory.setInitialOffset(new QuadrupedInitialOffsetAndYaw());
       simulationFactory.setHighLevelControllerParameters(highLevelControllerParameters);
       simulationFactory.setDCMPlannerParameters(dcmPlannerParameters);
       simulationFactory.setSitDownParameters(sitDownParameters);
@@ -110,8 +116,8 @@ public class GenericQuadrupedSimulationFactory
       try
       {
          GenericQuadrupedSimulationFactory simulationFactory = new GenericQuadrupedSimulationFactory();
-         SimulationConstructionSet scs = simulationFactory.createSimulation();
-         scs.startOnAThread();
+         SimulationConstructionSet2 scs = simulationFactory.createSimulation();
+         scs.start(true, false, false);
          scs.simulate();
       }
       catch (IOException ioException)

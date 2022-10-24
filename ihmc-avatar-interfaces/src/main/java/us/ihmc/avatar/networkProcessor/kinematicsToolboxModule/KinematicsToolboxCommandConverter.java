@@ -1,14 +1,14 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import controller_msgs.msg.dds.KinematicsToolboxContactStateMessage;
-import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxSupportRegionMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxContactStateCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
@@ -61,7 +61,7 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
          return true;
       if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
          return true;
-      if (message instanceof KinematicsToolboxContactStateMessage)
+      if (message instanceof KinematicsToolboxSupportRegionMessage)
          return true;
       if (message instanceof KinematicsToolboxInputCollectionMessage)
          return true;
@@ -86,11 +86,11 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
          KinematicsToolboxOneDoFJointCommand jointCommand = (KinematicsToolboxOneDoFJointCommand) command;
          jointCommand.set(jointMessage, jointHashCodeResolver);
       }
-      else if (message instanceof KinematicsToolboxContactStateMessage)
+      else if (message instanceof KinematicsToolboxSupportRegionMessage)
       {
-         KinematicsToolboxContactStateMessage contactStateMessage = (KinematicsToolboxContactStateMessage) message;
-         KinematicsToolboxContactStateCommand contactStateCommand = (KinematicsToolboxContactStateCommand) command;
-         contactStateCommand.set(contactStateMessage, rigidBodyHashCodeResolver);
+         KinematicsToolboxSupportRegionMessage contactStateMessage = (KinematicsToolboxSupportRegionMessage) message;
+         KinematicsToolboxSupportRegionCommand contactStateCommand = (KinematicsToolboxSupportRegionCommand) command;
+         contactStateCommand.set(contactStateMessage, referenceFrameHashCodeResolver);
       }
       else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
       {

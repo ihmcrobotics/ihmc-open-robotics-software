@@ -5,8 +5,7 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPInequalityInput;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPInequalityInput;
 
 /**
  * This class is used by the {@link ICPOptimizationQPSolver} to calculate variable constraints for the QP Solver
