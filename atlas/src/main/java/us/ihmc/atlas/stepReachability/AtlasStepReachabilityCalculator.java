@@ -2,8 +2,7 @@ package us.ihmc.atlas.stepReachability;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
-import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
+import us.ihmc.atlas.parameters.AtlasAvoidanceCollisionModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.reachabilityMap.footstep.HumanoidStepReachabilityCalculator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -36,7 +35,7 @@ public class AtlasStepReachabilityCalculator extends HumanoidStepReachabilityCal
    @Override
    protected RobotCollisionModel getRobotCollisionModel(HumanoidJointNameMap jointMap)
    {
-      AtlasKinematicsCollisionModel collisionModel = new AtlasKinematicsCollisionModel(jointMap);
+      AtlasAvoidanceCollisionModel collisionModel = new AtlasAvoidanceCollisionModel(jointMap);
       return collisionModel;
    }
 }

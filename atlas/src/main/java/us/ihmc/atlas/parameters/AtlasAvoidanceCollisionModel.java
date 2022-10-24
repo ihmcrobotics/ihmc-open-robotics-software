@@ -1,7 +1,6 @@
 package us.ihmc.atlas.parameters;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.euclid.Axis3D;
@@ -22,11 +21,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-public class AtlasKinematicsCollisionModel implements RobotCollisionModel
+public class AtlasAvoidanceCollisionModel implements RobotCollisionModel
 {
    private final HumanoidJointNameMap jointMap;
 
-   public AtlasKinematicsCollisionModel(HumanoidJointNameMap jointMap)
+   public AtlasAvoidanceCollisionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }

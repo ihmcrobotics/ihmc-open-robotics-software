@@ -25,7 +25,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.valkyrie.ValkyrieSDFLoadingDemo.addKinematicsCollisionGraphics;
+import static us.ihmc.valkyrie.ValkyrieSDFLoadingDemo.addAvoidanceCollisionGraphics;
 
 public class ValkyrieContactPointProjectorTest
 {
@@ -35,7 +35,7 @@ public class ValkyrieContactPointProjectorTest
       boolean printProjectedLocation = true;
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotAvoidanceCollisionModel();
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
@@ -161,7 +161,7 @@ public class ValkyrieContactPointProjectorTest
 
       FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(true);
       valkyrieRobot.setPositionInWorld(new Vector3D());
-      addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+      addAvoidanceCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotAvoidanceCollisionModel());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(valkyrieRobot);
       scs.addStaticLinkGraphics(graphics3DObject);

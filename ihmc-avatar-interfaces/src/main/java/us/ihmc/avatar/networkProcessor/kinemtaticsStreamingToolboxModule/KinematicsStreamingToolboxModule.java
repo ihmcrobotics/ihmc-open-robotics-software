@@ -65,7 +65,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                             yoGraphicsListRegistry,
                                                             registry);
-      controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
+      controller.setCollisionModel(robotModel.getHumanoidRobotAvoidanceCollisionModel());
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);

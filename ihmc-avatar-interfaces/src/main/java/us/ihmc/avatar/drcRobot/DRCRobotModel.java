@@ -233,7 +233,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new DefaultShapeCollisionSettings();
    }
 
-   default RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   default RobotCollisionModel getHumanoidRobotAvoidanceCollisionModel()
    {
       return null;
    }

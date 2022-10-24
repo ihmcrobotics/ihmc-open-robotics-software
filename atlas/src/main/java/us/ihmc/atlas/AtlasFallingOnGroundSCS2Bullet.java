@@ -41,7 +41,7 @@ public class AtlasFallingOnGroundSCS2Bullet
 
       if (removeCollisions)
       {
-         RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+         RobotCollisionModel collisionModel = robotModel.getHumanoidRobotAvoidanceCollisionModel();
          if (collisionModel != null)
             RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                                 robotDefinition);

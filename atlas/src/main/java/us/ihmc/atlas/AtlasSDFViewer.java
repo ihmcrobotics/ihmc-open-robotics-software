@@ -36,7 +36,7 @@ public class AtlasSDFViewer
    private static final boolean SHOW_ELLIPSOIDS = false;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_IMU_FRAMES = false;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
+   private static final boolean SHOW_AVOIDANCE_COLLISIONS = false;
    private static final boolean SHOW_SIM_COLLISIONS = false;
 
    public static void main(String[] args)
@@ -60,11 +60,11 @@ public class AtlasSDFViewer
          showIMUFrames(sdfRobot);
       }
 
-      if (SHOW_KINEMATICS_COLLISIONS)
+      if (SHOW_AVOIDANCE_COLLISIONS)
       {
          FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
          fullRobotModel.updateFrames();
-         addKinematicsCollisionGraphics(fullRobotModel, sdfRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+         addAvoidanceCollisionGraphics(fullRobotModel, sdfRobot, robotModel.getHumanoidRobotAvoidanceCollisionModel());
       }
 
       if (SHOW_SIM_COLLISIONS)
@@ -76,7 +76,7 @@ public class AtlasSDFViewer
          System.out.println(chestCoM);
          AtlasSimulationCollisionModel collisionModel = new AtlasSimulationCollisionModel(robotModel.getJointMap(), atlasRobotVersion);
          collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
-         addKinematicsCollisionGraphics(fullRobotModel, sdfRobot, collisionModel);
+         addAvoidanceCollisionGraphics(fullRobotModel, sdfRobot, collisionModel);
       }
 
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
@@ -166,7 +166,7 @@ public class AtlasSDFViewer
       }
    }
 
-   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
+   public static void addAvoidanceCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
    {
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
 

@@ -11,7 +11,7 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.atlas.parameters.AtlasICPSplitFractionCalculatorParameters;
-import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
+import us.ihmc.atlas.parameters.AtlasAvoidanceCollisionModel;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasPushRecoveryControllerParameters;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
@@ -686,9 +686,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   public RobotCollisionModel getHumanoidRobotAvoidanceCollisionModel()
    {
-      return new AtlasKinematicsCollisionModel(jointMap);
+      return new AtlasAvoidanceCollisionModel(jointMap);
    }
 
    @Override

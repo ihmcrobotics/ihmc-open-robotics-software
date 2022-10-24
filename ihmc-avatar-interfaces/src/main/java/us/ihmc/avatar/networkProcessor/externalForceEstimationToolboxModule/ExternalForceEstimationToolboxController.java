@@ -143,7 +143,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          tau.set(controllerDesiredTau);
       };
 
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotAvoidanceCollisionModel();
       List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
 
       predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);

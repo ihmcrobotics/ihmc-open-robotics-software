@@ -37,7 +37,7 @@ public class ValkyrieSDFLoadingDemo
    private static final boolean SHOW_ELLIPSOIDS = false;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
+   private static final boolean SHOW_AVOIDANCE_COLLISIONS = false;
    private static final boolean SHOW_SIM_COLLISIONS = true;
 
    private SimulationConstructionSet scs;
@@ -67,13 +67,13 @@ public class ValkyrieSDFLoadingDemo
          inertiaVis.update();
       }
 
-      if (SHOW_KINEMATICS_COLLISIONS)
-         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+      if (SHOW_AVOIDANCE_COLLISIONS)
+         addAvoidanceCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotAvoidanceCollisionModel());
 
       if (SHOW_SIM_COLLISIONS)
       {
          RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "ground");
-         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, collisionModel);
+         addAvoidanceCollisionGraphics(fullRobotModel, valkyrieRobot, collisionModel);
       }
 
       scs = new SimulationConstructionSet(valkyrieRobot);
@@ -128,7 +128,7 @@ public class ValkyrieSDFLoadingDemo
       }
    }
 
-   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
+   public static void addAvoidanceCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
    {
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
 

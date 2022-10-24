@@ -647,9 +647,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
+   public RobotCollisionModel getHumanoidRobotAvoidanceCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel(getJointMap());
+      return new ValkyrieAvoidanceCollisionModel(getJointMap());
    }
 
    @Override

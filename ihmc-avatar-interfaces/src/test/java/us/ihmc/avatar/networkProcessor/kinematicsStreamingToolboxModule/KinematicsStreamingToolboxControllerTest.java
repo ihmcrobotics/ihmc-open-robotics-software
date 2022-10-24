@@ -122,7 +122,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    public void setupWithWalkingController(Controller... additionalGhostControllers)
    {
       DRCRobotModel robotModel = newRobotModel();
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotAvoidanceCollisionModel();
 
       String robotName = robotModel.getSimpleRobotName();
 
@@ -303,12 +303,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
    public void testHandMotionWithCollision()
    {
       DRCRobotModel robotModel = newRobotModel();
-      setupNoWalkingController(robotModel.getHumanoidRobotKinematicsCollisionModel());
+      setupNoWalkingController(robotModel.getHumanoidRobotAvoidanceCollisionModel());
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(robotModel);
       toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
 
-      List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel.getElevator());
+      List<Collidable> collidables = robotModel.getHumanoidRobotAvoidanceCollisionModel().getRobotCollidables(desiredFullRobotModel.getElevator());
 
       assertTrue(toolboxController.initialize());
       snapSCSRobotToFullRobotModel(toolboxController.getDesiredFullRobotModel(), robot);

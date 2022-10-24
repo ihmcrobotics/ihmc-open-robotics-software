@@ -104,7 +104,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       simulationTestHelperFactory.getHighLevelHumanoidControllerFactory().createUserDesiredControllerCommandGenerator();
       if (useBulletPhysicsEngine)
       {
-         robotModel.getHumanoidRobotKinematicsCollisionModel();
+         robotModel.getHumanoidRobotAvoidanceCollisionModel();
          simulationTestHelperFactory.setUseBulletPhysicsEngine(useBulletPhysicsEngine);
       }
       physicsEngineName = useBulletPhysicsEngine ? "Bullet Physics Engine: " : "SCS2 Physics Engine: ";
