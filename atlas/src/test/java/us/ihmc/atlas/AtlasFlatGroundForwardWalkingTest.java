@@ -4,17 +4,16 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
+import us.ihmc.atlas.parameters.AtlasICPControllerParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.AvatarFlatGroundForwardWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-2")
 public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWalkingTest
@@ -30,9 +29,9 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
          return new AtlasWalkingControllerParameters(target, jointMap, getContactPointParameters())
          {
             @Override
-            public ICPOptimizationParameters getICPOptimizationParameters()
+            public ICPControllerParameters getICPControllerParameters()
             {
-               return new AtlasICPOptimizationParameters(false)
+               return new AtlasICPControllerParameters(false)
                {
                   @Override
                   public boolean useAngularMomentum()
@@ -67,14 +66,14 @@ public class AtlasFlatGroundForwardWalkingTest extends AvatarFlatGroundForwardWa
 
    @Override
    @Test
-   public void testForwardWalk() throws SimulationExceededMaximumTimeException
+   public void testForwardWalk()
    {
       super.testForwardWalk();
    }
 
    @Override
    @Test
-   public void testForwardWalkWithForceDisturbances() throws SimulationExceededMaximumTimeException
+   public void testForwardWalkWithForceDisturbances()
    {
       super.testForwardWalkWithForceDisturbances();
    }

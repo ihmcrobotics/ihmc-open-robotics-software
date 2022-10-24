@@ -24,6 +24,7 @@ public class BehaviorRegistry
    {
       DEFAULT_BEHAVIORS.register(LookAndStepBehavior.DEFINITION);
       DEFAULT_BEHAVIORS.register(TraverseStairsBehavior.DEFINITION);
+
       ARCHIVED_BEHAVIORS.register(StepInPlaceBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(PatrolBehavior.DEFINITION);
       ARCHIVED_BEHAVIORS.register(FancyPosesBehavior.DEFINITION);

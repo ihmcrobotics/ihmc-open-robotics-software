@@ -20,6 +20,6 @@ bool enable_user_pelvis_control
 bool enable_user_pelvis_control_during_walking
 
 # The position/orientation trajectory information.
-controller_msgs/SE3TrajectoryMessage se3_trajectory
+ihmc_common_msgs/SE3TrajectoryMessage se3_trajectory
 
 

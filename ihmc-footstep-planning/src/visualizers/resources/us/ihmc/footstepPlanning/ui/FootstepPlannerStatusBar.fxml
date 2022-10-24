@@ -52,29 +52,32 @@
             <Label text="Plan time" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
             <Text fx:id="bodyPathPlanTime" GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
-            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2"/>
+            <Label text="Iterations" GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.halignment="RIGHT"/>
+            <Text fx:id="pathIterationsTaken" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+
+            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2"/>
 
             <!-- Footstep plan status -->
-            <Label GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2" text="Footstep Plan" textAlignment="CENTER"/>
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.columnSpan="2" text="Footstep Plan" textAlignment="CENTER"/>
 
-            <Label text="Result" GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.halignment="RIGHT"/>
-            <Text fx:id="stepPlanResult" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+            <Label text="Result" GridPane.columnIndex="0" GridPane.rowIndex="10" GridPane.halignment="RIGHT"/>
+            <Text fx:id="stepPlanResult" GridPane.columnIndex="1" GridPane.rowIndex="10" />
 
-            <Label text="Plan time" GridPane.columnIndex="0" GridPane.rowIndex="10" GridPane.halignment="RIGHT"/>
-            <Text fx:id="footstepPlanTime" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+            <Label text="Plan time" GridPane.columnIndex="0" GridPane.rowIndex="11" GridPane.halignment="RIGHT"/>
+            <Text fx:id="footstepPlanTime" GridPane.columnIndex="1" GridPane.rowIndex="11" />
 
-            <Label text="Iterations" GridPane.columnIndex="0" GridPane.rowIndex="11" GridPane.halignment="RIGHT"/>
-            <Text fx:id="iterationsTaken" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+            <Label text="Iterations" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.halignment="RIGHT"/>
+            <Text fx:id="stepIterationsTaken" GridPane.columnIndex="1" GridPane.rowIndex="12" />
 
-            <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"
+            <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="0" GridPane.rowIndex="14" GridPane.columnSpan="2"
                     GridPane.halignment="CENTER"/>
 
-            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"/>
+            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"/>
 
             <!-- Add region to enlarge default width of status bar -->
-            <Region GridPane.columnIndex="1" GridPane.rowIndex="14" prefWidth="150"/>
+            <Region GridPane.columnIndex="1" GridPane.rowIndex="15" prefWidth="150"/>
 
-            <TableView fx:id="footstepPlanTable" GridPane.rowIndex="15" GridPane.columnSpan="2"/>
+            <TableView fx:id="footstepPlanTable" GridPane.rowIndex="16" GridPane.columnSpan="2"/>
         </children>
     </GridPane>
 

@@ -14,24 +14,27 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BlendedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryGenerator
 {
-   private final BlendedPositionTrajectoryGenerator blendedPositionTrajectory;
+   private final BlendedWaypointPositionTrajectoryGenerator blendedPositionTrajectory;
    private final BlendedOrientationTrajectoryGenerator blendedOrientationTrajectory;
 
    private final FixedFramePoseTrajectoryGenerator trajectory;
 
-   private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    public BlendedPoseTrajectoryGenerator(String prefix, FixedFramePoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
-      this.blendedPositionTrajectory = new BlendedPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
+      this.blendedPositionTrajectory = new BlendedWaypointPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
       this.blendedOrientationTrajectory = new BlendedOrientationTrajectoryGenerator(prefix + "Orientation", trajectory, trajectoryFrame, parentRegistry);
    }
 
-   public BlendedPositionTrajectoryGenerator getPositionTrajectoryGenerator()
+   public BlendedOrientationTrajectoryGenerator getOrientationTrajectoryGenerator()
+   {
+      return blendedOrientationTrajectory;
+   }
+
+   public BlendedWaypointPositionTrajectoryGenerator getPositionTrajectoryGenerator()
    {
       return blendedPositionTrajectory;
    }

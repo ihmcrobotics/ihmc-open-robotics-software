@@ -2,9 +2,12 @@ package us.ihmc.gdx.simulation.scs2;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.instructions.*;
@@ -17,6 +20,7 @@ import us.ihmc.robotics.robotDescription.*;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.*;
 import us.ihmc.scs2.definition.robot.*;
+import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -302,5 +306,23 @@ public class SCS2Tools
             rigidBodyDefinition.addCollisionShapeDefinition(collisionShapeDefinition);
          }
       }
+   }
+
+   public static RobotDefinition singleBodyRobot(RigidBodyDefinition rigidBodyDefinition)
+   {
+      RobotDefinition robotDefinition = new RobotDefinition(rigidBodyDefinition.getName() + "Robot");
+      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition("rootBody");
+      robotDefinition.setRootBodyDefinition(rootBodyDefinition);
+      SixDoFJointDefinition sixDoFJointDefinition = new SixDoFJointDefinition("rootJoint");
+      rootBodyDefinition.addChildJoint(sixDoFJointDefinition);
+      sixDoFJointDefinition.setSuccessor(rigidBodyDefinition);
+      return robotDefinition;
+   }
+
+   public static void setInitialPoseOfRobot(RobotDefinition robotDefinition, Orientation3DReadOnly orientation, Tuple3DReadOnly position)
+   {
+      SixDoFJointState initialRootJointState = new SixDoFJointState(orientation, position);
+      initialRootJointState.setVelocity(new Vector3D(), new Vector3D());
+      robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(initialRootJointState);
    }
 }

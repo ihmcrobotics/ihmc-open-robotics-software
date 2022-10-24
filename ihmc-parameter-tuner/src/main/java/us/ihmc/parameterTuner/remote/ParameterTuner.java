@@ -3,7 +3,8 @@ package us.ihmc.parameterTuner.remote;
 import java.io.IOException;
 
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
+import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
@@ -44,6 +45,7 @@ public class ParameterTuner extends ParameterTuningApplication
 
    public static void main(String[] args)
    {
+      JavaFXApplicationCreator.createAJavaFXApplication();
       String enableAutoDiscoveryParameter = System.getProperty("enableAutoDiscovery", "true");
       DataServerSelectorGUI selector = new DataServerSelectorGUI(Boolean.parseBoolean(enableAutoDiscoveryParameter));
 
@@ -58,7 +60,7 @@ public class ParameterTuner extends ParameterTuningApplication
       {
          try
          {
-            ApplicationRunner.runApplication(new ParameterTuner(connection));
+            JavaFXMissingTools.runApplication(new ParameterTuner(connection));
          }
          catch (IOException e)
          {

@@ -8,7 +8,6 @@ import us.ihmc.avatar.AvatarPauseWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
 {
@@ -33,7 +32,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("allocation-slow")
    @Test
    @Override
-   public void testPauseWalking() throws SimulationExceededMaximumTimeException
+   public void testPauseWalking()
    {
       super.testPauseWalking();
    }
@@ -41,7 +40,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("allocation-slow")
    @Test
    @Override
-   public void testTwoIndependentSteps() throws SimulationExceededMaximumTimeException
+   public void testTwoIndependentSteps()
    {
       super.testTwoIndependentSteps();
    }
@@ -49,7 +48,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("allocation-slow")
    @Test
    @Override
-   public void testStartSecondStepWhileTransitioningToStand() throws SimulationExceededMaximumTimeException
+   public void testStartSecondStepWhileTransitioningToStand()
    {
       super.testStartSecondStepWhileTransitioningToStand();
    }
@@ -57,7 +56,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
-   public void testPauseWalkingForward() throws SimulationExceededMaximumTimeException
+   public void testPauseWalkingForward()
    {
       super.testPauseWalkingForward();
    }
@@ -65,7 +64,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
-   public void testPauseWalkingInitialTransfer() throws SimulationExceededMaximumTimeException
+   public void testPauseWalkingInitialTransfer()
    {
       super.testPauseWalkingInitialTransfer();
    }
@@ -73,7 +72,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("humanoid-flat-ground-slow-2")
    @Test
    @Override
-   public void testPauseWalkingInitialTransferOneStep() throws SimulationExceededMaximumTimeException
+   public void testPauseWalkingInitialTransferOneStep()
    {
       super.testPauseWalkingInitialTransferOneStep();
    }
@@ -81,7 +80,7 @@ public class AtlasPauseWalkingTest extends AvatarPauseWalkingTest
    @Tag("allocation-slow")
    @Test
    @Override
-   public void testPauseWalkingForwardInitialTransfer() throws SimulationExceededMaximumTimeException
+   public void testPauseWalkingForwardInitialTransfer()
    {
       super.testPauseWalkingForwardInitialTransfer();
    }

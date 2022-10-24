@@ -44,8 +44,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       syncedRobot = helper.newSyncedRobot();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
       addChild(lookAndStepBehavior);
-      doorBehavior = new DoorBehavior(helper);
-      doorBehavior.setSyncedRobot(syncedRobot);
+      doorBehavior = new DoorBehavior(helper, syncedRobot);
       addChild(doorBehavior);
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
       traverseStairsBehavior.setSyncedRobot(syncedRobot);

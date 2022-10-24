@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 
 public class CollidingScanPointFilter implements ScanPointFilter
 {

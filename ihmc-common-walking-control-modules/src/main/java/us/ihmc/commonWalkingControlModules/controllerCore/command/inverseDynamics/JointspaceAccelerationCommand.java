@@ -9,6 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
@@ -57,6 +58,13 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    private final TDoubleArrayList weights = new TDoubleArrayList(initialCapacity);
 
    /**
+    * Specifies the constraint type to use. If it is an objective, this command will be entered as a cost objective
+    * into the QP. If it is equality, it will be entered as an equality constraint. If it is an inequality,
+    * it will be used to set either the upper or lower acceleration bound in the QP.
+    */
+   private ConstraintType constraintType = ConstraintType.OBJECTIVE;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -81,6 +89,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
          weights.add(other.getWeight(i));
       }
       desiredAccelerations.set(other.desiredAccelerations);
+      constraintType = other.getConstraintType();
    }
 
    /**
@@ -93,6 +102,14 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       joints.clear();
       desiredAccelerations.clear();
       weights.reset();
+   }
+
+   /**
+    * Sets the constraint type to be used in the QP for this command.
+    */
+   public void setConstraintType(ConstraintType constraintType)
+   {
+      this.constraintType = constraintType;
    }
 
    /**
@@ -277,6 +294,14 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    }
 
    /**
+    * Gets the constraint type to be used in the QP for this command.
+    */
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
+   }
+
+   /**
     * Gets the weight associated with the {@code jointIndex}<sup>th</sup> joint of this command.
     * 
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
@@ -377,6 +402,8 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
          if (commandId != other.commandId)
             return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
+            return false;
+         if (constraintType != other.getConstraintType())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
          {

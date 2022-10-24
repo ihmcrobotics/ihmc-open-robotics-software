@@ -11,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
@@ -266,6 +267,12 @@ public class RobotDefinitionLoader
 
          JointDefinition jointDefinition = robotDefinition.getJointDefinition(jointName);
 
+         if (jointDefinition == null) // In the case there are no joints of that name
+         {
+            LogTools.error("No joint named {}. Skipping...", jointName);
+            continue;
+         }
+
          jointDefinition.addGroundContactPointDefinition(groundContactPoint);
          jointDefinition.addExternalWrenchPointDefinition(externalWrenchPoint);
 
@@ -275,7 +282,7 @@ public class RobotDefinitionLoader
          {
             VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
             visualDefinitionFactory.appendTranslation(jointContactPoint.getRight());
-            visualDefinitionFactory.addSphere(0.01, new MaterialDefinition(ColorDefinitions.Orange()));
+            visualDefinitionFactory.addSphere(0.01, ColorDefinitions.Orange());
             jointDefinition.getSuccessor().getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());
          }
       }

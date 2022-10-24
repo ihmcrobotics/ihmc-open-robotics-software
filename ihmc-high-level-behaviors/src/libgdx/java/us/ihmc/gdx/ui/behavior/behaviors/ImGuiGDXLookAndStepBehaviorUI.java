@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
@@ -12,6 +11,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -23,13 +23,14 @@ import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXBoxVisualizer;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.yo.ImGuiYoDoublePlot;
+import us.ihmc.gdx.ui.yo.ImPlotYoHelperDoublePlotLine;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -59,6 +60,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
    private final AtomicReference<Boolean> impassibilityDetected;
    private final ImBoolean stopForImpassibilities = new ImBoolean(true);
+   private final ImPlotYoHelperDoublePlotLine footstepPlanningDurationPlot;
    private final ImGuiYoDoublePlot footholdVolumePlot;
 
    private boolean reviewingBodyPath = true;
@@ -67,16 +69,18 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 
    private final GDXSphereAndArrowGraphic subGoalGraphic = new GDXSphereAndArrowGraphic();
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+   private final GDXPlanarRegionsGraphic receivedRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final GDXBodyPathPlanGraphic bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
-   private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
-   private final GDXFootstepPlanGraphic commandedFootstepsGraphic = new GDXFootstepPlanGraphic();
-   private final GDXFootstepPlanGraphic startAndGoalFootstepsGraphic = new GDXFootstepPlanGraphic();
+   private final GDXFootstepPlanGraphic footstepPlanGraphic;
+   private final GDXFootstepPlanGraphic commandedFootstepsGraphic;
+   private final GDXFootstepPlanGraphic startAndGoalFootstepsGraphic;
    private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner = new ImGuiStoredPropertySetTuner("Look and Step Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (for Look and Step)");
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
-   private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBallAndArrowPosePlacement goalAffordance = new GDXBallAndArrowPosePlacement();
    private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
    private final ImBoolean invertShowGraphics = new ImBoolean(false);
+   private final ImBoolean showReceivedRegions = new ImBoolean(false);
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -85,10 +89,14 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       helper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions);
+            planarRegionsGraphic.generateMeshesAsync(regions.copy());
+      });
+      helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
+      {
+         if (regions != null)
+            receivedRegionsGraphic.generateMeshesAsync(regions.copy());
       });
       helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPoseNoCallbacks);
       helper.subscribeViaCallback(SubGoalForUI, subGoalGraphic::setToPose);
@@ -97,6 +105,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          if (bodyPath != null)
             Gdx.app.postRunnable(() -> bodyPathPlanGraphic.generateMeshes(bodyPath));
       });
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
+      commandedFootstepsGraphic = new GDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
+      startAndGoalFootstepsGraphic = new GDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       footstepPlanGraphic.setTransparency(0.2);
       latestPlannedFootsteps = helper.subscribeViaReference(PlannedFootstepsForUI, new ArrayList<>());
       latestCommandedFootsteps = helper.subscribeViaReference(LastCommandedFootsteps, new ArrayList<>());
@@ -110,6 +121,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setTransparency(0.4);
       helper.subscribeViaCallback(ImminentFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
       helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
@@ -130,12 +142,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
                                        LookAndStepBehaviorParameters.keys,
-                                       () ->
-                                       {
-                                          StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
-                                          lookAndStepParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
-                                          helper.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
-                                       });
+                                       () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
       stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
@@ -147,10 +154,10 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       swingPlannerParameterTuner.create(swingPlannerParameters, SwingPlannerParameterKeys.keys,
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
-      goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
+      goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
       subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);
 
-      baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
 
    public void setGoal(Pose3DBasics goal)
@@ -175,6 +182,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          startAndGoalFootstepsGraphic.update();
          planarRegionsGraphic.update();
          bodyPathPlanGraphic.update();
+         if (showReceivedRegions.get())
+            receivedRegionsGraphic.update();
       }
    }
 
@@ -205,6 +214,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          clearGraphics();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Invert"), invertShowGraphics);
+      ImGui.checkbox(labels.get("Received Regions"), showReceivedRegions);
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -219,23 +229,23 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       {
          helper.publish(ReviewApproval, true);
       }
-      ImGui.text("Footstep planning regions recieved:");
-      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      footstepPlanningDurationPlot.renderImGuiWidgets();
+//      ImGui.text("Footstep planning regions recieved:");
+//      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
       if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
       {
          lookAndStepParameterTuner.changeParameter(LookAndStepBehaviorParameters.stopForImpassibilities, stopForImpassibilities.get());
       }
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
-      footholdVolumePlot.render();
-
+//      footholdVolumePlot.render();
 
 //      ImGui.checkbox("Show graphics", showGraphics);
 //      ImGui.sameLine();
-      if (ImGui.button("Add support regions once"))
-      {
-         helper.publish(PublishSupportRegions);
-      }
+//      if (ImGui.button("Add support regions once"))
+//      {
+//         helper.publish(PublishSupportRegions);
+//      }
 
 //      if (ImGui.collapsingHeader("Behavior Visualization"))
 //      {
@@ -248,28 +258,26 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 //      if (ImGui.collapsingHeader("Footstep Planning", flags))
 //      {
 //      ImGui.separator();
-      ImGui.text("Footstep planning:");
-         latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
-//         ImGui.pushItemWidth(ImGui.getWindowWidth() - 3);
-         ImGui.pushItemWidth(340.0f);
-         ImGui.text("Latest log:");
-         int flags2 = ImGuiInputTextFlags.ReadOnly;
-         ImGui.inputText("", latestFootstepPlannerLogPath, flags2);
-         ImGui.popItemWidth();
-//         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
-         ImGui.text("Rejection reasons:");
-         for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
-         {
-            if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
-               ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
-                          + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
-            else
-               ImGui.text("");
-         }
-//         ImGui.separator();
-//      }
-//      ImGui.popItemWidth();
+      ImGui.text("Footstep planning:");
+      latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
+//      ImGui.pushItemWidth(ImGui.getWindowWidth() - 3);
+      ImGui.pushItemWidth(340.0f);
+      ImGui.text("Latest log:");
+      int flags2 = ImGuiInputTextFlags.ReadOnly;
+      ImGui.inputText("", latestFootstepPlannerLogPath, flags2);
+      ImGui.popItemWidth();
+//      ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
+
+      ImGui.text("Rejection reasons:");
+      for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
+      {
+         if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
+            ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
+                       + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
+         else
+            ImGui.text("");
+      }
 //      if (ImGui.collapsingHeader("Swing Planning"))
 //      {
 //         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
@@ -310,6 +318,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
          planarRegionsGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
+         if (showReceivedRegions.get())
+            receivedRegionsGraphic.getRenderables(renderables, pool);
       }
    }
 
@@ -322,6 +332,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.clear();
       planarRegionsGraphic.clear();
       bodyPathPlanGraphic.clear();
+      receivedRegionsGraphic.clear();
    }
 
    @Override
@@ -333,6 +344,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       planarRegionsGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       obstacleBoxVisualizer.dispose();
+      receivedRegionsGraphic.destroy();
    }
 
    public String getWindowName()

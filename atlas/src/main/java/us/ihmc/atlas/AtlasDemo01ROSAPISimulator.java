@@ -20,6 +20,7 @@ import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -52,7 +53,7 @@ public class AtlasDemo01ROSAPISimulator extends ROSAPISimulator
       List<Map.Entry<String, RosTopicSubscriberInterface<? extends Message>>> subscribers = new ArrayList<>();
       MessageFactory messageFactory = NodeConfiguration.newPrivate().getTopicMessageFactory();
 
-      if(robotVersion.getHandModel().isHandSimulated())
+      if(robotVersion.getHandModel(RobotSide.RIGHT).isHandSimulated())
       {
          HandDesiredConfigurationRosMessage message = messageFactory.newFromType("ihmc_msgs/HandDesiredConfigurationRosMessage");
          RosTopicSubscriberInterface<HandDesiredConfigurationRosMessage> sub = IHMCMsgToPacketSubscriber

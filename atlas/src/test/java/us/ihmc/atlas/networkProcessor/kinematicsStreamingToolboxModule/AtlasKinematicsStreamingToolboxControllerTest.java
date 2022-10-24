@@ -6,7 +6,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasKinematicsStreamingToolboxControllerTest extends KinematicsStreamingToolboxControllerTest
 {
@@ -18,7 +17,7 @@ public class AtlasKinematicsStreamingToolboxControllerTest extends KinematicsStr
 
    @Override
    @Test
-   public void testStreamingToController() throws SimulationExceededMaximumTimeException
+   public void testStreamingToController()
    {
       super.testStreamingToController();
    }

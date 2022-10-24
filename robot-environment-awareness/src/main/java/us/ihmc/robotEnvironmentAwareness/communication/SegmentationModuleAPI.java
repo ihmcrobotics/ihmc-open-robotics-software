@@ -1,10 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.euclid.geometry.Pose3D;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -49,8 +49,8 @@ public class SegmentationModuleAPI
    public static final Topic<Boolean> PlanarRegionsPolygonizerEnable = topic("PlanarRegionsPolygonizerEnable");
    public static final Topic<Boolean> PlanarRegionsPolygonizerClear = topic("PlanarRegionsPolygonizerClear");
    public static final Topic<Boolean> PlanarRegionsIntersectionEnable = topic("PlanarRegionsIntersectionEnable");
-   public static final Topic<ConcaveHullFactoryParameters> PlanarRegionsConcaveHullParameters = topic("PlanarRegionsConcaveHullParameters");
-   public static final Topic<PolygonizerParameters> PlanarRegionsPolygonizerParameters = topic("PlanarRegionsPolygonizerParameters");
+   public static final Topic<ConcaveHullFactoryParametersMessage> PlanarRegionsConcaveHullParameters = topic("PlanarRegionsConcaveHullParameters");
+   public static final Topic<PolygonizerParametersMessage> PlanarRegionsPolygonizerParameters = topic("PlanarRegionsPolygonizerParameters");
    public static final Topic<IntersectionEstimationParameters> PlanarRegionsIntersectionParameters = topic("PlanarRegionsIntersectionParameters");
 
    public static final Topic<Boolean> OcTreeBoundingBoxEnable = topic("OcTreeBoundingBoxEnable");

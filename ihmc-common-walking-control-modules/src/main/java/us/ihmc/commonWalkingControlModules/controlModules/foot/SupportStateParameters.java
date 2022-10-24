@@ -25,10 +25,6 @@ public class SupportStateParameters
    private final BooleanProvider holdFootOrientationFlat;
 
    // Toe contact point loading time
-   private final boolean rampUpAllowableToeLoadAfterContact;
-   private final YoDouble toeLoadingDuration;
-   private final YoDouble fullyLoadedMagnitude;
-
    private final YoDouble footLoadThreshold;
    private final DoubleProvider copOnEdgeEpsilon;
    private final DoubleProvider copOnEdgeEpsilonWithHysteresis;
@@ -47,12 +43,6 @@ public class SupportStateParameters
       neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, false);
       neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, false);
       holdFootOrientationFlat = new BooleanParameter(prefix + "HoldFlatOrientation", registry, false);
-
-      rampUpAllowableToeLoadAfterContact = walkingControllerParameters.rampUpAllowableToeLoadAfterContact();
-      toeLoadingDuration = new YoDouble(prefix + "ToeContactPointLoadingTime", registry);
-      fullyLoadedMagnitude = new YoDouble(prefix + "FullyLoadedMagnitude", registry);
-      toeLoadingDuration.set(walkingControllerParameters.getToeLoadingDuration());
-      fullyLoadedMagnitude.set(walkingControllerParameters.getFullyLoadedToeForce());
 
       footLoadThreshold = new YoDouble(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
@@ -83,21 +73,6 @@ public class SupportStateParameters
    public boolean holdFootOrientationFlat()
    {
       return holdFootOrientationFlat.getValue();
-   }
-
-   public boolean rampUpAllowableToeLoadAfterContact()
-   {
-      return rampUpAllowableToeLoadAfterContact;
-   }
-
-   public double getToeLoadingDuration()
-   {
-      return toeLoadingDuration.getDoubleValue();
-   }
-
-   public double getFullyLoadedMagnitude()
-   {
-      return fullyLoadedMagnitude.getDoubleValue();
    }
 
    public double getFootLoadThreshold()

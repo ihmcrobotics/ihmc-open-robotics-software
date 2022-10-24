@@ -125,7 +125,7 @@ public class RosConnectedZeroPoseRobotConfigurationDataProducer extends Abstract
          Quaternion orientation = new Quaternion();
          translation.set(pelvisPoseInMocapFrame.getTranslation());
          orientation.set(pelvisPoseInMocapFrame.getRotation());
-         robotConfigurationData.getRootTranslation().set(translation);
+         robotConfigurationData.getRootPosition().set(translation);
          robotConfigurationData.getRootOrientation().set(orientation);
       }
       fullRobotModel.updateFrames();

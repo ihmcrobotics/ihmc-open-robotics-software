@@ -20,9 +20,12 @@ public class StepGeneratorJavaFXTopics
    private static final CategoryTheme Stepping = apiFactory.createCategoryTheme("Stepping");
 
    private static final TypedTopicTheme<Double> Duration = apiFactory.createTypedTopicTheme("Duration");
+   private static final TypedTopicTheme<Boolean> Adjustable = apiFactory.createTypedTopicTheme("Adjustable");
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
 
    public static final Topic<Double> WalkingTrajectoryDuration = Root.child(WalkingController).child(Trajectory).topic(Duration);
+
+   public static final Topic<Boolean> StepsAreAdjustable = Root.child(WalkingController).child(Stepping).topic(Adjustable);
 
    public static final Topic<JoystickStepParameters> SteppingParameters = Root.child(Stepping).topic(Parameters);
 

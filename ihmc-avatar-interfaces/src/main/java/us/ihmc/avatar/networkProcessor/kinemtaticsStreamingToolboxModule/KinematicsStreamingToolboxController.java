@@ -69,10 +69,25 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
+      this(commandInputManager, statusOutputManager, KinematicsStreamingToolboxParameters.defaultParameters(), desiredFullRobotModel, fullRobotModelFactory,
+           walkingControllerPeriod, toolboxControllerPeriod, yoGraphicsListRegistry, parentRegistry);
+   }
+
+   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
+                                               StatusMessageOutputManager statusOutputManager,
+                                               KinematicsStreamingToolboxParameters parameters,
+                                               FullHumanoidRobotModel desiredFullRobotModel,
+                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                               double walkingControllerPeriod,
+                                               double toolboxControllerPeriod,
+                                               YoGraphicsListRegistry yoGraphicsListRegistry,
+                                               YoRegistry parentRegistry)
+   {
       super(statusOutputManager, parentRegistry);
 
       tools = new KSTTools(commandInputManager,
                            statusOutputManager,
+                           parameters,
                            desiredFullRobotModel,
                            fullRobotModelFactory,
                            walkingControllerPeriod,

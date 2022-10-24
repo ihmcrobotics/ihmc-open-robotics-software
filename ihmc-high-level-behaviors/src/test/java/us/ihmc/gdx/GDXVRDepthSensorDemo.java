@@ -15,7 +15,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXLowLevelDepthSensorSimulator;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -34,6 +34,7 @@ public class GDXVRDepthSensorDemo
    private final Matrix4 tempTransform = new Matrix4();
    private final ImBoolean enablePointCloudRender = new ImBoolean(true);
    private final ImBoolean useSensorColor = new ImBoolean(false);
+   private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
    private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
@@ -44,7 +45,15 @@ public class GDXVRDepthSensorDemo
 
    public GDXVRDepthSensorDemo()
    {
-      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor", 90.0, imageWidth, imageHeight, 0.05, 10.0);
+      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor",
+                                                                                                 90.0,
+                                                                                                 imageWidth,
+                                                                                                 imageHeight,
+                                                                                                 0.05,
+                                                                                                 10.0,
+                                                                                                 0.03,
+                                                                                                 0.07,
+                                                                                                 false);
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();
 
@@ -55,11 +64,11 @@ public class GDXVRDepthSensorDemo
          {
             baseUI.create();
 
-            baseUI.get3DSceneManager().addCoordinateFrame(1.0);
+            baseUI.getPrimaryScene().addCoordinateFrame(1.0);
             DepthSensorDemoObjectsModel depthSensorDemoObjectsModel = new DepthSensorDemoObjectsModel();
             cylinder = depthSensorDemoObjectsModel.buildCylinder();
-            baseUI.get3DSceneManager().addModelInstance(cylinder);
-            baseUI.get3DSceneManager().addModelInstance(depthSensorDemoObjectsModel.newInstance());
+            baseUI.getPrimaryScene().addModelInstance(cylinder);
+            baseUI.getPrimaryScene().addModelInstance(depthSensorDemoObjectsModel.newInstance());
 
             RigidBodyTransform initialCameraTransform = new RigidBodyTransform();
             initialCameraTransform.appendOrientation(new AxisAngle(Axis3D.Z, Math.PI / 2.0));
@@ -74,9 +83,9 @@ public class GDXVRDepthSensorDemo
 
             for (RobotSide side : RobotSide.values)
             {
-               ModelInstance coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
+               ModelInstance coordinateFrameInstance = GDXModelBuilder.createCoordinateFrameInstance(0.1);
                controllerCoordinateFrames.put(side, coordinateFrameInstance);
-               baseUI.get3DSceneManager().addModelInstance(coordinateFrameInstance, GDXSceneLevel.VIRTUAL);
+               baseUI.getPrimaryScene().addModelInstance(coordinateFrameInstance, GDXSceneLevel.VIRTUAL);
             }
 
             baseUI.getVRManager().getContext().addVRInputProcessor(this::handleVREvents);
@@ -85,10 +94,11 @@ public class GDXVRDepthSensorDemo
             baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getColorPanel());
             baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getDepthPanel());
 
-            gizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            gizmo.create(baseUI.getPrimary3DPanel());
             gizmo.getTransformToParent().set(initialCameraTransform);
-            baseUI.addImGui3DViewInputProcessor(gizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(gizmo::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(gizmo::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }
 
          private void handleVREvents(GDXVRContext vrContext)
@@ -138,7 +148,7 @@ public class GDXVRDepthSensorDemo
             {
                pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
                Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-               depthSensorSimulator.render(baseUI.get3DSceneManager(), pointColor, pointSize.get());
+               depthSensorSimulator.render(baseUI.getPrimaryScene(), colorBasedOnWorldZ.get(), pointColor, pointSize.get());
                pointCloudRenderer.updateMeshFastest(depthSensorSimulator.getNumberOfPoints());
             }
 
@@ -151,6 +161,7 @@ public class GDXVRDepthSensorDemo
             ImGui.checkbox("Enable point cloud", enablePointCloudRender);
             ImGui.checkbox("Use Gizmo to pose sensor", useGizmoToPoseSensor);
             ImGui.checkbox("Use Sensor Color", useSensorColor);
+            ImGui.checkbox("Color based on world Z", colorBasedOnWorldZ);
             ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
             ImGui.colorPicker4("Color", color);
          }

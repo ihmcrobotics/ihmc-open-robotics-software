@@ -11,10 +11,11 @@
                 <Label text="General" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
                 <CheckBox fx:id="showRobotToggleButton" mnemonicParsing="false" selected="true" text="Show robot" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <CheckBox fx:id="showOcTreeToggleButton" mnemonicParsing="false" selected="false" text="Show octree" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                <CheckBox fx:id="showStart" mnemonicParsing="false" selected="true" text="Show start" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                <CheckBox fx:id="showGoal" mnemonicParsing="false" selected="true" text="Show goal" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                <CheckBox fx:id="showCoordinateSystem" mnemonicParsing="false" selected="true" text="Show coordinate system" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CheckBox fx:id="showHeightMap" mnemonicParsing="false" selected="false" text="Show height map" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                <CheckBox fx:id="showOcTreeToggleButton" mnemonicParsing="false" selected="false" text="Show octree" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                <CheckBox fx:id="showStart" mnemonicParsing="false" selected="true" text="Show start" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                <CheckBox fx:id="showGoal" mnemonicParsing="false" selected="true" text="Show goal" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                <CheckBox fx:id="showCoordinateSystem" mnemonicParsing="false" selected="true" text="Show coordinate system" GridPane.columnIndex="1" GridPane.rowIndex="7" />
 
                 <Label text="Body path" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
                 <CheckBox fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.columnIndex="2" GridPane.rowIndex="1" />
@@ -28,10 +29,10 @@
 
                 <Label text="Footstep Planner" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
                 <CheckBox fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                <CheckBox fx:id="showOccupancyMap" mnemonicParsing="false" selected="false" text="Show occupancy map" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                <CheckBox fx:id="showLogGraphics" mnemonicParsing="false" text="Show log graphics" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                <CheckBox fx:id="showPostProcessingInfo" mnemonicParsing="false" selected="true" text="Show post processing info" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                <CheckBox fx:id="renderAdjustedWaypoints" mnemonicParsing="false" selected="true" text="Render adjusted waypoints" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                <CheckBox fx:id="showLogGraphics" mnemonicParsing="false" text="Show footstep log graphics" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                <CheckBox fx:id="showBodyPathLogGraphics" mnemonicParsing="false" text="Show body path log graphics" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+                <CheckBox fx:id="showPostProcessingInfo" mnemonicParsing="false" selected="true" text="Show post processing info" GridPane.columnIndex="3" GridPane.rowIndex="5" />
+                <CheckBox fx:id="renderAdjustedWaypoints" mnemonicParsing="false" selected="true" text="Render adjusted waypoints" GridPane.columnIndex="3" GridPane.rowIndex="6" />
             </children>
         </GridPane>
     </children>

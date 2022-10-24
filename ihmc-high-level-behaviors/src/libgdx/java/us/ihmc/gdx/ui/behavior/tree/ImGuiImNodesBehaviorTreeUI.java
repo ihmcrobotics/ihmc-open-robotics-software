@@ -5,12 +5,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImColor;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
+import imgui.extension.imnodes.flag.ImNodesMiniMapLocation;
 import imgui.extension.imnodes.flag.ImNodesStyleVar;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImNodesTools;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
@@ -33,7 +35,7 @@ public class ImGuiImNodesBehaviorTreeUI
 
    public void create()
    {
-      ImNodes.createContext();
+      ImNodesTools.initialize();
 
       float backgroundColor;
       float gridColor;
@@ -89,6 +91,7 @@ public class ImGuiImNodesBehaviorTreeUI
          loadLayoutNodesFromFile();
       }
 
+      ImNodes.miniMap(0.1f, ImNodesMiniMapLocation.BottomRight);
       ImNodes.endNodeEditor();
       ImGui.popFont();
    }

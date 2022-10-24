@@ -12,10 +12,11 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDX3DScene;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -29,7 +30,7 @@ public class GDXVRManager
    private boolean skipHeadset = false;
    private final Object syncObject = new Object();
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
-   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
+   private GDXPose3DGizmo scenePoseGizmo;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final Notification posesReady = new Notification();
@@ -50,10 +51,11 @@ public class GDXVRManager
    private volatile int setupEyesCount = 0;
    private final Notification waitOnPosesNotification = new Notification();
    private volatile boolean waitGetPosesThreadRunning = false;
+   private final GDXVRTeleporter teleporter = new GDXVRTeleporter();
 
    public void create()
    {
-
+      teleporter.create(context);
    }
 
    /**
@@ -63,7 +65,7 @@ public class GDXVRManager
     * TODO: This thread has to be a multiple of the parent (240?)
     * TODO: If the rest of the app is too slow, can we run this one faster?
     */
-   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DSceneManager sceneManager)
+   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DScene scene)
    {
       boolean posesReady = pollEvents(baseUI);
       if (posesReady && isVRReady())
@@ -73,7 +75,7 @@ public class GDXVRManager
          waitGetToRenderDuration = waitGetToRenderStopwatch.totalElapsed();
          synchronized (syncObject)
          {
-            context.renderEyes(sceneManager.getSceneBasics());
+            context.renderEyes(scene);
          }
          skipHeadset = false;
       }
@@ -112,7 +114,8 @@ public class GDXVRManager
                baseUI.setForegroundFPS(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
-            scenePoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            scenePoseGizmo = new GDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
+            scenePoseGizmo.create(baseUI.getPrimary3DPanel());
             contextInitialized = true;
             waitGetPosesThreadRunning = true;
             ThreadTools.startAsDaemon(this::waitOnPoses, getClass().getSimpleName() + "WaitOnPosesThread");
@@ -207,6 +210,16 @@ public class GDXVRManager
       waitGetToRenderDelayPlot.render(waitGetToRenderDuration);
    }
 
+   public void renderImGuiTunerWidgets()
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         GDXVRController controller = context.getController(side);
+         ImGui.text(side.getPascalCaseName() + " controller selection point:");
+         controller.renderImGuiTunerWidgets();
+      }
+   }
+
    public void dispose()
    {
       waitGetPosesThreadRunning = false;
@@ -225,6 +238,14 @@ public class GDXVRManager
       return vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
    }
 
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      if (isVRReady() && showScenePoseGizmo.get())
+      {
+         scenePoseGizmo.calculate3DViewPick(input);
+      }
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
       if (isVRReady() && showScenePoseGizmo.get())
@@ -241,6 +262,7 @@ public class GDXVRManager
    {
       if (vrEnabled.get() && contextInitialized)
       {
+         teleporter.getRenderables(renderables, pool);
          if (!skipHeadset)
          {
             context.getHeadsetRenderable(renderables, pool);

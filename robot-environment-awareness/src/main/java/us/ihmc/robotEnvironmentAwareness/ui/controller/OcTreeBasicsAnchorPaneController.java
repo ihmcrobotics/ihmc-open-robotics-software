@@ -11,11 +11,13 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -256,7 +258,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
 
       PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
       polygonizerParameters.setConcaveHullThreshold(0.15);
-      uiMessager.broadcastMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParameters);
+      uiMessager.broadcastMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertToMessage(polygonizerParameters));
    }
 
    public void setParametersForDepth()

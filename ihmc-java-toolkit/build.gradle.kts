@@ -19,14 +19,15 @@ mainDependencies {
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("com.google.guava:guava:18.0")
    api("org.reflections:reflections:0.10.2")
+   api("org.apache.commons:commons-text:1.10.0")
 
-   api("us.ihmc:ihmc-commons:0.30.5")
+   api("us.ihmc:ihmc-commons:0.31.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:euclid-frame:0.17.0")
-   api("us.ihmc:euclid-shape:0.17.0")
-   api("us.ihmc:euclid-geometry:0.17.0")
-   api("us.ihmc:ihmc-graphics-description:0.19.4")
+   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:euclid-frame:0.19.0")
+   api("us.ihmc:euclid-shape:0.19.0")
+   api("us.ihmc:euclid-geometry:0.19.0")
+   api("us.ihmc:ihmc-graphics-description:0.19.8")
 }
 
 testDependencies {

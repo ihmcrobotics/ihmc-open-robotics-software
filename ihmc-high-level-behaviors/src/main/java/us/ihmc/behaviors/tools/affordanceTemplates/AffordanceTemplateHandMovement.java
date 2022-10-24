@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.tools.affordanceTemplates;
 
-import controller_msgs.msg.dds.FrameInformation;
+import ihmc_common_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

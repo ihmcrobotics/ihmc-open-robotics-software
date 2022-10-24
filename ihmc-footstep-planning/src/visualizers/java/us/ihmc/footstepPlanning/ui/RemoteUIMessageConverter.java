@@ -1,20 +1,25 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.*;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import toolbox_msgs.msg.dds.*;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -25,9 +30,9 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -65,6 +70,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> snapGoalSteps;
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
+   private final AtomicReference<HeightMapMessage> heightMapReference;
    private final AtomicReference<Boolean> planBodyPath;
    private final AtomicReference<Boolean> planNarrowPassage;
    private final AtomicReference<Boolean> performAStarSearch;
@@ -139,6 +145,7 @@ public class RemoteUIMessageConverter
       snapGoalSteps = messager.createInput(FootstepPlannerMessagerAPI.SnapGoalSteps);
       abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
+      heightMapReference = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
       planNarrowPassage = messager.createInput(FootstepPlannerMessagerAPI.PlanNarrowPassage, false);
       performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
@@ -176,14 +183,9 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
                                                     FootstepPlannerAPI.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, FootstepPlannerAPI.outputTopic(robotName),
-                                           s -> processBodyPathPlanMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                     FootstepPlannerAPI.outputTopic(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerOccupancyMapMessage.class,
-                                                    FootstepPlannerAPI.outputTopic(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
@@ -206,9 +208,8 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
-      ROS2Topic controllerPreviewOutputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                    .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopic, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
+      ROS2Topic<HeightMapMessage> heightMapOutput = ROS2Tools.HEIGHT_MAP_OUTPUT;
+      new ROS2Callback<>(ros2Node, heightMapOutput, m -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, m));
 
       /* publishers */
       plannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
@@ -255,14 +256,6 @@ public class RemoteUIMessageConverter
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
-      {
-         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-         toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
-         walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
-         walkingPreviewRequestPublisher.publish(request);
-      });
-
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
@@ -326,21 +319,6 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength);
    }
 
-   private void processBodyPathPlanMessage(BodyPathPlanMessage packet)
-   {
-      PlanarRegionsListMessage planarRegionsListMessage = packet.getPlanarRegionsList();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-      FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
-      List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, result);
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
-
-      if (verbose)
-         LogTools.info("Received a body path planning result from the toolbox.");
-   }
-
    private void processFootstepPlanningOutputStatus(FootstepPlanningToolboxOutputStatus packet)
    {
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
@@ -348,6 +326,7 @@ public class RemoteUIMessageConverter
       BodyPathPlanningResult bodyPathPlanningResult = BodyPathPlanningResult.fromByte(packet.getBodyPathPlanningResult());
       FootstepPlanningResult footstepPlanningResult = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
+      List<? extends Point3D> bodyPathUnsmoothed = packet.getBodyPathUnsmoothed();
       Pose3D lowLevelGoal = packet.getGoalPose();
 
       if (plannerRequestId > currentPlanRequestId.get())
@@ -355,16 +334,12 @@ public class RemoteUIMessageConverter
 
       ThreadTools.sleep(100);
 
-      boolean broadcastFootstepPlan = footstepPlanningResult.terminalResult() || !footstepDataListMessage.getFootstepDataList().isEmpty();
-      if (broadcastFootstepPlan)
-      {
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);         
-      }
-      
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, bodyPathPlanningResult);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, footstepPlanningResult);
-      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, Pair.of(bodyPath, bodyPathUnsmoothed));
+
       if (lowLevelGoal != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, lowLevelGoal.getPosition());
@@ -527,6 +502,8 @@ public class RemoteUIMessageConverter
          packet.setHorizonLength(plannerHorizonLengthReference.get());
       if (plannerPlanarRegionReference.get() != null)
          packet.getPlanarRegionsListMessage().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(plannerPlanarRegionReference.get()));
+      if (heightMapReference.get() != null)
+         packet.getHeightMapMessage().set(heightMapReference.get());
       packet.setAssumeFlatGround(assumeFlatGround.get());
       packet.setGoalDistanceProximity(goalDistanceProximity.get());
       packet.setGoalYawProximity(goalYawProximity.get());

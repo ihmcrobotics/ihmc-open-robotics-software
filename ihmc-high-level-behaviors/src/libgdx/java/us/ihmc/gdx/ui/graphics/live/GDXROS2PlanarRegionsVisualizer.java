@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import imgui.internal.ImGui;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -31,7 +31,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
 
    public GDXROS2PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<PlanarRegionsListMessage> topic)
    {
-      super(title);
+      super(title + " (ROS 2)");
       this.topic = topic;
       new IHMCROS2Callback<>(ros2Node, topic, this::acceptMessage);
 

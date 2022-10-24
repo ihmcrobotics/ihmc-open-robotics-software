@@ -5,6 +5,7 @@ import java.util.Random;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPInequalityInput;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotics.Assert;
 

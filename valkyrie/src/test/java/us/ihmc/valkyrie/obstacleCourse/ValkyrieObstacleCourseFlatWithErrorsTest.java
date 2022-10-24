@@ -8,7 +8,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatWithErrorsTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseFlatWithErrorsTest
@@ -42,7 +41,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
    @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
-   public void testSimpleFlatGroundScriptWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScriptWithOscillatingFeet()
    {
       super.testSimpleFlatGroundScriptWithOscillatingFeet();
    }
@@ -50,7 +49,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
    @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
-   public void testSimpleFlatGroundScriptWithRandomFootSlip() throws SimulationExceededMaximumTimeException
+   public void testSimpleFlatGroundScriptWithRandomFootSlip()
    {
       super.testSimpleFlatGroundScriptWithRandomFootSlip();
    }
@@ -58,7 +57,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
    @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
-   public void testSideStepsWithSlipping() throws SimulationExceededMaximumTimeException
+   public void testSideStepsWithSlipping()
    {
       super.testSideStepsWithSlipping();
    }
@@ -66,7 +65,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
    @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
-   public void testStandingWithOscillatingFeet() throws SimulationExceededMaximumTimeException
+   public void testStandingWithOscillatingFeet()
    {
       super.testStandingWithOscillatingFeet();
    }
@@ -74,7 +73,7 @@ public class ValkyrieObstacleCourseFlatWithErrorsTest extends DRCObstacleCourseF
    @Tag("humanoid-flat-ground-slow")
    @Override
    @Test
-   public void testSideStepsWithRandomSlipping() throws SimulationExceededMaximumTimeException
+   public void testSideStepsWithRandomSlipping()
    {
       super.testSideStepsWithRandomSlipping();
    }

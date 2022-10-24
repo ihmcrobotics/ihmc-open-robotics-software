@@ -38,7 +38,6 @@ public class RecoveryTransferState extends PushRecoveryState
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
 
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
 
    private final FramePoint2D capturePoint = new FramePoint2D();
@@ -103,7 +102,7 @@ public class RecoveryTransferState extends PushRecoveryState
 
 //      pelvisOrientationManager.setUpcomingFootstep(footsteps);
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      pelvisOrientationManager.initializeTransfer(transferToSide, stepTiming.getTransferTime(), stepTiming.getSwingTime());
+      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override
@@ -163,29 +162,23 @@ public class RecoveryTransferState extends PushRecoveryState
       {
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
 
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
-                                                     nextFootstep,
-                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
-                                                     desiredCoP,
                                                      balanceManager.getDesiredICP(),
-                                                     capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP(),
-                                                     balanceManager.getLinearMomentumRateControlModuleInput().getPerfectCoP());
+                                                     capturePoint2d);
 
-         if (feetManager.okForPointToeOff())
+         if (feetManager.okForPointToeOff(false))
          {
-            feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+            feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, desiredCoP);
             return true;
          }
-         else if (feetManager.okForLineToeOff())
+         else if (feetManager.okForLineToeOff(false))
          {
-            feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+            feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, desiredCoP);
             return true;
          }
       }
@@ -193,8 +186,8 @@ public class RecoveryTransferState extends PushRecoveryState
       else if (!feetManager.isUsingPointContactInToeOff(trailingLeg) && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
-         feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), desiredCoP);
+         feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, desiredCoP);
          return true;
       }
       return false;

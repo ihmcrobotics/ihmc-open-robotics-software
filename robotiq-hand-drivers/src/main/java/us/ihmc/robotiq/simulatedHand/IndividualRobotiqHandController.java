@@ -19,6 +19,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotiq.RobotiqGraspMode;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -854,8 +855,16 @@ public class IndividualRobotiqHandController implements RobotController
       {
          OneDoFJointBasics fingerJoint = allFingerJoints.get(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(fingerJoint);
-         jointDesiredOutput.setDesiredPosition(desiredAngles.get(fingerJoint).getValue());
-         jointDesiredOutput.setDesiredVelocity(0.0);
+         double desiredJointAngle = desiredAngles.get(fingerJoint).getValue();
+         if (jointDesiredOutput.getControlMode() == JointDesiredControlMode.POSITION)
+         {
+            fingerJoint.setQ(desiredJointAngle);
+         }
+         else
+         {
+            jointDesiredOutput.setDesiredPosition(desiredJointAngle);
+            jointDesiredOutput.setDesiredVelocity(0.0);
+         }
       }
    }
 

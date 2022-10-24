@@ -18,11 +18,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -42,7 +42,7 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
    private final ImBoolean publishTestLoop = new ImBoolean(false);
    private final TargetFollowingBehaviorParameters targetFollowingParameters = new TargetFollowingBehaviorParameters();
    private final ImGuiStoredPropertySetTuner targetFollowingParameterTuner = new ImGuiStoredPropertySetTuner("Target Following Parameters");
-   private final ImGuiGDXPoseGoalAffordance manualTargetAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBallAndArrowPosePlacement manualTargetAffordance = new GDXBallAndArrowPosePlacement();
    private final RosTopicPublisher<PoseStamped> manualTargetPublisher;
    private int pointNumber;
    private final FramePose3D testLoopTargetPose = new FramePose3D();
@@ -95,9 +95,9 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
       targetFollowingParameterTuner.create(targetFollowingParameters,
                                            TargetFollowingBehaviorParameters.keys,
                                            () -> helper.publish(TargetFollowingParameters, targetFollowingParameters.getAllAsStrings()));
-      targetApproachPoseGraphic = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
+      targetApproachPoseGraphic = GDXModelBuilder.createCoordinateFrameInstance(0.1);
       targetApproachPoseReference = helper.subscribeViaReference(TargetApproachPose, BehaviorTools.createNaNPose());
-      manualTargetAffordance.create(baseUI, placedTargetPose ->
+      manualTargetAffordance.create(placedTargetPose ->
       {
          syncedRobot.update();
          manualTargetPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), placedTargetPose);
@@ -107,7 +107,7 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
          RosTools.toRos(manualTargetPose, poseStampedMessage.getPose());
          manualTargetPublisher.publish(poseStampedMessage);
       }, Color.GREEN);
-      baseUI.addImGui3DViewInputProcessor(manualTargetAffordance::processImGui3DViewInput);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualTargetAffordance::processImGui3DViewInput);
 
       lookAndStepUI.create(baseUI);
    }

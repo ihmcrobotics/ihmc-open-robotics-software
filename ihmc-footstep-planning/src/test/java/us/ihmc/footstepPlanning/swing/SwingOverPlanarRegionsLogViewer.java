@@ -92,7 +92,6 @@ public class SwingOverPlanarRegionsLogViewer
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
       SwingOverPlanarRegionsTrajectoryExpander expander = planningModule.getSwingOverPlanarRegionsTrajectoryExpander();
-      registry.addChild(planningModule.getYoVariableRegistry());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
 

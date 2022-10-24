@@ -14,9 +14,9 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -27,7 +27,6 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -37,7 +36,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    private static final boolean EXPORT_TORQUE_SPEED_DATA = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
    private int numberOfSteps = 6;
    private double stepHeight = 9.25 * 0.0254;
    private double stepLength = 0.32;
@@ -57,13 +56,10 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
-
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest();
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
@@ -109,20 +105,16 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       double startZ = up ? 0.0 : numberOfSteps * stepHeight;
 
       StairsEnvironment environment = new StairsEnvironment(numberOfSteps, stepHeight, stepLength, true);
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
-      drcSimulationTestHelper.createSimulation(testInfo.getTestClass().getClass().getSimpleName() + " " + testInfo.getTestMethod().get().getName());
+      SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters);
+      simulationTestHelperFactory.setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(startX, 0, startZ));
+      simulationTestHelperFactory.setUseImpulseBasedPhysicsEngine(useExperimentalPhysicsEngine);
+      simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      simulationTestHelper.start();
 
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.setCameraFix(startX, 0.0, 0.8 + startZ);
-      scs.setCameraPosition(startX, -5.0, 0.8 + startZ);
-      scs.setCameraTrackingOffsets(0.0, 0.0, 0.0);
-      scs.setCameraDollyOffsets(up ? -2.4 : 2.4, -6.0, 0.0);
-      scs.setCameraTracking(true, true, true, true);
-      scs.setCameraDolly(true, true, true, true);
+      simulationTestHelper.setCameraFocusPosition(startX, 0.0, 0.8 + startZ);
+      simulationTestHelper.setCameraPosition(startX, -5.0, 0.8 + startZ);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
 
       FootstepDataListMessage footsteps = createStairsFootsteps(slow, up, stepHeight, stepLength, 0.25, numberOfSteps);
       if (up)
@@ -134,13 +126,13 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
          corruptor.accept(footsteps);
       publishHeightOffset(heightOffset);
 
-      scs.setInPoint();
+      simulationTestHelper.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
 
       if (EXPORT_TORQUE_SPEED_DATA)
       {
-         EndToEndTestTools.exportTorqueSpeedCurves(scs,
+         EndToEndTestTools.exportTorqueSpeedCurves(simulationTestHelper,
                                                    EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
                                                    testInfo.getTestMethod().get().getName());
       }
@@ -150,17 +142,17 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    {
       if (!Double.isFinite(heightOffset) || EuclidCoreTools.epsilonEquals(0.0, heightOffset, 1.0e-3))
          return;
-      MovingReferenceFrame rootJointFrame = drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
+      MovingReferenceFrame rootJointFrame = simulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint();
       double z = rootJointFrame.getTransformToRoot().getTranslationZ();
-      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, z + heightOffset));
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+      simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, z + heightOffset));
+      assertTrue(simulationTestHelper.simulateNow(0.5));
    }
 
    private void publishFootstepsAndSimulate(DRCRobotModel robotModel, FootstepDataListMessage footsteps) throws Exception
    {
       double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters());
-      drcSimulationTestHelper.publishToController(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1 * walkingDuration));
+      simulationTestHelper.publishToController(footsteps);
+      assertTrue(simulationTestHelper.simulateNow(1.1 * walkingDuration));
    }
 
    private static FootstepDataListMessage translate(FootstepDataListMessage message, Tuple3DReadOnly translation)

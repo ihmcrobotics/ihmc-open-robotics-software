@@ -80,7 +80,7 @@ public class CombinedRigidBodyTwistProvidersTest
             FrameVector3D expectedLinearVelocity = new FrameVector3D();
             expectedTwist.getLinearVelocityAt(bodyFixedPoint, expectedLinearVelocity);
             FrameVector3DReadOnly actualLinearVelocity = combinedRigidBodyTwistProviders.getLinearVelocityOfBodyFixedPoint(base, body, bodyFixedPoint);
-            EuclidFrameTestTools.assertFrameTuple3DEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
+            EuclidFrameTestTools.assertEquals(expectedLinearVelocity, actualLinearVelocity, EPSILON);
          }
       }
    }

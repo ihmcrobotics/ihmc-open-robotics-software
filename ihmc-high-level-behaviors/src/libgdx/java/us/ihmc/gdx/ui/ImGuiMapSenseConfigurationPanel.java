@@ -1,7 +1,7 @@
 package us.ihmc.gdx.ui;
 
 import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
-import controller_msgs.msg.dds.PolygonizerParametersStringMessage;
+import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;

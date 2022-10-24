@@ -23,7 +23,7 @@ import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.affordances.GDXBallAndArrowPosePlacement;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -40,7 +40,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
                                                                                                   ImGuiGDXTraverseStairsBehaviorUI::new);
 
    private final BehaviorHelper helper;
-   private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
+   private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final Stopwatch completedStopwatch = new Stopwatch();
@@ -55,7 +55,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
    private final ImGuiMovingPlot distanceToStairsPlot = new ImGuiMovingPlot("Distance to stairs", 1000, 250, 15);
    private long numberOfSupportRegionsReceived = 0;
    private final Timer supportRegionsReceivedTimer = new Timer();
-   private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBallAndArrowPosePlacement goalAffordance = new GDXBallAndArrowPosePlacement();
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Stairs behavior)");
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (Stairs behavior)");
    private double timeLeftInPause = 0.0;
@@ -63,6 +63,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
    public ImGuiGDXTraverseStairsBehaviorUI(BehaviorHelper helper)
    {
       this.helper = helper;
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(helper.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
@@ -83,7 +84,6 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
       });
       helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
-         goalAffordance.setLatestRegions(regions);
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });
@@ -97,8 +97,8 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
-      goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
-      baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+      goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
@@ -155,6 +155,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
       {
          currentStatePlot.render(-1, "");
       }
+
       pauseTimeLeft.setNextValue((float) timeLeftInPause);
       pauseTimeLeft.calculate(FormattingTools.getFormattedDecimal2D(timeLeftInPause));
       boolean supportRegionsReceivedRecently = supportRegionsReceivedTimer.isRunning(5.0);

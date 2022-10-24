@@ -81,9 +81,9 @@ public class BlendedPositionTrajectoryGeneratorTest
 
       public void assertEpsilonEquals(PositionTrajectoryState other, double epsilon)
       {
-         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(position, other.position, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(linearVelocity, other.linearVelocity, epsilon);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(linearAcceleration, other.linearAcceleration, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(position, other.position, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(linearVelocity, other.linearVelocity, epsilon);
+         EuclidFrameTestTools.assertGeometricallyEquals(linearAcceleration, other.linearAcceleration, epsilon);
       }
    }
 
@@ -145,8 +145,8 @@ public class BlendedPositionTrajectoryGeneratorTest
       // Check if initial pose constraint is satisfied
       PositionTrajectoryState referenceInitialState = new PositionTrajectoryState(referenceTrajectory, 0.0, worldFrame);
       PositionTrajectoryState blendedInitialState = new PositionTrajectoryState(blendedTrajectory, 0.0, worldFrame);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(blendedInitialState.getPosition(), initialState.getPosition(), EPSILON);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(blendedInitialState.getLinearVelocity(), referenceInitialState.getLinearVelocity(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedInitialState.getPosition(), initialState.getPosition(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedInitialState.getLinearVelocity(), referenceInitialState.getLinearVelocity(), EPSILON);
 
       // Check if blended trajectory is equal to reference trajectory after the initial blend interval
       for (int i = 0; i < numberOfSamples; i++)
@@ -182,8 +182,8 @@ public class BlendedPositionTrajectoryGeneratorTest
 
       // Check if initial pose and twist constraints are satisfied
       PositionTrajectoryState blendedInitialState = new PositionTrajectoryState(blendedTrajectory, 0.0, worldFrame);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(blendedInitialState.getPosition(), initialState.getPosition(), EPSILON);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(blendedInitialState.getLinearVelocity(), initialState.getLinearVelocity(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedInitialState.getPosition(), initialState.getPosition(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedInitialState.getLinearVelocity(), initialState.getLinearVelocity(), EPSILON);
 
       // Check if blended trajectory is equal to reference trajectory after the initial blend interval
       for (int i = 0; i < numberOfSamples; i++)
@@ -232,7 +232,7 @@ public class BlendedPositionTrajectoryGeneratorTest
 
 
       //assertTrue(blendedFinalState.getTwist().epsilonEquals(referenceFinalState.getTwist(), EPSILON));
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalState.getPosition(), blendedPose, EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalState.getPosition(), blendedPose, EPSILON);
 
       // Check if blended trajectory is equal to reference trajectory before the final blend interval
       for (int i = 0; i < numberOfSamples; i++)
@@ -282,8 +282,8 @@ public class BlendedPositionTrajectoryGeneratorTest
       blendedPosition.setIncludingFrame(blendedTrajectory.getPosition());
 
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(blendedFinalState.getLinearVelocity(), referenceFinalState.getLinearVelocity(), EPSILON);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalReferencePosition, blendedPosition, EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedFinalState.getLinearVelocity(), referenceFinalState.getLinearVelocity(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalReferencePosition, blendedPosition, EPSILON);
 
       // Check if blended trajectory is equal to reference trajectory for the whole thing
       for (double time = 0.0; time <= trajectoryDuration; time += dt)
@@ -314,8 +314,8 @@ public class BlendedPositionTrajectoryGeneratorTest
 
       // Check if final pose and twist constraint is satisfied
       PositionTrajectoryState blendedFinalState = new PositionTrajectoryState(blendedTrajectory, trajectoryDuration, worldFrame);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(blendedFinalState.getPosition(), finalState.getPosition(), EPSILON);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(blendedFinalState.getLinearVelocity(), finalState.getLinearVelocity(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedFinalState.getPosition(), finalState.getPosition(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedFinalState.getLinearVelocity(), finalState.getLinearVelocity(), EPSILON);
 
       // Check if blended trajectory is equal to reference trajectory before the final blend interval
       for (int i = 0; i < numberOfSamples; i++)
@@ -355,13 +355,13 @@ public class BlendedPositionTrajectoryGeneratorTest
 
       // Check if initial pose, twist, and acceleration constraints are satisfied
       PositionTrajectoryState blendedInitialState = new PositionTrajectoryState(blendedTrajectory, 0.0, worldFrame);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(blendedInitialState.getPosition(), initialState.getPosition(), EPSILON);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(blendedInitialState.getLinearVelocity(), initialState.getLinearVelocity(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedInitialState.getPosition(), initialState.getPosition(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedInitialState.getLinearVelocity(), initialState.getLinearVelocity(), EPSILON);
 
       // Check if final pose, twist, and acceleration constraint is satisfied
       PositionTrajectoryState blendedFinalState = new PositionTrajectoryState(blendedTrajectory, trajectoryDuration, worldFrame);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(blendedFinalState.getPosition(), finalState.getPosition(), EPSILON);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(blendedFinalState.getLinearVelocity(), finalState.getLinearVelocity(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedFinalState.getPosition(), finalState.getPosition(), EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(blendedFinalState.getLinearVelocity(), finalState.getLinearVelocity(), EPSILON);
 
       // Check if blended trajectory is equal to reference trajectory after the initial blend interval and before the final blend interval
       for (int i = 0; i < numberOfSamples; i++)
@@ -420,11 +420,11 @@ public class BlendedPositionTrajectoryGeneratorTest
       FramePoint3D tempPosition = new FramePoint3D();
       swingTrajectory.compute(trajectoryDuration);
       tempPosition.setIncludingFrame(swingTrajectory.getPosition());
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalPosition, tempPosition, EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalPosition, tempPosition, EPSILON);
 
       blendedTrajectory.compute(trajectoryDuration);
       tempPosition.setIncludingFrame(blendedTrajectory.getPosition());
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(finalPositionToBlend, tempPosition, EPSILON);
+      EuclidFrameTestTools.assertGeometricallyEquals(finalPositionToBlend, tempPosition, EPSILON);
    }
 
    @Test

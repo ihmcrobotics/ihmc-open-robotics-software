@@ -26,8 +26,15 @@ import java.util.List;
 public class GDXBodyPathPlanGraphic implements RenderableProvider
 {
    private static final double LINE_THICKNESS = 0.025;
-   private final float startColorHue = (float) javafx.scene.paint.Color.GREEN.getHue();
-   private final float goalColorHue = (float) javafx.scene.paint.Color.RED.getHue();
+   private final float startColorHue;
+   private final float goalColorHue;
+   {
+      float[] hsv = new float[3];
+      Color.GREEN.toHsv(hsv);
+      startColorHue = hsv[0];
+      Color.RED.toHsv(hsv);
+      goalColorHue = hsv[0];
+   }
 
    private volatile Runnable buildMeshAndCreateModelInstance = null;
 

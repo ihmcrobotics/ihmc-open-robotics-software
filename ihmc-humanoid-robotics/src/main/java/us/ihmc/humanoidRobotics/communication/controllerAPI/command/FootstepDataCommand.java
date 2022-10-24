@@ -2,10 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.List;
 
+import controller_msgs.msg.dds.StepConstraintsListMessage;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -51,6 +52,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private double executionDelayTime;
    /** the execution time. This number is set if the execution delay is non zero **/
    public double adjustedExecutionTime;
+   public boolean shouldCheckForReachability;
+
+   private final StepConstraintsListCommand stepConstraints = new StepConstraintsListCommand();
 
    public FootstepDataCommand()
    {
@@ -76,6 +80,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       touchdownDuration = Double.NaN;
       liftoffDuration = Double.NaN;
+
+      stepConstraints.clear();
+      shouldCheckForReachability = false;
    }
 
    @Override
@@ -85,6 +92,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = RobotSide.fromByte(message.getRobotSide());
       trajectoryType = TrajectoryType.fromByte(message.getTrajectoryType());
       swingHeight = message.getSwingHeight();
+      shouldCheckForReachability = message.getShouldCheckForReachability();
       swingTrajectoryBlendDuration = message.getSwingTrajectoryBlendDuration();
       position.setIncludingFrame(worldFrame, message.getLocation());
       orientation.setIncludingFrame(worldFrame, message.getOrientation());
@@ -135,6 +143,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       touchdownDuration = message.getTouchdownDuration();
       liftoffDuration = message.getLiftoffDuration();
 
+      StepConstraintsListMessage stepConstraints = message.getStepConstraints();
+      this.stepConstraints.clear();
+      if (stepConstraints != null)
+         this.stepConstraints.setFromMessage(stepConstraints);
+
       this.executionDelayTime = message.getExecutionDelayTime();
    }
 
@@ -148,6 +161,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       position.setIncludingFrame(other.position);
       orientation.setIncludingFrame(other.orientation);
+      shouldCheckForReachability = other.shouldCheckForReachability;
 
       RecyclingArrayList<MutableDouble> otherWaypointProportions = other.customWaypointProportions;
       customWaypointProportions.clear();
@@ -175,6 +189,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       touchdownDuration = other.touchdownDuration;
       liftoffDuration = other.liftoffDuration;
       this.executionDelayTime = other.executionDelayTime;
+      this.stepConstraints.clear();
+      this.stepConstraints.set(other.getStepConstraints());
    }
 
    public void set(ReferenceFrame trajectoryFrame, FootstepDataMessage message)
@@ -202,6 +218,11 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
+   }
+
+   public void setShouldCheckForReachability(boolean shouldCheckForReachability)
+   {
+      this.shouldCheckForReachability = shouldCheckForReachability;
    }
 
    public void setTrajectoryType(TrajectoryType trajectoryType)
@@ -289,6 +310,16 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public double getLiftoffDuration()
    {
       return liftoffDuration;
+   }
+
+   public StepConstraintsListCommand getStepConstraints()
+   {
+      return stepConstraints;
+   }
+
+   public boolean getShouldCheckForReacahbility()
+   {
+      return shouldCheckForReachability;
    }
 
    @Override

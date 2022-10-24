@@ -2,10 +2,10 @@ package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.AvatarFeetErrorTranslationTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow-2")
 public class AtlasFeetErrorTranslationTest extends AvatarFeetErrorTranslationTest
@@ -16,7 +16,7 @@ public class AtlasFeetErrorTranslationTest extends AvatarFeetErrorTranslationTes
 
    @Override
    @Test
-   public void testForwardWalk() throws SimulationExceededMaximumTimeException
+   public void testForwardWalk()
    {
       super.testForwardWalk();
    }

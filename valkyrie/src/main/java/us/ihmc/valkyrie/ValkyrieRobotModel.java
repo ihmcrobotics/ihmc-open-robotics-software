@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -44,20 +43,12 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
-import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
-import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
+import us.ihmc.valkyrie.parameters.*;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -115,7 +106,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.target = target;
       this.robotVersion = robotVersion;
 
-      controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
+      controllerDT = 0.004;
       estimatorDT = 0.002;
       simulateDT = estimatorDT / 3.0;
    }
@@ -275,6 +266,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.modelSizeScale = modelSizeScale;
    }
 
+   public void disableOneDoFJointDamping()
+   {
+      setRobotDefinitionMutator(getRobotDefinitionMutator().andThen(def -> def.forEachOneDoFJointDefinition(joint -> joint.setDamping(0.0))));
+   }
+
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
       if (robotDefinition != null)
@@ -366,8 +362,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return valkyrieInitialSetup;
    }
 
-   @Override
    public ValkyrieHandModel getHandModel()
+   {
+      return getHandModel(null);
+   }
+
+   public ValkyrieHandModel getHandModel(RobotSide side)
    {
       return new ValkyrieHandModel();
    }
@@ -521,6 +521,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   {
+      return new ValkyrieFootstepPlannerParameters(fileNameSuffix);
+   }
+
+   @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
@@ -530,6 +536,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
+   {
+      return new ValkyrieSwingPlannerParameters(fileNameSuffix);
    }
 
    @Override

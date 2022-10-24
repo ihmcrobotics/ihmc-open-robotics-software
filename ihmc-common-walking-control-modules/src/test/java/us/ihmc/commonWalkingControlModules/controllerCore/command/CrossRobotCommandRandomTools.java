@@ -35,25 +35,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
@@ -79,6 +66,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVeloci
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -711,6 +699,7 @@ public class CrossRobotCommandRandomTools
    {
       JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
       next.setCommandId(random.nextInt());
+      next.setConstraintType(ConstraintType.values()[RandomNumbers.nextInt(random, 0, ConstraintType.values().length - 1)]);
 
       List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
       int numberOfJoints = random.nextInt(allJoints.size());
@@ -734,6 +723,34 @@ public class CrossRobotCommandRandomTools
       next.setMomentumRate(RandomMatrices_DDRM.rectangle(6, 1, random));
       next.setWeights(nextWeightMatrix6D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+      next.setConsiderAllJoints(random.nextBoolean());
+
+      List<JointBasics> allJoints = SubtreeStreams.fromChildren(rootBody).collect(Collectors.toList());
+      int numberOfJoints = allJoints.isEmpty() ? 0 : Math.max(random.nextInt(allJoints.size()), 1);
+
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         next.addJointToSelection(allJoints.remove(random.nextInt(allJoints.size())));
+      }
+
+      return next;
+   }
+
+   public static QPObjectiveCommand nextQPObjectiveCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      QPObjectiveCommand next = new QPObjectiveCommand();
+
+      int numberOfRows = RandomNumbers.nextInt(random, 1, 10);
+      int numberOfDoFs = RandomNumbers.nextInt(random, 1, 50);
+      int selectionSize = RandomNumbers.nextInt(random, 1, numberOfRows);
+      next.setCommandId(random.nextInt());
+      next.reshape(numberOfRows, numberOfDoFs);
+      next.getJacobian().set(RandomMatrices_DDRM.rectangle(numberOfRows, numberOfDoFs, random));
+      next.getObjective().set(RandomMatrices_DDRM.rectangle(numberOfRows, 1, random));
+      next.getWeightMatrix().set(RandomMatrices_DDRM.rectangle(numberOfRows, numberOfRows, random));
+      next.getSelectionMatrix().set(RandomMatrices_DDRM.rectangle(selectionSize, numberOfDoFs, random));
+      next.setDoNullSpaceProjection(random.nextBoolean());
+
       return next;
    }
 
@@ -798,7 +815,9 @@ public class CrossRobotCommandRandomTools
       next.setCommandId(random.nextInt());
       next.setJointVelocityWeight(random.nextDouble());
       next.setJointAccelerationWeight(random.nextDouble());
-      next.setJointVelocityLimitMode(nextElementIn(random, JointVelocityLimitMode.values()));
+      next.setJointTorqueWeight(random.nextDouble());
+      next.setJointVelocityLimitMode(nextElementIn(random, ActivationState.values()));
+      next.setComputeJointTorques(nextElementIn(random, ActivationState.values()));
       return next;
    }
 
@@ -1618,6 +1637,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1654,6 +1674,7 @@ public class CrossRobotCommandRandomTools
       next.setSchedulerTick(random.nextLong());
       next.setControllerRan(random.nextBoolean());
       next.setEstimatorRan(random.nextBoolean());
+      next.setPerceptionRan(random.nextBoolean());
       return next;
    }
 
@@ -1833,7 +1854,6 @@ public class CrossRobotCommandRandomTools
    {
       LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
       next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
-      next.setResidualICPErrorForStepAdjustment(nextFrameVector2D(random, possibleFrames));
       return next;
    }
 
@@ -1848,10 +1868,12 @@ public class CrossRobotCommandRandomTools
       next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setUsePelvisHeightCommand(random.nextBoolean());
+      next.setHasHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
+      next.setDesiredCapturePointAtEndOfState(nextFramePoint2D(random, possibleFrames));
       next.setInitializeOnStateChange(random.nextBoolean());
       next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
@@ -70,7 +70,7 @@ public class CenterOfPressureResolver
       return normalTorqueAtCenterOfPressure;
    }
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint3DBasics centerOfPressureToPack,
+   public double resolveCenterOfPressureAndNormalTorque(FixedFramePoint3DBasics centerOfPressureToPack,
                                                         SpatialForceReadOnly spatialForceVector,
                                                         ReferenceFrame centerOfPressurePlaneFrame)
    {
@@ -100,7 +100,9 @@ public class CenterOfPressureResolver
          normalTorqueAtCenterOfPressure = torqueAtZeroInPlaneFrame.getZ();
       }
 
-      centerOfPressureToPack.setIncludingFrame(centerOfPressurePlaneFrame, vector12x, vector12y, 0.0);
+      // TODO Implement FixedFramePoint3DBasics.setMatchingFrame(ReferenceFrame, double, double, double)
+      centerOfPressureToPack.set(vector12x, vector12y, 0.0);
+      centerOfPressurePlaneFrame.transformFromThisToDesiredFrame(centerOfPressureToPack.getReferenceFrame(), centerOfPressureToPack);
       return normalTorqueAtCenterOfPressure;
    }
 }

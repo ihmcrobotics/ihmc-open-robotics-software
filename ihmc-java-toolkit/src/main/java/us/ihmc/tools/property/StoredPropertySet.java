@@ -1,42 +1,99 @@
 package us.ihmc.tools.property;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
  * Provides a load/saveable property set accessed by strongly typed static keys.
- *
- * The property INI file is saved to the classpath by file and loaded from the classpath by resource.
- *
+ * <p>
+ * The property JSON file is saved to the classpath by file and loaded from the classpath by resource.
+ * <p>
  * Some of the benefits of this framework:
- * - Keys are created with title cased names available for GUI fields
- * - No YoVariableServer required
- * - INI file can be placed in higher level projects to override the defaults
+ * <li>Keys are created with title cased names available for GUI fields</li>
+ * <li>Lightweight and can be used as part of other frameworks</li>
+ * <li>JSON file can be placed in higher level projects to override the defaults</li>
+ * <p>
+ * To create a StoredPropertySet, create a main, us.ihmc.YourStoredPropertySet.java
+ *
+ * <pre>
+ * public static void main(String[] args)
+ * {
+ *    StoredPropertySet parameters = new StoredPropertySet(keys,
+ *                                                         YourStoredPropertySet.class,
+ *                                                         DIRECTORY_NAME_TO_ASSUME_PRESENT,
+ *                                                         SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
+ *    parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);
+ * }
+ * </pre>
+ *
+ * where the paths are replaced to match your situation. The subsequest paths may be shorter or longer depending on how nested the
+ * projects are. Typically, the "directory name to assume present" is the name of the repository. These paths are necessary
+ * to allow saving the parameters in version control.
+ * <p>
+ * Then, create a us.ihmc.YourStoredPropertySetName.json in the resources folder.
+ * The name should be the exact same as the *.java class.
+ * <p>
+ * Properties should only be declared in the JSON if using the generator.
+ *
+ * <pre>
+ * {
+ *   "title": "Stored property set name",
+ *   "The first boolean property": false,
+ *   "The first double property": 0.5,
+ *   "The first integer property": 3
+ * }
+ * </pre>
+ *
+ * Run the main, which will generate Basics and ReadOnly interfaces and rewrite the main class to extend and implement the correct classes.
+ * <p>
+ * In order to add descriptions to parameters, you may add it by making the value a JSON array
+ * with the 2nd value being the description. You may mix parameters that have descriptions with ones
+ * that don't. Descriptions have to be a single long line in JSON, so it is recommended to enable word wrap
+ * for JSON files in your editor.
+ *
+ *  <pre>
+ *  {
+ *    "title": "Stored property set name",
+ *    "The first boolean property": [false, "This is an example test property."],
+ *    "The first double property": 0.5,
+ *    "The first integer property": [3, "The property before this one doesn't have a description."]
+ *  }
+ *  </pre>
+ *
  */
 public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
    private final Object[] values;
-   private final Class<?> classForLoading;
-   private final String uncapitalizedClassName;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
-   private String saveFileName;
+   private String title;
+   private String legacyFileNameINI;
+   private String saveFileNameJSON;
    private String currentVersionSuffix;
+   private Class<?> classForLoading;
+   private String directoryNameToAssumePresent;
+   private String subsequentPathToResourceFolder;
+   private final WorkspaceDirectory workspaceDirectory;
+   private final String uncapitalizedClassName;
+   private final String capitalizedClassName;
+   private WorkspaceFile workspaceLegacyINIFile;
+   private WorkspaceFile workspaceJSONFile;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
 
@@ -55,13 +112,15 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             String versionSuffix)
    {
       this.keys = keys;
-      this.classForLoading = classForLoading;
       this.uncapitalizedClassName = StringUtils.uncapitalize(classForLoading.getSimpleName());
+      this.capitalizedClassName = classForLoading.getSimpleName();
+      this.classForLoading = classForLoading;
+      title = classForLoading.getSimpleName();
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+      workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading);
 
       updateBackingSaveFile(versionSuffix);
-
       values = new Object[keys.keys().size()];
 
       for (StoredPropertyKey<?> key : keys.keys())
@@ -70,6 +129,30 @@ public class StoredPropertySet implements StoredPropertySetBasics
          {
             setInternal(key, key.getDefaultValue());
          }
+      }
+   }
+
+   public void generateJavaFiles(String subsequentPathToJavaFolder)
+   {
+      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(classForLoading,
+                                                                                    directoryNameToAssumePresent,
+                                                                                    subsequentPathToResourceFolder,
+                                                                                    subsequentPathToJavaFolder);
+      if (jsonResourceExists())
+      {
+         generator.loadFromJSON();
+      }
+      else // Handle it as it was loaded from INI
+      {
+         generator.loadFromStoredPropertySet(this);
+      }
+      generator.generate();
+
+      // Automatically upgrade the stored file to JSON
+      if (!jsonResourceExists())
+      {
+         load();
+         save();
       }
    }
 
@@ -91,6 +174,9 @@ public class StoredPropertySet implements StoredPropertySetBasics
       return (Boolean) values[key.getIndex()];
    }
 
+   /**
+    * @return the value or null
+    */
    @Override
    public <T> T get(StoredPropertyKey<T> key)
    {
@@ -224,7 +310,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
    public void updateBackingSaveFile(String versionSuffix)
    {
       currentVersionSuffix = versionSuffix;
-      saveFileName = uncapitalizedClassName + currentVersionSuffix + ".ini";
+      legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
+      workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
+      saveFileNameJSON = classForLoading.getSimpleName() + currentVersionSuffix + ".json";
+      workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
    }
 
    @Override
@@ -242,11 +331,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load(String fileName, boolean crashIfMissingKeys)
    {
-      if (!fileName.startsWith(StringUtils.uncapitalize(classForLoading.getSimpleName())))
+      if (!fileName.startsWith(StringUtils.uncapitalize(workspaceDirectory.getClassForLoading().getSimpleName())))
          throw new RuntimeException("This filename " + fileName +
                                     " breaks the contract of the StoredPropertySet API. The filename should be the class name + suffix.");
       fileName = fileName.replace(".ini", "");
-      updateBackingSaveFile(fileName.substring(StringUtils.uncapitalize(classForLoading.getSimpleName()).length()));
+      updateBackingSaveFile(fileName.substring(StringUtils.uncapitalize(workspaceDirectory.getClassForLoading().getSimpleName()).length()));
       load(crashIfMissingKeys);
    }
 
@@ -257,18 +346,62 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    private void load(boolean crashIfMissingKeys)
    {
-      ExceptionTools.handle(() ->
+      if (jsonResourceExists())
       {
-         Properties properties = new Properties();
-         InputStream streamForLoading = accessStreamForLoading();
+         JSONFileTools.loadFromClasspath(classForLoading, workspaceJSONFile.getPathForResourceLoadingPathFiltered(), node ->
+         {
+            if (node instanceof ObjectNode objectNode)
+            {
+               if (objectNode.get("title") instanceof TextNode textNode)
+               {
+                  title = textNode.asText();
+               }
 
-         if (streamForLoading == null)
+               for (StoredPropertyKey<?> key : keys.keys())
+               {
+                  JsonNode propertyNode = objectNode.get(key.getTitleCasedName());
+                  if (propertyNode == null)
+                  {
+                     if (!crashIfMissingKeys && key.hasDefaultValue())
+                     {
+                        setInternal(key, key.getDefaultValue());
+                        continue;
+                     }
+
+                     throw new RuntimeException(workspaceJSONFile.getClasspathResource() + " does not contain key: " + key.getTitleCasedName());
+                  }
+
+                  String stringValue;
+                  if (propertyNode instanceof ArrayNode arrayNode)
+                  {
+                     stringValue = arrayNode.get(0).asText();
+                     key.setDescription(arrayNode.get(1).asText());
+                  }
+                  else
+                  {
+                     stringValue = propertyNode.asText();
+                  }
+
+                  if (stringValue.equals("null"))
+                  {
+                     LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
+                  }
+                  else
+                  {
+                     setInternal(key, deserializeString(key, stringValue));
+                  }
+               }
+            }
+         });
+      }
+      else if (iniResourceExists()) // fallback to the old INI format
+      {
+         ExceptionTools.handle(() ->
          {
-            LogTools.warn("Parameter file {} could not be found. Values will be null.", saveFileName);
-         }
-         else
-         {
-            LogTools.info("Loading parameters from {}", saveFileName);
+            Properties properties = new Properties();
+            InputStream streamForLoading = workspaceLegacyINIFile.getClasspathResourceAsStream();
+
+            LogTools.info("Loading parameters from {}", legacyFileNameINI);
             properties.load(streamForLoading);
 
             for (StoredPropertyKey<?> key : keys.keys())
@@ -281,49 +414,96 @@ public class StoredPropertySet implements StoredPropertySetBasics
                      continue;
                   }
 
-                  throw new RuntimeException(accessUrlForLoading() + " does not contain key: " + key.getCamelCasedName());
+                  throw new RuntimeException(workspaceLegacyINIFile.getClasspathResource() + " does not contain key: " + key.getCamelCasedName());
                }
 
                String stringValue = (String) properties.get(key.getCamelCasedName());
 
                if (stringValue.equals("null"))
                {
-                  LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileName);
+                  LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), legacyFileNameINI);
                }
                else
                {
                   setInternal(key, deserializeString(key, stringValue));
                }
             }
-         }
-      }, DefaultExceptionHandler.PRINT_STACKTRACE);
+         }, DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
+      else
+      {
+         LogTools.warn("Parameter file {} could not be found. Values will be null.", workspaceJSONFile.getPathForResourceLoadingPathFiltered());
+      }
+   }
+
+   private boolean iniResourceExists()
+   {
+      return workspaceLegacyINIFile.getClasspathResource() != null;
+   }
+
+   private boolean jsonResourceExists()
+   {
+      return workspaceJSONFile.getClasspathResource() != null;
    }
 
    public void save()
    {
-      ExceptionTools.handle(() ->
+      Path fileForSaving = findFileForSaving();
+      LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
+      if (workspaceDirectory.isFileAccessAvailable())
       {
-         Properties properties = new Properties()
-         {
-            @Override
-            public synchronized Enumeration<Object> keys() {
-               TreeSet<Object> tree = new TreeSet<>(Comparator.comparingInt(o -> indexOfCamelCaseName(o))); // sort by index
-               tree.addAll(super.keySet());
-               return Collections.enumeration(tree);
-            }
-         };
-
+         FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      }
+      JSONFileTools.save(fileForSaving, jsonRootObjectNode ->
+      {
+         jsonRootObjectNode.put("title", title);
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            properties.setProperty(key.getCamelCasedName(), serializeValue(values[key.getIndex()]));
+            if (!key.getDescription().isEmpty())
+            {
+               ArrayNode arrayNode = jsonRootObjectNode.putArray(key.getTitleCasedName());
+               boolean valueIsNull = get(key) == null;
+               boolean defaultValueIsNull = key.getDefaultValue() == null;
+               if (key instanceof BooleanStoredPropertyKey booleanKey)
+               {
+                  arrayNode.add(valueIsNull ? (defaultValueIsNull ? false : (boolean) key.getDefaultValue()) : get(booleanKey));
+               }
+               else if (key instanceof DoubleStoredPropertyKey doubleKey)
+               {
+                  arrayNode.add(valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
+               }
+               else if (key instanceof IntegerStoredPropertyKey integerKey)
+               {
+                  arrayNode.add(valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+               }
+               arrayNode.add(key.getDescription());
+            }
+            else
+            {
+               boolean valueIsNull = get(key) == null;
+               boolean defaultValueIsNull = key.getDefaultValue() == null;
+               if (key instanceof BooleanStoredPropertyKey booleanKey)
+               {
+                  jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? false : (boolean) key.getDefaultValue()) : get(booleanKey));
+               }
+               else if (key instanceof DoubleStoredPropertyKey doubleKey)
+               {
+                  jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
+               }
+               else if (key instanceof IntegerStoredPropertyKey integerKey)
+               {
+                  jsonRootObjectNode.put(key.getTitleCasedName(), valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+               }
+            }
          }
+      });
+      convertLineEndingsToUnix(fileForSaving);
 
-         Path fileForSaving = findFileForSaving();
-         LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
-         properties.store(new PrintWriter(fileForSaving.toFile()), LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE));
-
-         convertLineEndingsToUnix(fileForSaving);
-      }, DefaultExceptionHandler.PRINT_STACKTRACE);
+      // Automatically upgrade the stored file to JSON
+      if (iniResourceExists() && workspaceLegacyINIFile.isFileAccessAvailable())
+      {
+         FileTools.deleteQuietly(workspaceLegacyINIFile.getFilePath());
+      }
    }
 
    private String serializeValue(Object object)
@@ -364,6 +544,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       {
          if (key.getCamelCasedName().equals(camelCaseName))
          {
+            LogTools.info("Index of camel case name {}: {}", camelCaseName, key.getIndex());
             return key.getIndex();
          }
       }
@@ -386,71 +567,26 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
-   private InputStream accessStreamForLoading()
+   private Path findFileForSaving()
    {
-      return classForLoading.getResourceAsStream(saveFileName);
+      return findSaveFileDirectory().resolve(saveFileNameJSON);
    }
 
-   private URL accessUrlForLoading()
-   {
-      return classForLoading.getResource(saveFileName);
-   }
-
-   public Path findFileForSaving()
-   {
-      return findSaveFileDirectory().resolve(saveFileName);
-   }
-
+   /**
+    * Find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
+    * or just save the file in the working directory.
+    */
    @Override
    public Path findSaveFileDirectory()
    {
-      // find, for example, ihmc-open-robotics-software/ihmc-footstep-planning/src/main/java/us/ihmc/footstepPlanning/graphSearch/parameters
-      // of just save the file in the working directory
-
-      // TODO: This should probably use PathTools#findDirectoryInline
-
-      Path absoluteWorkingDirectory = Paths.get(".").toAbsolutePath().normalize();
-
-      Path reworkedPath = Paths.get("/").toAbsolutePath().normalize(); // start with system root
-      boolean directoryFound = false;
-      for (Path path : absoluteWorkingDirectory)
+      if (workspaceDirectory.isFileAccessAvailable())
       {
-         reworkedPath = reworkedPath.resolve(path); // building up the path
-
-         if (path.toString().equals(directoryNameToAssumePresent))
-         {
-            directoryFound = true;
-            break;
-         }
+         return workspaceDirectory.getDirectoryPath();
       }
-
-      if (!directoryFound && Files.exists(reworkedPath.resolve(directoryNameToAssumePresent))) // working directory is workspace
+      else
       {
-         reworkedPath = reworkedPath.resolve(directoryNameToAssumePresent);
-         directoryFound = true;
+         return Paths.get("");
       }
-
-      if (!directoryFound)
-      {
-         LogTools.warn("Directory {} could not be found to save parameters. Using working directory {}. Reworked path: {}",
-                       directoryNameToAssumePresent,
-                       absoluteWorkingDirectory,
-                       reworkedPath);
-         return absoluteWorkingDirectory;
-      }
-
-      String packageName = classForLoading.getPackage().toString();
-      LogTools.debug(packageName);
-      String packagePath = packageName.split(" ")[1].replaceAll("\\.", "/");
-      LogTools.debug(packagePath);
-
-      Path subPath = Paths.get(subsequentPathToResourceFolder, packagePath);
-
-      Path finalPath = reworkedPath.resolve(subPath);
-
-      FileTools.ensureDirectoryExists(finalPath, DefaultExceptionHandler.PRINT_STACKTRACE);
-
-      return finalPath;
    }
 
    @Override
@@ -479,23 +615,13 @@ public class StoredPropertySet implements StoredPropertySetBasics
       return currentVersionSuffix;
    }
 
-   public String getUncapitalizedClassName()
+   public String getCapitalizedClassName()
    {
-      return uncapitalizedClassName;
+      return capitalizedClassName;
    }
 
-   public Class<?> getClassForLoading()
+   public String getTitle()
    {
-      return classForLoading;
-   }
-
-   public String getDirectoryNameToAssumePresent()
-   {
-      return directoryNameToAssumePresent;
-   }
-
-   public String getSubsequentPathToResourceFolder()
-   {
-      return subsequentPathToResourceFolder;
+      return title;
    }
 }

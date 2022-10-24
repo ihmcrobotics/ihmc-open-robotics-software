@@ -124,10 +124,10 @@ public class VirtualModelMomentumControllerTestHelper
             currentForce.set(armController.getCurrentForce(i));
             currentTorque.set(armController.getCurrentTorque(i));
 
-            EuclidCoreTestTools.assertTuple3DEquals("", currentPosition, desiredPositions.get(i), 0.01);
-            EuclidCoreTestTools.assertQuaternionEquals(currentOrientation, desiredOrientations.get(i), 0.01);
-            EuclidCoreTestTools.assertTuple3DEquals("", desiredForces.get(i), currentForce, 0.5);
-            EuclidCoreTestTools.assertTuple3DEquals("", desiredTorques.get(i), currentTorque, 0.5);
+            EuclidCoreTestTools.assertEquals("", currentPosition, desiredPositions.get(i), 0.01);
+            EuclidCoreTestTools.assertEquals(currentOrientation, desiredOrientations.get(i), 0.01);
+            EuclidCoreTestTools.assertEquals("", desiredForces.get(i), currentForce, 0.5);
+            EuclidCoreTestTools.assertEquals("", desiredTorques.get(i), currentTorque, 0.5);
          }
       }
 

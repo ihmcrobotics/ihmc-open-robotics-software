@@ -18,22 +18,24 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.vr.GDXVRController;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 import java.util.ArrayList;
@@ -50,6 +52,12 @@ public class GDXJoystickBasedStepping
    private final SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints;
    private Controller currentController;
    private boolean currentControllerConnected;
+   private GDXVRController leftVRController;
+   private GDXVRController rightVRController;
+   private boolean walkingModeActive = false;
+   private double forwardJoystickValue = 0.0;
+   private double lateralJoystickValue = 0.0;
+   private double turningJoystickValue = 0.0;
 
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory("FootstepPublisher"));
    private final ContinuousStepGenerator continuousStepGenerator = new ContinuousStepGenerator();
@@ -67,7 +75,7 @@ public class GDXJoystickBasedStepping
    private final ImDouble turnStepWidth = new ImDouble();
    private final ImDouble turnMaxAngleInward = new ImDouble();
    private final ImDouble turnMaxAngleOutward = new ImDouble();
-   private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
+   private IHMCROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
    private ROS2ControllerHelper controllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
 
@@ -79,6 +87,7 @@ public class GDXJoystickBasedStepping
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
    private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(false);
    private boolean supportFootPosesInitialized = false;
+   private boolean userNotClickingAnImGuiPanel;
 
    public GDXJoystickBasedStepping(DRCRobotModel robotModel)
    {
@@ -88,10 +97,12 @@ public class GDXJoystickBasedStepping
       swingHeight.set(steppingParameters.getMinSwingHeightFromStanceFoot());
       swingDuration.set(walkingControllerParameters.getDefaultSwingTime());
       transferDuration.set(walkingControllerParameters.getDefaultTransferTime());
-      maxStepLength.set(steppingParameters.getMaxStepLength());
+//      maxStepLength.set(steppingParameters.getMaxStepLength());
+      maxStepLength.set(0.3);
       defaultStepWidth.set(steppingParameters.getInPlaceWidth());
       minStepWidth.set(steppingParameters.getMinStepWidth());
-      maxStepWidth.set(steppingParameters.getMaxStepWidth());
+//      maxStepWidth.set(steppingParameters.getMaxStepWidth());
+      maxStepWidth.set(0.3);
       turnStepWidth.set(steppingParameters.getTurningStepWidth());
       turnMaxAngleInward.set(steppingParameters.getMaxAngleTurnInwards());
       turnMaxAngleOutward.set(steppingParameters.getMaxAngleTurnOutwards());
@@ -99,7 +110,7 @@ public class GDXJoystickBasedStepping
       continuousStepGenerator.setDesiredTurningVelocityProvider(turningVelocity::get);
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocity.get(), lateralVelocity.get()));
       continuousStepGenerator.configureWith(walkingControllerParameters);
-      continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
+      continuousStepGenerator.addFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
       continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
@@ -107,7 +118,7 @@ public class GDXJoystickBasedStepping
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
    }
 
-   public void create(ROS2ControllerHelper controllerHelper, ROS2SyncedRobotModel syncedRobot)
+   public void create(GDXImGuiBasedUI baseUI, ROS2ControllerHelper controllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
       this.controllerHelper = controllerHelper;
       this.syncedRobot = syncedRobot;
@@ -145,9 +156,16 @@ public class GDXJoystickBasedStepping
       footstepPlanGraphic.setColor(RobotSide.RIGHT, new Color(0.6039216f, 0.8039216f, 0.19607843f, 1.0f)); //yellowgreen
 
       executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 500, TimeUnit.MILLISECONDS);
+
+      leftVRController = baseUI.getVRManager().getContext().getController(RobotSide.LEFT);
+      rightVRController = baseUI.getVRManager().getContext().getController(RobotSide.RIGHT);
+      baseUI.getVRManager().getContext().addVRInputProcessor(context ->
+      {
+         userNotClickingAnImGuiPanel = context.getSelectedPick() == null;
+      });
    }
 
-   public void update()
+   public void update(boolean enabled)
    {
       while (!queuedTasksToProcess.isEmpty())
          queuedTasksToProcess.poll().run();
@@ -155,83 +173,101 @@ public class GDXJoystickBasedStepping
       currentController = Controllers.getCurrent();
       currentControllerConnected = currentController != null;
 
-      if (capturabilityBasedStatusInput.hasReceivedFirstMessage() && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0))
+      if (enabled && (currentControllerConnected || (leftVRController.isConnected() && rightVRController.isConnected())))
       {
-
-         CapturabilityBasedStatus capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
-         boolean isLeftFootInSupport = !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
-         boolean isRightFootInSupport = !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
-         isFootInSupport.set(RobotSide.LEFT, isLeftFootInSupport);
-         isFootInSupport.set(RobotSide.RIGHT, isRightFootInSupport);
-         boolean isInDoubleSupport = isLeftFootInSupport && isRightFootInSupport;
-
-         if (!supportFootPosesInitialized && isInDoubleSupport)
+         if (currentControllerConnected)
          {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               lastSupportFootPoses.put(robotSide, new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide)));
-            }
-
-            supportFootPosesInitialized = true;
+            walkingModeActive = currentController.getButton(currentController.getMapping().buttonR1);
+            forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
+            lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
+            turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
          }
 
-         if (supportFootPosesInitialized && currentControllerConnected)
+         if (rightVRController.isConnected())
          {
-            for (RobotSide robotSide : RobotSide.values)
+            walkingModeActive = rightVRController.getClickTriggerActionData().bState() && userNotClickingAnImGuiPanel;
+            turningJoystickValue = -rightVRController.getJoystickActionData().x();
+         }
+
+         if (leftVRController.isConnected())
+         {
+            forwardJoystickValue = leftVRController.getJoystickActionData().y();
+            lateralJoystickValue = -leftVRController.getJoystickActionData().x();
+         }
+
+         if (capturabilityBasedStatusInput.hasReceivedFirstMessage() && syncedRobot.getDataReceptionTimerSnapshot().isRunning(1.0))
+         {
+            CapturabilityBasedStatus capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
+            boolean isLeftFootInSupport = !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
+            boolean isRightFootInSupport = !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
+            isFootInSupport.set(RobotSide.LEFT, isLeftFootInSupport);
+            isFootInSupport.set(RobotSide.RIGHT, isRightFootInSupport);
+            boolean isInDoubleSupport = isLeftFootInSupport && isRightFootInSupport;
+
+            if (!supportFootPosesInitialized && isInDoubleSupport)
             {
-               if (isFootInSupport.get(robotSide))
-               { // Touchdown may not have been made with the foot properly settled, so we update the support foot pose if its current pose is lower.
-                  MovingReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(robotSide);
-                  double currentHeight = soleFrame.getTransformToWorldFrame().getTranslationZ();
-                  if (currentHeight < lastSupportFootPoses.get(robotSide).getZ())
-                     lastSupportFootPoses.put(robotSide, new FramePose3D(soleFrame));
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  lastSupportFootPoses.put(robotSide, new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide)));
                }
+
+               supportFootPosesInitialized = true;
             }
 
-            boolean newWalkingRequest = currentController.getButton(currentController.getMapping().buttonR1);
-            double stepTime = swingDuration.get() + transferDuration.get();
-            double forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
-            double deadband = 0.1;
-            forwardJoystickValue = DeadbandTools.applyDeadband(deadband, forwardJoystickValue);
-            forwardVelocity.set((maxStepLength.get() / stepTime) * MathTools.clamp(forwardJoystickValue, 1.0));
-            double lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
-            lateralJoystickValue = DeadbandTools.applyDeadband(deadband, lateralJoystickValue);
-            lateralVelocity.set((maxStepWidth.get() / stepTime) * MathTools.clamp(lateralJoystickValue, 1.0));
-            double turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
-            turningJoystickValue = DeadbandTools.applyDeadband(deadband, turningJoystickValue);
-            // if (forwardVelocity.get() < -0.001) // kinda like it better without this
-            //    turningJoystickValue = -turningJoystickValue;
-            turningVelocity.set(((turnMaxAngleOutward.get() - turnMaxAngleInward.get()) / stepTime) * MathTools.clamp(turningJoystickValue, 1.0));
-
-            if (newWalkingRequest)
+            if (supportFootPosesInitialized)
             {
-               isWalking.set(true);
-               continuousStepGenerator.startWalking();
-               hasSuccessfullyStoppedWalking.set(false);
-            }
-            else
-            {
-               isWalking.set(false);
-               footstepsToSendReference.set(null);
-               continuousStepGenerator.stopWalking();
-               sendPauseWalkingToController();
-            }
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  if (isFootInSupport.get(robotSide))
+                  { // Touchdown may not have been made with the foot properly settled, so we update the support foot pose if its current pose is lower.
+                     MovingReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(robotSide);
+                     double currentHeight = soleFrame.getTransformToWorldFrame().getTranslationZ();
+                     if (currentHeight < lastSupportFootPoses.get(robotSide).getZ())
+                        lastSupportFootPoses.put(robotSide, new FramePose3D(soleFrame));
+                  }
+               }
 
-            continuousStepGenerator.setFootstepTiming(swingDuration.get(), transferDuration.get());
-            continuousStepGenerator.setStepTurningLimits(turnMaxAngleInward.get(), turnMaxAngleOutward.get());
-            continuousStepGenerator.setStepWidths(defaultStepWidth.get(), minStepWidth.get(), maxStepWidth.get());
-            continuousStepGenerator.setMaxStepLength(maxStepLength.get());
-            continuousStepGenerator.update(Double.NaN);
+               double stepTime = swingDuration.get() + transferDuration.get();
+               double deadband = 0.1;
+               forwardJoystickValue = DeadbandTools.applyDeadband(deadband, forwardJoystickValue);
+               forwardVelocity.set((maxStepLength.get() / stepTime) * MathTools.clamp(forwardJoystickValue, 1.0));
+               lateralJoystickValue = DeadbandTools.applyDeadband(deadband, lateralJoystickValue);
+               lateralVelocity.set((maxStepWidth.get() / stepTime) * MathTools.clamp(lateralJoystickValue, 1.0));
+               turningJoystickValue = DeadbandTools.applyDeadband(deadband, turningJoystickValue);
+               // if (forwardVelocity.get() < -0.001) // kinda like it better without this
+               //    turningJoystickValue = -turningJoystickValue;
+               turningVelocity.set(((turnMaxAngleOutward.get() - turnMaxAngleInward.get()) / stepTime) * MathTools.clamp(turningJoystickValue, 1.0));
 
-            if (!continuousStepGenerator.isWalking())
-            {
-               footstepPlanGraphic.clear();
+               if (walkingModeActive)
+               {
+                  isWalking.set(true);
+                  continuousStepGenerator.startWalking();
+                  hasSuccessfullyStoppedWalking.set(false);
+               }
+               else
+               {
+                  disableWalking();
+                  footstepPlanGraphic.clear();
+               }
+
+               continuousStepGenerator.setFootstepTiming(swingDuration.get(), transferDuration.get());
+               continuousStepGenerator.setStepTurningLimits(turnMaxAngleInward.get(), turnMaxAngleOutward.get());
+               continuousStepGenerator.setStepWidths(defaultStepWidth.get(), minStepWidth.get(), maxStepWidth.get());
+               continuousStepGenerator.setMaxStepLength(maxStepLength.get());
+               continuousStepGenerator.update(Double.NaN);
             }
-
          }
-      }
 
-      footstepPlanGraphic.update();
+         footstepPlanGraphic.update();
+      }
+   }
+
+   private void disableWalking()
+   {
+      isWalking.set(false);
+      footstepsToSendReference.set(null);
+      continuousStepGenerator.stopWalking();
+      sendPauseWalkingToController();
    }
 
    private void sendFootsteps()
@@ -290,13 +326,16 @@ public class GDXJoystickBasedStepping
       footstepPlanGraphic.getRenderables(renderables, pool);
    }
 
-   private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
+   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
       adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
-      return adjustedBasedOnStanceFoot;
+      
+      adjustedFootstep.set(adjustedBasedOnStanceFoot);
+      return true;
+//      return adjustedBasedOnStanceFoot;
    }
 
    private void prepareFootsteps(FootstepDataListMessage footstepDataListMessage)

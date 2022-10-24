@@ -2,6 +2,7 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.SteppingParameters;
 import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.WalkingTrajectoryDuration;
+import static us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXTopics.StepsAreAdjustable;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonBState;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonLeftBumperState;
 import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController.ButtonRightBumperState;
@@ -27,8 +28,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.animation.AnimationTimer;
@@ -51,6 +52,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
@@ -88,6 +90,7 @@ public class StepGeneratorJavaFXController
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
 
    private final AtomicReference<Double> trajectoryDuration;
+   private final AtomicReference<Boolean> stepsAreAdjustable;
    private final JavaFXRobotVisualizer javaFXRobotVisualizer;
 
    public enum SecondaryControlOption
@@ -147,7 +150,7 @@ public class StepGeneratorJavaFXController
       reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
 
       continuousStepController.setFootstepMessenger(this::prepareFootsteps);
-      continuousStepController.setPauseWalkingPublisher(pauseWalkingPublisher::publish);
+      continuousStepController.setPauseWalkingPublisher(this::sendPauseWalkingMessage);
       continuousStepController.setFootPoseProviders(robotSide ->
       {
          if (javaFXRobotVisualizer.isRobotConfigurationInitialized())
@@ -165,6 +168,7 @@ public class StepGeneratorJavaFXController
       });
 
       trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
+      stepsAreAdjustable = messager.createInput(StepsAreAdjustable, false);
 
       setupKickAction(messager);
       setupPunchAction(messager);
@@ -300,8 +304,14 @@ public class StepGeneratorJavaFXController
          footstepNode.add(createFootstep(footstepDataMessage));
       }
       footstepsToVisualizeReference.set(footstepNode);
-      //      footstepDataListMessage.setAreFootstepsAdjustable(true);
-      footstepsToSendReference.set(new FootstepDataListMessage(footstepDataListMessage));
+      FootstepDataListMessage messageCopy = new FootstepDataListMessage(footstepDataListMessage);
+      messageCopy.setAreFootstepsAdjustable(stepsAreAdjustable.get());
+      footstepsToSendReference.set(messageCopy);
+   }
+
+   private void sendPauseWalkingMessage()
+   {
+      pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
    }
 
    private void sendFootsteps()
@@ -309,6 +319,7 @@ public class StepGeneratorJavaFXController
       FootstepDataListMessage footstepsToSend = footstepsToSendReference.getAndSet(null);
       if (footstepsToSend != null && continuousStepController.isWalking())
       {
+//         footstepsToSend.setAreFootstepsAdjustable(true);
          footstepPublisher.publish(footstepsToSend);
       }
    }
@@ -427,9 +438,7 @@ public class StepGeneratorJavaFXController
    public void stop()
    {
       animationTimer.stop();
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
-      pauseWalkingPublisher.publish(pauseWalkingMessage);
+      sendPauseWalkingMessage();
       if (yoVariableServer != null)
       {
          yoVariableServer.close();

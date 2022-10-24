@@ -78,16 +78,16 @@ public class CoMTrajectorySegmentTest
             comAcceleration.scaleAdd(2.0, fourthSegment, comAcceleration);
 
             double epsilon = 1e-7;
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(comPosition, segment.getPosition(), epsilon);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(comVelocity, segment.getVelocity(), epsilon);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(comAcceleration, segment.getAcceleration(), epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(comPosition, segment.getPosition(), epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(comVelocity, segment.getVelocity(), epsilon);
+            EuclidFrameTestTools.assertGeometricallyEquals(comAcceleration, segment.getAcceleration(), epsilon);
 
             FramePoint3D dcmPosition = new FramePoint3D();
             FrameVector3D dcmVelocity = new FrameVector3D();
             dcmPosition.scaleAdd(1.0 / omega, comVelocity, comPosition);
             dcmVelocity.scaleAdd(1.0 / omega, comAcceleration, comVelocity);
 
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmPosition, segment.getDCMPosition(), 1e-7);
+            EuclidFrameTestTools.assertGeometricallyEquals(dcmPosition, segment.getDCMPosition(), 1e-7);
 
             assertFalse(segment.isDone());
          }
@@ -111,10 +111,10 @@ public class CoMTrajectorySegmentTest
             originalSegment.compute(time);
             segmentToSet.compute(time);
 
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(originalSegment.getPosition(), segmentToSet.getPosition(), 1e-8);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(originalSegment.getVelocity(), segmentToSet.getVelocity(), 1e-8);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(originalSegment.getAcceleration(), segmentToSet.getAcceleration(), 1e-8);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(originalSegment.getDCMPosition(), segmentToSet.getDCMPosition(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(originalSegment.getPosition(), segmentToSet.getPosition(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(originalSegment.getVelocity(), segmentToSet.getVelocity(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(originalSegment.getAcceleration(), segmentToSet.getAcceleration(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(originalSegment.getDCMPosition(), segmentToSet.getDCMPosition(), 1e-8);
          }
       }
    }
@@ -150,10 +150,10 @@ public class CoMTrajectorySegmentTest
             segmentToCrop.compute(timeInCropped);
 
             String failureMessage = "Failed at time " + time;
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(failureMessage, originalSegment.getPosition(), segmentToCrop.getPosition(), 1e-8);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(failureMessage, originalSegment.getVelocity(), segmentToCrop.getVelocity(), 1e-8);
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(failureMessage, originalSegment.getAcceleration(), segmentToCrop.getAcceleration(), 1e-8);
-            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(failureMessage, originalSegment.getDCMPosition(), segmentToCrop.getDCMPosition(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(failureMessage, originalSegment.getPosition(), segmentToCrop.getPosition(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(failureMessage, originalSegment.getVelocity(), segmentToCrop.getVelocity(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(failureMessage, originalSegment.getAcceleration(), segmentToCrop.getAcceleration(), 1e-8);
+            EuclidFrameTestTools.assertGeometricallyEquals(failureMessage, originalSegment.getDCMPosition(), segmentToCrop.getDCMPosition(), 1e-8);
          }
       }
    }

@@ -36,16 +36,7 @@ public class GDXYoManager
 
    public void update()
    {
-      if (linkedRootRegistry != null)
-         linkedRootRegistry.pull();
-   }
-
-   public void stopSession()
-   {
-      rootRegistry = null;
-      linkedYoVariableFactory = null;
-      linkedRootRegistry = null;
-      linkedBufferProperties = null;
+      linkedRootRegistry.pull();
    }
 
    public boolean isSessionLoaded()
@@ -63,6 +54,11 @@ public class GDXYoManager
       return linkedYoVariableFactory.newLinkedYoVariable(yoVariable);
    }
 
+   public LinkedBufferProperties newLinkedBufferProperties()
+   {
+      return linkedYoVariableFactory.newLinkedBufferProperties();
+   }
+
    public YoRegistry getRootRegistry()
    {
       return rootRegistry;
@@ -73,20 +69,43 @@ public class GDXYoManager
       return linkedRootRegistry;
    }
 
-   public LinkedBufferProperties newLinkedBufferProperties()
+   public LinkedBufferProperties getLinkedBufferProperties()
    {
-      if (linkedYoVariableFactory == null)
-         return null;
-      else
-         return linkedYoVariableFactory.newLinkedBufferProperties();
+      return linkedBufferProperties;
    }
 
    public int getBufferSize()
    {
-      if (linkedBufferProperties == null)
-         return -1;
-      if (linkedBufferProperties.peekCurrentBufferProperties() == null)
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
          return -1;
       return linkedBufferProperties.peekCurrentBufferProperties().getSize();
+   }
+
+   public int getInPoint()
+   {
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
+         return -1;
+      return linkedBufferProperties.peekCurrentBufferProperties().getInPoint();
+   }
+
+   public int getOutPoint()
+   {
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
+         return -1;
+      return linkedBufferProperties.peekCurrentBufferProperties().getOutPoint();
+   }
+
+   public int getCurrentIndex()
+   {
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
+         return -1;
+      return linkedBufferProperties.peekCurrentBufferProperties().getCurrentIndex();
+   }
+
+   public int getActiveBufferLength()
+   {
+      if (linkedBufferProperties == null || linkedBufferProperties.peekCurrentBufferProperties() == null)
+         return -1;
+      return linkedBufferProperties.peekCurrentBufferProperties().getActiveBufferLength();
    }
 }

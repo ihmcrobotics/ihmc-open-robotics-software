@@ -1,14 +1,14 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StoredPropertySetMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -24,6 +24,7 @@ public class LookAndStepBehaviorAPI
 
    public static final String REGIONS_FOR_FOOTSTEP_PLANNING = RosTools.MAPSENSE_REGIONS;
    public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.MAPSENSE_REGIONS;
+   public static final ROS2Topic<HeightMapMessage> ROS2_HEIGHT_MAP = ROS2Tools.HEIGHT_MAP_OUTPUT;
 
    /**
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
@@ -76,7 +77,9 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<Pose3D> GoalForUI = topic("GoalForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
+   public static final MessagerAPIFactory.Topic<PlanarRegionsList> ReceivedPlanarRegionsForUI = topic("ReceivedlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");
+   public static final MessagerAPIFactory.Topic<Boolean> PlanningFailed = topic("PlanningFailed");
    public static final MessagerAPIFactory.Topic<MutablePair<Pose3D, Vector3D>> Obstacle = topic("Obstacle");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");

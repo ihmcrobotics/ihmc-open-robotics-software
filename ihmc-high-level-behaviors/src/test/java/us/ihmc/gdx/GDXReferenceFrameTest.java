@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXModelBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
@@ -44,7 +44,7 @@ public class GDXReferenceFrameTest
          {
             baseUI.create();
 
-            worldFrameGraphic = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+            worldFrameGraphic = new ModelInstance(GDXModelBuilder.createCoordinateFrame(0.3));
             GDXTools.setTransparency(worldFrameGraphic, 0.6f);
 
             userTransformToParent = new RigidBodyTransform();
@@ -53,7 +53,7 @@ public class GDXReferenceFrameTest
             userReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
             userReferenceFrameGraphic.setToReferenceFrame(userReferenceFrame);
 
-            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
+            baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
             baseUI.getImGuiPanelManager().addPanel("Reference Frames", this::renderImGuiWidgets);
          }
 

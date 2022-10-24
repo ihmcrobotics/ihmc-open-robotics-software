@@ -19,7 +19,7 @@ public class GDXDoorFrameObject extends GDXEnvironmentObject
    public GDXDoorFrameObject()
    {
       super(NAME, FACTORY);
-      setRealisticModel(GDXModelLoader.loadG3DModel("environmentObjects/door/doorFrame/DoorFrame.g3dj"));
+      setRealisticModel(GDXModelLoader.load("environmentObjects/door/doorFrame/DoorFrame.g3dj"));
       double sizeX = 0.0889;
       double sizeY = 0.0889;
       double sizeZ = 2.159;
