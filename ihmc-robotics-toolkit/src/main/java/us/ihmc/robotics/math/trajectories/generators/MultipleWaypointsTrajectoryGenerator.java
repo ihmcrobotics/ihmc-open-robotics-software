@@ -3,20 +3,14 @@ package us.ihmc.robotics.math.trajectories.generators;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.util.Precision;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
-import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -162,21 +156,6 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       }
 
       currentWaypointIndex.set(0);
-   }
-
-   private void initializeSubTrajectory(int waypointIndex)
-   {
-      int secondWaypointIndex = Math.min(waypointIndex + 1, numberOfWaypoints.getValue() - 1);
-      YoOneDoFTrajectoryPoint start = waypoints.get(waypointIndex);
-      YoOneDoFTrajectoryPoint end = waypoints.get(secondWaypointIndex);
-
-      double subTrajectoryDuration = end.getTime() - start.getTime();
-      subTrajectory.setCubic(0.0,
-                             subTrajectoryDuration,
-                             start.getPosition(),
-                             start.getVelocity(),
-                             end.getPosition(),
-                             end.getVelocity());
    }
 
    @Override
