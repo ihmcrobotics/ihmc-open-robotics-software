@@ -381,7 +381,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private void calculateVRPick(RDXVRContext vrContext)
    {
       if (interactablesAvailable && interactablesEnabled.get())
-            environmentCollisionModel.calculateVRPick(vrContext);
+         environmentCollisionModel.calculateVRPick(vrContext);
    }
 
    private void processVRInput(RDXVRContext vrContext)
