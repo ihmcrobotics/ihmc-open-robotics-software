@@ -55,7 +55,7 @@ public abstract class RDXVRTrackedDevice
             }
 
             deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
-            LibGDXTools.toGDX(tempOpenVRToWorldTransform, modelInstance.transform);
+            LibGDXTools.toLibGDX(tempOpenVRToWorldTransform, modelInstance.transform);
          }
       }
    }

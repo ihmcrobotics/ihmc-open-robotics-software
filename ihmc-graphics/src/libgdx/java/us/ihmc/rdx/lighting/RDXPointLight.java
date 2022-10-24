@@ -45,10 +45,10 @@ public class RDXPointLight
    {
       camera.near = CAMERA_NEAR;
       camera.far = CAMERA_FAR;
-      LibGDXTools.toGDX(position, camera.position);
+      LibGDXTools.toLibGDX(position, camera.position);
       camera.update();
       if (attribute != null)
-         LibGDXTools.toGDX(position, attribute.position);
+         LibGDXTools.toLibGDX(position, attribute.position);
    }
 
    public <T extends RenderableProvider> void render(Iterable<T> renderableProviders)

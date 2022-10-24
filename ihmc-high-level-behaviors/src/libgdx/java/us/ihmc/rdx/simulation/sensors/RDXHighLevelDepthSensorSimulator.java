@@ -288,9 +288,9 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       if (sensorEnabled.get())
       {
          if (sensorFrame != null)
-            LibGDXTools.toGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
+            LibGDXTools.toLibGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
          else
-            LibGDXTools.toGDX(sensorFrameToWorldTransform, gdxTransform);
+            LibGDXTools.toLibGDX(sensorFrameToWorldTransform, gdxTransform);
 
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
 
@@ -299,7 +299,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 
          if (renderPointCloudDirectly.get())
          {
-            LibGDXTools.toGDX(color, pointColorFromPicker);
+            LibGDXTools.toLibGDX(color, pointColorFromPicker);
             Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
             depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSize.get());
             pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);

@@ -116,10 +116,10 @@ public class RDXVRTeleporter
             RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
 
             pickRayPose.get(tempTransform);
-            LibGDXTools.toGDX(tempTransform, lineModel.transform);
+            LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
             proposedTeleportPose.get(tempTransform);
-            LibGDXTools.toGDX(tempTransform, ring.transform);
-            LibGDXTools.toGDX(tempTransform, arrow.transform);
+            LibGDXTools.toLibGDX(tempTransform, ring.transform);
+            LibGDXTools.toLibGDX(tempTransform, arrow.transform);
          }
 
          if (!preparingToTeleport && bChanged)

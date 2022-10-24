@@ -107,7 +107,7 @@ public class RDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          if (graphics3DAddModelFile.getAppearance() != null)
          {
             AppearanceDefinition appearance = graphics3DAddModelFile.getAppearance();
-            Color color = LibGDXTools.toGDX(appearance);
+            Color color = LibGDXTools.toLibGDX(appearance);
 
             if (model.materials.size == 0)
             {
@@ -320,7 +320,7 @@ public class RDXGraphicsObject extends Graphics3DInstructionExecutor implements 
       {
          tempTransform.set(transforms.get(modelInstance));
          worldTransform.transform(tempTransform);
-         LibGDXTools.toGDX(tempTransform, modelInstance.transform);
+         LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
       }
    }
 

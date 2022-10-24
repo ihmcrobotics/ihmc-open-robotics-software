@@ -90,7 +90,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
          // Set position of modelInstance, selectablePose3DGizmo,
          // and the sphere used in stepCheckIsPointInsideAlgorithm all to the pointInWorld that the cursor is at
-         LibGDXTools.toGDX(pickPointInWorld, footstepBeingPlaced.getFootstepModelInstance().transform);
+         LibGDXTools.toLibGDX(pickPointInWorld, footstepBeingPlaced.getFootstepModelInstance().transform);
 
          footstepBeingPlaced.setGizmoPose(pickPointInWorld.getX(),
                                           pickPointInWorld.getY(),

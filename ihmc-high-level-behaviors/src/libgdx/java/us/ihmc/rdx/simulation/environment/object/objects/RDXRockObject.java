@@ -86,7 +86,7 @@ public class RDXRockObject extends RDXEnvironmentObject
 
       setCollisionModel(meshBuilder ->
       {
-         Color color = LibGDXTools.toGDX(YoAppearance.LightBlue());
+         Color color = LibGDXTools.toLibGDX(YoAppearance.LightBlue());
          meshBuilder.addMesh(CollidableVisualizer.newConvexPolytope3DMesh(rock), getCenterOfMassInModelFrame(), color);
       });
 

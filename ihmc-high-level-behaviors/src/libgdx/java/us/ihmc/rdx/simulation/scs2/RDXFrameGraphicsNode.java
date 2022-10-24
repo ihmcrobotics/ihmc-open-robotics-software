@@ -46,7 +46,7 @@ public class RDXFrameGraphicsNode
       }
 
       if (ENABLE_REFERENCE_FRAME_GRAPHICS)
-         LibGDXTools.toGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
+         LibGDXTools.toLibGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

@@ -99,7 +99,7 @@ public class RDXVRHandPlacedFootstepMode
                   poseForPlacement.changeFrame(ReferenceFrame.getWorldFrame());
                   poseForPlacement.get(tempTransform);
 
-                  LibGDXTools.toGDX(tempTransform, footBeingPlaced.transform);
+                  LibGDXTools.toLibGDX(tempTransform, footBeingPlaced.transform);
                }
 
                InputDigitalActionData aButton = controller.getAButtonActionData();
