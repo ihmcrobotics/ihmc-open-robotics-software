@@ -96,7 +96,7 @@ public class RDXBehaviorActionSequenceEditor
       actionSequence.clear();
       playbackNextIndex = 0;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
-      JSONFileTools.load(workspaceFile, jsonNode ->
+      JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
       {
          for (Iterator<JsonNode> actionNodeIterator = jsonNode.withArray("actions").elements(); actionNodeIterator.hasNext(); )
          {
