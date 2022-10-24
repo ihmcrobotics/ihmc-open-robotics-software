@@ -1,6 +1,7 @@
 package us.ihmc.bytedeco.mapsenseWrapper.test;
 
 import us.ihmc.bytedeco.mapsenseWrapper.MapsenseWrapper;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -75,13 +76,35 @@ public class MapsenseWrapperTest
 
       List<String> libraryFiles = new ArrayList<>();
 
+      // Load these libraries before laoding the wrapper JNI .so. Use ldd to list all necessary libs
+      // and copy them.
+      libraryFiles.add("libopencv_core.so.4.2");
+      libraryFiles.add("libopencv_imgproc.so.4.2");
+      libraryFiles.add("libwebp.so.6");
+
+      libraryFiles.add("libHalf.so.24");
+      libraryFiles.add("libIex-2_3.so.24");
+      libraryFiles.add("libIlmThread-2_3.so.24");
+
+      libraryFiles.add("libIlmImf-2_3.so.24");
+
+      libraryFiles.add("libjson-c.so.4");
+      libraryFiles.add("libpoppler.so.97");
+      libraryFiles.add("libarmadillo.so.9");
+      libraryFiles.add("libgdal.so.26");
+      libraryFiles.add("libopencv_imgcodecs.so.4.2");
+      libraryFiles.add("libopencv_highgui.so.4.2");
+
       libraryFiles.add("libmapsense-wrapper.so");
       libraryFiles.add("libjniMapsenseWrapper.so");
 
       WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/mapsense-wrapper/resources");
       for (String libraryFile : libraryFiles)
       {
-         System.load(new WorkspaceFile(resourcesDirectory, libraryFile).getFilePath().toAbsolutePath().normalize().toString());
+         WorkspaceFile file = new WorkspaceFile(resourcesDirectory, libraryFile);
+         String filePath = file.getFilePath().toAbsolutePath().normalize().toString();
+         System.out.println("Loading: " + filePath);
+         System.load(filePath);
       }
    }
 }

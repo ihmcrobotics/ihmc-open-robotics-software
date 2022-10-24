@@ -19,6 +19,7 @@ RUN apt-get --quiet 2 --yes update  \
     libtbb-dev \
     openjdk-17-jdk \
     libeigen3-dev \
+    libopencv-dev \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
