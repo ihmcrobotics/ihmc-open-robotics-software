@@ -60,7 +60,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
 
    public RDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
-      this((FrameShape3DBasics) collidable.getShape(), // Need isPointInside
+      this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
            collidable.getShape().getReferenceFrame(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
@@ -69,7 +69,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
 
    public RDXRobotCollisionLink(Collidable collidable, Color color)
    {
-      this((FrameShape3DBasics) collidable.getShape(), // Need isPointInside
+      this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
            collidable.getShape().getReferenceFrame(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
