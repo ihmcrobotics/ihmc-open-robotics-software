@@ -13,12 +13,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.math.trajectories.HermiteCurveBasedOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FrameOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FixedFrameSO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointReadOnly;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.yoVariables.euclid.referenceFrame.interfaces.FrameIndexMap;
@@ -121,27 +122,27 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(SO3TrajectoryPointBasics so3Waypoint)
+   public void appendWaypoint(SO3TrajectoryPointReadOnly so3Waypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(so3Waypoint);
    }
 
-   public void appendWaypoint(FrameSO3TrajectoryPoint frameSO3TrajectoryPoint)
+   public void appendWaypoint(FrameSO3TrajectoryPointReadOnly frameSO3TrajectoryPoint)
    {
       checkReferenceFrameMatch(frameSO3TrajectoryPoint);
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(frameSO3TrajectoryPoint);
    }
 
-   public void appendWaypoint(FrameSE3TrajectoryPoint frameSE3TrajectoryPoint)
+   public void appendWaypoint(FrameSE3TrajectoryPointReadOnly frameSE3TrajectoryPoint)
    {
       checkReferenceFrameMatch(frameSE3TrajectoryPoint);
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }
 
-   private void appendWaypointUnsafe(SO3TrajectoryPointBasics so3Waypoint)
+   private void appendWaypointUnsafe(SO3TrajectoryPointReadOnly so3Waypoint)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(so3Waypoint);
       numberOfWaypoints.increment();
@@ -171,7 +172,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
       }
    }
 
-   public void appendWaypoints(SO3TrajectoryPointBasics[] so3Waypoints)
+   public void appendWaypoints(SO3TrajectoryPointReadOnly[] so3Waypoints)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + so3Waypoints.length);
 
@@ -181,7 +182,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator implements FrameOri
       }
    }
 
-   public void appendWaypoints(TrajectoryPointListBasics<? extends SO3TrajectoryPointBasics> trajectoryPointList)
+   public void appendWaypoints(TrajectoryPointListBasics<? extends SO3TrajectoryPointReadOnly> trajectoryPointList)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
 

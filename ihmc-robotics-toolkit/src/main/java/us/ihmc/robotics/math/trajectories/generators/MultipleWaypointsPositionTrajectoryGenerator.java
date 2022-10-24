@@ -20,11 +20,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoEuclideanTrajectoryPoint;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FixedFrameEuclideanTrajectoryPointBasics;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameEuclideanTrajectoryPointReadOnly;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointReadOnly;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -144,27 +144,27 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoint(EuclideanTrajectoryPointBasics euclideanWaypoint)
+   public void appendWaypoint(EuclideanTrajectoryPointReadOnly euclideanWaypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(euclideanWaypoint);
    }
 
-   public void appendWaypoint(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint)
+   public void appendWaypoint(FrameEuclideanTrajectoryPointReadOnly frameEuclideanTrajectoryPoint)
    {
       checkReferenceFrameMatch(frameEuclideanTrajectoryPoint);
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(frameEuclideanTrajectoryPoint);
    }
 
-   public void appendWaypoint(FrameSE3TrajectoryPoint frameSE3TrajectoryPoint)
+   public void appendWaypoint(FrameSE3TrajectoryPointReadOnly frameSE3TrajectoryPoint)
    {
       checkReferenceFrameMatch(frameSE3TrajectoryPoint);
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }
 
-   private void appendWaypointUnsafe(EuclideanTrajectoryPointBasics euclideanWaypoint)
+   private void appendWaypointUnsafe(EuclideanTrajectoryPointReadOnly euclideanWaypoint)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(euclideanWaypoint);
       numberOfWaypoints.increment();
@@ -192,7 +192,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], linearVelocities[i]);
    }
 
-   public void appendWaypoints(EuclideanTrajectoryPointBasics[] euclideanWaypoint)
+   public void appendWaypoints(EuclideanTrajectoryPointReadOnly[] euclideanWaypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + euclideanWaypoint.length);
 
@@ -200,7 +200,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          appendWaypointUnsafe(euclideanWaypoint[i]);
    }
 
-   public void appendWaypoints(RecyclingArrayList<? extends EuclideanTrajectoryPointBasics> euclideanWaypoint)
+   public void appendWaypoints(RecyclingArrayList<? extends EuclideanTrajectoryPointReadOnly> euclideanWaypoint)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + euclideanWaypoint.size());
 
@@ -208,7 +208,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator implements FramePositi
          appendWaypointUnsafe(euclideanWaypoint.get(i));
    }
 
-   public void appendWaypoints(TrajectoryPointListBasics<? extends EuclideanTrajectoryPointBasics> trajectoryPointList)
+   public void appendWaypoints(TrajectoryPointListBasics<? extends EuclideanTrajectoryPointReadOnly> trajectoryPointList)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + trajectoryPointList.getNumberOfTrajectoryPoints());
 
