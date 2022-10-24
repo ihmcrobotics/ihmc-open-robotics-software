@@ -32,14 +32,6 @@ import org.bytedeco.javacpp.tools.InfoMapper;
 )
 public class ProMPInfoMapper implements InfoMapper
 {
-<<<<<<< HEAD
-//   static
-//   {
-//      Loader.checkVersion("org.bytedeco", "promp");
-//   }
-
-=======
->>>>>>> origin/develop
    public void map(InfoMap infoMap)
    {
       infoMap.put(new Info("promp::TrajectoryGroup::normalize_length").javaText("public native long normalize_length();"));
