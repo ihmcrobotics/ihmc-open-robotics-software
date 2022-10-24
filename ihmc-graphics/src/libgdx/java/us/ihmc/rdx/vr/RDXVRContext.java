@@ -16,6 +16,8 @@ import org.lwjgl.openvr.*;
 
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -93,6 +95,10 @@ public class RDXVRContext
    private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
    private final ArrayList<RDXVRPickResult> pickResults = new ArrayList<>();
    private RDXVRPickResult selectedPick = null;
+
+
+   private final FrameLine3D pickRay = new FrameLine3D();
+   private final FramePoint3D pickIntersection = new FramePoint3D();
 
    public void initSystem()
    {

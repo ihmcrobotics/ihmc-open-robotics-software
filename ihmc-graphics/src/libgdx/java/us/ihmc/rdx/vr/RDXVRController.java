@@ -5,6 +5,8 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -256,6 +258,8 @@ public class RDXVRController extends RDXVRTrackedDevice
          runIfConnected.accept(this);
       }
    }
+
+//   public void calculateIntersection()
 
    public FramePose3DReadOnly getPickPointPose()
    {
