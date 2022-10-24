@@ -18,4 +18,4 @@ docker run \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
     --volume /usr/share/fonts:/usr/share/fonts \
-    ihmcrobotics/nvidia-ros2-ide:0.1 $1
+    ihmcrobotics/nvidia-ros2-ide:0.3 $1

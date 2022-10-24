@@ -11,16 +11,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.DirectionalControlConfigurationMessage;
-import controller_msgs.msg.dds.DirectionalControlInputMessage;
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.*;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
@@ -449,7 +441,7 @@ public class DirectionalControlController extends ToolboxController
     * @param footSide     -- left or right
     * @return 3D pose for the input step
     */
-   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   private boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
