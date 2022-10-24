@@ -14,7 +14,6 @@ import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -52,8 +51,8 @@ public class ROS2PointCloudProvider
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final PointCloud pointCloud;
+   private boolean messageQueued = false;
 
    public ROS2PointCloudProvider(ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
    {
@@ -84,6 +83,7 @@ public class ROS2PointCloudProvider
       pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
+   // TODO: old one, need to be deleted at some point
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
       //      frequencyPlot.recordEvent();
@@ -92,6 +92,7 @@ public class ROS2PointCloudProvider
       latestStereoVisionMessageReference.set(message);
    }
 
+   // TODO: old one, need to be deleted at some point
    private void queueRenderLidarScan(LidarScanMessage message)
    {
       //      frequencyPlot.recordEvent();
@@ -100,7 +101,7 @@ public class ROS2PointCloudProvider
 
    private void queueRenderFusedSensorHeadPointCloud(FusedSensorHeadPointCloudMessage message)
    {
-      frequencyPlot.recordEvent();
+      messageQueued = true;
       latestFusedSensorHeadPointCloudMessageReference.set(message);
    }
 
@@ -222,13 +223,18 @@ public class ROS2PointCloudProvider
       return xyzRGBASizeFloatBuffer-> 0;
    }
 
-   public ImGuiFrequencyPlot getFrequencyPlot()
-   {
-      return frequencyPlot;
-   }
-
    public PointCloud getPointCloud()
    {
       return pointCloud;
+   }
+
+   public boolean isMessageQueued()
+   {
+      return messageQueued;
+   }
+
+   public void setMessageQueued(boolean messageQueued)
+   {
+      this.messageQueued = messageQueued;
    }
 }

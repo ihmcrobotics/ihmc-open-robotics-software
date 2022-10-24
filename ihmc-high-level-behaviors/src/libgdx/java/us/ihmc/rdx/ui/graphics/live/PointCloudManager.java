@@ -11,7 +11,7 @@ public class PointCloudManager
    public PointCloudManager(ROS2Node ros2Node, ROS2Topic<?> topic, String visualizerTitle, int pointsPerSegment, int numberOfSegments)
    {
       pointCloudProvider = new ROS2PointCloudProvider(ros2Node,topic, pointsPerSegment, numberOfSegments);
-      pointCloudVisualizer = new RDXPointCloudVisualizer(visualizerTitle, topic.getName(), pointsPerSegment, numberOfSegments, pointCloudProvider.getFrequencyPlot());
+      pointCloudVisualizer = new RDXPointCloudVisualizer(visualizerTitle, topic.getName(), pointsPerSegment, numberOfSegments);
    }
 
    public void create()
@@ -29,6 +29,8 @@ public class PointCloudManager
          {
             pointCloudVisualizer.setLatestSegmentIndex(pointCloudProvider.getLatestSegmentIndex());
             pointCloudVisualizer.updatePointCloud(pointCloudProvider.getPointCloud());
+            pointCloudVisualizer.recordEventFrequency(pointCloudProvider.isMessageQueued());
+            pointCloudProvider.setMessageQueued(false);
             pointCloudVisualizer.updateMeshFastest();
          }
       }

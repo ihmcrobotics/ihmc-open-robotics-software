@@ -66,7 +66,7 @@ public class RDXGlobalVisualizersPanel extends ImGuiPanel implements RenderableP
          }
          if (visualizer.getPanel() != null)
             visualizer.getPanel().getIsShowing().set(visualizer.isActive());
-         if (visualizer.isActive() && !visualizer.getTitle().toLowerCase().contains("mvc"))
+         if (visualizer.isActive())
          {
             visualizer.update();
          }

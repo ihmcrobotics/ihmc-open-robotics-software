@@ -18,7 +18,7 @@ import java.util.function.Function;
 public class RDXPointCloudVisualizer extends RDXVisualizer
 {
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private final ImGuiFrequencyPlot frequencyPlot;
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -29,14 +29,13 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    private final String topicName;
    private int latestSegmentIndex;
 
-   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments, ImGuiFrequencyPlot plot)
+   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments)
    {
       super(title + " (ROS 2)");
       this.pointsPerSegment = pointsPerSegment;
       this.numberOfSegments = numberOfSegments;
       totalNumberOfPoints = pointsPerSegment * numberOfSegments;
       this.topicName = topicName;
-      frequencyPlot = plot;
    }
 
    @Override
@@ -44,14 +43,13 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    {
       super.create();
       pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
-      pointCloudRenderer.getVertexBuffer().limit(3256320);
+      pointCloudRenderer.getVertexBuffer().limit(pointsPerSegment * 8);
    }
 
    @Override
    public void update()
    {
       super.update();
-//      updateMeshFastest();
    }
 
    public void updateMeshFastest()
@@ -84,13 +82,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
 
    public void updatePointCloud(PointCloud pointCloud)
    {
-//       = pointCloud.getData();
-      for (int i = 0; i < 50; ++i)
-      {
-         System.out.println(pointCloud.getData()[i]);
-      }
       pointCloudRenderer.getVertexBuffer().put(pointCloud.getData());
-
    }
 
    @Override
@@ -108,5 +100,11 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    public void setTotalNumberOfPoints(int totalNumberOfPoints)
    {
       this.totalNumberOfPoints = totalNumberOfPoints;
+   }
+
+   public void recordEventFrequency(boolean messageQueued)
+   {
+      if (messageQueued)
+         frequencyPlot.recordEvent();
    }
 }
