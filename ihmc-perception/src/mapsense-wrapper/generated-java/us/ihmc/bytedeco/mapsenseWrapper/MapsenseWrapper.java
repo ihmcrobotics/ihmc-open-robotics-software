@@ -31,6 +31,9 @@ public static class MapsenseExternal extends Pointer {
     }
 
 
+        public native void extractPlanarRegionsFromPointCloud(FloatPointer points, int numPoints);
+        public native void extractPlanarRegionsFromPointCloud(FloatBuffer points, int numPoints);
+        public native void extractPlanarRegionsFromPointCloud(float[] points, int numPoints);
         public native void printMat(FloatPointer buffer, int height, int width);
         public native void printMat(FloatBuffer buffer, int height, int width);
         public native void printMat(float[] buffer, int height, int width);

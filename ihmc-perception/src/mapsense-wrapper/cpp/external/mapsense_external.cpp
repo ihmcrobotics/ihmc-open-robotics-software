@@ -16,3 +16,12 @@ void MapsenseExternal::loadMat()
     cv::imshow("Window", mat);
     cv::waitKey(0);
 }
+
+void MapsenseExternal::extractPlanarRegionsFromPointCloud(float* points, int numPoints)
+{
+    for(int i = 0; i<numPoints; i++)
+    {
+        std::cout << "Point: " << points[i*3] << ", " << points[i*3+1] << ", " << points[i*3+2] << std::endl;
+    }
+
+}
