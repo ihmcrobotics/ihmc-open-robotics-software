@@ -50,6 +50,10 @@ public class MapsenseWrapperTest
 
       mapsenseExternal.printMat(poseInitial, 6, 1);
 
+      mapsenseExternal.loadMat();
+
+
+
 
 
    }

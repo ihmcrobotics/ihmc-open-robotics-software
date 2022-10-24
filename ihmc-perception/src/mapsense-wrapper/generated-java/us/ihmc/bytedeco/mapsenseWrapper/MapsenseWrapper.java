@@ -30,9 +30,11 @@ public static class MapsenseExternal extends Pointer {
         return new MapsenseExternal((Pointer)this).offsetAddress(i);
     }
 
+
         public native void printMat(FloatPointer buffer, int height, int width);
         public native void printMat(FloatBuffer buffer, int height, int width);
         public native void printMat(float[] buffer, int height, int width);
+        public native void loadMat();
 
 
 }

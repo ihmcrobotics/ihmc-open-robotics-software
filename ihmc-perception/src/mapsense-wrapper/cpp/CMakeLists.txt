@@ -57,6 +57,9 @@ set(MS_SOURCES
     launcher/mapsense_headless_launcher.cpp
     launcher/application_state.h
     launcher/application_state.cpp
+
+    external/mapsense_external.h
+    external/mapsense_external.cpp
 )
 
 
@@ -82,24 +85,25 @@ set(MS_SOURCES
 # +++++++++++++++++++++++++++++++++++++++++++++++  MapsenseWrapper ++++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-set(MSW_SOURCES
-    external/mapsense_external.h
-    external/mapsense_external.cpp
-)
-
-add_library(mapsense-wrapper SHARED ${MSW_SOURCES})
+add_library(mapsense-wrapper SHARED ${MS_SOURCES})
 
 target_link_libraries(mapsense-wrapper
-    # gtsam
- #   eigen
+    tbb
+    Eigen3::Eigen
+    ${OpenCV_LIBS}
+    /usr/lib/x86_64-linux-gnu/libOpenCL.so
 )
 
 target_include_directories(mapsense-wrapper PUBLIC
-    # cpp/mapsense/
-    external/
+     /usr/include/
+     feature_detection/
+     geometry/
+     launcher/
+     opencl/
+     external/
 )
 
 install(TARGETS mapsense-wrapper
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-install(FILES ${MSW_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
