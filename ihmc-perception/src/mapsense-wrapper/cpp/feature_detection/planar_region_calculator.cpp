@@ -1,6 +1,6 @@
 #include "planar_region_calculator.h"
 
-PlanarRegionCalculator::PlanarRegionCalculator(int argc, char **argv, ApplicationState& app) : app(app)
+PlanarRegionCalculator::PlanarRegionCalculator(ApplicationState& app) : app(app)
 {
    std::cout << "PlanarRegionCalculator Created" << std::endl;
    // MS_INFO("Creating PlanarRegionCalculator");

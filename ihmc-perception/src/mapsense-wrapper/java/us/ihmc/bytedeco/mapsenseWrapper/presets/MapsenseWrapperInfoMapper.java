@@ -6,7 +6,7 @@ import org.bytedeco.javacpp.tools.*;
 @Properties(
       value =
       @Platform(
-            includepath = "../",
+            includepath = {"../","/usr/include/opencv4","/usr/include/eigen3"},
             resourcepath = "../",
             linkpath = "../",
             include = {"include/mapsense_external.h"},

@@ -13,15 +13,16 @@ public class MapsenseWrapper extends us.ihmc.bytedeco.mapsenseWrapper.presets.Ma
 
 // #pragma once
 
-public static class MapsenseExternal extends Pointer {
+// #include "core.h"
+// #include "opencl_manager.h"
+// #include "planar_region_calculator.h"
+
+@NoOffset public static class MapsenseExternal extends Pointer {
     static { Loader.load(); }
-    /** Default native constructor. */
-    public MapsenseExternal() { super((Pointer)null); allocate(); }
-    /** Native array allocator. Access with {@link Pointer#position(long)}. */
-    public MapsenseExternal(long size) { super((Pointer)null); allocateArray(size); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
     public MapsenseExternal(Pointer p) { super(p); }
-    private native void allocate();
+    /** Native array allocator. Access with {@link Pointer#position(long)}. */
+    public MapsenseExternal(long size) { super((Pointer)null); allocateArray(size); }
     private native void allocateArray(long size);
     @Override public MapsenseExternal position(long position) {
         return (MapsenseExternal)super.position(position);
@@ -30,6 +31,8 @@ public static class MapsenseExternal extends Pointer {
         return new MapsenseExternal((Pointer)this).offsetAddress(i);
     }
 
+        public MapsenseExternal() { super((Pointer)null); allocate(); }
+        private native void allocate();
 
         public native void extractPlanarRegionsFromPointCloud(FloatPointer points, int numPoints);
         public native void extractPlanarRegionsFromPointCloud(FloatBuffer points, int numPoints);

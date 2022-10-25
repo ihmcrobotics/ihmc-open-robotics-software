@@ -2,7 +2,7 @@
 
 #include "map_frame.h"
 #include "planar_region.h"
-#include <opencv2/highgui.hpp>
+#include "opencv4/opencv2/highgui/highgui.hpp">
 #include "application_state.h"
 
 class MapFrameProcessor

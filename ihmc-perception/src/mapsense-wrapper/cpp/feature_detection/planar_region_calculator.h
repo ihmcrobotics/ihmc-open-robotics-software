@@ -1,7 +1,7 @@
 #pragma once
 
-#include "opencv2/highgui/highgui.hpp"
-#include "opencv2/core/core.hpp"
+#include "opencv4/opencv2/highgui/highgui.hpp"
+#include "opencv4/opencv2/core/core.hpp"
 #include <CL/cl.h>
 
 #include "map_frame_processor.h"
@@ -10,6 +10,8 @@
 #include "geom_tools.h"
 #include "point_cloud.h"
 
+#include "application_state.h"
+
 class MapFrame;
 class PlanarRegion;
 
@@ -17,7 +19,7 @@ class PlanarRegion;
 class PlanarRegionCalculator
 {
    public:
-      PlanarRegionCalculator(int argc, char **argv, ApplicationState& app);
+      PlanarRegionCalculator(ApplicationState& app);
 
       void Render();
 

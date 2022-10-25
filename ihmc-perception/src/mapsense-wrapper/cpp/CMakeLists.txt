@@ -60,6 +60,8 @@ set(MS_SOURCES
 
     external/mapsense_external.h
     external/mapsense_external.cpp
+
+    # core/core.h
 )
 
 
@@ -96,11 +98,13 @@ target_link_libraries(mapsense-wrapper
 
 target_include_directories(mapsense-wrapper PUBLIC
      /usr/include/
+     /usr/include/opencv4/
      feature_detection/
      geometry/
      launcher/
      opencl/
      external/
+    #  core/
 )
 
 install(TARGETS mapsense-wrapper

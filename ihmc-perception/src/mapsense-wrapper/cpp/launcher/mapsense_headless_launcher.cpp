@@ -3,7 +3,7 @@
 MapsenseHeadlessLauncher::MapsenseHeadlessLauncher(int argc, char **argv)
 {
    _openCLManager = new OpenCLManager("");
-   _regionCalculator = new PlanarRegionCalculator(argc, argv, appState);
+   _regionCalculator = new PlanarRegionCalculator(appState);
    _regionCalculator->setOpenCLManager(_openCLManager);
 }
 

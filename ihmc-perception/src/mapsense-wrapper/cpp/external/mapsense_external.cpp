@@ -1,20 +1,30 @@
 #include "mapsense_external.h"
 #include "iostream"
-#include "opencv2/highgui.hpp"
+
+MapsenseExternal::MapsenseExternal()
+{
+    _openCL = new OpenCLManager("/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/src/mapsense-wrapper/cpp");
+
+   _regionCalculator = new PlanarRegionCalculator(appState);
+   _regionCalculator->setOpenCLManager(_openCL);
+
+   std::cout << "MapsenseExternal Created" << std::endl;
+}
 
 void MapsenseExternal::printMat(float* buffer, int height, int width)
 {
     std::cout << "Height: " << height << " Width: " << width << std::endl;
 }
 
+
 void MapsenseExternal::loadMat()
 {
-    cv::Mat mat = cv::imread("/home/quantum/Pictures/Profiler_2.jpg");
+    // cv::Mat mat = cv::imread("/home/quantum/Pictures/Profiler_2.jpg");
 
-    std::cout << "Height: " << mat.rows << std::endl;
+    // std::cout << "Height: " << mat.rows << std::endl;
 
-    cv::imshow("Window", mat);
-    cv::waitKey(0);
+    // cv::imshow("Window", mat);
+    // cv::waitKey(0);
 }
 
 void MapsenseExternal::extractPlanarRegionsFromPointCloud(float* points, int numPoints)

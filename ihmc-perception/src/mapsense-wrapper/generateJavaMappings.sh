@@ -38,18 +38,18 @@ cp -r us/ihmc/bytedeco/mapsenseWrapper/MapsenseWrapper.java ../../../generated-j
 
 # Run ldd on libmapsense-wrapper.so to find required .so file names.
 cp ../lib/libmapsense-wrapper.so ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.4.2 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libopencv_imgcodecs.so.4.2 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.2 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libwebp.so.6 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libIlmImf-2_3.so.24 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libHalf.so.24 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libIex-2_3.so.24 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libIlmThread-2_3.so.24 ../../../resources
-cp /usr/lib/x86_64-linux-gnu/libIlmThread-2_3.so.24 ../../../resources
-cp /lib/libgdal.so.26 ../../../resources
-cp /lib/libarmadillo.so.9 ../../../resources
-cp /lib/x86_64-linux-gnu/libpoppler.so.97 ../../../resources
-cp /lib/x86_64-linux-gnu/libjson-c.so.4 ../../../resources
-cp /lib/x86_64-linux-gnu/libqhull.so.7 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libopencv_highgui.so.4.2 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libopencv_imgcodecs.so.4.2 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.4.2 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libopencv_core.so.4.2 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libwebp.so.6 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libIlmImf-2_3.so.24 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libHalf.so.24 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libIex-2_3.so.24 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libIlmThread-2_3.so.24 ../../../resources
+#cp /usr/lib/x86_64-linux-gnu/libIlmThread-2_3.so.24 ../../../resources
+#cp /lib/libgdal.so.26 ../../../resources
+#cp /lib/libarmadillo.so.9 ../../../resources
+#cp /lib/x86_64-linux-gnu/libpoppler.so.97 ../../../resources
+#cp /lib/x86_64-linux-gnu/libjson-c.so.4 ../../../resources
+#cp /lib/x86_64-linux-gnu/libqhull.so.7 ../../../resources

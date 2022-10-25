@@ -34,10 +34,10 @@ public class MapsenseWrapperTest
       //mapsenseExternal.printMat(poseInitial, 6, 1);
       //mapsenseExternal.loadMat();
 
-      float[] points = new float[400000];
-      int numPoints = loadPointCloud("/home/quantum/Workspace/Code/MapSense/Data/Extras/Clouds/Scan_94", points);
-      
-      mapsenseExternal.extractPlanarRegionsFromPointCloud(points, numPoints);
+      //float[] points = new float[400000];
+      //int numPoints = loadPointCloud("/home/quantum/Workspace/Code/MapSense/Data/Extras/Clouds/Scan_94", points);
+      //
+      //mapsenseExternal.extractPlanarRegionsFromPointCloud(points, numPoints);
 
    }
 
@@ -78,22 +78,22 @@ public class MapsenseWrapperTest
 
       // Load these libraries before laoding the wrapper JNI .so. Use ldd to list all necessary libs
       // and copy them.
-      libraryFiles.add("libopencv_core.so.4.2");
-      libraryFiles.add("libopencv_imgproc.so.4.2");
-      libraryFiles.add("libwebp.so.6");
-
-      libraryFiles.add("libHalf.so.24");
-      libraryFiles.add("libIex-2_3.so.24");
-      libraryFiles.add("libIlmThread-2_3.so.24");
-
-      libraryFiles.add("libIlmImf-2_3.so.24");
-
-      libraryFiles.add("libjson-c.so.4");
-      libraryFiles.add("libpoppler.so.97");
-      libraryFiles.add("libarmadillo.so.9");
-      libraryFiles.add("libgdal.so.26");
-      libraryFiles.add("libopencv_imgcodecs.so.4.2");
-      libraryFiles.add("libopencv_highgui.so.4.2");
+      //libraryFiles.add("libopencv_core.so.4.2");
+      //libraryFiles.add("libopencv_imgproc.so.4.2");
+      //libraryFiles.add("libwebp.so.6");
+      //
+      //libraryFiles.add("libHalf.so.24");
+      //libraryFiles.add("libIex-2_3.so.24");
+      //libraryFiles.add("libIlmThread-2_3.so.24");
+      //
+      //libraryFiles.add("libIlmImf-2_3.so.24");
+      //
+      //libraryFiles.add("libjson-c.so.4");
+      //libraryFiles.add("libpoppler.so.97");
+      //libraryFiles.add("libarmadillo.so.9");
+      //libraryFiles.add("libgdal.so.26");
+      //libraryFiles.add("libopencv_imgcodecs.so.4.2");
+      //libraryFiles.add("libopencv_highgui.so.4.2");
 
       libraryFiles.add("libmapsense-wrapper.so");
       libraryFiles.add("libjniMapsenseWrapper.so");
