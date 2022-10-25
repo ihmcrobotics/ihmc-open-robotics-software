@@ -348,7 +348,8 @@ public class AvatarSimulationFactory
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
                                                           robotModel.get(),
-                                                          stepSnapperUpdatable);
+                                                          stepSnapperUpdatable,
+                                                          realtimeROS2Node.get());
    }
 
    private void createMasterContext()

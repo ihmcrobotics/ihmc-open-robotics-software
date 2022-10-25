@@ -2,14 +2,17 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -28,7 +31,7 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       this.csgPluginFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
       this.velocityPluginFactory = new VelocityBasedSteppingPluginFactory();
 
-//      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
+      //      csgPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
 //      velocityPluginFactory.setStepGeneratorCommandInputManager(commandInputManager);
    }
 
@@ -83,8 +86,9 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
                                                                                         contactableFeet,
                                                                                         timeProvider);
 
-      csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
-      csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
+      csgFootstepGenerator.getContinuousStepGenerator().setYoComponentProviders();
+//      csgFootstepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
+//      csgFootstepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
       csgFootstepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
 
       fastWalkingPlugin.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
