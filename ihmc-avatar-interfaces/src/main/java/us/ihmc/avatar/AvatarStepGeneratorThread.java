@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
@@ -50,7 +51,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,
                                     DRCRobotModel drcRobotModel,
-                                    AvatarStepSnapperUpdatable stepSnapperUpdatable)
+                                    AvatarStepSnapperUpdatable stepSnapperUpdatable,
+                                    RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
 
@@ -75,6 +77,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          pluginFactory.addUpdatable(stepSnapperUpdatable);
          pluginFactory.setFootStepAdjustment(stepSnapperUpdatable);
       }
+      if (ros2Node != null)
+         pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,

@@ -85,7 +85,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          if (polygonArea > parameters.getMinPlanarRegionArea())
             continue;
 
-         if (candidateRegion.getTransformToWorld().getM22() >= Math.cos(parameters.getMaxPlanarRegionAngle()))
+         if (candidateRegion.getTransformToWorld().getM22() < Math.cos(parameters.getMaxPlanarRegionAngle()))
             continue;
 
          PlanarRegion planarRegion = steppableRegionsList.add();
@@ -103,7 +103,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepAtSameHeightAsStanceFoot.setZ(stanceFootPose.getZ());
       footstepAtSameHeightAsStanceFoot.getOrientation().set(footstepPose.getOrientation());
 
-      if (steppableRegionsList.isEmpty())
+      if (!steppableRegionsList.isEmpty())
       {
          adjustedFootstepPose.set(footstepAtSameHeightAsStanceFoot);
          footPolygonToWiggle.set(footPolygons.get(footSide));
