@@ -32,7 +32,7 @@ import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
    private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
@@ -49,7 +49,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
-   public PlanarRegionFootstepSnapper(SteppingParameters steppingParameters, YoRegistry parentRegistry)
+   public PlanarRegionFootstepSnapper(SteppingParameters steppingParameters)
    {
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
@@ -64,10 +64,12 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
       footPolygon.update();
       footPolygons = new SideDependentList<>(footPolygon, footPolygon);
-
-      parentRegistry.addChild(registry);
    }
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
 
    public void setPlanarRegions(PlanarRegionsListCommand planarRegions)
    {
