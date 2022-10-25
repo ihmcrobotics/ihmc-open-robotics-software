@@ -27,7 +27,8 @@ public class ProMPManager
 {
    private final String taskName;
    private final HashMap<String, String> bodyPartsGeometry;
-   private final HashMap<String, ProMP> learnedProMPs = new HashMap<>(); //learned a multi-D promp for each bodyPart
+   // learnedProMPs stores a set of multi-D (e.g., for pose D=6, for position D=3) proMPs (a multi-D proMP for each body part)
+   private final HashMap<String, ProMP> learnedProMPs = new HashMap<>();
    private final HashMap<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
 
    /* Class constructor
@@ -100,8 +101,14 @@ public class ProMPManager
          // make all training trajectories have the same length (= mean length)
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
          trainingTrajectories.put(bodyPart, trainingTrajectory);
-         learnedProMPs.put(bodyPart, new ProMP(trainingTrajectory, 20)); // default 20 rbf functions seems to generalize well //TODO add as private attribute and set mehos
+         learnedProMPs.put(bodyPart, new ProMP(trainingTrajectory, 20)); // default 20 rbf functions seems to generalize well
       }
+   }
+
+   public void resetTask()
+   {
+      for (String bodyPart : bodyPartsGeometry.keySet())
+         learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), 20));
    }
 
    /* update the speed of the ProMPs of the task based on observation of a body-part trajectory (e.g., RightHand or LeftHand) */
@@ -129,8 +136,8 @@ public class ProMPManager
       // NOTE. we do not want to condition a proMP that will be modulated afterwards, this will likely corrupt the model
       ProMP copyProMPCurrentTask = new ProMP(trainingTrajectories.get(bodyPart), 20);
       // condition proMP to reach observed goal
-      updateTrajectoryGoal(copyProMPCurrentTask,bodyPart,observedGoal);
-      Trajectory meanTrajectoryProMPCurrentTask = new Trajectory(copyProMPCurrentTask.generate_trajectory(),1.0);
+      updateTrajectoryGoal(copyProMPCurrentTask, bodyPart, observedGoal);
+      Trajectory meanTrajectoryProMPCurrentTask = new Trajectory(copyProMPCurrentTask.generate_trajectory(), 1.0);
       // infer the new speed for the mean trajectory based on observed (portion of) trajectory
       double inferredSpeed = meanTrajectoryProMPCurrentTask.infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
@@ -196,7 +203,7 @@ public class ProMPManager
    /* update the predicted trajectory based on observed setpose */
    public void updateTaskTrajectory(String bodyPart, Pose3DReadOnly observedPose, int conditioningTimestep)
    {
-      updateTrajectory(learnedProMPs.get(bodyPart),bodyPart,observedPose,conditioningTimestep);
+      updateTrajectory(learnedProMPs.get(bodyPart), bodyPart, observedPose, conditioningTimestep);
    }
 
    private void updateTrajectory(ProMP myProMP, String bodyPart, Pose3DReadOnly observedPose, int conditioningTimestep)
@@ -216,29 +223,7 @@ public class ProMPManager
                viaPointStdDeviation.apply(i, j).put(0);
          }
       }
-      if (bodyPartsGeometry.get(bodyPart).equals("Position"))
-      {
-         viaPoint.apply(0).put(observedPose.getPosition().getX());
-         viaPoint.apply(1).put(observedPose.getPosition().getY());
-         viaPoint.apply(2).put(observedPose.getPosition().getZ());
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
-      {
-         viaPoint.apply(0).put(observedPose.getOrientation().getX());
-         viaPoint.apply(1).put(observedPose.getOrientation().getY());
-         viaPoint.apply(2).put(observedPose.getOrientation().getZ());
-         viaPoint.apply(3).put(observedPose.getOrientation().getS());
-      }
-      else if (bodyPartsGeometry.get(bodyPart).equals("Pose"))
-      {
-         viaPoint.apply(0).put(observedPose.getOrientation().getX());
-         viaPoint.apply(1).put(observedPose.getOrientation().getY());
-         viaPoint.apply(2).put(observedPose.getOrientation().getZ());
-         viaPoint.apply(3).put(observedPose.getOrientation().getS());
-         viaPoint.apply(4).put(observedPose.getPosition().getX());
-         viaPoint.apply(5).put(observedPose.getPosition().getY());
-         viaPoint.apply(6).put(observedPose.getPosition().getZ());
-      }
+      setViaPoint(viaPoint, bodyPart, observedPose);
       myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
    }
 
@@ -255,7 +240,7 @@ public class ProMPManager
    /* update the predicted trajectory based on observed goal */
    public void updateTaskTrajectoryGoal(String bodyPart, Pose3DReadOnly observedPose)
    {
-      updateTrajectoryGoal(learnedProMPs.get(bodyPart),bodyPart,observedPose);
+      updateTrajectoryGoal(learnedProMPs.get(bodyPart), bodyPart, observedPose);
    }
 
    private void updateTrajectoryGoal(ProMP myProMP, String bodyPart, Pose3DReadOnly observedPose)
@@ -276,6 +261,12 @@ public class ProMPManager
                viaPointStdDeviation.apply(i, j).put(0);
          }
       }
+      setViaPoint(viaPoint, bodyPart, observedPose);
+      myProMP.condition_goal(viaPoint, viaPointStdDeviation);
+   }
+
+   private void setViaPoint(EigenVectorXd viaPoint, String bodyPart, Pose3DReadOnly observedPose)
+   {
       if (bodyPartsGeometry.get(bodyPart).equals("Position"))
       {
          viaPoint.apply(0).put(observedPose.getPosition().getX());
@@ -299,7 +290,6 @@ public class ProMPManager
          viaPoint.apply(5).put(observedPose.getPosition().getY());
          viaPoint.apply(6).put(observedPose.getPosition().getZ());
       }
-      myProMP.condition_goal(viaPoint, viaPointStdDeviation);
    }
 
    /* generate mean of predicted trajectory as a list of frame poses */
@@ -352,5 +342,10 @@ public class ProMPManager
    public String getTaskName()
    {
       return taskName;
+   }
+
+   public HashMap<String, String> getBodyPartsGeometry()
+   {
+      return bodyPartsGeometry;
    }
 }
