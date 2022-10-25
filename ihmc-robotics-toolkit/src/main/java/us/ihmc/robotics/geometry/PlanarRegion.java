@@ -25,6 +25,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterface<PlanarRegion>
 {
@@ -38,7 +39,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
-   private final List<Point2D> concaveHullsVertices;
+   private final List<Point2DReadOnly> concaveHullsVertices;
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
     * the plane.
@@ -95,12 +96,12 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * @param planarRegionConvexPolygons the list of convex polygon that represents the planar
     *           region. Expressed in local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DBasics> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-      this.concaveHullsVertices = concaveHullVertices;
+      this.concaveHullsVertices = concaveHullVertices.stream().map(Point2D::new).collect(Collectors.toList());
       //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
       checkConcaveHullRepeatVertices(false);
 
@@ -144,6 +145,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
+      concaveHullsVertices.clear();
+
       convexPolygons.clear();
       for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
          convexPolygons.add(planarRegionConvexPolygons.get(i));
@@ -153,6 +156,26 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       regionId = newRegionId;
    }
+
+   public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, List<? extends Point2DReadOnly> concaveHullVertices, int newRegionId)
+   {
+      fromLocalToWorldTransform.set(transformToWorld);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      this.concaveHullsVertices.clear();
+      for (int i = 0; i < concaveHullVertices.size(); i++)
+         this.concaveHullsVertices.add(concaveHullVertices.get(i));
+
+      convexPolygons.clear();
+      for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
+         convexPolygons.add(planarRegionConvexPolygons.get(i));
+
+      updateBoundingBox();
+      updateConvexHull();
+
+      regionId = newRegionId;
+   }
+
 
    /**
     * Check if the given lineSegment intersects this region projected onto the XY-plane.
@@ -204,26 +227,27 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
    }
 
+   private final ConvexPolygon2D proejctedPolygonTemp = new ConvexPolygon2D();
    /**
     * Check if the given polygon intersects this region projected onto the XY-plane.
     *
-    * @param convexPolygon2d
+    * @param convexPolygonInWorld
     * @return true if the polygon intersects this PlanarRegion.
     */
-   public boolean isPolygonIntersecting(ConvexPolygon2DReadOnly convexPolygon2d)
+   public boolean isPolygonIntersecting(ConvexPolygon2DReadOnly convexPolygonInWorld)
    {
-      BoundingBox2DReadOnly polygonBoundingBox = convexPolygon2d.getBoundingBox();
+      BoundingBox2DReadOnly polygonBoundingBox = convexPolygonInWorld.getBoundingBox();
       if (!boundingBox3dInWorld.intersectsInclusiveInXYPlane(polygonBoundingBox))
          return false;
 
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
-      ConvexPolygon2D projectedPolygon = projectPolygonVerticallyToRegion(convexPolygon2d);
+      projectPolygonVerticallyToRegion(convexPolygonInWorld, proejctedPolygonTemp);
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygon, null);
+         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, proejctedPolygonTemp, null);
          if (hasIntersection)
             return true;
       }
@@ -807,7 +831,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return containsNaN;
    }
 
-   public List<Point2D> getConcaveHull()
+   public List<? extends Point2DReadOnly> getConcaveHull()
    {
       return concaveHullsVertices;
    }
@@ -821,8 +845,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       {
          int nextIndex = (i + 1) % concaveHullsVertices.size();
 
-         Point2D vertex = concaveHullsVertices.get(i);
-         Point2D nextVertex = concaveHullsVertices.get(nextIndex);
+         Point2DReadOnly vertex = concaveHullsVertices.get(i);
+         Point2DReadOnly nextVertex = concaveHullsVertices.get(nextIndex);
 
          if (vertex.distance(nextVertex) < 1e-7)
          {
@@ -835,7 +859,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
    }
 
-   public Point2D getConcaveHullVertex(int i)
+   public Point2DReadOnly getConcaveHullVertex(int i)
    {
       return concaveHullsVertices.get(i);
    }
@@ -1352,6 +1376,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, concaveHullCopy, convexPolygonsCopy);
       planarRegion.setRegionId(regionId);
+
       return planarRegion;
    }
 
