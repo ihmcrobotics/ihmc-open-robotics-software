@@ -13,14 +13,7 @@ import java.util.stream.Collectors;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.AvatarEstimatorThreadFactory;
-import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.AvatarStepGeneratorThread;
-import us.ihmc.avatar.ControllerTask;
-import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.StepGeneratorTask;
+import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
@@ -395,6 +388,7 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
       HumanoidSteppingPluginFactory steppingFactory;
+      AvatarStepSnapperUpdatable stepSnapperUpdatable = null;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
       HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParameters.hasValue()
             ? headingAndVelocityEvaluationScriptParameters.get()
@@ -413,18 +407,25 @@ public class SCS2AvatarSimulationFactory
       }
       else
       {
-         JoystickBasedSteppingPluginFactory velocityBasedSteppingGeneratorFactory = new JoystickBasedSteppingPluginFactory();
+         JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
          if (heightMapForFootstepZ.hasValue())
-            velocityBasedSteppingGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+            joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+         else
+         {
+            stepSnapperUpdatable = new AvatarStepSnapperUpdatable(robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                  joystickPluginFactory.getStepGeneratorCommandInputManager());
+            stepSnapperUpdatable.setShouldSnapToRegions(true);
+         }
 
-         steppingFactory = velocityBasedSteppingGeneratorFactory;
+         steppingFactory = joystickPluginFactory;
       }
 
       stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get());
+                                                          robotModel.get(),
+                                                          stepSnapperUpdatable);
    }
 
    private void setupMultiThreadedRobotController()
