@@ -30,6 +30,7 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("registry");
    private final OptionalFactoryField<StepGeneratorCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
    private final OptionalFactoryField<VelocityBasedSteppingParameters> inputParametersField = new OptionalFactoryField<>("inputParametersField");
+   private final List<Updatable> updatables = new ArrayList<>();
 
    public void setRegistry()
    {
@@ -64,6 +65,12 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
+   public void addUpdatable(Updatable updatable)
+   {
+      updatables.add(updatable);
+   }
+
+   @Override
    public StepGeneratorCommandInputManager getStepGeneratorCommandInputManager()
    {
       if (csgCommandInputManagerField.hasValue())
@@ -86,8 +93,6 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
          setRegistry();
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
-
-      List<Updatable> updatables = new ArrayList<>();
 
       VelocityBasedSteppingPlugin fastWalkingJoystickPlugin = new VelocityBasedSteppingPlugin(updatables);
 
