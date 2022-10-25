@@ -576,7 +576,7 @@ public class PlanarRegionTools
       firstEndPointInLocal.applyTransform(transformToLocal);
       secondEndPointInLocal.applyTransform(transformToLocal);
 
-      List<Point2D> concaveHull = query.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = query.getConcaveHull();
 
       List<Point3D> convexPolygon3D = new ArrayList<>();
       for (int i = 0; i < concaveHull.size(); i++)

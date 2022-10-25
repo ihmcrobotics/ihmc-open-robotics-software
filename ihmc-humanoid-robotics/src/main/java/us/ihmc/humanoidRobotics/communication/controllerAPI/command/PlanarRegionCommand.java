@@ -153,7 +153,7 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
 
    public void getPlanarRegion(PlanarRegion planarRegionToPack)
    {
-      planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, regionId);
+      planarRegionToPack.set(fromLocalToWorldTransform, convexPolygons, concaveHullsVertices, regionId);
    }
 
    @Override
