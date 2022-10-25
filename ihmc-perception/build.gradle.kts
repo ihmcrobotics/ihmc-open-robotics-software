@@ -86,6 +86,7 @@ slamWrapperDependencies {
 mapsenseWrapperDependencies {
    apiBytedecoNatives("javacpp")
    api("us.ihmc:ihmc-java-toolkit:source")
+   api("us.ihmc:ihmc-perception:source")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")

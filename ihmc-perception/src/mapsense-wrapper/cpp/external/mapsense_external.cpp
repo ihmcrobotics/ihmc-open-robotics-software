@@ -19,19 +19,47 @@ void MapsenseExternal::printMat(float* buffer, int height, int width)
 
 void MapsenseExternal::loadMat()
 {
-    // cv::Mat mat = cv::imread("/home/quantum/Pictures/Profiler_2.jpg");
+    cv::Mat mat = cv::imread("/home/bmishra/Pictures/20221011_BhavyanshMishra02.jpg");
 
-    // std::cout << "Height: " << mat.rows << std::endl;
+    std::cout << "Height: " << mat.rows << std::endl;
 
-    // cv::imshow("Window", mat);
-    // cv::waitKey(0);
+    cv::imshow("Window", mat);
+    cv::waitKey(0);
 }
 
 void MapsenseExternal::extractPlanarRegionsFromPointCloud(float* points, int numPoints)
 {
+
+    auto start_point = std::chrono::steady_clock::now();
+
+    std::vector<float> vertices;
+    
     for(int i = 0; i<numPoints; i++)
     {
-        std::cout << "Point: " << points[i*3] << ", " << points[i*3+1] << ", " << points[i*3+2] << std::endl;
+        Eigen::Vector3f point(points[i*3], points[i*3+1], points[i*3+2]);
+
+        if(point.norm() > 0.1f)
+        {
+            vertices.push_back(point.x());
+            vertices.push_back(point.y());
+            vertices.push_back(point.z());
+        }
+
+        // std::cout << "Point: " << points[i*3] << ", " << points[i*3+1] << ", " << points[i*3+2] << std::endl;
     }
+
+    // Call planar region calculator method to load pointcloud and return planar regions.
+    _regionCalculator->GenerateRegionsFromPointCloud(appState, vertices);
+
+
+    printf("Total Points: %d\n", (int)(vertices.size()/3));
+
+    auto end_point = std::chrono::steady_clock::now();
+   long long start = std::chrono::time_point_cast<std::chrono::microseconds>(start_point).time_since_epoch().count();
+   long long end = std::chrono::time_point_cast<std::chrono::microseconds>(end_point).time_since_epoch().count();
+
+   float duration = (end - start) * 0.001f;
+
+   printf("Total Time to Generate Regions: %.3lf ms\n", duration);
 
 }

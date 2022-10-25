@@ -1,4 +1,5 @@
 #include "planar_region_calculator.h"
+#include "buffer_tools.h"
 
 PlanarRegionCalculator::PlanarRegionCalculator(ApplicationState& app) : app(app)
 {
@@ -328,58 +329,37 @@ bool PlanarRegionCalculator::GeneratePatchGraphFromDepth(ApplicationState& appSt
    return true;
 }
 
-void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& appState, const PointCloud& cloud, double inputTimestamp)
+void PlanarRegionCalculator::GenerateRegionsFromPointCloud(ApplicationState& appState, std::vector<float>& points)
 {
-   // MAPSENSE_PROFILE_FUNCTION();
-
-   //    int ROWS = 64;
-   //    int COLS = 1024;
-   //
-   //    appState.KERNEL_SLIDER_LEVEL = 2;
-   //    appState.DEPTH_INPUT_WIDTH = COLS;
-   //    appState.DEPTH_INPUT_HEIGHT = ROWS;
-   //    appState.DEPTH_PATCH_HEIGHT = appState.KERNEL_SLIDER_LEVEL;
-   //    appState.DEPTH_PATCH_WIDTH = appState.KERNEL_SLIDER_LEVEL;
-   //    appState.SUB_H = ROWS / appState.DEPTH_PATCH_HEIGHT;
-   //    appState.SUB_W = COLS / appState.DEPTH_PATCH_WIDTH;
-
-   // std::vector<float> points = cloud.GetMesh()->_vertices;
-   std::vector<float> points;
-
-   // MS_INFO("GenerateRegions:({}, {}, {}, {}, {}, {})", app.HASH_INPUT_HEIGHT, app.HASH_INPUT_WIDTH, app.HASH_PATCH_HEIGHT, app.HASH_PATCH_WIDTH, app.HASH_SUB_H,
-   //         app.HASH_SUB_W);
+   
+   printf("GenerateRegions:({}, {}, {}, {}, {}, {})", app.HASH_INPUT_HEIGHT, app.HASH_INPUT_WIDTH, app.HASH_PATCH_HEIGHT, app.HASH_PATCH_WIDTH, app.HASH_SUB_H,
+           app.HASH_SUB_W);
 
    appState.REGION_MODE = 1;
    _hashMapFrameProcessor->Init(appState);
 
    /* Setup size for reading patch-wise kernel maps from GPU */
    std::array<cl::size_type, 3> regionOutputSize({appState.HASH_SUB_W, appState.HASH_SUB_H, 1});
-   // regionOutputSize[0] = appState.HASH_SUB_W;
-   // regionOutputSize[1] = appState.HASH_SUB_H;
-   // regionOutputSize[2] = 1;
-   // cl::size_type<3> origin, size;
-   // origin[0] = 0;
-   // origin[0] = 0;
-   // origin[0] = 0;
-   // size[0] = appState.HASH_INPUT_WIDTH;
-   // size[1] = appState.HASH_INPUT_HEIGHT;
-   // size[2] = 1;
-
+   std::array<cl::size_type, 3> size({appState.HASH_INPUT_WIDTH, appState.HASH_INPUT_HEIGHT, 1});
 
    /*-------------------------------------------------------------------------------------------------------
     * ---------------------------------------    GPU Buffers -----------------------------------------------
     * ------------------------------------------------------------------------------------------------------
     * */
-   /* Input Data GPU OpenCL Buffers */
+
+   /* Create input data GPU OpenCL Buffers and load vertices into them as float sequence */
+   printf("/* Create input data GPU OpenCL Buffers and load vertices into them as float sequence */\n");
    uint8_t paramsBuffer = CreateParameterBuffer(appState);
    uint8_t pointsBuffer = _openCL->CreateLoadBufferFloat(points.data(), points.size());
 
-   /* Intermediate GPU OpenCL Buffers */
+   /* Create empty intermediate buffers for GPU kernels */
+   printf("/* Create empty intermediate buffers for GPU kernels */\n");
    uint8_t indexBuffer = _openCL->CreateBufferInt((int) (points.size() / 3) * 2);
    uint8_t partsBuffer = _openCL->CreateBufferInt((int) (points.size() / 3));
    uint8_t hashBuffer = _openCL->CreateReadWriteImage2D_R16(appState.HASH_INPUT_WIDTH, appState.HASH_INPUT_HEIGHT);
 
    /*Output Data GPU OpenCL Buffers */
+   printf("/*Output Data GPU OpenCL Buffers */\n");
    uint8_t clBuffer_nx = _openCL->CreateReadWriteImage2D_RFloat(appState.HASH_SUB_W, appState.HASH_SUB_H);
    uint8_t clBuffer_ny = _openCL->CreateReadWriteImage2D_RFloat(appState.HASH_SUB_W, appState.HASH_SUB_H);
    uint8_t clBuffer_nz = _openCL->CreateReadWriteImage2D_RFloat(appState.HASH_SUB_W, appState.HASH_SUB_H);
@@ -388,8 +368,8 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
    uint8_t clBuffer_gz = _openCL->CreateReadWriteImage2D_RFloat(appState.HASH_SUB_W, appState.HASH_SUB_H);
    uint8_t clBuffer_graph = _openCL->CreateReadWriteImage2D_R8(appState.HASH_SUB_W, appState.HASH_SUB_H);
 
-   // MS_INFO("Created All Input Images.");
-
+   /* Set arguments for the various GPU kernels to be used */
+   printf("/* Set arguments for the various GPU kernels to be used */\n");
    _openCL->SetArgument("indexKernel", 0, pointsBuffer, false);
    _openCL->SetArgument("indexKernel", 1, indexBuffer, false);
    _openCL->SetArgument("indexKernel", 2, partsBuffer, false);
@@ -405,6 +385,7 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
    _openCL->SetArgument("diffuseKernel", 0, hashBuffer, true);
    _openCL->SetArgument("diffuseKernel", 1, paramsBuffer, false);
 
+   printf("Setup PackKernel arguments\n");
    std::vector<uint8_t> argsImgPack = {hashBuffer, clBuffer_nx, clBuffer_ny, clBuffer_nz, clBuffer_gx, clBuffer_gy, clBuffer_gz};
    for (uint8_t i = 0; i < argsImgPack.size(); i++)
       _openCL->SetArgument("packKernel", i, argsImgPack[i], true);
@@ -412,6 +393,7 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
    _openCL->SetArgument("packKernel", argsImgPack.size() + 1, pointsBuffer);
    _openCL->SetArgumentInt("packKernel", argsImgPack.size() + 2, appState.REGION_MODE);
 
+   printf("Setup MergeKernel arguments\n");
    std::vector<uint8_t> argsImgMerge = {clBuffer_nx, clBuffer_ny, clBuffer_nz, clBuffer_gx, clBuffer_gy, clBuffer_gz, clBuffer_graph};
    for (uint8_t i = 0; i < argsImgMerge.size(); i++)
       _openCL->SetArgument("mergeKernel", i, argsImgMerge[i], true);
@@ -422,9 +404,11 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
     * ------------------------------------------------------------------------------------------------------
     * */
    /* Input Data CPU OpenCV Buffers */
+   printf("Setup input data CPU buffers\n");
    cv::Mat indexMat(appState.HASH_INPUT_HEIGHT, appState.HASH_INPUT_WIDTH, CV_16UC1, cv::Scalar(0));
 
    /* Intermediate GPU OpenCV Buffers */
+   printf("Setup GPU buffers\n");
    cv::Mat output_nx(appState.HASH_SUB_H, appState.HASH_SUB_W, CV_32FC1);
    cv::Mat output_ny(appState.HASH_SUB_H, appState.HASH_SUB_W, CV_32FC1);
    cv::Mat output_nz(appState.HASH_SUB_H, appState.HASH_SUB_W, CV_32FC1);
@@ -438,6 +422,7 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
     * ---------------------------------------    OpenCL Kernel Calls ---------------------------------------
     * ------------------------------------------------------------------------------------------------------
     * */
+   printf("Deploy OpenCL kernels\n");
    _openCL->commandQueue.enqueueNDRangeKernel(_openCL->indexKernel, cl::NullRange, cl::NDRange(points.size() / 3), cl::NullRange);
    _openCL->commandQueue.enqueueNDRangeKernel(_openCL->hashKernel, cl::NullRange, cl::NDRange(appState.HASH_INPUT_HEIGHT, appState.HASH_INPUT_WIDTH),
                                               cl::NullRange);
@@ -455,7 +440,7 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
     * ------------------------------------------------------------------------------------------------------
     * */
 
-   auto start_point = std::chrono::steady_clock::now();
+   printf("Read data from GPU buffers\n");
    _openCL->ReadImage(clBuffer_nx, regionOutputSize, output_nx.data);
    _openCL->ReadImage(clBuffer_ny, regionOutputSize, output_ny.data);
    _openCL->ReadImage(clBuffer_nz, regionOutputSize, output_nz.data);
@@ -465,13 +450,12 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
    _openCL->ReadImage(clBuffer_graph, regionOutputSize, output_graph.data);
 
    _openCL->commandQueue.finish();
-   auto end_point = std::chrono::steady_clock::now();
 
-   // if (appState.HASH_PRINT_MAT)
-   // {
-   //    _openCL->ReadImage(hashBuffer, size, indexMat.data);
-   //    AppUtils::PrintMatR16(indexMat);
-   // }
+   if (appState.HASH_PRINT_MAT)
+   {
+      _openCL->ReadImage(hashBuffer, size, indexMat.data);
+      AppUtils::PrintMatR16(indexMat);
+   }
 
    if (appState.HASH_PARTS_ENABLED)
    {
@@ -484,6 +468,7 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
       // cloud.SetPartIds(partIds);
    }
 
+   printf("Combine outputs from CPU buffers\n");
    /* Combine the CPU buffers into single image with multiple channels */
    cv::Mat regionOutput(appState.HASH_SUB_H, appState.HASH_SUB_W, CV_32FC(6));
    std::vector<cv::Mat> channels = {output_nx, output_ny, output_nz, output_gx, output_gy, output_gz};
@@ -491,6 +476,7 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
    output.setRegionOutput(regionOutput);
    output.setPatchData(output_graph);
 
+   printf("Perform segmentation\n");
    _hashMapFrameProcessor->GenerateSegmentation(output, planarRegionList); // Perform segmentation using DFS on Patch Graph on CPU to generate Planar Regions
    PlanarRegion::SetZeroId(planarRegionList);
 
@@ -511,6 +497,8 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
    //      _hashRegionsZUp.emplace_back(std::move(planarRegion));
    //   }
 
+
+   printf("Collect planar regions after segmentation.\n");
    for (int k = 0; k < planarRegionList.size(); k++)
       planarRegionList[k]->RetainConvexHull();
 
@@ -521,13 +509,8 @@ void PlanarRegionCalculator::GeneratePatchGraphFromPointCloud(ApplicationState& 
       frameId++;
    }
 
-   long long start = std::chrono::time_point_cast<std::chrono::microseconds>(start_point).time_since_epoch().count();
-   long long end = std::chrono::time_point_cast<std::chrono::microseconds>(end_point).time_since_epoch().count();
 
-   float duration = (end - start) * 0.001f;
-
-   // MS_INFO("Total Time PR: {} ms", duration);
-   // MS_INFO("Total Regions Found: {}", planarRegionList.size());
+   printf("Total Regions Found: %d\n", planarRegionList.size());
 }
 
 void PlanarRegionCalculator::generateRegionsFromDepth(ApplicationState& appState, cv::Mat& depth, double inputTimestamp)
@@ -608,7 +591,7 @@ bool PlanarRegionCalculator::RenderEnabled()
    return _render;
 }
 
-void PlanarRegionCalculator::GenerateRegionFromPointcloudOnCPU()
+void PlanarRegionCalculator::GenerateRegionFromPointCloudOnCPU()
 {
    //    float pitchUnit = M_PI / (2 * ROWS);
    //    float yawUnit = 2 * M_PI / (COLS);

@@ -511,8 +511,6 @@ void kernel indexKernel(global float* cloud, global int* indices, global int* pa
 
 //   printf("Index: %d -> %d, %d\n", id, indices[id*2], indices[id*2+1]);
 
-
-
 }
 
 /*

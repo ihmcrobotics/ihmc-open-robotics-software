@@ -73,13 +73,16 @@ OpenCLManager::OpenCLManager(const std::string& packagePath)
 
 uint8_t OpenCLManager::CreateLoadBufferFloat(float *params, uint32_t count)
 {
-   buffers.emplace_back(cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * count, params));
+   buffers.emplace_back(cl::Buffer(CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(float) * count, params, nullptr));
    return buffers.size() - 1;
 }
 
 uint8_t OpenCLManager::CreateLoadBufferUnsignedInt(uint32_t *params, uint32_t count)
 {
    buffers.emplace_back(cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(uint32_t) * count, params));
+   cl::Buffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+        sizeof(uint32_t) * count,
+        params, nullptr);
    return buffers.size() - 1;
 }
 

@@ -31,7 +31,7 @@ class ApplicationState
        * b) InputWidth should be divisible by (KernelResLevel * AspectRatioWidth)
        * */
       bool HASH_DIFFUSION_ENABLED = false;
-      bool HASH_PRINT_MAT = false;
+      bool HASH_PRINT_MAT = true;
       bool HASH_PARTS_ENABLED = false;
       int REGION_MODE = 0; // 0 for depth, 1 for point-cloud
       int HASH_INPUT_HEIGHT = 64;

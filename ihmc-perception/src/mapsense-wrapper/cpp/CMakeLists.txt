@@ -61,7 +61,10 @@ set(MS_SOURCES
     external/mapsense_external.h
     external/mapsense_external.cpp
 
-    # core/core.h
+    core/core.h
+
+    tools/buffer_tools.h
+    tools/buffer_tools.cpp
 )
 
 
@@ -104,7 +107,8 @@ target_include_directories(mapsense-wrapper PUBLIC
      launcher/
      opencl/
      external/
-    #  core/
+     core/
+     tools/
 )
 
 install(TARGETS mapsense-wrapper

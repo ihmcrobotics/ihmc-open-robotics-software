@@ -39,9 +39,9 @@ class PlanarRegionCalculator
 
       uint8_t CreateParameterBuffer(const ApplicationState& app);
 
-      void GeneratePatchGraphFromPointCloud(ApplicationState& appState, const PointCloud& cloud, double inputTimestamp);
+      void GenerateRegionsFromPointCloud(ApplicationState& appState, std::vector<float>& vertices);
 
-      void GenerateRegionFromPointcloudOnCPU();
+      void GenerateRegionFromPointCloudOnCPU();
 
       bool RenderEnabled();
 
