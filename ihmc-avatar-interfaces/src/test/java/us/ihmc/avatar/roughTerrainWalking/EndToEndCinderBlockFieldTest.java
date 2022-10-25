@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -48,6 +51,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockField
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockType;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments.CinderBlockFieldPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
@@ -108,12 +112,11 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
-      cinderBlockFieldEnvironment.addFlatGround();
-      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addDRCCinderBlockField();
-      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses, getStepHeightOffset());
+      CinderBlockFieldPlanarRegionEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldPlanarRegionEnvironment();
+//      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addDRCCinderBlockField();
+//      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses, getStepHeightOffset());
 
-      footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(getSwingHeight()));
+//      footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(getSwingHeight()));
 
       setupSimulation(cinderBlockFieldEnvironment);
       simulationTestHelper.start();
@@ -129,26 +132,27 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double desiredHeight = pelvisPosition.getZ();
       simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
-      simulationTestHelper.publishToController(generatePlanarRegionsListForCinderBlocks(cinderBlockPoses, getStepHeightOffset()));
+      simulationTestHelper.publishToController(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockFieldEnvironment.getPlanarRegionsList()));//generatePlanarRegionsListForCinderBlocks(cinderBlockPoses, getStepHeightOffset()));
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateNow(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
-      assertTrue(success);
-
-      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
-      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
-      Point3D expectedPelvis = new Point3D();
-      expectedPelvis.interpolate(step1, step2, 0.5);
-      expectedPelvis.setZ(desiredHeight);
-      Vector3D margin = new Vector3D(0.25, 0.25, 0.25);
-      Point3D min = new Point3D(expectedPelvis);
-      Point3D max = new Point3D(expectedPelvis);
-      min.sub(margin);
-      max.add(margin);
-      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
+      success = simulationTestHelper.simulateNow(5.0);
+//      assertTrue(success);
+//
+//      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
+//      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
+//      Point3D expectedPelvis = new Point3D();
+//      expectedPelvis.interpolate(step1, step2, 0.5);
+//      expectedPelvis.setZ(desiredHeight);
+//      Vector3D margin = new Vector3D(0.25, 0.25, 0.25);
+//      Point3D min = new Point3D(expectedPelvis);
+//      Point3D max = new Point3D(expectedPelvis);
+//      min.sub(margin);
+//      max.add(margin);
+//      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
+      simulationTestHelper.setKeepSCSUp(true);
 
       simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
@@ -625,7 +629,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       List<ConvexPolygon2D> polygonList = new ArrayList<>();
       polygonList.add(polygon);
 
-      PlanarRegion planarRegion = new PlanarRegion(planarRegionPose, polygonList);
+      PlanarRegion planarRegion = new PlanarRegion(planarRegionPose,
+                                                   polygon.getVertexBufferView().stream().map(Point2D::new).collect(Collectors.toList()), polygonList);
       planarRegionsListToPack.add(planarRegion);
    }
 
