@@ -310,6 +310,7 @@ public class AvatarSimulationFactory
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
       HumanoidSteppingPluginFactory steppingFactory;
+      AvatarStepSnapperUpdatable stepSnapperUpdatable = null;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
 
       if (useHeadingAndVelocityScript || headingAndVelocityEvaluationScriptParameters.hasValue())
@@ -329,18 +330,25 @@ public class AvatarSimulationFactory
       }
       else
       {
-         JoystickBasedSteppingPluginFactory velocityBasedSteppingGeneratorFactory = new JoystickBasedSteppingPluginFactory();
+         JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
          if (footstepAdjustment.hasValue())
-            velocityBasedSteppingGeneratorFactory.setFootStepAdjustment(footstepAdjustment.get());
+            joystickPluginFactory.setFootStepAdjustment(footstepAdjustment.get());
+         else
+         {
+            stepSnapperUpdatable = new AvatarStepSnapperUpdatable(robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                  joystickPluginFactory.getStepGeneratorCommandInputManager());
+            stepSnapperUpdatable.setShouldSnapToRegions(true);
+         }
 
-         steppingFactory = velocityBasedSteppingGeneratorFactory;
+         steppingFactory = joystickPluginFactory;
       }
 
       stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get());
+                                                          robotModel.get(),
+                                                          stepSnapperUpdatable);
    }
 
    private void createMasterContext()

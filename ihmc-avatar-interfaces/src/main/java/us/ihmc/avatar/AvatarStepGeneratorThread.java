@@ -49,7 +49,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     HumanoidRobotContextDataFactory contextDataFactory,
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,
-                                    DRCRobotModel drcRobotModel)
+                                    DRCRobotModel drcRobotModel,
+                                    AvatarStepSnapperUpdatable stepSnapperUpdatable)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
 
@@ -69,12 +70,11 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
       csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
 
-
-      AvatarStepSnapperUpdatable stepGeneratorSnapperUpdatable = new AvatarStepSnapperUpdatable(drcRobotModel.getWalkingControllerParameters().getSteppingParameters(),
-                                                                                                csgCommandInputManager,
-                                                                                                csgRegistry);
-      pluginFactory.addUpdatable(stepGeneratorSnapperUpdatable);
-      pluginFactory.setFootStepAdjustment(stepGeneratorSnapperUpdatable);
+      if (stepSnapperUpdatable != null)
+      {
+         pluginFactory.addUpdatable(stepSnapperUpdatable);
+         pluginFactory.setFootStepAdjustment(stepSnapperUpdatable);
+      }
 
       humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       continuousStepGeneratorPlugin = pluginFactory.buildPlugin(humanoidReferenceFrames,
@@ -87,7 +87,8 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                                                    csgTime);
       csgRegistry.addChild(continuousStepGeneratorPlugin.getRegistry());
 
-
+      if (stepSnapperUpdatable != null)
+         csgRegistry.addChild(stepSnapperUpdatable.getRegistry());
 
       ParameterLoaderHelper.loadParameters(this, drcRobotModel, csgRegistry);
 
