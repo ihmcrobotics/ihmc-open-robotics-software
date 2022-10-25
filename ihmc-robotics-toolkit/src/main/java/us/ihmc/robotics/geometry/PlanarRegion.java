@@ -81,7 +81,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * @param planarRegionConvexPolygons the list of convex polygon that represents the planar
     *           region. Expressed in local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       this(transformToWorld, new ArrayList<>(), planarRegionConvexPolygons);
       updateConcaveHull();
