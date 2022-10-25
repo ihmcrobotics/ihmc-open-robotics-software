@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -20,6 +21,7 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    private final ComponentBasedFootstepDataMessageGeneratorFactory csgPluginFactory;
    private final VelocityBasedSteppingPluginFactory velocityPluginFactory;
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
+   private final List<Updatable> updatables = new ArrayList<>();
 
    public JoystickBasedSteppingPluginFactory()
    {
@@ -40,6 +42,12 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    {
       csgPluginFactory.setFootStepAdjustment(footstepAdjustment);
       velocityPluginFactory.setFootStepAdjustment(footstepAdjustment);
+   }
+
+   @Override
+   public void addUpdatable(Updatable updatable)
+   {
+      this.updatables.add(updatable);
    }
 
    @Override
@@ -86,7 +94,6 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                     commandInputManager::setHighLevelStateChangeStatusMessage);
 
-      List<Updatable> updatables = new ArrayList<>();
       updatables.add(commandInputManager);
 
       //this is probably not the way the class was intended to be modified.
