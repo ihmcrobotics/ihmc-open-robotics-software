@@ -17,14 +17,14 @@ import static java.lang.Math.exp;
  * which represent a probabilistic prediction of multi-dimensional trajectories.
  * Initially the input from the user is not modified and is simply observed to produce a fitting prediction.
  * Once the task is detected (by recognizing the protagonist object of that task and observing the current motion of the user),
- * the teleoperated referenceFrame gradually shifts (as we get closer to the goal of the task)
- * from the reference specified by the user to the predicted assistance of the ProMPs.
+ * the teleoperated referenceFrame gradually shifts from the reference specified by the user to the predicted assistance of the ProMPs.
  */
 public class ProMPAssistant implements TeleoperationAssistant
 {
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); //proMPManagers stores a proMPManager for each task
    private String currentTask = ""; //detected task
    private int numberObservations = 0; //number of observations used to update the prediction
+   private String relevantBodyPart = "";
    private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedFrameTrajectory = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
@@ -53,14 +53,14 @@ public class ProMPAssistant implements TeleoperationAssistant
       {
          //TODO change to retrieve from config file what is the relevant robot part for the goal of that task
          //TODO change to guess what side is the one being used
-         String relevantBodyPart = "rightHand"; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
+         relevantBodyPart = "rightHand"; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
          if (objectPoseEstimated())
          {
             //store observed pose
             bodyPartObservedFrameTrajectory.get(bodyPart).add(observedPose);
             if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
             {
-               updateTask(relevantBodyPart);
+               updateTask();
                generateTaskTrajectories();
                doneInitialProcessingTask = true;
             }
@@ -72,9 +72,9 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       if (currentTask.isEmpty())
       {
-         //TODO 1. recognize task with the help of object detection (or Aruco Markers to begin with)
+         //TODO 1. recognize task with object detection algorithm (or Aruco Markers to begin with)
          currentTask = "PushDoor";
-         //initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of FramePoses
+         //initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
          for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
             bodyPartObservedFrameTrajectory.put(bodyPart, new ArrayList<>());
          return !(currentTask.isEmpty());
@@ -91,9 +91,9 @@ public class ProMPAssistant implements TeleoperationAssistant
       return !(taskGoalPose.equals(new FramePose3D()));
    }
 
-   private void updateTask(String relevantBodyPart)
+   private void updateTask()
    {
-      //update speed proMP based on relevant body part observed (portion of) trajectory and goal
+      //update speed proMP based on relevant body part observed trajectory and goal
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get(relevantBodyPart), taskGoalPose, relevantBodyPart);
       //update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedFrameTrajectory.keySet())
@@ -113,7 +113,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       for (String bodyPart : bodyPartObservedFrameTrajectory.keySet())
       {
          bodyPartGeneratedFrameTrajectory.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart));
-         bodyPartTrajectorySampleCounter.put(bodyPart,numberObservations);
+         bodyPartTrajectorySampleCounter.put(bodyPart, numberObservations);
       }
    }
 
@@ -129,40 +129,47 @@ public class ProMPAssistant implements TeleoperationAssistant
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
       //take a sample from the trajectory
       FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
-      //take the next sample from the trajectory next time
-      bodyPartTrajectorySampleCounter.replace(bodyPart,bodyPartTrajectorySampleCounter.get(bodyPart)+1);
+      //TODO compute distance from region close to the goal and use this to select the next sample.
+      // If distance is increasing, go back to previous sample
 
-      if (bodyPart.equals(relevantBodyPart)){
-         //compute distance from goal
-
-         //compute initial distance when goal is detected
-
-         //set a_stpNo according to distance
+      if (bodyPart.equals(relevantBodyPart))
+      {
+         //TODO compute distance from region close to the goal and use this to modulate alpha
+         // compute initial distance when goal is detected
+         // set alpha according to distance
       }
       // shared-control arbitration law
-      if (a_stepNo <= alpha_step)
+      int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
+      if (sampleCounter <= generatedFramePoseTrajectory.size())
       {
-         double alpha = 1.0 / (1 + exp(-12 * (x - 0.5))); //sigmoid with ~[X:0,Y:0],[X:0.5,Y:0.5],~[X:1,Y:1]
+         double x = (sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
+         //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1]
+         double alpha = 1.0 / (1 + 4 * exp(-18 * (x - 0.2)));
          //set orientation
          FixedFrameQuaternionBasics frameOrientation = framePose.getOrientation();
          FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
          FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-         arbitratedFrameOrientation.set(alpha * frameOrientation.getX() + (1 - alpha) * generatedFrameOrientation.getX(),
-                                        alpha * frameOrientation.getY() + (1 - alpha) * generatedFrameOrientation.getY(),
-                                        alpha * frameOrientation.getZ() + (1 - alpha) * generatedFrameOrientation.getZ(),
-                                        alpha * frameOrientation.getS() + (1 - alpha) * generatedFrameOrientation.getS());
+         arbitratedFrameOrientation.set((1 - alpha) * frameOrientation.getX() + alpha * generatedFrameOrientation.getX(),
+                                        (1 - alpha) * frameOrientation.getY() + alpha * generatedFrameOrientation.getY(),
+                                        (1 - alpha) * frameOrientation.getZ() + alpha * generatedFrameOrientation.getZ(),
+                                        (1 - alpha) * frameOrientation.getS() + alpha * generatedFrameOrientation.getS());
          //set position
          FixedFramePoint3DBasics framePosition = framePose.getPosition();
          FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
          FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-         arbitratedFramePosition.setX(alpha * framePosition.getX() + (1 - alpha) * generatedFramePosition.getX());
-         arbitratedFramePosition.setY(alpha * framePosition.getY() + (1 - alpha) * generatedFramePosition.getY());
-         arbitratedFramePosition.setZ(alpha * framePosition.getZ() + (1 - alpha) * generatedFramePosition.getZ());
+         arbitratedFramePosition.setX((1 - alpha) * framePosition.getX() + alpha * generatedFramePosition.getX());
+         arbitratedFramePosition.setY((1 - alpha) * framePosition.getY() + alpha * generatedFramePosition.getY());
+         arbitratedFramePosition.setZ((1 - alpha) * framePosition.getZ() + alpha * generatedFramePosition.getZ());
 
          framePose.getPosition().set(arbitratedFramePosition);
          framePose.getOrientation().set(arbitratedFrameOrientation);
 
-         a_stepNo++;
+         //take the next sample from the trajectory next time
+         bodyPartTrajectorySampleCounter.replace(bodyPart, bodyPartTrajectorySampleCounter.get(bodyPart) + 1);
+      }
+      else
+      {
+         reset();
       }
    }
 
