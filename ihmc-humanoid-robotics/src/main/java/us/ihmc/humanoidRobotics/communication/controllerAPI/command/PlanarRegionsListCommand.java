@@ -97,6 +97,11 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
       return planarRegions.get(i);
    }
 
+   public void addPlanarRegionCommand(PlanarRegionCommand command)
+   {
+      this.planarRegions.add().set(command);
+   }
+
    @Override
    public Class<PlanarRegionsListMessage> getMessageClass()
    {

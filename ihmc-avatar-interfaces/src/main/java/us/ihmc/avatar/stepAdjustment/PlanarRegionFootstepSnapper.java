@@ -82,14 +82,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                                                                          candidateRegion.getConcaveHullsVertices().size(),
                                                                                          true,
                                                                                          null);
-         if (polygonArea > parameters.getMinPlanarRegionArea())
+         if (polygonArea < parameters.getMinPlanarRegionArea())
             continue;
 
-         if (candidateRegion.getTransformToWorld().getM22() < Math.cos(parameters.getMaxPlanarRegionAngle()))
+         if (Math.abs(candidateRegion.getTransformToWorld().getM22()) < Math.cos(parameters.getMaxPlanarRegionAngle()))
             continue;
 
          PlanarRegion planarRegion = steppableRegionsList.add();
-         planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getRegionId());
+         planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getConcaveHullsVertices(), candidateRegion.getRegionId());
       }
    }
 
