@@ -32,6 +32,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    private final OptionalFactoryField<FootstepAdjustment> primaryFootstepAdjusterField = new OptionalFactoryField<>("csgPrimaryFootstepAdjusterField");
    private final OptionalFactoryField<List<FootstepAdjustment>> secondaryFootstepAdjusterField = new OptionalFactoryField<>("csgSecondaryFootstepAdjusterFields");
 
+   private final List<Updatable> updatables = new ArrayList<>();
+
    public ComponentBasedFootstepDataMessageGeneratorFactory()
    {
       createSupportFootBasedFootstepAdjustment.setDefaultValue(true);
@@ -51,6 +53,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    public void setFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
       primaryFootstepAdjusterField.set(footStepAdjustment);
+   }
+
+   @Override
+   public void addUpdatable(Updatable updatable)
+   {
+      this.updatables.add(updatable);
    }
 
    public void addSecondaryFootStepAdjustment(FootstepAdjustment footStepAdjustment)
@@ -140,8 +148,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       });
 
       continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
-
-      List<Updatable> updatables = new ArrayList<>();
 
       if (yoGraphicsListRegistry != null && contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
