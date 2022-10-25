@@ -62,7 +62,7 @@ public class PlanarRegionFootstepSnapperTest
 
       poseOnGround.set(-0.15, 0.0, 0.0);
       poseOnBlock.set(0.3, 0.4, 0.0);
-      poseOnBlockEdge.set(0.2, 0.3, 0.0);
+      poseOnBlockEdge.set(0.2, 0.25, 0.0);
 
       FramePose3D snappedPoseOnGround = new FramePose3D();
       FramePose3D snappedPoseOnBlockEdge = new FramePose3D();
@@ -74,6 +74,7 @@ public class PlanarRegionFootstepSnapperTest
 
       expectedPoseOnGround.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.15, 0.0, 0.0), new FrameQuaternion());
       expectedPoseOnBlock.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.3, 0.4, 0.25), new FrameQuaternion());
+      expectedPoseOnBlockEdge.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, 0.3, 0.25), new FrameQuaternion());
 
       snapper.adjustFootstep(new FramePose3D(), poseOnGround, RobotSide.LEFT, snappedPoseOnGround);
       EuclidFrameTestTools.assertEquals(expectedPoseOnGround, snappedPoseOnGround, 1e-5);
