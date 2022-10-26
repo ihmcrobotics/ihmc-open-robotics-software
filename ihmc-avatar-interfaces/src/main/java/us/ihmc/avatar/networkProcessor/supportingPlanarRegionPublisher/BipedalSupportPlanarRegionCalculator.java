@@ -1,26 +1,27 @@
 package us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,102 +31,114 @@ public class BipedalSupportPlanarRegionCalculator
    private static final int RIGHT_FOOT_INDEX = 1;
    private static final int CONVEX_HULL_INDEX = 2;
 
-   private final List<PlanarRegion> supportRegions = new ArrayList<>();
+   private final PlanarRegionCommand[] supportRegions = new PlanarRegionCommand[3];
 
-   private final FullHumanoidRobotModel fullRobotModel;
-   private final OneDoFJointBasics[] allJointsExcludingHands;
-   private final HumanoidReferenceFrames referenceFrames;
    private final SideDependentList<ContactablePlaneBody> contactableFeet;
-   private final SideDependentList<List<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private final SideDependentList<RecyclingArrayList<FramePoint2D>> scaledContactPointList = new SideDependentList<>(new RecyclingArrayList<>(FramePoint2D::new),
+                                                                                                                      new RecyclingArrayList<>(FramePoint2D::new));
 
-   public BipedalSupportPlanarRegionCalculator(DRCRobotModel robotModel)
+   private final ContactStateProvider contactStateProvider;
+
+   private final PlanarRegionCommand leftRegion = new PlanarRegionCommand();
+   private final PlanarRegionCommand rightRegion = new PlanarRegionCommand();
+   private final SideDependentList<PlanarRegionCommand> footRegions = new SideDependentList<>(leftRegion, rightRegion);
+   private final PlanarRegionCommand combinedRegion = new PlanarRegionCommand();
+
+   private final FramePoint2D tempPoint = new FramePoint2D();
+
+   public BipedalSupportPlanarRegionCalculator(FullHumanoidRobotModel fullRobotModel,
+                                               HumanoidReferenceFrames referenceFrames,
+                                               RobotContactPointParameters<RobotSide> contactPointParameters,
+                                               ContactStateProvider contactStateProviders)
    {
-      String robotName = robotModel.getSimpleRobotName();
-      fullRobotModel = robotModel.createFullRobotModel();
-      allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      this.contactStateProvider = contactStateProviders;
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
-      contactableBodiesFactory.setFootContactPoints(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
 
-      for (int i = 0; i < 3; i++)
-      {
-         supportRegions.add(new PlanarRegion());
-      }
+
    }
 
    public void initializeEmptyRegions()
    {
-      supportRegions.set(LEFT_FOOT_INDEX, new PlanarRegion());
-      supportRegions.set(RIGHT_FOOT_INDEX, new PlanarRegion());
-      supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
+      supportRegions[LEFT_FOOT_INDEX] = null;
+      supportRegions[RIGHT_FOOT_INDEX] = null;
+      supportRegions[CONVEX_HULL_INDEX] = null;
    }
 
-   public void calculateSupportRegions(double scaleFactor, CapturabilityBasedStatus capturabilityBasedStatus, RobotConfigurationData robotConfigurationData)
+   public void calculateSupportRegions(double scaleFactor)
    {
       initializeEmptyRegions();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          scaledContactPointList.get(robotSide).clear();
-         for (FramePoint2D contactPoint : contactableFeet.get(robotSide).getContactPoints2d())
+         for (int i = 0; i < contactableFeet.get(robotSide).getContactPoints2d().size(); i++)
          {
-            FramePoint2D scaledContactPoint = new FramePoint2D(contactPoint);
-            scaledContactPoint.scale(scaleFactor);
-            scaledContactPointList.get(robotSide).add(scaledContactPoint);
+            FramePoint2DReadOnly contactPoint = contactableFeet.get(robotSide).getContactPoints2d().get(i);
+            scaledContactPointList.get(robotSide).add().setAndScale(scaleFactor, contactPoint);
          }
       }
 
-      KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, fullRobotModel.getRootJoint(), allJointsExcludingHands);
-
-      referenceFrames.updateFrames();
-
-      SideDependentList<Boolean> isInSupport = new SideDependentList<Boolean>(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty(),
-                                                                              !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());
-
-      if (feetAreInSamePlane(isInSupport))
+      if (feetAreInSamePlane(contactStateProvider))
       {
          ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
 
-         List<FramePoint2D> allContactPoints = new ArrayList<>();
-         allContactPoints.addAll(scaledContactPointList.get(RobotSide.LEFT));
-         allContactPoints.addAll(scaledContactPointList.get(RobotSide.RIGHT));
-         allContactPoints.forEach(p -> p.changeFrameAndProjectToXYPlane(leftSoleFrame));
+         combinedRegion.clear();
+         combinedRegion.setRegionProperties(CONVEX_HULL_INDEX, leftSoleFrame.getTransformToRoot());
+         ConvexPolygon2D convexHull = combinedRegion.getConvexPolygons().add();
+         convexHull.clear();
 
-         supportRegions.set(LEFT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(RIGHT_FOOT_INDEX, new PlanarRegion());
-         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion(leftSoleFrame.getTransformToWorldFrame(),
-                                                                new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(allContactPoints))));
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (int i = 0; i < scaledContactPointList.get(robotSide).size(); i++)
+            {
+               tempPoint.setIncludingFrame(scaledContactPointList.get(robotSide).get(i));
+               tempPoint.changeFrameAndProjectToXYPlane(leftSoleFrame);
+               convexHull.addVertex(tempPoint);
+            }
+         }
+         convexHull.update();
+         for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
+            combinedRegion.getConcaveHullsVertices().add().set(convexHull.getVertex(i));
+
+         supportRegions[CONVEX_HULL_INDEX] = combinedRegion;
       }
       else
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (isInSupport.get(robotSide))
+            if (contactStateProvider.isInContact(robotSide))
             {
                ContactablePlaneBody contactableFoot = contactableFeet.get(robotSide);
                List<FramePoint2D> contactPoints = scaledContactPointList.get(robotSide);
-               RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToWorldFrame();
-               supportRegions.set(robotSide.ordinal(),
-                                  new PlanarRegion(transformToWorld, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(contactPoints))));
-            }
-            else
-            {
-               supportRegions.set(robotSide.ordinal(), new PlanarRegion());
+               RigidBodyTransform transformToWorld = contactableFoot.getSoleFrame().getTransformToRoot();
+
+               PlanarRegionCommand footRegion = footRegions.get(robotSide);
+               footRegion.clear();
+               footRegion.setRegionProperties(CONVEX_HULL_INDEX, transformToWorld);
+               ConvexPolygon2D convexHull = combinedRegion.getConvexPolygons().add();
+               convexHull.clear();
+
+               for (int i = 0; i < contactPoints.size(); i++)
+                  convexHull.addVertex(contactPoints.get(i));
+               convexHull.update();
+               for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
+                  footRegion.getConcaveHullsVertices().add().set(convexHull.getVertex(i));
+
+               supportRegions[robotSide.ordinal()] = footRegion;
             }
          }
-
-         supportRegions.set(CONVEX_HULL_INDEX, new PlanarRegion());
       }
    }
 
-   private boolean feetAreInSamePlane(SideDependentList<Boolean> isInSupport)
+   private boolean feetAreInSamePlane(ContactStateProvider contactStateProvider)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (!isInSupport.get(robotSide))
+         if (!contactStateProvider.isInContact(robotSide))
          {
             return false;
          }
@@ -141,23 +154,18 @@ public class BipedalSupportPlanarRegionCalculator
              && Math.abs(relativeSoleTransform.getTranslationZ()) < translationEpsilon;
    }
 
-   public List<PlanarRegion> getSupportRegions()
+   public PlanarRegionCommand[] getSupportRegions()
    {
       for (int i = 0; i < 3; i++)
       {
-         supportRegions.get(i).setRegionId(i);
+         if (supportRegions[i] != null)
+            supportRegions[i].setPlanarRegionId(i);
       }
       return supportRegions;
    }
 
-   public PlanarRegionsList getSupportRegionsAsList()
+   public interface ContactStateProvider
    {
-      ArrayList<PlanarRegion> copiedRegions = new ArrayList<>();
-      List<PlanarRegion> supportRegions = getSupportRegions();
-      for (PlanarRegion supportRegion : supportRegions)
-      {
-         copiedRegions.add(supportRegion.copy());
-      }
-      return new PlanarRegionsList(copiedRegions);
+      boolean isInContact(RobotSide robotSide);
    }
 }
