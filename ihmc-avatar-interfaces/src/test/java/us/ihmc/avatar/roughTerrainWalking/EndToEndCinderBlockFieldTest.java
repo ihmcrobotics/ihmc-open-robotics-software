@@ -225,7 +225,6 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
-      simulationTestHelper.setKeepSCSUp(true);
       Random random = new Random(674);
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
@@ -543,22 +542,6 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       return CinderBlockStackDescription.grid2D(centerBasePose, stackSizes, types);
    }
 
-   private static PlanarRegionsListMessage generatePlanarRegionsListForCinderBlocks(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses,
-                                                                                    double zOffset)
-   {
-      List<PlanarRegion> planarRegionList = new ArrayList<>();
-
-      for (int row = 0; row < cinderBlockPoses.size(); row++)
-      {
-         for (int col = 0; col < cinderBlockPoses.get(row).size(); col++)
-         {
-            addPlanarRegionFromCBPose(planarRegionList, cinderBlockPoses.get(row).get(col), 0.0, 0.0, zOffset, 0.0);
-         }
-      }
-
-      return PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(new PlanarRegionsList(planarRegionList));
-   }
-
    private static FootstepDataListMessage generateFootstepsForSlantedCinderBlockLeveledField(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses,
                                                                                              double zOffset,
                                                                                              boolean slow)
@@ -604,33 +587,6 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       }
 
       return footsteps;
-   }
-
-   private static void addPlanarRegionFromCBPose(List<PlanarRegion> planarRegionsListToPack,
-                                                 Pose3DReadOnly cinderBlockPose,
-                                                 double xOffset,
-                                                 double yOffset,
-                                                 double zOffset,
-                                                 double yawOffset)
-   {
-      Pose3D planarRegionPose = new Pose3D(cinderBlockPose);
-      planarRegionPose.appendYawRotation(yawOffset);
-      planarRegionPose.appendTranslation(xOffset, yOffset, zOffset);
-
-      double width = DefaultCommonAvatarEnvironment.cinderBlockWidth;
-      ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(0.5 * width, 0.5 * width);
-      polygon.addVertex(0.5 * width, -0.5 * width);
-      polygon.addVertex(-0.5 * width, -0.5 * width);
-      polygon.addVertex(-0.5 * width, 0.5 * width);
-      polygon.update();
-
-      List<ConvexPolygon2D> polygonList = new ArrayList<>();
-      polygonList.add(polygon);
-
-      PlanarRegion planarRegion = new PlanarRegion(planarRegionPose,
-                                                   polygon.getVertexBufferView().stream().map(Point2D::new).collect(Collectors.toList()), polygonList);
-      planarRegionsListToPack.add(planarRegion);
    }
 
    private static void addFootstepFromCBPose(FootstepDataListMessage footsteps,
