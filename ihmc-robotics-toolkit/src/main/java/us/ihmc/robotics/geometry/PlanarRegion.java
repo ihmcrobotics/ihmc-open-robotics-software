@@ -157,6 +157,27 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       regionId = newRegionId;
    }
 
+   public void set(RigidBodyTransform transformToWorld, Vertex2DSupplier convexPolygon, int newRegionId)
+   {
+      fromLocalToWorldTransform.set(transformToWorld);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      concaveHullsVertices.clear();
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         concaveHullsVertices.add(new Point2D(convexPolygon.getVertex(i)));
+      }
+      checkConcaveHullRepeatVertices(false);
+
+      convexPolygons = new ArrayList<>();
+      convexPolygons.add(new ConvexPolygon2D(convexPolygon));
+
+      updateBoundingBox();
+      updateConvexHull();
+
+      regionId = newRegionId;
+   }
+
    public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, List<? extends Point2DReadOnly> concaveHullVertices, int newRegionId)
    {
       fromLocalToWorldTransform.set(transformToWorld);
