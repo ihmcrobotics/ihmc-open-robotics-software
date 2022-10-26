@@ -177,6 +177,9 @@ public class ContinuousStepGenerator implements Updatable
       parameters.clear();
       numberOfTicksBeforeSubmittingFootsteps.set(2);
 
+      ignoreWalkInputProvider.set(true);
+      desiredVelocity.setX(0.3);
+
       setSupportFootBasedFootstepAdjustment(true);
    }
 
