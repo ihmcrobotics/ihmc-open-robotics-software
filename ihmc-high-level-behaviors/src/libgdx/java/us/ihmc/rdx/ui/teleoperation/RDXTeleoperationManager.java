@@ -89,8 +89,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
    private final SideDependentList<RDXFootInteractable> footInteractables = new SideDependentList<>();
    private final SideDependentList<RDXHandInteractable> handInteractables = new SideDependentList<>();
-   private RDXLiveRobotPartInteractable pelvisInteractable;
-   private final ArrayList<RDXLiveRobotPartInteractable> allRobotPartInteractables = new ArrayList<>();
+   private RDXInteractableRobotLink pelvisInteractable;
+   private final ArrayList<RDXInteractableRobotLink> allInteractableRobotLinks = new ArrayList<>();
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
@@ -204,7 +204,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             {
                if (pelvisInteractable == null)
                {
-                  pelvisInteractable = new RDXLiveRobotPartInteractable();
+                  pelvisInteractable = new RDXInteractableRobotLink();
                   pelvisInteractable.create(robotCollidable,
                                             syncedRobot.getReferenceFrames().getPelvisFrame(),
                                             modelFileName,
@@ -214,7 +214,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                      ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
                                                                                                        pelvisInteractable.getPose()));
                   });
-                  allRobotPartInteractables.add(pelvisInteractable);
+                  allInteractableRobotLinks.add(pelvisInteractable);
                }
                else
                {
@@ -233,7 +233,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                                                                                              teleoperationParameters.getTrajectoryTime(),
                                                                                                              footInteractable.getPose())));
                      footInteractables.put(side, footInteractable);
-                     allRobotPartInteractables.add(footInteractable);
+                     allInteractableRobotLinks.add(footInteractable);
                   }
                   else
                   {
@@ -246,7 +246,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   {
                      RDXHandInteractable handInteractable = new RDXHandInteractable(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
                      handInteractables.put(side, handInteractable);
-                     allRobotPartInteractables.add(handInteractable);
+                     allInteractableRobotLinks.add(handInteractable);
                      // TODO this should probably not handle the space event!
                      // This sends a command to the controller.
                      handInteractable.setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
@@ -314,7 +314,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             selfCollisionModel.update();
             environmentCollisionModel.update();
 
-            for (RDXLiveRobotPartInteractable robotPartInteractable : allRobotPartInteractables)
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.update();
          }
       }
@@ -388,7 +388,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesAvailable)
       {
-         for (RDXLiveRobotPartInteractable robotPartInteractable : allRobotPartInteractables)
+         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.processVRInput(vrContext);
 
          if (interactablesEnabled.get())
@@ -408,7 +408,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
 
-            for (RDXLiveRobotPartInteractable robotPartInteractable : allRobotPartInteractables)
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.calculate3DViewPick(input);
          }
       }
@@ -471,7 +471,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             manualFootstepPlacement.exitPlacement();
             interactableFootstepPlan.clear();
             walkPathControlRing.delete();
-            for (RDXLiveRobotPartInteractable robotPartInteractable : allRobotPartInteractables)
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.delete();
             legControlMode = RDXLegControlMode.DISABLED;
          }
@@ -654,7 +654,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
             if (showEnvironmentCollisionMeshes.get())
                environmentCollisionModel.getRenderables(renderables, pool);
 
-            for (RDXLiveRobotPartInteractable robotPartInteractable : allRobotPartInteractables)
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
                robotPartInteractable.getVirtualRenderables(renderables, pool);
          }
 

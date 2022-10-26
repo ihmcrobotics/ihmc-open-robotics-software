@@ -12,16 +12,16 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.scs2.simulation.collision.Collidable;
 
-public class RDXLiveRobotPartInteractableDemo
+public class RDXInteractableRobotLinkDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Live Robot Part Interactable Demo");
-   private RDXLiveRobotPartInteractable liveRobotPartInteractable;
+                                                  "Interactable Robot Link Demo");
+   private RDXInteractableRobotLink interactableRobotLink;
    private RDXRobotCollidable robotRobotCollidable;
 
-   public RDXLiveRobotPartInteractableDemo()
+   public RDXInteractableRobotLinkDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -44,24 +44,24 @@ public class RDXLiveRobotPartInteractableDemo
             baseUI.getPrimaryScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
 
             ModifiableReferenceFrame controlFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
-            liveRobotPartInteractable = new RDXLiveRobotPartInteractable();
-            liveRobotPartInteractable.create(robotRobotCollidable,
-                                             controlFrame.getReferenceFrame(),
-                                             "environmentObjects/l515Sensor/L515Sensor.g3dj",
-                                             baseUI.getPrimary3DPanel());
+            interactableRobotLink = new RDXInteractableRobotLink();
+            interactableRobotLink.create(robotRobotCollidable,
+                                         controlFrame.getReferenceFrame(),
+                                         "environmentObjects/l515Sensor/L515Sensor.g3dj",
+                                         baseUI.getPrimary3DPanel());
 
-            baseUI.getPrimaryScene().addRenderableProvider(liveRobotPartInteractable::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-            baseUI.getImGuiPanelManager().addPanel("Live Robot Part Interactable", liveRobotPartInteractable::renderImGuiWidgets);
-            baseUI.getVRManager().getContext().addVRInputProcessor(liveRobotPartInteractable::processVRInput);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(liveRobotPartInteractable::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(liveRobotPartInteractable::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(interactableRobotLink::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getImGuiPanelManager().addPanel("Live Robot Part Interactable", interactableRobotLink::renderImGuiWidgets);
+            baseUI.getVRManager().getContext().addVRInputProcessor(interactableRobotLink::processVRInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableRobotLink::calculate3DViewPick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableRobotLink::process3DViewInput);
          }
 
          @Override
          public void render()
          {
             robotRobotCollidable.update();
-            liveRobotPartInteractable.update();
+            interactableRobotLink.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -77,6 +77,6 @@ public class RDXLiveRobotPartInteractableDemo
 
    public static void main(String[] args)
    {
-      new RDXLiveRobotPartInteractableDemo();
+      new RDXInteractableRobotLinkDemo();
    }
 }

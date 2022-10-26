@@ -28,10 +28,8 @@ import java.util.ArrayList;
  * from the robot's pose -- the user has modified it. Selected means the
  * gizmo is showing, the arrow keys will move it, and usually, the spacebar
  * will send some action based on it.
- *
- * TODO: Rename to RDXInteractableRobotLink
  */
-public class RDXLiveRobotPartInteractable
+public class RDXInteractableRobotLink
 {
    private static final boolean SHOW_DEBUG_FRAMES = false;
    private final ArrayList<RDXRobotCollidable> robotCollidables = new ArrayList<>();
