@@ -115,7 +115,7 @@ public class RDXEnvironmentObject extends RDXSimpleObject
    public void getThisTransformForCopyToBullet(Matrix4 transformToWorld)
    {
       getThisTransformForCopyToBullet(tempTransform);
-      LibGDXTools.toGDX(tempTransform, transformToWorld);
+      LibGDXTools.toLibGDX(tempTransform, transformToWorld);
    }
 
    public void getThisTransformForCopyToBullet(RigidBodyTransform transformToWorld)

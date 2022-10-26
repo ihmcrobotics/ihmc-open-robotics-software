@@ -389,8 +389,8 @@ public class RDXPose3DGizmo implements RenderableProvider
          framePose3D.getOrientation().set(axisRotations.get(axis));
          framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
          framePose3D.get(tempTransform);
-         LibGDXTools.toGDX(tempTransform, arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
-         LibGDXTools.toGDX(tempTransform, torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
+         LibGDXTools.toLibGDX(tempTransform, arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
+         LibGDXTools.toLibGDX(tempTransform, torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
       }
       tempFramePose3D.setToZero(gizmoFrame);
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
