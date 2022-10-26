@@ -21,69 +21,30 @@ class PlanarRegionCalculator
    public:
       PlanarRegionCalculator(ApplicationState& app);
 
-      void Render();
-
-      void LoadRegions(std::string path, std::vector<std::string>& fileNames, int index);
-
-      void ImGuiUpdate(ApplicationState& appState);
+      void GenerateRegionsFromPointCloud(ApplicationState& appState, std::vector<float>& vertices);
 
       bool GeneratePatchGraphFromDepth(ApplicationState& appState);
 
       void generateRegionsFromDepth(ApplicationState& appState, cv::Mat& depth, double inputTimestamp);
 
-      void getFilteredDepth(cv::Mat& dispDepth, ApplicationState& appState);
+      void LoadRegions(std::string path, std::vector<std::string>& fileNames, int index);
 
-      static void onMouse(int event, int x, int y, int flags, void *userdata);
+      void getFilteredDepth(cv::Mat& dispDepth, ApplicationState& appState);
 
       void setOpenCLManager(OpenCLManager* ocl) {_openCL = ocl;}
 
       uint8_t CreateParameterBuffer(const ApplicationState& app);
 
-      void GenerateRegionsFromPointCloud(ApplicationState& appState, std::vector<float>& vertices);
 
-      void GenerateRegionFromPointCloudOnCPU();
-
-      bool RenderEnabled();
-
-
-      std::vector<std::shared_ptr<PlanarRegion>> planarRegionList;
-      std::vector<std::shared_ptr<PlanarRegion>> _hashRegionsZUp;
-      std::vector<std::shared_ptr<PlanarRegion>> _depthRegionsZUp;
 
    private:
-      //      cl::Kernel filterKernel, packKernel, mergeKernel;
-      //      cl::Context context;
-      //      cl::CommandQueue commandQueue;
-      //      cl::Event event;
 
-      std::unordered_map<std::string, cv::Mat> channelMap;
+      bool _render = true;
 
-      // cl::size_type<3> origin;
-      ApplicationState& app;
-
-      cv::Mat inputDepth;
-      cv::Mat inputColor;
-      double inputTimestamp;
-      cv::Mat filteredDepth;
-
-      cv::Mat inputStereoLeft, inputStereoRight;
-      MapFrame output;
-      MapFrameProcessor* _depthMapFrameProcessor;
-      MapFrameProcessor* _hashMapFrameProcessor;
-
-      OpenCLManager* _openCL;
-
-      RigidBodyTransform _headToL515Transform;
-      RigidBodyTransform _headToOusterTransform;
-      RigidBodyTransform _transformZUp;
-
-      std::vector<std::string> depthFiles, cloudFiles;
       int depthFileSelected = 0;
       int cloudFileSelected = 0;
-
       int frameId = 0;
       int depthReceiverId = -1;
-      bool _render = true;
 
       float xAngle = 0;
       float yAngle = 0;
@@ -92,6 +53,29 @@ class PlanarRegionCalculator
       float yOffset = 0;
       float zOffset = 0;
 
+      double inputTimestamp;
+
+      ApplicationState& app;
+      OpenCLManager* _openCL;
+
+      std::vector<std::shared_ptr<PlanarRegion>> planarRegionList;
+      std::vector<std::shared_ptr<PlanarRegion>> _hashRegionsZUp;
+      std::vector<std::shared_ptr<PlanarRegion>> _depthRegionsZUp;
+      std::unordered_map<std::string, cv::Mat> channelMap;
+      std::vector<std::string> depthFiles, cloudFiles;
+
+      cv::Mat inputDepth;
+      cv::Mat inputColor;
+      cv::Mat filteredDepth;
+      cv::Mat inputStereoLeft, inputStereoRight;
+
+      MapFrame output;
+      MapFrameProcessor* _depthMapFrameProcessor;
+      MapFrameProcessor* _hashMapFrameProcessor;
+
+      RigidBodyTransform _headToL515Transform;
+      RigidBodyTransform _headToOusterTransform;
+      RigidBodyTransform _transformZUp;
 
 };
 

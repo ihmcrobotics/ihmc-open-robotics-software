@@ -41,7 +41,7 @@ class ApplicationState
       int HASH_ADJ_SKIPS = 2;
 
       int KERNEL_SLIDER_LEVEL = 2;
-      int HASH_PATCH_HEIGHT =  2;
+      int HASH_PATCH_HEIGHT =  4;
       int HASH_PATCH_WIDTH =   4;
       int DEPTH_PATCH_HEIGHT = KERNEL_SLIDER_LEVEL;
       int DEPTH_PATCH_WIDTH = KERNEL_SLIDER_LEVEL;

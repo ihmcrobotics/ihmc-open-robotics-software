@@ -30,7 +30,7 @@ public class MapsenseWrapperTest
 //      mapsenseExternal.loadMat();
 
       float[] points = new float[400000];
-      int numPoints = MapsenseTools.loadPointCloud("/home/bmishra/Workspace/Code/MapSense/Data/Extras/Clouds/Scan_94", points);
+      int numPoints = MapsenseTools.loadPointCloud("/home/quantum/Workspace/Code/MapSense/Data/Extras/Clouds/Scan_94", points);
       LogTools.info("Total Points Loaded: {}", numPoints);
 
       long start = System.currentTimeMillis();

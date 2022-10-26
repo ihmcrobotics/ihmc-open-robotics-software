@@ -479,6 +479,8 @@ void kernel indexKernel(global float* cloud, global int* indices, global int* pa
 {
    int id = get_global_id(0);
 
+   printf("IndexKernel: %d\n", id);
+
    indices[id * 2] = 0;
    indices[id * 2 + 1] = 0;
    parts[id] = 1;
@@ -505,11 +507,14 @@ void kernel indexKernel(global float* cloud, global int* indices, global int* pa
    if (pitchCount >= 0 && pitchCount < params[INPUT_HEIGHT] && yawCount >= 0 && yawCount < params[INPUT_WIDTH])
    {
       if(indices[id*2] == 0 && indices[id*2+1] == 0 && pitchCount != 0 && yawCount != 0) parts[id] = 2;
-      indices[id * 2] = pitchCount;
-      indices[id * 2 + 1] = yawCount;
+      // indices[id * 2] = pitchCount;
+      // indices[id * 2 + 1] = yawCount;
+
+      indices[id * 2] = 102;
+      indices[id * 2 + 1] = 201;
    }
 
-//   printf("Index: %d -> %d, %d\n", id, indices[id*2], indices[id*2+1]);
+   printf("Index: %d -> %d, %d\n", id, indices[id*2], indices[id*2+1]);
 
 }
 
