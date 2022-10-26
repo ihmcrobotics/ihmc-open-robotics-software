@@ -14,6 +14,8 @@ class MapsenseExternal
         void printMat(float* buffer, int height, int width);
         void loadMat();
 
+        void testOpenCLParallelAdd(float* bufferA, float* bufferB, float* bufferOutput, int numFloats);
+
     private:
         
         int _id = 0;

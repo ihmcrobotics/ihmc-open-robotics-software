@@ -3,7 +3,8 @@
 
 MapsenseExternal::MapsenseExternal()
 {
-    _openCL = new OpenCLManager("/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/src/mapsense-wrapper/cpp");
+    // _openCL = new OpenCLManager("/home/quantum/Workspace/Code/IHMC/repository-group/ihmc-open-robotics-software/ihmc-perception/src/mapsense-wrapper/cpp");
+    _openCL = new OpenCLManager("/home/bmishra/Workspace/Code/repository-group/ihmc-open-robotics-software/ihmc-perception/src/mapsense-wrapper/cpp");
 
    _regionCalculator = new PlanarRegionCalculator(appState);
    _regionCalculator->setOpenCLManager(_openCL);
@@ -61,5 +62,23 @@ void MapsenseExternal::extractPlanarRegionsFromPointCloud(float* points, int num
    float duration = (end - start) * 0.001f;
 
    printf("Total Time to Generate Regions: %.3lf ms\n", duration);
+
+}
+
+void MapsenseExternal::testOpenCLParallelAdd(float* bufferA, float* bufferB, float* bufferOutput, int numFloats)
+{
+    uint8_t idBufferA = _openCL->CreateLoadBufferFloat(bufferA, numFloats);
+    uint8_t idBufferB = _openCL->CreateLoadBufferFloat(bufferB, numFloats);
+    uint8_t idBufferOutput = _openCL->CreateBufferFloat(numFloats);
+
+    _openCL->SetArgument("parallelAddKernel", 0, idBufferA);
+    _openCL->SetArgument("parallelAddKernel", 1, idBufferB);
+    _openCL->SetArgument("parallelAddKernel", 2, idBufferOutput);
+
+    _openCL->commandQueue.enqueueNDRangeKernel(_openCL->parallelAddKernel, cl::NullRange, cl::NDRange(numFloats), cl::NullRange);
+
+    _openCL->ReadBufferFloat(idBufferOutput, bufferOutput, numFloats);
+
+    printf("Parallel Add Completed\n");
 
 }

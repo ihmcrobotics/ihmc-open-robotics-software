@@ -897,4 +897,11 @@ void kernel normalsKernel(global float* cloud, global int* cylinderIndices, glob
 
 }
 
+void kernel parallelAddKernel(global float* bufferA, global float* bufferB, global float* bufferOutput)
+{
+   int id = get_global_id(0);
+
+   bufferOutput[id] = bufferA[id] + bufferB[id];
+}
+
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

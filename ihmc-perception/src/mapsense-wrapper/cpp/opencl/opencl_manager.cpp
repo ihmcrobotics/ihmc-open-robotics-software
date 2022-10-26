@@ -7,6 +7,66 @@
 
 OpenCLManager::OpenCLManager(const std::string& packagePath)
 {
+
+   /*Step1: Getting platforms and choose an available one.*/
+   cl_uint numPlatforms; //the NO. of platforms
+   cl_platform_id platform = NULL; //the chosen platform
+   cl_int status = clGetPlatformIDs(0, NULL, &numPlatforms);
+   if (status != CL_SUCCESS)
+   {
+      cout << "Error: Getting platforms!" << endl;
+      return FAILURE;
+   }
+
+   /*For clarity, choose the first available platform. */
+   if (numPlatforms > 0)
+   {
+      cl_platform_id* platforms = 
+                     (cl_platform_id*)malloc(numPlatforms * sizeof(cl_platform_id));
+      status = clGetPlatformIDs(numPlatforms, platforms, NULL);
+      platform = platforms[0];
+      free(platforms);
+   }
+
+   /*Step 2:Query the platform and choose the first GPU device if has one.Otherwise use the CPU as device.*/
+   cl_uint numDevices = 0;
+   cl_device_id        *devices;
+   status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &numDevices);
+   if (numDevices == 0) //no GPU available.
+   {
+      cout << "No GPU device available." << endl;
+      cout << "Choose CPU as default device." << endl;
+      status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, 0, NULL, &numDevices);
+      devices = (cl_device_id*)malloc(numDevices * sizeof(cl_device_id));
+      status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_CPU, numDevices, devices, NULL);
+   }
+   else
+   {
+      devices = (cl_device_id*)malloc(numDevices * sizeof(cl_device_id));
+      status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, NULL);
+   }
+
+
+   /*Step 3: Create context.*/
+   cl_context context = clCreateContext(NULL, 1, devices, NULL, NULL, NULL);
+
+   /*Step 4: Creating command queue associate with the context.*/
+   cl_command_queue commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
+
+   /*Step 5: Create program object */
+   const char *filename = (packagePath + "/kernels/fitting_kernel.cpp").c_str();
+   std::string sourceStr;
+   status = LoadProgramIntoString(filename, sourceStr);
+   const char *source = sourceStr.c_str();
+   size_t sourceSize[] = { strlen(source) };
+   cl_program program = clCreateProgramWithSource(context, 1, &source, sourceSize, NULL);
+
+   /*Step 6: Build program. */
+   status = clBuildProgram(program, 1, devices, NULL, NULL, NULL);
+
+   // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
    printf("Initializing OpenCL\n");
 
    std::vector<cl::Platform> all_platforms;
@@ -33,7 +93,7 @@ OpenCLManager::OpenCLManager(const std::string& packagePath)
    if (!fp)
    {
       printf("Failed to load kernel\n");
-      printf("%s", (packagePath + "/kernels/fitting_kernel.cpp").c_str());
+      printf("%s\n", (packagePath + "/kernels/fitting_kernel.cpp").c_str());
       return;
    }
 
@@ -67,8 +127,41 @@ OpenCLManager::OpenCLManager(const std::string& packagePath)
    indexKernel = cl::Kernel(program, "indexKernel");
    diffuseKernel = cl::Kernel(program, "diffuseKernel");
 
+   parallelAddKernel = cl::Kernel(program, "parallelAddKernel");
+
    printf("OpenCL Initialized Successfully\n");
 
+}
+
+/* convert the kernel file into a string */
+int OpenCLManager::LoadProgramIntoString(const char *filename, std::string& source)
+{
+	size_t size;
+	char*  str;
+	std::fstream f(filename, (std::fstream::in | std::fstream::binary));
+
+	if (f.is_open())
+	{
+		size_t fileSize;
+		f.seekg(0, std::fstream::end);
+		size = fileSize = (size_t)f.tellg();
+		f.seekg(0, std::fstream::beg);
+		str = new char[size + 1];
+		if (!str)
+		{
+			f.close();
+			return 0;
+		}
+
+		f.read(str, fileSize);
+		f.close();
+		str[size] = '\0';
+		s = str;
+		delete[] str;
+		return 0;
+	}
+	cout << "Error: failed to open file\n:" << filename << endl;
+	return FAILURE;
 }
 
 uint8_t OpenCLManager::CreateLoadBufferFloat(float *params, uint32_t count)

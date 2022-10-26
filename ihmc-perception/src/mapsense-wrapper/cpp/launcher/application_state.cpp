@@ -23,7 +23,7 @@ ApplicationState::ApplicationState()
       }
 
 
-      printf("NAME: %s, VALUE: %s\n", name.c_str(), value.c_str());
+      if(name.length() > 0) printf("NAME: %s, VALUE: %s\n", name.c_str(), value.c_str());
       if(str == "# end") break;
 
       // Ints

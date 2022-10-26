@@ -53,8 +53,6 @@ set(MS_SOURCES
     opencl/opencl_manager.cpp
     opencl/opencl_manager.h
 
-
-    launcher/mapsense_headless_launcher.cpp
     launcher/application_state.h
     launcher/application_state.cpp
 
@@ -67,28 +65,10 @@ set(MS_SOURCES
     tools/buffer_tools.cpp
 )
 
-
-# add_executable(MapsenseHeadless ${MS_SOURCES})
-# target_link_libraries(MapsenseHeadless
-#     tbb
-#     Eigen3::Eigen
-#     ${OpenCV_LIBS}
-#     /usr/lib/x86_64-linux-gnu/libOpenCL.so
-#  #   eigen
-# )
-# target_include_directories(MapsenseHeadless PUBLIC
-    
-#     /usr/include/
-
-#     feature_detection/
-#     geometry/
-#     launcher/
-#     opencl/
-# )
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# +++++++++++++++++++++++++++++++++++++++++++++++  MapsenseWrapper ++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++  Mapsense Wrapper +++++++++++++++++++++++++++++++++++++++
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 
 add_library(mapsense-wrapper SHARED ${MS_SOURCES})
 
@@ -115,3 +95,23 @@ install(TARGETS mapsense-wrapper
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
 install(FILES ${MS_SOURCES} DESTINATION "${INSTALL_INC_DIR}")
+
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++  Launchers       ++++++++++++++++++++++++++++++++++++++++
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+add_executable(MapsenseHeadless launcher/mapsense_headless_launcher.cpp)
+target_link_libraries(MapsenseHeadless
+    mapsense-wrapper
+)
+target_include_directories(MapsenseHeadless PUBLIC
+    /usr/include/
+    feature_detection/
+    geometry/
+    launcher/
+    opencl/
+)
+
+

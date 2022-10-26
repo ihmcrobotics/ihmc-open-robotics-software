@@ -24,7 +24,7 @@ public class OusterRegionsCalculator
 
       try
       {
-         numPoints = MapsenseTools.loadPointCloud("/home/quantum/Workspace/Code/MapSense/Data/Extras/Clouds/Scan_94", points);
+         numPoints = MapsenseTools.loadPointCloud("/home/bmishra/Workspace/Code/MapSense/Data/Extras/Clouds/Scan_94", points);
       }
       catch (FileNotFoundException e)
       {
@@ -44,8 +44,6 @@ public class OusterRegionsCalculator
    public void update()
    {
       long start = System.currentTimeMillis();
-
-
       mapsenseExternal.extractPlanarRegionsFromPointCloud(points, numPoints);
       long end = System.currentTimeMillis();
 

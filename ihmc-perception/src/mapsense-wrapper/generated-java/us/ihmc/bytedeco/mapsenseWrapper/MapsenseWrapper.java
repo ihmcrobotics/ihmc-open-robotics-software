@@ -42,6 +42,10 @@ public class MapsenseWrapper extends us.ihmc.bytedeco.mapsenseWrapper.presets.Ma
         public native void printMat(float[] buffer, int height, int width);
         public native void loadMat();
 
+        public native void testOpenCLParallelAdd(FloatPointer bufferA, FloatPointer bufferB, FloatPointer bufferOutput, int numFloats);
+        public native void testOpenCLParallelAdd(FloatBuffer bufferA, FloatBuffer bufferB, FloatBuffer bufferOutput, int numFloats);
+        public native void testOpenCLParallelAdd(float[] bufferA, float[] bufferB, float[] bufferOutput, int numFloats);
+
 
 }
 
