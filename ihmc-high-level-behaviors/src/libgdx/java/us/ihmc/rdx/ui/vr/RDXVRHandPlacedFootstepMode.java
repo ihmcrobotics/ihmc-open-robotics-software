@@ -130,7 +130,7 @@ public class RDXVRHandPlacedFootstepMode
                      // TODO: Support all types of swings
                      // TODO: Support partial footholds
 
-                     LibGDXTools.setTransparency(placedFootstep.getModelInstance(), 0.5f);
+                     LibGDXTools.setOpacity(placedFootstep.getModelInstance(), 0.5f);
                      sentFootsteps.add(placedFootstep);
                   }
                   placedFootsteps.clear();

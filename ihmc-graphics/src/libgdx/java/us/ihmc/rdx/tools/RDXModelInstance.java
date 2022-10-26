@@ -19,6 +19,7 @@ public class RDXModelInstance extends ModelInstance
    private final static BoundingBox bounds = new BoundingBox();
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private float currentOpacity = Float.NaN;
 
    public RDXModelInstance(Model model)
    {
@@ -54,9 +55,12 @@ public class RDXModelInstance extends ModelInstance
       LibGDXTools.toLibGDX(pose, tempTransform, transform);
    }
 
-   public void setTransparency(float transparency)
+   public void setOpacity(float opacity)
    {
-      LibGDXTools.setTransparency(this, transparency);
+      // Prevent allocating new BlendingMode over and over
+      if (opacity != currentOpacity)
+         LibGDXTools.setOpacity(this, opacity);
+      currentOpacity = opacity;
    }
 
    public void setDiffuseColor(Color color)
@@ -70,7 +74,7 @@ public class RDXModelInstance extends ModelInstance
       setDiffuseColor(colorGDX);
       if (colorGDX.a < 1.0f)
       {
-         setTransparency(colorGDX.a);
+         setOpacity(colorGDX.a);
       }
    }
 }
