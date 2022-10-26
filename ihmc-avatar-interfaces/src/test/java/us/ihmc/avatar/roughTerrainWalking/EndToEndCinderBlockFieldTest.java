@@ -123,7 +123,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(0.5);
+      boolean success = simulationTestHelper.simulateNow(0.1);
+      simulationTestHelper.publishToController(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockFieldEnvironment.getPlanarRegionsList()));//generatePlanarRegionsListForCinderBlocks(cinderBlockPoses, getStepHeightOffset()));
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -133,7 +134,6 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double desiredHeight = pelvisPosition.getZ();
       simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
-      simulationTestHelper.publishToController(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockFieldEnvironment.getPlanarRegionsList()));//generatePlanarRegionsListForCinderBlocks(cinderBlockPoses, getStepHeightOffset()));
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
