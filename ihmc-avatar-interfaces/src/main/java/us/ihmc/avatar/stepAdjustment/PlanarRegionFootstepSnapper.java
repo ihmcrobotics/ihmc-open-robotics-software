@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstra
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
@@ -34,8 +35,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
-   private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
+   private SteppableRegionsProvider steppableRegionsProvider;
 
    private final FramePose3D footstepAtSameHeightAsStanceFoot = new FramePose3D();
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
@@ -49,23 +49,13 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
-   public PlanarRegionFootstepSnapper(SteppingParameters steppingParameters)
+   public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
+      this.footPolygons = footPolygons;
 
       wiggleParameters.setDesiredDistanceInside(0.02);
-
-      double footLength = steppingParameters.getFootLength();
-      double toeWidth = steppingParameters.getToeWidth();
-      double footWidth = steppingParameters.getFootWidth();
-      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-      footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
-      footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, -footWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, footWidth / 2.0);
-      footPolygon.update();
-      footPolygons = new SideDependentList<>(footPolygon, footPolygon);
    }
 
    public YoRegistry getRegistry()
@@ -73,31 +63,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return registry;
    }
 
-   public void setPlanarRegions(PlanarRegionsListCommand planarRegions)
+   public void setSteppableRegionsProvider(SteppableRegionsProvider steppableRegionsProvider)
    {
-      steppableRegionsList.clear();
-      for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegionCommand candidateRegion = planarRegions.getPlanarRegionCommand(i);
-
-         double polygonArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(candidateRegion.getConcaveHullsVertices(),
-                                                                                         candidateRegion.getConcaveHullsVertices().size(),
-                                                                                         true,
-                                                                                         null);
-         if (polygonArea < parameters.getMinPlanarRegionArea())
-            continue;
-
-         if (Math.abs(candidateRegion.getTransformToWorld().getM22()) < Math.cos(parameters.getMaxPlanarRegionAngle()))
-            continue;
-
-         PlanarRegion planarRegion = steppableRegionsList.add();
-         planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getConcaveHullsVertices(), candidateRegion.getRegionId());
-      }
-   }
-
-   public List<PlanarRegion> getSteppableRegionsList()
-   {
-      return steppableRegionsList;
+      this.steppableRegionsProvider = steppableRegionsProvider;
    }
 
    public GarbageFreePlanarRegionListPolygonSnapper getSnapper()
@@ -120,7 +88,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepAtSameHeightAsStanceFoot.setZ(stanceFootPose.getZ());
       footstepAtSameHeightAsStanceFoot.getOrientation().set(footstepPose.getOrientation());
 
-      if (!steppableRegionsList.isEmpty())
+      if (steppableRegionsProvider != null && !steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
          adjustedFootstepPose.set(footstepAtSameHeightAsStanceFoot);
          footPolygonToWiggle.set(footPolygons.get(footSide));
@@ -157,7 +125,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    public boolean snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
-      if (steppableRegionsList.isEmpty())
+      if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
          snappedFootstepPolygonToPack.clear();
          return false;
@@ -167,7 +135,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepPolygonInWorld.setIncludingFrame(soleFrameBeforeSnapping, footStepPolygonInSoleFrame);
       footstepPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
-      if (isFootPolygonOnBoundaryOfPlanarRegions(steppableRegionsList, footstepPolygonInWorld))
+      if (isFootPolygonOnBoundaryOfPlanarRegions(steppableRegionsProvider.getSteppableRegions(), footstepPolygonInWorld))
       {
          /*
           * If foot is on the boundary of planar regions, don't snap/wiggle but
@@ -203,7 +171,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                 FrameConvexPolygon2DReadOnly footPolygonInWorld,
                                 ConvexPolygon2DBasics snappedFootholdInWorldToPack)
    {
-      if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsList, Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
+      if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld, steppableRegionsProvider.getSteppableRegions(), Double.POSITIVE_INFINITY, regionToSnapTo, snapTransform))
       {
          throw new RuntimeException("Snapping failed");
       }
@@ -280,9 +248,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       double shortestDistanceToPoint = Double.POSITIVE_INFINITY;
       PlanarRegion closestRegion = null;
 
-      for (int i = 0; i < steppableRegionsList.size(); i++)
+      for (int i = 0; i < steppableRegionsProvider.getSteppableRegions().size(); i++)
       {
-         PlanarRegion candidateRegion = steppableRegionsList.get(i);
+         PlanarRegion candidateRegion = steppableRegionsProvider.getSteppableRegions().get(i);
          double distanceToRegion = candidateRegion.distanceToPointByProjectionOntoXYPlane(x, y);
          if (distanceToRegion < shortestDistanceToPoint)
          {

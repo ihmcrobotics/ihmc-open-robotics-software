@@ -1,12 +1,14 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -69,11 +71,15 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setProcessedJointData(processedJointData);
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+
+      SteppableRegionsProvider steppableRegionsProvider = new SimpleSteppableRegionsCalculator();
       csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
+
+      csgCommandInputManager.setSteppableRegionsProvider(steppableRegionsProvider);
 
       if (stepSnapperUpdatable != null)
       {
-         pluginFactory.addUpdatable(stepSnapperUpdatable);
+         stepSnapperUpdatable.setSteppableRegionsProvider(steppableRegionsProvider);
          pluginFactory.setFootStepAdjustment(stepSnapperUpdatable.getFootstepAdjustment());
          for (FootstepValidityIndicator footstepValidityIndicator : stepSnapperUpdatable.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);

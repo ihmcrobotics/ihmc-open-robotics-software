@@ -12,13 +12,20 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class PlanarRegionFootstepSnapperTest
 {
    @Test
    public void testSimpleBlock()
    {
-      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new TestSteppingParameters());
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      footPolygon.addVertex(0.1, 0.05);
+      footPolygon.addVertex(0.1, -0.05);
+      footPolygon.addVertex(-0.1, 0.05);
+      footPolygon.addVertex(-0.1, -0.05);
+      footPolygon.update();
+      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon));
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -84,111 +91,5 @@ public class PlanarRegionFootstepSnapperTest
 
       snapper.adjustFootstep(new FramePose3D(), poseOnBlockEdge, RobotSide.LEFT, snappedPoseOnBlockEdge);
       EuclidFrameTestTools.assertEquals(expectedPoseOnBlockEdge, snappedPoseOnBlockEdge, 1e-5);
-   }
-
-   private static class TestSteppingParameters implements SteppingParameters
-   {
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         return 0.1;
-      }
-
-      @Override
-      public double getToeWidth()
-      {
-         return 0.1;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         return 0.2;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         return 0.1;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         return 0.2;
-      }
-
-      @Override
-      public double getMaxStepLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         return 0;
-      }
    }
 }

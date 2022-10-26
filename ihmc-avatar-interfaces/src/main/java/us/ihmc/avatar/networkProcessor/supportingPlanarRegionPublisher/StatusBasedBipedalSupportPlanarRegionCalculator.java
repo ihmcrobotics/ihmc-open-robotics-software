@@ -4,6 +4,9 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -17,6 +20,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class StatusBasedBipedalSupportPlanarRegionCalculator
 {
@@ -32,7 +37,12 @@ public class StatusBasedBipedalSupportPlanarRegionCalculator
       fullRobotModel = robotModel.createFullRobotModel();
       allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      supportRegionCalculator = new BipedalSupportPlanarRegionCalculator(fullRobotModel, referenceFrames, robotModel.getContactPointParameters(), isInContact::get);
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
+                                                                                {
+                                                                                   ArrayList<Point2D> footPoints = robotModel.getContactPointParameters().getFootContactPoints().get(side);
+                                                                                   return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+                                                                                });
+      supportRegionCalculator = new BipedalSupportPlanarRegionCalculator(referenceFrames, footPolygons, isInContact::get);
    }
 
    public void initializeEmptyRegions()
@@ -54,20 +64,11 @@ public class StatusBasedBipedalSupportPlanarRegionCalculator
 
    public List<PlanarRegion> getSupportRegions()
    {
-      List<PlanarRegion> planarRegions = new ArrayList<>();
-      for (PlanarRegionCommand command : supportRegionCalculator.getSupportRegions())
-      {
-         if (command == null)
-            continue;
-         PlanarRegion planarRegion = new PlanarRegion();
-         command.getPlanarRegion(planarRegion);
-         planarRegions.add(planarRegion);
-      }
-      return planarRegions;
+      return supportRegionCalculator.getSteppableRegions();
    }
 
    public PlanarRegionsList getSupportRegionsAsList()
    {
-      return new PlanarRegionsList(getSupportRegions());
+      return new PlanarRegionsList(getSupportRegions().stream().map(PlanarRegion::copy).collect(Collectors.toList()));
    }
 }
