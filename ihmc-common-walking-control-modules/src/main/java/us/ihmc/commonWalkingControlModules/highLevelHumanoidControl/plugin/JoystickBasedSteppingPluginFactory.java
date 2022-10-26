@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -46,6 +47,14 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       csgPluginFactory.setFootStepAdjustment(footstepAdjustment);
       velocityPluginFactory.setFootStepAdjustment(footstepAdjustment);
    }
+
+   @Override
+   public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
+   {
+      csgPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
+      velocityPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
+   }
+
 
    @Override
    public void addUpdatable(Updatable updatable)
