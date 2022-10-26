@@ -6,13 +6,12 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -51,7 +50,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,
                                     DRCRobotModel drcRobotModel,
-                                    AvatarStepSnapperUpdatable stepSnapperUpdatable,
+                                    AvatarStepGeneratorEnvironmentUpdatable stepSnapperUpdatable,
                                     RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();
@@ -75,7 +74,9 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       if (stepSnapperUpdatable != null)
       {
          pluginFactory.addUpdatable(stepSnapperUpdatable);
-         pluginFactory.setFootStepAdjustment(stepSnapperUpdatable);
+         pluginFactory.setFootStepAdjustment(stepSnapperUpdatable.getFootstepAdjustment());
+         for (FootstepValidityIndicator footstepValidityIndicator : stepSnapperUpdatable.getFootstepValidityIndicators())
+            pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
       }
       if (ros2Node != null)
          pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);

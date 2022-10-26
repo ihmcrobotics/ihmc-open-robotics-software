@@ -50,11 +50,19 @@ public class BoundingBoxCollisionDetector
 
    public BodyCollisionData checkForCollision()
    {
+      BodyCollisionData collisionData = new BodyCollisionData();
+      checkForCollision(collisionData);
+
+      return collisionData;
+   }
+
+   public boolean checkForCollision(BodyCollisionData collisionDataToPack)
+   {
       checkInputs();
       setBoundingBoxPosition();
       setDimensions();
 
-      BodyCollisionData collisionData = new BodyCollisionData();
+      boolean collisionDetected = false;
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
@@ -66,16 +74,20 @@ public class BoundingBoxCollisionDetector
             EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
             if (collisionResult.areShapesColliding())
             {
-               collisionData.setCollisionDetected(true);
-               collisionData.setCollisionResult(collisionResult);
-               collisionData.getPlanarRegion().set(region);
-               collisionData.getBodyBox().set(bodyBox);
+               collisionDetected = true;
+               if (collisionDataToPack != null)
+               {
+                  collisionDataToPack.setCollisionDetected(true);
+                  collisionDataToPack.setCollisionResult(collisionResult);
+                  collisionDataToPack.getPlanarRegion().set(region);
+                  collisionDataToPack.getBodyBox().set(bodyBox);
+               }
                break;
             }
          }
       }
 
-      return collisionData;
+      return collisionDetected;
    }
 
    private static double getMinimumPositiveValue(double... values)
