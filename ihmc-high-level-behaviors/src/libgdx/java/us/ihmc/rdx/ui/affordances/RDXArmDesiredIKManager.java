@@ -119,12 +119,12 @@ public class RDXArmDesiredIKManager
       // track solution quality.
    }
 
-   public void update(RDXHandInteractable handInteractable, FullHumanoidRobotModel desiredRobot)
+   public void update(RDXInteractableHand interactableHand, FullHumanoidRobotModel desiredRobot)
    {
       desiredArmJacobian.compute();
       actualArmJacobian.compute();
 
-      correctedDesiredHandControlFramePose.setToZero(handInteractable.getControlReferenceFrame());
+      correctedDesiredHandControlFramePose.setToZero(interactableHand.getControlReferenceFrame());
       correctedDesiredHandControlFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       correctedDesiredHandControlFramePose.get(temporaryFrame.getTransformToParent());
       temporaryFrame.getReferenceFrame().update();
