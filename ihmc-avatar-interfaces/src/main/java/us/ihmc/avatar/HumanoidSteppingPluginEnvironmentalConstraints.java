@@ -1,5 +1,6 @@
 package us.ihmc.avatar;
 
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -70,7 +71,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
 
       footstepValidityIndicators.add(this::isStepSnappable);
       footstepValidityIndicators.add(this::isSafeStepHeight);
-      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
+//      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
 
       registry.addChild(stepSnapper.getRegistry());
 
@@ -134,8 +135,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
       return heightChange < steppingParameters.getMaxStepUp() && heightChange > -steppingParameters.getMaxStepDown();
    }
 
+   // FIXME this generates a LOT of garbage
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
+      // FIXME should not use the step snapper regions, as those may filter out collisions
       if (stepSnapper.getSteppableRegionsList().isEmpty() || !shouldSnapToRegions.getValue())
          return true;
 
