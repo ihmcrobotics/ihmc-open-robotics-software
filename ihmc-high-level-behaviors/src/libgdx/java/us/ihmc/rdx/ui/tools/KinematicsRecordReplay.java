@@ -126,6 +126,11 @@ public class KinematicsRecordReplay
       }
    }
 
+   public ImBoolean isRecordingEnabled()
+   {
+      return enablerRecording;
+   }
+
    public boolean isRecording()
    {
       return isRecording;

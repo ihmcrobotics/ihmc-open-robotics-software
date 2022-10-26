@@ -41,7 +41,8 @@ public class ProMPAssistant implements TeleoperationAssistant
       taskName = "PushDoor";
       bodyPartsGeometry.put("leftHand", "Pose");
       bodyPartsGeometry.put("rightHand", "Pose");
-      proMPManagers.put(taskName, new ProMPManager(taskName, bodyPartsGeometry));
+      boolean logEnabled = false;
+      proMPManagers.put(taskName, new ProMPManager(taskName, bodyPartsGeometry,logEnabled));
       for (ProMPManager proMPManager : proMPManagers.values())
          proMPManager.learnTaskFromDemos();
    }
@@ -143,7 +144,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       if (sampleCounter <= generatedFramePoseTrajectory.size())
       {
          double x = (sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
-         //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1]
+         //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
          double alpha = 1.0 / (1 + 4 * exp(-18 * (x - 0.2)));
          //set orientation
          FixedFrameQuaternionBasics frameOrientation = framePose.getOrientation();
