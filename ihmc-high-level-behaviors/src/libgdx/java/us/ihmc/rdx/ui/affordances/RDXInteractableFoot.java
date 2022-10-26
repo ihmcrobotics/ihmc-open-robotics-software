@@ -6,14 +6,14 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXFootInteractable extends RDXInteractableRobotLink
+public class RDXInteractableFoot extends RDXInteractableRobotLink
 {
    public static boolean robotCollidableIsFoot(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
       return robotCollidable.getRigidBodyName().equals(fullRobotModel.getFoot(side).getName());
    }
 
-   public RDXFootInteractable(RobotSide side,
+   public RDXInteractableFoot(RobotSide side,
                               RDXBaseUI baseUI,
                               RDXRobotCollidable robotCollidable,
                               DRCRobotModel robotModel,

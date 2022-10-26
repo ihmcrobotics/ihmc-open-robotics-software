@@ -18,7 +18,7 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
-public class RDXHandInteractable extends RDXInteractableRobotLink
+public class RDXInteractableHand extends RDXInteractableRobotLink
 {
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -30,7 +30,7 @@ public class RDXHandInteractable extends RDXInteractableRobotLink
       return robotCollidable.getRigidBodyName().equals(fullRobotModel.getHand(side).getName());
    }
 
-   public RDXHandInteractable(RobotSide side,
+   public RDXInteractableHand(RobotSide side,
                               RDXBaseUI baseUI,
                               RDXRobotCollidable robotCollidable,
                               DRCRobotModel robotModel,
