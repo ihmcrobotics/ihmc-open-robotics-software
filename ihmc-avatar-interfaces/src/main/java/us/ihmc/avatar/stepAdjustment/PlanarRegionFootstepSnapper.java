@@ -95,6 +95,11 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
    }
 
+   public List<PlanarRegion> getSteppableRegionsList()
+   {
+      return steppableRegionsList;
+   }
+
    private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
    private final ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D();
 
