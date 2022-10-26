@@ -104,6 +104,22 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
    }
 
+   public void setRegionProperties(int id, RigidBodyTransform transform)
+   {
+      regionId = id;
+      regionOrigin.set(transform.getTranslation());
+      regionNormal.set(transform.getM02(), transform.getM12(), transform.getM22());
+      regionOrientation.get(transform.getRotation());
+
+      fromLocalToWorldTransform.set(transform);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+   }
+
+   public void setPlanarRegionId(int id)
+   {
+      regionId = id;
+   }
+
    public Point2D addConcaveHullVertex()
    {
       return concaveHullsVertices.add();
