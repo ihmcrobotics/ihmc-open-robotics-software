@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -21,6 +22,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPluginFactory
 {
@@ -63,6 +65,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 
    @Override
    public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
+   {
+   }
+
+   @Override
+   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
    {
    }
 

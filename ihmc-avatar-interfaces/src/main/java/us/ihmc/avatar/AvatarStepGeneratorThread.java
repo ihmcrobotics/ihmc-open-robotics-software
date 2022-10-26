@@ -72,14 +72,11 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       contextDataFactory.setSensorDataContext(new SensorDataContext(fullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      SteppableRegionsProvider steppableRegionsProvider = new SimpleSteppableRegionsCalculator();
       csgCommandInputManager = pluginFactory.getStepGeneratorCommandInputManager();
-
-      csgCommandInputManager.setSteppableRegionsProvider(steppableRegionsProvider);
 
       if (stepSnapperUpdatable != null)
       {
-         stepSnapperUpdatable.setSteppableRegionsProvider(steppableRegionsProvider);
+         pluginFactory.addPlanarRegionsListCommandConsumer(stepSnapperUpdatable);
          pluginFactory.setFootStepAdjustment(stepSnapperUpdatable.getFootstepAdjustment());
          for (FootstepValidityIndicator footstepValidityIndicator : stepSnapperUpdatable.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
