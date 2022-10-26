@@ -25,54 +25,75 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.gizmo.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class RDXRobotCollisionLink implements RenderableProvider
+/**
+ * A robot collidable is a part of the robot that the user can click on.
+ * It supports all the different collision shape types collisions up to
+ * date with the correct pose. It can be attached/synced to the robot
+ * or "detached" from the robot.
+ */
+public class RDXRobotCollidable implements RenderableProvider
 {
    private final RDXModelInstance collisionModelInstance;
    private final RigidBodyTransform shapeTransformToParentFrameAfterJoint;
    private final ReferenceFrame collisionShapeFrame;
    private final FramePose3D boxPose = new FramePose3D();
    private final RigidBodyTransform boxCenterToWorldTransform = new RigidBodyTransform();
-   private final FrameShape3DReadOnly shape;
+   private final FrameShape3DBasics shape;
+   private final FramePose3D vrPickPose = new FramePose3D();
    private final MovingReferenceFrame frameAfterJoint;
    private String rigidBodyName;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private final SideDependentList<RDXVRPickResult> vrPickResult = new SideDependentList<>(RDXVRPickResult::new);
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private CylinderRayIntersection cylinderRayIntersection;
    private EllipsoidRayIntersection ellipsoidRayIntersection;
    private BoxRayIntersection boxRayIntersection;
    private RDXModelInstance collisionShapeCoordinateFrameGraphic;
+   /**
+    * A robot collision link is either taking the pose of the link that
+    * it's representing, or it's detached, as in, it's taking the pose
+    * of some desired of the operator. When you select the hand for instance
+    * and move it, that is "detaching" it. This link's parent frame
+    * will be different based on detached state.
+    */
    private boolean isDetached = false;
    private final RigidBodyTransform detachedTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame detachedFrameAfterJoint;
    private final ReferenceFrame detachedShapeFrame;
    private boolean pickSelected = false;
+   private boolean mousePickSelected = false;
+   private final SideDependentList<Boolean> vrPickSelected = new SideDependentList<>(false, false);
 
-   public RDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
+   public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
-      this(collidable.getShape(),
+      this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
            collidable.getShape().getReferenceFrame(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
            color);
    }
 
-   public RDXRobotCollisionLink(Collidable collidable, Color color)
+   public RDXRobotCollidable(Collidable collidable, Color color)
    {
-      this(collidable.getShape(),
+      this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
            collidable.getShape().getReferenceFrame(),
            collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
            collidable.getRigidBody().getName(),
            color);
    }
 
-   public RDXRobotCollisionLink(FrameShape3DReadOnly shape,
-                                ReferenceFrame shapeFrame,
-                                MovingReferenceFrame frameAfterJoint,
-                                String rigidBodyName,
-                                Color color)
+   public RDXRobotCollidable(FrameShape3DBasics shape,
+                             ReferenceFrame shapeFrame,
+                             MovingReferenceFrame frameAfterJoint,
+                             String rigidBodyName,
+                             Color color)
    {
       this.shape = shape;
       this.frameAfterJoint = frameAfterJoint;
@@ -150,13 +171,19 @@ public class RDXRobotCollisionLink implements RenderableProvider
             LogTools.warn("Shape not handled: {}", shape);
          }
       }, rigidBodyName));
-      LibGDXTools.setTransparency(collisionModelInstance, color.a);
+      LibGDXTools.setOpacity(collisionModelInstance, color.a);
 
       collisionShapeCoordinateFrameGraphic = new RDXModelInstance(RDXModelBuilder.createCoordinateFrame(0.15));
    }
 
    public void update()
    {
+      pickSelected = mousePickSelected;
+      for (RobotSide side : RobotSide.values)
+         pickSelected |= vrPickSelected.get(side);
+
+      collisionModelInstance.setOpacity(pickSelected ? 1.0f : 0.4f);
+
       if (isDetached)
       {
          detachedFrameAfterJoint.update();
@@ -172,6 +199,38 @@ public class RDXRobotCollisionLink implements RenderableProvider
       }
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      // The frame after joint, or parent frame, is dynamic based on detached state
+      ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickResult.get(side).reset();
+         vrContext.getController(side).runIfConnected(controller ->
+         {
+            vrPickPose.setIncludingFrame(controller.getPickPointPose());
+            vrPickPose.changeFrame(frameAfterJointToUse);
+            shape.setReferenceFrame(frameAfterJointToUse);
+            if (shape.isPointInside(vrPickPose.getPosition())) // Check if the operator's pick is intersecting the link
+            {
+               vrPickResult.get(side).addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
+            }
+         });
+         if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
+         {
+            vrContext.addPickResult(side, vrPickResult.get(side));
+         }
+      }
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         vrPickSelected.set(side, vrContext.getSelectedPick().get(side) == vrPickResult.get(side));
+      }
+   }
+
    public void calculatePick(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
@@ -179,7 +238,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
       pickResult.reset();
       if (shape instanceof Sphere3DReadOnly sphere)
       {
-         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition());
+         sphereRayIntersection.update(sphere.getRadius(), sphere.getPosition(), frameAfterJointToUse);
          if (sphereRayIntersection.intersect(input.getPickRayInWorld()))
          {
             pickResult.addPickCollision(input.getPickRayInWorld().getPoint().distance(sphereRayIntersection.getFirstIntersectionToPack()));
@@ -246,11 +305,9 @@ public class RDXRobotCollisionLink implements RenderableProvider
       }
    }
 
-   // Happens after update
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      pickSelected = input.getClosestPick() == pickResult;
-      LibGDXTools.setTransparency(collisionModelInstance, pickSelected ? 1.0f : 0.4f);
+      mousePickSelected = input.getClosestPick() == pickResult;
    }
 
    @Override
@@ -266,9 +323,19 @@ public class RDXRobotCollisionLink implements RenderableProvider
       return detachedTransformToWorld;
    }
 
-   public boolean getPickSelected()
+   public boolean getAnyPickSelected()
    {
       return pickSelected;
+   }
+
+   public boolean getMousePickSelected()
+   {
+      return mousePickSelected;
+   }
+
+   public boolean getVRPickSelected(RobotSide side)
+   {
+      return vrPickSelected.get(side);
    }
 
    public String getRigidBodyName()

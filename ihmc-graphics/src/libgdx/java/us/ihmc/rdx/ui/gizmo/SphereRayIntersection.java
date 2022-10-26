@@ -2,6 +2,8 @@ package us.ihmc.rdx.ui.gizmo;
 
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,6 +16,7 @@ public class SphereRayIntersection
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
    private boolean intersects = false;
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
 
    public void update(double radius, RigidBodyTransformReadOnly transform)
    {
@@ -41,6 +44,16 @@ public class SphereRayIntersection
       sphere.setToZero();
       sphere.setRadius(radius);
       sphere.getPosition().set(positionInWorld);
+   }
+
+   public void update(double radius, Point3DReadOnly offset, ReferenceFrame sphereFrame)
+   {
+      tempFramePoint.setIncludingFrame(sphereFrame, offset);
+      tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+      sphere.setToZero();
+      sphere.setRadius(radius);
+      sphere.getPosition().set(tempFramePoint);
    }
 
    public boolean intersect(Line3DReadOnly pickRay)

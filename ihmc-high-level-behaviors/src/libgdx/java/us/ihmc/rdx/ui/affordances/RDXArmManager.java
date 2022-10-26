@@ -80,12 +80,12 @@ public class RDXArmManager
    }
 
    // TODO this update should be moved into the control ring, and should use the control ring pose.
-   public void update(SideDependentList<RDXHandInteractable> handInteractables)
+   public void update(SideDependentList<RDXInteractableHand> interactableHands)
    {
       boolean desiredHandsChanged = false;
-      for (RobotSide side : handInteractables.sides())
+      for (RobotSide side : interactableHands.sides())
       {
-         armManagers.get(side).update(handInteractables.get(side), desiredRobot);
+         armManagers.get(side).update(interactableHands.get(side), desiredRobot);
 
          // We only want to evaluate this when we are going to take action on it
          // Otherwise, we will not notice the desired changed while the solver was still solving
@@ -99,7 +99,7 @@ public class RDXArmManager
       if (readyToSolve && desiredHandsChanged)
       {
          readyToSolve = false;
-         for (RobotSide side : handInteractables.sides())
+         for (RobotSide side : interactableHands.sides())
          {
             armManagers.get(side).copyActualToWork();
          }
@@ -108,7 +108,7 @@ public class RDXArmManager
          {
             try
             {
-               for (RobotSide side : handInteractables.sides())
+               for (RobotSide side : interactableHands.sides())
                {
                   armManagers.get(side).solve();
                }
@@ -122,7 +122,7 @@ public class RDXArmManager
       if (readyToCopySolution)
       {
          readyToCopySolution = false;
-         for (RobotSide side : handInteractables.sides())
+         for (RobotSide side : interactableHands.sides())
          {
             armManagers.get(side).copyWorkToDesired();
          }
