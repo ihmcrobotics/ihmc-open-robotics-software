@@ -34,7 +34,7 @@ import java.util.ArrayList;
 public class RDXLiveRobotPartInteractable
 {
    private static final boolean SHOW_DEBUG_FRAMES = false;
-   private final ArrayList<RDXRobotCollisionLink> collisionLinks = new ArrayList<>();
+   private final ArrayList<RDXRobotCollidable> robotCollidables = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ReferenceFrame graphicFrame;
    private ReferenceFrame collisionFrame;
@@ -56,19 +56,19 @@ public class RDXLiveRobotPartInteractable
    private boolean isVRDragging = false;
    private final SideDependentList<ModifiableReferenceFrame> dragReferenceFrame = new SideDependentList<>();
 
-   public void create(RDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, RDX3DPanel panel3D)
+   public void create(RDXRobotCollidable robotCollidable, ReferenceFrame controlFrame, String graphicFileName, RDX3DPanel panel3D)
    {
-      create(collisionLink, controlFrame, controlFrame, controlFrame, graphicFileName, panel3D);
+      create(robotCollidable, controlFrame, controlFrame, controlFrame, graphicFileName, panel3D);
    }
 
-   public void create(RDXRobotCollisionLink collisionLink,
+   public void create(RDXRobotCollidable robotCollidable,
                       ReferenceFrame graphicFrame,
                       ReferenceFrame collisionFrame,
                       ReferenceFrame controlFrame,
                       String modelFileName,
                       RDX3DPanel panel3D)
    {
-      collisionLinks.add(collisionLink);
+      robotCollidables.add(robotCollidable);
       this.graphicFrame = graphicFrame;
       this.collisionFrame = collisionFrame;
       this.controlFrame = controlFrame;
@@ -102,9 +102,9 @@ public class RDXLiveRobotPartInteractable
          vrContext.getController(side).runIfConnected(controller ->
          {
             boolean isHovering = false;
-            for (RDXRobotCollisionLink collisionLink : collisionLinks)
+            for (RDXRobotCollidable robotCollidable : robotCollidables)
             {
-               isHovering |= collisionLink.getVRPickSelected(side);
+               isHovering |= robotCollidable.getVRPickSelected(side);
             }
             isVRHovering |= isHovering;
 
@@ -157,9 +157,9 @@ public class RDXLiveRobotPartInteractable
    public boolean process3DViewInput(ImGui3DViewInput input)
    {
       isMouseHovering = false;
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         isMouseHovering |= collisionLink.getMousePickSelected();
+         isMouseHovering |= robotCollidable.getMousePickSelected();
       }
 
       if (isMouseHovering && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
@@ -208,17 +208,17 @@ public class RDXLiveRobotPartInteractable
       {
          tempTransform.set(controlToCollisionTransform);
          selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
-         for (RDXRobotCollisionLink collisionLink : collisionLinks)
+         for (RDXRobotCollidable robotCollidable : robotCollidables)
          {
-            collisionLink.setDetachedTransform(true).set(tempTransform);
+            robotCollidable.setDetachedTransform(true).set(tempTransform);
          }
          highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
       }
       else
       {
-         for (RDXRobotCollisionLink collisionLink : collisionLinks)
+         for (RDXRobotCollidable robotCollidable : robotCollidables)
          {
-            collisionLink.setDetachedTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+            robotCollidable.setDetachedTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
          }
          highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
       }
@@ -254,9 +254,9 @@ public class RDXLiveRobotPartInteractable
    private void onBecomesModified()
    {
       modified = true;
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.setDetachedTransform(true);
+         robotCollidable.setDetachedTransform(true);
       }
       selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
       selectablePose3DGizmo.getPoseGizmo().updateTransforms();
@@ -305,11 +305,11 @@ public class RDXLiveRobotPartInteractable
          controlReferenceFrameGraphic.getRenderables(renderables, pool);
       }
 
-      boolean anyCollisionLinkHovered = false;
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
-         anyCollisionLinkHovered |= collisionLink.getAnyPickSelected();
+      boolean anyRobotCollidableHovered = false;
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
+         anyRobotCollidableHovered |= robotCollidable.getAnyPickSelected();
 
-      if (modified || anyCollisionLinkHovered)
+      if (modified || anyRobotCollidableHovered)
       {
          highlightModel.getRenderables(renderables, pool);
       }
@@ -320,9 +320,9 @@ public class RDXLiveRobotPartInteractable
    {
       modified = false;
       selectablePose3DGizmo.getSelected().set(false);
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.setDetachedTransform(false);
+         robotCollidable.setDetachedTransform(false);
       }
    }
 
@@ -356,9 +356,9 @@ public class RDXLiveRobotPartInteractable
       this.onSpacePressed = onSpacePressed;
    }
 
-   public void addAdditionalCollisionLink(RDXRobotCollisionLink collisionLink)
+   public void addAdditionalRobotCollidable(RDXRobotCollidable robotCollidable)
    {
-      collisionLinks.add(collisionLink);
+      robotCollidables.add(robotCollidable);
    }
 
    public Notification getContextMenuNotification()

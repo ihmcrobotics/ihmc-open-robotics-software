@@ -194,7 +194,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
          // create the manager for the desired arm setpoints
          armManager.create();
 
-         for (RDXRobotCollisionLink robotCollidable : environmentCollisionModel.getRobotCollidables())
+         for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
             RobotDefinition robotDefinition = robotModel.getRobotDefinition();
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
@@ -218,12 +218,12 @@ public class RDXTeleoperationManager extends ImGuiPanel
                }
                else
                {
-                  pelvisInteractable.addAdditionalCollisionLink(robotCollidable);
+                  pelvisInteractable.addAdditionalRobotCollidable(robotCollidable);
                }
             }
             for (RobotSide side : RobotSide.values)
             {
-               if (RDXFootInteractable.collisionLinkIsFoot(side, robotCollidable, fullRobotModel))
+               if (RDXFootInteractable.robotCollidableIsFoot(side, robotCollidable, fullRobotModel))
                {
                   if (!footInteractables.containsKey(side))
                   {
@@ -237,10 +237,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   }
                   else
                   {
-                     footInteractables.get(side).addAdditionalCollisionLink(robotCollidable);
+                     footInteractables.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (RDXHandInteractable.collisionLinkIsHand(side, robotCollidable, fullRobotModel))
+               if (RDXHandInteractable.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                {
                   if (!handInteractables.containsKey(side))
                   {
@@ -253,7 +253,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   }
                   else
                   {
-                     handInteractables.get(side).addAdditionalCollisionLink(robotCollidable);
+                     handInteractables.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
             }
