@@ -33,9 +33,9 @@ import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
-   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry registry;
 
-   private SteppableRegionsProvider steppableRegionsProvider;
+   private final SteppableRegionsProvider steppableRegionsProvider;
 
    private final FramePose3D footstepAtSameHeightAsStanceFoot = new FramePose3D();
    private final FramePose3D adjustedFootstepPose = new FramePose3D();
@@ -49,8 +49,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
-   public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons, SteppableRegionsProvider steppableRegionsProvider)
    {
+      this.steppableRegionsProvider = steppableRegionsProvider;
+      registry = new YoRegistry("PlanarRegionFootstepSnapper");
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       this.footPolygons = footPolygons;
@@ -61,11 +63,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    public YoRegistry getRegistry()
    {
       return registry;
-   }
-
-   public void setSteppableRegionsProvider(SteppableRegionsProvider steppableRegionsProvider)
-   {
-      this.steppableRegionsProvider = steppableRegionsProvider;
    }
 
    public GarbageFreePlanarRegionListPolygonSnapper getSnapper()

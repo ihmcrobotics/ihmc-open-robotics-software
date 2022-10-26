@@ -2,6 +2,7 @@ package us.ihmc.avatar.footstepSnapper;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.*;
@@ -25,7 +26,10 @@ public class PlanarRegionFootstepSnapperTest
       footPolygon.addVertex(-0.1, 0.05);
       footPolygon.addVertex(-0.1, -0.05);
       footPolygon.update();
+
+      SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
       PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon));
+      snapper.setSteppableRegionsProvider(steppableRegionsCalculator);
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -61,7 +65,7 @@ public class PlanarRegionFootstepSnapperTest
       listCommand.addPlanarRegionCommand(groundRegion);
       listCommand.addPlanarRegionCommand(blockRegion);
 
-      snapper.setPlanarRegions(listCommand);
+      steppableRegionsCalculator.consume(listCommand);
 
       FramePose2D poseOnGround = new FramePose2D();
       FramePose2D poseOnBlockEdge = new FramePose2D();

@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPluginFactory
 {
@@ -26,6 +27,8 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    private final VelocityBasedSteppingPluginFactory velocityPluginFactory;
    private final StepGeneratorCommandInputManager commandInputManager = new StepGeneratorCommandInputManager();
    private final List<Updatable> updatables = new ArrayList<>();
+   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+
 
    public JoystickBasedSteppingPluginFactory()
    {
@@ -55,6 +58,11 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
       velocityPluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
    }
 
+   @Override
+   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   {
+      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
+   }
 
    @Override
    public void addUpdatable(Updatable updatable)
@@ -110,6 +118,9 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 
       //this is probably not the way the class was intended to be modified.
       commandInputManager.setCSG(csgFootstepGenerator.getContinuousStepGenerator());
+
+      for (Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer : planarRegionsListCommandConsumers)
+         commandInputManager.addPlanarRegionsListCommandConsumer(planarRegionsListCommandConsumer);
 
       JoystickBasedSteppingPlugin joystickBasedSteppingPlugin = new JoystickBasedSteppingPlugin(csgFootstepGenerator, fastWalkingPlugin, updatables);
       joystickBasedSteppingPlugin.setHighLevelStateChangeStatusListener(walkingStatusMessageOutputManager);

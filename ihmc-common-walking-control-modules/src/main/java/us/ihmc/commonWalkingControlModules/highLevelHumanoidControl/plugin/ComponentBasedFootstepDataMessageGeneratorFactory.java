@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
@@ -11,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,6 +34,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    private final OptionalFactoryField<FootstepAdjustment> primaryFootstepAdjusterField = new OptionalFactoryField<>("csgPrimaryFootstepAdjusterField");
    private final List<FootstepAdjustment> secondaryFootstepAdjusters = new ArrayList<>();
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
+   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
 
    private final List<Updatable> updatables = new ArrayList<>();
 
@@ -61,6 +64,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
       footstepValidityIndicators.add(footstepValidityIndicator);
+   }
+
+   @Override
+   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   {
+      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
    }
 
    @Override
@@ -172,6 +181,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       else if (csgCommandInputManagerField.hasValue())
       {
          StepGeneratorCommandInputManager commandInputManager = csgCommandInputManagerField.get();
+         for (Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer : planarRegionsListCommandConsumers)
+            commandInputManager.addPlanarRegionsListCommandConsumer(planarRegionsListCommandConsumer);
+
          continuousStepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
          continuousStepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
