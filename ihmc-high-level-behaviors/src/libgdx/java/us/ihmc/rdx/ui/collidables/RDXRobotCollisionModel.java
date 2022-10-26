@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.affordances.RDXRobotCollisionLink;
+import us.ihmc.rdx.ui.affordances.RDXRobotCollidable;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.vr.RDXVRContext;
@@ -19,7 +19,7 @@ import java.util.List;
 public class RDXRobotCollisionModel
 {
    private final RobotCollisionModel robotCollisionModel;
-   private final ArrayList<RDXRobotCollisionLink> robotCollidables = new ArrayList<>();
+   private final ArrayList<RDXRobotCollidable> robotCollidables = new ArrayList<>();
    private List<Collidable> collidables;
 
    public RDXRobotCollisionModel(RobotCollisionModel robotCollisionModel)
@@ -37,60 +37,60 @@ public class RDXRobotCollisionModel
       collidables = robotCollisionModel.getRobotCollidables(rootBody);
       for (Collidable collidable : collidables)
       {
-         RDXRobotCollisionLink collisionLink = new RDXRobotCollisionLink(collidable, LibGDXTools.toLibGDX(color));
-         robotCollidables.add(collisionLink);
+         RDXRobotCollidable robotCollidable = new RDXRobotCollidable(collidable, LibGDXTools.toLibGDX(color));
+         robotCollidables.add(robotCollidable);
       }
    }
 
    public void update()
    {
-      for (RDXRobotCollisionLink collisionLink : robotCollidables)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.update();
+         robotCollidable.update();
       }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      for (RDXRobotCollisionLink collisionLink : robotCollidables)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.calculateVRPick(vrContext);
+         robotCollidable.calculateVRPick(vrContext);
       }
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      for (RDXRobotCollisionLink collisionLink : robotCollidables)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.processVRInput(vrContext);
+         robotCollidable.processVRInput(vrContext);
       }
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXRobotCollisionLink collisionLink : robotCollidables)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.calculatePick(input);
+         robotCollidable.calculatePick(input);
       }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXRobotCollisionLink collisionLink : robotCollidables)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.process3DViewInput(input);
+         robotCollidable.process3DViewInput(input);
       }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXRobotCollisionLink collisionLink : robotCollidables)
+      for (RDXRobotCollidable robotCollidable : robotCollidables)
       {
-         collisionLink.getRenderables(renderables, pool);
+         robotCollidable.getRenderables(renderables, pool);
       }
    }
 
-   public ArrayList<RDXRobotCollisionLink> getRobotCollidables()
+   public ArrayList<RDXRobotCollidable> getRobotCollidables()
    {
       return robotCollidables;
    }

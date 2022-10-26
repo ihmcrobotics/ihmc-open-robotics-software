@@ -8,19 +8,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXFootInteractable extends RDXLiveRobotPartInteractable
 {
-   public static boolean collisionLinkIsFoot(RobotSide side, RDXRobotCollisionLink collisionLink, FullHumanoidRobotModel fullRobotModel)
+   public static boolean robotCollidableIsFoot(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
-      return collisionLink.getRigidBodyName().equals(fullRobotModel.getFoot(side).getName());
+      return robotCollidable.getRigidBodyName().equals(fullRobotModel.getFoot(side).getName());
    }
 
    public RDXFootInteractable(RobotSide side,
                               RDXBaseUI baseUI,
-                              RDXRobotCollisionLink collisionLink,
+                              RDXRobotCollidable robotCollidable,
                               DRCRobotModel robotModel,
                               FullHumanoidRobotModel fullRobotModel)
    {
-      String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(collisionLink.getRigidBodyName()));
-      create(collisionLink,
+      String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
+      create(robotCollidable,
              fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
              modelFileName,
              baseUI.getPrimary3DPanel());

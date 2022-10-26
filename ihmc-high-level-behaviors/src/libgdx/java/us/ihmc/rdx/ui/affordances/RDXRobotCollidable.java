@@ -36,10 +36,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * It supports all the different collision shape types collisions up to
  * date with the correct pose. It can be attached/synced to the robot
  * or "detached" from the robot.
- *
- * TODO: Rename to RDXRobotCollidable
  */
-public class RDXRobotCollisionLink implements RenderableProvider
+public class RDXRobotCollidable implements RenderableProvider
 {
    private final RDXModelInstance collisionModelInstance;
    private final RigidBodyTransform shapeTransformToParentFrameAfterJoint;
@@ -73,7 +71,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private boolean mousePickSelected = false;
    private final SideDependentList<Boolean> vrPickSelected = new SideDependentList<>(false, false);
 
-   public RDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
+   public RDXRobotCollidable(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
       this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
            collidable.getShape().getReferenceFrame(),
@@ -82,7 +80,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
            color);
    }
 
-   public RDXRobotCollisionLink(Collidable collidable, Color color)
+   public RDXRobotCollidable(Collidable collidable, Color color)
    {
       this((FrameShape3DBasics) collidable.getShape(), // Need to setReferenceFrame
            collidable.getShape().getReferenceFrame(),
@@ -91,11 +89,11 @@ public class RDXRobotCollisionLink implements RenderableProvider
            color);
    }
 
-   public RDXRobotCollisionLink(FrameShape3DBasics shape,
-                                ReferenceFrame shapeFrame,
-                                MovingReferenceFrame frameAfterJoint,
-                                String rigidBodyName,
-                                Color color)
+   public RDXRobotCollidable(FrameShape3DBasics shape,
+                             ReferenceFrame shapeFrame,
+                             MovingReferenceFrame frameAfterJoint,
+                             String rigidBodyName,
+                             Color color)
    {
       this.shape = shape;
       this.frameAfterJoint = frameAfterJoint;

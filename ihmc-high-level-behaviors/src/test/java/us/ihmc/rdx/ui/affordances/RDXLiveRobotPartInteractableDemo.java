@@ -19,7 +19,7 @@ public class RDXLiveRobotPartInteractableDemo
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "Live Robot Part Interactable Demo");
    private RDXLiveRobotPartInteractable liveRobotPartInteractable;
-   private RDXRobotCollisionLink robotCollisionLink;
+   private RDXRobotCollidable robotRobotCollidable;
 
    public RDXLiveRobotPartInteractableDemo()
    {
@@ -36,16 +36,16 @@ public class RDXLiveRobotPartInteractableDemo
             FrameSphere3D frameShape = new FrameSphere3D(ReferenceFrame.getWorldFrame(), 0.03);
             Collidable collidable = new Collidable(rigidBody, 0, 0, frameShape);
 
-            robotCollisionLink = new RDXRobotCollisionLink(collidable, Color.GRAY);
-            baseUI.getVRManager().getContext().addVRPickCalculator(robotCollisionLink::calculateVRPick);
-            baseUI.getVRManager().getContext().addVRInputProcessor(robotCollisionLink::processVRInput);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(robotCollisionLink::calculatePick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotCollisionLink::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(robotCollisionLink, RDXSceneLevel.VIRTUAL);
+            robotRobotCollidable = new RDXRobotCollidable(collidable, Color.GRAY);
+            baseUI.getVRManager().getContext().addVRPickCalculator(robotRobotCollidable::calculateVRPick);
+            baseUI.getVRManager().getContext().addVRInputProcessor(robotRobotCollidable::processVRInput);
+            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(robotRobotCollidable::calculatePick);
+            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(robotRobotCollidable::process3DViewInput);
+            baseUI.getPrimaryScene().addRenderableProvider(robotRobotCollidable, RDXSceneLevel.VIRTUAL);
 
             ModifiableReferenceFrame controlFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
             liveRobotPartInteractable = new RDXLiveRobotPartInteractable();
-            liveRobotPartInteractable.create(robotCollisionLink,
+            liveRobotPartInteractable.create(robotRobotCollidable,
                                              controlFrame.getReferenceFrame(),
                                              "environmentObjects/l515Sensor/L515Sensor.g3dj",
                                              baseUI.getPrimary3DPanel());
@@ -60,7 +60,7 @@ public class RDXLiveRobotPartInteractableDemo
          @Override
          public void render()
          {
-            robotCollisionLink.update();
+            robotRobotCollidable.update();
             liveRobotPartInteractable.update();
 
             baseUI.renderBeforeOnScreenUI();
