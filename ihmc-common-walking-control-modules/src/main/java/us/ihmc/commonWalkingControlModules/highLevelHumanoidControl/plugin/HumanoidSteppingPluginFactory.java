@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -22,6 +23,8 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
    StepGeneratorCommandInputManager getStepGeneratorCommandInputManager();
 
    void setFootStepAdjustment(FootstepAdjustment footstepAdjustment);
+
+   void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator);
 
    void addUpdatable(Updatable updatable);
 
