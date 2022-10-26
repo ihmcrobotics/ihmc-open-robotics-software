@@ -13,7 +13,6 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.sharedControl.ProMPAssistant;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -74,8 +73,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
-   private final ProMPAssistant proMPAssistant = new ProMPAssistant();
-   private final ImBoolean sharedControlActive = new ImBoolean(false);
+   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -165,6 +163,8 @@ public class RDXVRKinematicsStreamingMode
          // Check if left B button is pressed in order to trigger recording or replay of motion
          InputDigitalActionData bButton = controller.getBButtonActionData();
          kinematicsRecorder.processRecordReplayInput(bButton);
+         // or shared control assistance
+         sharedControlAssistant.processInput(bButton);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -212,12 +212,12 @@ public class RDXVRKinematicsStreamingMode
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
-               else if (sharedControlActive.get())
+               else if (sharedControlAssistant.isActive())
                {
-                  if(proMPAssistant.readyToPack())
-                     proMPAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                  if(sharedControlAssistant.readyToPack())
+                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
                   else
-                     proMPAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
                }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
@@ -320,10 +320,12 @@ public class RDXVRKinematicsStreamingMode
          sleepToolbox();
       }
       // add widgets for recording/replaying motion in VR
-      ImGui.text("Start/Stop recording: Press Right B button");
+      ImGui.text("Start/Stop recording: Right B button");
       kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Start/Stop replay: Press Right B button (cannot stream/record if replay)");
+      ImGui.text("Start/Stop replay: Right B button (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
+      // add widget for using shared control assistance in VR
+      sharedControlAssistant.renderWidgets(labels);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());

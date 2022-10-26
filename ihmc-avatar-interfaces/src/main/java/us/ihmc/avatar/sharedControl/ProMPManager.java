@@ -30,15 +30,18 @@ public class ProMPManager
    // learnedProMPs stores a set of multi-D (e.g., for pose D=6, for position D=3) proMPs (a multi-D proMP for each body part)
    private final HashMap<String, ProMP> learnedProMPs = new HashMap<>();
    private final HashMap<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
+   private final ProMPLogger logger = new ProMPLogger();
+   private boolean logEnabled = false;
 
    /* Class constructor
     * @param taskName: name of the task
     * @param bodyPartsGeometry: body part of the robot and geometry (e.g. position, orientation, pose) for which you want to learn the ProMPs
     */
-   public ProMPManager(String taskName, HashMap<String, String> bodyPartsGeometry)
+   public ProMPManager(String taskName, HashMap<String, String> bodyPartsGeometry, boolean logEnabled)
    {
       this.taskName = taskName;
       this.bodyPartsGeometry = bodyPartsGeometry;
+      this.logEnabled = logEnabled;
       ProMPNativeLibrary.load();
    }
 
@@ -102,6 +105,11 @@ public class ProMPManager
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
          trainingTrajectories.put(bodyPart, trainingTrajectory);
          learnedProMPs.put(bodyPart, new ProMP(trainingTrajectory, 20)); // default 20 rbf functions seems to generalize well
+
+         if (logEnabled)
+         {
+            logger.saveDemosAndLearnedTrajectories(bodyPart, learnedProMPs.get(bodyPart), trainingTrajectory);
+         }
       }
    }
 
@@ -125,7 +133,14 @@ public class ProMPManager
       LogTools.info("Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (ProMP proMPBodyPart : learnedProMPs.values())
+      {
          proMPBodyPart.update_time_modulation((double) proMPBodyPart.get_traj_length() / inferredTimesteps);
+
+         if (logEnabled)
+         {
+            logger.saveModulatedTrajectories(bodyPart, proMPBodyPart);
+         }
+      }
    }
 
    /* update the speed of the ProMPs of the task based on observation of a body-part trajectory and goal (e.g., RightHand or LeftHand) */
@@ -145,7 +160,14 @@ public class ProMPManager
       LogTools.info("Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (ProMP proMPBodyPart : learnedProMPs.values())
+      {
          proMPBodyPart.update_time_modulation((double) proMPBodyPart.get_traj_length() / inferredTimesteps);
+
+         if (logEnabled)
+         {
+            logger.saveModulatedTrajectories(bodyPart, proMPBodyPart);
+         }
+      }
    }
 
    /* transform trajectory from list of setposes to EigenMatrixXd */
@@ -225,6 +247,11 @@ public class ProMPManager
       }
       setViaPoint(viaPoint, bodyPart, observedPose);
       myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
+
+      if (logEnabled)
+      {
+         logger.saveConditionedTrajectories(bodyPart, myProMP, conditioningTimestep);
+      }
    }
 
    /* update the predicted trajectory based on observed goal */
@@ -263,6 +290,11 @@ public class ProMPManager
       }
       setViaPoint(viaPoint, bodyPart, observedPose);
       myProMP.condition_goal(viaPoint, viaPointStdDeviation);
+
+      if (logEnabled)
+      {
+         logger.saveConditionedGoalTrajectories(bodyPart, myProMP);
+      }
    }
 
    private void setViaPoint(EigenVectorXd viaPoint, String bodyPart, Pose3DReadOnly observedPose)
