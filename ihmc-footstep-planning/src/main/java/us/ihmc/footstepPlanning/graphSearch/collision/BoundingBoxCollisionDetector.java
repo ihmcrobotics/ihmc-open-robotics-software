@@ -28,6 +28,8 @@ public class BoundingBoxCollisionDetector
    // this is the bounding box of "bodyBox", used as an optimization before doing a full collision check
    private final BoundingBox3D boundingBox = new BoundingBox3D();
 
+   private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
+
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
