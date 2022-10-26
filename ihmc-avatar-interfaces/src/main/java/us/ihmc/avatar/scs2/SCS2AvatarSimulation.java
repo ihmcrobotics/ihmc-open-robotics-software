@@ -151,6 +151,7 @@ public class SCS2AvatarSimulation
          simulationConstructionSet.stopSimulationThread();
 
       simulationConstructionSet.reinitializeSimulation();
+      simulationConstructionSet.setBufferInPoint();
 
       if (wasSimulationThreadRunning)
       {
