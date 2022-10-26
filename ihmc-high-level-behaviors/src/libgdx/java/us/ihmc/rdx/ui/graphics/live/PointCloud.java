@@ -5,22 +5,19 @@ import org.bytedeco.javacpp.FloatPointer;
 public class PointCloud
 {
    private final int numberOfPoints;
-   private final int pointLength;
+   private final int numberOfElementsPerPoint;
    private final float[] data;
 
    public PointCloud(int numberOfPoints, int pointLength)
    {
       this.numberOfPoints = numberOfPoints;
-      this.pointLength = pointLength;
+      this.numberOfElementsPerPoint = pointLength;
       data = new float[numberOfPoints * pointLength];
    }
 
    public void setData(FloatPointer fp, int size)
    {
-      for (int i = 0; i < size; ++i)
-      {
-         data[i] = fp.get(i);
-      }
+      fp.get(data, 0, size);
    }
 
    public float[] getData()
@@ -33,8 +30,8 @@ public class PointCloud
       return numberOfPoints;
    }
 
-   public int getPointLength()
+   public int getNumberOfElementsPerPoint()
    {
-      return pointLength;
+      return numberOfElementsPerPoint;
    }
 }

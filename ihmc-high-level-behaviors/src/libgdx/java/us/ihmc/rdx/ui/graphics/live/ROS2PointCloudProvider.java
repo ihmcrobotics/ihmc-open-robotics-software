@@ -14,7 +14,7 @@ import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -27,40 +27,53 @@ import java.nio.FloatBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+/**
+ * {@link ROS2PointCloudProvider} subscribes to ROS2 topic and reads in pointCloud data, stores into OpenCLFloatBuffer, and packs into {@link PointCloud}.
+ * <p>
+ * It expects to subscribe to {@link FusedSensorHeadPointCloudMessage}.
+ * </p>
+ **/
+
 public class ROS2PointCloudProvider
 {
-   private final ROS2Node ros2Node;
+   // NOTE: Subscribe to receive message.
+   private final ROS2NodeInterface ros2Node;
    private final ROS2Topic<?> topic;
-   private final float pointSize = 0.01f;
+   private boolean messageQueued = false;
 
-   private final int pointsPerSegment;
-   private final int numberOfSegments;
-   private final int totalNumberOfPoints;
-   private final int inputBytesPerPoint = 4 * Integer.BYTES;
-   private final ResettableExceptionHandlingExecutorService threadQueue;
-   private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
-   private final ByteBuffer decompressionInputDirectBuffer;
+   // NOTE: Reference to message. (gets set when new message received from ros2 callback)
    private final AtomicReference<FusedSensorHeadPointCloudMessage> latestFusedSensorHeadPointCloudMessageReference = new AtomicReference<>(null);
    private final AtomicReference<LidarScanMessage> latestLidarScanMessageReference = new AtomicReference<>(null);
    private final AtomicReference<StereoVisionPointCloudMessage> latestStereoVisionMessageReference = new AtomicReference<>(null);
+
+   // NOTE: Some parameters for data processing
+   private static final float POINT_SIZE = 0.01f;
+   private final int pointsPerSegment;
+   private static final int inputBytesPerPoint = 4 * Integer.BYTES;
    private final Color color = new Color();
    private int latestSegmentIndex = -1;
+
+   // NOTE: Decompress incoming binary data (compressed)
+   private final ResettableExceptionHandlingExecutorService threadQueue;
+   private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
+   private final ByteBuffer decompressionInputDirectBuffer;
+
+   // NOTE: set up openCL kernel to read in data and store to vertexBuffer (discretized)
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private _cl_kernel unpackPointCloudKernel;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-   private final PointCloud pointCloud;
-   private boolean messageQueued = false;
 
-   public ROS2PointCloudProvider(ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
+   // NOTE: Data type PointCloud, to be updated and used globally in the future whenever sending / receiving pointCloud data.
+   private final PointCloud pointCloud;
+
+   public ROS2PointCloudProvider(ROS2NodeInterface ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
    {
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.pointsPerSegment = pointsPerSegment;
-      this.numberOfSegments = numberOfSegments;
-      totalNumberOfPoints = pointsPerSegment * numberOfSegments;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
       decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
@@ -150,7 +163,7 @@ public class ROS2PointCloudProvider
          latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
 
          parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
-         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize);
+         parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, POINT_SIZE);
          parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
 
          parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
@@ -220,7 +233,7 @@ public class ROS2PointCloudProvider
             return latestStereoVisionMessage.getNumberOfPoints();
          };
       }
-      return xyzRGBASizeFloatBuffer-> 0;
+      return xyzRGBASizeFloatBuffer -> 0;
    }
 
    public PointCloud getPointCloud()
@@ -228,13 +241,10 @@ public class ROS2PointCloudProvider
       return pointCloud;
    }
 
-   public boolean isMessageQueued()
+   public boolean pollMessageQueued()
    {
-      return messageQueued;
-   }
-
-   public void setMessageQueued(boolean messageQueued)
-   {
-      this.messageQueued = messageQueued;
+      boolean ret = messageQueued;
+      messageQueued = false;
+      return ret;
    }
 }

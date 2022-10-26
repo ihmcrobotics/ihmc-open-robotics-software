@@ -13,7 +13,7 @@ kernel void unpackPointCloud(global float* parameters,
    int inputIntsPerPoint = 4;
    int inputStartIndex = n * inputIntsPerPoint;
 
-   int floatsPerVertex = 8;
+   int floatsPerVertex = 8;         // TODO: Need to remove these constants
    int currentSegmentStart = latestSegmentIndex * pointsPerSegment * floatsPerVertex;
    int pointCloudStartIndex = currentSegmentStart + n * floatsPerVertex;
 
@@ -38,5 +38,5 @@ kernel void unpackPointCloud(global float* parameters,
    pointCloudVertexBuffer[pointCloudStartIndex + 5] = b;
    pointCloudVertexBuffer[pointCloudStartIndex + 6] = a;
 
-   pointCloudVertexBuffer[pointCloudStartIndex + 7] = pointSize;
+   pointCloudVertexBuffer[pointCloudStartIndex + 7] = pointSize;    // TODO: Need to get rid of this by using uniform
 }

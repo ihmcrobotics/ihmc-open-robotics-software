@@ -15,27 +15,40 @@ import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import java.nio.FloatBuffer;
 import java.util.function.Function;
 
+/**
+ * RDXPointCloudVisualizer is intended to visualize any pointCloud data through GDX and ImGui api.
+ * <p>
+ * It expects to receive datatype: {@link PointCloud}
+ * </p>
+ **/
+
 public class RDXPointCloudVisualizer extends RDXVisualizer
 {
+   // Note: Renderer. Creates and sets up shader, generate mesh and provides renderable.
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+
+   // NOTE: Variables for ImGuiWidget render.
+   private final String topicName;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private int latestSegmentIndex;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
+   // NOTE: Some parameters of data
    private final int pointsPerSegment;
    private final int numberOfSegments;
    private int totalNumberOfPoints;
-   private final Color color = new Color();
-   private final String topicName;
-   private int latestSegmentIndex;
+   private final int numberOfElementsPerPoint;
 
-   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments)
+   public RDXPointCloudVisualizer(String title, String topicName, int pointsPerSegment, int numberOfSegments, int numberOfElementsPerPoint)
    {
       super(title + " (ROS 2)");
       this.pointsPerSegment = pointsPerSegment;
       this.numberOfSegments = numberOfSegments;
       totalNumberOfPoints = pointsPerSegment * numberOfSegments;
       this.topicName = topicName;
+      this.numberOfElementsPerPoint = numberOfElementsPerPoint;
    }
 
    @Override
@@ -43,7 +56,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    {
       super.create();
       pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
-      pointCloudRenderer.getVertexBuffer().limit(pointsPerSegment * 8);
+      pointCloudRenderer.getVertexBuffer().limit(pointsPerSegment * numberOfElementsPerPoint);
    }
 
    @Override
