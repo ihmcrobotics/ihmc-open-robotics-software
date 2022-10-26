@@ -388,7 +388,7 @@ public class SCS2AvatarSimulationFactory
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
       HumanoidSteppingPluginFactory steppingFactory;
-      AvatarStepSnapperUpdatable stepSnapperUpdatable = null;
+      AvatarStepGeneratorEnvironmentUpdatable stepSnapperUpdatable = null;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
       HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParameters.hasValue()
             ? headingAndVelocityEvaluationScriptParameters.get()
@@ -412,8 +412,8 @@ public class SCS2AvatarSimulationFactory
             joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
          else
          {
-            stepSnapperUpdatable = new AvatarStepSnapperUpdatable(robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
-                                                                  joystickPluginFactory.getStepGeneratorCommandInputManager());
+            stepSnapperUpdatable = new AvatarStepGeneratorEnvironmentUpdatable(robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                               joystickPluginFactory.getStepGeneratorCommandInputManager());
             stepSnapperUpdatable.setShouldSnapToRegions(true);
          }
 
