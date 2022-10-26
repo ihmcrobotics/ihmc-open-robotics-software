@@ -54,6 +54,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
 
+      wiggleParameters.setDesiredDistanceInside(0.02);
+
       double footLength = steppingParameters.getFootLength();
       double toeWidth = steppingParameters.getToeWidth();
       double footWidth = steppingParameters.getFootWidth();
@@ -163,7 +165,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          return true;
       }
 
-      // TODO garbasge
       doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, footstepPolygonInWorld, snappedFootstepPolygonToPack);
 
       solePose.get(transformToSole);
@@ -202,6 +203,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
       footPolygonInRegionFrame.applyTransform(transformFromSoleToRegion, false);
 
+      stepConstraintOptimizer.reset();
       RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footPolygonInRegionFrame, regionToSnapTo.getConvexHull(), wiggleParameters);
 
       if (wiggleTransform == null)
