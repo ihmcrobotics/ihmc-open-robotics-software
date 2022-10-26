@@ -112,19 +112,17 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      CinderBlockFieldPlanarRegionEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldPlanarRegionEnvironment();
-//      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addDRCCinderBlockField();
-//      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses, getStepHeightOffset());
-
+      CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
+      cinderBlockFieldEnvironment.addFlatGround();
+      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addDRCCinderBlockField();
+      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses, getStepHeightOffset());
       footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(getSwingHeight()));
-      footsteps.setOffsetFootstepsHeightWithExecutionError(true);
 
       setupSimulation(cinderBlockFieldEnvironment);
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateNow(0.1);
-      simulationTestHelper.publishToController(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockFieldEnvironment.getPlanarRegionsList()));//generatePlanarRegionsListForCinderBlocks(cinderBlockPoses, getStepHeightOffset()));
+      boolean success = simulationTestHelper.simulateNow(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -134,26 +132,26 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double desiredHeight = pelvisPosition.getZ();
       simulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.5, desiredHeight));
 
+      simulationTestHelper.publishToController(footsteps);
 
       WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateNow(30.0);
-//      assertTrue(success);
-//
-//      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
-//      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
-//      Point3D expectedPelvis = new Point3D();
-//      expectedPelvis.interpolate(step1, step2, 0.5);
-//      expectedPelvis.setZ(desiredHeight);
-//      Vector3D margin = new Vector3D(0.25, 0.25, 0.25);
-//      Point3D min = new Point3D(expectedPelvis);
-//      Point3D max = new Point3D(expectedPelvis);
-//      min.sub(margin);
-//      max.add(margin);
-//      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
-      simulationTestHelper.setKeepSCSUp(true);
+      success = simulationTestHelper.simulateNow(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      assertTrue(success);
+
+      Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
+      Point3D step2 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 2).getLocation();
+      Point3D expectedPelvis = new Point3D();
+      expectedPelvis.interpolate(step1, step2, 0.5);
+      expectedPelvis.setZ(desiredHeight);
+      Vector3D margin = new Vector3D(0.25, 0.25, 0.25);
+      Point3D min = new Point3D(expectedPelvis);
+      Point3D max = new Point3D(expectedPelvis);
+      min.sub(margin);
+      max.add(margin);
+      simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
       simulationTestHelper.createBambooVideo(getSimpleRobotName(), 2);
    }
