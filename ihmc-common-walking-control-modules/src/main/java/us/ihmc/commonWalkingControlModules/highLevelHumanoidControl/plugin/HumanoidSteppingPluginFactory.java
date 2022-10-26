@@ -11,6 +11,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -19,6 +20,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.function.Consumer;
+
 public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControllerPluginFactory
 {
    StepGeneratorCommandInputManager getStepGeneratorCommandInputManager();
@@ -26,6 +29,8 @@ public interface HumanoidSteppingPluginFactory extends HighLevelHumanoidControll
    void setFootStepAdjustment(FootstepAdjustment footstepAdjustment);
 
    void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator);
+
+   void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer);
 
    void addUpdatable(Updatable updatable);
 

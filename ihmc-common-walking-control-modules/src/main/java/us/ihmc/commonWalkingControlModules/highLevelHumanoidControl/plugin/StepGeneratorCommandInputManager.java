@@ -13,6 +13,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class StepGeneratorCommandInputManager implements Updatable
 {
@@ -26,7 +27,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
-   private SteppableRegionsProvider steppableRegionsProvider;
+   private List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
 
    public StepGeneratorCommandInputManager()
    {
@@ -37,9 +38,9 @@ public class StepGeneratorCommandInputManager implements Updatable
       this.continuousStepGenerator = continuousStepGenerator;
    }
 
-   public void setSteppableRegionsProvider(SteppableRegionsProvider steppableRegionsProvider)
+   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
    {
-      this.steppableRegionsProvider = steppableRegionsProvider;
+      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
    }
 
    public CommandInputManager getCommandInputManager()
@@ -92,10 +93,11 @@ public class StepGeneratorCommandInputManager implements Updatable
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
 
-      if (steppableRegionsProvider != null && commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+      if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
-         PlanarRegionsListCommand commands = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
-         steppableRegionsProvider.consume(commands);
+         PlanarRegionsListCommand command = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
+         for (int i = 0; i < planarRegionsListCommandConsumers.size(); i++)
+            planarRegionsListCommandConsumers.get(i).accept(command);
       }
       commandInputManager.clearCommands(PlanarRegionsListCommand.class);
 
@@ -147,10 +149,5 @@ public class StepGeneratorCommandInputManager implements Updatable
    public BooleanProvider createWalkInputProvider()
    {
       return () -> walk;
-   }
-
-   public SteppableRegionsProvider getSteppableRegionsProvider()
-   {
-      return steppableRegionsProvider;
    }
 }

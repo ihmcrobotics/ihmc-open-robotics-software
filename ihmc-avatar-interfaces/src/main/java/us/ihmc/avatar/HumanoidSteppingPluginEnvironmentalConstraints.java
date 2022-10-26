@@ -2,6 +2,7 @@ package us.ihmc.avatar;
 
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -30,8 +31,9 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class HumanoidSteppingPluginEnvironmentalConstraints
+public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<PlanarRegionsListCommand>
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean shouldSnapToRegions;
@@ -44,7 +46,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints
 
    private final BoundingBoxCollisionDetector collisionDetector;
 
-   private SteppableRegionsProvider steppableRegionsProvider;
+   private final SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
 
    // temp variables
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -62,7 +64,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints
                                                                                    ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
-      stepSnapper = new PlanarRegionFootstepSnapper(footPolygons)
+      stepSnapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsCalculator)
       {
          @Override
          public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose,
@@ -95,10 +97,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints
       this.shouldSnapToRegions.set(shouldSnapToRegions);
    }
 
-   public void setSteppableRegionsProvider(SteppableRegionsProvider steppableRegionsProvider)
+   @Override
+   public void accept(PlanarRegionsListCommand planarRegionsListCommand)
    {
-      stepSnapper.setSteppableRegionsProvider(steppableRegionsProvider);
-      this.steppableRegionsProvider = steppableRegionsProvider;
+      steppableRegionsCalculator.consume(planarRegionsListCommand);
    }
 
    public YoRegistry getRegistry()
@@ -119,7 +121,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
-      if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
+      if (steppableRegionsCalculator.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
          return true;
 
       footPolygon.set(stepSnapper.getFootPolygon(swingSide));
@@ -127,7 +129,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints
 
       return stepSnapper.getSnapper()
                         .snapPolygonToPlanarRegionsList(footPolygon,
-                                                        steppableRegionsProvider.getSteppableRegions(),
+                                                        steppableRegionsCalculator.getSteppableRegions(),
                                                         Double.POSITIVE_INFINITY,
                                                         tempRegion,
                                                         snapTransform);
@@ -143,7 +145,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
       // FIXME should not use the step snapper regions, as those may filter out collisions
-      if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
+      if (steppableRegionsCalculator.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
          return true;
 
       double halfStanceWidth = 0.5 * steppingParameters.getInPlaceWidth();
