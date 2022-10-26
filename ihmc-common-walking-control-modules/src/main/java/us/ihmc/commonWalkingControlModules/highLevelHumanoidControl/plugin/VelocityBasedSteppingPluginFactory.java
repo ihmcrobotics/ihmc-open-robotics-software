@@ -5,10 +5,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DirectionalControlMessenger;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StartWalkingMessenger;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -61,6 +58,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
 
    @Override
    public void setFootStepAdjustment(FootstepAdjustment footstepAdjustment)
+   {
+   }
+
+   @Override
+   public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
    }
 
