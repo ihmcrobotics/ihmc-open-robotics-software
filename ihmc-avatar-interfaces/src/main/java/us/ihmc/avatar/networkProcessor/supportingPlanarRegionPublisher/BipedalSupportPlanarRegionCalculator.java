@@ -57,8 +57,6 @@ public class BipedalSupportPlanarRegionCalculator
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getControllerFootGroundContactPoints());
       contactableFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactablePlaneBodies());
-
-
    }
 
    public void initializeEmptyRegions()
