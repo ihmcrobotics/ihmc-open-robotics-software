@@ -30,7 +30,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    /** This is used only when the support foot based footstep adjustment is created. */
    private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
    private final OptionalFactoryField<FootstepAdjustment> primaryFootstepAdjusterField = new OptionalFactoryField<>("csgPrimaryFootstepAdjusterField");
-   private final OptionalFactoryField<List<FootstepAdjustment>> secondaryFootstepAdjusterField = new OptionalFactoryField<>("csgSecondaryFootstepAdjusterFields");
+   private final List<FootstepAdjustment> secondaryFootstepAdjusters = new ArrayList<>();
+   private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
 
    private final List<Updatable> updatables = new ArrayList<>();
 
@@ -50,9 +51,16 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       registryField.set(new YoRegistry(name));
    }
 
+   @Override
    public void setFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
       primaryFootstepAdjusterField.set(footStepAdjustment);
+   }
+
+   @Override
+   public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
+   {
+      footstepValidityIndicators.add(footstepValidityIndicator);
    }
 
    @Override
@@ -63,9 +71,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
    public void addSecondaryFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
-      if (!secondaryFootstepAdjusterField.hasValue())
-         secondaryFootstepAdjusterField.set(new ArrayList<>());
-      secondaryFootstepAdjusterField.get().add(footStepAdjustment);
+      secondaryFootstepAdjusters.add(footStepAdjustment);
    }
 
    public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
@@ -118,11 +124,10 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
-      if (secondaryFootstepAdjusterField.hasValue())
-      {
-         for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusterField.get())
-            continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
-      }
+      for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusters)
+         continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
+      for (FootstepValidityIndicator footstepValidityIndicator : footstepValidityIndicators)
+         continuousStepGenerator.addFootstepValidityIndicator(footstepValidityIndicator);
       continuousStepGenerator.setFootstepStatusListener(walkingStatusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
