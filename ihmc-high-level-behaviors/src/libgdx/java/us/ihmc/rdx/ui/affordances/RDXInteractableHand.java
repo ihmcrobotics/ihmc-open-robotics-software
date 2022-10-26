@@ -18,21 +18,21 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
-public class RDXHandInteractable extends RDXLiveRobotPartInteractable
+public class RDXInteractableHand extends RDXInteractableRobotLink
 {
    private final RobotSide side;
    private final ROS2SyncedRobotModel syncedRobot;
    private RDXSpatialVectorArrows wristWrenchArrows;
    private String contextMenuName;
 
-   public static boolean collisionLinkIsHand(RobotSide side, RDXRobotCollisionLink collisionLink, FullHumanoidRobotModel fullRobotModel)
+   public static boolean robotCollidableIsHand(RobotSide side, RDXRobotCollidable robotCollidable, FullHumanoidRobotModel fullRobotModel)
    {
-      return collisionLink.getRigidBodyName().equals(fullRobotModel.getHand(side).getName());
+      return robotCollidable.getRigidBodyName().equals(fullRobotModel.getHand(side).getName());
    }
 
-   public RDXHandInteractable(RobotSide side,
+   public RDXInteractableHand(RobotSide side,
                               RDXBaseUI baseUI,
-                              RDXRobotCollisionLink collisionLink,
+                              RDXRobotCollidable robotCollidable,
                               DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
                               YoVariableClientHelper yoVariableClientHelper)
@@ -43,7 +43,7 @@ public class RDXHandInteractable extends RDXLiveRobotPartInteractable
       String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
       FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
-      String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(collisionLink.getRigidBodyName()));
+      String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
       ReferenceFrame handFrame = fullRobotModel.getEndEffectorFrame(side, LimbName.ARM);
       ReferenceFrame collisionFrame = handFrame;
@@ -52,7 +52,7 @@ public class RDXHandInteractable extends RDXLiveRobotPartInteractable
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
                                                                                 handFrame,
                                                                                 robotModel.getUIParameters().getHandGraphicToHandFrameTransform(side));
-      super.create(collisionLink, handGraphicFrame, collisionFrame, handControlFrame, modelFileName, baseUI.getPrimary3DPanel());
+      super.create(robotCollidable, handGraphicFrame, collisionFrame, handControlFrame, modelFileName, baseUI.getPrimary3DPanel());
 
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
@@ -71,8 +71,11 @@ public class RDXHandInteractable extends RDXLiveRobotPartInteractable
       contextMenuName = side + " Hand Context Menu";
    }
 
+   @Override
    public void update()
    {
+      super.update();
+
       if (wristWrenchArrows != null)
       {
          // RDXSpatialVectorArrows wristArrows = wristWrenchArrows.get(side);

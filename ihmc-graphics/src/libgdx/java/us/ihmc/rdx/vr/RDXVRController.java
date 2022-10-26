@@ -17,6 +17,7 @@ import us.ihmc.rdx.imgui.ImGuiRigidBodyTransformTuner;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.LongBuffer;
@@ -76,8 +77,8 @@ public class RDXVRController extends RDXVRTrackedDevice
     * selecting or interacting with.
     */
    private final FramePose3D pickPoseFramePose = new FramePose3D();
-   private final RigidBodyTransform pickPoseTransformToControllerFrame = new RigidBodyTransform();
-   private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseTransformToControllerFrame);
+   private final ModifiableReferenceFrame pickPoseFrame;
+   private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
    private RDXModelInstance pickPoseSphere;
 
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
@@ -89,10 +90,12 @@ public class RDXVRController extends RDXVRTrackedDevice
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
                                                                                 getDeviceYUpZBackFrame(),
                                                                                 controllerYBackZLeftXRightToXForwardZUp);
-
-      pickPoseTransformToControllerFrame.getTranslation().setX(0.029);
-      pickPoseTransformToControllerFrame.getTranslation().setY(side.negateIfLeftSide(0.020));
-      pickPoseTransformToControllerFrame.getTranslation().setZ(-0.017);
+      pickPoseFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
+      pickPoseFrame.getTransformToParent().getTranslation().setX(0.029);
+      pickPoseFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(0.020));
+      pickPoseFrame.getTransformToParent().getTranslation().setZ(-0.017);
+      pickPoseFrame.getReferenceFrame().update();
+      pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseFrame.getTransformToParent());
    }
 
    public void initSystem()
@@ -142,7 +145,8 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
          }
 
-         pickPoseFramePose.setIncludingFrame(xForwardZUpControllerFrame, pickPoseTransformToControllerFrame);
+         pickPoseFrame.getReferenceFrame().update();
+         pickPoseFramePose.setToZero(pickPoseFrame.getReferenceFrame());
          pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          pickPoseSphere.setPoseInWorldFrame(pickPoseFramePose);
       }
@@ -260,5 +264,10 @@ public class RDXVRController extends RDXVRTrackedDevice
    public FramePose3DReadOnly getPickPointPose()
    {
       return pickPoseFramePose;
+   }
+
+   public ReferenceFrame getPickPoseFrame()
+   {
+      return pickPoseFrame.getReferenceFrame();
    }
 }
