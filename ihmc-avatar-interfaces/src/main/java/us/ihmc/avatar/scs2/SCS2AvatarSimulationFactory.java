@@ -412,8 +412,8 @@ public class SCS2AvatarSimulationFactory
             joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
          else
          {
-            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
-                                                                                      joystickPluginFactory.getStepGeneratorCommandInputManager());
+            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters());
             stepSnapperUpdatable.setShouldSnapToRegions(true);
          }
 
