@@ -8,11 +8,11 @@ public class PointCloud
    private final int numberOfElementsPerPoint;
    private final float[] data;
 
-   public PointCloud(int numberOfPoints, int pointLength)
+   public PointCloud(int numberOfPoints, int numberOfElementsPerPoint)
    {
       this.numberOfPoints = numberOfPoints;
-      this.numberOfElementsPerPoint = pointLength;
-      data = new float[numberOfPoints * pointLength];
+      this.numberOfElementsPerPoint = numberOfElementsPerPoint;
+      data = new float[numberOfPoints * numberOfElementsPerPoint];
    }
 
    public void setData(FloatPointer fp, int size)
