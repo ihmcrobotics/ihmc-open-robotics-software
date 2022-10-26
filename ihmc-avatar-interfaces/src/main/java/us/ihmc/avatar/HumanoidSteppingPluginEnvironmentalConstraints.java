@@ -6,49 +6,63 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
+public class HumanoidSteppingPluginEnvironmentalConstraints
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final StepGeneratorCommandInputManager commandInputManager;
    private final YoBoolean shouldSnapToRegions;
 
    private final SteppingParameters steppingParameters;
 
    private final PlanarRegionFootstepSnapper stepSnapper;
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
+//   private final BipedalSupportPlanarRegionCalculator supportPlanarRegionCalculator;
 
    private final BoundingBoxCollisionDetector collisionDetector;
+
+   private SteppableRegionsProvider steppableRegionsProvider;
 
    // temp variables
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
    private final PlanarRegion tempRegion = new PlanarRegion();
 
-   public HumanoidSteppingPluginEnvironmentalConstraints(SteppingParameters steppingParameters, StepGeneratorCommandInputManager commandInputManager)
+   public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters,
+                                                         SteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
-
-      stepSnapper = new PlanarRegionFootstepSnapper(steppingParameters)
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
+                                                                                {
+                                                                                   ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
+                                                                                   return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+                                                                                });
+      stepSnapper = new PlanarRegionFootstepSnapper(footPolygons)
       {
          @Override
          public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose,
@@ -71,16 +85,20 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
 
       footstepValidityIndicators.add(this::isStepSnappable);
       footstepValidityIndicators.add(this::isSafeStepHeight);
-//      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
+      //      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
 
       registry.addChild(stepSnapper.getRegistry());
-
-      this.commandInputManager = commandInputManager;
    }
 
    public void setShouldSnapToRegions(boolean shouldSnapToRegions)
    {
       this.shouldSnapToRegions.set(shouldSnapToRegions);
+   }
+
+   public void setSteppableRegionsProvider(SteppableRegionsProvider steppableRegionsProvider)
+   {
+      stepSnapper.setSteppableRegionsProvider(steppableRegionsProvider);
+      this.steppableRegionsProvider = steppableRegionsProvider;
    }
 
    public YoRegistry getRegistry()
@@ -98,24 +116,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
       return footstepValidityIndicators;
    }
 
-   @Override
-   public void update(double time)
-   {
-      if (commandInputManager != null)
-      {
-         if (commandInputManager.getCommandInputManager().isNewCommandAvailable(PlanarRegionsListCommand.class))
-         {
-            PlanarRegionsListCommand commands = commandInputManager.getCommandInputManager().pollNewestCommand(PlanarRegionsListCommand.class);
-            stepSnapper.setPlanarRegions(commands);
-         }
-
-         commandInputManager.getCommandInputManager().clearCommands(PlanarRegionsListCommand.class);
-      }
-   }
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
-      if (stepSnapper.getSteppableRegionsList().isEmpty() || !shouldSnapToRegions.getValue())
+      if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
          return true;
 
       footPolygon.set(stepSnapper.getFootPolygon(swingSide));
@@ -123,7 +127,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
 
       return stepSnapper.getSnapper()
                         .snapPolygonToPlanarRegionsList(footPolygon,
-                                                        stepSnapper.getSteppableRegionsList(),
+                                                        steppableRegionsProvider.getSteppableRegions(),
                                                         Double.POSITIVE_INFINITY,
                                                         tempRegion,
                                                         snapTransform);
@@ -139,7 +143,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Updatable
    private boolean isSafeDistanceFromObstacle(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
       // FIXME should not use the step snapper regions, as those may filter out collisions
-      if (stepSnapper.getSteppableRegionsList().isEmpty() || !shouldSnapToRegions.getValue())
+      if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
          return true;
 
       double halfStanceWidth = 0.5 * steppingParameters.getInPlaceWidth();
