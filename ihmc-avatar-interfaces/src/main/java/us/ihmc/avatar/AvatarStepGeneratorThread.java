@@ -50,7 +50,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
                                     StatusMessageOutputManager walkingOutputManager,
                                     CommandInputManager walkingCommandInputManager,
                                     DRCRobotModel drcRobotModel,
-                                    AvatarStepGeneratorEnvironmentUpdatable stepSnapperUpdatable,
+                                    HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable,
                                     RealtimeROS2Node ros2Node)
    {
       this.fullRobotModel = drcRobotModel.createFullRobotModel();

@@ -100,6 +100,16 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return steppableRegionsList;
    }
 
+   public GarbageFreePlanarRegionListPolygonSnapper getSnapper()
+   {
+      return snapper;
+   }
+
+   public ConvexPolygon2DReadOnly getFootPolygon(RobotSide robotSide)
+   {
+      return footPolygons.get(robotSide);
+   }
+
    private final ConvexPolygon2D footPolygonToWiggle = new ConvexPolygon2D();
    private final ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D();
 
