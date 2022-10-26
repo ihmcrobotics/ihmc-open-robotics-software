@@ -1,5 +1,10 @@
 package us.ihmc.rdx.vr;
 
+/**
+ * A pick result is intended to be created as a field and reused.
+ * Call reset(), add collisions if they are present, and add this
+ * pick result to the VR context.
+ */
 public class RDXVRPickResult
 {
    private double distanceToControllerPickPoint = Double.POSITIVE_INFINITY;

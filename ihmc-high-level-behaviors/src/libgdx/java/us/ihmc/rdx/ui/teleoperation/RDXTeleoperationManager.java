@@ -194,18 +194,18 @@ public class RDXTeleoperationManager extends ImGuiPanel
          // create the manager for the desired arm setpoints
          armManager.create();
 
-         for (RDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
+         for (RDXRobotCollisionLink robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
             RobotDefinition robotDefinition = robotModel.getRobotDefinition();
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
-            String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(collisionLink.getRigidBodyName()));
+            String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
-            if (collisionLink.getRigidBodyName().equals(fullRobotModel.getPelvis().getName()))
+            if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getPelvis().getName()))
             {
                if (pelvisInteractable == null)
                {
                   pelvisInteractable = new RDXLiveRobotPartInteractable();
-                  pelvisInteractable.create(collisionLink,
+                  pelvisInteractable.create(robotCollidable,
                                             syncedRobot.getReferenceFrames().getPelvisFrame(),
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
@@ -218,16 +218,16 @@ public class RDXTeleoperationManager extends ImGuiPanel
                }
                else
                {
-                  pelvisInteractable.addAdditionalCollisionLink(collisionLink);
+                  pelvisInteractable.addAdditionalCollisionLink(robotCollidable);
                }
             }
             for (RobotSide side : RobotSide.values)
             {
-               if (RDXFootInteractable.collisionLinkIsFoot(side, collisionLink, fullRobotModel))
+               if (RDXFootInteractable.collisionLinkIsFoot(side, robotCollidable, fullRobotModel))
                {
                   if (!footInteractables.containsKey(side))
                   {
-                     RDXFootInteractable footInteractable = new RDXFootInteractable(side, baseUI, collisionLink, robotModel, fullRobotModel);
+                     RDXFootInteractable footInteractable = new RDXFootInteractable(side, baseUI, robotCollidable, robotModel, fullRobotModel);
                      footInteractable.setOnSpacePressed(() ->
                              ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
                                                                                                              teleoperationParameters.getTrajectoryTime(),
@@ -237,14 +237,14 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   }
                   else
                   {
-                     footInteractables.get(side).addAdditionalCollisionLink(collisionLink);
+                     footInteractables.get(side).addAdditionalCollisionLink(robotCollidable);
                   }
                }
-               if (RDXHandInteractable.collisionLinkIsHand(side, collisionLink, fullRobotModel))
+               if (RDXHandInteractable.collisionLinkIsHand(side, robotCollidable, fullRobotModel))
                {
                   if (!handInteractables.containsKey(side))
                   {
-                     RDXHandInteractable handInteractable = new RDXHandInteractable(side, baseUI, collisionLink, robotModel, syncedRobot, yoVariableClientHelper);
+                     RDXHandInteractable handInteractable = new RDXHandInteractable(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
                      handInteractables.put(side, handInteractable);
                      allRobotPartInteractables.add(handInteractable);
                      // TODO this should probably not handle the space event!
@@ -253,7 +253,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                   }
                   else
                   {
-                     handInteractables.get(side).addAdditionalCollisionLink(collisionLink);
+                     handInteractables.get(side).addAdditionalCollisionLink(robotCollidable);
                   }
                }
             }

@@ -19,7 +19,7 @@ import java.util.List;
 public class RDXRobotCollisionModel
 {
    private final RobotCollisionModel robotCollisionModel;
-   private final ArrayList<RDXRobotCollisionLink> collisionLinks = new ArrayList<>();
+   private final ArrayList<RDXRobotCollisionLink> robotCollidables = new ArrayList<>();
    private List<Collidable> collidables;
 
    public RDXRobotCollisionModel(RobotCollisionModel robotCollisionModel)
@@ -38,13 +38,13 @@ public class RDXRobotCollisionModel
       for (Collidable collidable : collidables)
       {
          RDXRobotCollisionLink collisionLink = new RDXRobotCollisionLink(collidable, LibGDXTools.toLibGDX(color));
-         collisionLinks.add(collisionLink);
+         robotCollidables.add(collisionLink);
       }
    }
 
    public void update()
    {
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollisionLink collisionLink : robotCollidables)
       {
          collisionLink.update();
       }
@@ -52,7 +52,7 @@ public class RDXRobotCollisionModel
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollisionLink collisionLink : robotCollidables)
       {
          collisionLink.calculateVRPick(vrContext);
       }
@@ -60,7 +60,7 @@ public class RDXRobotCollisionModel
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollisionLink collisionLink : robotCollidables)
       {
          collisionLink.processVRInput(vrContext);
       }
@@ -68,7 +68,7 @@ public class RDXRobotCollisionModel
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollisionLink collisionLink : robotCollidables)
       {
          collisionLink.calculatePick(input);
       }
@@ -76,7 +76,7 @@ public class RDXRobotCollisionModel
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollisionLink collisionLink : robotCollidables)
       {
          collisionLink.process3DViewInput(input);
       }
@@ -84,19 +84,14 @@ public class RDXRobotCollisionModel
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXRobotCollisionLink collisionLink : collisionLinks)
+      for (RDXRobotCollisionLink collisionLink : robotCollidables)
       {
          collisionLink.getRenderables(renderables, pool);
       }
    }
 
-   public ArrayList<RDXRobotCollisionLink> getCollisionLinks()
+   public ArrayList<RDXRobotCollisionLink> getRobotCollidables()
    {
-      return collisionLinks;
-   }
-
-   public List<Collidable> getCollidables()
-   {
-      return collidables;
+      return robotCollidables;
    }
 }

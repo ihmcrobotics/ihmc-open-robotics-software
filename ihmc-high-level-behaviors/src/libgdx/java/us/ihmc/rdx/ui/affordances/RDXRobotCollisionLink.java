@@ -31,6 +31,14 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+/**
+ * A robot collidable is a part of the robot that the user can click on.
+ * It supports all the different collision shape types collisions up to
+ * date with the correct pose. It can be attached/synced to the robot
+ * or "detached" from the robot.
+ *
+ * TODO: Rename to RDXRobotCollidable
+ */
 public class RDXRobotCollisionLink implements RenderableProvider
 {
    private final RDXModelInstance collisionModelInstance;
@@ -50,6 +58,13 @@ public class RDXRobotCollisionLink implements RenderableProvider
    private EllipsoidRayIntersection ellipsoidRayIntersection;
    private BoxRayIntersection boxRayIntersection;
    private RDXModelInstance collisionShapeCoordinateFrameGraphic;
+   /**
+    * A robot collision link is either taking the pose of the link that
+    * it's representing, or it's detached, as in, it's taking the pose
+    * of some desired of the operator. When you select the hand for instance
+    * and move it, that is "detaching" it. This link's parent frame
+    * will be different based on detached state.
+    */
    private boolean isDetached = false;
    private final RigidBodyTransform detachedTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame detachedFrameAfterJoint;
@@ -188,6 +203,7 @@ public class RDXRobotCollisionLink implements RenderableProvider
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
+      // The frame after joint, or parent frame, is dynamic based on detached state
       ReferenceFrame frameAfterJointToUse = isDetached ? detachedShapeFrame : frameAfterJoint;
       for (RobotSide side : RobotSide.values)
       {
@@ -196,17 +212,10 @@ public class RDXRobotCollisionLink implements RenderableProvider
          {
             vrPickPose.setIncludingFrame(controller.getPickPointPose());
             vrPickPose.changeFrame(frameAfterJointToUse);
-            try
+            shape.setReferenceFrame(frameAfterJointToUse);
+            if (shape.isPointInside(vrPickPose.getPosition())) // Check if the operator's pick is intersecting the link
             {
-               shape.setReferenceFrame(frameAfterJointToUse);
-               if (shape.isPointInside(vrPickPose.getPosition()))
-               {
-                  vrPickResult.get(side).addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
-               }
-            }
-            catch (UnsupportedOperationException unsupportedOperationException)
-            {
-               unsupportedOperationException.printStackTrace();
+               vrPickResult.get(side).addPickCollision(shape.getCentroid().distance(vrPickPose.getPosition()));
             }
          });
          if (vrPickResult.get(side).getPickCollisionWasAddedSinceReset())
