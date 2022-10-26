@@ -2,10 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGeneratorParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -29,6 +26,8 @@ public class StepGeneratorCommandInputManager implements Updatable
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
+   private SteppableRegionsProvider steppableRegionsProvider;
+
    public StepGeneratorCommandInputManager()
    {
    }
@@ -36,6 +35,11 @@ public class StepGeneratorCommandInputManager implements Updatable
    public void setCSG(ContinuousStepGenerator continuousStepGenerator)
    {
       this.continuousStepGenerator = continuousStepGenerator;
+   }
+
+   public void setSteppableRegionsProvider(SteppableRegionsProvider steppableRegionsProvider)
+   {
+      this.steppableRegionsProvider = steppableRegionsProvider;
    }
 
    public CommandInputManager getCommandInputManager()
@@ -88,6 +92,13 @@ public class StepGeneratorCommandInputManager implements Updatable
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
 
+      if (steppableRegionsProvider != null && commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
+      {
+         PlanarRegionsListCommand commands = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
+         steppableRegionsProvider.consume(commands);
+      }
+      commandInputManager.clearCommands(PlanarRegionsListCommand.class);
+
       if (!isOpen)
          walk = false;
    }
@@ -136,5 +147,10 @@ public class StepGeneratorCommandInputManager implements Updatable
    public BooleanProvider createWalkInputProvider()
    {
       return () -> walk;
+   }
+
+   public SteppableRegionsProvider getSteppableRegionsProvider()
+   {
+      return steppableRegionsProvider;
    }
 }
