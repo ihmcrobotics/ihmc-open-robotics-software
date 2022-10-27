@@ -280,36 +280,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       handManager.create(baseUI, communicationHelper);
 
       baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
-
-      // NOTE: temporary method to test shield holding
-      RDX3DPanelToolbarButton leftShieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      RDXIconTexture shieldIcon = new RDXIconTexture("icons/shield.png");
-      leftShieldButton.setIcon(shieldIcon);
-      leftShieldButton.setTooltipText("left side - testing shield lifting on Nadia");
-      // NOTE: need to set runnable here to send armTrajectory command >>
-      Runnable leftShieldCommand = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-
-         }
-      };
-      leftShieldButton.setOnPressed(leftShieldCommand);
-
-      RDX3DPanelToolbarButton rightShieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      leftShieldButton.setIcon(shieldIcon);
-      leftShieldButton.setTooltipText("right side - testing shield lifting on Nadia");
-      // NOTE: need to set runnable here to send armTrajectory command >>
-      Runnable rightShieldCommand = new Runnable()
-      {
-         @Override
-         public void run()
-         {
-
-         }
-      };
-      rightShieldButton.setOnPressed(rightShieldCommand);
    }
 
    public void update()
