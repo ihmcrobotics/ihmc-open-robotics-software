@@ -10,6 +10,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -32,6 +33,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -76,7 +78,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private SideDependentList<MovingReferenceFrame> footFrames;
    private final AtomicInteger footstepPlannerId = new AtomicInteger(0);
    private FootstepPlanningModule footstepPlanner;
-   private RDXFootstepPlanGraphic foostepPlanGraphic;
+   private RDXFootstepPlanGraphic footstepPlanGraphic;
    private double halfIdealFootstepWidth;
    private volatile FootstepPlan footstepPlan;
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
@@ -91,7 +93,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private RDXWalkPathType walkPathType = RDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
 
-   private GDXPoseTracking poseTracking;
+   private RDXPoseTracking poseTracking;
    private final boolean isContinuousStepping = false;
    private boolean joystickOn = false;
    private ImBoolean joystickMode = new ImBoolean(false);
@@ -130,7 +132,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      foostepPlanGraphic = new RDXFootstepPlanGraphic(contactPoints);
+      footstepPlanGraphic = new RDXFootstepPlanGraphic(contactPoints);
       leftStanceFootstepGraphic.create();
       rightStanceFootstepGraphic.create();
       leftGoalFootstepGraphic.create();
@@ -147,7 +149,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
-      poseTracking = new GDXPoseTracking(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, teleoperationParameters, footstepPlannerParameters);
+      poseTracking = new RDXPoseTracking(baseUI, robotModel, syncedRobot, ros2Helper, communicationHelper, teleoperationParameters, footstepPlannerParameters);
    }
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -235,7 +237,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       if (selected && joystickOn)
       {
-         poseTracking.run(footstepPlannerGoalGizmo.getFramePose3D());
+         poseTracking.run((FramePose3D) footstepPlannerGoalGizmo.getPose3D());
       }
 
       if (selected && footstepPlannerGoalGizmo.isNewlyModified())
@@ -285,13 +287,22 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                              new Pose3D(rightStanceFootPose),
                                              new Pose3D(leftGoalFootPose),
                                              new Pose3D(rightGoalFootPose));
+            }
+            case TURN_WALK_TURN ->
+            {
+               planFootstepsUsingTurnWalkTurnPlanner();
+            }
+            case TURN_STRAIGHT_TURN ->
+            {
+               planFootstepsUsingTurnStraightTurnFootstepGenerator();
+            }
+            case POSE_TRACKING ->
+            {
+               planJoystick();
+               joystickOn = true;
+            }
          }
-         else
-         {
-            planJoystick();
-            joystickOn = true;
-         }
-         if (plannerToUse!=3)
+         if (footstepPlanningAlgorithm != RDXFootstepPlanningAlgorithm.POSE_TRACKING)
          {
             poseTracking.stop();
             joystickOn = false;
@@ -394,9 +405,9 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.TURN_STRAIGHT_TURN;
       }
-      if (ImGui.radioButton(labels.get("Continuous Tracking"), plannerToUse == 3 ))
+      if (ImGui.radioButton(labels.get("Continuous Tracking"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.POSE_TRACKING))
       {
-         plannerToUse = 3;
+         footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.POSE_TRACKING;
       }
       ImGui.checkbox(labels.get("joystick"), joystickMode);
 

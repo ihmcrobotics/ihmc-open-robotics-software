@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.affordances;
+package us.ihmc.rdx.ui.affordances;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -27,11 +27,11 @@ import us.ihmc.footstepPlanning.baselinePlanner.BaselineFootstepPlannerParameter
 import us.ihmc.footstepPlanning.baselinePlanner.ContinuousTrackingFootstepPlanner;
 import us.ihmc.footstepPlanning.baselinePlanner.SimpleTimedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.teleoperation.GDXTeleoperationParameters;
-import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
@@ -45,7 +45,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GDXPoseTracking
+public class RDXPoseTracking
 {
    private class Controller implements us.ihmc.scs2.definition.controller.interfaces.Controller
    {
@@ -156,10 +156,10 @@ public class GDXPoseTracking
    private ImDouble gamma = new ImDouble(Math.PI / 10.0);
    private final double yawDotTopLimit = Math.PI / 6.0;
    private final double yawDotBottomLimit = Math.PI / 20.0;
-   private GDXImGuiBasedUI baseUI;
+   private RDXBaseUI baseUI;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   private final GDXSphereAndArrowGraphic sphereAndArrowGraphic;
+   private final RDXSphereAndArrowGraphic sphereAndArrowGraphic;
 
    private enum MODE
    {
@@ -175,14 +175,14 @@ public class GDXPoseTracking
    Controller controller = null;
    FootstepPlannerParametersBasics footstepPlannerParameters;
    private FramePose3D goalPoseWithZOffset = new FramePose3D();
-   private GDXTeleoperationParameters teleoperationParameters;
+   private RDXTeleoperationParameters teleoperationParameters;
 
-   public GDXPoseTracking(GDXImGuiBasedUI baseUI,
+   public RDXPoseTracking(RDXBaseUI baseUI,
                           DRCRobotModel robotModel,
                           ROS2SyncedRobotModel syncedRobot,
                           ROS2ControllerHelper controllerHelper,
                           CommunicationHelper communicationHelper,
-                          GDXTeleoperationParameters teleoperationParameters,
+                          RDXTeleoperationParameters teleoperationParameters,
                           FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       this.baseUI = baseUI;
@@ -192,7 +192,7 @@ public class GDXPoseTracking
       this.communicationHelper = communicationHelper;
       this.teleoperationParameters = teleoperationParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
-      sphereAndArrowGraphic = new GDXSphereAndArrowGraphic();
+      sphereAndArrowGraphic = new RDXSphereAndArrowGraphic();
       sphereAndArrowGraphic.create(0.05f, 0.4f, Color.PURPLE);
    }
 
@@ -353,7 +353,7 @@ public class GDXPoseTracking
 
    public static void setMaxVx(double maxVx)
    {
-      GDXPoseTracking.maxVx = maxVx;
+      RDXPoseTracking.maxVx = maxVx;
    }
 
    public static double getMaxVy()
@@ -363,7 +363,7 @@ public class GDXPoseTracking
 
    public static void setMaxVy(double maxVy)
    {
-      GDXPoseTracking.maxVy = maxVy;
+      RDXPoseTracking.maxVy = maxVy;
    }
 
    public static double getMaxVyaw()
@@ -373,6 +373,6 @@ public class GDXPoseTracking
 
    public static void setMaxVyaw(double maxVyaw)
    {
-      GDXPoseTracking.maxVyaw = maxVyaw;
+      RDXPoseTracking.maxVyaw = maxVyaw;
    }
 }
