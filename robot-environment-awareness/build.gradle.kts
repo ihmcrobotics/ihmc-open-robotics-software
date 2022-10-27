@@ -20,6 +20,7 @@ ihmc {
    openSource = true
    
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    configurePublications()
 }
 
