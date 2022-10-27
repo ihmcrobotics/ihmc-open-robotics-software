@@ -13,7 +13,8 @@ class VisualOdometry
    public:
       VisualOdometry(ApplicationState& app);
       
-      bool Update();
+      bool UpdateStereo(const cv::Mat& leftImage, const cv::Mat& rightImage);
+      void UpdateMonocular(const cv::Mat& image);
 
       void ExtractKeypoints_FAST(cv::Mat img_1, std::vector<cv::Point2f>& points1);
       void ExtractKeypoints(cv::Mat img, cv::Ptr<cv::ORB> orb, std::vector<cv::KeyPoint>& points, cv::Mat& desc);

@@ -5,6 +5,134 @@ VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
    cameraPose = Eigen::Matrix4f::Identity();
 }
 
+void VisualOdometry::UpdateMonocular(const cv::Mat& image)
+{
+   width = (uint32_t)image.cols;
+   height = (uint32_t)image.rows;
+   cvtColor(image, prevLeft, cv::COLOR_BGR2GRAY);
+   ExtractKeypoints(prevLeft, orb, kp_prevLeft, desc_prevLeft);
+}
+
+bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& rightImage)
+{
+   auto start_point = std::chrono::steady_clock::now();
+   cv::Mat cvPose, points4D;
+   std::vector<PointLandmark> points3D;
+
+   if (!leftImage.empty() && leftImage.rows > 0 && leftImage.cols > 0 && !rightImage.empty() && rightImage.rows > 0 && rightImage.cols > 0)
+   {
+      /* During first iteration, simply store (prev) grayscale images, extract keypoints,
+       * and insert the first keyframe at identity pose, and return false, since no pose was computed. */
+      if (count == 0)
+      {
+         width = (uint32_t)leftImage.cols;
+         height = (uint32_t)leftImage.rows;
+         cvtColor(leftImage, prevLeft, cv::COLOR_BGR2GRAY);
+         cvtColor(rightImage, prevRight, cv::COLOR_BGR2GRAY);
+         ExtractKeypoints(prevLeft, orb, kp_prevLeft, desc_prevLeft);
+         ExtractKeypoints(prevRight, orb, kp_prevRight, desc_prevRight);
+         _keyframes.emplace_back(Keyframe(desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, Eigen::Matrix4f::Identity(), leftImage.clone(), rightImage.clone()));
+         count++;
+         return false;
+      }
+
+      /* From second iteration onwards, store (cur) grayscale images, initialize, and insert keyframes when needed. */
+      cvtColor(leftImage, curLeft, cv::COLOR_BGR2GRAY);
+      cvtColor(rightImage, curRight, cv::COLOR_BGR2GRAY);
+
+      /* Initialization step: Build initial local map of 3D points; Insert the second keyframe. */
+      if (!_initialized)
+      {
+         auto kf = _keyframes[0];
+         CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
+
+         Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+         eigenPose.transposeInPlace();
+         cameraPose = cameraPose * eigenPose;
+
+//         prevFinalDisplay = leftImage.clone();
+//         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
+
+         if (cameraPose.block<3, 1>(0, 3).norm() > 1)
+         {
+            _initialized = true;
+            _keyframes.emplace_back(Keyframe(desc_curLeft.clone(), desc_curRight.clone(),
+                                             kp_curLeft, kp_curRight, cameraPose, leftImage.clone(), rightImage.clone()));
+         }
+      } else
+      {
+         prevFinalDisplay = leftImage.clone();
+
+         auto kf = _keyframes[_keyframes.size() - 1];
+         CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
+         cvCurPose = cvCurPose * cvPose;
+
+         Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+         eigenPose.transposeInPlace();
+         cameraPose = cameraPose * eigenPose;
+
+//         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
+
+         if (eigenPose.block<3, 1>(0, 3).norm() > 0.8)
+         {
+            _initialized = true;
+            _keyframes.emplace_back(
+                  Keyframe(desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight, cameraPose, leftImage.clone(), rightImage.clone()));
+
+            printf("Performing Bundle Adjustment.");
+
+            /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
+//            std::vector<Eigen::Matrix4f> poses;
+//            poses.emplace_back(_keyframes[_keyframes.size() - 2].pose);
+//            poses.emplace_back(_keyframes[_keyframes.size() - 1].pose);
+//            _bundleAdjustment->Update(points3D, poses);
+            /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
+
+//            _bundleAdjustment->Optimize();
+
+
+            // if (axes)
+            // {
+            //    glm::mat4 glmTransform;
+            //    for (uint32_t i = 0; i < 4; ++i)
+            //       for (int j = 0; j < 4; ++j)
+            //          glmTransform[j][i] = cameraPose(i, j);
+            //    glmTransform[3][0] *= scalar;
+            //    glmTransform[3][1] *= scalar;
+            //    glmTransform[3][2] *= scalar;
+            //    axes->ApplyTransform(glmTransform);
+            // }
+
+            /* Triangulated Points */
+            /* TODO: Filter points by 5-point algorithm mask before triangulation. */
+            // if (cloud)
+            // {
+            //    for (uint32_t i = 0; i < points3D.size(); i++)
+            //    {
+            //       if (i % 4 == 0)
+            //       {
+            //          Eigen::Vector4f point;
+            //          point << points3D[i]._point3D, 1;
+            //          point = cameraPose * point;
+            //          cloud->InsertVertex(scalar * point.x() / point.w(), scalar * point.y() / point.w(), scalar * point.z() / point.w());
+            //       }
+            //    }
+            // }
+         }
+      }
+   }
+
+   auto end_point = std::chrono::steady_clock::now();
+   long long start = std::chrono::time_point_cast<std::chrono::microseconds>(start_point).time_since_epoch().count();
+   long long end = std::chrono::time_point_cast<std::chrono::microseconds>(end_point).time_since_epoch().count();
+
+   float duration = (end - start) * 0.001f;
+
+   printf("(Visual Odometry) Total Time Taken: %.3lf ms\n", duration);
+
+   return true;
+}
+
 void VisualOdometry::DrawMatches(cv::Mat& img, std::vector<cv::Point2f> prev_pts, std::vector<cv::Point2f> cur_pts)
 {
    for (uint32_t i = 0; i < prev_pts.size(); i++)
@@ -340,125 +468,7 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
 //   prevFinalDisplay = leftImage;
 }
 
-bool VisualOdometry::Update()
-{
-   auto start_point = std::chrono::steady_clock::now();
-   cv::Mat cvPose, points4D;
-   std::vector<PointLandmark> points3D;
 
-   if (!leftImage.empty() && leftImage.rows > 0 && leftImage.cols > 0 && !rightImage.empty() && rightImage.rows > 0 && rightImage.cols > 0)
-   {
-      /* During first iteration, simply store (prev) grayscale images, extract keypoints,
-       * and insert the first keyframe at identity pose, and return false, since no pose was computed. */
-      if (count == 0)
-      {
-         width = (uint32_t)leftImage.cols;
-         height = (uint32_t)leftImage.rows;
-         cvtColor(leftImage, prevLeft, cv::COLOR_BGR2GRAY);
-         cvtColor(rightImage, prevRight, cv::COLOR_BGR2GRAY);
-         ExtractKeypoints(prevLeft, orb, kp_prevLeft, desc_prevLeft);
-         ExtractKeypoints(prevRight, orb, kp_prevRight, desc_prevRight);
-         _keyframes.emplace_back(Keyframe(desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, Eigen::Matrix4f::Identity(), leftImage.clone(), rightImage.clone()));
-         count++;
-         return false;
-      }
-
-      /* From second iteration onwards, store (cur) grayscale images, initialize, and insert keyframes when needed. */
-      cvtColor(leftImage, curLeft, cv::COLOR_BGR2GRAY);
-      cvtColor(rightImage, curRight, cv::COLOR_BGR2GRAY);
-
-      /* Initialization step: Build initial local map of 3D points; Insert the second keyframe. */
-      if (!_initialized)
-      {
-         auto kf = _keyframes[0];
-         CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
-
-         Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
-         eigenPose.transposeInPlace();
-         cameraPose = cameraPose * eigenPose;
-
-//         prevFinalDisplay = leftImage.clone();
-//         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
-
-         if (cameraPose.block<3, 1>(0, 3).norm() > 1)
-         {
-            _initialized = true;
-            _keyframes.emplace_back(Keyframe(desc_curLeft.clone(), desc_curRight.clone(),
-                                             kp_curLeft, kp_curRight, cameraPose, leftImage.clone(), rightImage.clone()));
-         }
-      } else
-      {
-         prevFinalDisplay = leftImage.clone();
-
-         auto kf = _keyframes[_keyframes.size() - 1];
-         CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
-         cvCurPose = cvCurPose * cvPose;
-
-         Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
-         eigenPose.transposeInPlace();
-         cameraPose = cameraPose * eigenPose;
-
-//         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
-
-         if (eigenPose.block<3, 1>(0, 3).norm() > 0.8)
-         {
-            _initialized = true;
-            _keyframes.emplace_back(
-                  Keyframe(desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight, cameraPose, leftImage.clone(), rightImage.clone()));
-
-            printf("Performing Bundle Adjustment.");
-
-            /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
-//            std::vector<Eigen::Matrix4f> poses;
-//            poses.emplace_back(_keyframes[_keyframes.size() - 2].pose);
-//            poses.emplace_back(_keyframes[_keyframes.size() - 1].pose);
-//            _bundleAdjustment->Update(points3D, poses);
-            /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
-
-//            _bundleAdjustment->Optimize();
-
-
-            // if (axes)
-            // {
-            //    glm::mat4 glmTransform;
-            //    for (uint32_t i = 0; i < 4; ++i)
-            //       for (int j = 0; j < 4; ++j)
-            //          glmTransform[j][i] = cameraPose(i, j);
-            //    glmTransform[3][0] *= scalar;
-            //    glmTransform[3][1] *= scalar;
-            //    glmTransform[3][2] *= scalar;
-            //    axes->ApplyTransform(glmTransform);
-            // }
-
-            /* Triangulated Points */
-            /* TODO: Filter points by 5-point algorithm mask before triangulation. */
-            // if (cloud)
-            // {
-            //    for (uint32_t i = 0; i < points3D.size(); i++)
-            //    {
-            //       if (i % 4 == 0)
-            //       {
-            //          Eigen::Vector4f point;
-            //          point << points3D[i]._point3D, 1;
-            //          point = cameraPose * point;
-            //          cloud->InsertVertex(scalar * point.x() / point.w(), scalar * point.y() / point.w(), scalar * point.z() / point.w());
-            //       }
-            //    }
-            // }
-         }
-      }
-   }
-
-   auto end_point = std::chrono::steady_clock::now();
-   long long start = std::chrono::time_point_cast<std::chrono::microseconds>(start_point).time_since_epoch().count();
-   long long end = std::chrono::time_point_cast<std::chrono::microseconds>(end_point).time_since_epoch().count();
-
-   float duration = (end - start) * 0.001f;
-
-   printf("(Visual Odometry) Total Time Taken: %.3lf ms\n", duration);
-
-   return true;
-}
 
 void VisualOdometry::Show()
 {
