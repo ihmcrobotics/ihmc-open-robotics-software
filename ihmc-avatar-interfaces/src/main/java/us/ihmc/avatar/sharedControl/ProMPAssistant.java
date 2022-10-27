@@ -1,13 +1,19 @@
 package us.ihmc.avatar.sharedControl;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
+import java.util.*;
 
 import static java.lang.Math.exp;
 
@@ -24,7 +30,8 @@ public class ProMPAssistant implements TeleoperationAssistant
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); //proMPManagers stores a proMPManager for each task
    private String currentTask = ""; //detected task
    private int numberObservations = 0; //number of observations used to update the prediction
-   private String relevantBodyPart = "";
+   private String relevantBodyPart = ""; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
+   private HashMap<String,String> taskRelevantBodyPart = new HashMap<>();
    private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedFrameTrajectory = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
@@ -33,16 +40,79 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    public ProMPAssistant()
    {
-      HashMap<String, String> bodyPartsGeometry = new HashMap<>();
-      String taskName = "";
-      // TODO change 100 to number from config related to observation time and kinematics streaming period
-      numberObservations = 100;
-      //TODO read list of available tasks and body parts involved from config file
-      taskName = "PushDoor";
-      bodyPartsGeometry.put("leftHand", "Pose");
-      bodyPartsGeometry.put("rightHand", "Pose");
+      List<String> taskNames = new ArrayList<>();
+      List<String> relevantBodyParts = new ArrayList<>();
+      List<HashMap<String, String>> bodyPartsGeometries = new ArrayList<>();
       boolean logEnabled = false;
-      proMPManagers.put(taskName, new ProMPManager(taskName, bodyPartsGeometry,logEnabled));
+      // read parameters regarding the properties of available learned tasks from json file
+      try
+      {
+         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"),
+                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-avatar-interfaces/src/main/resources/us/ihmc/avatar/sharedControl/ProMPAssistant.json")
+                                                                                         .toString()));
+         numberObservations = (int) ((long) jsonObject.get("numberObservations"));
+         logEnabled = (boolean) jsonObject.get("logging");
+         // getting tasks
+         JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
+         //iterating tasks
+         Iterator taskIterator = tasksArray.iterator();
+         while (taskIterator.hasNext())
+         {
+            Iterator<Map.Entry> taskPropertiesIterator = ((Map) taskIterator.next()).entrySet().iterator();
+            while (taskPropertiesIterator.hasNext())
+            {
+               Map.Entry taskPropertyMap = taskPropertiesIterator.next();
+               switch (taskPropertyMap.getKey().toString())
+               {
+                  case "name":
+                     taskNames.add((String) taskPropertyMap.getValue());
+                     break;
+                  case "relevantBodyPart":
+                     relevantBodyParts.add((String) taskPropertyMap.getValue());
+                     break;
+                  case "bodyParts":
+                     JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
+                     for (Object bodyPartObject : bodyPartsArray)
+                     {
+                        HashMap<String, String> bodyPartsGeometry = new HashMap<>();
+                        JSONObject jsonBodyPartObject = (JSONObject) bodyPartObject;
+                        jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
+                        {
+                           String name = "";
+                           String geometry = "";
+                           if ("name".equals(bodyPartProperty.toString()))
+                              name = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
+                           else if ("geometry".equals(bodyPartProperty.toString()))
+                              geometry = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
+                           if (!(name.isEmpty()))
+                              bodyPartsGeometry.put(name, geometry);
+                        });
+                        bodyPartsGeometries.add(bodyPartsGeometry);
+                     }
+                     break;
+                  default:
+                     break;
+               }
+            }
+         }
+      }
+      catch (FileNotFoundException ex)
+      {
+         ex.printStackTrace();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      catch (ParseException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      for (int i=0; i<taskNames.size(); i++){
+         proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled));
+         taskRelevantBodyPart.put(taskNames.get(i),relevantBodyParts.get(i));
+      }
       for (ProMPManager proMPManager : proMPManagers.values())
          proMPManager.learnTaskFromDemos();
    }
@@ -52,9 +122,6 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       if (objectDetected())
       {
-         //TODO change to retrieve from config file what is the relevant robot part for the goal of that task
-         //TODO change to guess what side is the one being used
-         relevantBodyPart = "rightHand"; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
          if (objectPoseEstimated())
          {
             //store observed pose
@@ -75,6 +142,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       {
          //TODO 1. recognize task with object detection algorithm (or Aruco Markers to begin with)
          currentTask = "PushDoor";
+         relevantBodyPart = taskRelevantBodyPart.get(currentTask);
          //initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
          for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
             bodyPartObservedFrameTrajectory.put(bodyPart, new ArrayList<>());
