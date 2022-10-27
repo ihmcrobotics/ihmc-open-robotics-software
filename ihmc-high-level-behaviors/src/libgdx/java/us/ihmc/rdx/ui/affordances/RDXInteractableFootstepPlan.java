@@ -146,6 +146,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    // NOTE: using RecyclingList to update planned footsteps. Make sure this only gets called when new plan comes in.
    public void updateFromPlan(FootstepPlan footstepPlan)
    {
+      updateFromPlan(footstepPlan, false);
+   }
+
+   public void updateFromPlan(FootstepPlan footstepPlan, boolean autoTrack)
+   {
       for (RDXInteractableFootstep step : footsteps)
       {
          step.getFootstepModelInstance().transform.val[Matrix4.M03] = Float.NaN;
@@ -158,6 +163,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          RDXInteractableFootstep addedStep = footsteps.add();
          addedStep.updateFromPlannedStep(baseUI, plannedStep, i);
       }
+
+      if (autoTrack)
+         walkFromSteps();
    }
 
    public void update()

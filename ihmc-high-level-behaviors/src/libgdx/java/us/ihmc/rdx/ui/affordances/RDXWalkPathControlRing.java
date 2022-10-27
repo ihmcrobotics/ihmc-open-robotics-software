@@ -90,11 +90,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private ImGui3DViewInput latestInput;
    private final Notification contextMenuNotification = new Notification();
    private Runnable extendedContextMenu;
-   private enum MODE
-   {
-      AUTO, MANUAL
-   };
-   private MODE mode = MODE.MANUAL;
    private ImBoolean autoTrack = new ImBoolean(false);
 
 
@@ -160,7 +155,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       if (footstepPlanToGenerateMeshes != null)
 //      if (footstepPlan != null)
       {
-         plannedFootstepPlacement.updateFromPlan(footstepPlan);
+         plannedFootstepPlacement.updateFromPlan(footstepPlan, autoTrack.get());
 //         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
 //                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
@@ -541,10 +536,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          if (extendedContextMenu != null)
             extendedContextMenu.run();
-         if (ImGui.checkbox(labels.get("Auto-tracking"), autoTrack))
-         {
-            mode = autoTrack.get() ? MODE.AUTO : MODE.MANUAL;
-         }
+
+         ImGui.checkbox(labels.get("Auto-tracking"), autoTrack);
          if (ImGui.menuItem("Close"))
             ImGui.closeCurrentPopup();
          ImGui.endPopup();
