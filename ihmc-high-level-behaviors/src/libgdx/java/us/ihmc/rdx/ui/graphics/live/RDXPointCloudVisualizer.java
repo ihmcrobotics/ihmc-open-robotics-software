@@ -95,7 +95,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
 
    public void updatePointCloud(PointCloud pointCloud)
    {
-      pointCloudRenderer.getVertexBuffer().put(pointCloud.getData());
+      getVertexBuffer().put(pointCloud.getData());
    }
 
    @Override
