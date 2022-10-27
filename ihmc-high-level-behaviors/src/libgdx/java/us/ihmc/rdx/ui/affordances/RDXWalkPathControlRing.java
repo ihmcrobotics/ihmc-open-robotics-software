@@ -6,11 +6,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -86,6 +88,15 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private SteppingParameters steppingParameters;
    private RDXWalkPathType walkPathType = RDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
+   private final Notification contextMenuNotification = new Notification();
+   private Runnable extendedContextMenu;
+   private enum MODE
+   {
+      AUTO, MANUAL
+   };
+   private MODE mode = MODE.MANUAL;
+   private ImBoolean autoTrack = new ImBoolean(false);
+
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
@@ -134,6 +145,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
+      panel3D.addImGuiOverlayAddition(this::renderTooltipsAndContextMenu);
+      setExtendedContextMenu(this::renderTooltipsAndContextMenu);
    }
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -168,6 +181,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       footstepPlannerGoalGizmo.process3DViewInput(input, selected);
       mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
+
+      if (mouseRingPickSelected && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
+      {
+         contextMenuNotification.set();
+      }
 
       if (mouseRingPickSelected && leftMouseReleasedWithoutDrag)
       {
@@ -237,10 +255,10 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          {
             case A_STAR ->
             {
-               planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
-                                             new Pose3D(rightStanceFootPose),
-                                             new Pose3D(leftGoalFootPose),
-                                             new Pose3D(rightGoalFootPose));
+               planFootstepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
+                                              new Pose3D(rightStanceFootPose),
+                                              new Pose3D(leftGoalFootPose),
+                                              new Pose3D(rightGoalFootPose));
 
             }
             case TURN_WALK_TURN ->
@@ -303,10 +321,10 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    }
 
-   private void planFoostepsUsingAStarPlanner(Pose3DReadOnly leftStanceFootPose,
-                                              Pose3DReadOnly rightStanceFootPose,
-                                              Pose3DReadOnly leftGoalFootPose,
-                                              Pose3DReadOnly rightGoalFootPose)
+   private void planFootstepsUsingAStarPlanner(Pose3DReadOnly leftStanceFootPose,
+                                               Pose3DReadOnly rightStanceFootPose,
+                                               Pose3DReadOnly leftGoalFootPose,
+                                               Pose3DReadOnly rightGoalFootPose)
    {
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
@@ -510,5 +528,31 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    public boolean isSelected()
    {
       return selected;
+   }
+
+   private void renderTooltipsAndContextMenu()
+   {
+      if (contextMenuNotification.poll())
+      {
+         ImGui.openPopup(labels.get("Popup"));
+      }
+
+      if (ImGui.beginPopup(labels.get("Popup")))
+      {
+         if (extendedContextMenu != null)
+            extendedContextMenu.run();
+         if (ImGui.checkbox(labels.get("Auto-tracking"), autoTrack))
+         {
+            mode = autoTrack.get() ? MODE.AUTO : MODE.MANUAL;
+         }
+         if (ImGui.menuItem("Close"))
+            ImGui.closeCurrentPopup();
+         ImGui.endPopup();
+      }
+   }
+
+   public void setExtendedContextMenu(Runnable runnable)
+   {
+      this.extendedContextMenu = runnable;
    }
 }
