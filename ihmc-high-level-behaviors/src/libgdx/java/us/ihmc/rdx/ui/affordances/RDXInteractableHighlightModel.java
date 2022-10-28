@@ -45,7 +45,7 @@ public class RDXInteractableHighlightModel implements RenderableProvider
 
    public void setTransparency(double transparency)
    {
-      LibGDXTools.setTransparency(scaledModelInstance.getModelInstance(), (float) transparency);
+      LibGDXTools.setOpacity(scaledModelInstance.getModelInstance(), (float) transparency);
    }
 
    @Override
