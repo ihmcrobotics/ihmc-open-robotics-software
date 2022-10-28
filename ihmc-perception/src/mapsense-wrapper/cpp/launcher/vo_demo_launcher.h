@@ -7,5 +7,19 @@ class VODemoLauncher
    public:
 
       VODemoLauncher();
+
+      void Run(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index);
+
+      void TestExtractKeypoints(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index);
+      void TestMatchKeypoints(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index);
+
+   private:
+
+      ApplicationState appState;
+
+      bool loop = false;
+
+      std::string leftDatasetDirectory = "/home/quantum/Workspace/Data/Datasets/sequences/00/image_0/";
+      std::string rightDatasetDirectory = "/home/quantum/Workspace/Data/Datasets/sequences/00/image_1/";
 };
 

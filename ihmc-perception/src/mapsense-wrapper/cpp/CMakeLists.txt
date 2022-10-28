@@ -39,6 +39,9 @@ set(MS_SOURCES
 
     tools/buffer_tools.h
     tools/buffer_tools.cpp
+
+    tools/file_tools.h
+    tools/file_tools.cpp
 )
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

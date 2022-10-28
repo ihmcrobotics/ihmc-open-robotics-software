@@ -10,7 +10,7 @@ void VisualOdometry::UpdateMonocular(const cv::Mat& image)
    width = (uint32_t)image.cols;
    height = (uint32_t)image.rows;
    cvtColor(image, prevLeft, cv::COLOR_BGR2GRAY);
-   ExtractKeypoints(prevLeft, orb, kp_prevLeft, desc_prevLeft);
+   ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
 }
 
 bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& rightImage)
@@ -27,18 +27,18 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
       {
          width = (uint32_t)leftImage.cols;
          height = (uint32_t)leftImage.rows;
-         cvtColor(leftImage, prevLeft, cv::COLOR_BGR2GRAY);
-         cvtColor(rightImage, prevRight, cv::COLOR_BGR2GRAY);
-         ExtractKeypoints(prevLeft, orb, kp_prevLeft, desc_prevLeft);
-         ExtractKeypoints(prevRight, orb, kp_prevRight, desc_prevRight);
+         prevLeft = leftImage.clone();
+         prevRight = rightImage.clone();
+         ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
+         ExtractKeypoints(prevRight, kp_prevRight, desc_prevRight);
          _keyframes.emplace_back(Keyframe(desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, Eigen::Matrix4f::Identity(), leftImage.clone(), rightImage.clone()));
          count++;
          return false;
       }
 
       /* From second iteration onwards, store (cur) grayscale images, initialize, and insert keyframes when needed. */
-      cvtColor(leftImage, curLeft, cv::COLOR_BGR2GRAY);
-      cvtColor(rightImage, curRight, cv::COLOR_BGR2GRAY);
+      curLeft = leftImage.clone();
+      curRight = rightImage.clone();
 
       /* Initialization step: Build initial local map of 3D points; Insert the second keyframe. */
       if (!_initialized)
@@ -50,8 +50,8 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
          eigenPose.transposeInPlace();
          cameraPose = cameraPose * eigenPose;
 
-//         prevFinalDisplay = leftImage.clone();
-//         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
+        prevFinalDisplay = leftImage.clone();
+        DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
 
          if (cameraPose.block<3, 1>(0, 3).norm() > 1)
          {
@@ -61,7 +61,6 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
          }
       } else
       {
-         prevFinalDisplay = leftImage.clone();
 
          auto kf = _keyframes[_keyframes.size() - 1];
          CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
@@ -71,7 +70,8 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
          eigenPose.transposeInPlace();
          cameraPose = cameraPose * eigenPose;
 
-//         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
+         prevFinalDisplay = leftImage.clone();
+         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
 
          if (eigenPose.block<3, 1>(0, 3).norm() > 0.8)
          {
@@ -172,11 +172,11 @@ void VisualOdometry::ExtractKeypoints_FAST(cv::Mat img_1, std::vector<cv::Point2
    cv::KeyPoint::convert(keypoints_1, points1, std::vector<int>());
 }
 
-void VisualOdometry::ExtractKeypoints(cv::Mat img, cv::Ptr<cv::ORB> orb, std::vector<cv::KeyPoint>& points, cv::Mat& desc)
+void VisualOdometry::ExtractKeypoints(cv::Mat img, std::vector<cv::KeyPoint>& points, cv::Mat& desc)
 {
    desc.setTo(0);
    points.clear();
-   orb->detectAndCompute(img, cv::noArray(), points, desc);
+   _orb->detectAndCompute(img, cv::noArray(), points, desc);
 }
 
 
@@ -344,12 +344,21 @@ void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, std::v
 cv::Mat
 VisualOdometry::EstimateMotion_2D2D(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam)
 {
+   printf("EstimateMotion_2D2D\n");
+
    using namespace cv;
    float data[9] = {cam._fx, 0, cam._cx, 0, cam._fy, cam._cy, 0, 0, 1};
    cv::Mat K = cv::Mat(3, 3, CV_32FC1, data);
+   cv::Mat R(3, 3, CV_32FC1);
+   cv::Mat t(1, 3, CV_32FC1);
 
-   cv::Mat R(3, 3, CV_32FC1), t(1, 3, CV_32FC1);
+   printf("Fine Essential Matrix\n");
    cv::Mat E = findEssentialMat(prevFeatures, curFeatures, K, cv::RANSAC, 0.999, 1.0, mask);
+
+
+   std::cout << E << std::endl;
+
+   printf("Recover Pose\n");
    recoverPose(E, prevFeatures, curFeatures, K, R, t, mask);
 
    printf("Features: %ld %ld %d %d\n", prevFeatures.size(), curFeatures.size(), mask.rows, mask.cols);
@@ -367,6 +376,10 @@ VisualOdometry::EstimateMotion_2D2D(std::vector<cv::Point2f>& prevFeatures, std:
    R.copyTo(cvPose(Range(0, 3), Range(0, 3))); /* Excludes the 'end' element */
    t.copyTo(cvPose(Range(0, 3), Range(3, 4)));
    cv::invert(cvPose, cvPose);
+   
+   printf("EstimationMotion_2D2D Completed\n");
+
+
    return cvPose;
 }
 
@@ -374,15 +387,20 @@ VisualOdometry::EstimateMotion_2D2D(std::vector<cv::Point2f>& prevFeatures, std:
 
 void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D)
 {
+   printf("CalculateOdometry_ORB\n");
 
-   ExtractKeypoints(leftImage, orb, kp_curLeft, desc_curLeft);
-   ExtractKeypoints(rightImage, orb, kp_curRight, desc_curRight);
+   printf("Extract Keypoints\n");
+   ExtractKeypoints(leftImage, kp_curLeft, desc_curLeft);
+   ExtractKeypoints(rightImage, kp_curRight, desc_curRight);
+
+   printf("Match Keypoints\n");
    MatchKeypoints(kf.descLeft, desc_curLeft, matchesLeft);
    MatchKeypoints(kf.descLeft, kf.descRight, prevMatchesStereo);
 
    printf("Stereo Matches: %ld %d %d\n", prevMatchesStereo.size(), kf.descLeft.rows, kf.descRight.rows);
 //   cv::drawMatches(kf.rightImage, kf.keypointsRight, kf.leftImage, kf.keypointsLeft, prevMatchesStereo, prevFinalDisplay);
 
+   printf("Filter Matches Left\n");
    for (int i = matchesLeft.size() - 1; i >= 0; i--)
    {
       auto m = matchesLeft[i];
@@ -393,6 +411,8 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
       }
    }
 
+
+   printf("Filter Matches Stereo\n");
    for (int i = prevMatchesStereo.size() - 1; i >= 0; i--)
    {
       auto m = prevMatchesStereo[i];
@@ -404,10 +424,10 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
    }
 
    printf("Points To Be Triangulated: %ld\n", prevMatchesStereo.size());
-
    TriangulateStereoNormal(kf.keypointsLeft, kf.keypointsRight, prevMatchesStereo, points3D);
    printf("Points Triangulated: %ld\n", points3D.size());
 
+   printf("Extract 2D Feature Points\n");
    prevPoints2D.clear();
    curPoints2D.clear();
    for (auto m: matchesLeft)
@@ -432,8 +452,10 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
 //      }
    }
 
+   printf("Extract Final Set\n");
    ExtractFinalSet(matchesLeft, kp_curLeft, points3D);
 
+   printf("Draw Landmarks\n");
    DrawLandmarks(prevFinalDisplay, points3D);
 
 
@@ -455,6 +477,7 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
 
    //   cv::drawMatches(curLeft, kp_curLeft, kf.image, kf.keypoints, matchesLeft, prevFinalDisplay);
 
+   printf("Reset Buffers\n");
    prevLeft = curLeft.clone();
    desc_prevLeft = desc_curLeft.clone();
    kp_prevLeft = kp_curLeft;
@@ -466,15 +489,30 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
    count++;
 
 //   prevFinalDisplay = leftImage;
+
+   printf("CalculateOdometry_ORB Finished\n");
 }
 
-
-
-void VisualOdometry::Show()
+void VisualOdometry::Show(int delay)
 {
    if (!prevFinalDisplay.empty() && prevFinalDisplay.rows != 0 && prevFinalDisplay.cols != 0)
       cv::imshow("Previous Keypoints Visualizer", prevFinalDisplay);
    if (!curFinalDisplay.empty() && curFinalDisplay.rows != 0 && curFinalDisplay.cols != 0)
       cv::imshow("Keypoints Visualizer", curFinalDisplay);
-   cv::waitKey(1);
+   cv::waitKey(delay);
 }
+
+
+// TODO: Move to OpenCV tools class
+void VisualOdometry::DrawKeypoints(cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints)
+{
+   cv::drawKeypoints(image, keypoints, curFinalDisplay);
+}
+
+// TODO: Move to OpenCV tools class
+void VisualOdometry::DrawKeypointMatches(cv::Mat& img1, const std::vector<cv::KeyPoint>& kp1, cv::Mat& img2, const std::vector<cv::KeyPoint>& kp2, std::vector<cv::DMatch>& matches)
+{
+   cv::drawMatches(img1, kp1, img2, kp2, matches, curFinalDisplay);
+}
+
+
