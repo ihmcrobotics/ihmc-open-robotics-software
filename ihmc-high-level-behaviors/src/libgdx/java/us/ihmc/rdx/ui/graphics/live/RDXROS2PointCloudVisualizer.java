@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -19,6 +20,7 @@ import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -40,10 +42,12 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
+   private IHMCROS2Callback<?> ros2Callback = null;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean subscribed = new ImBoolean(true);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final int pointsPerSegment;
    private final int numberOfSegments;
@@ -81,20 +85,26 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
       decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
 
+      setSubscribed(subscribed.get());
+   }
+
+   private void subscribe()
+   {
+      subscribed.set(true);
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
+         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
       }
       else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
+         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
       }
       else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node,
-                                topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                ROS2QosProfile.BEST_EFFORT(),
-                                this::queueRenderFusedSensorHeadPointCloud);
+         ros2Callback = new IHMCROS2Callback<>(ros2Node,
+                                               topic.withType(FusedSensorHeadPointCloudMessage.class),
+                                               ROS2QosProfile.BEST_EFFORT(),
+                                               this::queueRenderFusedSensorHeadPointCloud);
       }
    }
 
@@ -141,7 +151,8 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    public void update()
    {
       super.update();
-      if (isActive())
+
+      if (subscribed.get() && isActive())
       {
          FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
          if (fusedMessage != null)
@@ -234,6 +245,12 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    @Override
    public void renderImGuiWidgets()
    {
+      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
+      {
+         setSubscribed(subscribed.get());
+      }
+      ImGuiTools.previousWidgetTooltip("Subscribed");
+      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       ImGui.sameLine();
@@ -249,5 +266,29 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    {
       if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public void setSubscribed(boolean subscribed)
+   {
+      if (subscribed && ros2Callback == null)
+      {
+         subscribe();
+      }
+      else if (!subscribed && ros2Callback != null)
+      {
+         unsubscribe();
+      }
+   }
+
+   private void unsubscribe()
+   {
+      subscribed.set(false);
+      ros2Callback.destroy();
+      ros2Callback = null;
+   }
+
+   public boolean isSubscribed()
+   {
+      return subscribed.get();
    }
 }
