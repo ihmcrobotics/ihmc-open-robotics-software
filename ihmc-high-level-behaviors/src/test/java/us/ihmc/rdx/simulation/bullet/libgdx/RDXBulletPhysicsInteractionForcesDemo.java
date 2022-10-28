@@ -269,7 +269,7 @@ public class RDXBulletPhysicsInteractionForcesDemo
                   recreateAndPlace();
                }
                ImGui.sliderFloat("Block transparency", blockTransparency.getData(), 0.0f, 1.0f);
-               LibGDXTools.setTransparency(fallingBlock.getRealisticModelInstance(), blockTransparency.get());
+               LibGDXTools.setOpacity(fallingBlock.getRealisticModelInstance(), blockTransparency.get());
                numberOfContactPointsPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
                pointAPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());
                pointBPlot.render(environmentBuilder.getBulletPhysicsManager().getSimulate().get());

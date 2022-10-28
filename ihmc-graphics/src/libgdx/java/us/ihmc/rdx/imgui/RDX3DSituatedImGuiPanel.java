@@ -264,8 +264,8 @@ public class RDX3DSituatedImGuiPanel
             mousePosX = scaledX;
             mousePosY = scaledY;
 
-            pickResult.setDistanceToCamera(distance);
-            vrContext.addPickResult(pickResult);
+            pickResult.setDistanceToControllerPickPoint(distance);
+            vrContext.addPickResult(RobotSide.RIGHT, pickResult);
          }
       });
    }
@@ -274,7 +274,7 @@ public class RDX3DSituatedImGuiPanel
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         if (vrContext.getSelectedPick() == pickResult)
+         if (vrContext.getSelectedPick().get(RobotSide.RIGHT) == pickResult)
          {
             leftMouseDown = controller.getClickTriggerActionData().bState();
          }
