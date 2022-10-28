@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 public class KinematicsRecordReplay
 {
    private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "");
-   private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/").toString());
+   private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString());
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
    private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/myFile.csv").toString());
