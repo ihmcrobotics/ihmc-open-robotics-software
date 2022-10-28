@@ -6,6 +6,9 @@ import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.JointspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -15,7 +18,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -36,9 +38,14 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
    private final BooleanParameter defaultDirectPositionControlMode;
    private final YoBoolean directPositionControlMode;
+   private final JointAccelerationIntegrationCommand disableAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
 
-   public RigidBodyJointspaceControlState(String bodyName, OneDoFJointBasics[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
-         YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper, YoRegistry parentRegistry)
+   public RigidBodyJointspaceControlState(String bodyName,
+                                          OneDoFJointBasics[] jointsToControl,
+                                          TObjectDoubleHashMap<String> homeConfiguration,
+                                          YoDouble yoTime,
+                                          RigidBodyJointControlHelper jointControlHelper,
+                                          YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
       this.jointControlHelper = jointControlHelper;
@@ -60,6 +67,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          if (!homeConfiguration.contains(jointName))
             throw new RuntimeException(warningPrefix + "Can not create control manager since joint home configuration is not defined.");
          jointsHomeConfiguration[jointIdx] = homeConfiguration.get(jointName);
+         JointAccelerationIntegrationParameters jointParameters = disableAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
+         jointParameters.setDisableAccelerationIntegration(true);
       }
    }
 
@@ -219,6 +228,15 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public void onExit(double timeInState)
    {
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      if (directPositionControlMode.getValue())
+         return disableAccelerationIntegrationCommand;
+      else
+         return null;
    }
 
    @Override
