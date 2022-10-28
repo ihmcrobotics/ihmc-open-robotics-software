@@ -100,7 +100,8 @@ public class TrajectoryRecordReplay<T extends Number>
       }
 
       String fileName = new SimpleDateFormat("yyyyMMddHHmm'.csv'").format(new Date());
-      File csvFile = new File(filePath + fileName);
+      File csvFile = new File(filePath + "/" + fileName);
+      System.out.println("Writing file " + filePath + "/" + fileName + " ...");
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
          dataLines.stream().map(this::convertToCSV).forEach(writer::println);
