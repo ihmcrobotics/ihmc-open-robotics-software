@@ -22,7 +22,7 @@ import static java.lang.Math.exp;
  * The assistance comes from pre-trained probabilistic models: the ProMPs,
  * which represent a probabilistic prediction of multi-dimensional trajectories.
  * Initially the input from the user is not modified and is simply observed to produce a fitting prediction.
- * Once the task is detected (by recognizing the protagonist object of that task and observing the current motion of the user),
+ * Once the task is detected (by recognizing the protagonist object of that task and/or by observing the current motion of the user),
  * the teleoperated referenceFrame gradually shifts from the reference specified by the user to the predicted assistance of the ProMPs.
  */
 public class ProMPAssistant implements TeleoperationAssistant
