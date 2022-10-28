@@ -70,4 +70,9 @@ public abstract class RDXVisualizer implements RenderableProvider
    {
 
    }
+
+   public String getTitle()
+   {
+      return title;
+   }
 }

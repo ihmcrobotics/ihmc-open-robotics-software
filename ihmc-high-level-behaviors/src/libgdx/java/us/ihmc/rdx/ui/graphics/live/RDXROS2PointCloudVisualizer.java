@@ -88,6 +88,26 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       setSubscribed(subscribed.get());
    }
 
+   private void subscribe()
+   {
+      subscribed.set(true);
+      if (topic.getType().equals(LidarScanMessage.class))
+      {
+         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
+      }
+      else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
+      {
+         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
+      }
+      else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
+      {
+         ros2Callback = new IHMCROS2Callback<>(ros2Node,
+                                               topic.withType(FusedSensorHeadPointCloudMessage.class),
+                                               ROS2QosProfile.BEST_EFFORT(),
+                                               this::queueRenderFusedSensorHeadPointCloud);
+      }
+   }
+
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
       frequencyPlot.recordEvent();
@@ -225,7 +245,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    @Override
    public void renderImGuiWidgets()
    {
-      if (ImGui.checkbox(labels.getHidden("Subscribed"), subscribed))
+      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
       {
          setSubscribed(subscribed.get());
       }
@@ -248,33 +268,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
-   private void subscribe()
-   {
-      subscribed.set(true);
-      if (topic.getType().equals(LidarScanMessage.class))
-      {
-         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
-      }
-      else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
-      {
-         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
-      }
-      else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
-      {
-         ros2Callback = new IHMCROS2Callback<>(ros2Node,
-                                               topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                               ROS2QosProfile.BEST_EFFORT(),
-                                               this::queueRenderFusedSensorHeadPointCloud);
-      }
-   }
-
-   private void unsubscribe()
-   {
-      subscribed.set(false);
-      ros2Callback.destroy();
-      ros2Callback = null;
-   }
-
    public void setSubscribed(boolean subscribed)
    {
       if (subscribed && ros2Callback == null)
@@ -285,6 +278,13 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       {
          unsubscribe();
       }
+   }
+
+   private void unsubscribe()
+   {
+      subscribed.set(false);
+      ros2Callback.destroy();
+      ros2Callback = null;
    }
 
    public boolean isSubscribed()
