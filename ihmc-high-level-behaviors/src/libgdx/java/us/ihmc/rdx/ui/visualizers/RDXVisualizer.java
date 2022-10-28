@@ -13,7 +13,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 public abstract class RDXVisualizer implements RenderableProvider
 {
    private ImBoolean active = new ImBoolean(false);
-   private ImBoolean isSubscribed = new ImBoolean(true);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String title;
    private boolean createdYet = false;
@@ -34,11 +33,8 @@ public abstract class RDXVisualizer implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.getHidden(title + "Subscription"), isSubscribed);
-      ImGuiTools.previousWidgetTooltip("toggle subscription");
-      ImGui.sameLine();
       ImGui.checkbox(labels.get(title), active);
-      ImGuiTools.previousWidgetTooltip("toggle rendering");
+      ImGuiTools.previousWidgetTooltip("Active");
    }
 
    public void update()
@@ -56,12 +52,7 @@ public abstract class RDXVisualizer implements RenderableProvider
 
    public boolean isActive()
    {
-      return isSubscribed.get() && active.get();
-   }
-
-   public boolean getIsSubscribed()
-   {
-      return isSubscribed.get();
+      return active.get();
    }
 
    @Override
