@@ -579,6 +579,9 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                }
                outputFusedROS2Message.setAquisitionSecondsSinceEpoch(now.getEpochSecond());
                outputFusedROS2Message.setAquisitionAdditionalNanos(now.getNano());
+               outputFusedROS2Message.setPointsPerSegment(imageHeight * imageWidth);
+               outputFusedROS2Message.setSegmentIndex(0);
+               outputFusedROS2Message.setNumberOfSegments(1);
                ((IHMCROS2Publisher<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
             });
          }
