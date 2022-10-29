@@ -50,9 +50,7 @@ public class RDXROS2PointCloudSensorDemo
             globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
             globalVisualizersPanel.addVisualizer(new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                  ros2Node,
-                                                                                 ROS2Tools.OUSTER_POINT_CLOUD,
-                                                                                 2048 * 128,
-                                                                                 1));
+                                                                                 ROS2Tools.OUSTER_POINT_CLOUD));
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel, RDXSceneLevel.VIRTUAL);

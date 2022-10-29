@@ -49,9 +49,9 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private final int pointsPerSegment;
-   private final int numberOfSegments;
-   private final int totalNumberOfPoints;
+   private int pointsPerSegment;
+   private int numberOfSegments;
+   private int totalNumberOfPoints;
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
    private final ByteBuffer decompressionInputDirectBuffer;
@@ -70,16 +70,9 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
-      this(title, ros2Node, topic, 500000, 1);
-   }
-
-   public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
-   {
       super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
       this.topic = topic;
-      this.pointsPerSegment = pointsPerSegment;
-      this.numberOfSegments = numberOfSegments;
       totalNumberOfPoints = pointsPerSegment * numberOfSegments;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
@@ -141,10 +134,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
 
       parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
-      decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
-      decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, pointCloudRenderer.getVertexBuffer());
-      pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    @Override
@@ -157,6 +146,20 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
          FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
          if (fusedMessage != null)
          {
+            if (pointsPerSegment != fusedMessage.getPointsPerSegment())
+            {
+               pointsPerSegment = fusedMessage.getPointsPerSegment();
+               numberOfSegments = (int) fusedMessage.getNumberOfSegments();
+               if (decompressedOpenCLIntBuffer != null)
+                  decompressedOpenCLIntBuffer.destroy(openCLManager);
+               decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
+               decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
+               if (pointCloudVertexBuffer != null)
+                  pointCloudVertexBuffer.destroy(openCLManager);
+               pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, pointCloudRenderer.getVertexBuffer());
+               pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+            }
+
             decompressionInputDirectBuffer.rewind();
             int numberOfBytes = fusedMessage.getScan().size();
             decompressionInputDirectBuffer.limit(numberOfBytes);

@@ -36,6 +36,7 @@ public class OpenCLFloatBuffer
       {
          openCLManager.releaseBufferObject(openCLBufferObject);
          openCLBufferObject.releaseReference();
+         openCLBufferObject = null;
       }
    }
 
@@ -44,10 +45,7 @@ public class OpenCLFloatBuffer
       this.numberOfFloats = numberOfFloats;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
-      if (openCLObjectCreated)
-      {
-         openCLManager.releaseBufferObject(openCLBufferObject);
-      }
+      destroy(openCLManager);
 
       if (backingDirectFloatBuffer == null)
       {
