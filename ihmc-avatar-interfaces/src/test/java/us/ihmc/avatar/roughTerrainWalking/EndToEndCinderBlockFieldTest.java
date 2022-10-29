@@ -107,7 +107,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
 
       footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(getSwingHeight()));
       footsteps.setOffsetFootstepsHeightWithExecutionError(true);
-      
+
       setupSimulation(cinderBlockFieldEnvironment);
       simulationTestHelper.setKeepSCSUp(true);
       simulationTestHelper.start();
