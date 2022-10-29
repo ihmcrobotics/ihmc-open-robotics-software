@@ -3,6 +3,18 @@
 VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
 {
    cameraPose = Eigen::Matrix4f::Identity();
+
+   stereo->setNumDisparities(app.STEREO_NUM_DISPARITIES * 16);
+   stereo->setBlockSize(2 * app.STEREO_BLOCK_SIZE + 1);
+   stereo->setPreFilterSize(2 * app.STEREO_PRE_FILTER_SIZE + 1);
+   stereo->setPreFilterType(app.STEREO_PRE_FILTER_TYPE);
+   stereo->setPreFilterCap(app.STEREO_PRE_FILTER_CAP);
+   stereo->setMinDisparity(app.STEREO_MIN_DISPARITY);
+   stereo->setTextureThreshold(app.STEREO_TEXTURE_THRESHOLD);
+   stereo->setUniquenessRatio(app.STEREO_UNIQUENESS_RATIO);
+   stereo->setSpeckleRange(app.STEREO_SPECKLE_RANGE);
+   stereo->setSpeckleWindowSize(app.STEREO_SPECKLE_WINDOW_SIZE);
+   stereo->setDisp12MaxDiff(app.STEREO_DISP_12_MAX_DIFF);
 }
 
 void VisualOdometry::UpdateMonocular(const cv::Mat& image)
@@ -342,26 +354,21 @@ void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, std::v
 
 
 cv::Mat
-VisualOdometry::EstimateMotion_2D2D(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam)
+VisualOdometry::EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam)
 {
-   printf("EstimateMotion_2D2D\n");
-
    using namespace cv;
    float data[9] = {cam._fx, 0, cam._cx, 0, cam._fy, cam._cy, 0, 0, 1};
    cv::Mat K = cv::Mat(3, 3, CV_32FC1, data);
    cv::Mat R(3, 3, CV_32FC1);
    cv::Mat t(1, 3, CV_32FC1);
 
-   printf("Fine Essential Matrix\n");
    cv::Mat E = findEssentialMat(prevFeatures, curFeatures, K, cv::RANSAC, 0.999, 1.0, mask);
 
 
    std::cout << E << std::endl;
 
-   printf("Recover Pose\n");
    recoverPose(E, prevFeatures, curFeatures, K, R, t, mask);
 
-   printf("Features: %ld %ld %d %d\n", prevFeatures.size(), curFeatures.size(), mask.rows, mask.cols);
    for (int i = (uint32_t) prevFeatures.size() - 1; i >= 0; i--)
    {
       if ((int) mask.at<unsigned char>(i, 0) == 1)
@@ -370,16 +377,12 @@ VisualOdometry::EstimateMotion_2D2D(std::vector<cv::Point2f>& prevFeatures, std:
          curFeatures.erase(curFeatures.begin() + i);
       }
    }
-   printf("Inliers: %ld %ld\n", prevFeatures.size(), curFeatures.size());
 
    Mat cvPose = Mat::eye(4, 4, CV_32FC1);
    R.copyTo(cvPose(Range(0, 3), Range(0, 3))); /* Excludes the 'end' element */
    t.copyTo(cvPose(Range(0, 3), Range(3, 4)));
    cv::invert(cvPose, cvPose);
    
-   printf("EstimationMotion_2D2D Completed\n");
-
-
    return cvPose;
 }
 
@@ -441,7 +444,7 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
    cv::Mat mask, pose;
    if (prevPoints2D.size() >= 10 && curPoints2D.size() >= 10)
    {
-      pose = EstimateMotion_2D2D(prevPoints2D, curPoints2D, mask, leftCamera);
+      pose = EstimateMotion(prevPoints2D, curPoints2D, mask, leftCamera);
       cvPose = pose;
 
       /* Triangulate Feature Points */
@@ -515,4 +518,16 @@ void VisualOdometry::DrawKeypointMatches(cv::Mat& img1, const std::vector<cv::Ke
    cv::drawMatches(img1, kp1, img2, kp2, matches, curFinalDisplay);
 }
 
+// TODO: Move to OpenCV tools class
+cv::Mat VisualOdometry::CalculateStereoDepth(cv::Mat left, cv::Mat right)
+{
+   cv::Mat disparity;
+   stereo->compute(left, right, disparity);
+   disparity.convertTo(disparity, CV_8U, 1.0);
+   return disparity;
+}
 
+void VisualOdometry::Display(cv::Mat& image)
+{
+   curFinalDisplay = image.clone();
+}

@@ -22,7 +22,7 @@ VODemoLauncher::VODemoLauncher()
    }
    else
    {
-      TestMatchKeypoints(vo, fileNames, 0);
+      TestEstimateMotion(vo, fileNames, 0, 10);
    }
 }
 
@@ -69,6 +69,36 @@ void VODemoLauncher::TestMatchKeypoints(VisualOdometry& vo, const std::vector<st
    vo.MatchKeypoints(leftDescriptors, rightDescriptors, matches);
 
    vo.DrawKeypointMatches(leftImage, leftKeypoints, rightImage, rightKeypoints, matches);
+   vo.Show(0);
+}
+
+
+void VODemoLauncher::TestStereoDisparityCalculation(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index)
+{
+   cv::Mat leftImage = cv::imread(leftDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
+   cv::Mat rightImage = cv::imread(rightDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
+
+   cv::Mat disparity = vo.CalculateStereoDepth(leftImage, rightImage);
+
+   vo.Display(disparity);
+   vo.Show(0);
+}
+
+void VODemoLauncher::TestEstimateMotion(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
+{
+   cv::Mat leftImagePrev = cv::imread(leftDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
+   cv::Mat rightImagePrev = cv::imread(rightDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
+
+   cv::Mat leftImageCur = cv::imread(leftDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
+   cv::Mat rightImageCur = cv::imread(rightDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
+
+   cv::Mat disparityPrev = vo.CalculateStereoDepth(leftImagePrev, rightImagePrev);
+   cv::Mat disparityCur = vo.CalculateStereoDepth(leftImageCur, rightImageCur);
+
+   vo.Display(disparityPrev);
+   vo.Show(0);
+
+   vo.Display(disparityCur);
    vo.Show(0);
 }
 

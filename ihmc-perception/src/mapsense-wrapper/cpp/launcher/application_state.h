@@ -123,17 +123,18 @@ class ApplicationState
       float REGION_GROWTH_FACTOR = 0.01;
 
       /* Stereo Matching Parameters */
-      int STEREO_NUM_DISPARITIES = 1;
-      int STEREO_BLOCK_SIZE = 2;
-      int STEREO_PRE_FILTER_SIZE = 2;
+      int STEREO_NUM_DISPARITIES = 6;
+      int STEREO_BLOCK_SIZE = 4;
+      int STEREO_PRE_FILTER_SIZE = 3;
       int STEREO_PRE_FILTER_TYPE = 1;
-      int STEREO_PRE_FILTER_CAP = 31;
-      int STEREO_MIN_DISPARITY = 0;
+      int STEREO_PRE_FILTER_CAP = 16;
+      int STEREO_MIN_DISPARITY = 3;
       int STEREO_TEXTURE_THRESHOLD = 10;
-      int STEREO_UNIQUENESS_RATIO = 15;
-      int STEREO_SPECKLE_RANGE = 0;
-      int STEREO_SPECKLE_WINDOW_SIZE = 0;
-      int STEREO_DISP_12_MAX_DIFF = -1;
+      int STEREO_UNIQUENESS_RATIO = 1;
+      int STEREO_SPECKLE_RANGE = 20;
+      int STEREO_SPECKLE_WINDOW_SIZE = 60;
+      int STEREO_DISP_12_MAX_DIFF = 90;
+
 
       std::string OUSTER_POINTS = "/os_cloud_node/points";
       std::string ZED_LEFT_IMAGE_RAW = "/zed/color/left/image_raw";

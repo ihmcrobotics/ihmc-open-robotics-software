@@ -30,8 +30,7 @@ class VisualOdometry
       void TriangulateStereoPoints(cv::Mat& leftPoseWorld, std::vector<cv::KeyPoint> kpLeft, std::vector<cv::KeyPoint> kpRight, std::vector<cv::DMatch> stereoMatches,
                                    std::vector<PointLandmark> points3D);
 
-      const Eigen::Matrix4f& EstimateMotion(std::vector<PointLandmark> points, int cameraID);
-      cv::Mat EstimateMotion_2D2D(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam);
+      cv::Mat EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam);
       cv::Mat TriangulatePoints(std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
 
@@ -41,6 +40,7 @@ class VisualOdometry
       void DrawMatches(cv::Mat& img, std::vector<cv::Point2f> prev_pts, std::vector<cv::Point2f> cur_pts);
       void DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& landmarks);
       void DrawAllMatches(cv::Mat& image);
+      void Display(cv::Mat& image);
       void Show(int delay = 1);
 
    private:
@@ -58,6 +58,7 @@ class VisualOdometry
       uint32_t yGridCount = 30;
 
 
+      cv::Ptr<cv::StereoBM> stereo = cv::StereoBM::create();
       cv::Ptr<cv::ORB> _orb = cv::ORB::create(kFeatures);
       cv::Mat prevLeft, prevRight, curLeft, curRight, leftImage, rightImage;
       std::vector<cv::DMatch> matchesLeft, matchesRight, prevMatchesStereo, curMatchesStereo;
