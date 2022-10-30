@@ -16,38 +16,39 @@ int createRGB(double input)
 
    double gradientSize = 0.2;
    double gradientLength = 1;
-   double alpha = fmod(input,gradientLength);
+   double alpha = fmod(input, gradientLength);
 
-   if(alpha<0) alpha = 1 + alpha;
+   if(alpha < 0)
+      alpha = 1 + alpha;
    if(alpha <= gradientSize * 1)
    {
-      r = interpolate(magentaR,blueR,(alpha) / gradientSize);
-      g = interpolate(magentaG,blueG,(alpha) / gradientSize);
-      b = interpolate(magentaB,blueB,(alpha) / gradientSize);
+      r = interpolate(magentaR, blueR, (alpha) / gradientSize);
+      g = interpolate(magentaG, blueG, (alpha) / gradientSize);
+      b = interpolate(magentaB, blueB, (alpha) / gradientSize);
    }
    else if(alpha <= gradientSize * 2)
    {
-      r = interpolate(blueR,greenR,(alpha - gradientSize * 1) / gradientSize);
-      g = interpolate(blueG,greenG,(alpha - gradientSize * 1) / gradientSize);
-      b = interpolate(blueB,greenB,(alpha - gradientSize * 1) / gradientSize);
+      r = interpolate(blueR, greenR, (alpha - gradientSize * 1) / gradientSize);
+      g = interpolate(blueG, greenG, (alpha - gradientSize * 1) / gradientSize);
+      b = interpolate(blueB, greenB, (alpha - gradientSize * 1) / gradientSize);
    }
    else if(alpha<=gradientSize * 3)
    {
-      r = interpolate(greenR,yellowR,(alpha - gradientSize * 2) / gradientSize);
-      g = interpolate(greenG,yellowG,(alpha - gradientSize * 2) / gradientSize);
-      b = interpolate(greenB,yellowB,(alpha - gradientSize * 2) / gradientSize);
+      r = interpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
+      g = interpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
+      b = interpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
    }
    else if(alpha<=gradientSize * 4)
    {
-      r = interpolate(yellowR,orangeR,(alpha - gradientSize * 3) / gradientSize);
-      g = interpolate(yellowG,orangeG,(alpha - gradientSize * 3) / gradientSize);
-      b = interpolate(yellowB,orangeB,(alpha - gradientSize * 3) / gradientSize);
+      r = interpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
+      g = interpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
+      b = interpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
    }
    else if(alpha<=gradientSize * 5)
    {
-      r = interpolate(orangeR,redR,(alpha - gradientSize * 4) / gradientSize);
-      g = interpolate(orangeG,redG,(alpha - gradientSize * 4) / gradientSize);
-      b = interpolate(orangeB,redB,(alpha - gradientSize * 4) / gradientSize);
+      r = interpolate(orangeR, redR, (alpha - gradientSize * 4) / gradientSize);
+      g = interpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
+      b = interpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
    }
 
    int color = ((int) round(r) << 24) | ((int) round(g) << 16) | ((int) round(b) << 8) | 255;
