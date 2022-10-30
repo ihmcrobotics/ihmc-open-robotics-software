@@ -24,6 +24,8 @@ public class RDXPointCloudRenderer implements RenderableProvider
    private Renderable renderable;
    private float[] vertices;
 
+   public static final int FLOATS_PER_VERTEX = 8;
+   public static final int BYTES_PER_VERTEX = FLOATS_PER_VERTEX * Float.BYTES;
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
                                                                                               3,
                                                                                               ShaderProgram.POSITION_ATTRIBUTE),
@@ -332,7 +334,8 @@ public class RDXPointCloudRenderer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      renderables.add(renderable);
+      if (renderable != null)
+         renderables.add(renderable);
    }
 
    public void dispose()

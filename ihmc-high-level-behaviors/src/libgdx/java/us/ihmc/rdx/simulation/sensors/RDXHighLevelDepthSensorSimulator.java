@@ -54,6 +54,7 @@ import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.rdx.ui.graphics.live.RDXROS2PointCloudVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -148,8 +149,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private _cl_kernel discretizePointsKernel;
+   private OpenCLFloatBuffer worldPointCloudBuffer;
    private OpenCLFloatBuffer parametersBuffer;
-   private BytedecoImage depthMetersImage;
    private ByteBuffer compressedPointCloudBuffer;
    private OpenCLIntBuffer discretizedIntBuffer;
    private FusedSensorHeadPointCloudMessage outputFusedROS2Message;
@@ -255,10 +256,10 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          openCLManager.create();
          openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator");
          discretizePointsKernel = openCLManager.createKernel(openCLProgram, "discretizePoints");
-         parametersBuffer = new OpenCLFloatBuffer(17);
+         parametersBuffer = new OpenCLFloatBuffer(3);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
-         depthMetersImage = new BytedecoImage(getLowLevelSimulator().getMetersDepthOpenCVMat());
-         depthMetersImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         worldPointCloudBuffer = new OpenCLFloatBuffer(depthSensorSimulator.getNumberOfPoints() * 8, depthSensorSimulator.getPointCloudBuffer());
+         worldPointCloudBuffer.createOpenCLBufferObject(openCLManager);
          discretizedIntBuffer = new OpenCLIntBuffer(imageWidth * imageHeight * 4);
          discretizedIntBuffer.createOpenCLBufferObject(openCLManager);
          compressedPointCloudBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * Integer.BYTES * 4);
@@ -528,62 +529,45 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          }
          else if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
          {
-            pointCloudExecutor.execute(() ->
+            Instant now = Instant.now();
+
+            sensorFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+            float verticalFieldOfView = getLowLevelSimulator().getCamera().fieldOfView;
+            float horizontalFieldOfView = verticalFieldOfView * imageWidth / imageHeight;
+            float discreteResolution = 0.003f;
+            parametersBuffer.getBytedecoFloatBufferPointer().put(0, RDXPointCloudRenderer.FLOATS_PER_VERTEX);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(1, RDXROS2PointCloudVisualizer.DISCRETE_INTS_PER_POINT);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(2, discreteResolution);
+
+            worldPointCloudBuffer.writeOpenCLBufferObject(openCLManager);
+            parametersBuffer.writeOpenCLBufferObject(openCLManager);
+
+            discretizedIntBuffer.getBackingDirectByteBuffer().rewind();
+
+            openCLManager.setKernelArgument(discretizePointsKernel, 0, worldPointCloudBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(discretizePointsKernel, 1, discretizedIntBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(discretizePointsKernel, 2, parametersBuffer.getOpenCLBufferObject());
+            openCLManager.execute1D(discretizePointsKernel, depthSensorSimulator.getNumberOfPoints());
+            discretizedIntBuffer.readOpenCLBufferObject(openCLManager);
+            openCLManager.finish();
+
+            compressedPointCloudBuffer.rewind();
+            compressedPointCloudBuffer.limit(compressedPointCloudBuffer.capacity());
+            discretizedIntBuffer.getBackingDirectByteBuffer().rewind();
+            // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
+            lz4Compressor.compress(discretizedIntBuffer.getBackingDirectByteBuffer(), compressedPointCloudBuffer);
+            compressedPointCloudBuffer.flip();
+            outputFusedROS2Message.getScan().clear();
+            for (int j = 0; j < compressedPointCloudBuffer.limit(); j++)
             {
-               Instant now = Instant.now();
-
-               sensorFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-               float verticalFieldOfView = getLowLevelSimulator().getCamera().fieldOfView;
-               float horizontalFieldOfView = 160.0f;
-               float discreteResolution = 0.003f;
-               parametersBuffer.getBytedecoFloatBufferPointer().put(0, horizontalFieldOfView);
-               parametersBuffer.getBytedecoFloatBufferPointer().put(1, verticalFieldOfView);
-               parametersBuffer.getBytedecoFloatBufferPointer().put(2, tempTransform.getTranslation().getX32());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(3, tempTransform.getTranslation().getY32());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(4, tempTransform.getTranslation().getZ32());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(5, (float) tempTransform.getRotation().getM00());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) tempTransform.getRotation().getM01());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) tempTransform.getRotation().getM02());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) tempTransform.getRotation().getM10());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) tempTransform.getRotation().getM11());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) tempTransform.getRotation().getM12());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) tempTransform.getRotation().getM20());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) tempTransform.getRotation().getM21());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) tempTransform.getRotation().getM22());
-               parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) imageWidth);
-               parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) imageHeight);
-               parametersBuffer.getBytedecoFloatBufferPointer().put(16, discreteResolution);
-
-               parametersBuffer.writeOpenCLBufferObject(openCLManager);
-               depthMetersImage.writeOpenCLImage(openCLManager);
-
-               discretizedIntBuffer.getBackingDirectByteBuffer().rewind();
-
-               openCLManager.setKernelArgument(discretizePointsKernel, 0, depthMetersImage.getOpenCLImageObject());
-               openCLManager.setKernelArgument(discretizePointsKernel, 1, discretizedIntBuffer.getOpenCLBufferObject());
-               openCLManager.setKernelArgument(discretizePointsKernel, 2, parametersBuffer.getOpenCLBufferObject());
-               openCLManager.execute2D(discretizePointsKernel, imageWidth, imageHeight);
-               discretizedIntBuffer.readOpenCLBufferObject(openCLManager);
-               openCLManager.finish();
-
-               compressedPointCloudBuffer.rewind();
-               compressedPointCloudBuffer.limit(compressedPointCloudBuffer.capacity());
-               discretizedIntBuffer.getBackingDirectByteBuffer().rewind();
-               // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
-               lz4Compressor.compress(discretizedIntBuffer.getBackingDirectByteBuffer(), compressedPointCloudBuffer);
-               compressedPointCloudBuffer.flip();
-               outputFusedROS2Message.getScan().clear();
-               for (int j = 0; j < compressedPointCloudBuffer.limit(); j++)
-               {
-                  outputFusedROS2Message.getScan().add(compressedPointCloudBuffer.get());
-               }
-               outputFusedROS2Message.setAquisitionSecondsSinceEpoch(now.getEpochSecond());
-               outputFusedROS2Message.setAquisitionAdditionalNanos(now.getNano());
-               outputFusedROS2Message.setPointsPerSegment(imageHeight * imageWidth);
-               outputFusedROS2Message.setSegmentIndex(0);
-               outputFusedROS2Message.setNumberOfSegments(1);
-               ((IHMCROS2Publisher<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
-            });
+               outputFusedROS2Message.getScan().add(compressedPointCloudBuffer.get());
+            }
+            outputFusedROS2Message.setAquisitionSecondsSinceEpoch(now.getEpochSecond());
+            outputFusedROS2Message.setAquisitionAdditionalNanos(now.getNano());
+            outputFusedROS2Message.setPointsPerSegment(imageHeight * imageWidth);
+            outputFusedROS2Message.setSegmentIndex(0);
+            outputFusedROS2Message.setNumberOfSegments(1);
+            ((IHMCROS2Publisher<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
          }
       }
    }
