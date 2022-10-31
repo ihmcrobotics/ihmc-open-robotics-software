@@ -134,7 +134,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (footstepIsBeingAdjusted)
       {
-         requestSwingSpeedUp = true;
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          failureDetectionControlModule.setNextFootstep(nextFootstep);
          updateFootstepParameters();
@@ -145,16 +144,16 @@ public class WalkingSingleSupportState extends SingleSupportState
                                            balanceManager.getFinalDesiredCoMAcceleration(),
                                            swingTime);
 
-         balanceManager.adjustFootstep(nextFootstep);
+         balanceManager.adjustFootstepInCoPPlan(nextFootstep);
          // FIXME I don't need to be computing this again
          balanceManager.computeICPPlan();
 
          updateHeightManager();
       }
 
-      if (requestSwingSpeedUp)
+      if (requestSwingSpeedUp || footstepIsBeingAdjusted)
       {
-         double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
+         double swingTimeRemaining = requestSwingSpeedUpInFeetManagerIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
@@ -331,7 +330,7 @@ public class WalkingSingleSupportState extends SingleSupportState
     *
     * @return the current swing time remaining for the swing foot trajectory
     */
-   private double requestSwingSpeedUpIfNeeded()
+   private double requestSwingSpeedUpInFeetManagerIfNeeded()
    {
       double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentState();
       double adjustedRemainingTime = Math.max(0.0,
