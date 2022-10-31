@@ -44,6 +44,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
@@ -133,6 +134,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private RigidBodyTransform sensorFrameToWorldTransform;
 
    private boolean tuning = false;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean sensorEnabled = new ImBoolean(false);
    private final ImBoolean renderPointCloudDirectly = new ImBoolean(false);
    private final ImBoolean publishDepthImageROS1 = new ImBoolean(false);
@@ -444,36 +446,42 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    {
       tuning = true;
       ImGui.text("Resolution: " + imageWidth + " x " + imageHeight);
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Sensor Enabled"), sensorEnabled);
+      ImGui.checkbox(labels.get("Sensor Enabled"), sensorEnabled);
       ImGui.sameLine();
-      ImGui.checkbox("Show frame graphic", debugCoordinateFrame);
+      ImGui.checkbox(labels.get("Show frame graphic"), debugCoordinateFrame);
       ImGui.text("Render:");
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud"), renderPointCloudDirectly);
+      ImGui.checkbox(labels.get("Point cloud"), renderPointCloudDirectly);
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), getLowLevelSimulator().getDepthPanel().getIsShowing());
+      ImGui.checkbox(labels.get("Depth video"), getLowLevelSimulator().getDepthPanel().getIsShowing());
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
+      ImGui.checkbox(labels.get("Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
+      ImGui.text("Publish:");
+      if (ros1DepthImageTopic != null)
+         ImGui.checkbox(labels.get("ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
+      if (ros1ColorImageTopic != null)
+         ImGui.checkbox(labels.get("ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
+      if (ros1PointCloudTopic != null)
+         ImGui.checkbox(labels.get("ROS 1 Point Cloud (" + ros1PointCloudTopic + ")"), publishPointCloudROS1);
+      if (ros2PointCloudTopic != null)
+         ImGui.checkbox(labels.get("ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
+      if (realtimeROS2Node != null)
+      {
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("Color image (ROS 2)"), publishColorImageROS2);
+      }
       ImGui.checkbox("Use Sensor Color", useSensorColor);
       ImGui.sameLine();
       ImGui.checkbox("Color based on world Z", colorBasedOnWorldZ);
       ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.10f);
-      ImGui.colorPicker4("Color", color);
-      ImGui.text("Publish:");
-      if (ros1DepthImageTopic != null)
-         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
-      if (ros1ColorImageTopic != null)
-         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
-      if (ros1PointCloudTopic != null)
-         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Point Cloud (" + ros1PointCloudTopic + ")"), publishPointCloudROS1);
-      if (ros2PointCloudTopic != null)
-         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
-      if (realtimeROS2Node != null)
+      if (ImGui.collapsingHeader(labels.get("Color tuner")))
       {
-         ImGui.sameLine();
-         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
+         ImGui.colorPicker4("Color", color);
       }
-      depthSensorSimulator.renderTuningSliders();
+      if (ImGui.collapsingHeader(labels.get("Low level settings")))
+      {
+         depthSensorSimulator.renderTuningSliders();
+      }
    }
 
    private void publishPointCloudROS2()
