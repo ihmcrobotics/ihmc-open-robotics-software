@@ -3,13 +3,24 @@
 struct Keyframe
 {
    public:
-      Keyframe(cv::Mat desc, std::vector<cv::KeyPoint> kp, Eigen::Matrix4f pose)
-         : descLeft(desc), keypointsLeft(kp), pose(pose) {};
-      Keyframe(cv::Mat descLeft, cv::Mat descRight, std::vector<cv::KeyPoint> kpLeft, std::vector<cv::KeyPoint> kpRight, Eigen::Matrix4f pose, cv::Mat left, cv::Mat right)
-            : descLeft(descLeft), descRight(descRight), keypointsLeft(kpLeft), keypointsRight(kpRight), pose(pose), leftImage(left), rightImage(right) {};
-      cv::Mat descLeft, descRight;
-      std::vector<cv::KeyPoint> keypointsLeft, keypointsRight;
+
+      Keyframe(Eigen::Matrix4f pose, cv::Mat desc, std::vector<cv::KeyPoint> kp)
+         : pose(pose), descLeft(desc), keypointsLeft(kp)  {};
+
+      Keyframe(Eigen::Matrix4f pose, cv::Mat descLeft, cv::Mat descRight, std::vector<cv::KeyPoint> kpLeft, std::vector<cv::KeyPoint> kpRight, cv::Mat left, cv::Mat right)
+            : pose(pose), descLeft(descLeft), descRight(descRight), keypointsLeft(kpLeft), keypointsRight(kpRight), leftImage(left), rightImage(right) {};
+      
+      
       Eigen::Matrix4f pose;
-      cv::Mat leftImage, rightImage;
+
+      cv::Mat descLeft;
+      cv::Mat descRight;
+      
+      std::vector<cv::KeyPoint> keypointsLeft;
+      std::vector<cv::KeyPoint> keypointsRight;
+      
+      cv::Mat leftImage;
+      cv::Mat rightImage;
+
 
 };

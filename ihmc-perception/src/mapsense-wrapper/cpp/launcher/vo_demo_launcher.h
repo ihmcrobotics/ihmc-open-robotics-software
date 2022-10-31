@@ -13,6 +13,7 @@ class VODemoLauncher
       void TestExtractKeypoints(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index);
       void TestMatchKeypoints(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index);
       void TestStereoDisparityCalculation(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index);
+      void TestMatchKeypointsMonocular(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo);
       void TestEstimateMotion(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo);
 
    private:

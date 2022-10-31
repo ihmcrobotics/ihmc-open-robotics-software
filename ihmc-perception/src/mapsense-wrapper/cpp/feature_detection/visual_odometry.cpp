@@ -1,4 +1,5 @@
 #include "visual_odometry.h"
+#include "opencv_tools.h"
 
 VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
 {
@@ -43,7 +44,7 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
          prevRight = rightImage.clone();
          ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
          ExtractKeypoints(prevRight, kp_prevRight, desc_prevRight);
-         _keyframes.emplace_back(Keyframe(desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, Eigen::Matrix4f::Identity(), leftImage.clone(), rightImage.clone()));
+         _keyframes.emplace_back(Keyframe(Eigen::Matrix4f::Identity(), desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, leftImage.clone(), rightImage.clone()));
          count++;
          return false;
       }
@@ -63,13 +64,14 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
          cameraPose = cameraPose * eigenPose;
 
         prevFinalDisplay = leftImage.clone();
-        DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
+
+        OpenCVTools::DrawMatchesSingle(prevPoints2D, curPoints2D, prevFinalDisplay);
 
          if (cameraPose.block<3, 1>(0, 3).norm() > 1)
          {
             _initialized = true;
-            _keyframes.emplace_back(Keyframe(desc_curLeft.clone(), desc_curRight.clone(),
-                                             kp_curLeft, kp_curRight, cameraPose, leftImage.clone(), rightImage.clone()));
+            _keyframes.emplace_back(Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(),
+                                             kp_curLeft, kp_curRight, leftImage.clone(), rightImage.clone()));
          }
       } else
       {
@@ -83,13 +85,13 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
          cameraPose = cameraPose * eigenPose;
 
          prevFinalDisplay = leftImage.clone();
-         DrawMatches(prevFinalDisplay, prevPoints2D, curPoints2D);
+         OpenCVTools::DrawMatchesSingle(prevPoints2D, curPoints2D, prevFinalDisplay);
 
          if (eigenPose.block<3, 1>(0, 3).norm() > 0.8)
          {
             _initialized = true;
             _keyframes.emplace_back(
-                  Keyframe(desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight, cameraPose, leftImage.clone(), rightImage.clone()));
+                  Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight, leftImage.clone(), rightImage.clone()));
 
             printf("Performing Bundle Adjustment.");
 
@@ -145,15 +147,6 @@ bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& right
    return true;
 }
 
-void VisualOdometry::DrawMatches(cv::Mat& img, std::vector<cv::Point2f> prev_pts, std::vector<cv::Point2f> cur_pts)
-{
-   for (uint32_t i = 0; i < prev_pts.size(); i++)
-   {
-      line(img, prev_pts[i], cur_pts[i], cv::Scalar(0, 255, 0), 3);
-      circle(img, prev_pts[i], 2, cv::Scalar(0, 0, 0), -1);
-      circle(img, cur_pts[i], 2, cv::Scalar(255, 255, 255), -1);
-   }
-}
 
 void VisualOdometry::DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& landmarks)
 {
@@ -386,7 +379,18 @@ VisualOdometry::EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vect
    return cvPose;
 }
 
-
+void VisualOdometry::FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, float distanceThreshold)
+{
+   for (int i = matches.size() - 1; i >= 0; i--)
+   {
+      auto m = matches[i];
+      float dist = cv::norm(kpQuery[m.queryIdx].pt - kpTrain[m.trainIdx].pt);
+      if (dist > distanceThreshold)
+      {
+         matches.erase(matches.begin() + i);
+      }
+   }
+}
 
 void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D)
 {
@@ -404,40 +408,18 @@ void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::
 //   cv::drawMatches(kf.rightImage, kf.keypointsRight, kf.leftImage, kf.keypointsLeft, prevMatchesStereo, prevFinalDisplay);
 
    printf("Filter Matches Left\n");
-   for (int i = matchesLeft.size() - 1; i >= 0; i--)
-   {
-      auto m = matchesLeft[i];
-      float dist = cv::norm(kp_curLeft[m.queryIdx].pt - kf.keypointsLeft[m.trainIdx].pt);
-      if (dist > 50.0f)
-      {
-         matchesLeft.erase(matchesLeft.begin() + i);
-      }
-   }
-
+   FilterMatchesByDistance(matchesLeft,kf.keypointsLeft, kp_curLeft, 50.0f);
 
    printf("Filter Matches Stereo\n");
-   for (int i = prevMatchesStereo.size() - 1; i >= 0; i--)
-   {
-      auto m = prevMatchesStereo[i];
-      int dist = kp_curLeft[m.queryIdx].pt.y - kf.keypointsLeft[m.trainIdx].pt.y;
-      if (dist > 8)
-      {
-         prevMatchesStereo.erase(prevMatchesStereo.begin() + i);
-      }
-   }
+   FilterMatchesByDistance(prevMatchesStereo, kf.keypointsLeft, kp_curLeft, 8.0f);
+
 
    printf("Points To Be Triangulated: %ld\n", prevMatchesStereo.size());
    TriangulateStereoNormal(kf.keypointsLeft, kf.keypointsRight, prevMatchesStereo, points3D);
    printf("Points Triangulated: %ld\n", points3D.size());
 
    printf("Extract 2D Feature Points\n");
-   prevPoints2D.clear();
-   curPoints2D.clear();
-   for (auto m: matchesLeft)
-   {
-      prevPoints2D.emplace_back(cv::Point2f(kf.keypointsLeft[m.trainIdx].pt));
-      curPoints2D.emplace_back(cv::Point2f(kp_curLeft[m.queryIdx].pt));
-   }
+   
 
    printf("Points for Motion Estimation: %ld %ld\n", prevPoints2D.size(), curPoints2D.size());
 
@@ -506,17 +488,6 @@ void VisualOdometry::Show(int delay)
 }
 
 
-// TODO: Move to OpenCV tools class
-void VisualOdometry::DrawKeypoints(cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints)
-{
-   cv::drawKeypoints(image, keypoints, curFinalDisplay);
-}
-
-// TODO: Move to OpenCV tools class
-void VisualOdometry::DrawKeypointMatches(cv::Mat& img1, const std::vector<cv::KeyPoint>& kp1, cv::Mat& img2, const std::vector<cv::KeyPoint>& kp2, std::vector<cv::DMatch>& matches)
-{
-   cv::drawMatches(img1, kp1, img2, kp2, matches, curFinalDisplay);
-}
 
 // TODO: Move to OpenCV tools class
 cv::Mat VisualOdometry::CalculateStereoDepth(cv::Mat left, cv::Mat right)
@@ -531,3 +502,17 @@ void VisualOdometry::Display(cv::Mat& image)
 {
    curFinalDisplay = image.clone();
 }
+
+void VisualOdometry::ExtractMatchesAsPoints(const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, const std::vector<cv::DMatch>& matches, std::vector<cv::Point2f>& pointsTrain, std::vector<cv::Point2f>& pointsQuery)
+{
+   pointsTrain.clear();
+   pointsQuery.clear();
+   
+   for (auto m: matches)
+   {
+      pointsTrain.emplace_back(cv::Point2f(kpTrain[m.trainIdx].pt));
+      pointsQuery.emplace_back(cv::Point2f(kpQuery[m.queryIdx].pt));
+   }
+}
+
+

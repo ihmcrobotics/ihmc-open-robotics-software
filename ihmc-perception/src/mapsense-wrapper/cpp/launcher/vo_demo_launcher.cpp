@@ -1,6 +1,7 @@
 #include "vo_demo_launcher.h"
 
 #include "file_tools.h"
+#include "opencv_tools.h"
 
 #include "opencv4/opencv2/core.hpp"
 
@@ -22,7 +23,7 @@ VODemoLauncher::VODemoLauncher()
    }
    else
    {
-      TestEstimateMotion(vo, fileNames, 0, 10);
+      TestEstimateMotion(vo, fileNames, 0, 1);
    }
 }
 
@@ -47,7 +48,9 @@ void VODemoLauncher::TestExtractKeypoints(VisualOdometry& vo, const std::vector<
    
    vo.ExtractKeypoints(leftImage, keypoints, descriptors);
 
-   vo.DrawKeypoints(leftImage, keypoints);
+   cv::Mat outImage;
+   cv::drawKeypoints(leftImage, keypoints, outImage);
+   vo.Display(outImage);
    vo.Show(0);
 }
 
@@ -64,11 +67,13 @@ void VODemoLauncher::TestMatchKeypoints(VisualOdometry& vo, const std::vector<st
    std::vector<cv::DMatch> matches;
 
    vo.ExtractKeypoints(leftImage, leftKeypoints, leftDescriptors);
-   vo.ExtractKeypoints(leftImage, rightKeypoints, rightDescriptors);
+   vo.ExtractKeypoints(rightImage, rightKeypoints, rightDescriptors);
 
    vo.MatchKeypoints(leftDescriptors, rightDescriptors, matches);
 
-   vo.DrawKeypointMatches(leftImage, leftKeypoints, rightImage, rightKeypoints, matches);
+   cv::Mat outImage;
+   cv::drawMatches(leftImage, leftKeypoints, rightImage, rightKeypoints, matches, outImage);
+   vo.Display(outImage);
    vo.Show(0);
 }
 
@@ -84,24 +89,73 @@ void VODemoLauncher::TestStereoDisparityCalculation(VisualOdometry& vo, const st
    vo.Show(0);
 }
 
+void VODemoLauncher::TestMatchKeypointsMonocular(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
+{
+   cv::Mat leftImagePrev = cv::imread(leftDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
+   cv::Mat leftImageCur = cv::imread(leftDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
+
+   cv::Mat descPrev;
+   cv::Mat descCur;
+   std::vector<cv::KeyPoint> kpPrev;
+   std::vector<cv::KeyPoint> kpCur;
+   
+   std::vector<cv::DMatch> matches;
+
+   vo.ExtractKeypoints(leftImagePrev, kpPrev, descPrev);
+   vo.ExtractKeypoints(leftImageCur, kpCur, descCur);
+
+   vo.MatchKeypoints(descPrev, descCur, matches);
+
+   printf("Total Matches Before: %ld\n", matches.size());
+   vo.FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
+   printf("Total Matches After: %ld\n", matches.size());
+
+
+   cv::Mat outImage;
+   OpenCVTools::DrawMatchesDouble(leftImagePrev, kpPrev, leftImageCur, kpCur, matches, outImage);
+   OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 0);
+}
+
 void VODemoLauncher::TestEstimateMotion(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
 {
    cv::Mat leftImagePrev = cv::imread(leftDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
-   cv::Mat rightImagePrev = cv::imread(rightDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);
-
    cv::Mat leftImageCur = cv::imread(leftDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
-   cv::Mat rightImageCur = cv::imread(rightDatasetDirectory + fileNames[indexTwo], cv::IMREAD_GRAYSCALE);
 
-   cv::Mat disparityPrev = vo.CalculateStereoDepth(leftImagePrev, rightImagePrev);
-   cv::Mat disparityCur = vo.CalculateStereoDepth(leftImageCur, rightImageCur);
+   cv::Mat descPrev;
+   cv::Mat descCur;
+   std::vector<cv::KeyPoint> kpPrev;
+   std::vector<cv::KeyPoint> kpCur;
+   
+   std::vector<cv::DMatch> matches;
 
-   vo.Display(disparityPrev);
-   vo.Show(0);
+   vo.ExtractKeypoints(leftImagePrev, kpPrev, descPrev);
+   vo.ExtractKeypoints(leftImageCur, kpCur, descCur);
 
-   vo.Display(disparityCur);
-   vo.Show(0);
+   vo.MatchKeypoints(descPrev, descCur, matches);
+
+   printf("Total Matches Before: %ld\n", matches.size());
+   vo.FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
+   printf("Total Matches After: %ld\n", matches.size());
+
+
+   CameraModel cam;
+   cam.SetParams(718.856, 718.856, 607.193, 185.216);
+
+   std::vector<cv::Point2f> pointsTrain;
+   std::vector<cv::Point2f> pointsQuery;
+
+   vo.ExtractMatchesAsPoints(kpPrev, kpCur, matches, pointsTrain, pointsQuery);
+
+   cv::Mat mask;
+   cv::Mat pose = vo.EstimateMotion(pointsTrain, pointsQuery, mask, cam);
+
+   std::cout << "Camera Pose: " << std::endl << pose << std::endl;
+
+
+   cv::Mat outImage;
+   OpenCVTools::DrawMatchesDouble(leftImagePrev, kpPrev, leftImageCur, kpCur, matches, outImage);
+   OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 0);
 }
-
 
 int main()
 {

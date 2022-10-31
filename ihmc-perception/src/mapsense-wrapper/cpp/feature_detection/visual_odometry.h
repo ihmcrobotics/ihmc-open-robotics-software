@@ -22,6 +22,8 @@ class VisualOdometry
       void TrackKeypoints(cv::Mat prev, cv::Mat cur, std::vector<cv::Point2f>& prev_pts, std::vector<cv::Point2f>& cur_pts);
       void MatchKeypoints(cv::Mat& desc1, cv::Mat& desc2, std::vector<cv::DMatch>& matches);
       void GridSampleKeypoints(std::vector<cv::KeyPoint>& keypoints, std::vector<cv::DMatch>& matches);
+      void ExtractMatchesAsPoints(const std::vector<cv::KeyPoint>& keypoints, std::vector<cv::Point2f>& points);
+      void FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, float distanceThreshold);
       void ExtractFinalSet(std::vector<cv::DMatch> leftMatches, std::vector<cv::KeyPoint> curLeftKp, std::vector<PointLandmark>& points3D);
       void CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D);
       void CalculateOdometry_FAST(Eigen::Matrix4f& transform);
@@ -29,15 +31,13 @@ class VisualOdometry
                                    std::vector<PointLandmark>& points3D);
       void TriangulateStereoPoints(cv::Mat& leftPoseWorld, std::vector<cv::KeyPoint> kpLeft, std::vector<cv::KeyPoint> kpRight, std::vector<cv::DMatch> stereoMatches,
                                    std::vector<PointLandmark> points3D);
+      void ExtractMatchesAsPoints(const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, const std::vector<cv::DMatch>& matches, std::vector<cv::Point2f>& pointsTrain, std::vector<cv::Point2f>& pointsQuery);
 
       cv::Mat EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam);
       cv::Mat TriangulatePoints(std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
+      
 
-
-      void DrawKeypointMatches(cv::Mat& img1, const std::vector<cv::KeyPoint>& kp1, cv::Mat& img2, const std::vector<cv::KeyPoint>& kp2, std::vector<cv::DMatch>& matches);
-      void DrawKeypoints(cv::Mat& image, const std::vector<cv::KeyPoint>& keypoints);
-      void DrawMatches(cv::Mat& img, std::vector<cv::Point2f> prev_pts, std::vector<cv::Point2f> cur_pts);
       void DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& landmarks);
       void DrawAllMatches(cv::Mat& image);
       void Display(cv::Mat& image);

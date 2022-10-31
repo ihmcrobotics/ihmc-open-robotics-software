@@ -42,6 +42,9 @@ set(MS_SOURCES
 
     tools/file_tools.h
     tools/file_tools.cpp
+
+    tools/opencv_tools.h
+    tools/opencv_tools.cpp
 )
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
