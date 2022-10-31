@@ -89,6 +89,27 @@ void VODemoLauncher::TestStereoDisparityCalculation(VisualOdometry& vo, const st
    vo.Show(0);
 }
 
+void VODemoLauncher::TestStereoTriangulation(VisualOdometry& vo, const std::vector<std::string>& fileNames, int index)
+{
+   cv::Mat leftImage = cv::imread(leftDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
+   cv::Mat rightImage = cv::imread(rightDatasetDirectory + fileNames[index], cv::IMREAD_GRAYSCALE);
+   
+   cv::Mat descCur;
+   cv::Mat depth;
+   std::vector<cv::KeyPoint> kpCur;
+   std::vector<Eigen::Vector3f> points;
+
+   cv::Mat disparity = vo.CalculateStereoDepth(leftImage, rightImage);
+
+   vo.ExtractKeypoints(leftImage, kpCur, descCur);
+
+   OpenCVTools::ConvertDisparityToDepth(disparity, depth);
+
+   vo.TriangulateKeypointsByDisparity(kpCur, depth, points);
+
+   OpenCVTools::DisplayImage("TestStereoTriangulation", disparity, 0);
+}
+
 void VODemoLauncher::TestMatchKeypointsMonocular(VisualOdometry& vo, const std::vector<std::string>& fileNames, int indexOne, int indexTwo)
 {
    cv::Mat leftImagePrev = cv::imread(leftDatasetDirectory + fileNames[indexOne], cv::IMREAD_GRAYSCALE);

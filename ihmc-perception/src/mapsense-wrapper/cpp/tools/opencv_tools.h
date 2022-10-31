@@ -4,7 +4,9 @@
 
 namespace OpenCVTools
 {
-    
+    std::string GetTypeString(int type);
+
+    void ConvertDisparityToDepth(cv::Mat& disparity, cv::Mat& depth);
 
     void DisplayImage(const std::string& name, cv::Mat& image, int delay = 1, float scale = 1.0f);
     void DrawMatchesSingle(std::vector<cv::Point2f> prev_pts, std::vector<cv::Point2f> cur_pts, cv::Mat& outImage);

@@ -2,6 +2,13 @@
 
 namespace OpenCVTools
 {
+
+    void ConvertDisparityToDepth(cv::Mat& disparity, cv::Mat& depth)
+    {
+        disparity.convertTo(disparity, CV_32FC1);
+        depth = 0.54 / disparity;
+    }
+
     void DrawMatchesSingle(std::vector<cv::Point2f> prev_pts, std::vector<cv::Point2f> cur_pts, cv::Mat& outImage)
     {
         for (uint32_t i = 0; i < prev_pts.size(); i++)
@@ -39,5 +46,29 @@ namespace OpenCVTools
         cv::resize(image, image, cv::Size((int)(scale * image.cols), (int)(scale * image.rows)));
         cv::imshow(name, image);
         cv::waitKey(delay);
+    }
+
+    std::string GetTypeString(int type) 
+    {
+        std::string r;
+
+        uchar depth = type & CV_MAT_DEPTH_MASK;
+        uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+        switch ( depth ) {
+            case CV_8U:  r = "8U"; break;
+            case CV_8S:  r = "8S"; break;
+            case CV_16U: r = "16U"; break;
+            case CV_16S: r = "16S"; break;
+            case CV_32S: r = "32S"; break;
+            case CV_32F: r = "32F"; break;
+            case CV_64F: r = "64F"; break;
+            default:     r = "User"; break;
+        }
+
+        r += "C";
+        r += (chans+'0');
+
+        return r;
     }
 }

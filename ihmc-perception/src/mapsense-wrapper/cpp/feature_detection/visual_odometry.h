@@ -13,8 +13,10 @@ class VisualOdometry
    public:
       VisualOdometry(ApplicationState& app);
       
+      void Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur);
       bool UpdateStereo(const cv::Mat& leftImage, const cv::Mat& rightImage);
       void UpdateMonocular(const cv::Mat& image);
+      void UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightImageCur);
 
       void ExtractPoseLinear();
       void ExtractKeypoints_FAST(cv::Mat img_1, std::vector<cv::Point2f>& points1);
@@ -29,9 +31,9 @@ class VisualOdometry
       void CalculateOdometry_FAST(Eigen::Matrix4f& transform);
       void TriangulateStereoNormal(std::vector<cv::KeyPoint>& pointsTrain, std::vector<cv::KeyPoint>& pointsQuery, std::vector<cv::DMatch>& matches,
                                    std::vector<PointLandmark>& points3D);
-      void TriangulateStereoPoints(cv::Mat& leftPoseWorld, std::vector<cv::KeyPoint> kpLeft, std::vector<cv::KeyPoint> kpRight, std::vector<cv::DMatch> stereoMatches,
-                                   std::vector<PointLandmark> points3D);
+      void TriangulateKeypointsByDisparity(const std::vector<cv::KeyPoint>& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, const std::vector<cv::DMatch>& matches, std::vector<cv::Point2f>& pointsTrain, std::vector<cv::Point2f>& pointsQuery);
+
 
       cv::Mat EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam);
       cv::Mat TriangulatePoints(std::vector<cv::Point2f>& prevPoints, std::vector<cv::Point2f>& curPoints, const CameraModel& cam, cv::Mat relativePose);
@@ -60,20 +62,21 @@ class VisualOdometry
 
       cv::Ptr<cv::StereoBM> stereo = cv::StereoBM::create();
       cv::Ptr<cv::ORB> _orb = cv::ORB::create(kFeatures);
-      cv::Mat prevLeft, prevRight, curLeft, curRight, leftImage, rightImage;
-      std::vector<cv::DMatch> matchesLeft, matchesRight, prevMatchesStereo, curMatchesStereo;
-      cv::Mat desc_prevRight, desc_prevLeft, desc_curRight, desc_curLeft;
-      cv::Mat curFinalDisplay, prevFinalDisplay;
-      cv::Mat curPoseLeft, prevPosLeft, curPoseRight, prevPoseRight;
-      cv::Mat curDisparity;
-      std::vector<cv::KeyPoint> kp_prevLeft, kp_prevRight, kp_curLeft, kp_curRight;
-      cv::Mat cvCurPose = cv::Mat::eye(4,4, CV_32F);
-      std::vector<PointLandmark> _prevPoints3D, _curPoints3D;
-
-      std::vector<cv::Point2f> prevFeaturesLeft, curFeaturesLeft;
-      std::vector<cv::Point2f> prevPoints2D, curPoints2D;
 
       std::vector<Keyframe> _keyframes;
+      std::vector<cv::DMatch> matchesLeft, matchesRight, prevMatchesStereo, curMatchesStereo;
+      std::vector<cv::KeyPoint> kp_prevLeft, kp_prevRight, kp_curLeft, kp_curRight;
+      std::vector<PointLandmark> _prevPoints3D, _curPoints3D;
+      std::vector<cv::Point2f> prevFeaturesLeft, curFeaturesLeft;
+      std::vector<cv::Point2f> prevPoints2D, curPoints2D;
+      
+      cv::Mat curDisparity;
+      cv::Mat curFinalDisplay, prevFinalDisplay;
+      cv::Mat curPoseLeft, prevPosLeft, curPoseRight, prevPoseRight;
+      cv::Mat desc_prevRight, desc_prevLeft, desc_curRight, desc_curLeft;
+      cv::Mat prevLeft, prevRight, curLeft, curRight, leftImage, rightImage;
+      
+      cv::Mat cvCurPose = cv::Mat::eye(4,4, CV_32F);
 
       CameraModel leftCamera;
       CameraModel rightCamera;

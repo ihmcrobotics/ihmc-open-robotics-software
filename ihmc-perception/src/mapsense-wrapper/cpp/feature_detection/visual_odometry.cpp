@@ -516,3 +516,62 @@ void VisualOdometry::ExtractMatchesAsPoints(const std::vector<cv::KeyPoint>& kpT
 }
 
 
+void VisualOdometry::UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
+{
+
+   ExtractKeypoints(leftImageCur, kp_curLeft, desc_curLeft);
+   ExtractKeypoints(rightImageCur, kp_curRight, desc_curRight);
+
+   // MatchKeypoints(desc_curLeft, descCur, matches);
+
+   // printf("Total Matches Before: %ld\n", matches.size());
+   // FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
+   // printf("Total Matches After: %ld\n", matches.size());
+
+
+   // CameraModel cam;
+   // cam.SetParams(718.856, 718.856, 607.193, 185.216);
+
+   // std::vector<cv::Point2f> pointsTrain;
+   // std::vector<cv::Point2f> pointsQuery;
+
+   // ExtractMatchesAsPoints(kpPrev, kpCur, matches, pointsTrain, pointsQuery);
+
+   // cv::Mat mask;
+   // cv::Mat pose = EstimateMotion(pointsTrain, pointsQuery, mask, cam);
+
+   // std::cout << "Camera Pose: " << std::endl << pose << std::endl;
+
+
+   // cv::Mat outImage;
+   // OpenCVTools::DrawMatchesDouble(leftImageCur, kpPrev, rightImageCur, kpCur, matches, outImage);
+   // OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 0);
+}
+
+void VisualOdometry::TriangulateKeypointsByDisparity(const std::vector<cv::KeyPoint>& kp, const cv::Mat& depth, std::vector<Eigen::Vector3f>& points3d)
+{
+   std::cout << "Type: " << OpenCVTools::GetTypeString(depth.type()) << std::endl;
+
+   for(uint32_t i = 0; i<kp.size(); i++)
+   {
+      Eigen::Vector3f point;
+      points3d.emplace_back(std::move(point));
+   }
+}
+
+void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
+{
+   ExtractKeypoints(leftImageCur, kp_curLeft, desc_curLeft);
+   ExtractKeypoints(rightImageCur, kp_curRight, desc_curRight);
+
+   MatchKeypoints(desc_curLeft, desc_curRight, curMatchesStereo);
+
+   cv::Mat cvPose;
+   Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+   eigenPose.transposeInPlace();
+   cameraPose = cameraPose * eigenPose;
+
+   _keyframes.emplace_back(Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight));
+
+   _initialized = true;
+}
