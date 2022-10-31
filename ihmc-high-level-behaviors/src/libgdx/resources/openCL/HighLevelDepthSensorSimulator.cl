@@ -64,9 +64,11 @@ kernel void discretizePoints(global float* pointCloudBuffer,
    int floatsPerPoint = parameters[0];
    int intsPerPoint = parameters[1];
    float discreteResolution = parameters[2];
+   int segmentIndex = parameters[3];
+   int pointsPerSegment = parameters[4];
 
    float4 worldFramePoint;
-   int worldPointStartIndex = n * floatsPerPoint;
+   int worldPointStartIndex = segmentIndex * pointsPerSegment * floatsPerPoint + n * floatsPerPoint;
    worldFramePoint.x = pointCloudBuffer[worldPointStartIndex];
    worldFramePoint.y = pointCloudBuffer[worldPointStartIndex + 1];
    worldFramePoint.z = pointCloudBuffer[worldPointStartIndex + 2];
