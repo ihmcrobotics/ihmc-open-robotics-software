@@ -1,7 +1,7 @@
 
 kernel void unpackPointCloud(global float* parameters,
                              global int* decompressedPointBuffer,
-                             global float* pointCloudVertexBuffer)
+                             global float* discretizedPointBuffer)
 {
    int n = get_global_id(0);
 
@@ -17,9 +17,9 @@ kernel void unpackPointCloud(global float* parameters,
    int currentSegmentStart = latestSegmentIndex * pointsPerSegment * floatsPerVertex;
    int pointCloudStartIndex = currentSegmentStart + n * floatsPerVertex;
 
-   pointCloudVertexBuffer[pointCloudStartIndex] = decompressedPointBuffer[inputStartIndex] * discretization;
-   pointCloudVertexBuffer[pointCloudStartIndex + 1] = decompressedPointBuffer[inputStartIndex + 1] * discretization;
-   pointCloudVertexBuffer[pointCloudStartIndex + 2] = decompressedPointBuffer[inputStartIndex + 2] * discretization;
+   discretizedPointBuffer[pointCloudStartIndex] = decompressedPointBuffer[inputStartIndex] * discretization;
+   discretizedPointBuffer[pointCloudStartIndex + 1] = decompressedPointBuffer[inputStartIndex + 1] * discretization;
+   discretizedPointBuffer[pointCloudStartIndex + 2] = decompressedPointBuffer[inputStartIndex + 2] * discretization;
 
    int colorRGBA8888 = decompressedPointBuffer[inputStartIndex + 3];
 
@@ -33,10 +33,10 @@ kernel void unpackPointCloud(global float* parameters,
    float b = bInt / 255.0;
    float a = aInt / 255.0;
 
-   pointCloudVertexBuffer[pointCloudStartIndex + 3] = r;
-   pointCloudVertexBuffer[pointCloudStartIndex + 4] = g;
-   pointCloudVertexBuffer[pointCloudStartIndex + 5] = b;
-   pointCloudVertexBuffer[pointCloudStartIndex + 6] = a;
+   discretizedPointBuffer[pointCloudStartIndex + 3] = r;
+   discretizedPointBuffer[pointCloudStartIndex + 4] = g;
+   discretizedPointBuffer[pointCloudStartIndex + 5] = b;
+   discretizedPointBuffer[pointCloudStartIndex + 6] = a;
 
-   pointCloudVertexBuffer[pointCloudStartIndex + 7] = pointSize;    // TODO: Need to get rid of this by using uniform
+   discretizedPointBuffer[pointCloudStartIndex + 7] = pointSize;    // TODO: Need to get rid of this by using uniform
 }

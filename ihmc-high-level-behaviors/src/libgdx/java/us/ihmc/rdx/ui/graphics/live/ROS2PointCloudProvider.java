@@ -62,7 +62,7 @@ public class ROS2PointCloudProvider
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private _cl_kernel unpackPointCloudKernel;
-   private OpenCLFloatBuffer pointCloudVertexBuffer;
+   private OpenCLFloatBuffer discretizedPointBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
 
@@ -92,8 +92,8 @@ public class ROS2PointCloudProvider
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, vertexBuffer);
-      pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+      discretizedPointBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, vertexBuffer);
+      discretizedPointBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    // TODO: old one, need to be deleted at some point
@@ -171,11 +171,11 @@ public class ROS2PointCloudProvider
 
          openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
          openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressedOpenCLIntBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 2, discretizedPointBuffer.getOpenCLBufferObject());
          openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
-         pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+         discretizedPointBuffer.readOpenCLBufferObject(openCLManager);
 
-         pointCloud.setData(pointCloudVertexBuffer.getBytedecoFloatBufferPointer(), pointsPerSegment * 8);
+         pointCloud.setData(discretizedPointBuffer.getBytedecoFloatBufferPointer(), pointsPerSegment * 8);
 
          return true;
       }
