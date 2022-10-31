@@ -73,6 +73,12 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
+   private long start =0;
+   private long finish = 0;
+   private long timeElapsed =0;
+   private int counter =0;
+   private boolean first =true;
+   // ...
 //   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
@@ -201,6 +207,19 @@ public class RDXVRKinematicsStreamingMode
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
+         if (first)
+         {
+            start = System.nanoTime();
+            first = false;
+         }
+         counter++;
+         if (counter == 1000){
+            finish = System.nanoTime();
+            timeElapsed = finish - start;
+         }
+         LogTools.info("timeElapsed: {}", timeElapsed);
+
+
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
