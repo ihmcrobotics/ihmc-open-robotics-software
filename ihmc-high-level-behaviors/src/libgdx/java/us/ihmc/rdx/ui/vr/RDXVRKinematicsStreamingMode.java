@@ -207,13 +207,13 @@ public class RDXVRKinematicsStreamingMode
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
-         if (first)
+         if (first&& counter>=10)
          {
             start = System.nanoTime();
             first = false;
          }
          counter++;
-         if (counter == 1000){
+         if (counter == 1010){
             finish = System.nanoTime();
             timeElapsed = finish - start;
          }
