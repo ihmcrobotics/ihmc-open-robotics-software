@@ -17,7 +17,7 @@ public class KinematicsRecordReplay
    private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString());
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
-   private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/myFile.csv").toString());
+   private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/1.csv").toString());
    private final ImBoolean enablerReplay = new ImBoolean(false);
    private boolean isReplaying = false;
    private ImBoolean enabledKinematicsStreaming;
@@ -74,16 +74,13 @@ public class KinematicsRecordReplay
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
       // Read file with stored trajectories: read setpoint per timestep until file is over
       Double[] dataPoint = trajectoryRecorder.play();
-      if (!trajectoryRecorder.hasDoneReplay())
-      {
-         // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-         framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
-         framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
-      }
-      else
+      // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
+      framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
+      framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
+      if (trajectoryRecorder.hasDoneReplay())
       {
          isReplaying = false;
-         enablerReplay.set(isReplaying);
+         enablerReplay.set(false);
       }
    }
 
@@ -129,6 +126,11 @@ public class KinematicsRecordReplay
    public ImBoolean isRecordingEnabled()
    {
       return enablerRecording;
+   }
+
+   public ImBoolean isReplayingEnabled()
+   {
+      return enablerReplay;
    }
 
    public boolean isRecording()

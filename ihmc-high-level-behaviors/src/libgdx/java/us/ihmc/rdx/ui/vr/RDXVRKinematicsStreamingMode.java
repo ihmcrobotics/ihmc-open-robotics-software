@@ -56,7 +56,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private IHMCROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(10.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(30.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
@@ -163,6 +163,8 @@ public class RDXVRKinematicsStreamingMode
          // Check if left B button is pressed in order to trigger recording or replay of motion
          InputDigitalActionData bButton = controller.getBButtonActionData();
          kinematicsRecorder.processRecordReplayInput(bButton);
+         if(kinematicsRecorder.isReplayingEnabled().get())
+            wakeUpToolbox();
          // or shared control assistance
 //         sharedControlAssistant.processInput(bButton);
       });
