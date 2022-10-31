@@ -28,6 +28,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean shouldSnapToRegions;
+   private final YoInteger numberOfSteppableRegions;
 
    private final SteppingParameters steppingParameters;
 
@@ -59,6 +61,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       this.steppingParameters = steppingParameters;
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
+      numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
                                                                                 {
                                                                                    ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
@@ -101,6 +104,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    public void accept(PlanarRegionsListCommand planarRegionsListCommand)
    {
       steppableRegionsCalculator.consume(planarRegionsListCommand);
+      numberOfSteppableRegions.set(steppableRegionsCalculator.getSteppableRegions().size());
    }
 
    public YoRegistry getRegistry()
