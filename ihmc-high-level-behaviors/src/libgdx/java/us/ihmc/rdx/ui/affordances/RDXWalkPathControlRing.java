@@ -109,6 +109,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private DRCRobotModel robotModel;
    private static final double positionEpsilon = 0.1;
    private BehaviorHelper behaviorHelper;
+   private boolean doLookAndStep = false;
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
@@ -240,6 +241,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          queueFootstepPlan();
       }
 
+      if (selected && doLookAndStep)
+      {
+         publishLookAndStep();
+      }
+
       if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          delete();
@@ -265,8 +271,9 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                                          new Pose3D(rightGoalFootPose));
             case TURN_WALK_TURN -> planFootstepsUsingTurnWalkTurnPlanner();
             case TURN_STRAIGHT_TURN -> planFootstepsUsingTurnStraightTurnFootstepGenerator();
-            case LOOK_AND_STEP -> planFootstepsUsingLookAndStep();
+            case LOOK_AND_STEP -> setupLookAndStep();
          }
+         doLookAndStep = footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.LOOK_AND_STEP;
       });
    }
 
@@ -318,7 +325,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    }
 
-   public void planFootstepsUsingLookAndStep()
+   public void setupLookAndStep()
    {
       RDXBehaviorUIDefinition highestLevelNode = RDXLookAndStepBehaviorUI.DEFINITION;
       RDXBehaviorUIDefinition[] entries = new RDXBehaviorUIDefinition[] {RDXLookAndStepBehaviorUI.DEFINITION};
@@ -326,24 +333,25 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       behaviorRegistry.activateRegistry();
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTRAPROCESS.getPubSubImplementation(), "look_and_step_behavior_test");
       boolean enableROS1 = false;
-      BehaviorHelper behaviorHelper = new BehaviorHelper("Look and Step Test", robotModel, ros2Node, enableROS1);
-
-      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = getUpdatingLookAndStepBehaviorParameters(behaviorHelper);
-
+      behaviorHelper = new BehaviorHelper("Look and Step Test", robotModel, ros2Node, enableROS1);
       behaviorHelper.getMessagerHelper().connectViaSharedMemory(BehaviorModule.getSharedMemoryMessager());
 
-      ThreadTools.sleepSeconds(5.0);
+//      ThreadTools.sleepSeconds(5.0);
+   }
 
+   public void publishLookAndStep()
+   {
       TypedNotification<Boolean> operatorReviewToggleNotification = behaviorHelper.subscribeViaNotification(LookAndStepBehaviorAPI.OperatorReviewEnabledToUI);
       TypedNotification<Pose3D> goalConfirmedNotification = behaviorHelper.subscribeViaNotification(LookAndStepBehaviorAPI.GoalForUI);
 
+      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = getUpdatingLookAndStepBehaviorParameters(behaviorHelper);
       lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.goalSatisfactionRadius, positionEpsilon);
       updateLookAndStepBehaviorParameters(behaviorHelper, lookAndStepBehaviorParameters);
 
-      while (!goalConfirmedNotification.poll())
+      if (!goalConfirmedNotification.poll())
       {
          behaviorHelper.publish(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(goalPose));
-//         ThreadTools.sleepSeconds(2.0);
+         //         ThreadTools.sleepSeconds(2.0);
       }
    }
 
