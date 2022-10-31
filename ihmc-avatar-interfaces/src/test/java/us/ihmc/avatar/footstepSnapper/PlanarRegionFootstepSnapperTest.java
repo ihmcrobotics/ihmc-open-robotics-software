@@ -28,8 +28,7 @@ public class PlanarRegionFootstepSnapperTest
       footPolygon.update();
 
       SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
-      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon));
-      snapper.setSteppableRegionsProvider(steppableRegionsCalculator);
+      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon), steppableRegionsCalculator);
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
