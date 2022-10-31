@@ -36,9 +36,9 @@ public class GDXFFMPEGOpenH264LoggingDemo
                                                                                             framerate,
                                                                                             400000,
                                                                                             "libopenh264");
-   final Random random = new Random();
-   final byte[] data = new byte[4];
-   int index = 0;
+   private final Random random = new Random();
+   private final byte[] data = new byte[4];
+   private int index = 0;
 
    public GDXFFMPEGOpenH264LoggingDemo()
    {
