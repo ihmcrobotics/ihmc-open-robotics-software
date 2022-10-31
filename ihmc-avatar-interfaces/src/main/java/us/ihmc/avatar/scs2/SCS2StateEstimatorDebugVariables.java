@@ -3,6 +3,7 @@ package us.ihmc.avatar.scs2;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
@@ -83,7 +84,7 @@ public class SCS2StateEstimatorDebugVariables implements Controller
       centroidalMomentPivot = new YoFrameVector2D("actualCMP", inertialFrame, registry);
 
       actualAccelerationFilterBreakFrequency = new YoDouble("actualAccelerationFilterBreakFrequency", registry);
-      actualAccelerationFilterBreakFrequency.set(0.25 / dt);
+      actualAccelerationFilterBreakFrequency.set(0.05 / dt); // 50Hz when running at 1kHz
       DoubleProvider alphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(actualAccelerationFilterBreakFrequency.getValue(),
                                                                                                            dt);
       centerOfMassAccelerationFiltered = new AlphaFilteredYoFrameVector("actualCenterOfMassAccelerationFiltered",
@@ -96,12 +97,20 @@ public class SCS2StateEstimatorDebugVariables implements Controller
       centroidalMomentPivotFiltered = new AlphaFilteredYoFrameVector2d("actualCMPFiltered", "", registry, alphaProvider, centroidalMomentPivot);
 
       centerOfMassAccelerationFiltered2 = new AlphaFilteredYoFrameVector("actualCenterOfMassAccelerationFiltered2",
-                                                                        "",
-                                                                        registry,
-                                                                        alphaProvider,
-                                                                        centerOfMassAccelerationFiltered);
-      linearMomentumRateFiltered2 = new AlphaFilteredYoFrameVector("actualLinearMomentumRateFiltered2", "", registry, alphaProvider, linearMomentumRateFiltered);
-      angularMomentumRateFiltered2 = new AlphaFilteredYoFrameVector("actualAngularMomentumRateFiltered2", "", registry, alphaProvider, angularMomentumRateFiltered);
+                                                                         "",
+                                                                         registry,
+                                                                         alphaProvider,
+                                                                         centerOfMassAccelerationFiltered);
+      linearMomentumRateFiltered2 = new AlphaFilteredYoFrameVector("actualLinearMomentumRateFiltered2",
+                                                                   "",
+                                                                   registry,
+                                                                   alphaProvider,
+                                                                   linearMomentumRateFiltered);
+      angularMomentumRateFiltered2 = new AlphaFilteredYoFrameVector("actualAngularMomentumRateFiltered2",
+                                                                    "",
+                                                                    registry,
+                                                                    alphaProvider,
+                                                                    angularMomentumRateFiltered);
       centroidalMomentPivotFiltered2 = new AlphaFilteredYoFrameVector2d("actualCMPFiltered2", "", registry, alphaProvider, centroidalMomentPivotFiltered);
    }
 
@@ -130,23 +139,35 @@ public class SCS2StateEstimatorDebugVariables implements Controller
 
       centerOfMassAcceleration.setAndScale(1.0 / mass, linearMomentumRate);
 
-      // CMP = COMxy - (z/Fz)*Fxy
-      centroidalMomentPivot.set(centerOfMassAcceleration);
-      double z = centerOfMassPosition.getZ();
-      double normalizedFz = -gravity + centerOfMassAcceleration.getZ();
-      centroidalMomentPivot.scale(-z / normalizedFz);
-      centroidalMomentPivot.addX(centerOfMassPosition.getX());
-      centroidalMomentPivot.addY(centerOfMassPosition.getY());
-
       centerOfMassAccelerationFiltered.update();
       linearMomentumRateFiltered.update();
       angularMomentumRateFiltered.update();
-      centroidalMomentPivotFiltered.update();
 
       centerOfMassAccelerationFiltered2.update();
       linearMomentumRateFiltered2.update();
       angularMomentumRateFiltered2.update();
-      centroidalMomentPivotFiltered2.update();
+
+      // CMP = COMxy - (z/Fz)*Fxy
+      centroidalMomentPivot.set(centerOfMassAcceleration);
+      double z = centerOfMassPosition.getZ();
+      double normalizedFz = -gravity + centerOfMassAcceleration.getZ();
+      if (EuclidCoreTools.isZero(normalizedFz, 1.0e-6))
+      {
+         centroidalMomentPivot.setToNaN();
+         centroidalMomentPivotFiltered.setToNaN();
+         centroidalMomentPivotFiltered.reset();
+         centroidalMomentPivotFiltered2.setToNaN();
+         centroidalMomentPivotFiltered2.reset();
+      }
+      else
+      {
+         centroidalMomentPivot.scale(-z / normalizedFz);
+         centroidalMomentPivot.addX(centerOfMassPosition.getX());
+         centroidalMomentPivot.addY(centerOfMassPosition.getY());
+
+         centroidalMomentPivotFiltered.update();
+         centroidalMomentPivotFiltered2.update();
+      }
       timer.stop();
    }
 
