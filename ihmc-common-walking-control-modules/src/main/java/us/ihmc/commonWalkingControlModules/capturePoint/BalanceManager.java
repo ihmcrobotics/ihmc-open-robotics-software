@@ -407,6 +407,7 @@ public class BalanceManager
       stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, omega0);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
+
       return footstepWasAdjusted;
    }
 
@@ -548,7 +549,7 @@ public class BalanceManager
       }
    }
 
-   public void adjustFootstep(Footstep footstep)
+   public void adjustFootstepInCoPPlan(Footstep footstep)
    {
       copTrajectoryState.getFootstep(0).set(footstep);
    }
