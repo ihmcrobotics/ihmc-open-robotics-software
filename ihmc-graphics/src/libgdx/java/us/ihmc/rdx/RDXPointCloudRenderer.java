@@ -265,6 +265,29 @@ public class RDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   public void updateMeshFastestBeforeKernel()
+   {
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+      floatBuffer.position(0);
+      int numberOfPointsNow;
+      if (!hasTurnedOver)
+         numberOfPointsNow = (currentSegmentIndex + 1) * pointsPerSegment;
+      else // After one cycle, we are just updating now; if you don't you'll get a progressive flicker
+         numberOfPointsNow = maxPoints;
+      floatBuffer.limit(numberOfPointsNow * floatsPerVertex);
+      renderable.meshPart.size = numberOfPointsNow;
+   }
+
+   public void updateMeshFastestAfterKernel()
+   {
+      ++currentSegmentIndex;
+      if (currentSegmentIndex == numberOfSegments)
+      {
+         hasTurnedOver = true;
+         currentSegmentIndex = 0;
+      }
+   }
+
    public void setVertex(int vertexIndex, Tuple3DReadOnly point)
    {
       setVertex(vertexIndex, point.getX32(), point.getY32(), point.getZ32(), 1.0f, 1.0f, 1.0f, 1.0f, 0.01f);
@@ -406,5 +429,10 @@ public class RDXPointCloudRenderer implements RenderableProvider
    public int getFloatsPerVertex()
    {
       return floatsPerVertex;
+   }
+
+   public int getCurrentSegmentIndex()
+   {
+      return currentSegmentIndex;
    }
 }

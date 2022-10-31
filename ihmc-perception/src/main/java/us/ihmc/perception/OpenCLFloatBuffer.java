@@ -81,6 +81,12 @@ public class OpenCLFloatBuffer
       openCLManager.enqueueReadBuffer(openCLBufferObject, numberOfFloats * Float.BYTES, bytedecoFloatBufferPointer);
    }
 
+   public void syncWithBackingBuffer()
+   {
+      bytedecoFloatBufferPointer.position(backingDirectFloatBuffer.position());
+      bytedecoFloatBufferPointer.limit(backingDirectFloatBuffer.limit());
+   }
+
    public FloatBuffer getBackingDirectFloatBuffer()
    {
       return backingDirectFloatBuffer;

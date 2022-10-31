@@ -9,6 +9,8 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
+import imgui.type.ImDouble;
+import imgui.type.ImInt;
 import perception_msgs.msg.dds.BigVideoPacket;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
@@ -23,7 +25,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -50,7 +51,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
@@ -61,11 +61,10 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.Timer;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.thread.Throttler;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
@@ -123,12 +122,13 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final FramePose3D tempSensorFramePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
-   private final Timer throttleTimer = new Timer();
+   private final Throttler throttler = new Throttler();
+   private final Throttler segmentedThrottler = new Throttler();
    private final ResettableExceptionHandlingExecutorService depthExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ResettableExceptionHandlingExecutorService colorExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ResettableExceptionHandlingExecutorService pointCloudExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ResettableExceptionHandlingExecutorService colorROS2Executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-   private final double publishRateHz;
+   private final ImDouble publishRateHz = new ImDouble();
    private final ImBoolean debugCoordinateFrame = new ImBoolean(false);
    private ModelInstance coordinateFrame;
    private RigidBodyTransform sensorFrameToWorldTransform;
@@ -148,6 +148,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private final Color pointColorFromPicker = new Color();
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {1.0f, 1.0f, 1.0f, 1.0f};
+   private final ImInt segmentationDivisor = new ImInt(8);
+   private int segmentIndex = 0;
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private _cl_kernel discretizePointsKernel;
@@ -188,7 +190,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-      this.publishRateHz = publishRateHz;
+      this.publishRateHz.set(publishRateHz);
 
       pointCloudRenderer.create(imageWidth * imageHeight);
 
@@ -203,8 +205,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       updateCameraPinholeBrown();
 
       rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
-
-      throttleTimer.reset();
    }
 
    public void setupForROS1Depth(RosNodeInterface ros1Node, String ros1DepthImageTopic, String ros1DepthCameraInfoTopic)
@@ -258,13 +258,15 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          openCLManager.create();
          openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator");
          discretizePointsKernel = openCLManager.createKernel(openCLProgram, "discretizePoints");
-         parametersBuffer = new OpenCLFloatBuffer(3);
+         parametersBuffer = new OpenCLFloatBuffer(5);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
+         int numberOfSegments = segmentationDivisor.get();
+         int pointsPerSegment = depthSensorSimulator.getNumberOfPoints() / numberOfSegments;
          worldPointCloudBuffer = new OpenCLFloatBuffer(depthSensorSimulator.getNumberOfPoints() * 8, depthSensorSimulator.getPointCloudBuffer());
          worldPointCloudBuffer.createOpenCLBufferObject(openCLManager);
-         discretizedIntBuffer = new OpenCLIntBuffer(imageWidth * imageHeight * 4);
+         discretizedIntBuffer = new OpenCLIntBuffer(pointsPerSegment * RDXROS2PointCloudVisualizer.DISCRETE_INTS_PER_POINT);
          discretizedIntBuffer.createOpenCLBufferObject(openCLManager);
-         compressedPointCloudBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * Integer.BYTES * 4);
+         compressedPointCloudBuffer = ByteBuffer.allocateDirect(pointsPerSegment * RDXROS2PointCloudVisualizer.DISCRETE_BYTES_PER_POINT);
          compressedPointCloudBuffer.order(ByteOrder.nativeOrder());
          outputFusedROS2Message = new FusedSensorHeadPointCloudMessage();
          lz4Compressor = LZ4Factory.nativeInstance().fastCompressor();
@@ -311,7 +313,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          {
             depthSensorSimulator.render(scene);
          }
-         if (throttleTimer.isExpired(UnitConversions.hertzToSeconds(publishRateHz)))
+         double publishPeriod = Conversions.hertzToSeconds(publishRateHz.get());
+         if (throttler.run(publishPeriod))
          {
             if (ros1Node != null && ros1Node.isStarted())
             {
@@ -322,17 +325,22 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                if (publishPointCloudROS1.get())
                   publishPointCloudROS1();
             }
-            if (ros2Node != null)
-            {
-               if (publishPointCloudROS2.get())
-                  publishPointCloudROS2();
-            }
+
             if (realtimeROS2Node != null)
             {
                if (publishColorImageROS2.get())
                   publishColorImageROS2();
             }
-            throttleTimer.reset();
+         }
+         if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
+            publishPeriod /= segmentationDivisor.get();
+         if (segmentedThrottler.run(publishPeriod)) // This one needs to potentially run faster to publish the segments
+         {
+            if (ros2Node != null)
+            {
+               if (publishPointCloudROS2.get())
+                  publishPointCloudROS2();
+            }
          }
 
          tuning = false;
@@ -456,19 +464,35 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       ImGui.checkbox(labels.get("Depth video"), getLowLevelSimulator().getDepthPanel().getIsShowing());
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
-      ImGui.text("Publish:");
-      if (ros1DepthImageTopic != null)
-         ImGui.checkbox(labels.get("ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
-      if (ros1ColorImageTopic != null)
-         ImGui.checkbox(labels.get("ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
-      if (ros1PointCloudTopic != null)
-         ImGui.checkbox(labels.get("ROS 1 Point Cloud (" + ros1PointCloudTopic + ")"), publishPointCloudROS1);
-      if (ros2PointCloudTopic != null)
-         ImGui.checkbox(labels.get("ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
-      if (realtimeROS2Node != null)
+      boolean publishing = ros1DepthImageTopic != null;
+      publishing |= ros1ColorImageTopic != null;
+      publishing |= ros1PointCloudTopic != null;
+      publishing |= ros2PointCloudTopic != null;
+      publishing |= realtimeROS2Node != null;
+      if (publishing)
       {
+         ImGui.text("Publish:");
          ImGui.sameLine();
-         ImGui.checkbox(labels.get("Color image (ROS 2)"), publishColorImageROS2);
+         ImGui.text("(" + publishRateHz.get() + " Hz)");
+         if (ros1DepthImageTopic != null)
+            ImGui.checkbox(labels.get("ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
+         if (ros1ColorImageTopic != null)
+            ImGui.checkbox(labels.get("ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
+         if (ros1PointCloudTopic != null)
+            ImGui.checkbox(labels.get("ROS 1 Point Cloud (" + ros1PointCloudTopic + ")"), publishPointCloudROS1);
+         if (ros2PointCloudTopic != null)
+         {
+            ImGui.checkbox(labels.get("ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
+            if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
+            {
+               ImGui.text("Number of segments: " + segmentationDivisor.get());
+            }
+         }
+         if (realtimeROS2Node != null)
+         {
+            ImGui.sameLine();
+            ImGui.checkbox(labels.get("Color image (ROS 2)"), publishColorImageROS2);
+         }
       }
       ImGui.checkbox("Use Sensor Color", useSensorColor);
       ImGui.sameLine();
@@ -543,9 +567,13 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             float verticalFieldOfView = getLowLevelSimulator().getCamera().fieldOfView;
             float horizontalFieldOfView = verticalFieldOfView * imageWidth / imageHeight;
             float discreteResolution = 0.003f;
+            int numberOfSegments = segmentationDivisor.get();
+            int pointsPerSegment = depthSensorSimulator.getNumberOfPoints() / numberOfSegments;
             parametersBuffer.getBytedecoFloatBufferPointer().put(0, RDXPointCloudRenderer.FLOATS_PER_VERTEX);
             parametersBuffer.getBytedecoFloatBufferPointer().put(1, RDXROS2PointCloudVisualizer.DISCRETE_INTS_PER_POINT);
             parametersBuffer.getBytedecoFloatBufferPointer().put(2, discreteResolution);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(3, (float) segmentIndex);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(4, (float) pointsPerSegment);
 
             worldPointCloudBuffer.writeOpenCLBufferObject(openCLManager);
             parametersBuffer.writeOpenCLBufferObject(openCLManager);
@@ -555,7 +583,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             openCLManager.setKernelArgument(discretizePointsKernel, 0, worldPointCloudBuffer.getOpenCLBufferObject());
             openCLManager.setKernelArgument(discretizePointsKernel, 1, discretizedIntBuffer.getOpenCLBufferObject());
             openCLManager.setKernelArgument(discretizePointsKernel, 2, parametersBuffer.getOpenCLBufferObject());
-            openCLManager.execute1D(discretizePointsKernel, depthSensorSimulator.getNumberOfPoints());
+            openCLManager.execute1D(discretizePointsKernel, pointsPerSegment);
             discretizedIntBuffer.readOpenCLBufferObject(openCLManager);
             openCLManager.finish();
 
@@ -572,10 +600,14 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             }
             outputFusedROS2Message.setAquisitionSecondsSinceEpoch(now.getEpochSecond());
             outputFusedROS2Message.setAquisitionAdditionalNanos(now.getNano());
-            outputFusedROS2Message.setPointsPerSegment(imageHeight * imageWidth);
-            outputFusedROS2Message.setSegmentIndex(0);
-            outputFusedROS2Message.setNumberOfSegments(1);
+            outputFusedROS2Message.setPointsPerSegment(pointsPerSegment);
+            outputFusedROS2Message.setSegmentIndex(segmentIndex);
+            outputFusedROS2Message.setNumberOfSegments(numberOfSegments);
             ((IHMCROS2Publisher<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
+
+            ++segmentIndex;
+            if (segmentIndex == numberOfSegments)
+               segmentIndex = 0;
          }
       }
    }
