@@ -86,7 +86,7 @@ public class JointAccelerationIntegrationCalculator
             continue;
 
          double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getPositionBreakFrequency(), controlDT);
-         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getPositionBreakFrequency(), controlDT);
+         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getVelocityBreakFrequency(), controlDT);
          double maxPositionError = parameters.getMaxPositionError();
          double maxVelocityError = parameters.getMaxVelocityError();
          double velocityReferenceAlpha = parameters.getVelocityReferenceAlpha();
