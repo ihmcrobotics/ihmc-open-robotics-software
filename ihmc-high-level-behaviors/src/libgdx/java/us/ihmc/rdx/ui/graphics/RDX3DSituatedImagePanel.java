@@ -95,22 +95,22 @@ public class RDX3DSituatedImagePanel
       tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
       LibGDXTools.toEuclid(topLeftPosition, tempFramePoint);
       tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toGDX(tempFramePoint, topLeftPosition);
+      LibGDXTools.toLibGDX(tempFramePoint, topLeftPosition);
       meshBuilder.vertex(topLeftPosition, topLeftNormal, Color.WHITE, topLeftUV);
       tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
       LibGDXTools.toEuclid(bottomLeftPosition, tempFramePoint);
       tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toGDX(tempFramePoint, bottomLeftPosition);
+      LibGDXTools.toLibGDX(tempFramePoint, bottomLeftPosition);
       meshBuilder.vertex(bottomLeftPosition, bottomLeftNormal, Color.WHITE, bottomLeftUV);
       tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
       LibGDXTools.toEuclid(bottomRightPosition, tempFramePoint);
       tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toGDX(tempFramePoint, bottomRightPosition);
+      LibGDXTools.toLibGDX(tempFramePoint, bottomRightPosition);
       meshBuilder.vertex(bottomRightPosition, bottomRightNormal, Color.WHITE, bottomRightUV);
       tempFramePoint.setToZero(ReferenceFrame.getWorldFrame());
       LibGDXTools.toEuclid(topRightPosition, tempFramePoint);
       tempFramePoint.changeFrame(referenceFrame);
-      LibGDXTools.toGDX(tempFramePoint, topRightPosition);
+      LibGDXTools.toLibGDX(tempFramePoint, topRightPosition);
       meshBuilder.vertex(topRightPosition, topRightNormal, Color.WHITE, topRightUV);
       meshBuilder.triangle((short) 3, (short) 0, (short) 1);
       meshBuilder.triangle((short) 1, (short) 2, (short) 3);
@@ -139,7 +139,7 @@ public class RDX3DSituatedImagePanel
       if (modelInstance != null)
       {
          referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-         LibGDXTools.toGDX(tempTransform, modelInstance.transform);
+         LibGDXTools.toLibGDX(tempTransform, modelInstance.transform);
       }
    }
 

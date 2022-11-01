@@ -62,8 +62,8 @@ public class RDXGizmoDemo
          @Override
          public void render()
          {
-            LibGDXTools.toGDX(poseGizmo.getClockFaceDragAlgorithm().getClockHandTipInWorld(), clockHandTip.transform);
-            LibGDXTools.toGDX(poseGizmo.getClockFaceDragAlgorithm().getClockCenter(), clockCenter.transform);
+            LibGDXTools.toLibGDX(poseGizmo.getClockFaceDragAlgorithm().getClockHandTipInWorld(), clockHandTip.transform);
+            LibGDXTools.toLibGDX(poseGizmo.getClockFaceDragAlgorithm().getClockCenter(), clockCenter.transform);
 
             keyboardTransformationFrameGraphic.getFramePose3D().setToZero();
             keyboardTransformationFrameGraphic.getFramePose3D().getOrientation().setToYawOrientation(focusBasedCamera.getFocusPointPose().getYaw());

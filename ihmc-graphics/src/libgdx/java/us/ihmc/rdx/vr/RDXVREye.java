@@ -93,12 +93,12 @@ public class RDXVREye extends Camera
       euclidUp.set(Axis3D.Z);
       eyeFramePose.getOrientation().transform(euclidUp);
 
-      LibGDXTools.toGDX(eyeFramePose.getPosition(), position);
+      LibGDXTools.toLibGDX(eyeFramePose.getPosition(), position);
       direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
 
       VRSystem.VRSystem_GetProjectionMatrix(side.ordinal(), Math.abs(near), Math.abs(far), projectionHmdMatrix44);
-      LibGDXTools.toGDX(projectionHmdMatrix44, projection);
+      LibGDXTools.toLibGDX(projectionHmdMatrix44, projection);
 
       view.setToLookAt(position, target.set(position).add(direction), up);
       combined.set(projection);

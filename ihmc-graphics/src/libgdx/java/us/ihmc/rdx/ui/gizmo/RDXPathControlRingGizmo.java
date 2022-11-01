@@ -357,11 +357,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       controlRingPose.setToZero(gizmoFrame);
       controlRingPose.changeFrame(ReferenceFrame.getWorldFrame());
       controlRingPose.get(controlRingTransformToWorld);
-      LibGDXTools.toGDX(controlRingTransformToWorld, discModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toGDX(controlRingTransformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toGDX(controlRingTransformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toGDX(controlRingTransformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
-      LibGDXTools.toGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(controlRingTransformToWorld, discModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(controlRingTransformToWorld, positiveXArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(controlRingTransformToWorld, positiveYArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(controlRingTransformToWorld, negativeXArrowModel.getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)

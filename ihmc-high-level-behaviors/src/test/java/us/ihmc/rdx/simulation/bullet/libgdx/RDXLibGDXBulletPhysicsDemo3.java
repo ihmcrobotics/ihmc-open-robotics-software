@@ -48,7 +48,7 @@ public class RDXLibGDXBulletPhysicsDemo3
                                                                                          0.0),
                                                                         new Point3D(0.0, 0.0, -0.0));
             groundTransform.appendTranslation(0.0, 0.0, -0.25);
-            LibGDXTools.toGDX(groundTransform, groundModelInstance.transform);
+            LibGDXTools.toLibGDX(groundTransform, groundModelInstance.transform);
             tempVector.set(groundSizeX / 2.0f, groundSizeY / 2.0f, groundSizeZ / 2.0f);
             btBoxShape groundBoxShape = new btBoxShape(tempVector);
             bulletPhysicsManager.addStaticObject(groundBoxShape, groundModelInstance.transform);
@@ -71,7 +71,7 @@ public class RDXLibGDXBulletPhysicsDemo3
                double pitch = RandomNumbers.nextDouble(random, -Math.PI / 90.0, Math.PI / 90.0);
                double roll = RandomNumbers.nextDouble(random, -Math.PI / 90.0, Math.PI / 90.0);
                RigidBodyTransform boxTransform = new RigidBodyTransform(new YawPitchRoll(yaw, pitch, roll), new Point3D(x, y, z));
-               LibGDXTools.toGDX(boxTransform, boxModelInstance.transform);
+               LibGDXTools.toLibGDX(boxTransform, boxModelInstance.transform);
 
                tempVector.set(boxSizeX / 2.0f, boxSizeY / 2.0f, boxSizeZ / 2.0f);
                btBoxShape boxShape = new btBoxShape(tempVector);

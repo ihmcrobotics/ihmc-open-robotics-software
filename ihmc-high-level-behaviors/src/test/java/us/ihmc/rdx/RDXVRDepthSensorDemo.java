@@ -78,7 +78,7 @@ public class RDXVRDepthSensorDemo
             pointCloudRenderer.create(depthSensorSimulator.getNumberOfPoints());
 
             depthSensorSimulator.create(pointCloudRenderer.getVertexBuffer());
-            LibGDXTools.toGDX(initialCameraTransform, tempTransform);
+            LibGDXTools.toLibGDX(initialCameraTransform, tempTransform);
             depthSensorSimulator.setCameraWorldTransform(tempTransform);
 
             for (RobotSide side : RobotSide.values)
@@ -140,7 +140,7 @@ public class RDXVRDepthSensorDemo
          {
             if (useGizmoToPoseSensor.get())
             {
-               LibGDXTools.toGDX(gizmo.getTransformToParent(), tempTransform);
+               LibGDXTools.toLibGDX(gizmo.getTransformToParent(), tempTransform);
                depthSensorSimulator.setCameraWorldTransform(tempTransform);
             }
 
