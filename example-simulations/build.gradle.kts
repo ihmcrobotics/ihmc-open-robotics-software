@@ -35,7 +35,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.31.0")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-quadruped-robotics-test:source")
    api("us.ihmc:ihmc-quadruped-planning-test:source")

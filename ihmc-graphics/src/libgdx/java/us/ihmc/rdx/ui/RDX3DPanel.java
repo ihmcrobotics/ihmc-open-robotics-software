@@ -40,7 +40,7 @@ public class RDX3DPanel
    private final int antiAliasing;
    private ImGuiPanel imGuiPanel;
    private RDX3DScene scene;
-   private boolean modelSceneMouseCollisionEnabled = true;
+   private boolean modelSceneMouseCollisionEnabled = false;
    private GLProfiler glProfiler;
    private SensorFrameBuffer frameBuffer;
    private float windowSizeX;

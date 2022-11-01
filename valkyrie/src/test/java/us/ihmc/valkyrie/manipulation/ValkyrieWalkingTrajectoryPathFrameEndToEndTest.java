@@ -83,6 +83,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+//      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @AfterEach
@@ -262,7 +263,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       SimRigidBodyBasics hand = simulationTestHelper.getRobot().getRigidBody(getHandName());
       SimJointBasics lastWristJoint = hand.getParentJoint();
 
-      ExternalWrenchPoint robotAttachmentPoint = lastWristJoint.getAuxialiryData()
+      ExternalWrenchPoint robotAttachmentPoint = lastWristJoint.getAuxiliaryData()
                                                                .addExternalWrenchPoint(new ExternalWrenchPointDefinition("robotAttachmentPoint",
                                                                                                                          getPendulumOffsetInHand()));
       simulationTestHelper.getRobot().updateFrames();
@@ -328,7 +329,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
       long expectedFrameIndex = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox().getWalkingTrajectoryPath()
                                                     .getWalkingTrajectoryPathFrame().getFrameIndex();
       long actualFrameIndex = ((YoLong) simulationTestHelper.findVariable(getHandName() + MultipleWaypointsPositionTrajectoryGenerator.class.getSimpleName(),
-                                                                          getHandName() + "CurrentPositionFrame")).getValue();
+                                                                          getHandName() + "Frame")).getValue();
       assertEquals(expectedFrameIndex, actualFrameIndex);
    }
 
@@ -356,7 +357,7 @@ public class ValkyrieWalkingTrajectoryPathFrameEndToEndTest
          this.robotAttachmentPoint = robotAttachmentPoint;
          rootJoint = (SimFloatingJointBasics) pendulumRobot.getJoint(FreeFloatingPendulumRobotDefinition.rootJointName);
          pendulumBody = rootJoint.getSuccessor();
-         pendulumAttachmentPoint = rootJoint.getAuxialiryData().getExternalWrenchPoints().get(0);
+         pendulumAttachmentPoint = rootJoint.getAuxiliaryData().getExternalWrenchPoints().get(0);
          rootFrame = robotAttachmentPoint.getFrame().getRootFrame();
 
          kp.set(500.0);

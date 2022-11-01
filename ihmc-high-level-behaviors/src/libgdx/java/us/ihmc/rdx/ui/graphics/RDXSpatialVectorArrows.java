@@ -85,7 +85,7 @@ public class RDXSpatialVectorArrows
       tempTransform.setToZero();
       EuclidGeometryTools.orientation3DFromZUpToVector3D(vector, tempTransform.getRotation());
       tempTransform.getTranslation().set(origin);
-      LibGDXTools.toGDX(tempTransform, arrowGraphic.getDynamicModel().getOrCreateModelInstance().transform);
+      LibGDXTools.toLibGDX(tempTransform, arrowGraphic.getDynamicModel().getOrCreateModelInstance().transform);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

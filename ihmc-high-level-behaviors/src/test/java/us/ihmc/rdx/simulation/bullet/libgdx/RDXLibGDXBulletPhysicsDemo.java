@@ -55,7 +55,7 @@ public class RDXLibGDXBulletPhysicsDemo
                                                                         new Point3D(0.0, 0.0, -0.0));
             groundTransform.appendTranslation(0.0, 0.0, -0.25);
             Matrix4 groundTransformGDX = new Matrix4();
-            LibGDXTools.toGDX(groundTransform, groundTransformGDX);
+            LibGDXTools.toLibGDX(groundTransform, groundTransformGDX);
             world.add("ground", groundTransformGDX);
 
             int numberOfBlocks = 6;
@@ -74,7 +74,7 @@ public class RDXLibGDXBulletPhysicsDemo
 
                RigidBodyTransform boxTransform = new RigidBodyTransform(new YawPitchRoll(yaw, pitch, roll), new Point3D(x, y, z));
                Matrix4 boxTransformGDX = new Matrix4();
-               LibGDXTools.toGDX(boxTransform, boxTransformGDX);
+               LibGDXTools.toLibGDX(boxTransform, boxTransformGDX);
                world.add("box", boxTransformGDX);
             }
 

@@ -53,7 +53,7 @@ public class RDXOusterBlackflyProjectionTest
             baseUI.create();
 
             worldFrameGraphic = new ModelInstance(RDXModelBuilder.createCoordinateFrame(0.3));
-            LibGDXTools.setTransparency(worldFrameGraphic, 0.6f);
+            LibGDXTools.setOpacity(worldFrameGraphic, 0.6f);
 
             userTransformToParent = new RigidBodyTransform();
             yaw.set(Math.toRadians(-90.0));
@@ -111,7 +111,7 @@ public class RDXOusterBlackflyProjectionTest
             pointOnCMOSPlane.setIncludingFrame(ReferenceFrame.getWorldFrame(), -focalLength.get(), -focalLength.get() * yaw2, focalLength.get() * pitch2);
 //            pointOnCMOSPlane.setIncludingFrame(userReferenceFrame, 0.0, 0.0, -focalLength.get());
 //            pointOnCMOSPlane.changeFrame(ReferenceFrame.getWorldFrame());
-            LibGDXTools.toGDX(pointOnCMOSPlane, pointOnCMOSGraphic.transform);
+            LibGDXTools.toLibGDX(pointOnCMOSPlane, pointOnCMOSGraphic.transform);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

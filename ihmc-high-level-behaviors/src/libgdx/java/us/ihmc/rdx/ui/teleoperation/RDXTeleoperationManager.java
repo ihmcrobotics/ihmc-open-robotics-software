@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
@@ -18,6 +17,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -34,6 +34,7 @@ import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -70,6 +71,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final RDXFootstepPlanning footstepPlanning;
+   private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
    private final RDXBallAndArrowPosePlacement ballAndArrowMidFeetPosePlacement = new RDXBallAndArrowPosePlacement();
    private final RDXManualFootstepPlacement manualFootstepPlacement = new RDXManualFootstepPlacement();
    private final RDXInteractableFootstepPlan interactableFootstepPlan = new RDXInteractableFootstepPlan();
@@ -80,19 +82,20 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final RDXHandConfigurationManager handManager = new RDXHandConfigurationManager();
    private RDXRobotCollisionModel selfCollisionModel;
    private RDXRobotCollisionModel environmentCollisionModel;
-   private RDXWholeBodyDesiredIKManager wholeBodyDesiredIKManager;
+   private RDXArmManager armManager;
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
 
-   private final SideDependentList<RDXFootInteractable> footInteractables = new SideDependentList<>();
-   private final SideDependentList<RDXHandInteractable> handInteractables = new SideDependentList<>();
+   private final SideDependentList<RDXInteractableFoot> interactableFeet = new SideDependentList<>();
+   private final SideDependentList<RDXInteractableHand> interactableHands = new SideDependentList<>();
+   private RDXInteractableRobotLink interactablePelvis;
+   private final ArrayList<RDXInteractableRobotLink> allInteractableRobotLinks = new ArrayList<>();
    private final SideDependentList<double[]> armHomes = new SideDependentList<>();
    private final SideDependentList<double[]> doorAvoidanceArms = new SideDependentList<>();
    private final ImString tempImGuiText = new ImString(1000);
-   private RDXLiveRobotPartInteractable pelvisInteractable;
    private final RDXWalkPathControlRing walkPathControlRing = new RDXWalkPathControlRing();
-   private final boolean interactableExists;
+   private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
 
@@ -125,20 +128,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       teleoperationParameters.load();
       teleoperationParameters.save();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         armHomes.put(side,
-                      new double[] {0.5,
-                                    side.negateIfRightSide(0.0),
-                                    side.negateIfRightSide(-0.5),
-                                    -1.0,
-                                    side.negateIfRightSide(0.0),
-                                    0.000,
-                                    side.negateIfLeftSide(0.0)});
-      }
-      doorAvoidanceArms.put(RobotSide.LEFT, new double[] {-0.121, -0.124, -0.971, -1.713, -0.935, -0.873, 0.277});
-      doorAvoidanceArms.put(RobotSide.RIGHT, new double[] {-0.523, -0.328, 0.586, -2.192, 0.828, 1.009, -0.281});
-
       syncedRobot = communicationHelper.newSyncedRobot();
 
       robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
@@ -159,16 +148,16 @@ public class RDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new RDXFootstepPlanning(robotModel, syncedRobot);
 
-      interactableExists = robotSelfCollisionModel != null;
-      if (interactableExists)
+      interactablesAvailable = robotSelfCollisionModel != null;
+      if (interactablesAvailable)
       {
          selfCollisionModel = new RDXRobotCollisionModel(robotSelfCollisionModel);
          environmentCollisionModel = new RDXRobotCollisionModel(robotEnvironmentCollisionModel);
-         wholeBodyDesiredIKManager = new RDXWholeBodyDesiredIKManager(robotModel,
-                                                                      syncedRobot,
-                                                                      desiredRobot.getDesiredFullRobotModel(),
-                                                                      ros2Helper,
-                                                                      teleoperationParameters);
+         armManager = new RDXArmManager(robotModel,
+                                        syncedRobot,
+                                        desiredRobot.getDesiredFullRobotModel(),
+                                        ros2Helper,
+                                        teleoperationParameters);
       }
    }
 
@@ -197,76 +186,81 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
          selfCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkGreen(), 0.4));
          environmentCollisionModel.create(syncedRobot, YoAppearanceTools.makeTransparent(YoAppearance.DarkRed(), 0.4));
 
          // create the manager for the desired arm setpoints
-         wholeBodyDesiredIKManager.create();
+         armManager.create();
 
-         for (RDXRobotCollisionLink collisionLink : environmentCollisionModel.getCollisionLinks())
+         for (RDXRobotCollidable robotCollidable : environmentCollisionModel.getRobotCollidables())
          {
             RobotDefinition robotDefinition = robotModel.getRobotDefinition();
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
-            String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(collisionLink.getRigidBodyName()));
+            String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
 
-            if (collisionLink.getRigidBodyName().equals(fullRobotModel.getPelvis().getName()))
+            if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getPelvis().getName()))
             {
-               if (pelvisInteractable == null)
+               if (interactablePelvis == null)
                {
-                  pelvisInteractable = new RDXLiveRobotPartInteractable();
-                  pelvisInteractable.create(collisionLink,
+                  interactablePelvis = new RDXInteractableRobotLink();
+                  interactablePelvis.create(robotCollidable,
                                             syncedRobot.getReferenceFrames().getPelvisFrame(),
                                             modelFileName,
                                             baseUI.getPrimary3DPanel());
-                  pelvisInteractable.setOnSpacePressed(() ->
-                                                       {
-                                                          ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
-                                                                                                                                            pelvisInteractable.getPose()));
-                                                       });
+                  interactablePelvis.setOnSpacePressed(() ->
+                  {
+                     ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(teleoperationParameters.getTrajectoryTime(),
+                                                                                                       interactablePelvis.getPose()));
+                  });
+                  allInteractableRobotLinks.add(interactablePelvis);
                }
                else
                {
-                  pelvisInteractable.addAdditionalCollisionLink(collisionLink);
+                  interactablePelvis.addAdditionalRobotCollidable(robotCollidable);
                }
             }
             for (RobotSide side : RobotSide.values)
             {
-               if (RDXFootInteractable.collisionLinkIsFoot(side, collisionLink, fullRobotModel))
+               if (RDXInteractableFoot.robotCollidableIsFoot(side, robotCollidable, fullRobotModel))
                {
-                  if (!footInteractables.containsKey(side))
+                  if (!interactableFeet.containsKey(side))
                   {
-                     RDXFootInteractable footInteractable = new RDXFootInteractable(side, baseUI, collisionLink, robotModel, fullRobotModel);
-                     footInteractable.setOnSpacePressed(() ->
+                     RDXInteractableFoot interactableFoot = new RDXInteractableFoot(side, baseUI, robotCollidable, robotModel, fullRobotModel);
+                     interactableFoot.setOnSpacePressed(() ->
                              ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side,
                                                                                                              teleoperationParameters.getTrajectoryTime(),
-                                                                                                             footInteractable.getPose())));
-                     footInteractables.put(side, footInteractable);
+                                                                                                             interactableFoot.getPose())));
+                     interactableFeet.put(side, interactableFoot);
+                     allInteractableRobotLinks.add(interactableFoot);
                   }
                   else
                   {
-                     footInteractables.get(side).addAdditionalCollisionLink(collisionLink);
+                     interactableFeet.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (RDXHandInteractable.collisionLinkIsHand(side, collisionLink, fullRobotModel))
+               if (RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                {
-                  if (!handInteractables.containsKey(side))
+                  if (!interactableHands.containsKey(side))
                   {
-                     RDXHandInteractable handInteractable = new RDXHandInteractable(side, baseUI, collisionLink, robotModel, syncedRobot, yoVariableClientHelper);
-                     handInteractables.put(side, handInteractable);
+                     RDXInteractableHand interactableHand = new RDXInteractableHand(side, baseUI, robotCollidable, robotModel, syncedRobot, yoVariableClientHelper);
+                     interactableHands.put(side, interactableHand);
+                     allInteractableRobotLinks.add(interactableHand);
                      // TODO this should probably not handle the space event!
                      // This sends a command to the controller.
-                     handInteractable.setOnSpacePressed(wholeBodyDesiredIKManager.getSubmitDesiredArmSetpointsCallback(side));
+                     interactableHand.setOnSpacePressed(armManager.getSubmitDesiredArmSetpointsCallback(side));
                   }
                   else
                   {
-                     handInteractables.get(side).addAdditionalCollisionLink(collisionLink);
+                     interactableHands.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
             }
          }
 
+         baseUI.getVRManager().getContext().addVRPickCalculator(this::calculateVRPick);
+         baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
          baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(this::calculate3DViewPick);
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
@@ -313,18 +307,55 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          walkPathControlRing.update(interactableFootstepPlan);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
-            wholeBodyDesiredIKManager.update(handInteractables);
+            armManager.update(interactableHands);
 
             selfCollisionModel.update();
             environmentCollisionModel.update();
 
-            for (RobotSide side : handInteractables.sides())
-            {
-               handInteractables.get(side).update();
-            }
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+               robotPartInteractable.update();
          }
+      }
+
+      if (walkPathControlRing.pollIsNewlyModified())
+      {
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+         interactableFootstepPlan.clear();
+      }
+
+      if (manualFootstepPlacement.pollIsModeNewlyActivated())
+      {
+         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      }
+
+      if (legControlMode != RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         for (RobotSide side : interactableFeet.sides())
+         {
+            interactableFeet.get(side).delete();
+         }
+      }
+
+      if (legControlMode != RDXLegControlMode.PATH_CONTROL_RING)
+      {
+         walkPathControlRing.delete();
+      }
+
+      if (legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING)
+      {
+         interactableFootstepPlan.clear();
+      }
+
+      if (legControlMode != RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT)
+      {
+         manualFootstepPlacement.exitPlacement();
+      }
+
+      if (legControlMode == RDXLegControlMode.DISABLED)
+      {
+         interactableFootstepPlan.clear();
       }
 
       manualFootstepPlacement.update();
@@ -334,53 +365,78 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepPlanning.setReadyToWalk(false);
          footstepsSentToControllerGraphic.clear();
       }
+
+      boolean allAreDeleted = interactablePelvis.isDeleted();
+      for (RobotSide side : interactableHands.sides())
+      {
+         allAreDeleted &= interactableHands.get(side).isDeleted();
+      }
+      for (RobotSide side : interactableFeet.sides())
+      {
+         allAreDeleted &= interactableFeet.get(side).isDeleted();
+      }
+      desiredRobot.setActive(!allAreDeleted);
    }
 
-   public void calculate3DViewPick(ImGui3DViewInput input)
+   private void calculateVRPick(RDXVRContext vrContext)
+   {
+      if (interactablesAvailable && interactablesEnabled.get())
+         environmentCollisionModel.calculateVRPick(vrContext);
+   }
+
+   private void processVRInput(RDXVRContext vrContext)
+   {
+      if (interactablesAvailable)
+      {
+         for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+            robotPartInteractable.processVRInput(vrContext);
+
+         if (interactablesEnabled.get())
+            environmentCollisionModel.processVRInput(vrContext);
+      }
+   }
+
+   private void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
          if (!manualFootstepPlacement.isPlacingFootstep())
             walkPathControlRing.calculate3DViewPick(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (input.isWindowHovered())
                environmentCollisionModel.calculate3DViewPick(input);
 
-            pelvisInteractable.calculate3DViewPick(input);
-            for (RobotSide side : footInteractables.sides())
-            {
-               footInteractables.get(side).calculate3DViewPick(input);
-            }
-            for (RobotSide side : handInteractables.sides())
-            {
-               handInteractables.get(side).calculate3DViewPick(input);
-            }
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+               robotPartInteractable.calculate3DViewPick(input);
          }
       }
    }
 
    // This happens after update.
-   public void process3DViewInput(ImGui3DViewInput input)
+   private void process3DViewInput(ImGui3DViewInput input)
    {
       if (interactablesEnabled.get())
       {
          if (!manualFootstepPlacement.isPlacingFootstep())
             walkPathControlRing.process3DViewInput(input);
 
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             environmentCollisionModel.process3DViewInput(input);
 
-            pelvisInteractable.process3DViewInput(input);
-            for (RobotSide side : footInteractables.sides())
+            interactablePelvis.process3DViewInput(input);
+            for (RobotSide side : interactableFeet.sides())
             {
-               footInteractables.get(side).process3DViewInput(input);
+               if (interactableFeet.get(side).process3DViewInput(input))
+               {
+                  legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+               }
             }
-            for (RobotSide side : handInteractables.sides())
+            for (RobotSide side : interactableHands.sides())
             {
-               handInteractables.get(side).process3DViewInput(input);
+               interactableHands.get(side).process3DViewInput(input);
             }
          }
       }
@@ -389,31 +445,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
    public void renderImGuiWidgets()
    {
       robotLowLevelMessenger.renderImGuiWidgets();
-
-      ImGui.text("Arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Home " + side.getPascalCaseName())))
-         {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        armHomes.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
-         }
-      }
-      ImGui.text("Door avoidance arms:");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         if (ImGui.button(labels.get(side.getPascalCaseName())))
-         {
-            ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                        teleoperationParameters.getTrajectoryTime(),
-                                                                                                        doorAvoidanceArms.get(side));
-            ros2Helper.publishToController(armTrajectoryMessage);
-         }
-      }
 
       pelvisHeightSlider.renderImGuiWidgets();
       chestPitchSlider.renderImGuiWidgets();
@@ -429,79 +460,106 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ImGui.separator();
 
+      if (interactablesAvailable)
+      {
+         ImGui.checkbox("Interactables enabled", interactablesEnabled);
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Delete all")))
+         {
+            footstepsSentToControllerGraphic.clear();
+            ballAndArrowMidFeetPosePlacement.clear();
+            manualFootstepPlacement.exitPlacement();
+            interactableFootstepPlan.clear();
+            walkPathControlRing.delete();
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+               robotPartInteractable.delete();
+            legControlMode = RDXLegControlMode.DISABLED;
+         }
+      }
+
+      ImGui.separator();
+
+      ImGui.text("Leg control mode: " + legControlMode.name());
+      if (ImGui.radioButton(labels.get("Disabled"), legControlMode == RDXLegControlMode.DISABLED))
+      {
+         legControlMode = RDXLegControlMode.DISABLED;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Manual foostep placement"), legControlMode == RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT))
+      {
+         legControlMode = RDXLegControlMode.MANUAL_FOOTSTEP_PLACEMENT;
+      }
+      if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == RDXLegControlMode.PATH_CONTROL_RING))
+      {
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
+         walkPathControlRing.becomeModified(true);
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
+      {
+         legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+      }
+
       manualFootstepPlacement.renderImGuiWidgets();
 
-      ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton();
+      if (ballAndArrowMidFeetPosePlacement.renderPlaceGoalButton())
+         legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
 
       ImGui.text("Walk path control ring planner:");
       walkPathControlRing.renderImGuiWidgets();
 
       interactableFootstepPlan.renderImGuiWidgets();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Delete All")))
-      {
-         footstepsSentToControllerGraphic.clear();
-         ballAndArrowMidFeetPosePlacement.clear();
-         manualFootstepPlacement.exitPlacement();
-         interactableFootstepPlan.clear();
-         walkPathControlRing.delete();
-      }
       ImGui.checkbox(labels.get("Show footstep related graphics"), showGraphics);
 
       ImGui.separator();
 
       handManager.renderImGuiWidgets();
 
-//      desiredRobot.renderImGuiWidgets();
-//      ImGui.sameLine();
       if (ImGui.button(labels.get("Set Desired To Current")))
       {
-         wholeBodyDesiredIKManager.setDesiredToCurrent();
+         armManager.setDesiredToCurrent();
          desiredRobot.setDesiredToCurrent();
       }
 
-      if (interactableExists)
+      if (interactablesAvailable)
       {
-         wholeBodyDesiredIKManager.renderImGuiWidgets();
-         ImGui.checkbox("Interactables enabled", interactablesEnabled);
-         ImGui.sameLine();
-         if (ImGui.button(labels.get("Delete all")))
-         {
-            walkPathControlRing.delete();
-            pelvisInteractable.delete();
-            for (RobotSide side : footInteractables.sides())
-               footInteractables.get(side).delete();
-            for (RobotSide side : handInteractables.sides())
-               handInteractables.get(side).delete();
-         }
+         armManager.renderImGuiWidgets();
 
          ImGui.text("Pelvis:");
+         ImGuiTools.previousWidgetTooltip("Send with: Spacebar");
          ImGui.sameLine();
-         pelvisInteractable.renderImGuiWidgets();
+         interactablePelvis.renderImGuiWidgets();
 
-         for (RobotSide side : handInteractables.sides())
+
+         boolean handInteractablesAreDeleted = true;
+         for (RobotSide side : interactableHands.sides())
          {
             ImGui.text(side.getPascalCaseName() + " hand:");
             ImGui.sameLine();
-            handInteractables.get(side).renderImGuiWidgets();
+            interactableHands.get(side).renderImGuiWidgets();
+            handInteractablesAreDeleted &= interactableHands.get(side).isDeleted();
          }
-         for (RobotSide side : footInteractables.sides())
+         desiredRobot.setActive(!handInteractablesAreDeleted);
+
+         if (!handInteractablesAreDeleted)
+         {
+            // desiredRobot.setPelvisShowing(!pelvisInteractable.isDeleted());
+            for (RobotSide side : interactableHands.sides())
+               desiredRobot.setArmShowing(side, !interactableHands.get(side).isDeleted()
+                                                && armManager.getArmControlMode() == RDXArmControlMode.JOINT_ANGLES);
+            // for (RobotSide side : footInteractables.sides())
+            //    desiredRobot.setLegShowing(side, !footInteractables.get(side).isDeleted());
+         }
+
+         for (RobotSide side : interactableFeet.sides())
          {
             ImGui.text(side.getPascalCaseName() + " foot:");
             ImGui.sameLine();
-            footInteractables.get(side).renderImGuiWidgets();
+            if (interactableFeet.get(side).renderImGuiWidgets())
+            {
+               legControlMode = RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING;
+            }
          }
-
-         boolean allAreDeleted = pelvisInteractable.isDeleted();
-         for (RobotSide side : handInteractables.sides())
-         {
-            allAreDeleted &= handInteractables.get(side).isDeleted();
-         }
-         for (RobotSide side : footInteractables.sides())
-         {
-            allAreDeleted &= footInteractables.get(side).isDeleted();
-         }
-         desiredRobot.setActive(!allAreDeleted);
 
          ImGui.separator();
 
@@ -518,15 +576,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
    private void renderTooltipsAndContextMenus()
    {
-      for (RobotSide side : handInteractables.sides())
+      for (RobotSide side : interactableHands.sides())
       {
-         RDXHandInteractable handInteractable = handInteractables.get(side);
-         if (handInteractable.getContextMenuNotification().poll())
+         RDXInteractableHand interactableHand = interactableHands.get(side);
+         if (interactableHand.getContextMenuNotification().poll())
          {
-            ImGui.openPopup(labels.get(handInteractable.getContextMenuName()));
+            ImGui.openPopup(labels.get(interactableHand.getContextMenuName()));
          }
 
-         if (ImGui.beginPopup(labels.get(handInteractable.getContextMenuName())))
+         if (ImGui.beginPopup(labels.get(interactableHand.getContextMenuName())))
          {
             ImGui.text("Real robot joint angles:");
 
@@ -589,26 +647,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (interactablesEnabled.get())
       {
-         if (interactableExists)
+         if (interactablesAvailable)
          {
             if (showSelfCollisionMeshes.get())
-            {
                selfCollisionModel.getRenderables(renderables, pool);
-            }
             if (showEnvironmentCollisionMeshes.get())
-            {
                environmentCollisionModel.getRenderables(renderables, pool);
-            }
 
-            pelvisInteractable.getVirtualRenderables(renderables, pool);
-            for (RobotSide side : footInteractables.sides())
-            {
-               footInteractables.get(side).getVirtualRenderables(renderables, pool);
-            }
-            for (RobotSide side : handInteractables.sides())
-            {
-               handInteractables.get(side).getVirtualRenderables(renderables, pool);
-            }
+            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+               robotPartInteractable.getVirtualRenderables(renderables, pool);
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);

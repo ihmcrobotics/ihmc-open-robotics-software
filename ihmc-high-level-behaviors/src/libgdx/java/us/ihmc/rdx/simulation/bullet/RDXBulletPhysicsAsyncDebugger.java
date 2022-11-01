@@ -44,7 +44,7 @@ public class RDXBulletPhysicsAsyncDebugger
             RDXBulletPhysicsDebuggerLineSegment lineSegment = lineSegmentsToDraw.add();
             LibGDXTools.toEuclid(from, lineSegment.getLineSegment().getFirstEndpoint());
             LibGDXTools.toEuclid(to, lineSegment.getLineSegment().getSecondEndpoint());
-            LibGDXTools.toGDX(color, lineSegment.getColor());
+            LibGDXTools.toLibGDX(color, lineSegment.getColor());
          }
 
          @Override

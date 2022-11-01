@@ -87,7 +87,7 @@ public class RDXBehaviorActionSequenceManager
       {
          boolean alreadyLoaded = false;
          for (RDXBehaviorActionSequenceEditor editor : editors)
-            alreadyLoaded |= editor.getWorkspaceFile().getResourceName().equals(queryContainedFile.getResourceName());
+            alreadyLoaded |= editor.getWorkspaceFile().getFileName().equals(queryContainedFile.getFileName());
 
          if (!alreadyLoaded)
          {

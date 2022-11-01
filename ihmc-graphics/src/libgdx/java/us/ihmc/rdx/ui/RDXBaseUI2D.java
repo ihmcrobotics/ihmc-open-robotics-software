@@ -56,7 +56,7 @@ public class RDXBaseUI2D
    private float sizeY;
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
-   private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toGDX(LogTools.getLevel()));
+   private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final RDXImGuiPerspectiveManager perspectiveManager;
 
    public RDXBaseUI2D(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)

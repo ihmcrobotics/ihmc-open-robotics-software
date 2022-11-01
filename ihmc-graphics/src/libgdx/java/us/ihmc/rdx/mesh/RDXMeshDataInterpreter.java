@@ -20,10 +20,10 @@ public class RDXMeshDataInterpreter
 
       for (int i = 0; i < meshData.getVertices().length; i++)
       {
-         Vector3 position = LibGDXTools.toGDX(meshData.getVertices()[i]);
-         Vector3 normal = LibGDXTools.toGDX(meshData.getVertexNormals()[i]);
+         Vector3 position = LibGDXTools.toLibGDX(meshData.getVertices()[i]);
+         Vector3 normal = LibGDXTools.toLibGDX(meshData.getVertexNormals()[i]);
          Color color = Color.WHITE;
-         Vector2 uvTextureCoordinates = LibGDXTools.toGDX(meshData.getTexturePoints()[i]);
+         Vector2 uvTextureCoordinates = LibGDXTools.toLibGDX(meshData.getTexturePoints()[i]);
          meshBuilder.vertex(position, normal, color, uvTextureCoordinates);
       }
 

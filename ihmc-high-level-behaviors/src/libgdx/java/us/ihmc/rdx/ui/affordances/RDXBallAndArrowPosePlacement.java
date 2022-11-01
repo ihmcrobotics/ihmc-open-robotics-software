@@ -112,14 +112,14 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          else // placing orientation
          {
             LibGDXTools.toEuclid(sphere.transform, tempSpherePosition);
-            LibGDXTools.toGDX(tempSpherePosition, arrow.transform);
+            LibGDXTools.toLibGDX(tempSpherePosition, arrow.transform);
 
             tempRotationVector.set(pickPointInWorld);
             tempRotationVector.sub(tempSpherePosition);
 
             double yaw = Math.atan2(tempRotationVector.getY(), tempRotationVector.getX());
             arrowRotationMatrix.setToYawOrientation(yaw);
-            LibGDXTools.toGDX(arrowRotationMatrix, arrow.transform);
+            LibGDXTools.toLibGDX(arrowRotationMatrix, arrow.transform);
 
             goalPoseForReading.set(tempSpherePosition, arrowRotationMatrix);
 
@@ -164,8 +164,9 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       placedNotification.set();
    }
 
-   public void renderPlaceGoalButton()
+   public boolean renderPlaceGoalButton()
    {
+      boolean placementStarted = false;
       if (locationFlagIcon != null)
       {
          ImGui.image(locationFlagIcon.getTexture().getTextureObjectHandle(), 22.0f, 22.0f);
@@ -180,6 +181,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       }
       if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
       {
+         placementStarted = true;
          placeGoalActionMap.start();
       }
       if (pushedFlags)
@@ -207,6 +209,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
          ImGui.popItemWidth();
       }
+      return placementStarted;
    }
 
    @Override
@@ -257,9 +260,9 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       }
       else
       {
-         LibGDXTools.toGDX(pose.getPosition(), sphere.transform);
+         LibGDXTools.toLibGDX(pose.getPosition(), sphere.transform);
          goalZOffset.set((float) pose.getZ());
-         LibGDXTools.toGDX(pose, tempTransform, arrow.transform);
+         LibGDXTools.toLibGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
    }
