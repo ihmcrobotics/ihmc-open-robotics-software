@@ -42,7 +42,7 @@ public class RDXIHMCLabEnvironment implements RenderableProvider
       modelInstances.add(floorInstance);
       pose.set(new Point3D(0.0f, 0.0f, 0.0f), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
       pose.get(transform);
-      LibGDXTools.toGDX(transform, floorInstance.transform);
+      LibGDXTools.toLibGDX(transform, floorInstance.transform);
 
 //      ModelInstance smallCinderBlockInstance = new ModelInstance(smallCinderBlockModel);
 //      modelInstances.add(smallCinderBlockInstance);
@@ -63,17 +63,17 @@ public class RDXIHMCLabEnvironment implements RenderableProvider
 
 //      pose.set(new Point3D(0.9f, 0.9f, 0.0f), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
 //      pose.get(transform);
-//      LibGDXTools.toGDX(transform, mediumCinderBlockRoughInstance.transform);
+//      LibGDXTools.toLibGDX(transform, mediumCinderBlockRoughInstance.transform);
 //
 //      largeCinderBlockInstance.transform.setTranslation(0.6f, 0.6f, 0.19f);
 
 //      pose.set(new Point3D(2.0, 0.46, 0.0), new YawPitchRoll(Math.toRadians(-45.0), 0.0, Math.toRadians(90.0)));
 //      pose.get(transform);
-//      LibGDXTools.toGDX(transform, doorInstance.transform);
+//      LibGDXTools.toLibGDX(transform, doorInstance.transform);
 //
 //      pose.set(new Point3D(2.0, 0.0, 0.0), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
 //      pose.get(transform);
-//      LibGDXTools.toGDX(transform, doorFrameInstance.transform);
+//      LibGDXTools.toLibGDX(transform, doorFrameInstance.transform);
    }
 
    public EuclidModelInstance addLargeCinderBlock()

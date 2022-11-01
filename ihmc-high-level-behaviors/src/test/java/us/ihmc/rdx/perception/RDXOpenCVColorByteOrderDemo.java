@@ -94,7 +94,7 @@ public class RDXOpenCVColorByteOrderDemo
             ImGui.separator();
 
             ImGui.colorPicker4("Environment Color", imColor);
-            LibGDXTools.toGDX(imColor, gdxColor);
+            LibGDXTools.toLibGDX(imColor, gdxColor);
          }
 
          private void printBytes(byte byte0, byte byte1, byte byte2, byte byte3)

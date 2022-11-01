@@ -32,7 +32,7 @@ public class RDXDirectionalLightObject extends RDXEnvironmentObject
 
       setCollisionModel(meshBuilder ->
       {
-         Color color = LibGDXTools.toGDX(YoAppearance.LightSkyBlue());
+         Color color = LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox(0.21f, 0.21f, 0.06f, color);
       });
       setCollisionGeometryObject(collisionBox);

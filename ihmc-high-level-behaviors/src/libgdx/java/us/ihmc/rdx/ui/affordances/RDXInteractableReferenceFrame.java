@@ -42,7 +42,7 @@ public class RDXInteractableReferenceFrame
       referenceFrameGraphic = new RDXReferenceFrameGraphic(length);
       highlightReferenceFrameGraphic = new RDXReferenceFrameGraphic(length + 0.001);
       coordinateFrameIntersection = new RDXCoordinateFrameIntersection(length);
-      LibGDXTools.setTransparency(highlightReferenceFrameGraphic, 0.5f);
+      LibGDXTools.setOpacity(highlightReferenceFrameGraphic, 0.5f);
       selectablePose3DGizmo = new RDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(panel3D);
    }
@@ -69,8 +69,8 @@ public class RDXInteractableReferenceFrame
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       tempFramePose.get(tempTransform);
 
-      LibGDXTools.toGDX(tempTransform, referenceFrameGraphic.transform);
-      LibGDXTools.toGDX(tempTransform, highlightReferenceFrameGraphic.transform);
+      LibGDXTools.toLibGDX(tempTransform, referenceFrameGraphic.transform);
+      LibGDXTools.toLibGDX(tempTransform, highlightReferenceFrameGraphic.transform);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

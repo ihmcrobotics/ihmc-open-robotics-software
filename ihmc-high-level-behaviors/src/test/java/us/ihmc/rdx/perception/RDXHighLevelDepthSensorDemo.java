@@ -97,7 +97,7 @@ public class RDXHighLevelDepthSensorDemo
                mousePosX = (int) input.getMousePosX();
                mousePosY = (int) input.getMousePosY();
 
-               LibGDXTools.toGDX(input.getPickPointInWorld(), mousePickSphere.transform);
+               LibGDXTools.toLibGDX(input.getPickPointInWorld(), mousePickSphere.transform);
             });
 
             baseUI.getImGuiPanelManager().addPanel("Mouse Picking", () ->

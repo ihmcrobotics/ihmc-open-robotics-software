@@ -72,7 +72,7 @@ public class RDXMultiBodySnakeObject extends RDXEnvironmentObject
       baseCollider.setCollisionShape(baseBox);
       Matrix4 worldTransform = new Matrix4();
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
-      LibGDXTools.toGDX(rigidBodyTransform, worldTransform);
+      LibGDXTools.toLibGDX(rigidBodyTransform, worldTransform);
       baseCollider.setWorldTransform(worldTransform);
       baseCollider.setFriction(1.0f);
       addMultiBodyCollisionShape(bulletPhysicsManager, baseCollider);
@@ -138,7 +138,7 @@ public class RDXMultiBodySnakeObject extends RDXEnvironmentObject
       {
          LibGDXTools.toEuclid(tempGDXTransform, tempTransform);
          tempTransform.appendTranslation(0.0, 0.0, -linkHalfExtents.z * 2.0f);
-         LibGDXTools.toGDX(tempTransform, tempGDXTransform);
+         LibGDXTools.toLibGDX(tempTransform, tempGDXTransform);
          linkColliders.get(i).setWorldTransform(tempGDXTransform);
          linkModelInstances.get(i).transform.set(tempGDXTransform);
       }
