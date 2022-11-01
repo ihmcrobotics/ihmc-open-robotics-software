@@ -49,6 +49,8 @@ public class ROS2PointCloudProvider
    // NOTE: Some parameters for data processing
    private static final float POINT_SIZE = 0.01f;
    private final int pointsPerSegment;
+   private final int numberOfSegments;
+   private final int numberOfElementsPerPoint;
    private static final int inputBytesPerPoint = 4 * Integer.BYTES;
    private final Color color = new Color();
    private int latestSegmentIndex = -1;
@@ -69,15 +71,17 @@ public class ROS2PointCloudProvider
    // NOTE: Data type PointCloud, to be updated and used globally in the future whenever sending / receiving pointCloud data.
    private final PointCloud pointCloud;
 
-   public ROS2PointCloudProvider(ROS2NodeInterface ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
+   public ROS2PointCloudProvider(ROS2NodeInterface ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments, int numberOfElementsPerPoint)
    {
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.pointsPerSegment = pointsPerSegment;
+      this.numberOfSegments = numberOfSegments;
+      this.numberOfElementsPerPoint = numberOfElementsPerPoint;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
       decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
-      pointCloud = new PointCloud(pointsPerSegment, 8);
+      pointCloud = new PointCloud(pointsPerSegment, numberOfElementsPerPoint);
       subscribe();
    }
 
@@ -92,7 +96,7 @@ public class ROS2PointCloudProvider
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      discretizedPointBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, vertexBuffer);
+      discretizedPointBuffer = new OpenCLFloatBuffer(pointsPerSegment * numberOfElementsPerPoint, vertexBuffer);
       discretizedPointBuffer.createOpenCLBufferObject(openCLManager);
    }
 
@@ -175,7 +179,8 @@ public class ROS2PointCloudProvider
          openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
          discretizedPointBuffer.readOpenCLBufferObject(openCLManager);
 
-         pointCloud.setData(discretizedPointBuffer.getBytedecoFloatBufferPointer(), pointsPerSegment * 8);
+         pointCloud.setData(discretizedPointBuffer.getBytedecoFloatBufferPointer(),
+                            pointsPerSegment * numberOfSegments * pointCloud.getNumberOfElementsPerPoint());
 
          return true;
       }

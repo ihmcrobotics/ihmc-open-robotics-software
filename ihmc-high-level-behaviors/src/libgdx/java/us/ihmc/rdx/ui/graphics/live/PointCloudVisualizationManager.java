@@ -19,9 +19,14 @@ public class PointCloudVisualizationManager
    // NOTE: Renders pointCloud received
    private final RDXPointCloudVisualizer pointCloudVisualizer;
 
-   public PointCloudVisualizationManager(ROS2NodeInterface ros2Node, ROS2Topic<?> topic, String visualizerTitle, int pointsPerSegment, int numberOfSegments)
+   public PointCloudVisualizationManager(ROS2NodeInterface ros2Node,
+                                         ROS2Topic<?> topic,
+                                         String visualizerTitle,
+                                         int pointsPerSegment,
+                                         int numberOfSegments,
+                                         int numberOfElementsPerPoint)
    {
-      pointCloudProvider = new ROS2PointCloudProvider(ros2Node,topic, pointsPerSegment, numberOfSegments);
+      pointCloudProvider = new ROS2PointCloudProvider(ros2Node,topic, pointsPerSegment, numberOfSegments, numberOfElementsPerPoint);
       pointCloudVisualizer = new RDXPointCloudVisualizer(visualizerTitle,
                                                          topic.getName(),
                                                          pointsPerSegment,
