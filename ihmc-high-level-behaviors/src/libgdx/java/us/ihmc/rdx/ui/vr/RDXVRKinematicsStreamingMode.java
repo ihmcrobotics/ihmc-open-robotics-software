@@ -44,6 +44,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -56,7 +57,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private IHMCROS2Input<KinematicsToolboxOutputStatus> status;
-   private final double streamPeriod = UnitConversions.hertzToSeconds(250.0);
+   private final double streamPeriod = UnitConversions.hertzToSeconds(60.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
@@ -73,11 +74,13 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
-   private long start =0;
-   private long finish = 0;
-   private long timeElapsed =0;
-   private int counter =0;
-   private boolean first =true;
+//   private long start =0;
+//   private long finish = 0;
+//   private long timeElapsed =0;
+//   private int counter =0;
+//   private boolean first =true;
+   private FrequencyStatisticPrinter start = new FrequencyStatisticPrinter();
+   private FrequencyStatisticPrinter end = new FrequencyStatisticPrinter();
    // ...
 //   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
 
@@ -205,20 +208,20 @@ public class RDXVRKinematicsStreamingMode
          });
       }
 
+      start.ping();
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
-         if (first&& counter>=10)
-         {
-            start = System.nanoTime();
-            first = false;
-         }
-         counter++;
-         if (counter == 1010){
-            finish = System.nanoTime();
-            timeElapsed = finish - start;
-         }
-         LogTools.info("timeElapsed: {}", timeElapsed);
-
+//         if (first&& counter>=10)
+//         {
+//            start = System.nanoTime();
+//            first = false;
+//         }
+//         counter++;
+//         if (counter == 1010){
+//            finish = System.nanoTime();
+//            timeElapsed = finish - start;
+//            LogTools.info("timeElapsed: {}", timeElapsed);
+//         }
 
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
@@ -278,6 +281,7 @@ public class RDXVRKinematicsStreamingMode
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
+      end.ping();
    }
 
    public void update(boolean ikStreamingModeEnabled)
