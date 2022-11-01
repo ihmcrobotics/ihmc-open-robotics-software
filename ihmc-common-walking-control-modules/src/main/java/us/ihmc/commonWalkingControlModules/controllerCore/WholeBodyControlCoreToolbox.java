@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
@@ -199,6 +200,10 @@ public class WholeBodyControlCoreToolbox
 
    /**
     * Registers a joint as inactive, i.e. it cannot be controlled but should still be considered.
+    * <p>
+    * The list of inactive joints can be modified at runtime via
+    * {@link InverseDynamicsOptimizationSettingsCommand}.
+    * </p>
     * 
     * @param inactiveJoint the joint to be registered as inactive.
     */
