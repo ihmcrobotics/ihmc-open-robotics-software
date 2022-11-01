@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
@@ -133,6 +135,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
+      if (primaryFootstepAdjusterField.hasValue() && primaryFootstepAdjusterField.get() != null)
+         continuousStepGenerator.setFootstepAdjustment(primaryFootstepAdjusterField.get());
       for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusters)
          continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
       for (FootstepValidityIndicator footstepValidityIndicator : footstepValidityIndicators)
@@ -165,8 +169,6 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (yoGraphicsListRegistry != null && contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
-      if (primaryFootstepAdjusterField.hasValue() && primaryFootstepAdjusterField.get() != null)
-         continuousStepGenerator.setFootstepAdjustment(primaryFootstepAdjusterField.get());
 
       if (useHeadingAndVelocityScriptField.get())
       {
@@ -189,6 +191,11 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
          continuousStepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
          walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                        commandInputManager::setHighLevelStateChangeStatusMessage);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class,
+                                                                       commandInputManager::setWalkingStatus);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
+         commandInputManager.setFootstepStatusListener(walkingStatusMessageOutputManager);
+
          updatables.add(commandInputManager);
 
          //this is probably not the way the class was intended to be modified.
