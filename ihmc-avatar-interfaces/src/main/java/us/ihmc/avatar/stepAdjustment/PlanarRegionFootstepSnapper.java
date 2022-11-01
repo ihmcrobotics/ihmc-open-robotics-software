@@ -48,6 +48,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final YoConstraintOptimizerParameters wiggleParameters;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
+   protected final PlanarRegion regionToSnapTo = new PlanarRegion();
+
 
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons, SteppableRegionsProvider steppableRegionsProvider)
    {
@@ -153,7 +155,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return true;
    }
 
-   private final PlanarRegion regionToSnapTo = new PlanarRegion();
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
 
    private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle", ReferenceFrame.getWorldFrame());
