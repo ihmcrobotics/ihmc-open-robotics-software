@@ -1,31 +1,32 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
-import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -34,40 +35,69 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<PlanarRegionsListCommand>
+/**
+ * This is designed to work along side the plugins. It must be added as a PlanarRegionsList Consumer to the {@link StepGeneratorCommandInputManager} and as an
+ * Updatable to clear the graphics to the
+ * {@link us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory#addUpdatable(Updatable)}
+ */
+public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<PlanarRegionsListCommand>, Updatable
 {
+   private static final int numberOfRegionsToVisualize = 3;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
    private final YoBoolean shouldSnapToRegions;
+   private final YoBoolean shouldVisualizeSnappedRegions;
    private final YoInteger numberOfSteppableRegions;
 
    private final SteppingParameters steppingParameters;
 
    private final PlanarRegionFootstepSnapper stepSnapper;
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
-//   private final BipedalSupportPlanarRegionCalculator supportPlanarRegionCalculator;
+   //   private final BipedalSupportPlanarRegionCalculator supportPlanarRegionCalculator;
 
    private final BoundingBoxCollisionDetector collisionDetector;
 
    private final SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
+
+   private final RecyclingArrayList<PlanarRegion> regionsSnapped = new RecyclingArrayList<>(PlanarRegion::new);
+   private final YoFrameConvexPolygon2D[] concaveRegionHulls = new YoFrameConvexPolygon2D[numberOfRegionsToVisualize];
+   private final YoFramePose3D[] concaveRegionPoses = new YoFramePose3D[numberOfRegionsToVisualize];
 
    // temp variables
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
    private final PlanarRegion tempRegion = new PlanarRegion();
 
-   public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters,
-                                                         SteppingParameters steppingParameters)
+   public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters, SteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
+      shouldVisualizeSnappedRegions = new YoBoolean("shouldVisualizeSnappedRegions", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
+
+      shouldVisualizeSnappedRegions.set(true);
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(robotSide);
          footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
+      }
+
+      for (int i = 0; i < numberOfRegionsToVisualize; i++)
+      {
+         concaveRegionHulls[i] = new YoFrameConvexPolygon2D("concaveRegionHull" + i, ReferenceFrame.getWorldFrame(), 20, registry);
+         concaveRegionPoses[i] = new YoFramePose3D("concaveRegionPose" + i, ReferenceFrame.getWorldFrame(), registry);
+         YoGraphicPolygon graphicPolygon = new YoGraphicPolygon("concaveRegionHull" + i,
+                                                                concaveRegionHulls[i],
+                                                                concaveRegionPoses[i],
+                                                                1.0,
+                                                                YoAppearance.Blue());
+
+         graphicsListRegistry.registerYoGraphic("Environmental Constraints", graphicPolygon);
       }
 
       stepSnapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsCalculator)
@@ -81,7 +111,27 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
             if (!shouldSnapToRegions.getValue())
                return true;
 
-            return super.adjustFootstep(stanceFootPose, footstepPose, footSide, adjustedPoseToPack);
+            boolean snapped = super.adjustFootstep(stanceFootPose, footstepPose, footSide, adjustedPoseToPack);
+
+            // stash these for visualization purposes.
+            if (shouldSnapToRegions.getValue() && regionsSnapped.size() < numberOfRegionsToVisualize)
+            {
+               for (int i = 0; i < regionsSnapped.size(); i++)
+               {
+                  if (regionsSnapped.get(i).epsilonEquals(regionToSnapTo, 1e-2))
+                     return snapped;
+               }
+
+               regionsSnapped.add().set(regionToSnapTo);
+
+               int index = regionsSnapped.size() - 1;
+               concaveRegionHulls[index].set(regionToSnapTo.getConvexHull());
+               regionToSnapTo.transformFromLocalToWorld(concaveRegionHulls[index]);
+
+               concaveRegionPoses[index].set(regionToSnapTo.getTransformToWorld());
+            }
+
+            return snapped;
          }
       };
 
@@ -104,6 +154,23 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    }
 
    @Override
+   public void update(double timeInState)
+   {
+      reset();
+   }
+
+   public void reset()
+   {
+      for (int i = 0; i < numberOfRegionsToVisualize; i++)
+      {
+         concaveRegionHulls[i].clear();
+         concaveRegionPoses[i].setToNaN();
+      }
+
+      regionsSnapped.clear();
+   }
+
+   @Override
    public void accept(PlanarRegionsListCommand planarRegionsListCommand)
    {
       steppableRegionsCalculator.consume(planarRegionsListCommand);
@@ -115,6 +182,11 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       return registry;
    }
 
+   public YoGraphicsListRegistry getGraphicsListRegistry()
+   {
+      return graphicsListRegistry;
+   }
+
    public FootstepAdjustment getFootstepAdjustment()
    {
       return stepSnapper;
@@ -124,7 +196,6 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    {
       return footstepValidityIndicators;
    }
-
 
    private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
