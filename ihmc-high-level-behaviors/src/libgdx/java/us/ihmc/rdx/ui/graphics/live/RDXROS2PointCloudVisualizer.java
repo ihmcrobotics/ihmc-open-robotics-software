@@ -23,6 +23,7 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -45,7 +46,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private final ROS2Topic<?> topic;
    private IHMCROS2Callback<?> ros2Callback = null;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
-   private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
+   private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
@@ -143,6 +144,8 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
          FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
          if (fusedMessage != null)
          {
+            segmentIndexPlot.addValue((int) fusedMessage.getSegmentIndex());
+
             if (pointsPerSegment != fusedMessage.getPointsPerSegment())
             {
                pointsPerSegment = fusedMessage.getPointsPerSegment();
@@ -267,7 +270,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
       ImGui.popItemWidth();
       frequencyPlot.renderImGuiWidgets();
-      segmentIndexPlot.render(pointCloudRenderer.getCurrentSegmentIndex());
+      segmentIndexPlot.renderImGuiWidgets();
    }
 
    @Override
