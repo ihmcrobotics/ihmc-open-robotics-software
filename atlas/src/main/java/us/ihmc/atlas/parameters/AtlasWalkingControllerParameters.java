@@ -8,7 +8,6 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
@@ -439,12 +438,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public String[] getJointsToIgnoreInController()
    {
       return new String[0];
-   }
-
-   @Override
-   public String[] getInactiveJoints()
-   {
-      return new String[] {jointMap.getArmJointName(RobotSide.LEFT, ArmJointName.SECOND_WRIST_PITCH)};
    }
 
    @Override
