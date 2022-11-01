@@ -110,6 +110,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private static final double positionEpsilon = 0.1;
    private BehaviorHelper behaviorHelper;
    private boolean doLookAndStep = false;
+   private LookAndStepBehaviorParameters lookAndStepBehaviorParameters;
+   private TypedNotification<Pose3D> goalConfirmedNotification;
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
@@ -159,6 +161,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
+      setupLookAndStep();
    }
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -271,7 +274,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                                          new Pose3D(rightGoalFootPose));
             case TURN_WALK_TURN -> planFootstepsUsingTurnWalkTurnPlanner();
             case TURN_STRAIGHT_TURN -> planFootstepsUsingTurnStraightTurnFootstepGenerator();
-            case LOOK_AND_STEP -> setupLookAndStep();
+//            case LOOK_AND_STEP -> setupLookAndStep();
          }
          doLookAndStep = footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.LOOK_AND_STEP;
       });
@@ -335,19 +338,17 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       boolean enableROS1 = false;
       behaviorHelper = new BehaviorHelper("Look and Step Test", robotModel, ros2Node, enableROS1);
       behaviorHelper.getMessagerHelper().connectViaSharedMemory(BehaviorModule.getSharedMemoryMessager());
-
-//      ThreadTools.sleepSeconds(5.0);
-   }
-
-   public void publishLookAndStep()
-   {
-      TypedNotification<Boolean> operatorReviewToggleNotification = behaviorHelper.subscribeViaNotification(LookAndStepBehaviorAPI.OperatorReviewEnabledToUI);
-      TypedNotification<Pose3D> goalConfirmedNotification = behaviorHelper.subscribeViaNotification(LookAndStepBehaviorAPI.GoalForUI);
+//      TypedNotification<Boolean> operatorReviewToggleNotification = behaviorHelper.subscribeViaNotification(LookAndStepBehaviorAPI.OperatorReviewEnabledToUI);
+      goalConfirmedNotification = behaviorHelper.subscribeViaNotification(LookAndStepBehaviorAPI.GoalForUI);
 
       LookAndStepBehaviorParameters lookAndStepBehaviorParameters = getUpdatingLookAndStepBehaviorParameters(behaviorHelper);
       lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.goalSatisfactionRadius, positionEpsilon);
       updateLookAndStepBehaviorParameters(behaviorHelper, lookAndStepBehaviorParameters);
+      //      ThreadTools.sleepSeconds(5.0);
+   }
 
+   public void publishLookAndStep()
+   {
       if (!goalConfirmedNotification.poll())
       {
          behaviorHelper.publish(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(goalPose));
