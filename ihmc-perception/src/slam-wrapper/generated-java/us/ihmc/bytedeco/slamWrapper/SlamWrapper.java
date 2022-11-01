@@ -73,9 +73,19 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(FloatBuffer lmVariances);
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
 
+        public native void addGenericProjectionFactor(FloatPointer point, int lmId, int poseIndex);
+        public native void addGenericProjectionFactor(FloatBuffer point, int lmId, int poseIndex);
+        public native void addGenericProjectionFactor(float[] point, int lmId, int poseIndex);
+
+        public native void setPointLandmarkInitialValue(int landmarkId, FloatPointer value);
+        public native void setPointLandmarkInitialValue(int landmarkId, FloatBuffer value);
+        public native void setPointLandmarkInitialValue(int landmarkId, float[] value);
+
         public native void printResults();
 
         public native void helloWorldTest();
+
+        public native void visualSLAMTest();
 }
 
 }

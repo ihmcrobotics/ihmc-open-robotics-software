@@ -32,9 +32,15 @@ class FactorGraphExternal
         // Expects packed Vector3
         void createOrientedPlaneNoiseModel(float* lmVariances);
 
+        void addGenericProjectionFactor(float *point, int lmId, int poseIndex);
+
+        void setPointLandmarkInitialValue(int landmarkId, float* value);
+
         void printResults();
 
         void helloWorldTest();
+
+        void visualSLAMTest();
 
     private:
         FactorGraphHandler factorGraphHandler;

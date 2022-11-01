@@ -49,6 +49,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
 
    api("us.ihmc:ihmc-perception-mapsense-wrapper:source")
+   api("us.ihmc:ihmc-perception-slam-wrapper:source")
 }
 
 openpnpDependencies {

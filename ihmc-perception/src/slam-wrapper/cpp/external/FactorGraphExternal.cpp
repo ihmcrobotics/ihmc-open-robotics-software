@@ -18,6 +18,16 @@ void FactorGraphExternal::addOrientedPlaneFactor(float *lmMean, int lmId, int po
 {
 }
 
+void FactorGraphExternal::addGenericProjectionFactor(float *point, int lmId, int poseIndex)
+{
+    factorGraphHandler.addGenericProjectionFactor(gtsam::Point2(point[0], point[1]), lmId, poseIndex);
+}
+
+void FactorGraphExternal::setPointLandmarkInitialValue(int landmarkId, float* value)
+{
+    factorGraphHandler.setPointLandmarkInitialValue(landmarkId, {value[0], value[1], value[2]});
+}
+
 void FactorGraphExternal::optimize()
 {
     factorGraphHandler.optimize();
@@ -65,4 +75,9 @@ void FactorGraphExternal::helloWorldTest()
     {
        std::cout << "Hello " << i << std::endl;
     }
+}
+
+void FactorGraphExternal::visualSLAMTest()
+{
+    factorGraphHandler.VisualSLAMTest();
 }
