@@ -1,18 +1,26 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class StepGeneratorCommandInputManager implements Updatable
@@ -27,7 +35,13 @@ public class StepGeneratorCommandInputManager implements Updatable
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
-   private List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+   private final AtomicReference<FootstepStatus> latestFootstepStatusReceived = new AtomicReference<>(null);
+   private final AtomicReference<FootstepStatus> previousFootstepStatusReceived = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegionsListCommand> latestPlanarRegions = new AtomicReference<>(null);
+   private final AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>(null);
+   private final AtomicReference<WalkingStatus> previousWalkingStatus = new AtomicReference<>(null);
+   private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
 
    public StepGeneratorCommandInputManager()
    {
@@ -62,6 +76,43 @@ public class StepGeneratorCommandInputManager implements Updatable
       currentController = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
    }
 
+   public void setWalkingStatus(WalkingStatusMessage message)
+   {
+      latestWalkingStatus.set(WalkingStatus.fromByte(message.getWalkingStatus()));
+   }
+
+   public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
+   {
+      statusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::consumeFootstepStatus);
+   }
+
+   public void consumeFootstepStatus(FootstepStatusMessage statusMessage)
+   {
+      FootstepStatus status = FootstepStatus.fromByte(statusMessage.getFootstepStatus());
+      if (status == FootstepStatus.COMPLETED)
+         notifyFootstepCompleted(RobotSide.fromByte(statusMessage.getRobotSide()));
+      else if (status == FootstepStatus.STARTED)
+         notifyFootstepStarted();
+   }
+
+   public void notifyFootstepCompleted(RobotSide robotSide)
+   {
+      latestFootstepStatusReceived.set(FootstepStatus.COMPLETED);
+   }
+
+   /**
+    * Notifies this generator that a footstep has been started, i.e. the foot started swinging.
+    * <p>
+    * It is used internally to mark the first generated footstep as unmodifiable so it does not change
+    * while the swing foot is targeting it.
+    * </p>
+    */
+   public void notifyFootstepStarted()
+   {
+      latestFootstepStatusReceived.set(FootstepStatus.STARTED);
+   }
+
+
    @Override
    public void update(double time)
    {
@@ -93,13 +144,32 @@ public class StepGeneratorCommandInputManager implements Updatable
       }
       commandInputManager.clearCommands(ContinuousStepGeneratorParametersCommand.class);
 
+      // update the local planar regions
       if (commandInputManager.isNewCommandAvailable(PlanarRegionsListCommand.class))
       {
-         PlanarRegionsListCommand command = commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class);
+         latestPlanarRegions.set(commandInputManager.pollNewestCommand(PlanarRegionsListCommand.class));
+      }
+      commandInputManager.clearCommands(PlanarRegionsListCommand.class);
+
+      // if the robot is standing, we should submit the newest regions
+      if (latestWalkingStatus.get() == WalkingStatus.COMPLETED)
+         shouldSubmitNewRegions.set(true);
+
+      // if we just finished a step, we need to resend the regions.
+      if (latestFootstepStatusReceived.get() != previousFootstepStatusReceived.get() && latestFootstepStatusReceived.get() == FootstepStatus.COMPLETED)
+         shouldSubmitNewRegions.set(true);
+
+      // submit the new planar regions
+      if (isOpen && shouldSubmitNewRegions.getAndSet(false) && latestPlanarRegions.get() != null)
+      {
+         PlanarRegionsListCommand command = latestPlanarRegions.getAndSet(null);
+
          for (int i = 0; i < planarRegionsListCommandConsumers.size(); i++)
             planarRegionsListCommandConsumers.get(i).accept(command);
       }
-      commandInputManager.clearCommands(PlanarRegionsListCommand.class);
+
+      previousWalkingStatus.set(latestWalkingStatus.get());
+      previousFootstepStatusReceived.set(latestFootstepStatusReceived.get());
 
       if (!isOpen)
          walk = false;
