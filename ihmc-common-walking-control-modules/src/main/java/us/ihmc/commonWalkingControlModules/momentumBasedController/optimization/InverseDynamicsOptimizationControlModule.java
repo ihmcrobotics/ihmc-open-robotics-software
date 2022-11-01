@@ -504,5 +504,19 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.setJerkRegularizationWeight(command.getJointJerkWeight());
       if (command.hasJointTorqueWeight())
          qpSolver.setJointTorqueWeight(command.getJointTorqueWeight());
+      for (int i = 0; i < command.getJointsToActivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToActivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         inactiveJointIndices.remove(jointIndex);
+      }
+      for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToDeactivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         // Prevent duplicates in the list.
+         if (!inactiveJointIndices.contains(jointIndex))
+            inactiveJointIndices.add(jointIndex);
+      }
    }
 }
