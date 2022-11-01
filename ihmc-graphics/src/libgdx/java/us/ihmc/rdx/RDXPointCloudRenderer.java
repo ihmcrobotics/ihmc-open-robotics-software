@@ -73,6 +73,8 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
    public void create(int pointsPerSegment, int numberOfSegments)
    {
+      currentSegmentIndex = 0;
+      hasTurnedOver = false;
       this.pointsPerSegment = pointsPerSegment;
       this.numberOfSegments = numberOfSegments;
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -281,7 +283,7 @@ public class RDXPointCloudRenderer implements RenderableProvider
    public void updateMeshFastestAfterKernel()
    {
       ++currentSegmentIndex;
-      if (currentSegmentIndex == numberOfSegments)
+      if (currentSegmentIndex >= numberOfSegments)
       {
          hasTurnedOver = true;
          currentSegmentIndex = 0;
