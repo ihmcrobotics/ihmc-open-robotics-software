@@ -62,11 +62,14 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
-      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
-                                                                                {
-                                                                                   ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
-                                                                                   return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
-                                                                                });
+
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(robotSide);
+         footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
+      }
+
       stepSnapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsCalculator)
       {
          @Override
