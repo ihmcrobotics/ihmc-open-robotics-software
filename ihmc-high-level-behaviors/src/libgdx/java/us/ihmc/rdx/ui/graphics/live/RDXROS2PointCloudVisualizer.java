@@ -18,6 +18,7 @@ import org.bytedeco.opencl._cl_program;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -159,6 +160,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
                                                               pointCloudRenderer.getVertexBuffer());
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+               LogTools.info("Allocated new buffers. {} points per segment. {} segments.", pointsPerSegment, numberOfSegments);
             }
 
             if (fusedMessage.getSegmentIndex() == pointCloudRenderer.getCurrentSegmentIndex())
