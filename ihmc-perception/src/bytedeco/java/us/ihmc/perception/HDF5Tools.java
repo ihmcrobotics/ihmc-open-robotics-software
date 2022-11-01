@@ -1,19 +1,20 @@
 package us.ihmc.perception;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.bytedeco.javacpp.*;
 import org.bytedeco.hdf5.*;
-import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
-import static org.bytedeco.hdf5.global.hdf5.*;
+import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
+import static org.bytedeco.hdf5.global.hdf5.H5O_TYPE_GROUP;
 
 public class HDF5Tools
 {
@@ -31,16 +32,18 @@ public class HDF5Tools
    static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
    static final String L515_COLOR = "/chest_l515/color/image_rect_raw";
 
-   private static int extractShape(DataSet dataSet, int dim) {
+   private static int extractShape(DataSet dataSet, int dim)
+   {
       DataSpace space = dataSet.getSpace();
       int nbDims = space.getSimpleExtentNdims();
       long[] shape = new long[nbDims];
       space.getSimpleExtentDims(shape);
-      if(dim < nbDims)
+      if (dim < nbDims)
       {
          return (int) shape[dim];
       }
-      else return 0;
+      else
+         return 0;
    }
 
    public static void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> points)
@@ -52,10 +55,10 @@ public class HDF5Tools
       p.get(pointsBuffer);
 
       points.clear();
-      for(int i = 0; i<pointsBuffer.length; i+=3)
+      for (int i = 0; i < pointsBuffer.length; i += 3)
       {
          Point3D32 point = points.add();
-         point.set(pointsBuffer[i], pointsBuffer[i+1], pointsBuffer[i+2]);
+         point.set(pointsBuffer[i], pointsBuffer[i + 1], pointsBuffer[i + 2]);
       }
    }
 
@@ -70,7 +73,6 @@ public class HDF5Tools
 
       return byteArray;
    }
-
 
    public static void loadImage(Group group, int index, Mat mat)
    {
@@ -87,7 +89,7 @@ public class HDF5Tools
       long[] dims = {points.size(), PCD_POINT_SIZE};
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
       float[] buf = new float[points.size() * PCD_POINT_SIZE];
-      for (int i = 0; i <  points.size(); i++)
+      for (int i = 0; i < points.size(); i++)
       {
          buf[i * PCD_POINT_SIZE] = points.get(i).getX32();
          buf[i * PCD_POINT_SIZE + 1] = points.get(i).getY32();
@@ -119,7 +121,7 @@ public class HDF5Tools
    {
       ArrayList<String> names = new ArrayList<>();
 
-      for(int i = 0; i<file.getNumObjs(); i++)
+      for (int i = 0; i < file.getNumObjs(); i++)
       {
          String obj = file.getObjnameByIdx(i).getString();
          Group group = file.openGroup(obj);
@@ -129,14 +131,14 @@ public class HDF5Tools
       return names;
    }
 
-
-
    public static void exploreH5(Group group, ArrayList<String> names, String prefix)
    {
       int count = 0;
-      for (int i = 0; i < group.getNumObjs(); i++) {
+      for (int i = 0; i < group.getNumObjs(); i++)
+      {
          BytePointer objPtr = group.getObjnameByIdx(i);
-         if (group.childObjType(objPtr) == H5O_TYPE_GROUP) {
+         if (group.childObjType(objPtr) == H5O_TYPE_GROUP)
+         {
             count++;
             String grpName = group.getObjnameByIdx(i).getString();
             Group grp = group.openGroup(grpName);
@@ -150,7 +152,7 @@ public class HDF5Tools
          //         System.out.println("ExploreH5: " + group.getObjnameByIdx(i).getString());
       }
 
-      if(count == 0)
+      if (count == 0)
       {
          System.out.println("Prefix: " + prefix);
          names.add(prefix);
@@ -159,7 +161,7 @@ public class HDF5Tools
 
    public static void storeFloatArray2D(Group group, long index, ArrayList<Float> data, int rows, int cols)
    {
-      long[] dims = { rows, cols };
+      long[] dims = {rows, cols};
 
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
       float[] dataObject = ArrayUtils.toPrimitive(data.toArray(new Float[0]), 0.0F);
@@ -178,8 +180,8 @@ public class HDF5Tools
 
    public static void storeMatrix(Group group, double[] data)
    {
-      long[] dims = { 5, 5 };
-      if(group.nameExists(String.valueOf(0)))
+      long[] dims = {5, 5};
+      if (group.nameExists(String.valueOf(0)))
       {
          DataSet dataset = group.openDataSet(String.valueOf(0));
          dataset.write(new DoublePointer(data), new DataType(PredType.NATIVE_DOUBLE()));
@@ -192,7 +194,8 @@ public class HDF5Tools
       }
    }
 
-   public static void main(String[] args) {
+   public static void main(String[] args)
+   {
       String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
       H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
 
