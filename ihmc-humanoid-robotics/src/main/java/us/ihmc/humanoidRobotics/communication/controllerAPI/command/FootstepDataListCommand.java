@@ -192,6 +192,11 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       return trustHeightOfFootsteps;
    }
 
+   public void setAreFootstepsAdjustable(boolean areFootstepsAdjustable)
+   {
+      this.areFootstepsAdjustable= areFootstepsAdjustable ;
+   }
+
    public boolean areFootstepsAdjustable()
    {
       return areFootstepsAdjustable;

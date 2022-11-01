@@ -35,7 +35,7 @@ public class RDXModelScalingDemo
             baseUI.getPrimaryScene().addRenderableProvider(scaledModel::getRenderables);
 
             ModelInstance sphere = RDXModelBuilder.createSphere(0.015f, Color.RED);
-            LibGDXTools.toGDX(scaledModel.getWholeModelCentroid(), sphere.transform);
+            LibGDXTools.toLibGDX(scaledModel.getWholeModelCentroid(), sphere.transform);
             LogTools.info(scaledModel.getWholeModelCentroid());
             baseUI.getPrimaryScene().addModelInstance(sphere);
 
@@ -55,7 +55,7 @@ public class RDXModelScalingDemo
                scaledModel.scale(scale.get());
             }
 
-            LibGDXTools.toGDX(gizmo.getTransformToParent(), scaledModel.getPoseTransform());
+            LibGDXTools.toLibGDX(gizmo.getTransformToParent(), scaledModel.getPoseTransform());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

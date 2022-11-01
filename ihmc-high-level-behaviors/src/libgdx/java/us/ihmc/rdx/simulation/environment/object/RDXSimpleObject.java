@@ -124,7 +124,7 @@ public class RDXSimpleObject
    public void setCollisionModel(Consumer<RDXMultiColorMeshBuilder> meshBuilderConsumer)
    {
       Model collisionGraphic = RDXModelBuilder.buildModel(meshBuilderConsumer, pascalCasedName + "CollisionModel" + getObjectIndex());
-      LibGDXTools.setTransparency(collisionGraphic, 0.4f);
+      LibGDXTools.setOpacity(collisionGraphic, 0.4f);
       setCollisionModel(collisionGraphic);
    }
 
@@ -137,7 +137,7 @@ public class RDXSimpleObject
       {
          setCollisionModel(meshBuilder ->
          {
-            Color color = LibGDXTools.toGDX(YoAppearance.LightSkyBlue());
+            Color color = LibGDXTools.toLibGDX(YoAppearance.LightSkyBlue());
             if (collisionGeometryObject instanceof Box3D)
             {
                Box3D box3D = (Box3D) collisionGeometryObject;
@@ -226,10 +226,10 @@ public class RDXSimpleObject
       collisionModelFrame.update();
 
       placementFramePose.setFromReferenceFrame(realisticModelFrame);
-      LibGDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
+      LibGDXTools.toLibGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
-      LibGDXTools.toGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
+      LibGDXTools.toLibGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
       if (collisionGeometryObject.getPose() == null)
       {
          if (collisionGeometryObject instanceof Sphere3D)
@@ -293,6 +293,6 @@ public class RDXSimpleObject
    public void setCollisionModelColor(ColorAttribute color, float transparency)
    {
       this.collisionModelInstance.materials.get(0).set(color);
-      this.collisionModelInstance.setTransparency(transparency);
+      this.collisionModelInstance.setOpacity(transparency);
    }
 }

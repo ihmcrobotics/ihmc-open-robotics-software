@@ -60,7 +60,7 @@ public class RDXLibGDXBulletPhysicsDemo4
                                                                         new Point3D(0.0, 0.0, -0.0));
             groundTransform.appendTranslation(0.0, 0.0, -0.25);
             Matrix4 groundTransformGDX = new Matrix4();
-            LibGDXTools.toGDX(groundTransform, groundTransformGDX);
+            LibGDXTools.toLibGDX(groundTransform, groundTransformGDX);
             world.add("ground", groundTransformGDX);
 
             int numberOfPolytopes = 6;
@@ -79,7 +79,7 @@ public class RDXLibGDXBulletPhysicsDemo4
 
                RigidBodyTransform polytopeTransform = new RigidBodyTransform(new YawPitchRoll(yaw, pitch, roll), new Point3D(x, y, z));
                Matrix4 polytopeTransformGDX = new Matrix4();
-               LibGDXTools.toGDX(polytopeTransform, polytopeTransformGDX);
+               LibGDXTools.toLibGDX(polytopeTransform, polytopeTransformGDX);
                world.add("poloytope", polytopeTransformGDX);
             }
             

@@ -328,11 +328,11 @@ public class RDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       centerFrameCoordinateFramePose.setToZero(centerXThroughZUpFrame);
       centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       centerFrameCoordinateFramePose.get(tempTransform);
-      LibGDXTools.toGDX(tempTransform, centerFrameCoordinateFrame.transform);
+      LibGDXTools.toLibGDX(tempTransform, centerFrameCoordinateFrame.transform);
       graphicsFrameCoordinateFramePose.setToZero(graphicsXRightYDownFrame);
       graphicsFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       graphicsFrameCoordinateFramePose.get(tempTransform);
-      LibGDXTools.toGDX(tempTransform, graphicsFrameCoordinateFrame.transform);
+      LibGDXTools.toLibGDX(tempTransform, graphicsFrameCoordinateFrame.transform);
    }
 
    @Override
@@ -360,7 +360,7 @@ public class RDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       plane.setToZero();
       plane.getNormal().set(Axis3D.X);
       plane.applyTransform(transform);
-      LibGDXTools.toGDX(transform, modelInstance.transform);
+      LibGDXTools.toLibGDX(transform, modelInstance.transform);
       centerXThroughZUpFrame.update();
 
       desiredPose.setToZero(centerXThroughZUpFrame);
