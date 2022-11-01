@@ -295,6 +295,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    }
 
    @Override
+   public MovingReferenceFrame getPerceptionHeadFrame()
+   {
+      return getChestFrame();
+   }
+
+   @Override
    public MovingReferenceFrame getPelvisFrame()
    {
       return pelvisFrame;
