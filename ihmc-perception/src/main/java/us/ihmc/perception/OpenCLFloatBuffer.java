@@ -45,7 +45,7 @@ public class OpenCLFloatBuffer
       this.numberOfFloats = numberOfFloats;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
-      destroy(openCLManager);
+      destroy(openCLManager); // TODO: Is this breaking things? Possible bug.
 
       if (backingDirectFloatBuffer == null)
       {

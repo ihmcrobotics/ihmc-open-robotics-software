@@ -48,7 +48,7 @@ public class OpenCLIntBuffer
       this.numberOfIntegers = numberOfIntegers;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
-      destroy(openCLManager);
+      destroy(openCLManager); // TODO: Is this breaking things? Possible bug.
 
       if (backingDirectIntBuffer == null)
       {

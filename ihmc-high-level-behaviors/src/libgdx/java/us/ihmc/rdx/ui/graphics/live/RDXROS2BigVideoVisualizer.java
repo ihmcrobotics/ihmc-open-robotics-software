@@ -78,7 +78,7 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
                inputJPEGMat.data(messageEncodedBytePointer);
 
                if (messageSizeStatusThrottler.run(1.0))
-               {
+               { // Only doing this at 1 Hz to improve readability and because String building and formatting is expensive to do every tick
                   String kilobytes = FormattingTools.getFormattedDecimal1D((double) numberOfBytes / 1000.0);
                   messageSizeString = String.format("Message size: ~%s KB", kilobytes);
                }
