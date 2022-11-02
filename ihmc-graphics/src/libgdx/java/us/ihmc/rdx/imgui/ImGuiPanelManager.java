@@ -22,11 +22,6 @@ public class ImGuiPanelManager
       panels.add(new ImGuiPanel(windowName, render));
    }
 
-   public void removePanel(ImGuiPanel panel)
-   {
-      panels.remove(panel);
-   }
-
    public void addSelfManagedPanel(String windowName)
    {
       panels.add(new ImGuiPanel(windowName));
