@@ -30,7 +30,6 @@ public class RDXFFMPEGPlaybackDemo
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
    private RDXCVImagePanel imagePanel;
-   private RDXCVImagePanel oldImagePanel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FFMPEGVideoPlaybackManager video;
    private boolean videoReload;
@@ -71,14 +70,9 @@ public class RDXFFMPEGPlaybackDemo
 
             if (videoReload)
             {
-               if (oldImagePanel != null)
-                  baseUI.getImGuiPanelManager().removePanel(oldImagePanel.getVideoPanel());
-
+               videoReload = false;
                baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
                baseUI.getPerspectiveManager().reloadPerspective();
-
-               oldImagePanel = null;
-               videoReload = false;
             }
          }
 
@@ -87,15 +81,14 @@ public class RDXFFMPEGPlaybackDemo
             if (video != null)
             {
                video.close();
-               oldImagePanel = imagePanel;
             }
 
             video = new FFMPEGVideoPlaybackManager(file);
-
-            imagePanel = new RDXCVImagePanel("Playback Video", video.getImage());
-
+            if (imagePanel == null)
+               imagePanel = new RDXCVImagePanel("Playback Video", video.getImage());
+            else
+               imagePanel.resize(video.getImage());
             video.play();
-
             videoReload = true;
          }
 
