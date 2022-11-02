@@ -12,8 +12,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -30,6 +30,7 @@ import us.ihmc.scs2.sessionVisualizer.jfx.managers.BackgroundExecutorManager;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ScheduledExecutorService;
@@ -40,11 +41,10 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 
 public class PerceptionDataLogger
 {
-   static final String FILE_NAME = "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5";
-   private final HDF5Manager hdf5Manager;
+   private HDF5Manager hdf5Manager;
 
-   private final ROS2Node ros2Node;
-   private final RealtimeROS2Node realtimeROS2Node;
+   private ROS2Node ros2Node;
+   private RealtimeROS2Node realtimeROS2Node;
 
    private final CommunicationMode communicationMode;
 
@@ -70,47 +70,59 @@ public class PerceptionDataLogger
                                                                                                   getClass(),
                                                                                                   ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
    private final BackgroundExecutorManager executor = new BackgroundExecutorManager(1);
+   private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
 
    private int depthMessageCounter = 0;
    private int compressedImageCounter = 0;
+   private ROS2ControllerHelper ros2Helper;
 
    public PerceptionDataLogger()
    {
       communicationMode = CommunicationMode.INTERPROCESS;
+   }
 
-      File f = new File(FILE_NAME);
+   public void startLogging(String logFileName, String simpleRobotName)
+   {
+      File f = new File(logFileName);
       if (!f.exists() && !f.isDirectory())
       {
 
-         LogTools.info("Creating HDF5 File: " + FILE_NAME);
-         hdf5Manager = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
-         hdf5Manager.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
+         LogTools.info("Creating HDF5 File: " + logFileName);
+         hdf5Manager = new HDF5Manager(logFileName, H5F_ACC_TRUNC);
+         hdf5Manager.getFile().openFile(logFileName, H5F_ACC_RDWR);
       }
       else
       {
-         LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
-         hdf5Manager = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
+         LogTools.info("Opening Existing HDF5 File: " + logFileName);
+         hdf5Manager = new HDF5Manager(logFileName, H5F_ACC_RDWR);
       }
 
       // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
       ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception_logger_node");
+      ros2Helper = new ROS2ControllerHelper(ros2Node, simpleRobotName);
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
 
       // Add callback for Ouster scans
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.OUSTER_POINT_CLOUD.withType(FusedSensorHeadPointCloudMessage.class), this::logLidarScanMessage);
+      var ousterSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_POINT_CLOUD);
+      ousterSubscription.addCallback(this::logLidarScanMessage);
+      runnablesToStopLogging.addLast(ousterSubscription::destroy);
 
       // Add callback for Robot Configuration Data
-      new IHMCROS2Callback<>(ros2Node, RobotConfigurationData.class, ROS2Tools.getRobotConfigurationDataTopic("Nadia"), this::logRobotConfigurationData);
+      var robotConfigurationDataSubscription = ros2Helper.subscribeToRobotConfigurationData();
+      robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
+      runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
 
       // Add callback for L515 Depth maps
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.L515_DEPTH, ROS2QosProfile.BEST_EFFORT(), subscriber ->
       {
-            depthVideoPacket.getData().resetQuick();
-            subscriber.takeNextData(depthVideoPacket, depthSampleInfo);
-            logDepthMap(depthVideoPacket);
+         depthVideoPacket.getData().resetQuick();
+         subscriber.takeNextData(depthVideoPacket, depthSampleInfo);
+         logDepthMap(depthVideoPacket);
       });
 
       realtimeROS2Node.spin();
+
+      runnablesToStopLogging.addLast(realtimeROS2Node::destroy);
 
       //      "D435 Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420
 
@@ -120,6 +132,14 @@ public class PerceptionDataLogger
       //      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
 
       executorService.scheduleAtFixedRate(this::collectStatistics, 0, 10, TimeUnit.MILLISECONDS);
+   }
+
+   public void stopLogging()
+   {
+      while (!runnablesToStopLogging.isEmpty())
+      {
+         runnablesToStopLogging.pollFirst().run();
+      }
    }
 
    public void collectStatistics()
@@ -282,9 +302,6 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
-
-      PerceptionDataLogger logger = new PerceptionDataLogger();
-
       //        HDF5Manager h5;
       //        File f = new File(FILE_NAME);
       //        if (!f.exists() && !f.isDirectory()) {
