@@ -82,6 +82,8 @@ public class FFMPEGLogger
       boolean isJustAlphaToNonAlpha = sourceAVPixelFormat == avutil.AV_PIX_FMT_RGBA && encoderPixelFormat == avutil.AV_PIX_FMT_RGB0;
       encoderFormatConversionNecessary = sourceAVPixelFormat != encoderAVPixelFormat && !isJustAlphaToNonAlpha;
 
+      avutil.av_log_set_level(avutil.AV_LOG_WARNING);
+
       LogTools.info("Initializing ffmpeg contexts for {} output to {}", formatName, fileName);
 
       int avDictFlags = 0;

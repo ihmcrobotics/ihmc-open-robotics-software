@@ -39,6 +39,8 @@ public class FFMPEGFileReader
 
    public FFMPEGFileReader(String file)
    {
+      avutil.av_log_set_level(avutil.AV_LOG_WARNING);
+
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
       FFMPEGTools.checkNonZeroError(avformat.avformat_open_input(avFormatContext, file, null, null), "Initializing format context");
