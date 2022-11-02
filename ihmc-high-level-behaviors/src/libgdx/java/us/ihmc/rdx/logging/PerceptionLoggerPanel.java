@@ -8,6 +8,8 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 
 import java.nio.FloatBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class PerceptionLoggerPanel extends ImGuiPanel
@@ -23,8 +25,6 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    private ImInt topicIndex = new ImInt(0);
    private ImInt objectIndex = new ImInt(0);
 
-   static final String PERCEPTION_LOG_FILE = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5";
-
    private String currentTopic;
 
    private int numDatasetsInCurrentGroup = 0;
@@ -33,14 +33,24 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    public PerceptionLoggerPanel(String panelName)
    {
       super(panelName);
+   }
 
-      loader = new PerceptionDataLoader(PERCEPTION_LOG_FILE);
-      topicNames = HDF5Tools.getTopicNames(loader.getHDF5Manager().getFile());
-      for (String topic : topicNames)
+   public void loadLog(String perceptionLogFile)
+   {
+      if (Files.exists(Paths.get(perceptionLogFile)))
       {
-         topicObjectCounts.add((int) loader.getHDF5Manager().getCount(topic));
+         loader = new PerceptionDataLoader(perceptionLogFile);
+         topicNames = HDF5Tools.getTopicNames(loader.getHDF5Manager().getFile());
+         for (String topic : topicNames)
+         {
+            topicObjectCounts.add((int) loader.getHDF5Manager().getCount(topic));
+         }
+         setRenderMethod(this::renderImguiWidgets);
       }
-      setRenderMethod(this::renderImguiWidgets);
+      else
+      {
+         LogTools.warn("Log file does not exist: {}", perceptionLogFile);
+      }
    }
 
    public void setPointCloudRenderer(RDXPointCloudRenderer pclRenderer)
