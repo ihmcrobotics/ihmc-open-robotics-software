@@ -32,22 +32,19 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.behavior.behaviors.RDXLookAndStepBehaviorUI;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
-import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -155,6 +152,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
                                                                                 soleFrames,
                                                                                 new FramePose2D(),
                                                                                 this);
+
    }
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
@@ -319,14 +317,14 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       if (behaviorHelper == null)
       {
          LogTools.info("Setting up look and step");
-         RDXBehaviorUIDefinition highestLevelNode = RDXLookAndStepBehaviorUI.DEFINITION;
-         RDXBehaviorUIDefinition[] entries = new RDXBehaviorUIDefinition[] {RDXLookAndStepBehaviorUI.DEFINITION};
-         RDXBehaviorUIRegistry behaviorRegistry = RDXBehaviorUIRegistry.of(highestLevelNode, entries);
-         behaviorRegistry.activateRegistry();
+//         RDXBehaviorUIDefinition highestLevelNode = RDXLookAndStepBehaviorUI.DEFINITION;
+//         RDXBehaviorUIDefinition[] entries = new RDXBehaviorUIDefinition[] {RDXLookAndStepBehaviorUI.DEFINITION};
+//         RDXBehaviorUIRegistry behaviorRegistry = RDXBehaviorUIRegistry.of(highestLevelNode, entries);
+//         behaviorRegistry.activateRegistry();
 
          lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
 
-         ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "look_and_step_behavior_test");
+         ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTRAPROCESS.getPubSubImplementation(), "look_and_step_behavior_test");
          boolean enableROS1 = false;
          behaviorHelper = new BehaviorHelper("Look and Step Test", robotModel, ros2Node, enableROS1);
          behaviorHelper.getMessagerHelper().connectViaSharedMemory(BehaviorModule.getSharedMemoryMessager());
