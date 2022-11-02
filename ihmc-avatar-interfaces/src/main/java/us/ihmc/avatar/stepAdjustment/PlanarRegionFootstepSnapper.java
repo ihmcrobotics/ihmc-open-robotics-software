@@ -50,6 +50,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
    protected final PlanarRegion regionToSnapTo = new PlanarRegion();
 
+   private PlanarRegionSnapperCallback planarRegionSnapperCallback;
 
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons, SteppableRegionsProvider steppableRegionsProvider)
    {
@@ -106,6 +107,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
              * It's fine if the snap & wiggle fails, can be because there are no planar regions around the footstep.
              * Let's just keep the adjusted footstep based on the pose of the current stance foot.
              */
+            adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
          }
          adjustedPoseToPack.set(adjustedFootstepPose);
          return true;
@@ -124,6 +126,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    public boolean snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
+      if (planarRegionSnapperCallback != null)
+         planarRegionSnapperCallback.advanceFootIndex();
+
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
          snappedFootstepPolygonToPack.clear();
@@ -144,6 +149,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          PlanarRegion closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
          footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
          snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
+
+         if (planarRegionSnapperCallback != null)
+            planarRegionSnapperCallback.footPoseIsOnBoundary();
+
          return true;
       }
 
@@ -177,6 +186,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       solePoseToSnapAndWiggle.setZ(0.0);
       solePoseToSnapAndWiggle.applyTransform(snapTransform);
 
+      if (planarRegionSnapperCallback != null)
+         planarRegionSnapperCallback.recordSnapTransform(snapTransform, regionToSnapTo);
+
       planarRegionFrame.setPoseAndUpdate(regionToSnapTo.getTransformToWorld());
       soleFrameAfterSnapAndBeforeWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
 
@@ -194,6 +206,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          solePoseToSnapAndWiggle.changeFrame(planarRegionFrame);
          solePoseToSnapAndWiggle.applyTransform(wiggleTransform);
          solePoseToSnapAndWiggle.changeFrame(ReferenceFrame.getWorldFrame());
+
+         if (planarRegionSnapperCallback != null)
+            planarRegionSnapperCallback.footPoseWasWiggled(wiggleTransform);
       }
 
       // check for partial foothold
