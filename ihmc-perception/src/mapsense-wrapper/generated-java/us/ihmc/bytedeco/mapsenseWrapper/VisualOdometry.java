@@ -45,9 +45,7 @@ public class VisualOdometry extends us.ihmc.bytedeco.mapsenseWrapper.presets.Vis
         public native void displayMat(@Cast("uint8_t*") ByteBuffer buffer, int height, int width, int delayMilliSeconds);
         public native void displayMat(@Cast("uint8_t*") byte[] buffer, int height, int width, int delayMilliSeconds);
         
-        public native void updateMonocular(@Cast("uint8_t*") BytePointer buffer, int height, int width);
-        public native void updateMonocular(@Cast("uint8_t*") ByteBuffer buffer, int height, int width);
-        public native void updateMonocular(@Cast("uint8_t*") byte[] buffer, int height, int width);
+        // void updateMonocular(uint8_t* buffer, int height, int width);
         public native void updateStereo(@Cast("uint8_t*") BytePointer bufferLeft, @Cast("uint8_t*") BytePointer bufferRight, int height, int width);
         public native void updateStereo(@Cast("uint8_t*") ByteBuffer bufferLeft, @Cast("uint8_t*") ByteBuffer bufferRight, int height, int width);
         public native void updateStereo(@Cast("uint8_t*") byte[] bufferLeft, @Cast("uint8_t*") byte[] bufferRight, int height, int width);

@@ -200,8 +200,13 @@ std::vector<gtsam::Pose3> createPoses() {
    gtsam::Point3 up(0,0,1);
    gtsam::Point3 target(0,0,0);
    for(; i < 8; ++i, theta += 2*M_PI/8) {
+
+      printf("Angle (i): %.3lf\n", theta);
+
       gtsam::Point3 position = gtsam::Point3(radius*cos(theta), radius*sin(theta), 0.0);
       gtsam::SimpleCamera camera = gtsam::SimpleCamera::Lookat(position, target, up);
+
+      printf("Position: %.3lf, %.3lf, %.3lf\n", position.x(), position.y(), position.z());
 
       gtsam::Pose3 camPose = camera.pose();
 

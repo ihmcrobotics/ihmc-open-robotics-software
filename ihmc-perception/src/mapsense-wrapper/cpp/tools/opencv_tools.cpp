@@ -22,6 +22,9 @@ namespace OpenCVTools
 
     void DrawMatchesDouble(cv::Mat& img1, const std::vector<cv::KeyPoint>& kp1, cv::Mat& img2, const std::vector<cv::KeyPoint>& kp2, std::vector<cv::DMatch>& matches, cv::Mat& outImage)
     {
+
+        printf("VConcat: (%d, %d) + (%d, %d)\n", img1.rows, img1.cols, img2.rows, img2.cols);
+
         std::vector<cv::Mat> imgs = {img1, img2};
         cv::vconcat(imgs, outImage);
         cv::cvtColor(outImage, outImage, cv::COLOR_GRAY2BGR);

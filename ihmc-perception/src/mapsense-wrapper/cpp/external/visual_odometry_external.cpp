@@ -48,19 +48,24 @@ void VisualOdometryExternal::displayMat(uint8_t* buffer, int height, int width, 
     cv::waitKey(delayMilliSeconds);
 }
 
-void VisualOdometryExternal::updateMonocular(uint8_t* buffer, int height, int width)
-{
-    cv::Mat mat(height, width, CV_8UC1, buffer);
-    cv::Mat final;
-    cv::cvtColor(mat, final, cv::COLOR_GRAY2BGR);
+// void VisualOdometryExternal::updateMonocular(uint8_t* buffer, int height, int width)
+// {
+//     cv::Mat mat(height, width, CV_8UC1, buffer);
+//     cv::Mat final;
+//     cv::cvtColor(mat, final, cv::COLOR_GRAY2BGR);
 
-    _visualOdometry->UpdateMonocular(final);
-}
+//     _visualOdometry->UpdateMonocular(final);
+// }
 
 void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)
 {
     cv::Mat matLeft(height, width, CV_8UC1, bufferLeft);
     cv::Mat matRight(height, width, CV_8UC1, bufferRight);
+
+    // cv::cvtColor(matLeft, matLeft, cv::COLOR_GRAY2BGR);
+    // cv::cvtColor(matRight, matRight, cv::COLOR_GRAY2BGR);
+
+    _visualOdometry->UpdateStereo(matLeft, matRight);
 
     // Extract keypoints and descriptors from left image
 

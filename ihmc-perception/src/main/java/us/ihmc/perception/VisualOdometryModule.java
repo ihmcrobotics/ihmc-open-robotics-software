@@ -4,8 +4,10 @@ import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.elements.CameraModel;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -15,6 +17,7 @@ import java.util.List;
 public class VisualOdometryModule
 {
    private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
+   private final SlamWrapper.FactorGraphExternal factorGraphExternal;
 
    private static final String LEFT_CAMERA_NAME = "image_0";
    private static final String RIGHT_CAMERA_NAME = "image_1";
@@ -39,26 +42,26 @@ public class VisualOdometryModule
       visualOdometryExternal = new VisualOdometry.VisualOdometryExternal();
 
       BytedecoTools.loadGTSAMLibraries();
-      SlamWrapper.FactorGraphExternal factorGraphExternal = new SlamWrapper.FactorGraphExternal();
+      factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       //      factorGraphExternal.helloWorldTest();
 
-      factorGraphExternal.visualSLAMTest();
+      //factorGraphExternal.visualSLAMTest();
 
-      //float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-      //float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+      float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
       //
-      //factorGraphExternal.addPriorPoseFactor(1, poseInitial);
+      factorGraphExternal.addPriorPoseFactor(1, poseInitial);
+      factorGraphExternal.setPoseInitialValue(1, poseInitial);
+
+      //float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
       //factorGraphExternal.addOdometryFactor(odometry, 2);
       //
-      //factorGraphExternal.setPoseInitialValue(1, poseInitial);
       //factorGraphExternal.setPoseInitialValue(2, odometry);
       //
       //factorGraphExternal.optimize();
       //
       //factorGraphExternal.printResults();
    }
-
 
 
    public void visualSLAMUpdate()
@@ -85,10 +88,13 @@ public class VisualOdometryModule
       {
          Pose3D pose = new Pose3D();
 
-
+         CameraModel camera = new CameraModel(50.0f,50.0f,50.0f,50.0f, pose);
 
          Point3D position = new Point3D(radius * Math.cos(theta), radius * Math.sin(theta), 0.0);
 
+         Point2D measurement = camera.project(points.get(i));
+
+         LogTools.info("Projection: {}", measurement);
 
 
       }
@@ -103,9 +109,21 @@ public class VisualOdometryModule
       currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
       currentImageRight = ImageTools.loadAsImageMat(rightImageName);
 
-      visualOdometryExternal.displayMat(currentImageLeft.getData(), currentImageLeft.getRows(), currentImageLeft.getCols(), 1);
+      //visualOdometryExternal.displayMat(currentImageLeft.getData(), currentImageLeft.getRows(), currentImageLeft.getCols(), 1);
 
       visualOdometryExternal.updateStereo(currentImageLeft.getData(), currentImageRight.getData(), currentImageLeft.getRows(), currentImageLeft.getCols());
+
+      LogTools.info("Inserting: {}", frameIndex+1);
+
+      float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+      factorGraphExternal.addOdometryFactor(odometry, frameIndex + 2);
+
+      float[] poseValue = new float[]{0.0f, 0.0f, 0.0f, 1.0f * frameIndex, 0.0f, 0.0f};
+      factorGraphExternal.setPoseInitialValue(frameIndex + 2, poseValue);
+
+      factorGraphExternal.optimize();
+
+      factorGraphExternal.printResults();
 
       frameIndex++;
    }
@@ -119,12 +137,12 @@ public class VisualOdometryModule
    {
       VisualOdometryModule vo = new VisualOdometryModule();
 
-      //for (int i = 0; i < 4500; i++)
-      //{
-      //   long start = System.nanoTime();
-      //   vo.update();
-      //   long end = System.nanoTime();
-      //   System.out.println("Time Taken (Update): " + (end - start) / 1000 + "us");
-      //}
+      for (int i = 0; i < 4500; i++)
+      {
+         long start = System.nanoTime();
+         vo.update();
+         long end = System.nanoTime();
+         System.out.println("Time Taken (Update): " + (end - start) / 1000 + "us");
+      }
    }
 }

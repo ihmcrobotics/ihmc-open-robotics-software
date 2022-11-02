@@ -3,7 +3,11 @@
 
 VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
 {
+   leftCamera.SetParams(718.856, 718.856, 607.193, 185.216);
+
    cameraPose = Eigen::Matrix4f::Identity();
+
+
 
    stereo->setNumDisparities(app.STEREO_NUM_DISPARITIES * 16);
    stereo->setBlockSize(2 * app.STEREO_BLOCK_SIZE + 1);
@@ -16,136 +20,195 @@ VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
    stereo->setSpeckleRange(app.STEREO_SPECKLE_RANGE);
    stereo->setSpeckleWindowSize(app.STEREO_SPECKLE_WINDOW_SIZE);
    stereo->setDisp12MaxDiff(app.STEREO_DISP_12_MAX_DIFF);
+
+
 }
 
-void VisualOdometry::UpdateMonocular(const cv::Mat& image)
-{
-   width = (uint32_t)image.cols;
-   height = (uint32_t)image.rows;
-   cvtColor(image, prevLeft, cv::COLOR_BGR2GRAY);
-   ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
-}
+// void VisualOdometry::UpdateMonocular(const cv::Mat& image)
+// {
+//    width = (uint32_t)image.cols;
+//    height = (uint32_t)image.rows;
+//    cvtColor(image, prevLeft, cv::COLOR_BGR2GRAY);
+//    ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
+// }
 
-bool VisualOdometry::UpdateStereo(const cv::Mat& leftImage, const cv::Mat& rightImage)
+bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 {
-   auto start_point = std::chrono::steady_clock::now();
-   cv::Mat cvPose, points4D;
-   std::vector<PointLandmark> points3D;
-
-   if (!leftImage.empty() && leftImage.rows > 0 && leftImage.cols > 0 && !rightImage.empty() && rightImage.rows > 0 && rightImage.cols > 0)
+   printf("UpdateStereo\n");
+   if(!_initialized)
    {
-      /* During first iteration, simply store (prev) grayscale images, extract keypoints,
-       * and insert the first keyframe at identity pose, and return false, since no pose was computed. */
-      if (count == 0)
-      {
-         width = (uint32_t)leftImage.cols;
-         height = (uint32_t)leftImage.rows;
-         prevLeft = leftImage.clone();
-         prevRight = rightImage.clone();
-         ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
-         ExtractKeypoints(prevRight, kp_prevRight, desc_prevRight);
-         _keyframes.emplace_back(Keyframe(Eigen::Matrix4f::Identity(), desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, leftImage.clone(), rightImage.clone()));
-         count++;
-         return false;
-      }
-
-      /* From second iteration onwards, store (cur) grayscale images, initialize, and insert keyframes when needed. */
-      curLeft = leftImage.clone();
-      curRight = rightImage.clone();
-
-      /* Initialization step: Build initial local map of 3D points; Insert the second keyframe. */
-      if (!_initialized)
-      {
-         auto kf = _keyframes[0];
-         CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
-
-         Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
-         eigenPose.transposeInPlace();
-         cameraPose = cameraPose * eigenPose;
-
-        prevFinalDisplay = leftImage.clone();
-
-        OpenCVTools::DrawMatchesSingle(prevPoints2D, curPoints2D, prevFinalDisplay);
-
-         if (cameraPose.block<3, 1>(0, 3).norm() > 1)
-         {
-            _initialized = true;
-            _keyframes.emplace_back(Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(),
-                                             kp_curLeft, kp_curRight, leftImage.clone(), rightImage.clone()));
-         }
-      } else
-      {
-
-         auto kf = _keyframes[_keyframes.size() - 1];
-         CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
-         cvCurPose = cvCurPose * cvPose;
-
-         Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
-         eigenPose.transposeInPlace();
-         cameraPose = cameraPose * eigenPose;
-
-         prevFinalDisplay = leftImage.clone();
-         OpenCVTools::DrawMatchesSingle(prevPoints2D, curPoints2D, prevFinalDisplay);
-
-         if (eigenPose.block<3, 1>(0, 3).norm() > 0.8)
-         {
-            _initialized = true;
-            _keyframes.emplace_back(
-                  Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight, leftImage.clone(), rightImage.clone()));
-
-            printf("Performing Bundle Adjustment.");
-
-            /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
-//            std::vector<Eigen::Matrix4f> poses;
-//            poses.emplace_back(_keyframes[_keyframes.size() - 2].pose);
-//            poses.emplace_back(_keyframes[_keyframes.size() - 1].pose);
-//            _bundleAdjustment->Update(points3D, poses);
-            /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
-
-//            _bundleAdjustment->Optimize();
-
-
-            // if (axes)
-            // {
-            //    glm::mat4 glmTransform;
-            //    for (uint32_t i = 0; i < 4; ++i)
-            //       for (int j = 0; j < 4; ++j)
-            //          glmTransform[j][i] = cameraPose(i, j);
-            //    glmTransform[3][0] *= scalar;
-            //    glmTransform[3][1] *= scalar;
-            //    glmTransform[3][2] *= scalar;
-            //    axes->ApplyTransform(glmTransform);
-            // }
-
-            /* Triangulated Points */
-            /* TODO: Filter points by 5-point algorithm mask before triangulation. */
-            // if (cloud)
-            // {
-            //    for (uint32_t i = 0; i < points3D.size(); i++)
-            //    {
-            //       if (i % 4 == 0)
-            //       {
-            //          Eigen::Vector4f point;
-            //          point << points3D[i]._point3D, 1;
-            //          point = cameraPose * point;
-            //          cloud->InsertVertex(scalar * point.x() / point.w(), scalar * point.y() / point.w(), scalar * point.z() / point.w());
-            //       }
-            //    }
-            // }
-         }
-      }
+      Initialize(leftImage, rightImage);
    }
+   else
+   {
 
-   auto end_point = std::chrono::steady_clock::now();
-   long long start = std::chrono::time_point_cast<std::chrono::microseconds>(start_point).time_since_epoch().count();
-   long long end = std::chrono::time_point_cast<std::chrono::microseconds>(end_point).time_since_epoch().count();
+      auto lastKeyframe = _keyframes[_keyframes.size() - 1];
+      cv::Mat descPrev = lastKeyframe.descLeft;
+      KeyPointVec& kpPrev = lastKeyframe.keypointsLeft;
 
-   float duration = (end - start) * 0.001f;
+      cv::Mat descCur;
+      KeyPointVec kpCur;
+      std::vector<cv::DMatch> matches;
 
-   printf("(Visual Odometry) Total Time Taken: %.3lf ms\n", duration);
+      ExtractKeypoints(leftImage, kpCur, descCur);
+      MatchKeypoints(descPrev, descCur, matches);
+
+      printf("Total Matches Before: %ld\n", matches.size());
+      FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
+      printf("Total Matches After: %ld\n", matches.size());
+
+
+      Point2fVec pointsTrain;
+      Point2fVec pointsQuery;
+      ExtractMatchesAsPoints(kpPrev, kpCur, matches, pointsTrain, pointsQuery);
+
+      cv::Mat mask;
+      cv::Mat pose = EstimateMotion(pointsTrain, pointsQuery, mask, leftCamera);
+
+      cv::Mat cvPose = pose;
+      Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+      eigenPose.transposeInPlace();
+      cameraPose = cameraPose * eigenPose;
+
+      InsertKeyframe(cameraPose, descCur, kpCur, leftImage);
+
+
+      // Visualization and Logging Only --------------------------------------------
+
+
+      std::cout << "Camera Pose: " << std::endl << pose << std::endl;
+
+      cv::Mat outImage;
+      OpenCVTools::DrawMatchesDouble(lastKeyframe.leftImage, kpPrev, leftImage, kpCur, matches, outImage);
+      OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 1);
+
+      // Visualization and Logging Only --------------------------------------------
+   }
+   printf("Total Keyframes: %ld\n", _keyframes.size());
 
    return true;
 }
+
+// bool VisualOdometry::UpdateStereoOld(const cv::Mat& leftImage, const cv::Mat& rightImage)
+// {
+//    auto start_point = std::chrono::steady_clock::now();
+//    cv::Mat cvPose, points4D;
+//    std::vector<PointLandmark> points3D;
+
+//    if (!leftImage.empty() && leftImage.rows > 0 && leftImage.cols > 0 && !rightImage.empty() && rightImage.rows > 0 && rightImage.cols > 0)
+//    {
+//       /* During first iteration, simply store (prev) grayscale images, extract keypoints,
+//        * and insert the first keyframe at identity pose, and return false, since no pose was computed. */
+//       if (count == 0)
+//       {
+//          width = (uint32_t)leftImage.cols;
+//          height = (uint32_t)leftImage.rows;
+//          prevLeft = leftImage.clone();
+//          prevRight = rightImage.clone();
+//          ExtractKeypoints(prevLeft, kp_prevLeft, desc_prevLeft);
+//          ExtractKeypoints(prevRight, kp_prevRight, desc_prevRight);
+//          _keyframes.emplace_back(Keyframe(Eigen::Matrix4f::Identity(), desc_prevLeft.clone(), desc_prevRight.clone(), kp_prevLeft, kp_prevRight, leftImage.clone(), rightImage.clone()));
+//          count++;
+//          return false;
+//       }
+
+//       /* From second iteration onwards, store (cur) grayscale images, initialize, and insert keyframes when needed. */
+//       curLeft = leftImage.clone();
+//       curRight = rightImage.clone();
+
+//       /* Initialization step: Build initial local map of 3D points; Insert the second keyframe. */
+//       if (!_initialized)
+//       {
+//          auto kf = _keyframes[0];
+//          CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
+
+//          Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+//          eigenPose.transposeInPlace();
+//          cameraPose = cameraPose * eigenPose;
+
+//         prevFinalDisplay = leftImage.clone();
+
+//         OpenCVTools::DrawMatchesSingle(prevPoints2D, curPoints2D, prevFinalDisplay);
+
+//          if (cameraPose.block<3, 1>(0, 3).norm() > 1)
+//          {
+//             _initialized = true;
+//             _keyframes.emplace_back(Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(),
+//                                              kp_curLeft, kp_curRight, leftImage.clone(), rightImage.clone()));
+//          }
+//       } else
+//       {
+
+//          auto kf = _keyframes[_keyframes.size() - 1];
+//          CalculateOdometry_ORB(kf, curLeft, curRight, cvPose, points3D);
+//          cvCurPose = cvCurPose * cvPose;
+
+//          Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+//          eigenPose.transposeInPlace();
+//          cameraPose = cameraPose * eigenPose;
+
+//          prevFinalDisplay = leftImage.clone();
+//          OpenCVTools::DrawMatchesSingle(prevPoints2D, curPoints2D, prevFinalDisplay);
+
+//          if (eigenPose.block<3, 1>(0, 3).norm() > 0.8)
+//          {
+//             _initialized = true;
+//             _keyframes.emplace_back(
+//                   Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight, leftImage.clone(), rightImage.clone()));
+
+//             printf("Performing Bundle Adjustment.");
+
+//             /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
+// //            std::vector<Eigen::Matrix4f> poses;
+// //            poses.emplace_back(_keyframes[_keyframes.size() - 2].pose);
+// //            poses.emplace_back(_keyframes[_keyframes.size() - 1].pose);
+// //            _bundleAdjustment->Update(points3D, poses);
+//             /* ------------------------- BUNDLE ADJUSTMENT ------------------------------*/
+
+// //            _bundleAdjustment->Optimize();
+
+
+//             // if (axes)
+//             // {
+//             //    glm::mat4 glmTransform;
+//             //    for (uint32_t i = 0; i < 4; ++i)
+//             //       for (int j = 0; j < 4; ++j)
+//             //          glmTransform[j][i] = cameraPose(i, j);
+//             //    glmTransform[3][0] *= scalar;
+//             //    glmTransform[3][1] *= scalar;
+//             //    glmTransform[3][2] *= scalar;
+//             //    axes->ApplyTransform(glmTransform);
+//             // }
+
+//             /* Triangulated Points */
+//             /* TODO: Filter points by 5-point algorithm mask before triangulation. */
+//             // if (cloud)
+//             // {
+//             //    for (uint32_t i = 0; i < points3D.size(); i++)
+//             //    {
+//             //       if (i % 4 == 0)
+//             //       {
+//             //          Eigen::Vector4f point;
+//             //          point << points3D[i]._point3D, 1;
+//             //          point = cameraPose * point;
+//             //          cloud->InsertVertex(scalar * point.x() / point.w(), scalar * point.y() / point.w(), scalar * point.z() / point.w());
+//             //       }
+//             //    }
+//             // }
+//          }
+//       }
+//    }
+
+//    auto end_point = std::chrono::steady_clock::now();
+//    long long start = std::chrono::time_point_cast<std::chrono::microseconds>(start_point).time_since_epoch().count();
+//    long long end = std::chrono::time_point_cast<std::chrono::microseconds>(end_point).time_since_epoch().count();
+
+//    float duration = (end - start) * 0.001f;
+
+//    printf("(Visual Odometry) Total Time Taken: %.3lf ms\n", duration);
+
+//    return true;
+// }
 
 
 void VisualOdometry::DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& landmarks)
@@ -168,16 +231,16 @@ void VisualOdometry::DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& lan
    }
 }
 
-void VisualOdometry::ExtractKeypoints_FAST(cv::Mat img_1, std::vector<cv::Point2f>& points1)
+void VisualOdometry::ExtractKeypoints_FAST(cv::Mat img_1, Point2fVec& points1)
 {
-   std::vector<cv::KeyPoint> keypoints_1;
+   KeyPointVec keypoints_1;
    int fast_threshold = 20;
    bool nonmaxSuppression = true;
    cv::FAST(img_1, keypoints_1, fast_threshold, nonmaxSuppression);
    cv::KeyPoint::convert(keypoints_1, points1, std::vector<int>());
 }
 
-void VisualOdometry::ExtractKeypoints(cv::Mat img, std::vector<cv::KeyPoint>& points, cv::Mat& desc)
+void VisualOdometry::ExtractKeypoints(cv::Mat img, KeyPointVec& points, cv::Mat& desc)
 {
    desc.setTo(0);
    points.clear();
@@ -229,7 +292,7 @@ void VisualOdometry::MatchKeypoints(cv::Mat& descTrain, cv::Mat& descQuery, std:
 
 }
 
-void VisualOdometry::GridSampleKeypoints(std::vector<cv::KeyPoint>& keypoints, std::vector<cv::DMatch>& matches)
+void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv::DMatch>& matches)
 {
    uint32_t xStep = width / xGridCount;
    uint32_t yStep = height / yGridCount;
@@ -265,7 +328,7 @@ void VisualOdometry::GridSampleKeypoints(std::vector<cv::KeyPoint>& keypoints, s
 
 
 
-void VisualOdometry::TriangulateStereoNormal(std::vector<cv::KeyPoint>& pointsTrain, std::vector<cv::KeyPoint>& pointsQuery, std::vector<cv::DMatch>& matches,
+void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
                                              std::vector<PointLandmark>& points3D)
 {
    points3D.clear();
@@ -311,7 +374,7 @@ void VisualOdometry::TriangulateStereoNormal(std::vector<cv::KeyPoint>& pointsTr
    //   printf("Triangulate(): Total Depth Points: {}", points3D.size());
 }
 
-void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, std::vector<cv::KeyPoint> curLeftKp, std::vector<PointLandmark>& points3D)
+void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, std::vector<PointLandmark>& points3D)
 {
    for (auto match: leftMatches)
    {
@@ -347,7 +410,7 @@ void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, std::v
 
 
 cv::Mat
-VisualOdometry::EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vector<cv::Point2f>& curFeatures, cv::Mat& mask, const CameraModel& cam)
+VisualOdometry::EstimateMotion(Point2fVec& prevFeatures, Point2fVec& curFeatures, cv::Mat& mask, const CameraModel& cam)
 {
    using namespace cv;
    float data[9] = {cam._fx, 0, cam._cx, 0, cam._fy, cam._cy, 0, 0, 1};
@@ -379,7 +442,7 @@ VisualOdometry::EstimateMotion(std::vector<cv::Point2f>& prevFeatures, std::vect
    return cvPose;
 }
 
-void VisualOdometry::FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, float distanceThreshold)
+void VisualOdometry::FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, float distanceThreshold)
 {
    for (int i = matches.size() - 1; i >= 0; i--)
    {
@@ -392,91 +455,91 @@ void VisualOdometry::FilterMatchesByDistance(std::vector<cv::DMatch>& matches, c
    }
 }
 
-void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D)
-{
-   printf("CalculateOdometry_ORB\n");
+// void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D)
+// {
+//    printf("CalculateOdometry_ORB\n");
 
-   printf("Extract Keypoints\n");
-   ExtractKeypoints(leftImage, kp_curLeft, desc_curLeft);
-   ExtractKeypoints(rightImage, kp_curRight, desc_curRight);
+//    printf("Extract Keypoints\n");
+//    ExtractKeypoints(leftImage, kp_curLeft, desc_curLeft);
+//    ExtractKeypoints(rightImage, kp_curRight, desc_curRight);
 
-   printf("Match Keypoints\n");
-   MatchKeypoints(kf.descLeft, desc_curLeft, matchesLeft);
-   MatchKeypoints(kf.descLeft, kf.descRight, prevMatchesStereo);
+//    printf("Match Keypoints\n");
+//    MatchKeypoints(kf.descLeft, desc_curLeft, matchesLeft);
+//    MatchKeypoints(kf.descLeft, kf.descRight, prevMatchesStereo);
 
-   printf("Stereo Matches: %ld %d %d\n", prevMatchesStereo.size(), kf.descLeft.rows, kf.descRight.rows);
-//   cv::drawMatches(kf.rightImage, kf.keypointsRight, kf.leftImage, kf.keypointsLeft, prevMatchesStereo, prevFinalDisplay);
+//    printf("Stereo Matches: %ld %d %d\n", prevMatchesStereo.size(), kf.descLeft.rows, kf.descRight.rows);
+// //   cv::drawMatches(kf.rightImage, kf.keypointsRight, kf.leftImage, kf.keypointsLeft, prevMatchesStereo, prevFinalDisplay);
 
-   printf("Filter Matches Left\n");
-   FilterMatchesByDistance(matchesLeft,kf.keypointsLeft, kp_curLeft, 50.0f);
+//    printf("Filter Matches Left\n");
+//    FilterMatchesByDistance(matchesLeft,kf.keypointsLeft, kp_curLeft, 50.0f);
 
-   printf("Filter Matches Stereo\n");
-   FilterMatchesByDistance(prevMatchesStereo, kf.keypointsLeft, kp_curLeft, 8.0f);
+//    printf("Filter Matches Stereo\n");
+//    FilterMatchesByDistance(prevMatchesStereo, kf.keypointsLeft, kp_curLeft, 8.0f);
 
 
-   printf("Points To Be Triangulated: %ld\n", prevMatchesStereo.size());
-   TriangulateStereoNormal(kf.keypointsLeft, kf.keypointsRight, prevMatchesStereo, points3D);
-   printf("Points Triangulated: %ld\n", points3D.size());
+//    printf("Points To Be Triangulated: %ld\n", prevMatchesStereo.size());
+//    TriangulateStereoNormal(kf.keypointsLeft, kf.keypointsRight, prevMatchesStereo, points3D);
+//    printf("Points Triangulated: %ld\n", points3D.size());
 
-   printf("Extract 2D Feature Points\n");
+//    printf("Extract 2D Feature Points\n");
    
 
-   printf("Points for Motion Estimation: %ld %ld\n", prevPoints2D.size(), curPoints2D.size());
+//    printf("Points for Motion Estimation: %ld %ld\n", prevPoints2D.size(), curPoints2D.size());
 
-   cv::Mat mask, pose;
-   if (prevPoints2D.size() >= 10 && curPoints2D.size() >= 10)
-   {
-      pose = EstimateMotion(prevPoints2D, curPoints2D, mask, leftCamera);
-      cvPose = pose;
+//    cv::Mat mask, pose;
+//    if (prevPoints2D.size() >= 10 && curPoints2D.size() >= 10)
+//    {
+//       pose = EstimateMotion(prevPoints2D, curPoints2D, mask, leftCamera);
+//       cvPose = pose;
 
-      /* Triangulate Feature Points */
-//      if (prevPoints2D.size() > 10)
-//      {
-//         cv::Mat points = TriangulatePoints(prevPoints2D, curPoints2D, leftCamera, pose);
-//         points4D = points;
-//      }
-   }
+//       /* Triangulate Feature Points */
+// //      if (prevPoints2D.size() > 10)
+// //      {
+// //         cv::Mat points = TriangulatePoints(prevPoints2D, curPoints2D, leftCamera, pose);
+// //         points4D = points;
+// //      }
+//    }
 
-   printf("Extract Final Set\n");
-   ExtractFinalSet(matchesLeft, kp_curLeft, points3D);
+//    printf("Extract Final Set\n");
+//    ExtractFinalSet(matchesLeft, kp_curLeft, points3D);
 
-   printf("Draw Landmarks\n");
-   DrawLandmarks(prevFinalDisplay, points3D);
-
-
-
-//   for(auto point : points3D)
-//   {
-//      printf("Landmark: {} {} {}", point.GetMeasurements2D()[0].y(), point.GetMeasurements2D()[1].y(), point.GetMeasurements2D()[2].y());
-//   }
+//    printf("Draw Landmarks\n");
+//    DrawLandmarks(prevFinalDisplay, points3D);
 
 
 
-
-   //   printf("%.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf\n",
-   //          cvPose.at<float>(0), cvPose.at<float>(1), cvPose.at<float>(2), cvPose.at<float>(3),
-   //          cvPose.at<float>(4), cvPose.at<float>(5), cvPose.at<float>(6), cvPose.at<float>(7),
-   //          cvPose.at<float>(8), cvPose.at<float>(9), cvPose.at<float>(10), cvPose.at<float>(11));
-
+// //   for(auto point : points3D)
+// //   {
+// //      printf("Landmark: {} {} {}", point.GetMeasurements2D()[0].y(), point.GetMeasurements2D()[1].y(), point.GetMeasurements2D()[2].y());
+// //   }
 
 
-   //   cv::drawMatches(curLeft, kp_curLeft, kf.image, kf.keypoints, matchesLeft, prevFinalDisplay);
 
-   printf("Reset Buffers\n");
-   prevLeft = curLeft.clone();
-   desc_prevLeft = desc_curLeft.clone();
-   kp_prevLeft = kp_curLeft;
 
-   prevRight = curRight.clone();
-   desc_prevRight = desc_curRight.clone();
-   kp_prevRight = kp_curRight;
+//    //   printf("%.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf %.4lf\n",
+//    //          cvPose.at<float>(0), cvPose.at<float>(1), cvPose.at<float>(2), cvPose.at<float>(3),
+//    //          cvPose.at<float>(4), cvPose.at<float>(5), cvPose.at<float>(6), cvPose.at<float>(7),
+//    //          cvPose.at<float>(8), cvPose.at<float>(9), cvPose.at<float>(10), cvPose.at<float>(11));
 
-   count++;
 
-//   prevFinalDisplay = leftImage;
 
-   printf("CalculateOdometry_ORB Finished\n");
-}
+//    //   cv::drawMatches(curLeft, kp_curLeft, kf.image, kf.keypoints, matchesLeft, prevFinalDisplay);
+
+//    printf("Reset Buffers\n");
+//    prevLeft = curLeft.clone();
+//    desc_prevLeft = desc_curLeft.clone();
+//    kp_prevLeft = kp_curLeft;
+
+//    prevRight = curRight.clone();
+//    desc_prevRight = desc_curRight.clone();
+//    kp_prevRight = kp_curRight;
+
+//    count++;
+
+// //   prevFinalDisplay = leftImage;
+
+//    printf("CalculateOdometry_ORB Finished\n");
+// }
 
 void VisualOdometry::Show(int delay)
 {
@@ -503,7 +566,7 @@ void VisualOdometry::Display(cv::Mat& image)
    curFinalDisplay = image.clone();
 }
 
-void VisualOdometry::ExtractMatchesAsPoints(const std::vector<cv::KeyPoint>& kpTrain, const std::vector<cv::KeyPoint>& kpQuery, const std::vector<cv::DMatch>& matches, std::vector<cv::Point2f>& pointsTrain, std::vector<cv::Point2f>& pointsQuery)
+void VisualOdometry::ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const std::vector<cv::DMatch>& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery)
 {
    pointsTrain.clear();
    pointsQuery.clear();
@@ -532,8 +595,8 @@ void VisualOdometry::UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightI
    // CameraModel cam;
    // cam.SetParams(718.856, 718.856, 607.193, 185.216);
 
-   // std::vector<cv::Point2f> pointsTrain;
-   // std::vector<cv::Point2f> pointsQuery;
+   // Point2fVec pointsTrain;
+   // Point2fVec pointsQuery;
 
    // ExtractMatchesAsPoints(kpPrev, kpCur, matches, pointsTrain, pointsQuery);
 
@@ -548,7 +611,7 @@ void VisualOdometry::UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightI
    // OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 0);
 }
 
-void VisualOdometry::TriangulateKeypointsByDisparity(const std::vector<cv::KeyPoint>& kp, const cv::Mat& depth, std::vector<Eigen::Vector3f>& points3d)
+void VisualOdometry::TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& depth, std::vector<Eigen::Vector3f>& points3d)
 {
    std::cout << "Type: " << OpenCVTools::GetTypeString(depth.type()) << std::endl;
 
@@ -566,12 +629,22 @@ void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
 
    MatchKeypoints(desc_curLeft, desc_curRight, curMatchesStereo);
 
-   cv::Mat cvPose;
-   Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
-   eigenPose.transposeInPlace();
-   cameraPose = cameraPose * eigenPose;
-
-   _keyframes.emplace_back(Keyframe(cameraPose, desc_curLeft.clone(), desc_curRight.clone(), kp_curLeft, kp_curRight));
+   InsertKeyframe(Eigen::Matrix4f::Identity(), desc_curLeft, desc_curRight, kp_curLeft, kp_curRight, leftImageCur, rightImageCur);
 
    _initialized = true;
+}
+
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight)
+{
+   _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight));
+}
+
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat)
+{
+   _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight, leftMat.clone(), rightMat.clone()));
+}
+
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const cv::Mat& leftMat)
+{
+   _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), kpLeft, leftMat.clone()));
 }
