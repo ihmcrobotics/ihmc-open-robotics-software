@@ -17,7 +17,7 @@ public class StepGeneratorNetworkSubscriber
    private static final boolean DEBUG = false;
 
    /** The input API to which the received messages should be submitted. */
-   private final CommandInputManager controllerCommandInputManager;
+   private final CommandInputManager generatorCommandInputManager;
    /** Used to filter messages coming in. */
    private final AtomicReference<ControllerNetworkSubscriber.MessageFilter> messageFilter;
    /** Used to filter messages coming in and report an error. */
@@ -36,9 +36,9 @@ public class StepGeneratorNetworkSubscriber
                                       RealtimeROS2Node realtimeROS2Node)
    {
       this.inputTopic = inputTopic;
-      this.controllerCommandInputManager = stepGeneratorCommandInputManager.getCommandInputManager();
+      this.generatorCommandInputManager = stepGeneratorCommandInputManager.getCommandInputManager();
       this.realtimeROS2Node = realtimeROS2Node;
-      listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
+      listOfSupportedControlMessages = generatorCommandInputManager.getListOfSupportedMessages();
 
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
@@ -176,7 +176,7 @@ public class StepGeneratorNetworkSubscriber
          return;
 
       if (testMessageWithMessageFilter(message))
-         controllerCommandInputManager.submitMessage((T) message);
+         generatorCommandInputManager.submitMessage((T) message);
    }
 
    private boolean testMessageWithMessageFilter(Settable<?> messageToTest)
