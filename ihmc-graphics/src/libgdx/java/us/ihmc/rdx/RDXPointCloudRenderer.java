@@ -267,6 +267,10 @@ public class RDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   /**
+    * This method is to be called before packing the vertex buffer,
+    * like when running an OpenCL kernel to pack it.
+    */
    public void updateMeshFastestBeforeKernel()
    {
       FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
@@ -280,6 +284,11 @@ public class RDXPointCloudRenderer implements RenderableProvider
       renderable.meshPart.size = numberOfPointsNow;
    }
 
+   /**
+    * This method is meant to be called after packing the vertex buffer.
+    * It is used to update the renderer segment index in the case
+    * that feature is being used.
+    */
    public void updateMeshFastestAfterKernel()
    {
       ++currentSegmentIndex;
