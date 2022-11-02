@@ -43,6 +43,7 @@ import java.util.function.Consumer;
 public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<PlanarRegionsListCommand>, Updatable
 {
    private static final int numberOfRegionsToVisualize = 3;
+   private static final int maximumVertices = 40;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -89,7 +90,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
       for (int i = 0; i < numberOfRegionsToVisualize; i++)
       {
-         concaveRegionHulls[i] = new YoFrameConvexPolygon2D("concaveRegionHull" + i, ReferenceFrame.getWorldFrame(), 20, registry);
+         concaveRegionHulls[i] = new YoFrameConvexPolygon2D("concaveRegionHull" + i, ReferenceFrame.getWorldFrame(), maximumVertices, registry);
          concaveRegionPoses[i] = new YoFramePose3D("concaveRegionPose" + i, ReferenceFrame.getWorldFrame(), registry);
          YoGraphicPolygon graphicPolygon = new YoGraphicPolygon("concaveRegionHull" + i,
                                                                 concaveRegionHulls[i],
@@ -125,8 +126,11 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
                regionsSnapped.add().set(regionToSnapTo);
 
                int index = regionsSnapped.size() - 1;
-               concaveRegionHulls[index].set(regionToSnapTo.getConvexHull());
-               regionToSnapTo.transformFromLocalToWorld(concaveRegionHulls[index]);
+               concaveRegionHulls[index].clear();
+               for (int i = 0; i < Math.min(maximumVertices, regionToSnapTo.getConvexHull().getNumberOfVertices()); i++)
+                  concaveRegionHulls[index].addVertex(regionToSnapTo.getConcaveHullVertex(i));
+               concaveRegionHulls[index].update();
+               concaveRegionHulls[index].applyTransform(regionToSnapTo.getTransformToLocal(), false);
 
                concaveRegionPoses[index].set(regionToSnapTo.getTransformToWorld());
             }
