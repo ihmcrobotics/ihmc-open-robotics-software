@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 public class PerceptionLoggerPanel extends ImGuiPanel
 {
-   private PerceptionDataLogger logger;
+   private PerceptionDataLogger logger = new PerceptionDataLogger();
    private PerceptionDataLoader loader;
    private RDXPointCloudRenderer pointCloudRenderer;
 
@@ -33,6 +33,11 @@ public class PerceptionLoggerPanel extends ImGuiPanel
 
    private int numDatasetsInCurrentGroup = 0;
    private int numGroupsInCurrentGroup = 0;
+
+   public PerceptionLoggerPanel()
+   {
+      this("Perception Logging and Loading");
+   }
 
    public PerceptionLoggerPanel(String panelName)
    {
@@ -90,5 +95,10 @@ public class PerceptionLoggerPanel extends ImGuiPanel
             pointCloudRenderer.updateMeshFastest();
          }
       }
+   }
+
+   public PerceptionDataLogger getLogger()
+   {
+      return logger;
    }
 }
