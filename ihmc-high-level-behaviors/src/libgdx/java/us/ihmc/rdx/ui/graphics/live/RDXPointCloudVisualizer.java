@@ -24,10 +24,10 @@ import java.util.function.Function;
 
 public class RDXPointCloudVisualizer extends RDXVisualizer
 {
-   // Note: Renderer. Creates and sets up shader, generate mesh and provides renderable.
+   // Renderer. Creates and sets up shader, generate mesh and provides renderable.
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
-   // NOTE: Variables for ImGuiWidget render.
+   // Variables for ImGuiWidget render.
    private final String topicName;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int latestSegmentIndex;
@@ -35,7 +35,7 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
    private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
 
-   // NOTE: Some parameters of data
+   // Some parameters of data
    private final int pointsPerSegment;
    private final int numberOfSegments;
    private int totalNumberOfPoints;
@@ -93,9 +93,9 @@ public class RDXPointCloudVisualizer extends RDXVisualizer
       return pointCloudRenderer.getVertexBuffer();
    }
 
-   public void updatePointCloud(PointCloud pointCloud)
+   public void updatePointCloud(FloatBuffer fp)
    {
-      getVertexBuffer().put(pointCloud.getData());
+      getVertexBuffer().put(fp);
    }
 
    @Override

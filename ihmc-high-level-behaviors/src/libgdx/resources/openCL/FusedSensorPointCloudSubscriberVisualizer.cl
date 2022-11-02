@@ -1,7 +1,7 @@
 
 kernel void unpackPointCloud(global float* parameters,
-                             global int* decompressedPointBuffer,
-                             global float* discretizedPointBuffer)
+                             global int* decompressedOpenCLIntBuffer,
+                             global float* undiscretizedVertexBuffer)
 {
    int n = get_global_id(0);
 
@@ -17,11 +17,11 @@ kernel void unpackPointCloud(global float* parameters,
    int currentSegmentStart = latestSegmentIndex * pointsPerSegment * floatsPerVertex;
    int pointCloudStartIndex = currentSegmentStart + n * floatsPerVertex;
 
-   discretizedPointBuffer[pointCloudStartIndex] = decompressedPointBuffer[inputStartIndex] * discretization;
-   discretizedPointBuffer[pointCloudStartIndex + 1] = decompressedPointBuffer[inputStartIndex + 1] * discretization;
-   discretizedPointBuffer[pointCloudStartIndex + 2] = decompressedPointBuffer[inputStartIndex + 2] * discretization;
+   undiscretizedVertexBuffer[pointCloudStartIndex] = decompressedOpenCLIntBuffer[inputStartIndex] * discretization;
+   undiscretizedVertexBuffer[pointCloudStartIndex + 1] = decompressedOpenCLIntBuffer[inputStartIndex + 1] * discretization;
+   undiscretizedVertexBuffer[pointCloudStartIndex + 2] = decompressedOpenCLIntBuffer[inputStartIndex + 2] * discretization;
 
-   int colorRGBA8888 = decompressedPointBuffer[inputStartIndex + 3];
+   int colorRGBA8888 = decompressedOpenCLIntBuffer[inputStartIndex + 3];
 
    int rInt = (colorRGBA8888 >> 24) & 0xFF;
    int gInt = (colorRGBA8888 >> 16) & 0xFF;
@@ -33,10 +33,10 @@ kernel void unpackPointCloud(global float* parameters,
    float b = bInt / 255.0;
    float a = aInt / 255.0;
 
-   discretizedPointBuffer[pointCloudStartIndex + 3] = r;
-   discretizedPointBuffer[pointCloudStartIndex + 4] = g;
-   discretizedPointBuffer[pointCloudStartIndex + 5] = b;
-   discretizedPointBuffer[pointCloudStartIndex + 6] = a;
+   undiscretizedVertexBuffer[pointCloudStartIndex + 3] = r;
+   undiscretizedVertexBuffer[pointCloudStartIndex + 4] = g;
+   undiscretizedVertexBuffer[pointCloudStartIndex + 5] = b;
+   undiscretizedVertexBuffer[pointCloudStartIndex + 6] = a;
 
-   discretizedPointBuffer[pointCloudStartIndex + 7] = pointSize;    // TODO: Need to get rid of this by using uniform
+   undiscretizedVertexBuffer[pointCloudStartIndex + 7] = pointSize;    // TODO: Need to get rid of this by using uniform
 }
