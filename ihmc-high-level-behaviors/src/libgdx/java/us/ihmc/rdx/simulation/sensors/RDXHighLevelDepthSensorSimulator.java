@@ -332,7 +332,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                   publishColorImageROS2();
             }
          }
-         if (pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
+         if (pointCloudMessageType != null && pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
             publishPeriod /= segmentationDivisor.get();
          if (segmentedThrottler.run(publishPeriod)) // This one needs to potentially run faster to publish the segments
          {
