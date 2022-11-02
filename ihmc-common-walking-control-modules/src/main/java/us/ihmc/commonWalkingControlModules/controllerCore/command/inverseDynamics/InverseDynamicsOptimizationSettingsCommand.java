@@ -490,6 +490,12 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
       jointAccelerationWeight = other.jointAccelerationWeight;
       jointJerkWeight = other.jointJerkWeight;
       jointTorqueWeight = other.jointTorqueWeight;
+      jointsToActivate.clear();
+      for (int i = 0; i < other.jointsToActivate.size(); i++)
+         jointsToActivate.add(other.jointsToActivate.get(i));
+      jointsToDeactivate.clear();
+      for (int i = 0; i < other.jointsToDeactivate.size(); i++)
+         jointsToDeactivate.add(other.jointsToDeactivate.get(i));
    }
 
    @Override
@@ -543,6 +549,10 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
          if (Double.compare(jointJerkWeight, other.jointJerkWeight) != 0)
             return false;
          if (Double.compare(jointTorqueWeight, other.jointTorqueWeight) != 0)
+            return false;
+         if (!jointsToActivate.equals(other.jointsToActivate))
+            return false;
+         if (!jointsToDeactivate.equals(other.jointsToDeactivate))
             return false;
          return true;
       }
