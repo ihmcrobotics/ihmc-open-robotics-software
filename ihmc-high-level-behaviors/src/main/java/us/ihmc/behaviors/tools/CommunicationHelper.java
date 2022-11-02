@@ -179,6 +179,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
       subscribeViaCallback(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
+   @Override
+   public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
+   {
+      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
+   }
+
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
    {
       subscribeViaCallback(topic, planarRegionsListMessage ->
