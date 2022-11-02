@@ -11,25 +11,45 @@ public class YoConstraintOptimizerParameters implements ConstraintOptimizerParam
    private static final double defaultMaxY = 0.5;
    private static final double defaultDeltaInside = 0.0;
    private static final boolean defaultConstrainMaxAdjustment = true;
+   private static final boolean defaultShouldPerformOptimization = true;
 
    private final YoDouble maxX;
    private final YoDouble maxY;
    private final YoDouble deltaInside;
    private final YoBoolean constrainMaxAdjustment;
+   private final YoBoolean shouldPerformOptimization;
 
    private boolean parametersChanged = false;
 
    public YoConstraintOptimizerParameters(YoRegistry registry)
    {
+      this(null, registry);
+   }
+
+   public YoConstraintOptimizerParameters(ConstraintOptimizerParametersReadOnly parameters, YoRegistry registry)
+   {
       maxX = new YoDouble("maxX", registry);
       maxY = new YoDouble("maxY", registry);
       deltaInside = new YoDouble("deltaInside", registry);
       constrainMaxAdjustment = new YoBoolean("constrainMaxAdjustment", registry);
+      shouldPerformOptimization = new YoBoolean("shouldPerformOptimization", registry);
 
-      maxX.set(defaultMaxX);
-      maxY.set(defaultMaxY);
-      deltaInside.set(defaultDeltaInside);
-      constrainMaxAdjustment.set(defaultConstrainMaxAdjustment);
+      if (parameters == null)
+      {
+         maxX.set(defaultMaxX);
+         maxY.set(defaultMaxY);
+         deltaInside.set(defaultDeltaInside);
+         constrainMaxAdjustment.set(defaultConstrainMaxAdjustment);
+         shouldPerformOptimization.set(defaultShouldPerformOptimization);
+      }
+      else
+      {
+         maxX.set(parameters.getMaxX());
+         maxY.set(parameters.getMaxY());
+         deltaInside.set(parameters.getDesiredDistanceInside());
+         constrainMaxAdjustment.set(parameters.getConstrainMaxAdjustment());
+         shouldPerformOptimization.set(parameters.shouldPerformOptimization());
+      }
 
       maxX.addListener(v -> parametersChanged = true);
       maxY.addListener(v -> parametersChanged = true);
@@ -86,5 +106,10 @@ public class YoConstraintOptimizerParameters implements ConstraintOptimizerParam
    public boolean getConstrainMaxAdjustment()
    {
       return constrainMaxAdjustment.getBooleanValue();
+   }
+
+   public boolean shouldPerformOptimization()
+   {
+      return shouldPerformOptimization.getValue();
    }
 }

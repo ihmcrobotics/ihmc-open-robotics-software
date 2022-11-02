@@ -101,6 +101,12 @@ public class ConvexStepConstraintOptimizer
                                                              ConstraintOptimizerParametersReadOnly parameters,
                                                              int[] startingVerticesToIgnore)
    {
+      if (!parameters.shouldPerformOptimization())
+      {
+         transformToReturn.setToZero();
+         return transformToReturn;
+      }
+
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
 
       boolean parametersChanged = parameters.pollParametersChanged();
