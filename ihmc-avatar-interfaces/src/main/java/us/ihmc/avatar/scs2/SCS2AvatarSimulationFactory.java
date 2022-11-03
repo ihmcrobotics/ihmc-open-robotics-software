@@ -427,6 +427,7 @@ public class SCS2AvatarSimulationFactory
                                                           robotModel.get(),
                                                           stepSnapperUpdatable,
                                                           realtimeROS2Node.get());
+      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getYoGraphicsListRegistry()));
    }
 
    private void setupMultiThreadedRobotController()

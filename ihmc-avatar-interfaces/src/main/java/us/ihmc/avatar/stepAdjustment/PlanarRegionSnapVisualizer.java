@@ -39,8 +39,8 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
    {
       stepsVisualized.set(-1);
 
-      for (int i = 0; i < numberOfStepsToVisualize; i++)
-         footholdData[i].reset();
+//      for (int i = 0; i < numberOfStepsToVisualize; i++)
+//         footholdData[i].reset();
    }
 
    @Override
@@ -53,15 +53,19 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
    public void recordUnadjustedFootstep(FramePose3DReadOnly footPose, ConvexPolygon2DReadOnly foothold)
    {
       int i = stepsVisualized.getIntegerValue();
+      if (i >= numberOfStepsToVisualize)
+         return;
 
       footholdData[i].unsnappedFootstepPolygon.set(foothold);
-      footholdData[i].unsnappedFootstepPolygon.applyTransform(footPose, false);
       footholdData[i].unsnappedFootstepPose.set(footPose);
    }
 
    @Override
    public void recordFootPoseIsOnBoundary()
    {
+      if (stepsVisualized.getIntegerValue() >= numberOfStepsToVisualize)
+         return;
+
       footholdData[stepsVisualized.getIntegerValue()].footPoseIsOnBoundaryOfWorld.set(true);
    }
 
@@ -70,23 +74,30 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
    {
       int i = stepsVisualized.getIntegerValue();
 
+      if (i >= numberOfStepsToVisualize)
+         return;
+
       footholdData[i].footWasSnapped.set(true);
       footholdData[i].footSnapTranslation.set(snapTransform.getTranslation());
       footholdData[i].regionsSnapped.set(regionSnappedTo);
 
       footholdData[i].concaveRegionHull.clear();
       for (int vertex = 0; vertex < Math.min(maximumVertices, regionSnappedTo.getConvexHull().getNumberOfVertices()); vertex++)
-         footholdData[i].concaveRegionHull.addVertex(regionSnappedTo.getConcaveHullVertex(vertex));
+         footholdData[i].concaveRegionHull.addVertex(regionSnappedTo.getConvexHull().getVertex(vertex));
       footholdData[i].concaveRegionHull.update();
-      footholdData[i].concaveRegionHull.applyTransform(regionSnappedTo.getTransformToWorld(), false);
+//      footholdData[i].concaveRegionHull.applyTransform(regionSnappedTo.getTransformToWorld(), false);
 
-      footholdData[i].concaveRegionPose.set(regionSnappedTo.getTransformToLocal());
+      footholdData[i].concaveRegionPose.set(regionSnappedTo.getTransformToWorld());
+      footholdData[i].concaveRegionPose.prependTranslation(0.0, 0.0, 0.001);
    }
 
    @Override
    public void recordWiggleTransform(RigidBodyTransformReadOnly wiggleTransform)
    {
       int i = stepsVisualized.getIntegerValue();
+
+      if (i >= numberOfStepsToVisualize)
+         return;
 
       footholdData[i].footWasWiggled.set(true);
       footholdData[i].footWiggleTranslation.set(wiggleTransform.getTranslation());
@@ -123,11 +134,11 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
          footSnapTranslation = new YoVector3D("footSnapTranslation" + suffix, registry);
          footWiggleTranslation = new YoVector3D("footWiggleTranslation" + suffix, registry);
 
-         YoGraphicPolygon regionGraphic = new YoGraphicPolygon("concaveRegionHull" + suffix, concaveRegionHull, concaveRegionPose, 1.0, YoAppearance.Green());
+         YoGraphicPolygon regionGraphic = new YoGraphicPolygon("concave Region Hull " + suffix, concaveRegionHull, concaveRegionPose, 1.0, YoAppearance.Green());
 
          AppearanceDefinition footAppearance = YoAppearance.Blue();
          footAppearance.setTransparency(0.5);
-         YoGraphicPolygon unsnappedGraphic = new YoGraphicPolygon("unsnappedGraphic" + suffix,
+         YoGraphicPolygon unsnappedGraphic = new YoGraphicPolygon("unsnapped Graphic " + suffix,
                                                                   unsnappedFootstepPolygon,
                                                                   unsnappedFootstepPose,
                                                                   1.0,
