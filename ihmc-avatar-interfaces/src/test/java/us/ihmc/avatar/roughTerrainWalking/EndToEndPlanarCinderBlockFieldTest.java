@@ -109,7 +109,7 @@ public abstract class EndToEndPlanarCinderBlockFieldTest implements MultiRobotTe
       simulationTestHelper.publishToController(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(cinderBlockFieldEnvironment.getPlanarRegionsList()));
 
       ContinuousStepGeneratorInputMessage stepGeneratorMessage = new ContinuousStepGeneratorInputMessage();
-      stepGeneratorMessage.setForwardVelocity(0.4);
+      stepGeneratorMessage.setForwardVelocity(0.25);
       stepGeneratorMessage.setWalk(true);
 
       simulationTestHelper.publishToController(stepGeneratorMessage);
