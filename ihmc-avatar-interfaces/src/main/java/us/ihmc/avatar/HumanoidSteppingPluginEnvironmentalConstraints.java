@@ -1,6 +1,7 @@
 package us.ihmc.avatar;
 
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import us.ihmc.avatar.stepAdjustment.PlanarRegionSnapVisualizer;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -112,32 +113,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
             if (!shouldSnapToRegions.getValue())
                return true;
 
-            boolean snapped = super.adjustFootstep(stanceFootPose, footstepPose, footSide, adjustedPoseToPack);
-
-            // stash these for visualization purposes.
-            if (shouldSnapToRegions.getValue() && regionsSnapped.size() < numberOfRegionsToVisualize)
-            {
-               for (int i = 0; i < regionsSnapped.size(); i++)
-               {
-                  if (regionsSnapped.get(i).epsilonEquals(regionToSnapTo, 1e-2))
-                     return snapped;
-               }
-
-               regionsSnapped.add().set(regionToSnapTo);
-
-               int index = regionsSnapped.size() - 1;
-               concaveRegionHulls[index].clear();
-               for (int i = 0; i < Math.min(maximumVertices, regionToSnapTo.getConvexHull().getNumberOfVertices()); i++)
-                  concaveRegionHulls[index].addVertex(regionToSnapTo.getConcaveHullVertex(i));
-               concaveRegionHulls[index].update();
-               concaveRegionHulls[index].applyTransform(regionToSnapTo.getTransformToLocal(), false);
-
-               concaveRegionPoses[index].set(regionToSnapTo.getTransformToWorld());
-            }
-
-            return snapped;
+            return super.adjustFootstep(stanceFootPose, footstepPose, footSide, adjustedPoseToPack);
          }
       };
+      stepSnapper.attachPlanarRegionSnapperCallback(new PlanarRegionSnapVisualizer(registry, graphicsListRegistry));
 
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
