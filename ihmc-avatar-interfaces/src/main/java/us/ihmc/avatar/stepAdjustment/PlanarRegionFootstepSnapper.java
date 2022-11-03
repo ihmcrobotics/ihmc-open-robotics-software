@@ -2,15 +2,11 @@ package us.ihmc.avatar.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,9 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
-import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -73,6 +66,11 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return snapper;
    }
 
+   public void attachPlanarRegionSnapperCallback(PlanarRegionSnapperCallback planarRegionSnapperCallback)
+   {
+      this.planarRegionSnapperCallback = planarRegionSnapperCallback;
+   }
+
    public ConvexPolygon2DReadOnly getFootPolygon(RobotSide robotSide)
    {
       return footPolygons.get(robotSide);
@@ -92,6 +90,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       {
          adjustedFootstepPose.set(footstepAtSameHeightAsStanceFoot);
          footPolygonToWiggle.set(footPolygons.get(footSide));
+
+         if (planarRegionSnapperCallback != null)
+            planarRegionSnapperCallback.recordUnadjustedFootstep(adjustedFootstepPose, footPolygonToWiggle);
+
          try
          {
             snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
@@ -151,7 +153,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
 
          if (planarRegionSnapperCallback != null)
-            planarRegionSnapperCallback.footPoseIsOnBoundary();
+            planarRegionSnapperCallback.recordFootPoseIsOnBoundary();
 
          return true;
       }
@@ -208,7 +210,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          solePoseToSnapAndWiggle.changeFrame(ReferenceFrame.getWorldFrame());
 
          if (planarRegionSnapperCallback != null)
-            planarRegionSnapperCallback.footPoseWasWiggled(wiggleTransform);
+            planarRegionSnapperCallback.recordWiggleTransform(wiggleTransform);
       }
 
       // check for partial foothold
