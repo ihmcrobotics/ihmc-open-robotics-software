@@ -15,20 +15,6 @@ public class VisualSLAMModule
    private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
    private final SlamWrapper.FactorGraphExternal factorGraphExternal;
 
-   private static final String LEFT_CAMERA_NAME = "image_0";
-   private static final String RIGHT_CAMERA_NAME = "image_1";
-
-   private static final String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
-
-   private ImageMat currentImageRight;
-   private ImageMat currentImageLeft;
-
-   private String leftImageName;
-   private String rightImageName;
-
-   private ImageMat displayImageLeft;
-
-   private String fileName = "000000.png";
    private int frameIndex = 0;
    private boolean initialized = false;
 
@@ -40,25 +26,37 @@ public class VisualSLAMModule
       BytedecoTools.loadGTSAMLibraries();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
-      //      factorGraphExternal.helloWorldTest();
-
-      //factorGraphExternal.visualSLAMTest();
-
       float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-      //
       factorGraphExternal.addPriorPoseFactor(1, poseInitial);
       factorGraphExternal.setPoseInitialValue(1, poseInitial);
-
-      //float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
-      //factorGraphExternal.addOdometryFactor(odometry, 2);
-      //
-      //factorGraphExternal.setPoseInitialValue(2, odometry);
-      //
-      //factorGraphExternal.optimize();
-      //
-      //factorGraphExternal.printResults();
    }
 
+
+   public void update(ImageMat leftImage, ImageMat rightImage)
+   {
+      //visualOdometryExternal.displayMat(leftImage.getData(), leftImage.getRows(), leftImage.getCols(), 1);
+
+      visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
+      //visualOdometryExternal.getKeyframe();
+
+      LogTools.info("Inserting: {}", frameIndex+1);
+
+      VisualOdometry.KeyframeExternal[] keyframes;
+
+      VisualOdometry.LandmarkExternal[] landmarks;
+
+      float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+      factorGraphExternal.addOdometryFactor(odometry, frameIndex + 2);
+
+      float[] poseValue = new float[]{0.0f, 0.0f, 0.0f, 1.0f * frameIndex, 0.0f, 0.0f};
+      factorGraphExternal.setPoseInitialValue(frameIndex + 2, poseValue);
+
+      factorGraphExternal.optimize();
+
+      factorGraphExternal.printResults();
+
+      frameIndex++;
+   }
 
    public void visualSLAMUpdate()
    {
@@ -96,54 +94,9 @@ public class VisualSLAMModule
       }
    }
 
-   public void update()
-   {
-      fileName = String.format("%1$6s", frameIndex).replace(' ', '0') + ".png";
-      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
-      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
-
-      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
-      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
-
-      //visualOdometryExternal.displayMat(currentImageLeft.getData(), currentImageLeft.getRows(), currentImageLeft.getCols(), 1);
-
-      visualOdometryExternal.updateStereo(currentImageLeft.getData(), currentImageRight.getData(), currentImageLeft.getRows(), currentImageLeft.getCols());
-      //visualOdometryExternal.getKeyframe();
-
-      LogTools.info("Inserting: {}", frameIndex+1);
-
-      VisualOdometry.KeyframeExternal[] keyframes;
-
-      VisualOdometry.LandmarkExternal[] landmarks;
-
-      float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
-      factorGraphExternal.addOdometryFactor(odometry, frameIndex + 2);
-
-      float[] poseValue = new float[]{0.0f, 0.0f, 0.0f, 1.0f * frameIndex, 0.0f, 0.0f};
-      factorGraphExternal.setPoseInitialValue(frameIndex + 2, poseValue);
-
-      factorGraphExternal.optimize();
-
-      factorGraphExternal.printResults();
-
-      frameIndex++;
-   }
-
    public void render()
    {
 
    }
 
-   public static void main(String[] args)
-   {
-      VisualSLAMModule vo = new VisualSLAMModule();
-
-      for (int i = 0; i < 4500; i++)
-      {
-         long start = System.nanoTime();
-         vo.update();
-         long end = System.nanoTime();
-         System.out.println("Time Taken (Update): " + (end - start) / 1000 + "us");
-      }
-   }
 }

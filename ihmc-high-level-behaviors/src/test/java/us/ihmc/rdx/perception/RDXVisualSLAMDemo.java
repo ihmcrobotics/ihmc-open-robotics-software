@@ -1,5 +1,7 @@
 package us.ihmc.rdx.perception;
 
+import us.ihmc.perception.ImageMat;
+import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -17,9 +19,31 @@ public class RDXVisualSLAMDemo
    private final ScheduledExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(),
                                                                                                            ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
 
+   private static final String LEFT_CAMERA_NAME = "image_0";
+   private static final String RIGHT_CAMERA_NAME = "image_1";
+
+   private static final String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
+
+   private ImageMat currentImageRight;
+   private ImageMat currentImageLeft;
+
+   private String leftImageName;
+   private String rightImageName;
+
+   private ImageMat displayImageLeft;
+
+   private String fileName = "000000.png";
+
    public RDXVisualSLAMDemo()
    {
       vslam = new VisualSLAMModule();
+
+      fileName = String.format("%1$6s", frameIndex).replace(' ', '0') + ".png";
+      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
+      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
+
+      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
+      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
 
       executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
 
