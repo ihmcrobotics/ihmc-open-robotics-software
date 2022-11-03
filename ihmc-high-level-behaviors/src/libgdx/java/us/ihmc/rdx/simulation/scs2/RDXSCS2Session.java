@@ -115,6 +115,7 @@ public class RDXSCS2Session
    public void update()
    {
       yoManager.update();
+      plotManager.update();
 
       if (!sessionStartedHandled && session.hasSessionStarted())
       {
