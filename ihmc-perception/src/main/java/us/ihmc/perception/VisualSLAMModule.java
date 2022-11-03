@@ -3,18 +3,14 @@ package us.ihmc.perception;
 import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.CameraModel;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class VisualOdometryModule
+public class VisualSLAMModule
 {
    private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
    private final SlamWrapper.FactorGraphExternal factorGraphExternal;
@@ -36,7 +32,7 @@ public class VisualOdometryModule
    private int frameIndex = 0;
    private boolean initialized = false;
 
-   public VisualOdometryModule()
+   public VisualSLAMModule()
    {
       BytedecoTools.loadMapsenseLibraries();
       visualOdometryExternal = new VisualOdometry.VisualOdometryExternal();
@@ -112,8 +108,13 @@ public class VisualOdometryModule
       //visualOdometryExternal.displayMat(currentImageLeft.getData(), currentImageLeft.getRows(), currentImageLeft.getCols(), 1);
 
       visualOdometryExternal.updateStereo(currentImageLeft.getData(), currentImageRight.getData(), currentImageLeft.getRows(), currentImageLeft.getCols());
+      //visualOdometryExternal.getKeyframe();
 
       LogTools.info("Inserting: {}", frameIndex+1);
+
+      VisualOdometry.KeyframeExternal[] keyframes;
+
+      VisualOdometry.LandmarkExternal[] landmarks;
 
       float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
       factorGraphExternal.addOdometryFactor(odometry, frameIndex + 2);
@@ -135,7 +136,7 @@ public class VisualOdometryModule
 
    public static void main(String[] args)
    {
-      VisualOdometryModule vo = new VisualOdometryModule();
+      VisualSLAMModule vo = new VisualSLAMModule();
 
       for (int i = 0; i < 4500; i++)
       {

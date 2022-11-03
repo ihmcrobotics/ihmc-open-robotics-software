@@ -51,4 +51,64 @@ public class VisualOdometry extends us.ihmc.bytedeco.mapsenseWrapper.presets.Vis
         public native void updateStereo(@Cast("uint8_t*") byte[] bufferLeft, @Cast("uint8_t*") byte[] bufferRight, int height, int width);
 }
 
+// Parsed from include/keyframe_external.h
+
+// #include "stdint.h"
+
+public static class KeyframeExternal extends Pointer {
+    static { Loader.load(); }
+    /** Default native constructor. */
+    public KeyframeExternal() { super((Pointer)null); allocate(); }
+    /** Native array allocator. Access with {@link Pointer#position(long)}. */
+    public KeyframeExternal(long size) { super((Pointer)null); allocateArray(size); }
+    /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+    public KeyframeExternal(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(long size);
+    @Override public KeyframeExternal position(long position) {
+        return (KeyframeExternal)super.position(position);
+    }
+    @Override public KeyframeExternal getPointer(long i) {
+        return new KeyframeExternal((Pointer)this).offsetAddress(i);
+    }
+
+
+        public native @Cast("uint32_t") int keyframeID(); public native KeyframeExternal keyframeID(int setter);
+        public native @Cast("uint32_t") int numberOfLandmarks(); public native KeyframeExternal numberOfLandmarks(int setter);
+
+        public native FloatPointer odometry(); public native KeyframeExternal odometry(FloatPointer setter);
+        public native @Cast("uint32_t*") IntPointer landmarkIDs(); public native KeyframeExternal landmarkIDs(IntPointer setter);
+}
+
+// Parsed from include/landmark_external.h
+
+// #include "stdint.h"
+
+public static class LandmarkExternal extends Pointer {
+    static { Loader.load(); }
+    /** Default native constructor. */
+    public LandmarkExternal() { super((Pointer)null); allocate(); }
+    /** Native array allocator. Access with {@link Pointer#position(long)}. */
+    public LandmarkExternal(long size) { super((Pointer)null); allocateArray(size); }
+    /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
+    public LandmarkExternal(Pointer p) { super(p); }
+    private native void allocate();
+    private native void allocateArray(long size);
+    @Override public LandmarkExternal position(long position) {
+        return (LandmarkExternal)super.position(position);
+    }
+    @Override public LandmarkExternal getPointer(long i) {
+        return new LandmarkExternal((Pointer)this).offsetAddress(i);
+    }
+
+
+        public native @Cast("uint32_t") int landmarkID(); public native LandmarkExternal landmarkID(int setter);
+        public native @Cast("uint32_t") int numberOfMeasurements(); public native LandmarkExternal numberOfMeasurements(int setter);
+
+        public native FloatPointer measurement(); public native LandmarkExternal measurement(FloatPointer setter);
+        public native FloatPointer point3d(); public native LandmarkExternal point3d(FloatPointer setter);
+
+        public native @Cast("uint32_t*") IntPointer keyframeIDs(); public native LandmarkExternal keyframeIDs(IntPointer setter);
+}
+
 }

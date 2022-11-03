@@ -6,6 +6,7 @@
 #include "point_landmark.h"
 #include "camera_model.h"
 #include "keyframe.h"
+#include "keyframe_external.h"
 
 
 using KeyPointVec = std::vector<cv::KeyPoint>;
@@ -90,6 +91,8 @@ class VisualOdometry
       CameraModel rightCamera;
 
       double baselineDistance = 0.5;
+      
+      std::vector<KeyframeExternal> _externalKeyframes;
 
 };
 

@@ -629,7 +629,8 @@ void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
 
    MatchKeypoints(desc_curLeft, desc_curRight, curMatchesStereo);
 
-   InsertKeyframe(Eigen::Matrix4f::Identity(), desc_curLeft, desc_curRight, kp_curLeft, kp_curRight, leftImageCur, rightImageCur);
+   InsertKeyframe(Eigen::Matrix4f::Identity(), desc_curLeft, kp_curLeft, leftImageCur);
+
 
    _initialized = true;
 }
@@ -647,4 +648,9 @@ void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv:
 void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const cv::Mat& leftMat)
 {
    _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), kpLeft, leftMat.clone()));
+}
+
+void VisualOdometry::InsertKeyframeExternal(Eigen::Matrix4f pose, KeyPointVec& kpLeft, )
+{
+   _externalKeyframes.emplace_back(Keyframe(pose, descLeft.clone(), kpLeft, leftMat.clone()));
 }

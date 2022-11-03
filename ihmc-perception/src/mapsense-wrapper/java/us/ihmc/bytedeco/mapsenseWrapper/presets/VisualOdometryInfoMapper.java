@@ -9,7 +9,7 @@ import org.bytedeco.javacpp.tools.*;
             includepath = {"../","/usr/include/opencv4","/usr/include/eigen3"},
             resourcepath = "../",
             linkpath = "../",
-            include = {"include/visual_odometry_external.h"},
+            include = {"include/visual_odometry_external.h", "include/keyframe_external.h", "include/landmark_external.h"},
             link = {"visual-odometry"}
       ),
       target = "us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry"
