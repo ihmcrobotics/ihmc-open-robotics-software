@@ -43,6 +43,11 @@ public class PointCloud
       return numberOfPoints;
    }
 
+   public void limit(int numberOfBytes)
+   {
+      getData().limit(numberOfBytes);
+   }
+
    public int getNumberOfElementsPerPoint()
    {
       return numberOfElementsPerPoint;
