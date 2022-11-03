@@ -37,7 +37,7 @@ mainDependencies {
 
 testDependencies {
    api(ihmc.sourceSetProject("visualizers"))
-   api("us.ihmc:ihmc-commons-testing:0.31.0")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
@@ -47,7 +47,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
    api("us.ihmc:simulation-construction-set:0.22.10")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.10.2")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.10.3")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

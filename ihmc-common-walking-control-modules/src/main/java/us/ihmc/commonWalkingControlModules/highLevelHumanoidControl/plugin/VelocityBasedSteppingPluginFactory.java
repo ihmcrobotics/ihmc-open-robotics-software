@@ -100,7 +100,7 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
          {
             message.setForward(desiredXVelocity);
             message.setRight(-desiredYVelocity);
-            message.setClockwise(desiredTurningSpeed);
+            message.setClockwise(-desiredTurningSpeed);
 
             walkingCommandInputManager.submitMessage(message);
          }
