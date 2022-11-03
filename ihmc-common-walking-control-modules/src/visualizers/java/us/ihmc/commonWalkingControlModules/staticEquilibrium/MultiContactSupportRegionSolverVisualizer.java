@@ -219,7 +219,7 @@ public class MultiContactSupportRegionSolverVisualizer
       for (int i = 0; i < convexPolytope3D.getNumberOfVertices(); i++)
       {
          Vertex3D scaledVertex = new Vertex3D(convexPolytope3D.getVertex(i));
-         scaledVertex.scale(ContactPoint.forceVectorGraphicScale);
+         scaledVertex.scale(2e-4);
          scaledPolytope.addVertex(scaledVertex);
       }
 
