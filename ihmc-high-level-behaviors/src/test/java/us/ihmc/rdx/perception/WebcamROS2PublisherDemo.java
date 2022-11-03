@@ -39,8 +39,8 @@ public class WebcamROS2PublisherDemo
                                                   "ROS 2 Webcam Publisher");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
-   private int imageHeight = 1080;
    private int imageWidth = 1920;
+   private int imageHeight = 1080;
    private double requestedFPS = 30.0;
    private double reportedFPS = 30.0;
    private String backendName = "";
@@ -223,6 +223,8 @@ public class WebcamROS2PublisherDemo
          Instant now = TimeTools.now();
          videoPacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
          videoPacket.setAcquisitionTimeAdditionalNanos(now.getNano());
+         videoPacket.setImageWidth(imageWidth);
+         videoPacket.setImageHeight(imageHeight);
          publisher.publish(videoPacket);
 
          publishFrequencyPlot.ping();
