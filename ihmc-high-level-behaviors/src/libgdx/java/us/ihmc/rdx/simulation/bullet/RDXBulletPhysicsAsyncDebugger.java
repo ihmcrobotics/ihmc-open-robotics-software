@@ -9,9 +9,10 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.bullet.LinearMath.btVector3;
-import org.bytedeco.javacpp.Pointer;
+import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyDynamicsWorld;
@@ -36,7 +37,7 @@ public class RDXBulletPhysicsAsyncDebugger
    {
       this.multiBodyDynamicsWorld = multiBodyDynamicsWorld;
 
-      btDebugDraw = new btIDebugDraw((Pointer) null) // TODO: We might need to fix the Bullet preset
+      btDebugDraw = new btIDebugDraw()
       {
          @Override
          public void drawLine(btVector3 from, btVector3 to, btVector3 color)
@@ -60,13 +61,13 @@ public class RDXBulletPhysicsAsyncDebugger
          }
 
          @Override
-         public void reportErrorWarning(String warningString)
+         public void reportErrorWarning(BytePointer warningString)
          {
-            LogTools.error("Bullet: {}", warningString);
+            LogTools.error("Bullet: {}", BytedecoTools.stringFromByteBuffer(warningString));
          }
 
          @Override
-         public void draw3dText(btVector3 location, String textString)
+         public void draw3dText(btVector3 location, BytePointer textString)
          {
 
          }
