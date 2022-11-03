@@ -6,8 +6,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2BulletSimulationSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.scs2.examples.simulations.bullet.FallingBoxBulletSimulation;
-import us.ihmc.scs2.examples.simulations.bullet.FallingSphereExperimentalBulletSimulation;
+import us.ihmc.scs2.examples.simulations.bullet.*;
 
 public class RDXSCS2BulletSimulationDemos
 {
@@ -44,15 +43,54 @@ public class RDXSCS2BulletSimulationDemos
 
          private void renderSessionSelectionPanelImGuiWidgets()
          {
-            if (ImGui.button(labels.get("Falling Box")))
+            if (ImGui.button(labels.get("Box")))
+            {
+               scs2SimulationSession.startSession(BoxExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Box teetering edge to edge")))
+            {
+               scs2SimulationSession.startSession(BoxTeeteringEdgeToEdgeExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Colliding spheres no gravity")))
+            {
+               scs2SimulationSession.startSession(CollidingSpheresNoGravityExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Connected shapes")))
+            {
+               scs2SimulationSession.startSession(ConnectedShapesExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Falling box")))
             {
                scs2SimulationSession.startSession(FallingBoxBulletSimulation.createSession());
             }
-            if (ImGui.button(labels.get("Falling Sphere")))
+            if (ImGui.button(labels.get("Falling sphere")))
             {
                scs2SimulationSession.startSession(FallingSphereExperimentalBulletSimulation.createSession());
             }
-
+            if (ImGui.button(labels.get("Mobile")))
+            {
+               scs2SimulationSession.startSession(MobileBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Newton's cradle")))
+            {
+               scs2SimulationSession.startSession(NewtonsCradleExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Prismatic spring")))
+            {
+               scs2SimulationSession.startSession(PrismaticSpringBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Spring box with intertia and collision offsets")))
+            {
+               scs2SimulationSession.startSession(SingleBoxWithInertiaAndCollisionOffsetsBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Sliding box")))
+            {
+               scs2SimulationSession.startSession(SlidingBoxExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Stack of boxes")))
+            {
+               scs2SimulationSession.startSession(StackOfBoxesExperimentalBulletSimulation.createSession());
+            }
          }
 
          @Override
