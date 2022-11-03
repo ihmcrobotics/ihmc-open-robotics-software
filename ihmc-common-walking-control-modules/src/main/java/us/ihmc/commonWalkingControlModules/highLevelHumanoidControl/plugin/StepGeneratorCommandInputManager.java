@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -64,11 +65,7 @@ public class StepGeneratorCommandInputManager implements Updatable
 
    public List<Class<? extends Command<?, ?>>> supportedCommands()
    {
-      List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      commands.add(ContinuousStepGeneratorParametersCommand.class);
-      commands.add(ContinuousStepGeneratorInputCommand.class);
-      commands.add(PlanarRegionsListCommand.class);
-      return commands;
+      return StepGeneratorAPIDefinition.getStepGeneratorSupportedCommands();
    }
 
    public void setHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)

@@ -92,7 +92,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          footPolygonToWiggle.set(footPolygons.get(footSide));
 
          if (planarRegionSnapperCallback != null)
+         {
+            planarRegionSnapperCallback.advanceFootIndex();
             planarRegionSnapperCallback.recordUnadjustedFootstep(adjustedFootstepPose, footPolygonToWiggle);
+         }
 
          try
          {
@@ -128,8 +131,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    public boolean snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
-      if (planarRegionSnapperCallback != null)
-         planarRegionSnapperCallback.advanceFootIndex();
+
 
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {

@@ -43,14 +43,10 @@ import java.util.function.Consumer;
  */
 public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<PlanarRegionsListCommand>, Updatable
 {
-   private static final int numberOfRegionsToVisualize = 3;
-   private static final int maximumVertices = 40;
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
    private final YoBoolean shouldSnapToRegions;
-   private final YoBoolean shouldVisualizeSnappedRegions;
    private final YoInteger numberOfSteppableRegions;
 
    private final SteppingParameters steppingParameters;
@@ -63,24 +59,20 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private final SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
 
-   private final RecyclingArrayList<PlanarRegion> regionsSnapped = new RecyclingArrayList<>(PlanarRegion::new);
-   private final YoFrameConvexPolygon2D[] concaveRegionHulls = new YoFrameConvexPolygon2D[numberOfRegionsToVisualize];
-   private final YoFramePose3D[] concaveRegionPoses = new YoFramePose3D[numberOfRegionsToVisualize];
 
    // temp variables
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
    private final PlanarRegion tempRegion = new PlanarRegion();
 
+   private final PlanarRegionSnapVisualizer snapVisualizer;
+
    public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters, SteppingParameters steppingParameters)
    {
       this.steppingParameters = steppingParameters;
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
-      shouldVisualizeSnappedRegions = new YoBoolean("shouldVisualizeSnappedRegions", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
-
-      shouldVisualizeSnappedRegions.set(true);
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -89,18 +81,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
          footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
       }
 
-      for (int i = 0; i < numberOfRegionsToVisualize; i++)
-      {
-         concaveRegionHulls[i] = new YoFrameConvexPolygon2D("concaveRegionHull" + i, ReferenceFrame.getWorldFrame(), maximumVertices, registry);
-         concaveRegionPoses[i] = new YoFramePose3D("concaveRegionPose" + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicPolygon graphicPolygon = new YoGraphicPolygon("concaveRegionHull" + i,
-                                                                concaveRegionHulls[i],
-                                                                concaveRegionPoses[i],
-                                                                1.0,
-                                                                YoAppearance.Blue());
 
-         graphicsListRegistry.registerYoGraphic("Environmental Constraints", graphicPolygon);
-      }
 
       stepSnapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsCalculator)
       {
@@ -116,7 +97,8 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
             return super.adjustFootstep(stanceFootPose, footstepPose, footSide, adjustedPoseToPack);
          }
       };
-      stepSnapper.attachPlanarRegionSnapperCallback(new PlanarRegionSnapVisualizer(registry, graphicsListRegistry));
+      snapVisualizer = new PlanarRegionSnapVisualizer(registry, graphicsListRegistry);
+      stepSnapper.attachPlanarRegionSnapperCallback(snapVisualizer);
 
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
@@ -144,13 +126,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    public void reset()
    {
-      for (int i = 0; i < numberOfRegionsToVisualize; i++)
-      {
-         concaveRegionHulls[i].clear();
-         concaveRegionPoses[i].setToNaN();
-      }
-
-      regionsSnapped.clear();
+      snapVisualizer.reset();
    }
 
    @Override
