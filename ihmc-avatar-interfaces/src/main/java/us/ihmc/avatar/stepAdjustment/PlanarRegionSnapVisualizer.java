@@ -85,7 +85,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
       for (int vertex = 0; vertex < Math.min(maximumVertices, regionSnappedTo.getConvexHull().getNumberOfVertices()); vertex++)
          footholdData[i].concaveRegionHull.addVertex(regionSnappedTo.getConvexHull().getVertex(vertex));
       footholdData[i].concaveRegionHull.update();
-//      footholdData[i].concaveRegionHull.applyTransform(regionSnappedTo.getTransformToWorld(), false);
 
       footholdData[i].concaveRegionPose.set(regionSnappedTo.getTransformToWorld());
       footholdData[i].concaveRegionPose.prependTranslation(0.0, 0.0, 0.001);
@@ -134,7 +133,9 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
          footSnapTranslation = new YoVector3D("footSnapTranslation" + suffix, registry);
          footWiggleTranslation = new YoVector3D("footWiggleTranslation" + suffix, registry);
 
-         YoGraphicPolygon regionGraphic = new YoGraphicPolygon("concave Region Hull " + suffix, concaveRegionHull, concaveRegionPose, 1.0, YoAppearance.Green());
+         AppearanceDefinition regionAppearance = YoAppearance.Green();
+         regionAppearance.setTransparency(0.75);
+         YoGraphicPolygon regionGraphic = new YoGraphicPolygon("concave Region Hull " + suffix, concaveRegionHull, concaveRegionPose, 1.0, regionAppearance);
 
          AppearanceDefinition footAppearance = YoAppearance.Blue();
          footAppearance.setTransparency(0.5);
