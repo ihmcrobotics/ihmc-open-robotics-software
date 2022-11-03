@@ -5,6 +5,7 @@
     "SCS 2 Session" : true,
     "Statistics" : true,
     "YoVariable Search" : false,
+    "Session Selection" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }

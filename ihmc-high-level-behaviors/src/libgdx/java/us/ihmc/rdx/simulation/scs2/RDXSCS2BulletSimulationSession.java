@@ -12,7 +12,6 @@ import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.tools.UnitConversions;
 
 import java.util.Set;
 
@@ -21,14 +20,21 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
    private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private PhysicsEngine physicsEngine;
 
-   public RDXSCS2BulletSimulationSession()
+   /**
+    * Construct a session.
+    */
+   public void createEmptySessionAndStart()
    {
-      this(new SimulationSession(BulletPhysicsEngine::new));
+      startSession(new SimulationSession(BulletPhysicsEngine::new));
    }
 
-   public RDXSCS2BulletSimulationSession(SimulationSession simulationSession)
+   /**
+    * Bring your own session.
+    * This supports being called multiple times to switch between sessions.
+    */
+   public void startSession(SimulationSession simulationSession)
    {
-      super(simulationSession);
+      super.startSession(simulationSession);
 
       physicsEngine = simulationSession.getPhysicsEngine();
       if (physicsEngine instanceof BulletPhysicsEngine)
@@ -46,9 +52,6 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
          {
             simulationSession.setSessionMode(SessionMode.PAUSE);
          }
-
-         simulationDurationCalculator.ping();
-         simulationRealtimeRate.set(UnitConversions.hertzToSeconds(dtHz.get()) / simulationDurationCalculator.getDuration());
       });
    }
 
