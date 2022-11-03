@@ -53,7 +53,7 @@ public class ROS2PointCloudProvider
    // Decompress incoming binary data (compressed)
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
-   private final ByteBuffer incomingCompressedBuffer;
+   private final ByteBuffer decompressionInputDirectBuffer;
 
    // Data type PointCloud, to be updated and used globally in the future whenever sending / receiving pointCloud data.
    private final PointCloud pointCloud;
@@ -66,9 +66,9 @@ public class ROS2PointCloudProvider
       this.numberOfSegments = numberOfSegments;
       this.numberOfElementsPerPoint = numberOfElementsPerPoint;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-      incomingCompressedBuffer = ByteBuffer.allocateDirect(pointsPerSegment * numberOfSegments * inputBytesPerPoint);
-      incomingCompressedBuffer.order(ByteOrder.nativeOrder());
-      pointCloud = new PointCloud(pointsPerSegment * numberOfSegments, numberOfElementsPerPoint);
+      decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
+      decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
+      pointCloud = new PointCloud(pointsPerSegment, numberOfElementsPerPoint);
       subscribe();
    }
 
@@ -128,18 +128,17 @@ public class ROS2PointCloudProvider
       FusedSensorHeadPointCloudMessage fusedMessage = latestFusedSensorHeadPointCloudMessageReference.getAndSet(null);
       if (fusedMessage != null)
       {
-         incomingCompressedBuffer.rewind();
+         decompressionInputDirectBuffer.rewind();
          int numberOfBytes = fusedMessage.getScan().size();
-         incomingCompressedBuffer.limit(numberOfBytes);
-         pointCloud.limit(numberOfBytes);
+         decompressionInputDirectBuffer.limit(numberOfBytes);
          for (int i = 0; i < numberOfBytes; i++)
          {
-            incomingCompressedBuffer.put(fusedMessage.getScan().get(i));
+            decompressionInputDirectBuffer.put(fusedMessage.getScan().get(i));
          }
-         incomingCompressedBuffer.flip();
+         decompressionInputDirectBuffer.flip();
          pointCloud.rewindBufferData();
          // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
-         lz4Decompressor.decompress(incomingCompressedBuffer, pointCloud.getData());
+         lz4Decompressor.decompress(decompressionInputDirectBuffer, pointCloud.getData());
          pointCloud.rewindBufferData();
 
 //         pointCloud.setData(decompressedOpenCLIntBuffer.getBackingDirectByteBuffer(),

@@ -72,7 +72,7 @@ public class PointCloudVisualizationManager
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
       parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
-      decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * numberOfElementsPerPoint);
+      decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
       undiscretizedVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * numberOfElementsPerPoint, pointCloudVisualizer.getVertexBuffer());
       undiscretizedVertexBuffer.createOpenCLBufferObject(openCLManager);
