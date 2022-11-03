@@ -25,6 +25,9 @@ public class RDXSCS2BulletPhysicsDoorDemo
          {
             baseUI.create();
 
+            scs2SimulationSession.create(baseUI);
+            scs2SimulationSession.createEmptySessionAndStart();
+
             DoorDefinition doorDefinition = new DoorDefinition();
             doorDefinition.getDoorPanelDefinition().setAddFiducials(false);
             doorDefinition.build();
@@ -35,7 +38,6 @@ public class RDXSCS2BulletPhysicsDoorDemo
 
             scs2SimulationSession.addTerrainObject(new LabFloorDefinition());
 
-            scs2SimulationSession.create(baseUI);
             scs2SimulationSession.setDT(UnitConversions.hertzToSeconds(240.0));
             baseUI.getImGuiPanelManager().addPanel(scs2SimulationSession.getControlPanel());
          }

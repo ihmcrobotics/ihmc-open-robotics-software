@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
+   private RDXImGuiPerspectiveManager perspectiveManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
@@ -33,19 +34,34 @@ public class SCS2YoImPlotManager
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridFile configurationFile;
 
-   public void create(RDXImGuiPerspectiveManager perspectiveManager, RDXYoManager yoManager, ImGuiPanel parentPanel)
+   public void create(RDXImGuiPerspectiveManager perspectiveManager, ImGuiPanel parentPanel)
    {
-      this.yoManager = yoManager;
+      this.perspectiveManager = perspectiveManager;
       this.parentPanel = parentPanel;
 
-      yoVariableSearchPanel = new ImGuiYoVariableSearchPanel(yoManager.getRootRegistry());
-      parentPanel.addChild(yoVariableSearchPanel.getPanel());
-
+      updateConfigurationFile(perspectiveManager.getPerspectiveDirectory());
       perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(this::updateConfigurationFile);
       perspectiveManager.getLoadListeners().add(this::loadConfiguration);
       perspectiveManager.getSaveListeners().add(this::saveConfiguration);
-      updateConfigurationFile(perspectiveManager.getPerspectiveDirectory());
+   }
+
+   public void setupForSession(RDXYoManager yoManager)
+   {
+      this.yoManager = yoManager;
+
+      if (yoVariableSearchPanel == null)
+      {
+         yoVariableSearchPanel = new ImGuiYoVariableSearchPanel(yoManager.getRootRegistry());
+         parentPanel.addChild(yoVariableSearchPanel.getPanel());
+      }
+      else
+      {
+         removeAllPlotPanels();
+         yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
+      }
+
       loadConfiguration(perspectiveManager.getCurrentConfigurationLocation());
+      perspectiveManager.reloadPerspective();
    }
 
    private void updateConfigurationFile(HybridDirectory perspectiveDirectory)
@@ -55,6 +71,7 @@ public class SCS2YoImPlotManager
 
    private void loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
+
       configurationFile.setMode(configurationLocation.toHybridResourceMode());
       InputStream inputStream = configurationFile.getInputStream();
       if (inputStream != null)
@@ -158,11 +175,16 @@ public class SCS2YoImPlotManager
 
    public void destroy()
    {
+      removeAllPlotPanels();
+      parentPanel.queueRemoveChild(yoVariableSearchPanel.getPanel());
+   }
+
+   private void removeAllPlotPanels()
+   {
       ImPlotModifiableYoPlotPanel[] plotPanelsArray = plotPanels.toArray(new ImPlotModifiableYoPlotPanel[0]);
       for (ImPlotModifiableYoPlotPanel plotPanel : plotPanelsArray)
       {
          removePlotPanel(plotPanel);
       }
-      parentPanel.queueRemoveChild(yoVariableSearchPanel.getPanel());
    }
 }
