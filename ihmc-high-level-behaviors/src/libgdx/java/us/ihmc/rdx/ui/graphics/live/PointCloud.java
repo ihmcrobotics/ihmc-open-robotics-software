@@ -1,39 +1,26 @@
 package us.ihmc.rdx.ui.graphics.live;
 
 import org.bytedeco.javacpp.FloatPointer;
-import us.ihmc.perception.OpenCLIntBuffer;
-
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 public class PointCloud
 {
    private final int numberOfPoints;
    private final int numberOfElementsPerPoint;
-   private final ByteBuffer data;  // x,y,z,color
+   private final float[] data;
 
    public PointCloud(int numberOfPoints, int numberOfElementsPerPoint)
    {
       this.numberOfPoints = numberOfPoints;
       this.numberOfElementsPerPoint = numberOfElementsPerPoint;
-      data = ByteBuffer.allocateDirect(numberOfPoints * numberOfElementsPerPoint * Integer.BYTES);
+      data = new float[numberOfPoints * numberOfElementsPerPoint];
    }
 
-   public void setData(ByteBuffer fp, int size)
+   public void setData(FloatPointer fp, int size)
    {
-//      for (int i = 0; i < size; ++i)
-//      {
-         data.put(fp);
-//         data[i] = fp.get(i);
-//      }
+      fp.get(data, 0, size);
    }
 
-   public void rewindBufferData()
-   {
-      data.rewind();
-   }
-
-   public ByteBuffer getData()
+   public float[] getData()
    {
       return this.data;
    }
