@@ -21,6 +21,8 @@ import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.definition.visual.*;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParameters;
 
 import java.util.ArrayList;
@@ -44,7 +46,8 @@ public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
             baseUI.create();
 
             rdxSCS2SimulationSession.create(baseUI);
-            rdxSCS2SimulationSession.createEmptySessionAndStart();
+
+            SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
 
             ContactParameters contactParameters = new ContactParameters();
             contactParameters.setMinimumPenetration(5.0e-5);
@@ -94,7 +97,7 @@ public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
                                                                           new CollisionShapeDefinition(terrainPose, terrainGeometry));
 
 
-            robotDefinitions.forEach(rdxSCS2SimulationSession::addRobot);
+            robotDefinitions.forEach(simulationSession::addRobot);
       //      physicsSimulator.addTerrainObject(terrain);
 
             BoxRobotDefinition boxRobot = new BoxRobotDefinition();
@@ -105,7 +108,10 @@ public class RDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
             SlopeGroundDefinition slopeTerrain = new SlopeGroundDefinition();
 
       //      physicsSimulator.addRobot(boxRobot);
-            rdxSCS2SimulationSession.addTerrainObject(slopeTerrain);
+            simulationSession.addTerrainObject(slopeTerrain);
+
+            rdxSCS2SimulationSession.startSession(simulationSession);
+
             baseUI.getImGuiPanelManager().addPanel(rdxSCS2SimulationSession.getControlPanel());
          }
 
