@@ -1,8 +1,9 @@
-package us.ihmc.rdx.logging;
+package us.ihmc.perception.logging;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang.ArrayUtils;
 import org.bytedeco.hdf5.Group;
+import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -12,21 +13,20 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.BigVideoPacket;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.HDF5Manager;
-import us.ihmc.perception.HDF5Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.sessionVisualizer.jfx.managers.BackgroundExecutorManager;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
@@ -56,6 +56,7 @@ public class PerceptionDataLogger
 
    private int pointCloudCount = 0;
    private int depthMapCount = 0;
+   private int d435ImageCount = 0;
 
    private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
    private LidarScanMessage lidarScanMessage = new LidarScanMessage();
@@ -72,7 +73,6 @@ public class PerceptionDataLogger
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                   getClass(),
                                                                                                   ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   private final BackgroundExecutorManager executor = new BackgroundExecutorManager(1);
    private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
 
    private int depthMessageCounter = 0;
@@ -91,13 +91,13 @@ public class PerceptionDataLogger
       {
 
          LogTools.info("Creating HDF5 File: " + logFileName);
-         hdf5Manager = new HDF5Manager(logFileName, H5F_ACC_TRUNC);
-         hdf5Manager.getFile().openFile(logFileName, H5F_ACC_RDWR);
+         hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_TRUNC);
+         hdf5Manager.getFile().openFile(logFileName, hdf5.H5F_ACC_RDWR);
       }
       else
       {
          LogTools.info("Opening Existing HDF5 File: " + logFileName);
-         hdf5Manager = new HDF5Manager(logFileName, H5F_ACC_RDWR);
+         hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_RDWR);
       }
 
       // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
@@ -115,13 +115,15 @@ public class PerceptionDataLogger
       robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
       runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
 
+      // Add callback for Robot Configuration Data
+      var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.VIDEO);
+      d435VideoSubscription.addCallback(this::logVideoPacketD435);
+      runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
+
       // Add callback for L515 Depth maps
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.L515_DEPTH, ROS2QosProfile.BEST_EFFORT(), subscriber ->
-      {
-         depthVideoPacket.getData().resetQuick();
-         subscriber.takeNextData(depthVideoPacket, depthSampleInfo);
-         logDepthMap(depthVideoPacket);
-      });
+      var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH);
+      l515DepthSubscription.addCallback(this::logDepthMap);
+      runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
 
       // Add callback for L515 Depth maps
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_LIDAR, ROS2QosProfile.BEST_EFFORT(), subscriber ->
@@ -159,6 +161,11 @@ public class PerceptionDataLogger
 //      LogTools.info("Collecting Statistics");
    }
 
+   /*
+   * Log methods are simple high-level calls to request logging for direct message/packet types.
+   * They internally call Store methods for actually deploying threads to write compressed data to files.
+   * */
+
    public void logRobotConfigurationData(RobotConfigurationData data)
    {
       LogTools.info("Robot Configuration Data Received: {}", data.getMonotonicTime());
@@ -182,6 +189,12 @@ public class PerceptionDataLogger
    {
       LogTools.info("Depth Map Received.");
       storeDepthMap("/chest_l515/depth/image_compressed/", packet);
+   }
+
+   public void logVideoPacketD435(VideoPacket videoPacket)
+   {
+      LogTools.info("Logging D435 VideoPacket: ", videoPacket.toString());
+      storeVideoPacket("/d435/video/", videoPacket);
    }
 
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
@@ -208,69 +221,81 @@ public class PerceptionDataLogger
       //      logImage(mat);
    }
 
-   public void logImage(Mat mat)
-   {
-      BytePointer jpegImageBytePointer = new BytePointer();
-      IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
-      opencv_imgcodecs.imencode(".jpg", mat, jpegImageBytePointer, compressionParameters);
-
-      HDF5Tools.storeCompressedImage(hdf5Manager.getGroup("/ihmc/logger/camera/"), compressedImageCounter, jpegImageBytePointer);
-   }
+   /*
+    *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
+   */
 
    public void storeDepthMap(String namespace, BigVideoPacket message)
    {
       Group group = hdf5Manager.getGroup(namespace);
-      executor.executeInBackground(() ->
-                                   {
-                                      synchronized (this)
-                                      {
-                                         LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
-                                         depthMapCount = (int) hdf5Manager.getCount(namespace);
+      ThreadTools.startAThread(() ->
+                               {
+                                  synchronized (this)
+                                  {
+                                     LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
+                                     depthMapCount = (int) hdf5Manager.getCount(namespace);
 
-                                         IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
-                                         imageEncodedTByteArrayList.toArray(messageDataHeapArray);
-//                                         messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
-//                                         messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
+                                     IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
+                                     imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+                                     //                                         messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
+                                     //                                         messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
 
-                                         HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, message.getData().size());
-                                         LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
-                                      }
-                                   });
+                                     HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, message.getData().size());
+                                     LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
+                                  }
+                               }, "depth_map_logger_thread");
+   }
+
+   public void storeVideoPacket(String namespace, VideoPacket packet)
+   {
+      Group group = hdf5Manager.getGroup(namespace);
+      ThreadTools.startAThread(() -> {
+
+         LogTools.info("{} Storing Buffer: {}", namespace, d435ImageCount);
+         d435ImageCount = (int) hdf5Manager.getCount(namespace);
+
+         IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+         imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+
+         HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, packet.getData().size());
+         LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
+
+      }, "video_packet_logger_thread -> " + namespace);
    }
 
    public void storePointCloud(String namespace, LidarScanMessage message)
    {
       Group group = hdf5Manager.getGroup(namespace);
 
-      executor.executeInBackground(() ->
-                                   {
-                                      synchronized (this)
-                                      {
-                                         LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
-                                         pointCloudCount = (int) hdf5Manager.getCount(namespace);
-                                         HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
-                                         LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
+      ThreadTools.startAThread(() ->
+      {
+        synchronized (this)
+        {
+           LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
+           pointCloudCount = (int) hdf5Manager.getCount(namespace);
+           HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
+           LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
 
-                                         //                                         pointCloudCount++;
-                                      }
-                                   });
+           //                                         pointCloudCount++;
+        }
+      }, "lidar_scan_logger_thread");
    }
 
    public void storePointCloud(String namespace, FusedSensorHeadPointCloudMessage message)
    {
       Group group = hdf5Manager.getGroup(namespace);
 
-      executor.executeInBackground(() ->
-                                   {
-                                      synchronized (this)
-                                      {
-                                         LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
-                                         pointCloudCount = (int) hdf5Manager.getCount(namespace);
-                                         HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
-                                         LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
-                                      }
-                                   });
+      ThreadTools.startAThread(() ->
+      {
+         synchronized (this)
+         {
+            LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
+            pointCloudCount = (int) hdf5Manager.getCount(namespace);
+            HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
+            LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
+         }
+      }, "fused_point_cloud_logger_thread");
    }
 
    public void storeFloatArray(String namespace, float[] array)
@@ -288,13 +313,13 @@ public class PerceptionDataLogger
          ArrayList<Float> data = new ArrayList<>(buffer);
          hdf5Manager.resetBuffer(namespace);
 
-         executor.executeInBackground(() ->
-                                      {
-                                         long count = hdf5Manager.getCount(namespace);
-                                         LogTools.info("Storing Buffer: {}", count);
-                                         HDF5Tools.storeFloatArray2D(group, count, data, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                         LogTools.info("Done Storing Buffer: {}", count);
-                                      });
+         ThreadTools.startAThread(() ->
+         {
+            long count = hdf5Manager.getCount(namespace);
+            LogTools.info("Storing Buffer: {}", count);
+            HDF5Tools.storeFloatArray2D(group, count, data, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+            LogTools.info("Done Storing Buffer: {}", count);
+         }, "float_array_logger_thread -> " + namespace);
       }
    }
 
@@ -314,6 +339,10 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      PerceptionDataLogger logger = new PerceptionDataLogger();
+      logger.startLogging(LOG_FILE, "Robot");
+
       //        HDF5Manager h5;
       //        File f = new File(FILE_NAME);
       //        if (!f.exists() && !f.isDirectory()) {

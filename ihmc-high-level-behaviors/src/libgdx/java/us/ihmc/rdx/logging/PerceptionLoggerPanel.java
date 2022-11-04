@@ -4,7 +4,8 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.HDF5Tools;
+import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 
 public class PerceptionLoggerPanel extends ImGuiPanel
 {
-   private PerceptionDataLogger logger = new PerceptionDataLogger();
+   private PerceptionDataLogger logger;
    private PerceptionDataLoader loader;
    private RDXPointCloudRenderer pointCloudRenderer;
 

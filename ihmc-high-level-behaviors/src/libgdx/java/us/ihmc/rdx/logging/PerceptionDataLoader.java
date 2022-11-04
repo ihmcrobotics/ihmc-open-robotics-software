@@ -11,6 +11,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.logging.HDF5Manager;
+import us.ihmc.perception.logging.HDF5Tools;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;

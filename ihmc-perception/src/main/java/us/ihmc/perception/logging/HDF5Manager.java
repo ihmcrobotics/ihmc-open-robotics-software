@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.logging;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.H5File;
@@ -71,6 +71,7 @@ public class HDF5Manager
       }
       else
       {
+         LogTools.info("Creating Group: {}", namespace);
          Group group = createGroup(namespace);
          groups.put(namespace, group);
          return group;

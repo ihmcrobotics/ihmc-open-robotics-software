@@ -1,7 +1,8 @@
-package us.ihmc.perception;
+package us.ihmc.perception.logging;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.bytedeco.hdf5.*;
+import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
@@ -12,9 +13,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
-
-import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_RDONLY;
-import static org.bytedeco.hdf5.global.hdf5.H5O_TYPE_GROUP;
 
 public class HDF5Tools
 {
@@ -137,7 +135,7 @@ public class HDF5Tools
       for (int i = 0; i < group.getNumObjs(); i++)
       {
          BytePointer objPtr = group.getObjnameByIdx(i);
-         if (group.childObjType(objPtr) == H5O_TYPE_GROUP)
+         if (group.childObjType(objPtr) == hdf5.H5O_TYPE_GROUP)
          {
             count++;
             String grpName = group.getObjnameByIdx(i).getString();
@@ -197,7 +195,7 @@ public class HDF5Tools
    public static void main(String[] args)
    {
       String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
-      H5File file = new H5File(HDF5_FILENAME, H5F_ACC_RDONLY);
+      H5File file = new H5File(HDF5_FILENAME, hdf5.H5F_ACC_RDONLY);
 
       ArrayList<String> topicNames = HDF5Tools.getTopicNames(file);
    }
