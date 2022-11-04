@@ -39,6 +39,7 @@ public class RDXSCS2Session
    protected final ImInt dtHz = new ImInt(-1);
    private final ImInt bufferRecordTickPeriod = new ImInt(1);
    private final ImFloat bufferDuration = new ImFloat(5.0f);
+   private String bufferSizeFormatString;
    protected final ImBoolean pauseAtEndOfBuffer = new ImBoolean(true);
    private final ArrayList<Pair<ImBoolean, String>> showRobotPairs = new ArrayList<>();
    private final HashMap<String, ImBoolean> showRobotMap = new HashMap<>();
@@ -233,7 +234,7 @@ public class RDXSCS2Session
          changeBufferDuration(bufferDuration.get());
       }
       ImGui.popItemWidth();
-      if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize()))
+      if (ImGui.sliderInt(labels.get("Buffer"), bufferIndex.getData(), 0, yoManager.getBufferSize(), bufferSizeFormatString))
       {
          session.submitBufferIndexRequest(bufferIndex.get());
       }
@@ -282,6 +283,7 @@ public class RDXSCS2Session
    {
       this.bufferDuration.set((float) bufferDuration);
       int bufferSizeRequest = (int) (bufferDuration / UnitConversions.hertzToSeconds(dtHz.get()) / bufferRecordTickPeriod.get());
+      bufferSizeFormatString = "%i / " + bufferSizeRequest;
       session.submitBufferSizeRequest(bufferSizeRequest);
    }
 
