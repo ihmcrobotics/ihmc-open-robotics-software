@@ -5,13 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.bullet.RDXBulletPhysicsAsyncDebugger;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
-import us.ihmc.scs2.simulation.robot.Robot;
 
 import java.util.Set;
 
@@ -19,14 +16,6 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
 {
    private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private PhysicsEngine physicsEngine;
-
-   /**
-    * Construct a session.
-    */
-   public void createEmptySessionAndStart()
-   {
-      startSession(new SimulationSession(BulletPhysicsEngine::new));
-   }
 
    /**
     * Bring your own session.
@@ -53,16 +42,6 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
             simulationSession.setSessionMode(SessionMode.PAUSE);
          }
       });
-   }
-
-   public Robot addRobot(RobotDefinition robotDefinition)
-   {
-      return getSimulationSession().addRobot(robotDefinition);
-   }
-
-   public void addTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
-   {
-      getSimulationSession().addTerrainObject(terrainObjectDefinition);
    }
 
    @Override
