@@ -6,7 +6,7 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.JointGainsHandle;
+import us.ihmc.rosControl.wholeRobot.JointImpedanceHandle;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -18,9 +18,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaBridge
+public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBridge
 {
    private static final String[] jointNames;
+   private static final double[] desiredJointAngles = new double[]{0.4, -1.0, 0.1, -1.0};
 
    static
    {
@@ -34,14 +35,13 @@ public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaB
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
 
-   private final JointGainsHandle[] jointGainsHandles = new JointGainsHandle[jointNames.length];
-   private final PositionJointHandle[] positionJointHandles = new PositionJointHandle[jointNames.length];
+   private final JointImpedanceHandle[] jointImpedanceHandles = new JointImpedanceHandle[jointNames.length];
 
    private final YoDouble desiredJointStiffness = new YoDouble("desiredJointStiffness", registry);
    private final YoDouble desiredJointDamping = new YoDouble("desiredJointDamping", registry);
    private YoVariableServer yoVariableServer;
 
-   public ValkyrieJointGainsTestController()
+   public ValkyrieImpedanceTestController()
    {
    }
 
@@ -50,8 +50,7 @@ public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaB
    {
       for (int i = 0; i < jointNames.length; i++)
       {
-         jointGainsHandles[i] = createJointGainsHandle(jointNames[i]);
-         positionJointHandles[i] = createPositionJointHandle(jointNames[i]);
+         jointImpedanceHandles[i] = createJointImpedanceHandle(jointNames[i]);
       }
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
@@ -67,18 +66,16 @@ public class ValkyrieJointGainsTestController extends IHMCWholeRobotControlJavaB
    {
       if (firstTick)
       {
-         for (int i = 0; i < jointNames.length; i++)
-         {
-            positionJointHandles[i].setDesiredPosition(positionJointHandles[i].getPosition());
-         }
-
          firstTick = false;
       }
 
       for (int i = 0; i < jointNames.length; i++)
       {
-         jointGainsHandles[i].setStiffness(desiredJointStiffness.getDoubleValue());
-         jointGainsHandles[i].setDamping(desiredJointDamping.getDoubleValue());
+         jointImpedanceHandles[i].setStiffness(desiredJointStiffness.getDoubleValue());
+         jointImpedanceHandles[i].setDamping(desiredJointDamping.getDoubleValue());
+
+         jointImpedanceHandles[i].setPosition(desiredJointAngles[i]);
+         jointImpedanceHandles[i].setVelocity(0.0);
       }
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp());
