@@ -208,6 +208,16 @@ public class RDXSCS2Session
          session.runTick();
       }
       ImGui.sameLine();
+      if (ImGui.button(labels.get("<")))
+      {
+         session.submitDecrementBufferIndexRequest(1);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get(">")))
+      {
+         session.submitIncrementBufferIndexRequest(1);
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Go to Out Point")))
       {
          session.submitBufferIndexRequest(yoManager.getOutPoint());
