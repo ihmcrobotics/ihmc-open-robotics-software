@@ -141,7 +141,8 @@ public class RDXSCS2Session
       {
          for (RDXSimulatedRobot robot : robots)
          {
-            if (showRobotMap.get(robot.getRobotDefinition().getName()).get())
+            ImBoolean showRobot = showRobotMap.get(robot.getRobotDefinition().getName());
+            if (showRobot != null && showRobot.get()) // Sometimes it's not ready yet and can be null
             {
                robot.getRealRenderables(renderables, pool);
             }
