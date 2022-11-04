@@ -6,6 +6,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
+import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.live.RDXROS2PointCloudVisualizer;
@@ -50,34 +51,12 @@ public class RDXROS2PointCloudSensorDemo
             globalVisualizersPanel = new RDXGlobalVisualizersPanel(false);
             globalVisualizersPanel.addVisualizer(new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                  ros2Node,
-                                                                                 ROS2Tools.OUSTER_POINT_CLOUD,
-                                                                                 2048 * 128,
-                                                                                 1));
+                                                                                 ROS2Tools.OUSTER_POINT_CLOUD));
             globalVisualizersPanel.create();
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel, RDXSceneLevel.VIRTUAL);
 
-            double publishRateHz = 20.0;
-            double verticalFOV = 90.0;
-            int imageWidth = 2048;
-            int imageHeight = 128;
-            double minRange = 0.105;
-            double maxRange = 15.0;
-            double noiseAmplitudeAtMinRange = 0.015;
-            double noiseAmplitudeAtMaxRange = 0.05;
-            boolean simulateL515Noise = false;
-            highLevelDepthSensorSimulator = new RDXHighLevelDepthSensorSimulator("Ouster",
-                                                                                 sensorPoseGizmo.getGizmoFrame(),
-                                                                                 () -> 0L,
-                                                                                 verticalFOV,
-                                                                                 imageWidth,
-                                                                                 imageHeight,
-                                                                                 minRange,
-                                                                                 maxRange,
-                                                                                 noiseAmplitudeAtMinRange,
-                                                                                 noiseAmplitudeAtMaxRange,
-                                                                                 simulateL515Noise,
-                                                                                 publishRateHz);
+            highLevelDepthSensorSimulator = RDXSimulatedSensorFactory.createOusterLidar(sensorPoseGizmo.getGizmoFrame(), () -> 0L);
             highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, ROS2Tools.OUSTER_POINT_CLOUD);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
             highLevelDepthSensorSimulator.setSensorEnabled(true);
@@ -94,7 +73,8 @@ public class RDXROS2PointCloudSensorDemo
 
             for (RDXEnvironmentObject allObject : environmentBuilder.getAllObjects())
             {
-               allObject.getRealisticModelInstance().setDiffuseColor(highLevelDepthSensorSimulator.getPointColorFromPicker());
+               if (allObject.getRealisticModelInstance() != null)
+                  allObject.getRealisticModelInstance().setDiffuseColor(highLevelDepthSensorSimulator.getPointColorFromPicker());
             }
 
             baseUI.renderBeforeOnScreenUI();
