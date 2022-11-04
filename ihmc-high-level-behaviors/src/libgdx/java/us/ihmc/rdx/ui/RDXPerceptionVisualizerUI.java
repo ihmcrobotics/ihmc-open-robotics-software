@@ -71,32 +71,17 @@ public class RDXPerceptionVisualizerUI
 
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Point Cloud",
                                                                               ros2Node,
-                                                                              ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class),
-                                                                              1024 * 768,
-                                                                              1));
-            int pointsPerSegment = 786432;
-            int numberOfSegments = 1;
+                                                                              ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class)));
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
                                                                               ros2Node,
-                                                                              ROS2Tools.FUSED_SENSOR_HEAD_POINT_CLOUD,
-                                                                              pointsPerSegment,
-                                                                              numberOfSegments));
-            pointsPerSegment = 407040;
-            numberOfSegments = 1;
+                                                                              ROS2Tools.FUSED_SENSOR_HEAD_POINT_CLOUD));
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("D435 Colored Point Cloud",
                                                                               ros2Node,
-                                                                              ROS2Tools.D435_COLORED_POINT_CLOUD,
-                                                                              pointsPerSegment,
-                                                                              numberOfSegments));
+                                                                              ROS2Tools.D435_COLORED_POINT_CLOUD));
 
-            int os0128Multiplier = 1;
-            pointsPerSegment = 131072 * os0128Multiplier;
-            numberOfSegments = 1;
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                               ros2Node,
-                                                                              ROS2Tools.OUSTER_POINT_CLOUD,
-                                                                              pointsPerSegment,
-                                                                              numberOfSegments));
+                                                                              ROS2Tools.OUSTER_POINT_CLOUD));
 
             videoVisualizer = new RDXROS2VideoVisualizer("Primary Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
             globalVisualizersUI.addVisualizer(videoVisualizer);
