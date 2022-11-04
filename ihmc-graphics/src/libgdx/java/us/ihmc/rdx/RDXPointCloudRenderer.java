@@ -24,6 +24,8 @@ public class RDXPointCloudRenderer implements RenderableProvider
    private Renderable renderable;
    private float[] vertices;
 
+   public static final int FLOATS_PER_VERTEX = 8;
+   public static final int BYTES_PER_VERTEX = FLOATS_PER_VERTEX * Float.BYTES;
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
                                                                                               3,
                                                                                               ShaderProgram.POSITION_ATTRIBUTE),
@@ -71,6 +73,8 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
    public void create(int pointsPerSegment, int numberOfSegments)
    {
+      currentSegmentIndex = 0;
+      hasTurnedOver = false;
       this.pointsPerSegment = pointsPerSegment;
       this.numberOfSegments = numberOfSegments;
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
@@ -263,6 +267,38 @@ public class RDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   /**
+    * This method is to be called before packing the vertex buffer,
+    * like when running an OpenCL kernel to pack it.
+    */
+   public void updateMeshFastestBeforeKernel()
+   {
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+      floatBuffer.position(0);
+      int numberOfPointsNow;
+      if (!hasTurnedOver)
+         numberOfPointsNow = (currentSegmentIndex + 1) * pointsPerSegment;
+      else // After one cycle, we are just updating now; if you don't you'll get a progressive flicker
+         numberOfPointsNow = maxPoints;
+      floatBuffer.limit(numberOfPointsNow * floatsPerVertex);
+      renderable.meshPart.size = numberOfPointsNow;
+   }
+
+   /**
+    * This method is meant to be called after packing the vertex buffer.
+    * It is used to update the renderer segment index in the case
+    * that feature is being used.
+    */
+   public void updateMeshFastestAfterKernel()
+   {
+      ++currentSegmentIndex;
+      if (currentSegmentIndex >= numberOfSegments)
+      {
+         hasTurnedOver = true;
+         currentSegmentIndex = 0;
+      }
+   }
+
    public void setVertex(int vertexIndex, Tuple3DReadOnly point)
    {
       setVertex(vertexIndex, point.getX32(), point.getY32(), point.getZ32(), 1.0f, 1.0f, 1.0f, 1.0f, 0.01f);
@@ -332,7 +368,8 @@ public class RDXPointCloudRenderer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      renderables.add(renderable);
+      if (renderable != null)
+         renderables.add(renderable);
    }
 
    public void dispose()
@@ -403,5 +440,10 @@ public class RDXPointCloudRenderer implements RenderableProvider
    public int getFloatsPerVertex()
    {
       return floatsPerVertex;
+   }
+
+   public int getCurrentSegmentIndex()
+   {
+      return currentSegmentIndex;
    }
 }
