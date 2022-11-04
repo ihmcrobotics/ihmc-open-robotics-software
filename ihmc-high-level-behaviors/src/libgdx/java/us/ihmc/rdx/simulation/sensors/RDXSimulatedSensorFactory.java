@@ -103,7 +103,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createRealsenseL515(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
    {
-      double publishRateHz = 5.0;
+      double publishRateHz = 4.0;
       double verticalFOV = 55.0;
       int imageWidth = 1024;
       int imageHeight = 768;
@@ -131,7 +131,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createOusterLidar(ReferenceFrame sensorFrame, LongSupplier timestampSupplier)
    {
-      double publishRateHz = 20.0;
+      double publishRateHz = 4.0;
       double verticalFOV = 80.0;
       int imageWidth = 1024;
       int imageHeight = 128;
@@ -164,7 +164,7 @@ public class RDXSimulatedSensorFactory
 
    public static RDXHighLevelDepthSensorSimulator createBlackflyFisheye(ReferenceFrame sensorFrame, LongSupplier timeSupplier)
    {
-      double publishRateHz = 1.0;
+      double publishRateHz = 20.0;
       double verticalFOV = 100.0;
       int imageWidth = 1024;
       int imageHeight = 1024;
