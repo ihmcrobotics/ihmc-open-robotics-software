@@ -19,6 +19,7 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -171,7 +172,7 @@ public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer implements Ren
       openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
 
-      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
+      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(4);
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
       decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
       decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
@@ -204,6 +205,7 @@ public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer implements Ren
             parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, latestSegmentIndex);
             parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize.get());
             parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(3, (float) DiscretizedColoredPointCloud.DISCRETE_RESOLUTION);
 
             parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
             decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
