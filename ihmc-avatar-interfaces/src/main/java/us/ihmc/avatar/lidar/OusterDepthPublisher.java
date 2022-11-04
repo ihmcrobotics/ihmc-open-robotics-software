@@ -27,21 +27,21 @@ public class OusterDepthPublisher
 
       nettyOuster = new NettyOuster();
       nettyOuster.setOnFrameReceived(() ->
-                                     {
-                                        nettyOuster.getDepthImageMeters().rewind();
-                                        byte[] heapByteArrayData = new byte[nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().remaining()];
-                                        nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().get(heapByteArrayData);
+      {
+          nettyOuster.getDepthImageMeters().rewind();
+          byte[] heapByteArrayData = new byte[nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().remaining()];
+          nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().get(heapByteArrayData);
 
-                                        videoPacket.getData().resetQuick();
-                                        videoPacket.getData().add(heapByteArrayData);
+          videoPacket.getData().resetQuick();
+          videoPacket.getData().add(heapByteArrayData);
 
-                                        videoPacket.setImageHeight(nettyOuster.getImageHeight());
-                                        videoPacket.setImageWidth(nettyOuster.getImageWidth());
-                                        videoPacket.setAcquisitionTimeSecondsSinceEpoch(nettyOuster.getAquisitionInstant().getEpochSecond());
-                                        videoPacket.setAcquisitionTimeAdditionalNanos(nettyOuster.getAquisitionInstant().getNano());
+          videoPacket.setImageHeight(nettyOuster.getImageHeight());
+          videoPacket.setImageWidth(nettyOuster.getImageWidth());
+          videoPacket.setAcquisitionTimeSecondsSinceEpoch(nettyOuster.getAquisitionInstant().getEpochSecond());
+          videoPacket.setAcquisitionTimeAdditionalNanos(nettyOuster.getAquisitionInstant().getNano());
 
-                                        ros2VideoPublisher.publish(videoPacket);
-                                     });
+          ros2VideoPublisher.publish(videoPacket);
+      });
       nettyOuster.bind();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "OusterDepthPublisherShutdown"));
