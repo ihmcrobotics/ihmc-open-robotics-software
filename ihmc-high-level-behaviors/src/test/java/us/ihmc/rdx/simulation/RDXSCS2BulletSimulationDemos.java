@@ -7,6 +7,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2BulletSimulationSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.scs2.examples.simulations.bullet.*;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletFlyingBallSimulationTest;
 
 public class RDXSCS2BulletSimulationDemos
 {
@@ -66,6 +67,10 @@ public class RDXSCS2BulletSimulationDemos
             if (ImGui.button(labels.get("Falling sphere")))
             {
                scs2SimulationSession.startSession(FallingSphereExperimentalBulletSimulation.createSession());
+            }
+            if (ImGui.button(labels.get("Flying ball")))
+            {
+               scs2SimulationSession.startSession(new BulletFlyingBallSimulationTest().createSession());
             }
             if (ImGui.button(labels.get("Mobile")))
             {
