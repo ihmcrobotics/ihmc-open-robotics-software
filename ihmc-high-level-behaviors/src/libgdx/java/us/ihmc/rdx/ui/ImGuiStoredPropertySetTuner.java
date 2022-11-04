@@ -124,12 +124,12 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
          ImGui.text(storedPropertySet.getCurrentVersionSuffix());
       }
 
-      if (ImGui.button("Load"))
+      if (ImGui.button(labels.get("Load")))
       {
          load();
       }
       ImGui.sameLine();
-      if (ImGui.button("Save"))
+      if (ImGui.button(labels.get("Save")))
       {
          storedPropertySet.save();
       }
