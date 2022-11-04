@@ -63,6 +63,7 @@ testDependencies {
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
    api("us.ihmc:scs2-examples:17-0.10.3")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.10.3")
 }
 
 app.entrypoint(ihmc.sourceSetProject("mission-control"),
