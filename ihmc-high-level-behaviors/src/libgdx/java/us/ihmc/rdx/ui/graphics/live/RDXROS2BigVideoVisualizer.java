@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,6 +21,7 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.Throttler;
 
 public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
 {
@@ -37,6 +39,8 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
+   private String messageSizeString;
+   private final Throttler messageSizeStatusThrottler = new Throttler();
 
    public RDXROS2BigVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
    {
@@ -65,12 +69,19 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
             synchronized (syncObject)
             {
                IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
+               int numberOfBytes = imageEncodedTByteArrayList.size();
                imageEncodedTByteArrayList.toArray(messageDataHeapArray);
-               messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
-               messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
+               messageEncodedBytePointer.put(messageDataHeapArray, 0, numberOfBytes);
+               messageEncodedBytePointer.limit(numberOfBytes);
 
-               inputJPEGMat.cols(imageEncodedTByteArrayList.size());
+               inputJPEGMat.cols(numberOfBytes);
                inputJPEGMat.data(messageEncodedBytePointer);
+
+               if (messageSizeStatusThrottler.run(1.0))
+               { // Only doing this at 1 Hz to improve readability and because String building and formatting is expensive to do every tick
+                  String kilobytes = FormattingTools.getFormattedDecimal1D((double) numberOfBytes / 1000.0);
+                  messageSizeString = String.format("Message size: ~%s KB", kilobytes);
+               }
             }
 
             // imdecode takes the longest by far out of all this stuff
@@ -98,6 +109,11 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
       ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
+      if (messageSizeString != null)
+      {
+         ImGui.sameLine();
+         ImGui.text(messageSizeString);
+      }
       if (getHasReceivedOne())
       {
          getFrequencyPlot().renderImGuiWidgets();
