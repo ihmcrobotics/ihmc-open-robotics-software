@@ -61,10 +61,13 @@ public class PerceptionDataLogger
    private LidarScanMessage lidarScanMessage = new LidarScanMessage();
 
    private final BigVideoPacket videoPacket = new BigVideoPacket();
+
    private final BigVideoPacket depthVideoPacket = new BigVideoPacket();
+   private final SampleInfo depthSampleInfo = new SampleInfo();
+
+   private final BigVideoPacket ousterDepthVideoPacket = new BigVideoPacket();
 
    private final SampleInfo ousterSampleInfo = new SampleInfo();
-   private final SampleInfo depthSampleInfo = new SampleInfo();
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                   getClass(),
@@ -118,6 +121,15 @@ public class PerceptionDataLogger
          depthVideoPacket.getData().resetQuick();
          subscriber.takeNextData(depthVideoPacket, depthSampleInfo);
          logDepthMap(depthVideoPacket);
+      });
+
+      // Add callback for L515 Depth maps
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_LIDAR, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+      {
+         LogTools.info("Ouster Depth Map Received");
+//         ousterDepthVideoPacket.getData().resetQuick();
+//         subscriber.takeNextData(ousterDepthVideoPacket, depthSampleInfo);
+//         logDepthMap(ousterDepthVideoPacket);
       });
 
       realtimeROS2Node.spin();
