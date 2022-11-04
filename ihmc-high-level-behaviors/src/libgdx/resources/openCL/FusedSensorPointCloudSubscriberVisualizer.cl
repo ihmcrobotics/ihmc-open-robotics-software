@@ -8,7 +8,7 @@ kernel void unpackPointCloud(global float* parameters,
    int latestSegmentIndex = parameters[0];
    float pointSize = parameters[1];
    int pointsPerSegment = parameters[2];
-   float discretization = 0.003; // TODO: Make parameter
+   float discretization = parameters[3];
 
    int inputIntsPerPoint = 4;
    int inputStartIndex = n * inputIntsPerPoint;
