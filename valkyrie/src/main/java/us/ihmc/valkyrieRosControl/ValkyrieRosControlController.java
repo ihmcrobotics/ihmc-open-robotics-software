@@ -38,12 +38,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
-import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.IMUHandle;
-import us.ihmc.rosControl.wholeRobot.JointGainsHandle;
-import us.ihmc.rosControl.wholeRobot.JointStateHandle;
-import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
+import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -263,7 +258,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
       HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));
 
-      HashMap<String, JointGainsHandle> jointGainsHandles = new HashMap<>();
+      HashMap<String, JointImpedanceHandle> jointImpedanceHandles = new HashMap<>();
       HashMap<String, EffortJointHandle> effortJointHandles = new HashMap<>();
       HashMap<String, PositionJointHandle> positionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> jointStateHandles = new HashMap<>();
@@ -296,10 +291,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       String[] GAIN_JOINTS = { "leftShoulderPitch", "rightShoulderPitch" };
       for (String joint : GAIN_JOINTS) 
       {
-          jointGainsHandles.put(joint, createJointGainsHandle(joint));
+          jointImpedanceHandles.put(joint, createJointImpedanceHandle(joint));
           // Set some dummy value so we can see it works
-          jointGainsHandles.get(joint).setDamping(3.14);
-          jointGainsHandles.get(joint).setStiffness(2.71);
+          jointImpedanceHandles.get(joint).setDamping(3.14);
+          jointImpedanceHandles.get(joint).setStiffness(2.71);
       }
 
       HashMap<String, IMUHandle> imuHandles = new HashMap<>();
