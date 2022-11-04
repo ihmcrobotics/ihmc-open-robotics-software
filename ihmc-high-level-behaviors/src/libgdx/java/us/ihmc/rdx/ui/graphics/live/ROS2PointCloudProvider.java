@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.elements.PointCloud;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.live;
+package us.ihmc.perception.elements;
 
 import org.bytedeco.javacpp.FloatPointer;
 
