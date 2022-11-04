@@ -15,14 +15,13 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
@@ -34,7 +33,6 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -54,8 +52,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   public static final int DISCRETE_INTS_PER_POINT = 4;
-   public static final int DISCRETE_BYTES_PER_POINT = DISCRETE_INTS_PER_POINT * Integer.BYTES;
    private int pointsPerSegment;
    private int numberOfSegments;
    private int totalNumberOfPoints;
@@ -134,7 +130,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
 
-      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(3);
+      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(4);
       parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
    }
 
@@ -155,7 +151,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                pointsPerSegment = fusedMessage.getPointsPerSegment();
                numberOfSegments = (int) fusedMessage.getNumberOfSegments();
                totalNumberOfPoints = pointsPerSegment * numberOfSegments;
-               int bytesPerSegment = pointsPerSegment * DISCRETE_BYTES_PER_POINT;
+               int bytesPerSegment = pointsPerSegment * DiscretizedColoredPointCloud.DISCRETE_BYTES_PER_POINT;
                String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
                messageSizeString = String.format("Message size: %s KB", kilobytes);
                pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
@@ -163,7 +159,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
                if (decompressedOpenCLIntBuffer != null)
                   decompressedOpenCLIntBuffer.destroy(openCLManager);
-               decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * DISCRETE_INTS_PER_POINT);
+               decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * DiscretizedColoredPointCloud.DISCRETE_INTS_PER_POINT);
                decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
                if (pointCloudVertexBuffer != null)
                   pointCloudVertexBuffer.destroy(openCLManager);
@@ -191,6 +187,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, pointCloudRenderer.getCurrentSegmentIndex());
                parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize.get());
                parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
+               parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(3, (float) DiscretizedColoredPointCloud.DISCRETE_RESOLUTION);
 
                parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
                decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
