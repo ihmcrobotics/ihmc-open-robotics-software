@@ -4,9 +4,9 @@
     "3D View" : true,
     "Environment###java.lang.Class:Environment" : false,
     "Global Visualizers" : true,
-    "Ouster Simulator###java.lang.Integer:Ouster Simulator" : true,
-    "Ouster Color###GlobalWidgetIndex:2:Ouster Color" : false,
-    "Ouster Depth###GlobalWidgetIndex:1:Ouster Depth" : false,
+    "Ouster Lidar Simulator###java.lang.Integer:Ouster Lidar Simulator" : true,
+    "Ouster Lidar Color###GlobalWidgetIndex:2:Ouster Lidar Color" : false,
+    "Ouster Lidar Depth###GlobalWidgetIndex:1:Ouster Lidar Depth" : false,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }
