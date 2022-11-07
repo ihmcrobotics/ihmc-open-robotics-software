@@ -89,6 +89,16 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
 }
 
+void VisualOdometryExternal::getExternalKeyframe(KeyframeExternal* keyframe, uint32_t* size)
+{
+
+}
+
+void VisualOdometryExternal::getExternalLandmarks(LandmarkExternal* landmarks, uint32_t size)
+{
+
+}
+
 // void VisualOdometryExternal::testStereoFeatureExtraction(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)
 // {
 

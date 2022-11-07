@@ -7,6 +7,7 @@
 #include "camera_model.h"
 #include "keyframe.h"
 #include "keyframe_external.h"
+#include "landmark_external.h"
 
 
 using KeyPointVec = std::vector<cv::KeyPoint>;
