@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.log.LogTools;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -72,23 +73,30 @@ public class ProMPAssistant implements TeleoperationAssistant
                      break;
                   case "bodyParts":
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
+                     HashMap<String, String> bodyPartsGeometry = new HashMap<>();
                      for (Object bodyPartObject : bodyPartsArray)
                      {
-                        HashMap<String, String> bodyPartsGeometry = new HashMap<>();
                         JSONObject jsonBodyPartObject = (JSONObject) bodyPartObject;
+                        List<String> name = new ArrayList<>();
+                        List<String> geometry = new ArrayList<>();
                         jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
                         {
-                           String name = "";
-                           String geometry = "";
-                           if ("name".equals(bodyPartProperty.toString()))
-                              name = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
-                           else if ("geometry".equals(bodyPartProperty.toString()))
-                              geometry = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
-                           if (!(name.isEmpty()))
-                              bodyPartsGeometry.put(name, geometry);
+                           switch (bodyPartProperty.toString())
+                           {
+                              case "name":
+                                 name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
+                                 break;
+                              case "geometry":
+                                 geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
+                                 break;
+                              default:
+                                 break;
+                           }
                         });
-                        bodyPartsGeometries.add(bodyPartsGeometry);
+                        for (int i=0; i<name.size(); i++)
+                           bodyPartsGeometry.put(name.get(i), geometry.get(i));
                      }
+                     bodyPartsGeometries.add(bodyPartsGeometry);
                      break;
                   default:
                      break;
@@ -110,11 +118,19 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
 
       for (int i=0; i<taskNames.size(); i++){
+         LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
+         for (int j=0; j<bodyPartsGeometries.size(); j++){
+            for (String key : bodyPartsGeometries.get(j).keySet()){
+               LogTools.info("     {}", key);
+               LogTools.info("     {}", bodyPartsGeometries.get(j).get(key));
+            }
+         }
          proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled));
          taskRelevantBodyPart.put(taskNames.get(i),relevantBodyParts.get(i));
       }
       for (ProMPManager proMPManager : proMPManagers.values())
          proMPManager.learnTaskFromDemos();
+      LogTools.info("ProMPs are ready to be used!");
    }
 
    @Override

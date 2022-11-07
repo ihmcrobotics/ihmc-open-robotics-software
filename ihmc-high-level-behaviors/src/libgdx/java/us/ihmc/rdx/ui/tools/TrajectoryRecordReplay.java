@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.tools;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,13 +17,14 @@ import java.util.stream.Stream;
  * For each dimension, at each time step the class stores or reads a setpoint.
  * The collection of setpoints defines the trajectory.
  * The trajectories are saved and loaded from .csv files.
- * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the center of mass, etc...).
+ * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the right hand, etc...).
  */
 public class TrajectoryRecordReplay<T extends Number>
 {
    private String filePath;
    private final Class<T> clazz;
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
+   private ArrayList<T[]> concatenatedDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
    private boolean doneReplaying = true;
@@ -58,6 +60,19 @@ public class TrajectoryRecordReplay<T extends Number>
       T[] localValues = newNumberArray(values.length);
       System.arraycopy(values, 0, localValues, 0, localValues.length);
       dataMatrix.add(localValues);
+   }
+
+   /* Useful if we are recording different body parts trajectories but not in the same scope
+   * and we want to concatenate them into one single row rather than having multiple TrajectoryRecordReplay objects */
+   public void concatenateRecording(int partsNumber)
+   {
+      for (int i=0; i< dataMatrix.size(); i++)
+      {
+         T[] concatenatedRow = newNumberArray(dataMatrix.get(0).length*partsNumber);
+         concatenateWithCopy(dataMatrix.get(i), dataMatrix.get(i+partsNumber));
+
+         concatenatedDataMatrix.add(concatenatedRow);
+      }
    }
 
    public void saveRecording()
@@ -193,6 +208,31 @@ public class TrajectoryRecordReplay<T extends Number>
          throw new IllegalArgumentException("Invalid type for TrajectoryRecordReplay. It only accepts primitive Number types.");
       }
       return value;
+   }
+
+   private <T> T concatenateWithCopy(T array1, T array2) {
+      if (!array1.getClass().isArray() || !array2.getClass().isArray()) {
+         throw new IllegalArgumentException("Only arrays are accepted.");
+      }
+
+      Class<?> componentType1 = array1.getClass().getComponentType();
+      Class<?> componentType2 = array2.getClass().getComponentType();
+
+      if (!componentType1.equals(componentType2)) {
+         throw new IllegalArgumentException("Two arrays have different types.");
+      }
+
+      int len1 = Array.getLength(array1);
+      int len2 = Array.getLength(array2);
+
+      @SuppressWarnings("unchecked")
+      //the cast is safe due to the previous checks
+      T result = (T) Array.newInstance(componentType1, len1 + len2);
+
+      System.arraycopy(array1, 0, result, 0, len1);
+      System.arraycopy(array2, 0, result, len1, len2);
+
+      return result;
    }
 
    public boolean hasSavedRecording()
