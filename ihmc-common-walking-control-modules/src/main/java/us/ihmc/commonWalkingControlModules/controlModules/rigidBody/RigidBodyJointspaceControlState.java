@@ -56,7 +56,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       this.jointControlHelper = jointControlHelper;
 
       defaultDirectPositionControlMode = new BooleanParameter(bodyName + "DefaultDirectPositionControlMode", parentRegistry, false);
-      directPositionControlMode = new YoBoolean("DirectPositionControlMode", parentRegistry);
+      directPositionControlMode = new YoBoolean(bodyName + "DirectPositionControlMode", parentRegistry);
 
       jointDesiredOutputList = new JointDesiredOutputList(jointsToControl);
 
