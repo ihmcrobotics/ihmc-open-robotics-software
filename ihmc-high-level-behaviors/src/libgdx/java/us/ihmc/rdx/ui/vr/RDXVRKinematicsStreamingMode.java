@@ -75,7 +75,6 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
    private FrequencyStatisticPrinter frequencyCheck = new FrequencyStatisticPrinter();
-   // ...
 //   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};

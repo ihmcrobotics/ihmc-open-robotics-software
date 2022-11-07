@@ -51,7 +51,7 @@ public class ProMPManager
    {
       WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
       String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-      String demoTrainingDirAbs = demoDirAbs + taskName;
+      String demoTrainingDirAbs = demoDirAbs + "/" + taskName;
       File demoFolder = new File(demoTrainingDirAbs);
       File[] listOfFiles = demoFolder.listFiles();
       List<String> fileListTraining = new ArrayList<>();
@@ -63,7 +63,7 @@ public class ProMPManager
       List<Long> dofs = new ArrayList<>();
       // This is how the dofs are stored in the csv training files (generated using KinematicsRecordReplay in GDXVRKinematicsStreaming)
       // 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z;
-      // 7,8,9,10: right hand quaternion; 11,12,13: left hand X,Y,Z;
+      // 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z;
       for (String bodyPart : bodyPartsGeometry.keySet())
       {
          if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
@@ -108,6 +108,8 @@ public class ProMPManager
 
          if (logEnabled)
          {
+            LogTools.info("Logging ProMPs for task {}", taskName);
+            LogTools.info("   with bodyPart {}", bodyPart);
             logger.saveDemosAndLearnedTrajectories(bodyPart, learnedProMPs.get(bodyPart), trainingTrajectory);
          }
       }
