@@ -14,6 +14,12 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
+      const octet REQUESTED_MODE_TORQUE_CONTROL =
+      0;
+
+      const octet REQUESTED_MODE_POSITION_CONTROL =
+      1;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.
@@ -32,10 +38,11 @@ module controller_msgs
          */
         boolean force_execution;
         /**
-         * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
-         * jointspace position control and the controller will not use the arms for balance.
+         * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
+         * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
          */
-        boolean enable_direct_position_control;
+        @defaultValue(value=255)
+        octet requested_mode;
         /**
          * Specifies the side of the robot that will execute the trajectory.
          */
