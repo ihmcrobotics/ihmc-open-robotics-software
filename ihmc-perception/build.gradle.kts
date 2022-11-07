@@ -52,7 +52,7 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.8-SNAPSHOT"
+val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
