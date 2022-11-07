@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HDF5Tools
 {
@@ -63,23 +64,31 @@ public class HDF5Tools
    public static byte[] loadByteArray(Group group, int index)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
-      byte[] byteArray = new byte[extractShape(dataset, 0)];
 
+      int size = extractShape(dataset, 0);
+
+      LogTools.info("Loading Dataset: {} with Shape: {}", index, size);
+
+
+      byte[] byteArray = new byte[size];
       BytePointer p = new BytePointer(byteArray);
       dataset.read(p, PredType.NATIVE_UINT8());
-      p.get(byteArray);
+      p.get(byteArray, 0, byteArray.length);
+
+      System.out.println(Arrays.toString(byteArray));
 
       return byteArray;
    }
 
    public static void loadImage(Group group, int index, Mat mat)
    {
+      LogTools.info("Opening Dataset: {}", index);
       DataSet dataset = group.openDataSet(String.valueOf(index));
       byte[] pointsBuffer = new byte[mat.rows() * mat.cols() * mat.channels()];
       BytePointer p = new BytePointer(pointsBuffer);
       dataset.read(p, PredType.NATIVE_UINT8());
       p.get(pointsBuffer);
-      mat.data(p);
+//      mat.data(p);
    }
 
    public static void storePointCloud(Group group, long index, ArrayList<Point3D> points)
@@ -171,6 +180,7 @@ public class HDF5Tools
    {
       LogTools.info("Store Byte Array: {} {}", index, size);
       long[] dims = {size};
+      LogTools.info("Creating Dataset: {} {}", group.toString(), String.valueOf(index));
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), new DataSpace(1, dims));
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
       dataset.close();

@@ -115,7 +115,7 @@ public class PerceptionDataLogger
       robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
       runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
 
-      // Add callback for Robot Configuration Data
+      // Add callback for D435 Color images
       var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.VIDEO);
       d435VideoSubscription.addCallback(this::logVideoPacketD435);
       runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
@@ -258,8 +258,8 @@ public class PerceptionDataLogger
          IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
          imageEncodedTByteArrayList.toArray(messageDataHeapArray);
 
-         HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, packet.getData().size());
-         LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
+         HDF5Tools.storeByteArray(group, d435ImageCount, messageDataHeapArray, packet.getData().size());
+         LogTools.info("{} Done Storing Buffer: {}", namespace, d435ImageCount);
 
       }, "video_packet_logger_thread -> " + namespace);
    }

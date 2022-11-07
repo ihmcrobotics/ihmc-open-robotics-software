@@ -86,6 +86,12 @@ public class HDF5Manager
          return 0;
    }
 
+   public Group openGroup(String namespace)
+   {
+      Group group = file.openGroup(namespace);
+      return group;
+   }
+
    public Group createGroup(String namespace)
    {
       Path path = Paths.get(namespace);

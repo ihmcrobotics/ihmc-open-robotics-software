@@ -4,18 +4,28 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.rdx.ui.graphics.live.ROS2VideoFormat;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
+
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
 public class PerceptionDataLoader
 {
@@ -25,41 +35,13 @@ public class PerceptionDataLoader
 
    private int latestSegmentIndex = -1;
 
-   private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-   private _cl_kernel unpackPointCloudKernel;
-   private OpenCLFloatBuffer pointCloudVertexBuffer;
-   private OpenCLIntBuffer decompressedOpenCLIntBuffer;
-   private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-
-   private int index = 0;
-
    private String filePath;
-
-   private int os0128Multiplier = 2;
-   private int pointsPerSegment = 131072 * os0128Multiplier;
-   private int numberOfSegments = 1;
-
-   private FloatBuffer hostPointCloudBuffer;
 
    public PerceptionDataLoader(String filePath)
    {
       this.filePath = filePath;
       hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
 
-      openCLManager = new OpenCLManager();
-      openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
-      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
-
-      hostPointCloudBuffer = FloatBuffer.allocate(pointsPerSegment * 8);
-
-      parametersOpenCLFloatBuffer = new OpenCLFloatBuffer(2);
-      parametersOpenCLFloatBuffer.createOpenCLBufferObject(openCLManager);
-      decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * 4);
-      decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(pointsPerSegment * 8, hostPointCloudBuffer);
-      pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
@@ -74,34 +56,59 @@ public class PerceptionDataLoader
 
       LogTools.info("Byte Array: {} {} {}", compressedByteArray[0], compressedByteArray[1], compressedByteArray[2]);
 
-      ByteBuffer compressedByteBuffer = ByteBuffer.wrap(compressedByteArray);
-
-      int numberOfBytes = compressedByteArray.length;
-
-      lz4Decompressor.decompress(compressedByteBuffer, decompressedOpenCLIntBuffer.getBackingDirectByteBuffer());
-      decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
-
-//      latestSegmentIndex = (int) fusedMessage.getSegmentIndex();
-
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, 0);
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, 0.5f);
-      parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
-
-      parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-      decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
-
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressedOpenCLIntBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-      openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
-      pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-
-      return hostPointCloudBuffer;
+      return null;
    }
 
    public void loadImage(String namespace, int index, Mat mat)
    {
-      HDF5Tools.loadImage(hdf5Manager.getGroup(namespace), index, mat);
+//      ThreadTools.startAThread(()->{
+//         Mat display = new Mat();
+
+         LogTools.info("Loading Image: {} {}", namespace, index);
+
+         Group group = hdf5Manager.getGroup(namespace);
+         byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+
+//         Mat decompressedImage = decompressImage(compressedByteArray);
+//
+//         LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
+
+//         imshow("Display", display);
+//         waitKey(1);
+//      }, "perception_data_loader -> " + namespace);
+   }
+
+   private Mat decompressImage(byte[] dataArray)
+   {
+      LogTools.info("Decompressing Image: {}", dataArray.length);
+
+      BytePointer messageEncodedBytePointer = new BytePointer(dataArray.length);
+      messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
+      messageEncodedBytePointer.limit(dataArray.length);
+
+      int colorWidth = 848;
+      int colorHeight = 480;
+
+      Mat inputJPEGMat = new Mat();
+      Mat inputYUVI420Mat = new Mat();
+
+      inputJPEGMat.cols(dataArray.length);
+      inputJPEGMat.data(messageEncodedBytePointer);
+
+      // imdecode takes the longest by far out of all this stuff
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+
+      Mat outputMat = new Mat();
+
+      synchronized (this)
+      {
+         // YUV I420 has 1.5 times the height of the image
+         colorWidth = inputYUVI420Mat.cols();
+         colorHeight = (int) (inputYUVI420Mat.rows() / 1.5f);
+
+         opencv_imgproc.cvtColor(inputYUVI420Mat, outputMat, opencv_imgproc.COLOR_YUV2BGR);
+      }
+      return outputMat;
    }
 
    public String getFilePath() {
@@ -114,15 +121,14 @@ public class PerceptionDataLoader
 
    public static void main(String[] args)
    {
-      String FILE_NAME = "/home/quantum/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
-      PerceptionDataLoader loader = new PerceptionDataLoader(FILE_NAME);
-      //      ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(loader.getClass(), ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
-      //      executorService.scheduleAtFixedRate(loader::loadNextDataFrame, 0, 100, TimeUnit.MILLISECONDS);
+//      BytedecoTools.loadOpenCV();
 
-      RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(200000, Point3D32::new);
-      for (int i = 0; i < loader.getHDF5Manager().getCount("/os_cloud_node/points"); i++)
-      {
-         loader.loadPointCloud("os_cloud_node/points", i, points);
-      }
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
+
+//      for (int i = 1; i < 80; i++)
+//      {
+         loader.loadImage("/d435/video/", 0, null);
+//      }
    }
 }
