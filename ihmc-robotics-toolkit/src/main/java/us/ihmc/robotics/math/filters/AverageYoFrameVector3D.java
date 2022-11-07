@@ -69,7 +69,6 @@ public class AverageYoFrameVector3D extends YoFrameVector3D
    public void reset()
    {
       sampleSize.set(0);
-      setToZero();
    }
 
    public int getSampleSize()
