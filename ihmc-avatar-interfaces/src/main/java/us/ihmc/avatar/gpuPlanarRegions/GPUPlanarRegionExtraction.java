@@ -12,6 +12,7 @@ import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -538,7 +539,17 @@ public class GPUPlanarRegionExtraction
             if (!MathTools.epsilonEquals(gpuPlanarRegion.getNormal().norm(), 1.0, 1e-4))
                throw new RuntimeException("The planar region norm isn't valid");
             FrameQuaternion orientation = new FrameQuaternion(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
-            orientation.changeFrame(ReferenceFrame.getWorldFrame());
+            try
+            {
+               orientation.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            catch (NotARotationMatrixException e)
+            {
+               LogTools.info("Normal = " + gpuPlanarRegion.getNormal());
+               LogTools.info("Orientation = " + orientation);
+
+               throw e;
+            }
 
             // First compute the set of concave hulls for this region
             FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
