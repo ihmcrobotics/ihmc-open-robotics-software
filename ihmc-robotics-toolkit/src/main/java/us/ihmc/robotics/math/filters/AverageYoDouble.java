@@ -43,7 +43,6 @@ public class AverageYoDouble extends YoDouble
    public void reset()
    {
       sampleSize.set(0);
-      set(0.0);
    }
 
    public int getSampleSize()
