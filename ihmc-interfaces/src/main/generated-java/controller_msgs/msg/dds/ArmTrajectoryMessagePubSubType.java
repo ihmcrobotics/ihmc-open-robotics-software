@@ -87,7 +87,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_7(data.getForceExecution());
 
-      cdr.write_type_7(data.getEnableDirectPositionControl());
+      cdr.write_type_9(data.getRequestedMode());
 
       cdr.write_type_9(data.getRobotSide());
 
@@ -100,7 +100,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
       	
       data.setForceExecution(cdr.read_type_7());
       	
-      data.setEnableDirectPositionControl(cdr.read_type_7());
+      data.setRequestedMode(cdr.read_type_9());
       	
       data.setRobotSide(cdr.read_type_9());
       	
@@ -113,7 +113,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("force_execution", data.getForceExecution());
-      ser.write_type_7("enable_direct_position_control", data.getEnableDirectPositionControl());
+      ser.write_type_9("requested_mode", data.getRequestedMode());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 
@@ -124,7 +124,7 @@ public class ArmTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setForceExecution(ser.read_type_7("force_execution"));
-      data.setEnableDirectPositionControl(ser.read_type_7("enable_direct_position_control"));
+      data.setRequestedMode(ser.read_type_9("requested_mode"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("jointspace_trajectory", new controller_msgs.msg.dds.JointspaceTrajectoryMessagePubSubType(), data.getJointspaceTrajectory());
 

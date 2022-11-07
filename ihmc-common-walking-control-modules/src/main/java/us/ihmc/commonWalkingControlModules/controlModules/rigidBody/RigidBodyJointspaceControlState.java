@@ -7,6 +7,8 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.JointspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
@@ -39,6 +41,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final BooleanParameter defaultDirectPositionControlMode;
    private final YoBoolean directPositionControlMode;
    private final JointAccelerationIntegrationCommand disableAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+   private final InverseDynamicsOptimizationSettingsCommand activateJointsCommand = new InverseDynamicsOptimizationSettingsCommand();
+   private final InverseDynamicsOptimizationSettingsCommand deactivateJointsCommand = new InverseDynamicsOptimizationSettingsCommand();
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
    public RigidBodyJointspaceControlState(String bodyName,
                                           OneDoFJointBasics[] jointsToControl,
@@ -69,6 +74,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          jointsHomeConfiguration[jointIdx] = homeConfiguration.get(jointName);
          JointAccelerationIntegrationParameters jointParameters = disableAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(joint);
          jointParameters.setDisableAccelerationIntegration(true);
+
+         activateJointsCommand.getJointsToActivate().add(joint);
+         deactivateJointsCommand.getJointsToDeactivate().add(joint);
       }
    }
 
@@ -233,10 +241,19 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
+      inverseDynamicsCommandList.clear();
+
       if (directPositionControlMode.getValue())
-         return disableAccelerationIntegrationCommand;
+      {
+         inverseDynamicsCommandList.addCommand(deactivateJointsCommand);
+         inverseDynamicsCommandList.addCommand(disableAccelerationIntegrationCommand);
+      }
       else
-         return null;
+      {
+         inverseDynamicsCommandList.addCommand(activateJointsCommand);
+      }
+
+      return inverseDynamicsCommandList;
    }
 
    @Override

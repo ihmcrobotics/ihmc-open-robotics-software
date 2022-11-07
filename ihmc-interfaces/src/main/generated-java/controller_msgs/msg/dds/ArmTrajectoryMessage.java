@@ -14,6 +14,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
+   public static final byte REQUESTED_MODE_TORQUE_CONTROL = (byte) 0;
+   public static final byte REQUESTED_MODE_POSITION_CONTROL = (byte) 1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
@@ -24,10 +26,10 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
             */
    public boolean force_execution_;
    /**
-            * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
-            * jointspace position control and the controller will not use the arms for balance.
+            * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
+            * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
             */
-   public boolean enable_direct_position_control_;
+   public byte requested_mode_ = (byte) 255;
    /**
             * Specifies the side of the robot that will execute the trajectory.
             */
@@ -55,7 +57,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       force_execution_ = other.force_execution_;
 
-      enable_direct_position_control_ = other.enable_direct_position_control_;
+      requested_mode_ = other.requested_mode_;
 
       robot_side_ = other.robot_side_;
 
@@ -95,20 +97,20 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    }
 
    /**
-            * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
-            * jointspace position control and the controller will not use the arms for balance.
+            * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
+            * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
             */
-   public void setEnableDirectPositionControl(boolean enable_direct_position_control)
+   public void setRequestedMode(byte requested_mode)
    {
-      enable_direct_position_control_ = enable_direct_position_control;
+      requested_mode_ = requested_mode;
    }
    /**
-            * If true and the robot has low-level gains for the arms, this trajectory is executed in direct
-            * jointspace position control and the controller will not use the arms for balance.
+            * Optional field, if REQUESTED_MODE_POSITION_CONTROL and the robot has low-level gains for the arms, this is executed in position control mode.
+            * If REQUESTED_MODE_TORQUE_CONTROL this is executed in torque control mode. If left unset the existing execution mode is unchanged.
             */
-   public boolean getEnableDirectPositionControl()
+   public byte getRequestedMode()
    {
-      return enable_direct_position_control_;
+      return requested_mode_;
    }
 
    /**
@@ -158,7 +160,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_execution_, other.force_execution_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_direct_position_control_, other.enable_direct_position_control_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_mode_, other.requested_mode_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
@@ -180,7 +182,7 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
       if(this.force_execution_ != otherMyClass.force_execution_) return false;
 
-      if(this.enable_direct_position_control_ != otherMyClass.enable_direct_position_control_) return false;
+      if(this.requested_mode_ != otherMyClass.requested_mode_) return false;
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
@@ -199,8 +201,8 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("force_execution=");
       builder.append(this.force_execution_);      builder.append(", ");
-      builder.append("enable_direct_position_control=");
-      builder.append(this.enable_direct_position_control_);      builder.append(", ");
+      builder.append("requested_mode=");
+      builder.append(this.requested_mode_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("jointspace_trajectory=");
