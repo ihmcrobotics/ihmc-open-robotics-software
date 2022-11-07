@@ -39,8 +39,8 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
    {
       stepsVisualized.set(-1);
 
-//      for (int i = 0; i < numberOfStepsToVisualize; i++)
-//         footholdData[i].reset();
+      for (int i = 0; i < numberOfStepsToVisualize; i++)
+         footholdData[i].reset();
    }
 
    @Override
