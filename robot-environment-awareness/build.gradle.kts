@@ -24,7 +24,7 @@ ihmc {
    configurePublications()
 }
 
-val javaCPPVersion = "1.5.8-SNAPSHOT"
+val javaCPPVersion = "1.5.8"
 
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
