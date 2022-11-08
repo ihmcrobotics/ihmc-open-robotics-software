@@ -14,6 +14,7 @@ plugins {
 ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
+   javaDirectory("slam-wrapper", "generated-java")
    configurePublications()
 }
 
@@ -22,7 +23,7 @@ mainDependencies {
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:ihmc-native-library-loader:1.3.1")
+   api("us.ihmc:ihmc-native-library-loader:2.0.1")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -35,8 +36,8 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.18.1")
-   api("us.ihmc:simulation-construction-set:0.22.5")
+   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -51,27 +52,32 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.7"
+val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.19-")
-   apiBytedecoNatives("opencv", "4.5.5-")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.19-")
-   apiBytedecoNatives("opencv", "4.5.5-")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
+}
+
+slamWrapperDependencies {
+   apiBytedecoNatives("javacpp")
+   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
@@ -93,7 +99,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.31.0")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
@@ -102,10 +108,16 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:simulation-construction-set:0.22.5")
+   api("us.ihmc:simulation-construction-set:0.22.10")
 
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
+}
+
+tasks.create("generateMappings", Exec::class)
+{
+   workingDir = file("src/slam-wrapper/cpp")
+   commandLine = listOf("./generate-java-mappings-docker.sh")
 }
 
 

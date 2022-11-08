@@ -56,13 +56,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BooleanProvider allowStepAdjustment;
    private final DoubleProvider footstepDeadband;
-   private final DoubleProvider transferDurationSplitFraction;
 
-   private final DoubleProvider minimumFootstepMultiplier;
    private final DoubleProvider minICPErrorForStepAdjustment;
-   private final DoubleProvider maximumTimeFromTransfer;
-   private final BooleanProvider useActualErrorInsteadOfResidual;
-   private final BooleanProvider considerErrorInAdjustment;
    private final BooleanProvider allowCrossOverSteps;
 
    private SimpleFootstep nextFootstep;
@@ -75,7 +70,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
    private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
-   private final YoDouble footstepMultiplier = new YoDouble(yoNamePrefix + "TotalFootstepMultiplier", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
@@ -84,9 +78,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final FramePoint3D referencePositionInControlPlane = new FramePoint3D();
    private final FramePoint3D tempPoint = new FramePoint3D();
 
-   private final YoFrameVector2D footstepAdjustmentFromErrorInControlPlane = new YoFrameVector2D(yoNamePrefix + "footstepAdjustmentFromErrorInControlPlane",
-                                                                                                 worldFrame,
-                                                                                                 registry);
    private final YoFrameVector2D footstepAdjustmentInControlPlane = new YoFrameVector2D(yoNamePrefix + "footstepAdjustmentInControlPlane",
                                                                                                  worldFrame,
                                                                                                  registry);
@@ -110,12 +101,12 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
-   private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
-   private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.02);
-   private final DoubleParameter supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront", registry, 0.02);
-   private final DoubleParameter supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack", registry, 0.05);
-   private final DoubleParameter supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside", registry, 0.02);
-   private final DoubleParameter supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside", registry, 0.035);
+   private final BooleanProvider useICPControlPlaneInStepAdjustment;
+   private final DoubleProvider minimumTimeForStepAdjustment;
+   private final DoubleParameter supportDistanceFromFront;
+   private final DoubleParameter supportDistanceFromBack;
+   private final DoubleParameter supportDistanceFromInside;
+   private final DoubleParameter supportDistanceFromOutside;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> allowableAreasForCoP = new SideDependentList<>();
 
@@ -137,8 +128,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D allowableAreaForCoP = new FrameConvexPolygon2D();
-
-   private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
 
    public ErrorBasedStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -172,22 +161,31 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, stepAdjustmentParameters.allowStepAdjustment());
 
-      minimumFootstepMultiplier = new DoubleParameter(yoNamePrefix + "MinimumFootstepMultiplier",
-                                                      registry,
-                                                      stepAdjustmentParameters.getMinimumFootstepMultiplier());
-      maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer",
-                                                    registry,
-                                                    stepAdjustmentParameters.maximumTimeFromTransferInFootstepMultiplier());
       minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment",
                                                          registry,
                                                          stepAdjustmentParameters.getMinICPErrorForStepAdjustment());
 
-      transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
-                                                          registry,
-                                                          stepAdjustmentParameters.getTransferSplitFraction());
+      useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment",
+                                                                registry,
+                                                                stepAdjustmentParameters.useICPControlPlane());
+      minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment",
+                                                         registry,
+                                                         stepAdjustmentParameters.getMinimumTimeForStepAdjustment());
+      supportDistanceFromFront = new DoubleParameter(yoNamePrefix + "supportDistanceFromFront",
+                                                     registry,
+                                                     stepAdjustmentParameters.getCoPDistanceFromFrontOfFoot());
+      supportDistanceFromBack = new DoubleParameter(yoNamePrefix + "supportDistanceFromBack",
+                                                    registry,
+                                                    stepAdjustmentParameters.getCoPDistanceFromBackOfFoot());
+      supportDistanceFromInside = new DoubleParameter(yoNamePrefix + "supportDistanceFromInside",
+                                                      registry,
+                                                      stepAdjustmentParameters.getCoPDistanceFromInsideOfFoot());
+      supportDistanceFromOutside = new DoubleParameter(yoNamePrefix + "supportDistanceFromOutside",
+                                                       registry,
+                                                       stepAdjustmentParameters.getCoPDistanceFromOutsideOfFoot());
 
       footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, stepAdjustmentParameters.getAdjustmentDeadband());
-      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, false);
+      allowCrossOverSteps = new BooleanParameter(yoNamePrefix + "AllowCrossOverSteps", registry, stepAdjustmentParameters.allowCrossOverSteps());
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       DoubleProvider lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
@@ -196,14 +194,13 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       DoubleProvider outerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
       DoubleProvider inPlaceWidth = new DoubleParameter(yoNamePrefix + "InPlaceWidth", registry, steppingParameters.getInPlaceWidth());
 
-      useActualErrorInsteadOfResidual = new BooleanParameter("useActualErrorInsteadOfResidual", registry, false);
-      considerErrorInAdjustment = new BooleanParameter(yoNamePrefix + "considerErrorInAdjustment", registry, false);
       reachabilityConstraintHandler = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
                                                                                lengthLimit,
                                                                                lengthBackLimit,
                                                                                innerLimit,
                                                                                outerLimit,
                                                                                inPlaceWidth,
+                                                                               stepAdjustmentParameters.getCrossOverReachabilityParameters(),
                                                                                yoNamePrefix,
                                                                                VISUALIZE,
                                                                                registry,
@@ -340,7 +337,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    public void compute(double currentTime,
                        FramePoint2DReadOnly desiredICP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly residualICPError,
                        double omega0)
    {
       if (!isInSwing.getBooleanValue())
@@ -401,11 +397,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
          icpControlPlane.projectPointOntoControlPlane(worldFrame, upcomingFootstep.getPosition(), referencePositionInControlPlane);
       else
          referencePositionInControlPlane.set(upcomingFootstep.getPosition());
-
-      if (errorAboveThreshold && considerErrorInAdjustment.getValue())
-         computeStepAdjustmentFromError(residualICPError, omega0);
-      else
-         footstepAdjustmentFromErrorInControlPlane.setToZero();
 
       projectAdjustedStepIntoCaptureRegion();
       boolean wasAdjusted = deadbandAndApplyStepAdjustment();
@@ -480,25 +471,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       }
    }
 
-   private void computeStepAdjustmentFromError(FrameVector2DReadOnly residualICPError, double omega0)
-   {
-      footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
-      if (useActualErrorInsteadOfResidual.getValue())
-      {
-         footstepAdjustmentFromErrorInControlPlane.set(icpError);
-         footstepAdjustmentFromErrorInControlPlane.negate();
-      }
-      else
-      {
-         footstepAdjustmentFromErrorInControlPlane.set(residualICPError);
-      }
-      footstepAdjustmentFromErrorInControlPlane.scale(1.0 / footstepMultiplier.getDoubleValue());
-   }
-
    private void projectAdjustedStepIntoCaptureRegion()
    {
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
-      adjustedSolutionInControlPlane.add(footstepAdjustmentFromErrorInControlPlane);
 
       captureRegionInWorld.setIncludingFrame(multiStepCaptureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
@@ -663,20 +638,5 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private void computeTimeRemainingInState()
    {
       timeRemainingInState.set(swingDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
-   }
-
-   private double computeFootstepAdjustmentMultiplier(double omega0)
-   {
-      double timeInTransferForShifting = Math.min(maximumTimeFromTransfer.getValue(),
-                                                  transferDurationSplitFraction.getValue() * nextTransferDuration.getDoubleValue());
-      recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
-      recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
-
-      // This is the maximum possible multiplier
-      double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
-
-      // The recursion multiplier is guaranteed to be between the max and min values. This forces it to interpolate between those two.
-      double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
-      return minimumFootstepMultiplier + (1.0 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
 }

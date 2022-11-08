@@ -366,4 +366,9 @@ public class HumanoidHighLevelControllerManager implements RobotController
    {
       return stateMachine.getCurrentStateKey();
    }
+
+   public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
+   {
+      stateMachine.addStateChangedListener(stateChangedListener);
+   }
 }

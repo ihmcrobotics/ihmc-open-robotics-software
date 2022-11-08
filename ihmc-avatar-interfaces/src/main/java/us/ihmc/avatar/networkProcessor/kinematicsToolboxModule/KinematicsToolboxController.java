@@ -1,20 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -570,8 +565,7 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void registerStaticCollidables(Collidable... collidables)
    {
-      for (Collidable collidable : collidables)
-         staticCollidables.add(collidable);
+      staticCollidables.addAll(Arrays.asList(collidables));
    }
 
    /**
@@ -813,9 +807,7 @@ public class KinematicsToolboxController extends ToolboxController
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
        * solve the optimization problem for this control tick.
        */
-      controllerCore.reset();
-      controllerCore.submitControllerCoreCommand(controllerCoreCommand);
-      controllerCore.compute();
+      controllerCore.compute(controllerCoreCommand);
 
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
@@ -1324,7 +1316,10 @@ public class KinematicsToolboxController extends ToolboxController
     */
    public void computeCollisionCommands(List<CollisionResult> collisions, InverseKinematicsCommandBuffer bufferToPack)
    {
-      if (collisions.isEmpty() || !enableSelfCollisionAvoidance.getValue())
+      boolean collisionsDetected = !collisions.isEmpty();
+      boolean collisionsEnabled = enableSelfCollisionAvoidance.getValue() || enableStaticCollisionAvoidance.getValue();
+
+      if (!collisionsDetected || !collisionsEnabled)
          return;
 
       int collisionIndex = 0;
@@ -1577,6 +1572,16 @@ public class KinematicsToolboxController extends ToolboxController
    public void minimizeAngularMomentum(boolean enable)
    {
       minimizeAngularMomentum.set(enable);
+   }
+
+   public void setEnableSelfCollisionAvoidance(boolean enableSelfCollisionAvoidance)
+   {
+      this.enableSelfCollisionAvoidance.set(enableSelfCollisionAvoidance);
+   }
+
+   public void setEnableStaticCollisionAvoidance(boolean enableStaticCollisionAvoidance)
+   {
+      this.enableStaticCollisionAvoidance.set(enableStaticCollisionAvoidance);
    }
 
    public InverseKinematicsOptimizationSettingsCommand getActiveOptimizationSettings()

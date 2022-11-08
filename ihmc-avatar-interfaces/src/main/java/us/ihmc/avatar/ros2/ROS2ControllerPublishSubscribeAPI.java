@@ -1,5 +1,6 @@
 package us.ihmc.avatar.ros2;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -17,6 +18,8 @@ public interface ROS2ControllerPublishSubscribeAPI extends ROS2PublishSubscribeA
    public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback);
 
    public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass);
+
+   public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData();
 
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback);
 

@@ -148,9 +148,6 @@ public class BalanceManager
 
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
-   private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
-   private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
-
    private final FrameVector2D icpError2d = new FrameVector2D();
 
    private final ConvexPolygonScaler convexPolygonShrinker = new ConvexPolygonScaler();
@@ -202,9 +199,7 @@ public class BalanceManager
    private boolean initializeOnStateChange = false;
    private boolean minimizeAngularMomentumRateZ = false;
    private RobotSide supportSide;
-   private final YoFrameVector2D residualICPErrorForStepAdjustment = new YoFrameVector2D("residualICPErrorForStepAdjustment", worldFrame, registry);
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
-   private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
    private final SimpleFootstep nextFootstep = new SimpleFootstep();
    private final FootstepTiming nextFootstepTiming = new FootstepTiming();
@@ -349,9 +344,6 @@ public class BalanceManager
          YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
          YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
-         YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, adjustedDesiredCapturePointViz.createArtifact());
-
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCoMViz.createArtifact());
@@ -415,7 +407,7 @@ public class BalanceManager
       if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
          stepAdjustmentController.setStepConstraintRegions(stepConstraintRegionHandler.pollHasNewStepConstraintRegions());
 
-      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, residualICPErrorForStepAdjustment, omega0);
+      stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint2d, omega0);
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
       return footstepWasAdjusted;
@@ -464,10 +456,6 @@ public class BalanceManager
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
 
-      // --- compute adjusted desired capture point
-      controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
-      yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
-      desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
 
       if (precomputedICPPlanner != null)
@@ -1014,12 +1002,6 @@ public class BalanceManager
       swingSpeedUpForStepAdjustment.set(contactStateManager.getTimeRemainingInCurrentSupportSequence() - timeRemainingInSwing);
    }
 
-   @Deprecated
-   public FrameVector3DReadOnly getEffectiveICPAdjustment()
-   {
-      return effectiveICPAdjustment;
-   }
-
    public FramePoint3DReadOnly getCapturePoint()
    {
       return controllerToolbox.getCapturePoint();
@@ -1038,7 +1020,6 @@ public class BalanceManager
    public void setLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput output)
    {
       desiredCMP.set(output.getDesiredCMP());
-      residualICPErrorForStepAdjustment.set(output.getResidualICPErrorForStepAdjustment());
    }
 
    public TaskspaceTrajectoryStatusMessage pollPelvisXYTranslationStatusToReport()

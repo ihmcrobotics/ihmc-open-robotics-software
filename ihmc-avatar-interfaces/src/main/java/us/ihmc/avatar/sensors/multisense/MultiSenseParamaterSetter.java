@@ -12,7 +12,7 @@ import org.ros.node.parameter.ParameterListener;
 import org.ros.node.parameter.ParameterTree;
 import org.ros.node.service.ServiceResponseListener;
 
-import controller_msgs.msg.dds.MultisenseParameterPacket;
+import perception_msgs.msg.dds.MultisenseParameterPacket;
 import dynamic_reconfigure.BoolParameter;
 import dynamic_reconfigure.DoubleParameter;
 import dynamic_reconfigure.Reconfigure;

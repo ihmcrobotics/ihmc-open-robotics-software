@@ -1,6 +1,6 @@
 package us.ihmc.avatar.networkProcessor.modules.mocap;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.net.PacketConsumer;
 
 public class MocapPlanarRegionsListManager implements PacketConsumer<PlanarRegionsListMessage>

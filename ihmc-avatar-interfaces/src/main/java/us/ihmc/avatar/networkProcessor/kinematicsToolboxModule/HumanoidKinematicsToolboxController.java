@@ -1,7 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -637,12 +637,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (!hasSurfaceNormalData)
          return false;
 
-      supportRegionSolverInput.clear();
-      for (int i = 0; i < multiContactBalanceStatusInternal.getContactPointsInWorld().size(); i++)
-      {
-         supportRegionSolverInput.addContactPoint(multiContactBalanceStatusInternal.getContactPointsInWorld().get(i),
-                                                  multiContactBalanceStatusInternal.getSurfaceNormalsInWorld().get(i));
-      }
+      supportRegionSolverInput.setFromMessage(multiContactBalanceStatus);
       supportRegionSolver.initialize(supportRegionSolverInput);
       return supportRegionSolver.solve();
    }

@@ -1,0 +1,42 @@
+#ifndef __toolbox_msgs__msg__KinematicsPlanningToolboxInputMessage__idl__
+#define __toolbox_msgs__msg__KinematicsPlanningToolboxInputMessage__idl__
+
+#include "toolbox_msgs/msg/./KinematicsPlanningToolboxCenterOfMassMessage_.idl"
+#include "toolbox_msgs/msg/./KinematicsPlanningToolboxRigidBodyMessage_.idl"
+#include "toolbox_msgs/msg/./KinematicsToolboxConfigurationMessage_.idl"
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsPlanningToolboxInputMessage_")
+      struct KinematicsPlanningToolboxInputMessage
+      {
+        /**
+         * This message is part of the IHMC whole-body inverse kinematics module: KinematicsPlanningToolbox.
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * This is a list of rigid body messages which is used in KinematicsPlanningToolbox.
+         * It should composed of at least one message. Each message represent the input for solving the trajectory for one rigid-body.
+         */
+        sequence<toolbox_msgs::msg::dds::KinematicsPlanningToolboxRigidBodyMessage> rigid_body_messages;
+        /**
+         * This is desired key frames for center of mass position and will be used in KinematicsPlanningToolbox.
+         * In case this message is empty, the kinematics solver will keep center of mass position in its current location.
+         */
+        toolbox_msgs::msg::dds::KinematicsPlanningToolboxCenterOfMassMessage center_of_mass_message;
+        /**
+         * This is kinematics configuration message and will configure whole body inverse kinematics solver.
+         * This is optional.
+         */
+        toolbox_msgs::msg::dds::KinematicsToolboxConfigurationMessage kinematics_configuration_message;
+      };
+    };
+  };
+};
+
+#endif

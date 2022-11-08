@@ -31,7 +31,7 @@ public class FootholdCropper
    private static final double defaultThresholdForMeasuredCellActivation = 1.0;
    private static final double defaultMeasuredDecayRatePerSecond = 0.0;// 0.2;
 
-   private final FootholdRotationParameters rotationParameters;
+   private final YoPartialFootholdModuleParameters.FootholdCroppingParameters rotationParameters;
 
    private final FrameConvexPolygon2D defaultFootPolygon;
    private final YoFrameConvexPolygon2D shrunkenFootPolygon;
@@ -62,7 +62,7 @@ public class FootholdCropper
    public FootholdCropper(String namePrefix,
                           ReferenceFrame soleFrame,
                           List<? extends FramePoint2DReadOnly> defaultContactPoints,
-                          FootholdRotationParameters rotationParameters,
+                          YoPartialFootholdModuleParameters.FootholdCroppingParameters rotationParameters,
                           double dt,
                           YoRegistry parentRegistry,
                           YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -108,19 +108,8 @@ public class FootholdCropper
          YoArtifactPolygon yoShrunkPolygon = new YoArtifactPolygon(namePrefix + "ShrunkPolygon", shrunkenFootPolygonInWorld, Color.BLUE, false);
          yoShrunkPolygon.setVisible(true);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
-
-//         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP",
-//                                                          measuredCoPOccupancy,
-//                                                          50,
-//                                                          YoAppearance.Red(),
-//                                                          registry,
-//                                                          yoGraphicsListRegistry);
-         measuredVisualizer = null;
       }
-      else
-      {
-         measuredVisualizer = null;
-      }
+      measuredVisualizer = null;
 
       parentRegistry.addChild(registry);
    }
@@ -179,6 +168,9 @@ public class FootholdCropper
 
    private RobotSide getSideToCrop(FrameLine2DReadOnly lineOfRotation)
    {
+      if (!doPartialFootholdDetection.getValue())
+         return null;
+
       RobotSide sideOfFootToCropFromOccupancy = footCoPOccupancyGrid.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromHull = footCoPHullCropper.computeSideOfFootholdToCrop(lineOfRotation);
       RobotSide sideOfFootToCropFromDrop = footDropCropper.computeSideOfFootholdToCrop(lineOfRotation);
@@ -218,6 +210,11 @@ public class FootholdCropper
 
       shiftedLineToPack.setIncludingFrame(lineToShift);
       shiftedLineToPack.getPoint().add(shiftVector);
+   }
+
+   public boolean getValueOfPartialFootholdDetection()
+   {
+      return doPartialFootholdDetection.getValue();
    }
 
    public boolean shouldApplyShrunkenFoothold()

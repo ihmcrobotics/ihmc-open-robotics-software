@@ -1,0 +1,23 @@
+#ifndef __exoskeleton_msgs__msg__QuixSideStepSwingOutMessage__idl__
+#define __exoskeleton_msgs__msg__QuixSideStepSwingOutMessage__idl__
+
+module exoskeleton_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       */
+      @TypeCode(type="exoskeleton_msgs::msg::dds_::QuixSideStepSwingOutMessage_")
+      struct QuixSideStepSwingOutMessage
+      {
+        boolean side_step_in_swing_out;
+      };
+    };
+  };
+};
+
+#endif

@@ -16,9 +16,9 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
@@ -78,7 +78,6 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -209,7 +208,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), emptyEnvironment, simulationTestingParameters);
       simulationTestHelper.start();
 
-      ((YoBoolean) simulationTestHelper.findVariable("doPartialFootholdDetection")).set(false);
+//      ((YoBoolean) simulationTestHelper.findVariable("doPartialFootholdDetection")).set(false);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionTimeOnFootIfFootHasFullSupport")).set(0.6);
       ((YoDouble) simulationTestHelper.findVariable("fractionLoadIfOtherFootHasNoWidth")).set(0.7);

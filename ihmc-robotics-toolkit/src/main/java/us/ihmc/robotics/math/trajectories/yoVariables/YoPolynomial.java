@@ -189,12 +189,6 @@ public class YoPolynomial implements PolynomialVariableHolder, PolynomialBasics
       a[power].set(coefficient);
    }
 
-   public void setDirectlyReverse(double[] coefficients)
-   {
-      ArrayUtils.reverse(coefficients);
-      setDirectly(coefficients);
-   }
-
    @Override
    public void compute(double x)
    {

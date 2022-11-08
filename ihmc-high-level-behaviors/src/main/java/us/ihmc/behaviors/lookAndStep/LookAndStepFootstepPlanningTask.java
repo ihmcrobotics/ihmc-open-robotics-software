@@ -2,7 +2,7 @@ package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -329,7 +329,7 @@ public class LookAndStepFootstepPlanningTask
       // calculate impassibility
       if (lookAndStepParameters.getStopForImpassibilities() && lidarREAPlanarRegions != null)
       {
-         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootPosition()), robotConfigurationData.getRootOrientation());
          BodyCollisionData collisionData = PlannerTools.detectCollisionsAlongBodyPath(rootPose,
                                                                                       bodyPathPlan,
                                                                                       lidarREAPlanarRegions,

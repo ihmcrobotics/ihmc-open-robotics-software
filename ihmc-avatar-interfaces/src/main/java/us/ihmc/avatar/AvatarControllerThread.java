@@ -114,9 +114,16 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                      ControllerCrashNotificationPacket.class,
-                                                                      ROS2Tools.getControllerOutputTopic(robotName));
+      if(realtimeROS2Node != null)
+      {
+         crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                         ControllerCrashNotificationPacket.class,
+                                                                         ROS2Tools.getControllerOutputTopic(robotName));
+      }
+      else
+      {
+         crashNotificationPublisher = null;
+      }
 
       if (ALLOW_MODEL_CORRUPTION)
       {
@@ -287,6 +294,13 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       firstTick.set(true);
       humanoidRobotContextData.setControllerRan(false);
       humanoidRobotContextData.setEstimatorRan(false);
+
+      LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = humanoidRobotContextData.getJointDesiredOutputList();
+
+      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+      {
+         jointDesiredOutputList.getJointDesiredOutput(i).clear();
+      }
    }
 
    @Override
@@ -322,7 +336,10 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
       catch (Exception e)
       {
-         crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
+         if(crashNotificationPublisher != null)
+         {
+            crashNotificationPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
+         }
 
          throw new RuntimeException(e);
       }

@@ -279,11 +279,11 @@ public class QuadrupedSupportState extends QuadrupedFootState
       footBarelyLoaded.setWindowSize((int) (barelyLoadedWindowLength.getValue() / controlDT));
       if (footBarelyLoaded.getBooleanValue())
       {
-         footBarelyLoaded.update(footSwitch.computeFootLoadPercentage() < footFullyLoadedThreshold.getValue()); // if it is barely loaded, make it harder to switch back to barely loaded by using a different threshold
+         footBarelyLoaded.update(footSwitch.getFootLoadPercentage() < footFullyLoadedThreshold.getValue()); // if it is barely loaded, make it harder to switch back to barely loaded by using a different threshold
       }
       else
       {
-         if (footSwitch.computeFootLoadPercentage() < footBarelyLoadedThreshold.getValue())
+         if (footSwitch.getFootLoadPercentage() < footBarelyLoadedThreshold.getValue())
             footBarelyLoaded.set(true);
          else
             footBarelyLoaded.update(false);

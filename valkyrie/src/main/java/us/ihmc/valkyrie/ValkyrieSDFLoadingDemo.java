@@ -27,6 +27,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 /**
  * Created by dstephen on 2/7/14.
@@ -36,14 +37,14 @@ public class ValkyrieSDFLoadingDemo
    private static final boolean SHOW_ELLIPSOIDS = false;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = true;
-   private static final boolean SHOW_SIM_COLLISIONS = false;
+   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
+   private static final boolean SHOW_SIM_COLLISIONS = true;
 
    private SimulationConstructionSet scs;
 
    public ValkyrieSDFLoadingDemo()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
 
       FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       valkyrieRobot.setPositionInWorld(new Vector3D());
@@ -71,8 +72,7 @@ public class ValkyrieSDFLoadingDemo
 
       if (SHOW_SIM_COLLISIONS)
       {
-         ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(robotModel.getJointMap());
-         collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
+         RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "ground");
          addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, collisionModel);
       }
 

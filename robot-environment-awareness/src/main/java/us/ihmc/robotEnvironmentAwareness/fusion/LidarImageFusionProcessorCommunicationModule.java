@@ -8,12 +8,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import controller_msgs.msg.dds.Image32;
-import controller_msgs.msg.dds.IntrinsicParametersMessage;
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.Image32;
+import perception_msgs.msg.dds.IntrinsicParametersMessage;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import controller_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.ros2.ROS2Callback;

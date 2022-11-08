@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.faceDetection;
 
-import controller_msgs.msg.dds.DetectedFacesPacket;
+import perception_msgs.msg.dds.DetectedFacesPacket;
 import people_msgs.PositionMeasurement;
 import people_msgs.PositionMeasurementArray;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;

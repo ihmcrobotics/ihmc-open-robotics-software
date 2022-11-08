@@ -1855,7 +1855,7 @@
 			"shininess":  25.000000, 
 			"textures": [
 				{"id": "base_color_texture", 
-					"filename": "couch_base_color.jpg", 
+					"filename": "CouchBaseColor.jpg",
 					"type": "DIFFUSE"}
 			]}
 	], 

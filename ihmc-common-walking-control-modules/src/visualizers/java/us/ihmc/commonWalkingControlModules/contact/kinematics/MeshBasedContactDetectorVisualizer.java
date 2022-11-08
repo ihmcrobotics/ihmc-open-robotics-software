@@ -67,7 +67,7 @@ public class MeshBasedContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, registry);
       RobotFromDescription robot = setupRobot(sphereRobot, idRobot, floatingJoint, contactDetector);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
@@ -95,7 +95,7 @@ public class MeshBasedContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, registry);
 
       RobotFromDescription robot = setupRobot(cylinderRobot, idRobot, floatingJoint, contactDetector);
 
@@ -125,7 +125,7 @@ public class MeshBasedContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, registry);
 
       RobotFromDescription robot = setupRobot(capsuleRobot, idRobot, floatingJoint, contactDetector);
 
@@ -153,7 +153,7 @@ public class MeshBasedContactDetectorVisualizer
 
       YoRegistry registry = new YoRegistry("visualizationRegistry");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, Arrays.asList(linkName), registry);
+      MeshBasedContactDetector contactDetector = new MeshBasedContactDetector(idRobot, collisionModel, graphicsListRegistry, registry);
       RobotFromDescription robot = setupRobot(boxRobot, idRobot, floatingJoint, contactDetector);
 
       FloatingJoint scsFloatingJoint = (FloatingJoint) robot.getRootJoints().get(0);
@@ -251,7 +251,7 @@ public class MeshBasedContactDetectorVisualizer
 
             floatingJoint.getJointPose().set(scsFloatingJoint.getPosition(), scsFloatingJoint.getOrientation());
             idRobot.updateFramesRecursively();
-            contactDetector.update(0.0);
+            contactDetector.update();
          }
 
          @Override

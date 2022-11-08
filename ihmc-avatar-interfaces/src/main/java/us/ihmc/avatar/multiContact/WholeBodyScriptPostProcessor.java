@@ -7,13 +7,13 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import ihmc_common_msgs.msg.dds.FrameInformation;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryMessage;
-import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
@@ -21,6 +21,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -187,12 +188,12 @@ public class WholeBodyScriptPostProcessor
          System.out.println("waypointTime: " + waypointTime);
          KinematicsToolboxOutputStatus robotConfiguration = desiredRobotConfigurations.get(configurationIndex);
       
-         Vector3D desiredRootTranslation = robotConfiguration.getDesiredRootTranslation();
+         Point3D desiredRootPosition = robotConfiguration.getDesiredRootPosition();
          Quaternion desiredRootOrientation = robotConfiguration.getDesiredRootOrientation();
          Vector3D desiredRootLinearVelocity = robotConfiguration.getDesiredRootLinearVelocity();
          Vector3D desiredRootAngularVelocity = robotConfiguration.getDesiredRootAngularVelocity();
          
-         rootJoint.setJointPosition(desiredRootTranslation);
+         rootJoint.setJointPosition(desiredRootPosition);
          rootJoint.setJointOrientation(desiredRootOrientation);
          rootJoint.setJointLinearVelocity(desiredRootLinearVelocity);
          rootJoint.setJointAngularVelocity(desiredRootAngularVelocity);
