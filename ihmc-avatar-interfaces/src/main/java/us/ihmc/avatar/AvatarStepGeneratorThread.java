@@ -81,7 +81,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
       if (environmentalConstraints != null)
       {
          pluginFactory.addPlanarRegionsListCommandConsumer(environmentalConstraints);
-         pluginFactory.setFootStepAdjustment(environmentalConstraints.getFootstepAdjustment());
+         pluginFactory.setFootStepPlanAdjustment(environmentalConstraints.getFootstepPlanAdjustment());
          for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
 

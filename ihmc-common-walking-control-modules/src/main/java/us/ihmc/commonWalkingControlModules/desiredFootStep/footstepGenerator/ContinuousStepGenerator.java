@@ -142,6 +142,7 @@ public class ContinuousStepGenerator implements Updatable
    private StopWalkingMessenger stopWalkingMessenger;
    private StartWalkingMessenger startWalkingMessenger;
    private List<FootstepAdjustment> footstepAdjustments = new ArrayList<>();
+   private FootstepPlanAdjustment footstepPlanAdjustment;
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
 
@@ -299,6 +300,8 @@ public class ContinuousStepGenerator implements Updatable
       this.desiredVelocity.set(desiredVelocityX, desiredVelocityY);
       this.desiredTurningVelocity.set(turningVelocity);
 
+      int startingIndexToAdjust = footsteps.size();
+
       for (int i = footsteps.size(); i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
 
@@ -357,6 +360,11 @@ public class ContinuousStepGenerator implements Updatable
          swingSide = swingSide.getOppositeSide();
          previousFootstepPose.set(nextFootstepPose3D);
       }
+
+      if (footstepPlanAdjustment != null)
+         footstepPlanAdjustment.adjustFootstepPlan(currentSupportFootPose, startingIndexToAdjust, footstepDataListMessage);
+
+      // DO VALIDITY CHECK
 
       if (walk.getValue() && footstepMessenger != null)
       {
@@ -640,6 +648,16 @@ public class ContinuousStepGenerator implements Updatable
    {
       clearFootstepAdjustments();
       addFootstepAdjustment(footstepAdjustment);
+   }
+
+   /**
+    * Sets the method for adjusting height, pitch, and roll of the generated footstep plan.
+    *
+    * @param footstepPlanAdjustment the plan adjustment method.
+    */
+   public void setFootstepPlanAdjustment(FootstepPlanAdjustment footstepPlanAdjustment)
+   {
+      this.footstepPlanAdjustment = footstepPlanAdjustment;
    }
 
    public void addFootstepAdjustment(FootstepAdjustment footstepAdjustment)

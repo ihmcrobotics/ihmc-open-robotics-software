@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -48,6 +49,13 @@ public class JoystickBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    {
       csgPluginFactory.setFootStepAdjustment(footstepAdjustment);
       velocityPluginFactory.setFootStepAdjustment(footstepAdjustment);
+   }
+
+   @Override
+   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
+   {
+      csgPluginFactory.setFootStepPlanAdjustment(footStepAdjustment);
+      velocityPluginFactory.setFootStepPlanAdjustment(footStepAdjustment);
    }
 
    @Override
