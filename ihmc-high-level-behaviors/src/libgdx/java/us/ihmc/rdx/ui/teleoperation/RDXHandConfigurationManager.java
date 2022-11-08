@@ -111,7 +111,7 @@ public class RDXHandConfigurationManager
 
          double trajectoryTime = 3.0;
          ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, armJointAngles.get(robotSide));
-         armTrajectoryMessage.setEnableDirectPositionControl(true);
+//         armTrajectoryMessage.setRequestedMode(ArmTrajectoryMessage.REQUESTED_MODE_POSITION_CONTROL);
          communicationHelper.publishToController(armTrajectoryMessage);
       };
       shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
