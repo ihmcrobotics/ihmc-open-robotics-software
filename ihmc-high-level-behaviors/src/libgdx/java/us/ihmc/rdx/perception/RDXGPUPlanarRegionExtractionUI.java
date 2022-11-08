@@ -157,7 +157,7 @@ public class RDXGPUPlanarRegionExtractionUI
       heightMapGraphic = new RDXHeightMapGraphic();
       boundaryPointCloudSwap = new ZeroCopySwapReference<>(() ->
       {
-         GDXPointCloudRenderer boundaryPointCloud = new RDXPointCloudRenderer();
+         RDXPointCloudRenderer boundaryPointCloud = new RDXPointCloudRenderer();
          boundaryPointCloud.create(2000000);
          return boundaryPointCloud;
       });
