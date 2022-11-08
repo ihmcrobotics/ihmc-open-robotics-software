@@ -72,11 +72,6 @@ public class RDXSCS2BulletSimulationDemos
             {
                scs2SimulationSession.startSession(new BulletFlyingBallSimulationTest().createSession());
             }
-            if (ImGui.button(labels.get("Four bar linkage")))
-            {
-//               CrossFourBarLinkageRobotDefinition robotDefinition = new CrossFourBarLinkageRobotDefinition();
-               scs2SimulationSession.startSession(new BulletFlyingBallSimulationTest().createSession());
-            }
             if (ImGui.button(labels.get("Mobile")))
             {
                scs2SimulationSession.startSession(MobileBulletSimulation.createSession());
