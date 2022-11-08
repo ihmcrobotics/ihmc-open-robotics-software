@@ -58,7 +58,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.footPolygons = footPolygons;
 
       useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
-      useSimpleSnapping.set(false);
+      useSimpleSnapping.set(true);
 
       wiggleParameters.setDesiredDistanceInside(0.02);
    }
