@@ -98,6 +98,8 @@ public class LookAndStepFootstepPlanningTask
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
       private final Timer robotConfigurationDataExpirationTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
+      private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
+      private boolean isFlatGroundMode = false;
 
       public void initialize(LookAndStepBehavior lookAndStep)
       {
@@ -261,6 +263,11 @@ public class LookAndStepFootstepPlanningTask
          {
             performTask();
          }
+      }
+
+      public void setFlatGroundMode(boolean mode)
+      {
+         isFlatGroundMode = mode;
       }
 
       public void destroy()

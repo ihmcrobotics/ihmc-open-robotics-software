@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -268,6 +269,22 @@ public class LookAndStepPlanarRegionsManager
 
       for (PlanarRegionsList planarRegionsListForPlanning : planarRegionsForPlanning)
       {
+         // TODO remove all the planar regions that have no vertices
+         LogTools.info("checking for convex hull points . . .");
+         for (PlanarRegion region : planarRegionsListForPlanning.getPlanarRegionsAsList())
+         {
+            if (region.getConvexHull().getNumberOfVertices() < 1)
+            {
+               int numberOfPlanarRegions = region.getNumberOfConvexPolygons();
+               int numberOfVertices = 0;
+               for (int i = 0; i < numberOfPlanarRegions; i++)
+               {
+                  numberOfVertices += region.getConvexPolygon(i).getNumberOfVertices();
+               }
+               planarRegionsListForPlanning.getPlanarRegionsAsList().remove(region);
+               LogTools.info("REMOVED planar region with no points");
+            }
+         }
          removeCloseRegionsToExcludeThoseFromTheBody(planarRegionsListForPlanning);
       }
 
@@ -374,10 +391,11 @@ public class LookAndStepPlanarRegionsManager
          if (!isEmpty())
          {
 
-            List<FramePose3DReadOnly> posesToRemove = regionsFromSensors.keySet().parallelStream()
-                                                       .filter(pose -> pose.getPositionDistance(sensorPose) < minimumTranslationToAppend
-                                                                          && pose.getOrientationDistance(sensorPose) < minimumRotationToAppend).collect(
-                        Collectors.toList());
+            List<FramePose3DReadOnly> posesToRemove = regionsFromSensors.keySet()
+                                                                        .parallelStream()
+                                                                        .filter(pose -> pose.getPositionDistance(sensorPose) < minimumTranslationToAppend
+                                                                                        && pose.getOrientationDistance(sensorPose) < minimumRotationToAppend)
+                                                                        .collect(Collectors.toList());
 
             if (!posesToRemove.isEmpty())
             {
@@ -395,8 +413,10 @@ public class LookAndStepPlanarRegionsManager
 
       public void dequeueToSize(int size, double maxDistance)
       {
-         List<FramePose3DReadOnly> samplesTooFarAway = regionsFromSensors.keySet().stream().filter(pose -> pose.getPositionDistance(lastPose) > maxDistance).collect(
-               Collectors.toList());
+         List<FramePose3DReadOnly> samplesTooFarAway = regionsFromSensors.keySet()
+                                                                         .stream()
+                                                                         .filter(pose -> pose.getPositionDistance(lastPose) > maxDistance)
+                                                                         .collect(Collectors.toList());
          samplesTooFarAway.forEach(regionsFromSensors::remove);
          samplesTooFarAway.forEach(sensorList::remove);
 

@@ -79,6 +79,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
    private final ImBoolean invertShowGraphics = new ImBoolean(false);
    private final ImBoolean showReceivedRegions = new ImBoolean(false);
+   private static LookAndStepBehaviorParameters lookAndStepParameters;
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -137,7 +138,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
+      lookAndStepParameters = new LookAndStepBehaviorParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
                                        () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
       stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
@@ -352,5 +353,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    public String getName()
    {
       return DEFINITION.getName();
+   }
+
+   public static LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return lookAndStepParameters;
    }
 }

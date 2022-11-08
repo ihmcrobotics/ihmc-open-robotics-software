@@ -12,6 +12,8 @@ import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
@@ -98,17 +100,46 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private final boolean interactablesAvailable;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
+   private BehaviorHelper behaviorHelper = null;
+   private final LookAndStepBehaviorParameters lookAndStepBehaviorParameters;
 
    public RDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper)
    {
-      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null, null, null);
+      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, null);
    }
 
    public RDXTeleoperationManager(String robotRepoName,
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper,
+                                  BehaviorHelper behaviorHelper)
+   {
+      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, behaviorHelper, null, null, null, null);
+   }
+
+   public RDXTeleoperationManager(String robotRepoName,
+                                  String robotSubsequentPathToResourceFolder,
+                                  CommunicationHelper communicationHelper,
+                                  RobotCollisionModel robotSelfCollisionModel,
+                                  RobotCollisionModel robotEnvironmentCollisionModel,
+                                  YoVariableClientHelper yoVariableClientHelper)
+   {
+      this(robotRepoName,
+           robotSubsequentPathToResourceFolder,
+           communicationHelper,
+           null,
+           null,
+           robotSelfCollisionModel,
+           robotEnvironmentCollisionModel,
+           yoVariableClientHelper);
+   }
+
+   public RDXTeleoperationManager(String robotRepoName,
+                                  String robotSubsequentPathToResourceFolder,
+                                  CommunicationHelper communicationHelper,
+                                  BehaviorHelper behaviorHelper,
+                                  LookAndStepBehaviorParameters lookAndStepBehaviorParameters,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
                                   YoVariableClientHelper yoVariableClientHelper)
@@ -119,6 +150,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       addChild(teleoperationParametersTuner);
       addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
+      this.behaviorHelper = behaviorHelper;
+      this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
       ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
       robotModel = communicationHelper.getRobotModel();
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
@@ -184,7 +217,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters, behaviorHelper);
 
       if (interactablesAvailable)
       {

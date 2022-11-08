@@ -232,4 +232,9 @@ public class RDXBehaviorUIManager
    {
       return treeViewPanel;
    }
+
+   public BehaviorHelper getHelper()
+   {
+      return this.helper;
+   }
 }

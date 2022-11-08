@@ -68,6 +68,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       RESET, BODY_PATH_PLANNING, LOCALIZATION, FOOTSTEP_PLANNING, STEPPING;
    }
 
+   public LookAndStepBehavior(BehaviorHelper helper)
+   {
+      this(helper, false);
+   }
+
    /**
     * We'll make the following assumptions/constraints about the data being passed around between task/modules:
     * - Data output from module will be read only and the underlying data must not be modified after sending
@@ -82,8 +87,9 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
     * Inputs can be polled or triggered by an event
     * Outputs can be an event or polled by another task
     */
-   public LookAndStepBehavior(BehaviorHelper helper)
+   public LookAndStepBehavior(BehaviorHelper helper, boolean flatGroundMode)
    {
+      setFlatGroundMode(flatGroundMode);
       this.helper = helper;
       LogTools.info("Constructing");
 
@@ -225,5 +231,15 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    public String getName()
    {
       return DEFINITION.getName();
+   }
+
+   public void setFlatGroundMode(boolean mode)
+   {
+      footstepPlanning.setFlatGroundMode(mode);
+   }
+
+   public BehaviorHelper getHelper()
+   {
+      return this.helper;
    }
 }
