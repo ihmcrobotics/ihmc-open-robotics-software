@@ -34,6 +34,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    /** This is used only when the support foot based footstep adjustment is created. */
    private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
    private final OptionalFactoryField<FootstepAdjustment> primaryFootstepAdjusterField = new OptionalFactoryField<>("csgPrimaryFootstepAdjusterField");
+   private final OptionalFactoryField<FootstepPlanAdjustment> footstepPlanAdjusterField = new OptionalFactoryField<>("csgFootstepPlanAdjusterField");
    private final List<FootstepAdjustment> secondaryFootstepAdjusters = new ArrayList<>();
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
@@ -60,6 +61,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    public void setFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
       primaryFootstepAdjusterField.set(footStepAdjustment);
+   }
+
+   @Override
+   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
+   {
+      footstepPlanAdjusterField.set(footStepAdjustment);
    }
 
    @Override
@@ -137,6 +144,8 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
       if (primaryFootstepAdjusterField.hasValue() && primaryFootstepAdjusterField.get() != null)
          continuousStepGenerator.setFootstepAdjustment(primaryFootstepAdjusterField.get());
+      if (footstepPlanAdjusterField.hasValue() && footstepPlanAdjusterField.get() != null)
+         continuousStepGenerator.setFootstepPlanAdjustment(footstepPlanAdjusterField.get());
       for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusters)
          continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
       for (FootstepValidityIndicator footstepValidityIndicator : footstepValidityIndicators)
