@@ -8,10 +8,12 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 public abstract class RDXVisualizer implements RenderableProvider
 {
    private ImBoolean active = new ImBoolean(false);
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String title;
    private boolean createdYet = false;
 
@@ -31,7 +33,8 @@ public abstract class RDXVisualizer implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(title, active);
+      ImGui.checkbox(labels.get(title), active);
+      ImGuiTools.previousWidgetTooltip("Active");
    }
 
    public void update()
@@ -66,5 +69,10 @@ public abstract class RDXVisualizer implements RenderableProvider
    public void destroy()
    {
 
+   }
+
+   public String getTitle()
+   {
+      return title;
    }
 }

@@ -124,7 +124,7 @@ public class RDXSCS2SimpleObject
    public void setCollisionModel(Consumer<RDXMultiColorMeshBuilder> meshBuilderConsumer)
    {
       Model collisionGraphic = RDXModelBuilder.buildModel(meshBuilderConsumer, pascalCasedName + "CollisionModel" + getObjectIndex());
-      LibGDXTools.setTransparency(collisionGraphic, 0.4f);
+      LibGDXTools.setOpacity(collisionGraphic, 0.4f);
       setCollisionModel(collisionGraphic);
    }
 
@@ -293,6 +293,6 @@ public class RDXSCS2SimpleObject
    public void setCollisionModelColor(ColorAttribute color, float transparency)
    {
       this.collisionModelInstance.materials.get(0).set(color);
-      this.collisionModelInstance.setTransparency(transparency);
+      this.collisionModelInstance.setOpacity(transparency);
    }
 }

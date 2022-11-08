@@ -93,8 +93,8 @@ public class RDXVRContext
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
    private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final ArrayList<RDXVRPickResult> pickResults = new ArrayList<>();
-   private RDXVRPickResult selectedPick = null;
+   private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
+   private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
 
 
    private final FrameLine3D pickRay = new FrameLine3D();
@@ -204,7 +204,8 @@ public class RDXVRContext
          }
       }
 
-      pickResults.clear();
+      for (RobotSide side : RobotSide.values)
+         pickResults.get(side).clear();
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
       {
          vrPickCalculator.accept(this);
@@ -218,16 +219,19 @@ public class RDXVRContext
 
    private void calculateSelectedPick()
    {
-      selectedPick = null;
-      for (RDXVRPickResult pickResult : pickResults)
+      for (RobotSide side : RobotSide.values)
       {
-         if (selectedPick == null)
+         selectedPick.set(side, null);
+         for (RDXVRPickResult pickResult : pickResults.get(side))
          {
-            selectedPick = pickResult;
-         }
-         else if (pickResult.getDistanceToCamera() < selectedPick.getDistanceToCamera())
-         {
-            selectedPick = pickResult;
+            if (selectedPick.get(side) == null)
+            {
+               selectedPick.set(side, pickResult);
+            }
+            else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.get(side).getDistanceToControllerPickPoint())
+            {
+               selectedPick.set(side, pickResult);
+            }
          }
       }
    }
@@ -352,12 +356,12 @@ public class RDXVRContext
       return teleportIHMCZUpToIHMCZUpWorld;
    }
 
-   public void addPickResult(RDXVRPickResult pickResult)
+   public void addPickResult(RobotSide side, RDXVRPickResult pickResult)
    {
-      pickResults.add(pickResult);
+      pickResults.get(side).add(pickResult);
    }
 
-   public RDXVRPickResult getSelectedPick()
+   public SideDependentList<RDXVRPickResult> getSelectedPick()
    {
       return selectedPick;
    }

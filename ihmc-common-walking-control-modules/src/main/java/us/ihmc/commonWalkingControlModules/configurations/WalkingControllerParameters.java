@@ -356,6 +356,15 @@ public abstract class WalkingControllerParameters
    public abstract String[] getJointsToIgnoreInController();
 
    /**
+    * Returns a list of joints that cannot be controlled but should still be considered by the
+    * controller.
+    */
+   public String[] getInactiveJoints()
+   {
+      return null;
+   }
+
+   /**
     * Returns the {@link MomentumOptimizationSettings} for this robot. These parameters define the
     * weights given to the objectives of the walking controller in the QP.
     */

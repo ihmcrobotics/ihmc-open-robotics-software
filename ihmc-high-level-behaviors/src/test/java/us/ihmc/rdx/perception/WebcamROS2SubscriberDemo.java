@@ -106,10 +106,9 @@ public class WebcamROS2SubscriberDemo
                   baseUI.getPerspectiveManager().reloadPerspective();
 
                   messageEncodedBytePointer = new BytePointer(25000000);
-//                  inputJPEGYUVI420Mat = new Mat(25000000);
+                  //                  inputJPEGYUVI420Mat = new Mat(25000000);
                   inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
                   inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-                  bgr8Mat = new Mat(1080, 1920, opencv_core.CV_8UC3);
 
 //                  ThreadTools.startAsDaemon(() ->
 //                  {
@@ -153,6 +152,15 @@ public class WebcamROS2SubscriberDemo
                   {
                      delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(),
                                                                  videoPacket.getAcquisitionTimeAdditionalNanos()));
+
+                     if (videoPacket.getImageWidth() != imageWidth || videoPacket.getImageHeight() != imageHeight)
+                     {
+                        imageWidth = videoPacket.getImageWidth();
+                        imageHeight = videoPacket.getImageHeight();
+
+                        cvImagePanel.resize(imageWidth, imageHeight, null);
+                        bgr8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+                     }
 
                      IDLSequence.Byte imageEncodedTByteArrayList = videoPacket.getData();
                      imageEncodedTByteArrayList.toArray(messageDataHeapArray);
