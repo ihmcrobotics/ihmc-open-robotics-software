@@ -1,5 +1,6 @@
 package us.ihmc.avatar.stepAdjustment;
 
+import boofcv.struct.image.Planar;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -17,11 +18,14 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
@@ -39,6 +43,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
    private final YoConstraintOptimizerParameters wiggleParameters;
+   private final YoBoolean useSimpleSnapping;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
    protected final PlanarRegion regionToSnapTo = new PlanarRegion();
@@ -52,6 +57,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       this.footPolygons = footPolygons;
+
+      useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
+      useSimpleSnapping.set(true);
 
       wiggleParameters.setDesiredDistanceInside(0.02);
    }
@@ -93,13 +101,15 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
          if (planarRegionSnapperCallback != null)
          {
-            planarRegionSnapperCallback.advanceFootIndex();
             planarRegionSnapperCallback.recordUnadjustedFootstep(adjustedFootstepPose, footPolygonToWiggle);
          }
 
          try
          {
-            snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
+            if (useSimpleSnapping.getValue())
+               simpleSnapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
+            else
+               snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
             if (adjustedFootstepPose.containsNaN())
             {
                adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
@@ -129,10 +139,45 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final FrameConvexPolygon2D footstepPolygonInWorld = new FrameConvexPolygon2D();
    private final RigidBodyTransform transformToSole = new RigidBodyTransform();
 
-   public boolean snapAndWiggle(FramePose3D solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
+   private boolean simpleSnapAndWiggle(FramePose3DBasics unsnappedSolePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
+      if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
+      {
+         snappedFootstepPolygonToPack.clear();
+         return false;
+      }
 
+      soleFrameBeforeSnapping.setPoseAndUpdate(unsnappedSolePose);
+      footstepPolygonInWorld.setIncludingFrame(soleFrameBeforeSnapping, footStepPolygonInSoleFrame);
+      footstepPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
+      PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footstepPolygonInWorld, steppableRegionsProvider.getSteppableRegions(), intersectingRegions);
+
+      FixedFramePoint3DBasics footPosition = unsnappedSolePose.getPosition();
+
+      PlanarRegion closestRegion;
+      if (intersectingRegions.size() == 0)
+         closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
+      else
+         closestRegion = findHighestPlanarRegionAtPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY(), intersectingRegions);
+
+      footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
+      snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
+
+      regionToSnapTo.set(closestRegion);
+      snapTransform.setToZero();
+      snapTransform.getTranslation().setZ(footPosition.getZ());
+
+      if (planarRegionSnapperCallback != null)
+         planarRegionSnapperCallback.recordSnapTransform(snapTransform, regionToSnapTo);
+
+      return true;
+   }
+
+   private final List<PlanarRegion> intersectingRegions = new ArrayList<>();
+
+   private boolean snapAndWiggle(FramePose3DBasics solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
+   {
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
          snappedFootstepPolygonToPack.clear();
@@ -143,14 +188,23 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepPolygonInWorld.setIncludingFrame(soleFrameBeforeSnapping, footStepPolygonInSoleFrame);
       footstepPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
+
       if (isFootPolygonOnBoundaryOfPlanarRegions(steppableRegionsProvider.getSteppableRegions(), footstepPolygonInWorld))
       {
+
+         PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footstepPolygonInWorld, steppableRegionsProvider.getSteppableRegions(), intersectingRegions);
+
          /*
           * If foot is on the boundary of planar regions, don't snap/wiggle but
           * set it to the nearest plane's height
           */
          FixedFramePoint3DBasics footPosition = solePose.getPosition();
-         PlanarRegion closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
+         PlanarRegion closestRegion;
+         if (intersectingRegions.size() == 0)
+            closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
+         else
+            closestRegion = findHighestPlanarRegionAtPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY(), intersectingRegions);
+
          footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
          snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
 
@@ -177,7 +231,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final RigidBodyTransform transformFromSoleToRegion = new RigidBodyTransform();
    private final ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
 
-   private void doSnapAndWiggle(FramePose3D solePoseToSnapAndWiggle,
+   private void doSnapAndWiggle(FramePose3DBasics solePoseToSnapAndWiggle,
                                 ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
                                 FrameConvexPolygon2DReadOnly footPolygonInWorld,
                                 ConvexPolygon2DBasics snappedFootholdInWorldToPack)
@@ -218,7 +272,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       // check for partial foothold
       if (wiggleParameters.getDesiredDistanceInside() < 0.0)
       {
-
          soleFrameAfterWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
          soleFrameAfterWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);
          footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
@@ -260,6 +313,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       return false;
    }
 
+
    public PlanarRegion findClosestPlanarRegionToPointByProjectionOntoXYPlane(double x, double y)
    {
       double shortestDistanceToPoint = Double.POSITIVE_INFINITY;
@@ -277,5 +331,24 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
 
       return closestRegion;
+   }
+
+   public PlanarRegion findHighestPlanarRegionAtPointByProjectionOntoXYPlane(double x, double y, List<PlanarRegion> intersectingRegions)
+   {
+      double highestPoint = Double.NEGATIVE_INFINITY;
+      PlanarRegion highestRegion = null;
+
+      for (int i = 0; i < intersectingRegions.size(); i++)
+      {
+         PlanarRegion candidateRegion = intersectingRegions.get(i);
+         double heightAtPoint = candidateRegion.getPlaneZGivenXY(x, y);
+         if (heightAtPoint > highestPoint)
+         {
+            highestPoint = heightAtPoint;
+            highestRegion = candidateRegion;
+         }
+      }
+
+      return highestRegion;
    }
 }

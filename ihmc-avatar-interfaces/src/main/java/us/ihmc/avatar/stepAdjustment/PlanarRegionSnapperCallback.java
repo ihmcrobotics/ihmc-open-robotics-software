@@ -1,22 +1,15 @@
 package us.ihmc.avatar.stepAdjustment;
 
-import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-public interface PlanarRegionSnapperCallback extends Updatable
+public interface PlanarRegionSnapperCallback
 {
-   @Override
-   default void update(double timeInState)
-   {
-      reset();
-   }
-
    void reset();
 
-   void advanceFootIndex();
+   void setFootIndex(int index);
 
    void recordUnadjustedFootstep(FramePose3DReadOnly footPose, ConvexPolygon2DReadOnly foothold);
 

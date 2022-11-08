@@ -1,33 +1,26 @@
 package us.ihmc.avatar;
 
-import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepPlanSnapper;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionSnapVisualizer;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -51,7 +44,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private final SteppingParameters steppingParameters;
 
-   private final PlanarRegionFootstepSnapper stepSnapper;
+   private final PlanarRegionFootstepPlanSnapper stepSnapper;
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    //   private final BipedalSupportPlanarRegionCalculator supportPlanarRegionCalculator;
 
@@ -83,18 +76,17 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
 
 
-      stepSnapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsCalculator)
+      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons, steppableRegionsCalculator)
       {
          @Override
-         public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose,
-                                       FramePose2DReadOnly footstepPose,
-                                       RobotSide footSide,
-                                       FixedFramePose3DBasics adjustedPoseToPack)
+         public void adjustFootstepPlan(FramePose3DReadOnly stanceFootPose,
+                                       int stepIndexToStart,
+                                       FootstepDataListMessage dataListToSnap)
          {
             if (!shouldSnapToRegions.getValue())
-               return true;
+               return;
 
-            return super.adjustFootstep(stanceFootPose, footstepPose, footSide, adjustedPoseToPack);
+            super.adjustFootstepPlan(stanceFootPose, stepIndexToStart, dataListToSnap);
          }
       };
       snapVisualizer = new PlanarRegionSnapVisualizer(registry, graphicsListRegistry);
@@ -146,7 +138,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       return graphicsListRegistry;
    }
 
-   public FootstepAdjustment getFootstepAdjustment()
+   public FootstepPlanAdjustment getFootstepPlanAdjustment()
    {
       return stepSnapper;
    }
