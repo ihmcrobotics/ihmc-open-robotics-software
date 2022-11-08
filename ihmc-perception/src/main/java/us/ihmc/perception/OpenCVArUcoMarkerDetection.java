@@ -8,7 +8,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
-import org.bytedeco.opencv.opencv_aruco.EstimateParameters;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
@@ -46,7 +45,6 @@ public class OpenCVArUcoMarkerDetection
    private SwapReference<Mat> ids;
    private SwapReference<MatVector> rejectedImagePoints;
    private DetectorParameters detectorParameters;
-   private EstimateParameters estimateParameters;
    private Mat cameraMatrix;
    private Mat distortionCoefficients;
    private final ArrayList<Integer> idsAsList = new ArrayList<>();
@@ -81,9 +79,8 @@ public class OpenCVArUcoMarkerDetection
       corners = new SwapReference<>(MatVector::new);
       ids = new SwapReference<>(Mat::new);
       rejectedImagePoints = new SwapReference<>(MatVector::new);
-      detectorParameters = DetectorParameters.create();
+      detectorParameters = new DetectorParameters();
       detectorParameters.markerBorderBits(2);
-      estimateParameters = EstimateParameters.create();
       cameraMatrix = new Mat(3, 3, opencv_core.CV_32FC1);
       distortionCoefficients = new Mat(1, 4, opencv_core.CV_32FC1);
       distortionCoefficients.ptr(0, 0).putFloat(0.0f);
@@ -139,7 +136,9 @@ public class OpenCVArUcoMarkerDetection
                                              corners.getForThreadOne(),
                                              ids.getForThreadOne(),
                                              detectorParameters,
-                                             rejectedImagePoints.getForThreadOne());
+                                             rejectedImagePoints.getForThreadOne(),
+                                             cameraMatrix,
+                                             distortionCoefficients);
                });
                stopwatch.getForThreadOne().suspend();
             }
@@ -220,8 +219,7 @@ public class OpenCVArUcoMarkerDetection
                                                 distortionCoefficients,
                                                 rotationVectors,
                                                 translationVectors,
-                                                objectPoints,
-                                                estimateParameters);
+                                                objectPoints);
 
          double rx = rotationVectors.ptr(0).getDouble();
          double ry = rotationVectors.ptr(0).getDouble(Double.BYTES);
