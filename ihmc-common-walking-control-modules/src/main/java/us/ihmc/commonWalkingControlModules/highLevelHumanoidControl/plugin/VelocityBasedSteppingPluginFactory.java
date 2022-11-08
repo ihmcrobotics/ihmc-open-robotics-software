@@ -66,6 +66,11 @@ public class VelocityBasedSteppingPluginFactory implements HumanoidSteppingPlugi
    }
 
    @Override
+   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
+   {
+   }
+
+   @Override
    public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
    {
    }
