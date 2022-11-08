@@ -7,7 +7,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.logging.PerceptionDataLoader;
+import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.live.LogVideoLoader;

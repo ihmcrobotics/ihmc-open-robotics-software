@@ -5,6 +5,7 @@ import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.logging.HDF5Tools;
+import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
