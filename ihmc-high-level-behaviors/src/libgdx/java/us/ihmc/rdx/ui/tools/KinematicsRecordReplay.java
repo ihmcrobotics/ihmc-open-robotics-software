@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 
 public class KinematicsRecordReplay
 {
-   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "");
+   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "", 1);
    private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString());
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
@@ -22,9 +22,10 @@ public class KinematicsRecordReplay
    private boolean isReplaying = false;
    private ImBoolean enabledKinematicsStreaming;
 
-   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming)
+   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberParts)
    {
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
+      trajectoryRecorder.setNumberParts(numberParts);
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -35,7 +36,7 @@ public class KinematicsRecordReplay
          isRecording = !isRecording;
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
-            trajectoryRecorder.setPath(recordPath.get());
+            trajectoryRecorder.setPath(recordPath.get()); //recorder is reset when changing path
       }
       // check replay is on and trigger button has been pressed once. if button is pressed again replay is stopped
       if (enablerReplay.get() && triggerButton.bChanged() && !triggerButton.bState())
@@ -43,7 +44,7 @@ public class KinematicsRecordReplay
          isReplaying = !isReplaying;
          // check if replay file has been set to a different one from previous replay. In case update file path.
          if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
-            trajectoryRecorder.setPath(replayPath.get());
+            trajectoryRecorder.setPath(replayPath.get()); //replayer is reset when changing path
       }
    }
 
@@ -65,6 +66,7 @@ public class KinematicsRecordReplay
       }
       else if (!(trajectoryRecorder.hasSavedRecording()))
       {
+         trajectoryRecorder.concatenateData();
          trajectoryRecorder.saveRecording();
       }
    }

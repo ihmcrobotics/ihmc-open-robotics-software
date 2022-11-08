@@ -24,7 +24,7 @@ public class RDXVRSharedControl
 
    public void processInput(InputDigitalActionData triggerButton)
    {
-      // check streaming is on, recording is on and trigger button has been pressed once. if button is pressed again recording is stopped
+      // check streaming is on, shared control is on and trigger button has been pressed once. if button is pressed again shared control is stopped
       if (enabledKinematicsStreaming.get() && enabled.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isActive = !isActive;

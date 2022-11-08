@@ -73,9 +73,9 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
-   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled);
+   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled,2);
    private FrequencyStatisticPrinter frequencyCheck = new FrequencyStatisticPrinter();
-//   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
+   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -168,7 +168,7 @@ public class RDXVRKinematicsStreamingMode
          if(kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
          // or shared control assistance
-//         sharedControlAssistant.processInput(bButton);
+         sharedControlAssistant.processInput(bButton);
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -209,7 +209,7 @@ public class RDXVRKinematicsStreamingMode
          for (RobotSide side : RobotSide.values)
          {
             vrContext.getController(side).runIfConnected(controller ->
-            {  //TODO edit this part to include other robot parts (e.g., feet, chest?)
+            {  //TODO edit this part to include other robot parts (e.g., feet, elbows, chest?)
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
                tempFramePose.setToZero(handDesiredControlFrames.get(side).getReferenceFrame());
@@ -218,13 +218,13 @@ public class RDXVRKinematicsStreamingMode
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
-//               else if (sharedControlAssistant.isActive())
-//               {
-//                  if(sharedControlAssistant.readyToPack())
-//                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
-//                  else
-//                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
-//               }
+               else if (sharedControlAssistant.isActive())
+               {
+                  if(sharedControlAssistant.readyToPack())
+                     sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
+                  else
+                     sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+               }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
@@ -331,7 +331,7 @@ public class RDXVRKinematicsStreamingMode
       ImGui.text("Start/Stop replay: Right B button (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
       // add widget for using shared control assistance in VR
-//      sharedControlAssistant.renderWidgets(labels);
+      sharedControlAssistant.renderWidgets(labels);
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());

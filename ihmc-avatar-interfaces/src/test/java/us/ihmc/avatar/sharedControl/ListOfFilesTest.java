@@ -1,10 +1,10 @@
-package us.ihmc.avatar.testTools;
+package us.ihmc.avatar.sharedControl;
 
 import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.io.File;
 
-public class TestListOfFiles
+public class ListOfFilesTest
 {
    public static void main(String args[])
    {
