@@ -6,12 +6,15 @@ import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -61,7 +64,7 @@ public class HDF5Tools
       }
    }
 
-   public static byte[] loadByteArray(Group group, int index)
+   public static byte[] loadRawByteArray(Group group, int index)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
 
@@ -69,15 +72,44 @@ public class HDF5Tools
 
       LogTools.info("Loading Dataset: {} with Shape: {}", index, size);
 
-
       byte[] byteArray = new byte[size];
+
       BytePointer p = new BytePointer(byteArray);
-      dataset.read(p, PredType.NATIVE_UINT8());
+      dataset.read(p, new DataType(PredType.NATIVE_UCHAR()));
       p.get(byteArray, 0, byteArray.length);
 
       System.out.println(Arrays.toString(byteArray));
 
       return byteArray;
+   }
+
+   public static byte[] loadByteArray(Group group, int index)
+   {
+      int[] outputIntArray = HDF5Tools.loadIntArray(group, index);
+
+      byte[] outputArray = new byte[outputIntArray.length * Integer.BYTES];
+      ByteBuffer byteBuffer = ByteBuffer.wrap(outputArray);
+      IntBuffer outputIntBuffer = byteBuffer.asIntBuffer();
+      outputIntBuffer.put(outputIntArray);
+
+      return outputArray;
+   }
+
+   public static int[] loadIntArray(Group group, int index)
+   {
+      DataSet dataset = group.openDataSet(String.valueOf(index));
+
+      int size = extractShape(dataset, 0);
+
+      LogTools.info("Loading Dataset: {} with Shape: {}", index, size);
+
+      int[] intArray = new int[size];
+
+      IntPointer p = new IntPointer(intArray);
+      dataset.read(p, new DataType(PredType.NATIVE_INT()));
+      p.get(intArray, 0, intArray.length);
+
+      return intArray;
    }
 
    public static void loadImage(Group group, int index, Mat mat)
@@ -176,13 +208,47 @@ public class HDF5Tools
       dataset.close();
    }
 
-   public static void storeByteArray(Group group, long index, byte[] data, long size)
+   public static void storeRawByteArray(Group group, long index, byte[] data, long size)
    {
       LogTools.info("Store Byte Array: {} {}", index, size);
       long[] dims = {size};
       LogTools.info("Creating Dataset: {} {}", group.toString(), String.valueOf(index));
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), new DataSpace(1, dims));
+
+      DataSpace ds = new DataSpace(1, dims);
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), ds);
+
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
+
+      ds.close();
+      dataset.close();
+   }
+
+   public static void storeByteArray(Group group, long index, byte[] data, long size)
+   {
+      LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
+
+      ByteBuffer buffer = ByteBuffer.wrap(data);
+      IntBuffer intBuffer = buffer.asIntBuffer();
+
+      int intCount = (int)(size / Integer.BYTES);
+
+      int[] array = new int[intCount];
+      intBuffer.get(array);
+
+      HDF5Tools.storeIntArray(group, index, array, intCount);
+   }
+
+   public static void storeIntArray(Group group, long index, int[] data, long size)
+   {
+      LogTools.info("Store Int Array: Index: {} Size: {}", index, size);
+      long[] dims = {size};
+
+      DataSpace ds = new DataSpace(1, dims);
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_INT()), ds);
+
+      dataset.write(new IntPointer(data), new DataType(PredType.NATIVE_INT()));
+
+      ds.close();
       dataset.close();
    }
 

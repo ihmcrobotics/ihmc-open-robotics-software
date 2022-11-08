@@ -230,21 +230,19 @@ public class PerceptionDataLogger
    {
       Group group = hdf5Manager.getGroup(namespace);
       ThreadTools.startAThread(() ->
-                               {
-                                  synchronized (this)
-                                  {
-                                     LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
-                                     depthMapCount = (int) hdf5Manager.getCount(namespace);
+      {
+         synchronized (this)
+         {
+            LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
+            depthMapCount = (int) hdf5Manager.getCount(namespace);
 
-                                     IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
-                                     imageEncodedTByteArrayList.toArray(messageDataHeapArray);
-                                     //                                         messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
-                                     //                                         messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
+            IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
+            imageEncodedTByteArrayList.toArray(messageDataHeapArray);
 
-                                     HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, message.getData().size());
-                                     LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
-                                  }
-                               }, "depth_map_logger_thread");
+            HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, message.getData().size());
+            LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
+         }
+      }, "depth_map_logger_thread");
    }
 
    public void storeVideoPacket(String namespace, VideoPacket packet)
@@ -339,7 +337,7 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLogger logger = new PerceptionDataLogger();
       logger.startLogging(LOG_FILE, "Robot");
 
