@@ -12,10 +12,10 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
- * Class to record and replay multi-dimensional trajectories of primitive Number types.
+ * Class to record and replay multidimensional trajectories of primitive Number types.
  * The multi-dimension represents the number of elements that are considered.
- * For each dimension, at each time step the class stores or reads a setpoint.
- * The collection of setpoints defines the trajectory.
+ * For each dimension, at each time step the class stores or reads a set point.
+ * The collection of set points defines the trajectory.
  * The trajectories are saved and loaded from .csv files.
  * Each column represents the trajectory of a distinct element (e.g., X position of the right hand, or Y position of the right hand, etc...).
  */
@@ -23,17 +23,20 @@ public class TrajectoryRecordReplay<T extends Number>
 {
    private String filePath;
    private final Class<T> clazz;
+   private int numberParts; //specify the number of body parts you want to record
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private ArrayList<T[]> concatenatedDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
    private boolean doneReplaying = true;
+   private boolean concatenated = false;
 
-   public TrajectoryRecordReplay(Class<T> clazz, String filePath)
+   public TrajectoryRecordReplay(Class<T> clazz, String filePath, int numberParts)
    {
       super();
       this.clazz = clazz;
       this.filePath = filePath;
+      this.numberParts = numberParts;
    }
 
    public T[] play()
@@ -62,27 +65,34 @@ public class TrajectoryRecordReplay<T extends Number>
       dataMatrix.add(localValues);
    }
 
-   /* Useful if we are recording different body parts trajectories but not in the same scope
-   * and we want to concatenate them into one single row rather than having multiple TrajectoryRecordReplay objects */
-   public void concatenateRecording(int partsNumber)
+   /* Used if we are recording different body parts trajectories but not in the same scope
+    * and we want to concatenate them into one single row rather than having multiple TrajectoryRecordReplay objects
+    * and multiple csv files */
+   public void concatenateData()
    {
-      for (int i=0; i< dataMatrix.size(); i++)
+      for (int i = 0; i < dataMatrix.size(); i = i + numberParts)
       {
-         T[] concatenatedRow = newNumberArray(dataMatrix.get(0).length*partsNumber);
-         concatenateWithCopy(dataMatrix.get(i), dataMatrix.get(i+partsNumber));
-
+         T[] concatenatedRow = dataMatrix.get(i);
+         for (int j = 1; j <= numberParts - 1; j++)
+         {
+            concatenatedRow = concatenateWithCopy(concatenatedRow, dataMatrix.get(i + j));
+         }
          concatenatedDataMatrix.add(concatenatedRow);
       }
+      concatenated = true;
    }
 
    public void saveRecording()
    {
-      writeCSV(dataMatrix);
+      if (concatenated)
+         writeCSV(concatenatedDataMatrix);
+      else
+         writeCSV(dataMatrix);
       this.reset();
       savedRecording = true;
    }
 
-   private void readCSV()
+   public void readCSV()
    {
       doneReplaying = false;
       try
@@ -104,7 +114,7 @@ public class TrajectoryRecordReplay<T extends Number>
       }
    }
 
-   private void writeCSV(ArrayList<T[]> dataMatrix)
+   public void writeCSV(ArrayList<T[]> dataMatrix)
    {
       List<String[]> dataLines = new ArrayList<>();
       for (T[] dataLine : dataMatrix)
@@ -114,7 +124,7 @@ public class TrajectoryRecordReplay<T extends Number>
          dataLines.add(stringValues);
       }
 
-      String fileName = new SimpleDateFormat("yyyyMMddHHmm'.csv'").format(new Date());
+      String fileName = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ'.csv'").format(new Date());
       File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
@@ -146,6 +156,8 @@ public class TrajectoryRecordReplay<T extends Number>
    {
       timeStepReplay = 0;
       dataMatrix.clear();
+      concatenated = false;
+      concatenatedDataMatrix.clear();
    }
 
    @SuppressWarnings("unchecked")
@@ -210,15 +222,18 @@ public class TrajectoryRecordReplay<T extends Number>
       return value;
    }
 
-   private <T> T concatenateWithCopy(T array1, T array2) {
-      if (!array1.getClass().isArray() || !array2.getClass().isArray()) {
+   private <T> T concatenateWithCopy(T array1, T array2)
+   {
+      if (!array1.getClass().isArray() || !array2.getClass().isArray())
+      {
          throw new IllegalArgumentException("Only arrays are accepted.");
       }
 
       Class<?> componentType1 = array1.getClass().getComponentType();
       Class<?> componentType2 = array2.getClass().getComponentType();
 
-      if (!componentType1.equals(componentType2)) {
+      if (!componentType1.equals(componentType2))
+      {
          throw new IllegalArgumentException("Two arrays have different types.");
       }
 
@@ -254,5 +269,27 @@ public class TrajectoryRecordReplay<T extends Number>
    {
       this.filePath = filePath;
       this.reset();
+   }
+
+   public void setPath(String filePath, boolean reset)
+   {
+      this.filePath = filePath;
+      if (reset)
+         this.reset();
+   }
+
+   public void setNumberParts(int numberParts)
+   {
+      this.numberParts = numberParts;
+   }
+
+   public ArrayList<T[]> getData()
+   {
+      return dataMatrix;
+   }
+
+   public ArrayList<T[]> getConcatenatedData()
+   {
+      return concatenatedDataMatrix;
    }
 }

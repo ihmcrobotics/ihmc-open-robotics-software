@@ -1,4 +1,4 @@
-package us.ihmc.avatar.testTools;
+package us.ihmc.avatar.sharedControl;
 
 // Java program to read JSON from a file
 
@@ -13,11 +13,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
-public class TestJSONReader
+public class JSONReaderTest
 {
    public static void main(String[] args)
    {
-      // parsing file "JSONExample.json
+      // parsing file "ProMPAssistant.json"
       try
       {
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"),

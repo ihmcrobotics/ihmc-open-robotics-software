@@ -121,8 +121,7 @@ public class ProMPAssistant implements TeleoperationAssistant
          LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
          for (int j=0; j<bodyPartsGeometries.size(); j++){
             for (String key : bodyPartsGeometries.get(j).keySet()){
-               LogTools.info("     {}", key);
-               LogTools.info("     {}", bodyPartsGeometries.get(j).get(key));
+               LogTools.info("     {} {}", key, bodyPartsGeometries.get(j).get(key));
             }
          }
          proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled));
