@@ -5,16 +5,16 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.NormalEstimationParametersMessage;
-import controller_msgs.msg.dds.OcTreeKeyListMessage;
-import controller_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.PolygonizerParametersMessage;
-import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
-import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.NormalEstimationParametersMessage;
+import perception_msgs.msg.dds.OcTreeKeyListMessage;
+import perception_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PolygonizerParametersMessage;
+import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;

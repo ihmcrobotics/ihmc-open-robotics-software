@@ -34,6 +34,11 @@ public class IHMCROS2Input<T>
       this(ros2Node, messageType, topicName.getName());
    }
 
+   public IHMCROS2Input(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, MessageFilter<T> messageFilter)
+   {
+      this(ros2Node, messageType, topicName.getName(), ROS2TopicNameTools.newMessageInstance(messageType), messageFilter);
+   }
+
    public IHMCROS2Input(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       this(ros2Node, messageType, topicName, ROS2TopicNameTools.newMessageInstance(messageType), message -> true);

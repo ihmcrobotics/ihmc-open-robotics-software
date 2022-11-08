@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -59,7 +58,6 @@ public class SwingTrajectoryCalculator
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameVector3D pelvisVelocity = new FrameVector3D();
-   private final FrameVector3D footCurrentVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
    private final FrameVector3D initialAngularVelocity = new FrameVector3D();
 
@@ -108,11 +106,13 @@ public class SwingTrajectoryCalculator
 
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
+      // Setting the number of waypoints to two, since we only use the swing trajectory generator when there's two waypoints
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix,
                                                                minSwingHeightFromStanceFoot,
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
                                                                customWaypointAngleThreshold,
+                                                               2,
                                                                registry,
                                                                controllerToolbox.getYoGraphicsListRegistry());
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
@@ -258,8 +258,8 @@ public class SwingTrajectoryCalculator
       double liftOffVelocity = swingTrajectoryParameters.getMinLiftOffVerticalVelocity() / (Math.min(1.0, swingDuration.getDoubleValue()));
       initialLinearVelocity.setZ(Math.max(liftOffVelocity, initialLinearVelocity.getZ()));
 
-      initialLinearVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
-      initialAngularVelocity.clipToMaxLength(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
+      initialLinearVelocity.clipToMaxNorm(swingTrajectoryParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      initialAngularVelocity.clipToMaxNorm(swingTrajectoryParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
       stanceFootPosition.setToZero(oppositeSoleFrame);
    }
@@ -401,10 +401,10 @@ public class SwingTrajectoryCalculator
       {
          // In this case our swing trajectory contains the touchdown so we should use those values to be continuous.
          FrameSE3TrajectoryPoint lastPoint = swingWaypoints.getLast();
-         lastPoint.getPositionIncludingFrame(finalPosition);
-         lastPoint.getLinearVelocityIncludingFrame(finalLinearVelocity);
-         lastPoint.getOrientationIncludingFrame(finalOrientation);
-         lastPoint.getAngularVelocity(finalAngularVelocity);
+         finalPosition.setIncludingFrame(lastPoint.getPosition());
+         finalLinearVelocity.setIncludingFrame(lastPoint.getLinearVelocity());
+         finalOrientation.setIncludingFrame(lastPoint.getOrientation());
+         finalAngularVelocity.set(lastPoint.getAngularVelocity());
       }
    }
 

@@ -16,7 +16,9 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -37,6 +39,7 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class DRCFlatGroundWalkingTrack
 {
@@ -130,13 +133,11 @@ public class DRCFlatGroundWalkingTrack
       if (customControllerStateFactory != null)
          controllerFactory.addCustomControlState(customControllerStateFactory);
 
-      HeightMap heightMapForFootstepZ = null;
+      FootstepAdjustment footstepAdjustment = null;
       if (cheatWithGroundHeightAtForFootstep)
       {
-         heightMapForFootstepZ = scsInitialSetup.getHeightMap();
+         footstepAdjustment = new HeightMapBasedFootstepAdjustment(scsInitialSetup.getHeightMap());
       }
-
-      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ, walkingScriptParameters);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
@@ -148,6 +149,8 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
+      avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript, footstepAdjustment, walkingScriptParameters);
+
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
@@ -160,6 +163,8 @@ public class DRCFlatGroundWalkingTrack
          resetButton.addActionListener(e -> avatarSimulation.resetRobot());
          avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
       }
+
+      ((YoBoolean) avatarSimulation.getSimulationConstructionSet().getRootRegistry().findVariable("ignoreWalkInputProviderCSG")).set(true);
 
       avatarSimulation.start();
    }

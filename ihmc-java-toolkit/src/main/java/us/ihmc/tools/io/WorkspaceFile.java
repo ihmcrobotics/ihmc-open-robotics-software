@@ -49,14 +49,17 @@ public class WorkspaceFile
       return getResourceAsStream.get();
    }
 
+   /**
+    * @return null if not found
+    */
    public URL getClasspathResource()
    {
       return getResource.get();
    }
 
-   public String getResourceName()
+   public String getFileName()
    {
-      return Paths.get(getResource.get().getPath()).getFileName().toString();
+      return pathForResourceLoadingPathFiltered.substring(pathForResourceLoadingPathFiltered.lastIndexOf("/"));
    }
 
    public Path getFilePath()

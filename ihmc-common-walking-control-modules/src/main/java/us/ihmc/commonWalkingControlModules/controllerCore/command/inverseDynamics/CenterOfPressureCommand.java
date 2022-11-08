@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 /**
@@ -88,6 +89,11 @@ public class CenterOfPressureCommand implements InverseDynamicsCommand<CenterOfP
    public void setWeight(ReferenceFrame referenceFrame, double weightX, double weightY)
    {
       this.weight.setIncludingFrame(referenceFrame, weightX, weightY);
+   }
+
+   public void setWeight(ReferenceFrame referenceFrame, Tuple2DReadOnly weight)
+   {
+      this.weight.setIncludingFrame(referenceFrame, weight);
    }
 
    public void setDesiredCoP(FramePoint2DReadOnly desiredCoPInSoleFrame)

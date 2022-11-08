@@ -94,6 +94,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract double getEstimatorDT();
 
+   default double getStepGeneratorDT()
+   {
+      return 10.0 * getControllerDT();
+   }
+
    public default RobotROSClockCalculator getROSClockCalculator()
    {
       return new WallTimeBasedROSClockCalculator();

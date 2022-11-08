@@ -313,7 +313,6 @@ public class OneStepCaptureRegionCalculatorTest
    {
       // do not change parameters
       // expected results are pre-calculated
-      double midFootAnkleXOffset = 0.1;
       double footWidth = 0.5;
       double footLength = 1.0;
       double kineamaticStepRange = 3.0;
@@ -341,7 +340,6 @@ public class OneStepCaptureRegionCalculatorTest
       {
          FramePoint2D predictedICP = new FramePoint2D();
          CapturePointTools.computeDesiredCapturePointPosition(omega0, swingTimeRemaining, icp, cop, predictedICP);
-         //         CaptureRegionMathTools.predictCapturePoint(icp, cop, swingTimeRemaining, omega0, predictedICP);
          predictedICPList.add(predictedICP);
       }
 

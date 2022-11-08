@@ -123,7 +123,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
 
-      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
+      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGroundFiltered();
    }
 
    @Override
@@ -169,7 +169,7 @@ public class RecoveringSwingState extends PushRecoveryState
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, null, null);
 
-      pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, Double.NaN);
+      pelvisOrientationManager.initializeSwing();
 
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 

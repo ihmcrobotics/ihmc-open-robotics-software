@@ -61,10 +61,26 @@ public class RealSenseHardwareManager
       return new RealtimeL515(prefix, context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, registry, graphicsListRegistry);
    }
 
-   public BytedecoRealsenseL515 createFullFeaturedL515(String serialNumberToFind)
+   public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind)
+   {
+      return createFullFeaturedL515(serialNumberToFind, 1024, 768, 30);
+   }
+
+   public BytedecoRealsense createFullFeaturedL515(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
    {
       String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
-      return new BytedecoRealsenseL515(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind);
+      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
+   }
+
+   public BytedecoRealsense createD435(String serialNumberToFind)
+   {
+      return createD435(serialNumberToFind, 848, 480, 30);
+   }
+
+   public BytedecoRealsense createD435(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
+   {
+      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
+      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
    }
 
    public rs2_device createDevice(String serialNumberToFind)

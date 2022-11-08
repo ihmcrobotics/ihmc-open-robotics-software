@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Triple;
 
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
@@ -110,10 +110,6 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
                                 Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getFootstepPlanVariableDescriptors()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getStartMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getGoalMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getInterRegionVisibilityMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getVisibilityGraphPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
    }
 

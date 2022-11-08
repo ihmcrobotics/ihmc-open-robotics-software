@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -13,6 +14,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class HumanoidKinematicsSimulationContactStateHolder
@@ -27,8 +29,12 @@ public class HumanoidKinematicsSimulationContactStateHolder
    private final double zeta = 1.0;
    private final double kd = GainCalculator.computeDerivativeGain(kp, zeta);
    private final double weight = 50.0;
+   private final ModifiableReferenceFrame controlFrame;
+   private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommands
+           = new RecyclingArrayList<>(SpatialAccelerationCommand::new);
 
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
+   private final FramePoint3D desiredContactPoint;
 
    public static HumanoidKinematicsSimulationContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
    {
@@ -41,21 +47,24 @@ public class HumanoidKinematicsSimulationContactStateHolder
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();
+      controlFrame = new ModifiableReferenceFrame(currentPlaneFrame);
 
       desiredPlaneFramePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       desiredPlaneFrame = new PoseReferenceFrame("desiredPlaneFrame", desiredPlaneFramePose);
+      desiredContactPoint = new FramePoint3D(desiredPlaneFrame);
    }
 
    public void doControl()
    {
       commandList.clear();
+      spatialAccelerationCommands.clear();
 
       for (FramePoint3D currentContactPoint : contactStateToHold.getContactFramePointsInContactCopy())
       {
          currentContactPoint.changeFrame(currentPlaneFrame);
-         FramePoint3D desiredContactPoint = new FramePoint3D(desiredPlaneFrame, currentContactPoint);
-         PoseReferenceFrame controlFrame = new PoseReferenceFrame("atContactPoint", currentPlaneFrame);
-         controlFrame.setPositionAndUpdate(currentContactPoint);
+         desiredContactPoint.setIncludingFrame(desiredPlaneFrame, currentContactPoint);
+         controlFrame.getTransformToParent().getTranslation().set(currentContactPoint);
+         controlFrame.getReferenceFrame().update();
 
          FrameVector3D currentLinearVelocity = new FrameVector3D();
          currentPlaneFrame.getTwistOfFrame().getLinearVelocityAt(currentContactPoint, currentLinearVelocity);
@@ -68,12 +77,17 @@ public class HumanoidKinematicsSimulationContactStateHolder
          desiredLinearAcceleration.sub(desiredContactPoint, currentContactPoint);
          desiredLinearAcceleration.scale(kp);
          desiredLinearAcceleration.scaleAdd(-kd, currentLinearVelocity, desiredLinearAcceleration);
-         desiredLinearAcceleration.changeFrame(controlFrame);
+         desiredLinearAcceleration.changeFrame(controlFrame.getReferenceFrame());
 
-         SpatialAccelerationCommand command = new SpatialAccelerationCommand();
+         SpatialAccelerationCommand command = spatialAccelerationCommands.add();
+         command.getDesiredLinearAcceleration().setToZero();
+         command.getDesiredAngularAcceleration().setToZero();
+         command.getWeightMatrix().clear();
+         command.getSelectionMatrix().clearSelection();
+
          RigidBodyBasics contactingBody = contactStateToHold.getRigidBody();
          command.set(MultiBodySystemTools.getRootBody(contactingBody), contactingBody);
-         command.setLinearAcceleration(controlFrame, desiredLinearAcceleration);
+         command.setLinearAcceleration(controlFrame.getReferenceFrame(), desiredLinearAcceleration);
          command.setWeight(0.0, weight);
          command.setSelectionMatrixForLinearControl();
          commandList.addCommand(command);

@@ -3,6 +3,14 @@ package us.ihmc.humanoidRobotics.kryo;
 import java.util.ArrayList;
 import java.util.List;
 
+import atlas_msgs.msg.dds.*;
+import exoskeleton_msgs.msg.dds.ExoskeletonBehaviorStatePacketPubSubType;
+import exoskeleton_msgs.msg.dds.PilotAlarmPacketPubSubType;
+import exoskeleton_msgs.msg.dds.PilotInterfaceActionPacketPubSubType;
+import exoskeleton_msgs.msg.dds.PilotInterfacePacketPubSubType;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
+import ihmc_common_msgs.msg.dds.*;
 import org.ejml.data.DMatrixRMaj;
 
 import actionlib_msgs.msg.dds.GoalIDPubSubType;
@@ -60,6 +68,7 @@ import nav_msgs.msg.dds.MapMetaDataPubSubType;
 import nav_msgs.msg.dds.OccupancyGridPubSubType;
 import nav_msgs.msg.dds.OdometryPubSubType;
 import nav_msgs.msg.dds.PathPubSubType;
+import perception_msgs.msg.dds.*;
 import rcl_interfaces.msg.dds.IntraProcessMessagePubSubType;
 import rcl_interfaces.msg.dds.ListParametersResultPubSubType;
 import rcl_interfaces.msg.dds.ParameterDescriptorPubSubType;
@@ -133,6 +142,7 @@ import std_msgs.msg.dds.UInt8PubSubType;
 import stereo_msgs.msg.dds.DisparityImagePubSubType;
 import tf2_msgs.msg.dds.TF2ErrorPubSubType;
 import tf2_msgs.msg.dds.TFMessagePubSubType;
+import toolbox_msgs.msg.dds.*;
 import trajectory_msgs.msg.dds.JointTrajectoryPointPubSubType;
 import trajectory_msgs.msg.dds.JointTrajectoryPubSubType;
 import trajectory_msgs.msg.dds.MultiDOFJointTrajectoryPointPubSubType;
@@ -472,7 +482,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(PlanarRegionMessagePubSubType.class);
       registerPacketField(PauseWalkingMessagePubSubType.class);
       registerPacketField(TextToSpeechPacketPubSubType.class);
-      registerPacketField(AdjustFootstepMessagePubSubType.class);
       registerPacketField(AccelPubSubType.class);
       registerPacketField(ParameterEventPubSubType.class);
       registerPacketField(TwistStampedPubSubType.class);
@@ -680,7 +689,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Footstep data
       registerPacketClass(FootstepDataMessage.class);
-      registerPacketClass(AdjustFootstepMessage.class);
       registerPacketField(ArrayList.class);
       registerPacketField(List.class);
 

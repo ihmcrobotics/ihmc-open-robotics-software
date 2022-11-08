@@ -43,7 +43,7 @@ public class NettyOuster
 
    private final EventLoopGroup group;
    private final Bootstrap bootstrap;
-   private BytedecoImage image;
+   private BytedecoImage depthImageMeters;
    private Runnable onFrameReceived = null;
    private Instant aquisitionInstant;
 
@@ -65,8 +65,8 @@ public class NettyOuster
                   LogTools.error("Failed to initialize Ouster using TCP API.");
                   return;
                }
-               image = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
-               image.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
+               depthImageMeters = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
+               depthImageMeters.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); //Initialize matrix to 0
 
                actualLidarPacketSize = columnsPerPacket * (16 + (pixelsPerColumn * 12) + 4);
             }
@@ -92,7 +92,7 @@ public class NettyOuster
 
                if (dataOkay)
                {
-                  for (int k = 0; k < 64; k++)
+                  for (int k = 0; k < pixelsPerColumn; k++)
                   {
                      float rangeScaled = range[k] / 1000.0F;
                      if (rangeScaled > 30.0)
@@ -102,7 +102,7 @@ public class NettyOuster
 
                      //Calculate column by adding the reported row pixel shift to the measurement ID, and then adjusting for over/underflow
                      int column = (measurementID + pixelShift[k]) % columnsPerFrame;
-                     image.getBytedecoOpenCVMat().ptr(k, column).putFloat(rangeScaled);
+                     depthImageMeters.getBytedecoOpenCVMat().ptr(k, column).putFloat(rangeScaled);
                   }
                }
             }
@@ -159,6 +159,8 @@ public class NettyOuster
          columnsPerFrame = root.get("columns_per_frame").asInt();
          columnsPerPacket = root.get("columns_per_packet").asInt();
          pixelShift = new int[pixelsPerColumn];
+
+         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, Columns Per Packet: {}", pixelsPerColumn, columnsPerFrame, columnsPerPacket);
 
          JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
          for (int i = 0; i < pixelsPerColumn; i++)
@@ -238,9 +240,9 @@ public class NettyOuster
       return tcpInitialized ? pixelsPerColumn : -1;
    }
 
-   public BytedecoImage getBytedecoImage()
+   public BytedecoImage getDepthImageMeters()
    {
-      return image;
+      return depthImageMeters;
    }
 
    public void setOnFrameReceived(Runnable onFrameReceived)

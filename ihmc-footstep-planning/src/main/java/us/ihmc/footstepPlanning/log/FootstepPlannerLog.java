@@ -1,12 +1,13 @@
 package us.ihmc.footstepPlanning.log;
 
-import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.FootstepPlannerParametersPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
+import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
+import toolbox_msgs.msg.dds.SwingPlannerParametersPacket;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
@@ -20,13 +21,9 @@ public class FootstepPlannerLog
 
    // Packets
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
-   private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
-
-   // Vis graph data
-   private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
 
    // A* body path data
    private final List<VariableDescriptor> bodyPathVariableDescriptors = new ArrayList<>();
@@ -54,11 +51,6 @@ public class FootstepPlannerLog
       return requestPacket;
    }
 
-   public VisibilityGraphsParametersPacket getBodyPathParametersPacket()
-   {
-      return bodyPathParametersPacket;
-   }
-
    public FootstepPlannerParametersPacket getFootstepParametersPacket()
    {
       return footstepParametersPacket;
@@ -72,11 +64,6 @@ public class FootstepPlannerLog
    public FootstepPlanningToolboxOutputStatus getStatusPacket()
    {
       return statusPacket;
-   }
-
-   public VisibilityGraphHolder getVisibilityGraphHolder()
-   {
-      return visibilityGraphHolder;
    }
 
    public List<VariableDescriptor> getBodyPathVariableDescriptors()

@@ -1,7 +1,7 @@
 package us.ihmc.communication.ros2;
 
-import controller_msgs.msg.dds.BigVideoPacket;
-import controller_msgs.msg.dds.BigVideoPacketPubSubType;
+import perception_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.BigVideoPacketPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;

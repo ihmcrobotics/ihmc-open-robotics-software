@@ -1,14 +1,15 @@
 package us.ihmc.perception;
 
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_mem;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+/**
+ * To use this, you need to make sure to use native byte order on the ByteBuffers.
+ */
 public class OpenCLIntBuffer
 {
    private long numberOfIntegers;
@@ -38,6 +39,7 @@ public class OpenCLIntBuffer
       {
          openCLManager.releaseBufferObject(openCLBufferObject);
          openCLBufferObject.releaseReference();
+         openCLBufferObject = null;
       }
    }
 
@@ -46,10 +48,7 @@ public class OpenCLIntBuffer
       this.numberOfIntegers = numberOfIntegers;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
-      if (openCLObjectCreated)
-      {
-         openCLManager.releaseBufferObject(openCLBufferObject);
-      }
+      destroy(openCLManager); // TODO: Is this breaking things? Possible bug.
 
       if (backingDirectIntBuffer == null)
       {
@@ -83,6 +82,11 @@ public class OpenCLIntBuffer
    public void readOpenCLBufferObject(OpenCLManager openCLManager)
    {
       openCLManager.enqueueReadBuffer(openCLBufferObject, numberOfIntegers * Integer.BYTES, bytedecoIntBufferPointer);
+   }
+
+   public ByteBuffer getBackingDirectByteBuffer()
+   {
+      return backingDirectByteBuffer;
    }
 
    public IntBuffer getBackingDirectIntBuffer()

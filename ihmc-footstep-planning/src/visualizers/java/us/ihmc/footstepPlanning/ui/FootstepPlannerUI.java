@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import controller_msgs.msg.dds.HeightMapMessage;
-import controller_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -20,7 +20,6 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -47,8 +46,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
@@ -78,7 +75,6 @@ public class FootstepPlannerUI
    private final SwingPlanMeshViewer postProcessingViewer;
    private final GoalOrientationEditor orientationEditor;
    private final BodyPathMeshViewer bodyPathMeshViewer;
-   private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
    private final BodyPathLogRenderer bodyPathLogRenderer;
@@ -250,7 +246,6 @@ public class FootstepPlannerUI
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.postProcessingViewer = new SwingPlanMeshViewer(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
-      this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       this.bodyPathLogRenderer = new BodyPathLogRenderer(messager);
       new UIFootstepPlanManager(messager);
@@ -266,7 +261,6 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(pathViewer.getRoot());
       view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
-      view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
       view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
       view3dFactory.addNodeToView(bodyPathLogRenderer.getRoot());
@@ -323,7 +317,6 @@ public class FootstepPlannerUI
       pathViewer.start();
       postProcessingViewer.start();
       bodyPathMeshViewer.start();
-      visibilityGraphsRenderer.start();
       footstepPlannerLogRenderer.start();
       bodyPathLogRenderer.start();
       manualFootstepAdjustmentListener.start();
@@ -464,7 +457,6 @@ public class FootstepPlannerUI
       pathViewer.stop();
       postProcessingViewer.stop();
       bodyPathMeshViewer.stop();
-      visibilityGraphsRenderer.stop();
       heightMapVisualizer.stop();
 
       if (heightMapNavigationUpdater != null)

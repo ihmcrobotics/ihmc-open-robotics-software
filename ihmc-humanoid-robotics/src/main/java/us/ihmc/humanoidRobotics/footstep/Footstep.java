@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.IntToDoubleFunction;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.interfaces.Settable;
@@ -12,7 +13,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -565,10 +570,7 @@ public class Footstep implements Settable<Footstep>
 
       for (int pointIdx = 0; pointIdx < swingTrajectory.size(); pointIdx++)
       {
-         FrameSE3TrajectoryPoint trajectoryPoint = swingTrajectory.get(pointIdx);
-         trajectoryPoint.getPoseIncludingFrame(tempPose);
-         tempPose.prependTranslation(offset);
-         trajectoryPoint.setPosition(tempPose.getPosition());
+         swingTrajectory.get(pointIdx).getPosition().add(offset);
       }
    }
 

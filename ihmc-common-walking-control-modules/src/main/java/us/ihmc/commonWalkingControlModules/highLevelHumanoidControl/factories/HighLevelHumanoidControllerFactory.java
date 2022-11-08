@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
@@ -59,6 +60,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.stateMachine.core.StateChangedListener;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -193,7 +195,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    public void createComponentBasedFootstepDataMessageGenerator(boolean useHeadingAndVelocityScript,
-                                                                HeightMap heightMapForFootstepZ,
+                                                                FootstepAdjustment footstepAdjustment,
                                                                 HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
       if (componentBasedFootstepDataMessageGeneratorFactory != null)
@@ -203,7 +205,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
       componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
       componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
-      componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ);
+      componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment);
 
       if (humanoidHighLevelControllerManager != null)
          humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);
@@ -700,6 +702,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HighLevelControllerName getCurrentHighLevelControlState()
    {
       return humanoidHighLevelControllerManager.getCurrentHighLevelControlState();
+   }
+
+   public void addHighLevelStateChangedListener(StateChangedListener<HighLevelControllerName> stateChangedListener)
+   {
+      humanoidHighLevelControllerManager.addHighLevelStateChangedListener(stateChangedListener);
    }
 
    public void setListenToHighLevelStatePackets(boolean isListening)

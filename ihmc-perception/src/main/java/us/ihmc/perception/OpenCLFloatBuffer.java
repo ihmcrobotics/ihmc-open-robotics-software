@@ -36,6 +36,7 @@ public class OpenCLFloatBuffer
       {
          openCLManager.releaseBufferObject(openCLBufferObject);
          openCLBufferObject.releaseReference();
+         openCLBufferObject = null;
       }
    }
 
@@ -44,10 +45,7 @@ public class OpenCLFloatBuffer
       this.numberOfFloats = numberOfFloats;
 
       boolean openCLObjectCreated = openCLBufferObject != null;
-      if (openCLObjectCreated)
-      {
-         openCLManager.releaseBufferObject(openCLBufferObject);
-      }
+      destroy(openCLManager); // TODO: Is this breaking things? Possible bug.
 
       if (backingDirectFloatBuffer == null)
       {
@@ -81,6 +79,12 @@ public class OpenCLFloatBuffer
    public void readOpenCLBufferObject(OpenCLManager openCLManager)
    {
       openCLManager.enqueueReadBuffer(openCLBufferObject, numberOfFloats * Float.BYTES, bytedecoFloatBufferPointer);
+   }
+
+   public void syncWithBackingBuffer()
+   {
+      bytedecoFloatBufferPointer.position(backingDirectFloatBuffer.position());
+      bytedecoFloatBufferPointer.limit(backingDirectFloatBuffer.limit());
    }
 
    public FloatBuffer getBackingDirectFloatBuffer()

@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -181,6 +180,9 @@ public class OneStepCaptureRegionCalculator
       captureRegionPolygon.clear(supportSoleZUp);
       kinematicExtreme.setToZero(supportSoleZUp);
 
+      double distanceRight = 0;
+      double distanceLeft = 0;
+
       // 2. Get extreme CoP positions
       boolean icpOutsideSupport = computeVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
       FrameConvexPolygon2D reachableRegion = reachableRegions.get(swingSide.getOppositeSide());
@@ -204,6 +206,13 @@ public class OneStepCaptureRegionCalculator
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
          int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, copExtreme,
                                                                                       predictedICP, kinematicExtreme, null);
+
+         // When the predicted ICP distance is outside the circle radius, the extreme CoP defaults to the circle but paralell with both predictedICP values
+         if (predictedICP.distanceFromOriginSquared() > kinematicExtreme.distanceFromOriginSquared())
+         {
+            kinematicExtreme.setIncludingFrame(predictedICP);
+         }
+
          if (intersections > 1)
             throw new RuntimeException("The cop was outside of the reachable range.");
 
@@ -216,17 +225,33 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.addVertexMatchingFrame(kinematicExtreme, false);
 
          if (i == 0)
+         {
+            distanceRight = predictedICP.distanceFromOrigin();
             firstKinematicExtremeDirection.sub(kinematicExtreme, footCentroid);
+         }
          else if (i == lastIndex)
+         {
+            distanceLeft = predictedICP.distanceFromOrigin();
             lastKinematicExtremeDirection.sub(kinematicExtreme, footCentroid);
+         }
       }
 
       // 5. Add additional points to the capture region polygon on the circle between the kinematic extreme points
       for (int i = 0; i < KINEMATIC_LIMIT_POINTS - 1; i++)
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
-         captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
-                                                                              APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+
+         if (distanceRight >= distanceLeft)
+         {
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(lastKinematicExtremeDirection, firstKinematicExtremeDirection, alphaFromAToB,
+                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+         }
+         else
+         {
+            captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
+                                                                                 APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
+         }
+
          rawCaptureRegion.addVertexMatchingFrame(additionalKinematicPoint, false);
       }
 
