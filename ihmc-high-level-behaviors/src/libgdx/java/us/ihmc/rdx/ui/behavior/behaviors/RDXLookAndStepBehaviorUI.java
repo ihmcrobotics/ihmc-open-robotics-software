@@ -4,16 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.HeightMapMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -85,8 +83,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
-   private final ImBoolean invertShowGraphics = new ImBoolean(false);
-   private final ImBoolean showReceivedRegions = new ImBoolean(false);
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {

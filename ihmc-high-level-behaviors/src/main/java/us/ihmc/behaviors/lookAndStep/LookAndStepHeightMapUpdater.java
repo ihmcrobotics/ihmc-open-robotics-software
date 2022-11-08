@@ -1,15 +1,15 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.heightMap.HeightMapManager;
-import us.ihmc.robotics.heightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
