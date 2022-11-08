@@ -1,6 +1,5 @@
 package us.ihmc.avatar.stepAdjustment;
 
-import boofcv.struct.image.Planar;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -59,7 +58,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.footPolygons = footPolygons;
 
       useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
-      useSimpleSnapping.set(true);
+      useSimpleSnapping.set(false);
 
       wiggleParameters.setDesiredDistanceInside(0.02);
    }
@@ -107,9 +106,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          try
          {
             if (useSimpleSnapping.getValue())
-               simpleSnapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
+               snapToHeight(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
             else
                snapAndWiggle(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
+
             if (adjustedFootstepPose.containsNaN())
             {
                adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
@@ -139,7 +139,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final FrameConvexPolygon2D footstepPolygonInWorld = new FrameConvexPolygon2D();
    private final RigidBodyTransform transformToSole = new RigidBodyTransform();
 
-   private boolean simpleSnapAndWiggle(FramePose3DBasics unsnappedSolePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
+   private boolean snapToHeight(FramePose3DBasics unsnappedSolePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
@@ -188,10 +188,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepPolygonInWorld.setIncludingFrame(soleFrameBeforeSnapping, footStepPolygonInSoleFrame);
       footstepPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame()); // this works if the soleFrames are z up.
 
-
       if (isFootPolygonOnBoundaryOfPlanarRegions(steppableRegionsProvider.getSteppableRegions(), footstepPolygonInWorld))
       {
-
          PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footstepPolygonInWorld, steppableRegionsProvider.getSteppableRegions(), intersectingRegions);
 
          /*
@@ -270,7 +268,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
 
       // check for partial foothold
-      if (wiggleParameters.getDesiredDistanceInside() < 0.0)
+      if (wiggleParameters.shouldPerformOptimization() && wiggleParameters.getDesiredDistanceInside() < 0.0)
       {
          soleFrameAfterWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
          soleFrameAfterWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);
