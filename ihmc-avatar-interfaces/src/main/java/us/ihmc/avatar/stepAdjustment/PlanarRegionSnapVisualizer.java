@@ -47,6 +47,8 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
    public void setFootIndex(int index)
    {
       stepsVisualized.set(index);
+      if (index < footholdData.length)
+         footholdData[index].reset();
    }
 
    @Override
