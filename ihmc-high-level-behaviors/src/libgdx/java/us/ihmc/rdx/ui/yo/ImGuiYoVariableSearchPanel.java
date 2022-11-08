@@ -15,17 +15,25 @@ public class ImGuiYoVariableSearchPanel
    private final ImGuiPanel panel = new ImGuiPanel("YoVariable Search", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString searchBar = new ImString();
-   private final YoRegistry yoRegistry;
+   private YoRegistry yoRegistry;
    private final ArrayList<YoVariable> allVariables = new ArrayList<>();
    private boolean searchRequested = false;
    private YoVariable selectedVariable = null;
 
    public ImGuiYoVariableSearchPanel(YoRegistry yoRegistry)
    {
-      this.yoRegistry = yoRegistry;
+      changeYoRegistry(yoRegistry);
 
       panel.setFirstTimeWidth(800);
       panel.setFirstTimeHeight(800);
+   }
+
+   /**
+    * Used when switching between sessions.
+    */
+   public void changeYoRegistry(YoRegistry yoRegistry)
+   {
+      this.yoRegistry = yoRegistry;
    }
 
    private void renderImGuiWidgets()
