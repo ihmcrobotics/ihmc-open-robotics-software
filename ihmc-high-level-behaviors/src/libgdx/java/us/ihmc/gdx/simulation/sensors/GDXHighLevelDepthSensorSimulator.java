@@ -612,7 +612,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel
                int size = ros1PointsToPublish.size();
                Point3D[] points = ros1PointsToPublish.toArray(new Point3D[size]);
 
-               ros1PointCloudPublisher.publish(points, new float[0], "os_sensor");
+               ros1PointCloudPublisher.publish(points, new float[0], "odom");
             });
          }
       }
