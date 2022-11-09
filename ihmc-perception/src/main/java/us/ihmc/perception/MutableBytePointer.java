@@ -29,18 +29,14 @@ public class MutableBytePointer extends BytePointer
     * wrapper method to set a MutableBytePointer
     * to a given address, limit, and capacity
     * @param source the ByteBuffer where the MutableBytePointer
-    *               will set its address, limit and capacity
+    *               will set its address, limit capacity and position
     */
-   public void wrapMutableBytePointer(ByteBuffer source)
+   public void wrapByteBuffer(ByteBuffer source)
    {
-      this.address = getByteBufferAddress(source);
+      this.address = getDirectBufferAddress(source);
       this.limit = source.limit();
       this.capacity = source.capacity();
-   }
-
-   public long getByteBufferAddress(ByteBuffer source)
-   {
-      return getDirectBufferAddress(source);
+      this.position = source.position();
    }
 
    /**
