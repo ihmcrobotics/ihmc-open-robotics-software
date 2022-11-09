@@ -104,7 +104,7 @@ public class RDXVRTeleporter
             controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
             currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
 
-            orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint,planeRayIntesection );
+            orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
 
             proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
             proposedTeleportPose.getPosition().set(planeRayIntesection);
