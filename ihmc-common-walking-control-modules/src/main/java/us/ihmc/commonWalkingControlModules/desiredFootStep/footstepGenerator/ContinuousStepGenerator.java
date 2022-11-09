@@ -38,6 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
@@ -148,6 +149,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
+   private final ExecutionTimer stepGeneratorTimer = new ExecutionTimer("stepGeneratorTimer" + variableNameSuffix, registry);
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
@@ -195,6 +197,8 @@ public class ContinuousStepGenerator implements Updatable
    @Override
    public void update(double time)
    {
+      stepGeneratorTimer.startMeasurement();
+
       footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
       footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
       footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
@@ -427,6 +431,7 @@ public class ContinuousStepGenerator implements Updatable
       }
 
       walkPreviousValue.set(walk.getValue());
+      stepGeneratorTimer.stopMeasurement();
    }
 
    /**

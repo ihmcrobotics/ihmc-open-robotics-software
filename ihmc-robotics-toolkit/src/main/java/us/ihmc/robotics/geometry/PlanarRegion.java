@@ -247,7 +247,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, proejctedPolygonTemp, null);
+         boolean hasIntersection = convexPolygonTools.doPolygonsIntersect(polygonToCheck, proejctedPolygonTemp);
          if (hasIntersection)
             return true;
       }
