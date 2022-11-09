@@ -4,6 +4,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -138,12 +139,15 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       if (objectDetected())
       {
-         if (!relevantBodyPart.isEmpty()) //the task does have a relevant body part, this means there is a main object to interact with
+         if (!relevantBodyPart.isEmpty()) //the task does have a relevant body part, this means there is a goal a body part can reach
          {
             if (objectPoseEstimated())
             {
                //store observed pose
-               bodyPartObservedFrameTrajectory.get(bodyPart).add(observedPose);
+               Pose3D lastObservedPose = new Pose3D();
+               lastObservedPose.getPosition().set(observedPose.getPosition().getX(),observedPose.getPosition().getY(),observedPose.getPosition().getZ());
+               lastObservedPose.getOrientation().set(observedPose.getOrientation().getX(),observedPose.getOrientation().getY(),observedPose.getOrientation().getZ(),observedPose.getOrientation().getS());
+               bodyPartObservedFrameTrajectory.get(bodyPart).add(lastObservedPose);
                //update the proMP prediction according to observations and observed goal and generate mean trajectory
                if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
                {
@@ -153,16 +157,21 @@ public class ProMPAssistant implements TeleoperationAssistant
                }
             }
          }
-         else //there is no object to interact with in this task
+         else //there is no specific goal location to reach with a body part in this task
          {
             //store observed pose
-            bodyPartObservedFrameTrajectory.get(bodyPart).add(observedPose);
+            Pose3D lastObservedPose = new Pose3D();
+            lastObservedPose.getPosition().set(observedPose.getPosition().getX(),observedPose.getPosition().getY(),observedPose.getPosition().getZ());
+            lastObservedPose.getOrientation().set(observedPose.getOrientation().getX(),observedPose.getOrientation().getY(),observedPose.getOrientation().getZ(),observedPose.getOrientation().getS());
+            bodyPartObservedFrameTrajectory.get(bodyPart).add(lastObservedPose);
             //update the proMP prediction according to observations and generate mean trajectory
             if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
             {
+               LogTools.info("Updating ProMP based on observations ...");
                updateTask();
                generateTaskTrajectories();
                doneInitialProcessingTask = true;
+               LogTools.info("ProMPs initial processing completed!");
             }
          }
       }
@@ -210,14 +219,18 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    private void updateTask()
    {
+      //build vector of observed trajectories for the hands
       List<String> bodyParts = new ArrayList<>();
       bodyParts.add("leftHand");
       bodyParts.add("rightHand");
       List<List<Pose3DReadOnly>> bodyPartObservedFrameTrajectories = new ArrayList<>();
       for (String bodyPart : bodyParts)
          bodyPartObservedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
+      LogTools.info("   - Updating ProMP speed ...");
       //update speed proMP based on hands observed trajectories
-      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+//      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get("rightHand"), "rightHand");
+      LogTools.info("   - Updating ProMP trajectories ...");
       //update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedFrameTrajectory.keySet())
       {

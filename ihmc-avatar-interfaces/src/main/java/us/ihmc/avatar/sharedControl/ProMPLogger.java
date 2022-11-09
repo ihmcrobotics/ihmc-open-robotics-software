@@ -28,7 +28,7 @@ public class ProMPLogger
    public void saveModulatedTrajectories(String bodyPart, ProMP modulatedProMP)
    {
       ProMPInfoMapper.EigenMatrixXd meanTrajectory = modulatedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = modulatedProMP.gen_traj_std_dev();
+      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = modulatedProMP.gen_traj_std_dev(meanTrajectory.rows());
       ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanModulated.csv");
       ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationModulated.csv");
    }
@@ -36,7 +36,7 @@ public class ProMPLogger
    public void saveConditionedTrajectories(String bodyPart, ProMP conditionedProMP, int timestep)
    {
       ProMPInfoMapper.EigenMatrixXd meanTrajectory = conditionedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev();
+      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev(meanTrajectory.rows());
       ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanConditioned" + timestep + ".csv");
       ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationConditioned" + timestep + ".csv");
    }
@@ -44,7 +44,7 @@ public class ProMPLogger
    public void saveConditionedGoalTrajectories(String bodyPart, ProMP conditionedProMP)
    {
       ProMPInfoMapper.EigenMatrixXd meanTrajectory = conditionedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev();
+      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev(meanTrajectory.rows());
       ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanConditionedGoal.csv");
       ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationConditionedGoal.csv");
    }

@@ -260,6 +260,11 @@ public class TrajectoryRecordReplay<T extends Number>
       return doneReplaying;
    }
 
+   public void setDoneReplay(boolean doneReplaying)
+   {
+      this.doneReplaying = doneReplaying;
+   }
+
    public String getPath()
    {
       return this.filePath;

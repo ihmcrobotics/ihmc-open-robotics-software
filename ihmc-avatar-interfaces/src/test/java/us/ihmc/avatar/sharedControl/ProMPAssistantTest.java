@@ -5,8 +5,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
-import java.io.File;
-
 public class ProMPAssistantTest
 {
    public static void main(String[] args)
@@ -21,15 +19,17 @@ public class ProMPAssistantTest
       TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2);
       FramePose3D framePose = new FramePose3D();
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
-      while(!trajectoryPlayer.hasDoneReplay())
+      trajectoryPlayer.setDoneReplay(false);
+      while (!trajectoryPlayer.hasDoneReplay())
       {
          // Read file with stored trajectories: read setpoint per timestep until file is over
          Double[] dataPoint = trajectoryPlayer.play();
-         // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-         framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
-         framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
 
-         if(proMPAssistant.readyToPack())
+         // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
+         framePose.getOrientation().set(dataPoint[7], dataPoint[8], dataPoint[9], dataPoint[10]);
+         framePose.getPosition().set(dataPoint[11], dataPoint[12], dataPoint[13]);
+
+         if (proMPAssistant.readyToPack())
             proMPAssistant.framePoseToPack(framePose, "rightHand");
          else
             proMPAssistant.processFrameInformation(framePose, "rightHand");
