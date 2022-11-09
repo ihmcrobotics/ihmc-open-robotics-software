@@ -62,14 +62,12 @@ public class PerceptionDataLoader
          Group group = hdf5Manager.getGroup(namespace);
          byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
 
-         LogTools.info("Compressed Bytes: {}", Arrays.toString(compressedByteArray));
-
          Mat decompressedImage = decompressImage(compressedByteArray);
 
          LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
 
          imshow("Display", decompressedImage);
-         waitKey(100);
+         waitKey(30);
       //}, "perception_data_loader -> " + namespace);
    }
 
@@ -124,9 +122,9 @@ public class PerceptionDataLoader
       String LOG_FILE = System.getProperty("perception.log.file", "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
 
-      for (int i = 1; i < 80; i++)
+      for (int i = 1; i < 400; i++)
       {
-         loader.loadImage("/d435/video/", i, null);
+         loader.loadImage("/d435/depth/", i, null);
       }
    }
 }

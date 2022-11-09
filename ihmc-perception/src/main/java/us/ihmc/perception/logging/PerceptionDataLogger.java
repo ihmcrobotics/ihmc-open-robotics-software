@@ -5,7 +5,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -33,6 +32,7 @@ import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +41,17 @@ import static org.bytedeco.hdf5.global.hdf5.H5F_ACC_TRUNC;
 
 public class PerceptionDataLogger
 {
+   private final String ROOT_POSITION_NAME = "/robot/root/position/";
+   private final String ROOT_ORIENTATION_NAME = "/robot/root/orientation/";
+   private final String JOINT_ANGLES_NAME = "/robot/joint_angles/";
+   private final String JOINT_VELOCITIES_NAME = "/robot/joint_velocities/";
+   private final String JOINT_TORQUES_NAME = "/robot/joint_torques/";
+
+   private final String OUSTER_CLOUD_NAME = "/os_cloud_node/points/";
+
+   private final String D435_DEPTH_NAME = "/d435/depth/";
+   private final String D435_COLOR_NAME = "/d435/color/";
+
    private HDF5Manager hdf5Manager;
 
    private ROS2Node ros2Node;
@@ -48,11 +59,18 @@ public class PerceptionDataLogger
 
    private final CommunicationMode communicationMode;
 
-   private final byte[] messageDataHeapArray = new byte[25000000];
+   private final byte[] messageDepthDataArray = new byte[25000000];
+
+   private final HashMap<String, byte[]> buffers = new HashMap<>();
+   private final HashMap<String, Integer> counts = new HashMap<>();
+
    private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
+
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
+
+
 
    private int pointCloudCount = 0;
    private int depthMapCount = 0;
@@ -116,9 +134,18 @@ public class PerceptionDataLogger
       runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
 
       // Add callback for D435 Color images
-      var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.VIDEO);
-      d435VideoSubscription.addCallback(this::logVideoPacketD435);
+      var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_VIDEO);
+      d435VideoSubscription.addCallback(this::logColorD435);
       runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
+      buffers.put(D435_COLOR_NAME, new byte[25000000]);
+      counts.put(D435_COLOR_NAME, 0);
+
+      // Add callback for D435 Depth images
+      var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH);
+      d435DepthSubscription.addCallback(this::logDepthD435);
+      runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
+      buffers.put(D435_DEPTH_NAME, new byte[25000000]);
+      counts.put(D435_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH);
@@ -170,11 +197,11 @@ public class PerceptionDataLogger
    {
       LogTools.info("Robot Configuration Data Received: {}", data.getMonotonicTime());
 
-      storeFloatArray("/robot/root/position/", data.getRootPosition());
-      storeFloatArray("/robot/root/orientation/", data.getRootOrientation());
-      storeFloatArray("/robot/joint_angles/", data.getJointAngles().toArray());
-      storeFloatArray("/robot/joint_velocities/", data.getJointVelocities().toArray());
-      storeFloatArray("/robot/joint_torques/", data.getJointTorques().toArray());
+      storeFloatArray(ROOT_POSITION_NAME, data.getRootPosition());
+      storeFloatArray(ROOT_ORIENTATION_NAME, data.getRootOrientation());
+      storeFloatArray(JOINT_ANGLES_NAME, data.getJointAngles().toArray());
+      storeFloatArray(JOINT_VELOCITIES_NAME, data.getJointVelocities().toArray());
+      storeFloatArray(JOINT_TORQUES_NAME, data.getJointTorques().toArray());
    }
 
    public void logLidarScanMessage(FusedSensorHeadPointCloudMessage message)
@@ -182,7 +209,7 @@ public class PerceptionDataLogger
       LogTools.info("OUSTER POINT CLOUD Received.");
 
       ousterCloudPacket.set(message);
-      storePointCloud("/os_cloud_node/points/", ousterCloudPacket);
+      storePointCloud(OUSTER_CLOUD_NAME, ousterCloudPacket);
    }
 
    public void logDepthMap(BigVideoPacket packet)
@@ -191,17 +218,23 @@ public class PerceptionDataLogger
       storeDepthMap("/chest_l515/depth/image_compressed/", packet);
    }
 
-   public void logVideoPacketD435(VideoPacket videoPacket)
+   public void logColorD435(VideoPacket videoPacket)
    {
-      LogTools.info("Logging D435 VideoPacket: ", videoPacket.toString());
-      storeVideoPacket("/d435/video/", videoPacket);
+      LogTools.info("Logging D435 Color: ", videoPacket.toString());
+      storeVideoPacket(D435_COLOR_NAME, videoPacket);
+   }
+
+   public void logDepthD435(VideoPacket videoPacket)
+   {
+      LogTools.info("Logging D435 Depth: ", videoPacket.toString());
+      storeVideoPacket(D435_DEPTH_NAME, videoPacket);
    }
 
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
    {
       IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-      imageEncodedTByteArrayList.toArray(messageDataHeapArray);
-      messageEncodedBytePointer.put(messageDataHeapArray, 0, imageEncodedTByteArrayList.size());
+      imageEncodedTByteArrayList.toArray(messageDepthDataArray);
+      messageEncodedBytePointer.put(messageDepthDataArray, 0, imageEncodedTByteArrayList.size());
       messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
 
       inputJPEGMat.cols(imageEncodedTByteArrayList.size());
@@ -237,9 +270,9 @@ public class PerceptionDataLogger
             depthMapCount = (int) hdf5Manager.getCount(namespace);
 
             IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
-            imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+            imageEncodedTByteArrayList.toArray(messageDepthDataArray);
 
-            HDF5Tools.storeByteArray(group, depthMapCount, messageDataHeapArray, message.getData().size());
+            HDF5Tools.storeByteArray(group, depthMapCount, messageDepthDataArray, message.getData().size());
             LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
          }
       }, "depth_map_logger_thread");
@@ -250,14 +283,16 @@ public class PerceptionDataLogger
       Group group = hdf5Manager.getGroup(namespace);
       ThreadTools.startAThread(() -> {
 
-         LogTools.info("{} Storing Buffer: {}", namespace, d435ImageCount);
-         d435ImageCount = (int) hdf5Manager.getCount(namespace);
+         byte[] heapArray = buffers.get(namespace);
+         int imageCount = counts.get(namespace);
+         LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+         counts.put(namespace, imageCount + 1);
 
          IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-         imageEncodedTByteArrayList.toArray(messageDataHeapArray);
+         imageEncodedTByteArrayList.toArray(heapArray);
 
-         HDF5Tools.storeByteArray(group, d435ImageCount, messageDataHeapArray, packet.getData().size());
-         LogTools.info("{} Done Storing Buffer: {}", namespace, d435ImageCount);
+         HDF5Tools.storeByteArray(group, imageCount, heapArray, packet.getData().size());
+         LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
 
       }, "video_packet_logger_thread -> " + namespace);
    }
