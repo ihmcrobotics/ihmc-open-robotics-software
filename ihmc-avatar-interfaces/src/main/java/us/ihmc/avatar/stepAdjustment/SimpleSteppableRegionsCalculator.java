@@ -7,15 +7,32 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.List;
 
 public class SimpleSteppableRegionsCalculator implements SteppableRegionsProvider
 {
-   private final SnapAndWiggleSingleStepParameters parameters = new SnapAndWiggleSingleStepParameters();
+   private final DoubleProvider minRegionArea;
+   private final DoubleProvider maxNormalAngle;
 
    private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
 
+   public SimpleSteppableRegionsCalculator()
+   {
+      this(new SnapAndWiggleSingleStepParameters());
+   }
+
+   public SimpleSteppableRegionsCalculator(SnapAndWiggleSingleStepParameters parameters)
+   {
+      this(parameters::getMinPlanarRegionArea, parameters::getMaxPlanarRegionAngle);
+   }
+
+   public SimpleSteppableRegionsCalculator(DoubleProvider minRegionArea, DoubleProvider maxNormalAngle)
+   {
+      this.minRegionArea = minRegionArea;
+      this.maxNormalAngle = maxNormalAngle;
+   }
 
    @Override
    public void consume(PlanarRegionsListCommand planarRegions)
@@ -25,14 +42,14 @@ public class SimpleSteppableRegionsCalculator implements SteppableRegionsProvide
       {
          PlanarRegionCommand candidateRegion = planarRegions.getPlanarRegionCommand(i);
 
-         double polygonArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(candidateRegion.getConcaveHullsVertices(),
-                                                                                    candidateRegion.getConcaveHullsVertices().size(),
-                                                                                    true,
-                                                                                    null);
-         if (polygonArea < parameters.getMinPlanarRegionArea())
+         double polygonArea = 0.0;
+         for (int regionIdx = 0; regionIdx < candidateRegion.getConvexPolygons().size(); regionIdx++)
+            polygonArea += candidateRegion.getConvexPolygons().get(i).getArea();
+
+         if (polygonArea < minRegionArea.getValue())
             continue;
 
-         if (Math.abs(candidateRegion.getTransformToWorld().getM22()) < Math.cos(parameters.getMaxPlanarRegionAngle()))
+         if (Math.abs(candidateRegion.getTransformToWorld().getM22()) < Math.cos(maxNormalAngle.getValue()))
             continue;
 
          PlanarRegion planarRegion = steppableRegionsList.add();

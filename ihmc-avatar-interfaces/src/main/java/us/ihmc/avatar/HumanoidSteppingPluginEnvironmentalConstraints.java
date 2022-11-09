@@ -15,6 +15,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -46,11 +47,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private final PlanarRegionFootstepPlanSnapper stepSnapper;
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
-   //   private final BipedalSupportPlanarRegionCalculator supportPlanarRegionCalculator;
 
    private final BoundingBoxCollisionDetector collisionDetector;
 
-   private final SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
+   private final SimpleSteppableRegionsCalculator steppableRegionsCalculator;
 
 
    // temp variables
@@ -60,9 +60,13 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private final PlanarRegionSnapVisualizer snapVisualizer;
 
-   public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters, SteppingParameters steppingParameters)
+   public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters,
+                                                         SteppingParameters steppingParameters,
+                                                         SnapAndWiggleSingleStepParameters snapAndWiggleSingleStepParameters)
    {
       this.steppingParameters = steppingParameters;
+
+      steppableRegionsCalculator = new SimpleSteppableRegionsCalculator(snapAndWiggleSingleStepParameters);
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
@@ -73,8 +77,6 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
          ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(robotSide);
          footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
       }
-
-
 
       stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons, steppableRegionsCalculator)
       {
@@ -98,7 +100,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       collisionDetector = new BoundingBoxCollisionDetector();
       collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight);
 
-      footstepValidityIndicators.add(this::isStepSnappable);
+//      footstepValidityIndicators.add(this::isStepSnappable);
       footstepValidityIndicators.add(this::isSafeStepHeight);
       //      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
 
