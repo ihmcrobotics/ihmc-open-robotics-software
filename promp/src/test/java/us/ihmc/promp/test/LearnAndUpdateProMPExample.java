@@ -18,10 +18,10 @@ public class LearnAndUpdateProMPExample
       /*
        * Load training and test trajectories
        */
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
+      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/test/cppLibraryTestData");
       String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-      String demoTrainingDirAbs = demoDirAbs + "/Reaching1";
-      String demoTestingDirAbs = demoDirAbs + "/Reaching2";
+      String demoTrainingDirAbs = demoDirAbs + "/Reaching";
+      String demoTestingDirAbs = demoDirAbs + "/ReachingTest";
 
       List<String> fileListTraining = new ArrayList<>();
       // The trajectories contained in the Reaching1,2 folders represent different demonstration of a given task

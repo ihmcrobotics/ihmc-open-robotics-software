@@ -21,7 +21,7 @@ import static java.lang.Math.exp;
 /**
  * Class to pack a teleoperated referenceFrame and modify it by using some assistance from the robot.
  * The assistance comes from pre-trained probabilistic models: the ProMPs,
- * which represent a probabilistic prediction of multi-dimensional trajectories.
+ * which represent a probabilistic prediction of multidimensional trajectories.
  * Initially the input from the user is not modified and is simply observed to produce a fitting prediction.
  * Once the task is detected (by recognizing the protagonist object of that task and/or by observing the current motion of the user),
  * the teleoperated referenceFrame gradually shifts from the reference specified by the user to the predicted assistance of the ProMPs.
@@ -36,7 +36,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedFrameTrajectory = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
-   private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>();
+   private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); //to track the last used sample of a generated trajectory
    private boolean doneInitialProcessingTask = false;
 
    public ProMPAssistant()
@@ -74,6 +74,7 @@ public class ProMPAssistant implements TeleoperationAssistant
                   case "bodyParts":
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
                      HashMap<String, String> bodyPartsGeometry = new HashMap<>();
+                     //parse body parts
                      for (Object bodyPartObject : bodyPartsArray)
                      {
                         JSONObject jsonBodyPartObject = (JSONObject) bodyPartObject;
@@ -137,10 +138,26 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       if (objectDetected())
       {
-         if (objectPoseEstimated())
+         if (!relevantBodyPart.isEmpty()) //the task does have a relevant body part, this means there is a main object to interact with
+         {
+            if (objectPoseEstimated())
+            {
+               //store observed pose
+               bodyPartObservedFrameTrajectory.get(bodyPart).add(observedPose);
+               //update the proMP prediction according to observations and observed goal and generate mean trajectory
+               if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
+               {
+                  updateTaskWithObjectInfo();
+                  generateTaskTrajectories();
+                  doneInitialProcessingTask = true;
+               }
+            }
+         }
+         else //there is no object to interact with in this task
          {
             //store observed pose
             bodyPartObservedFrameTrajectory.get(bodyPart).add(observedPose);
+            //update the proMP prediction according to observations and generate mean trajectory
             if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
             {
                updateTask();
@@ -170,12 +187,11 @@ public class ProMPAssistant implements TeleoperationAssistant
    private boolean objectPoseEstimated()
    {
       //TODO 2. identify object pose (with Aruco Markers to begin with)
-      // it can also be multiple goal poses (e.g., two grasping points for bi-manipulation)
       //taskGoalPose = ;
       return !(taskGoalPose.equals(new FramePose3D()));
    }
 
-   private void updateTask()
+   private void updateTaskWithObjectInfo()
    {
       //update speed proMP based on relevant body part observed trajectory and goal
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get(relevantBodyPart), taskGoalPose, relevantBodyPart);
@@ -192,11 +208,34 @@ public class ProMPAssistant implements TeleoperationAssistant
       proMPManagers.get(currentTask).updateTaskTrajectoryGoal(relevantBodyPart, taskGoalPose);
    }
 
+   private void updateTask()
+   {
+      List<String> bodyParts = new ArrayList<>();
+      bodyParts.add("leftHand");
+      bodyParts.add("rightHand");
+      List<List<Pose3DReadOnly>> bodyPartObservedFrameTrajectories = new ArrayList<>();
+      for (String bodyPart : bodyParts)
+         bodyPartObservedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
+      //update speed proMP based on hands observed trajectories
+      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+      //update all proMP trajectories based on initial observations (stored observed poses)
+      for (String robotPart : bodyPartObservedFrameTrajectory.keySet())
+      {
+         List<Pose3DReadOnly> robotPartObservedTrajectory = bodyPartObservedFrameTrajectory.get(robotPart);
+         for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
+         {
+            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
+         }
+      }
+   }
+
    private void generateTaskTrajectories()
    {
+      //for each body part generate the mean trajectory of the learned promp
       for (String bodyPart : bodyPartObservedFrameTrajectory.keySet())
       {
          bodyPartGeneratedFrameTrajectory.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart));
+         //start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
          bodyPartTrajectorySampleCounter.put(bodyPart, numberObservations);
       }
    }
@@ -211,7 +250,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
-      //take a sample from the trajectory
+      //take a sample (frame) from the trajectory
       FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
       //TODO compute distance from region close to the goal and use this to select the next sample.
       // If distance is increasing, go back to previous sample

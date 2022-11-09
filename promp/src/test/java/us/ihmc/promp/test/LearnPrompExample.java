@@ -18,7 +18,7 @@ public class LearnPrompExample
    {
       ProMPNativeLibrary.load();
 
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos/Reaching1");
+      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/test/cppLibraryTestData/Reaching");
       String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
 
       List<String> fileList = new ArrayList<>();
