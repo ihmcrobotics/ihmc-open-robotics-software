@@ -37,7 +37,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.thread.ZeroCopySwapReference;
-import us.ihmc.tools.time.DurationStatisticPrinter;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -49,6 +50,7 @@ public class RDXGPUPlanarRegionExtractionUI
    private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
    private final SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater = new SimpleGPUHeightMapUpdater(new SimpleGPUHeightMapParameters());
    private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private final ImInt appliedPatchSize = new ImInt(gpuPlanarRegionExtraction.getParameters().getPatchSize());
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
@@ -79,11 +81,11 @@ public class RDXGPUPlanarRegionExtractionUI
    private ImGuiPlot planarRegionsSegmentationDurationPlot;
    private ImGuiPlot gpuHeightMapDurationPlot;
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
+   private final YoDouble wholeAlgorithmDuration = new YoDouble("wholeAlgorithmDuration", yoRegistry);
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
    private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuHeightMapStopwatch = new Stopwatch();
-   private final DurationStatisticPrinter wholeAlgorithmAverageDurationPrinter = new DurationStatisticPrinter(null, 200, 100.0, 20.0, getClass().getSimpleName());
    private ImGuiPanel imguiPanel;
    private RDXCVImagePanel blurredDepthPanel;
    private RDXCVImagePanel filteredDepthPanel;
@@ -184,7 +186,6 @@ public class RDXGPUPlanarRegionExtractionUI
             setParametersFromImGuiWidgets();
 
             wholeAlgorithmDurationStopwatch.start();
-            wholeAlgorithmAverageDurationPrinter.before();
 
             gpuDurationStopwatch.start();
 
@@ -263,7 +264,7 @@ public class RDXGPUPlanarRegionExtractionUI
                gpuHeightMapStopwatch.suspend();
 
                wholeAlgorithmDurationStopwatch.suspend();
-               wholeAlgorithmAverageDurationPrinter.after();
+               wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
 
                if (runWhenFinished != null)
                   runWhenFinished.run();

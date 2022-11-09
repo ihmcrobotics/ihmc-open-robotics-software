@@ -55,7 +55,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.time.DurationStatisticPrinter;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -74,7 +74,7 @@ public class LookAndStepBodyPathPlanningTask
    protected Consumer<List<? extends Pose3DReadOnly>> output;
 
    protected final Timer planningFailedTimer = new Timer();
-   protected final Stopwatch planningStopwatch = new Stopwatch();
+   protected YoDouble bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
    protected StereoVisionPointCloudMessage ousterLidarScan;
@@ -88,7 +88,6 @@ public class LookAndStepBodyPathPlanningTask
                                                                                                           ousterToWorld);
    protected RigidBodyTransform goalToWorld = new RigidBodyTransform();
    protected ReferenceFrame goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorld);
-   private final DurationStatisticPrinter durationStatisticPrinter = new DurationStatisticPrinter(null, 5, 100.0, getClass().getSimpleName());
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
@@ -125,6 +124,7 @@ public class LookAndStepBodyPathPlanningTask
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
          heightMapUpdater = new LookAndStepHeightMapUpdater();
          footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
+         bodyPathPlanningDuration = new YoDouble("bodyPathPlanningDuration", lookAndStep.yoRegistry);
 
          Consumer<Double> commandPitchHeadWithRespectToChest = lookAndStep.robotInterface::pitchHeadWithRespectToChest;
          RobotTarget robotTarget = lookAndStep.helper.getRobotModel().getTarget();
@@ -252,10 +252,12 @@ public class LookAndStepBodyPathPlanningTask
       }
    }
 
+   protected final Stopwatch planningStopwatch = new Stopwatch();
+
    protected void performTask()
    {
       statusLogger.info("Body path planning...");
-      durationStatisticPrinter.before();
+      planningStopwatch.reset();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
       Pair<BodyPathPlanningResult, List<? extends Pose3DReadOnly>> result;
       if (doPlanarRegionsVisibilityGraphsPlan)
@@ -292,7 +294,8 @@ public class LookAndStepBodyPathPlanningTask
          result = performTaskWithFlatGround();
       }
 
-      double duration = durationStatisticPrinter.after();
+      double duration = planningStopwatch.lap();
+      bodyPathPlanningDuration.set(duration);
 
       double pathLength = BodyPathPlannerTools.calculatePlanLength(result.getRight());
       statusLogger.info(StringTools.format("Body path plan completed with {}, {} waypoint(s), length: {}, planning duration: {} s",
@@ -338,7 +341,6 @@ public class LookAndStepBodyPathPlanningTask
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);
       bodyPathPlanner.setStanceFootPoses(syncedRobot.getReferenceFrames());
-      planningStopwatch.start();
       BodyPathPlanningResult result = bodyPathPlanner.planWaypoints();
       return new MutablePair<>(result, bodyPathPlanner.getWaypoints());// takes about 0.1s
    }
