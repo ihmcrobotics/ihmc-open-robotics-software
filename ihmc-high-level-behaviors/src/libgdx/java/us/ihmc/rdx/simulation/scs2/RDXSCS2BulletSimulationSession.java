@@ -5,14 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.bullet.RDXBulletPhysicsAsyncDebugger;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
-import us.ihmc.scs2.simulation.robot.Robot;
-import us.ihmc.tools.UnitConversions;
 
 import java.util.Set;
 
@@ -21,14 +17,13 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
    private RDXBulletPhysicsAsyncDebugger bulletPhysicsDebugger;
    private PhysicsEngine physicsEngine;
 
-   public RDXSCS2BulletSimulationSession()
+   /**
+    * Bring your own session.
+    * This supports being called multiple times to switch between sessions.
+    */
+   public void startSession(SimulationSession simulationSession)
    {
-      this(new SimulationSession(BulletPhysicsEngine::new));
-   }
-
-   public RDXSCS2BulletSimulationSession(SimulationSession simulationSession)
-   {
-      super(simulationSession);
+      super.startSession(simulationSession);
 
       physicsEngine = simulationSession.getPhysicsEngine();
       if (physicsEngine instanceof BulletPhysicsEngine)
@@ -46,20 +41,7 @@ public class RDXSCS2BulletSimulationSession extends RDXSCS2Session
          {
             simulationSession.setSessionMode(SessionMode.PAUSE);
          }
-
-         simulationDurationCalculator.ping();
-         simulationRealtimeRate.set(UnitConversions.hertzToSeconds(dtHz.get()) / simulationDurationCalculator.getDuration());
       });
-   }
-
-   public Robot addRobot(RobotDefinition robotDefinition)
-   {
-      return getSimulationSession().addRobot(robotDefinition);
-   }
-
-   public void addTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
-   {
-      getSimulationSession().addTerrainObject(terrainObjectDefinition);
    }
 
    @Override
