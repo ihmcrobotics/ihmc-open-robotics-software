@@ -21,6 +21,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -48,6 +49,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    protected final PlanarRegion regionToSnapTo = new PlanarRegion();
 
    private PlanarRegionSnapperCallback planarRegionSnapperCallback;
+
 
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons, SteppableRegionsProvider steppableRegionsProvider)
    {
@@ -125,6 +127,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
             adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
          }
          adjustedPoseToPack.set(adjustedFootstepPose);
+
          return true;
       }
       else
@@ -164,12 +167,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
       snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
 
-      regionToSnapTo.set(closestRegion);
-      snapTransform.setToZero();
-      snapTransform.getTranslation().setZ(footPosition.getZ());
-
       if (planarRegionSnapperCallback != null)
+      {
+         regionToSnapTo.set(closestRegion);
+         snapTransform.setToZero();
+         snapTransform.getTranslation().setZ(footPosition.getZ());
          planarRegionSnapperCallback.recordSnapTransform(snapTransform, regionToSnapTo);
+
+      }
 
       return true;
    }

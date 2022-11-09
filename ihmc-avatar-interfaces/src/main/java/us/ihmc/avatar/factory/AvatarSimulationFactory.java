@@ -32,6 +32,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -336,7 +337,8 @@ public class AvatarSimulationFactory
          else
          {
             stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
-                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters());
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                                      new SnapAndWiggleSingleStepParameters());
             stepSnapperUpdatable.setShouldSnapToRegions(true);
          }
 
