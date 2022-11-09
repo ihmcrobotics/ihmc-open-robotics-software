@@ -9,6 +9,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_aruco.DetectorParameters;
 import org.bytedeco.opencv.opencv_aruco.Dictionary;
 import org.bytedeco.opencv.opencv_aruco.EstimateParameters;
+import org.bytedeco.opencv.opencv_aruco.GridBoard;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;

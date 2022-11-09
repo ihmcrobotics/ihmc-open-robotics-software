@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.footstep.footstepGenerator.PathTypeStepParameter
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.SimplePathParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.TurnStraightTurnFootstepGenerator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -90,11 +91,12 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
-                      RDXTeleoperationParameters teleoperationParameters)
+                      RDXTeleoperationParameters teleoperationParameters,
+                      RDXVRContext context)
    {
       this.panel3D = panel3D;
       this.teleoperationParameters = teleoperationParameters;
-      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
+      footstepPlannerGoalGizmo.create(panel3D.getCamera3D(), context);
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
@@ -417,10 +419,12 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
          foostepPlanGraphic.getRenderables(renderables, pool);
       }
-      if (modified || mouseRingPickSelected)
+      if (modified || mouseRingPickSelected || footstepPlannerGoalGizmo.isRingHoveredFromVR())
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       }
+
+      footstepPlannerGoalGizmo.getVRLineRenderable(renderables, pool);
    }
 
    public void delete()

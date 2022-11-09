@@ -38,6 +38,7 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -107,7 +108,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    // VR moves the control-ring
    private ModelInstance lineModel;
-   private boolean isVRRayShooting = false;
    private final FrameLine3D vrPickRay = new FrameLine3D();
    private final FramePose3D vrPickRayPose = new FramePose3D();
    private final FramePose3D currentPlayArea = new FramePose3D();
@@ -115,15 +115,24 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final FrameVector3D controllerZAxisVector = new FrameVector3D();
    private final Point3D controllerZAxisProjectedToPlanePoint = new Point3D();
    private final Point3D planeRayIntesection = new Point3D();
-   private boolean isVRMovingGizmo = false;
+   private boolean isGizmoHoveredFromVR = false;
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D proposedTeleportPose = new FramePose3D();
    private double lineLength = 1.0;
    private final Color color = Color.ORANGE;
+   private final RDXVRPickResult vrPickResult = new RDXVRPickResult();
+   private boolean isRingHoveredFromVR = false;
 
    public RDXPathControlRingGizmo()
    {
       this(ReferenceFrame.getWorldFrame());
+   }
+
+   public RDXPathControlRingGizmo(RDXVRContext context)
+   {
+      this(ReferenceFrame.getWorldFrame());
+      context.addVRInputProcessor(this::calculateVRPick);
+      context.addVRInputProcessor(this::processVRInput);
    }
 
    public RDXPathControlRingGizmo(ReferenceFrame parentReferenceFrame)
@@ -149,8 +158,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public void create(RDXFocusBasedCamera camera3D, RDXVRContext context)
    {
       create(camera3D);
-      context.addVRInputProcessor(this::processVRInput);
       lineModel = RDXModelBuilder.buildModelInstance(this::buildLineMesh, "line");
+      context.addVRInputProcessor(this::calculateVRPick);
+      context.addVRInputProcessor(this::processVRInput);
    }
 
    public void create(RDXFocusBasedCamera camera3D)
@@ -241,73 +251,91 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       }
    }
 
-   private void processVRInput(RDXVRContext vrContext)
+   public void calculateVRPick(RDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
      {
-        if (controller.getClickTriggerActionData().bChanged())
+        vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
+        vrPickRay.getDirection().set(Axis3D.X);
+        vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
+        determineCurrentSelectionFromPickRay(vrPickRay);
+
+        vrPickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
+        vrPickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+        currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
+        currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
+
+        currentPlayAreaPlane.getNormal().set(Axis3D.Z);
+        currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
+
+        currentPlayAreaPlane.intersectionWith(vrPickRay, planeRayIntesection);
+
+        controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
+        controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+        controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
+        controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
+        currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
+
+        orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
+
+        proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
+        proposedTeleportPose.getPosition().set(planeRayIntesection);
+        EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
+                                                                   orientationDeterminationVector,
+                                                                   proposedTeleportPose.getOrientation());
+
+        lineLength = vrPickRayPose.getPosition().distance(proposedTeleportPose.getPosition());
+        RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
+
+        vrPickRayPose.get(tempTransform);
+        LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
+        proposedTeleportPose.get(tempTransform);
+
+        // vrRay intersected (collided) with this gizmo
+        if (closestCollisionSelection > -1)
         {
-            isVRRayShooting = !isVRRayShooting;
-        }
-
-        if (isVRRayShooting)
-        {
-           vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
-           vrPickRay.getDirection().set(Axis3D.X);
-           vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
-           determineCurrentSelectionFromPickRay(vrPickRay);
-
-           currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
-           currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
-
-           currentPlayAreaPlane.getNormal().set(Axis3D.Z);
-           currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
-
-           currentPlayAreaPlane.intersectionWith(vrPickRay, planeRayIntesection);
-
-           controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
-           controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-           controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
-           controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
-           currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
-
-           orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
-
-           proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
-           proposedTeleportPose.getPosition().set(planeRayIntesection);
-           EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
-                                                                      orientationDeterminationVector,
-                                                                      proposedTeleportPose.getOrientation());
-
-           lineLength = vrPickRayPose.getPosition().distance(proposedTeleportPose.getPosition());
-           RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
-
-           vrPickRayPose.get(tempTransform);
-           LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
-           proposedTeleportPose.get(tempTransform);
-
-           // vrRay intersected (collided) with this gizmo
-           if (closestCollisionSelection > -1)
-           {
-              pickResult.setDistanceToCamera(closestCollisionDistance);
-              isVRMovingGizmo = true;
-           }
-
-           if (isVRMovingGizmo)
-           {
-               this.controlRingPose.set(proposedTeleportPose);
-           }
+           vrPickResult.setDistanceToControllerPickPoint(closestCollisionDistance);
+           vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
+           isGizmoHoveredFromVR = true;
         }
         else
         {
-           isVRMovingGizmo = false;
+           isGizmoHoveredFromVR = false;
         }
-
-
      });
    }
 
+   private void processVRInput(RDXVRContext vrContext)
+   {
+      // The ray from vr is intersecting with control-ring, and it is also hovering on the 'RING'.
+      if (isGizmoHoveredFromVR && closestCollisionSelection == 0)
+      {
+         isRingHoveredFromVR = true;
+         vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+         {
+           // Holding onto the right controller trigger button
+           if (controller.getTriggerTouchedActionData().bState())
+           {
+
+              isNewlyModified = true;
+              Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(vrPickRay, closestCollision, Axis3D.Z);
+              tempFramePose3D.setToZero(gizmoFrame);
+              tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+              tempFramePose3D.getPosition().add(planarMotion);
+              tempFramePose3D.changeFrame(parentReferenceFrame);
+              tempFramePose3D.get(transformToParent);
+              closestCollision.add(planarMotion);
+//              this.controlRingPose.set(proposedTeleportPose);
+              updateTransforms();
+           }
+         });
+      }
+      else
+         isRingHoveredFromVR = true;
+
+   }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
@@ -554,7 +582,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = highlightingEnabled && isGizmoHovered;
+      boolean prior = highlightingEnabled && isGizmoHovered || highlightingEnabled && isRingHoveredFromVR;
       discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedMaterial : normalMaterial);
       positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedMaterial : normalMaterial);
       positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedMaterial : normalMaterial);
@@ -608,13 +636,19 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       discModel.getOrCreateModelInstance().getRenderables(renderables, pool);
-      if (showArrows)
+      if (showArrows || isRingHoveredFromVR)
       {
          positiveXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
          positiveYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
          negativeXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
          negativeYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       }
+//      lineModel.getRenderables(renderables, pool);
+   }
+
+   public void getVRLineRenderable(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      lineModel.getRenderables(renderables, pool);
    }
 
    public Pose3DReadOnly getPose3D()
@@ -692,5 +726,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public boolean getGizmoHovered()
    {
       return isGizmoHovered;
+   }
+
+   public boolean isRingHoveredFromVR()
+   {
+      return isRingHoveredFromVR;
    }
 }
