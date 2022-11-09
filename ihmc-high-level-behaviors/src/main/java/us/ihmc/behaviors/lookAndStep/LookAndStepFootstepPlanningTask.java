@@ -51,7 +51,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.time.DurationStatisticPrinter;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -81,6 +80,7 @@ public class LookAndStepFootstepPlanningTask
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
    protected YoDouble footstepPlanningDuration;
+   protected YoDouble moreInclusivePlanningDuration;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -115,6 +115,7 @@ public class LookAndStepFootstepPlanningTask
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
          footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
+         moreInclusivePlanningDuration = new YoDouble("moreInclusivePlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
@@ -289,12 +290,12 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
+   protected final Stopwatch moreInclusivePlanningDurationStopwatch = new Stopwatch();
    private final Object logSessionSyncObject = new Object();
-   private final DurationStatisticPrinter footstepPlanningDurationPrinter = new DurationStatisticPrinter(null, 20, 100.0, getClass().getSimpleName());
 
    protected void performTask()
    {
-      footstepPlanningDurationPrinter.before();
+      moreInclusivePlanningDurationStopwatch.reset();
       // clear the list so we can inspect on completion
       stepsStartedWhilePlanning.clear();
 
@@ -452,8 +453,7 @@ public class LookAndStepFootstepPlanningTask
          }
       }, "FootstepPlanLogging");
 
-
-      footstepPlanningDurationPrinter.after();
+      moreInclusivePlanningDuration.set(moreInclusivePlanningDurationStopwatch.lap());
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?

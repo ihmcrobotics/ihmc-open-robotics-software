@@ -10,6 +10,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -23,7 +24,7 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.tools.time.DurationStatisticPrinter;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.LastCommandedFootsteps;
 
@@ -44,9 +45,8 @@ public class LookAndStepSteppingTask
    protected long previousStepMessageId = 0L;
    protected LookAndStepImminentStanceTracker imminentStanceTracker;
    protected ControllerStatusTracker controllerStatusTracker;
+   protected YoDouble stepDuration;
    private final Timer timerSincePlanWasSent = new Timer();
-
-   private final DurationStatisticPrinter stepDurationPrinter = new DurationStatisticPrinter(null, 10, 100.0, getClass().getSimpleName());
 
    protected final TypedInput<RobotConfigurationData> robotConfigurationData = new TypedInput<>();
 
@@ -67,6 +67,7 @@ public class LookAndStepSteppingTask
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
          uiPublisher = lookAndStep.helper::publish;
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
+         stepDuration = new YoDouble("stepDuration", lookAndStep.yoRegistry);
          doneWaitingForSwingOutput = () ->
          {
             if (!lookAndStep.isBeingReset.get())
@@ -111,6 +112,8 @@ public class LookAndStepSteppingTask
          }
       }
    }
+
+   private final Stopwatch stepDurationStopwatch = new Stopwatch();
 
    protected void performTask()
    {
@@ -163,7 +166,7 @@ public class LookAndStepSteppingTask
       double maxDurationToWait = 10.0;
       double robotTimeToStopWaitingRegardless = estimatedRobotTimeWhenPlanWasSent + maxDurationToWait;
       statusLogger.info("Waiting up to {} s for commanded step to start...", maxDurationToWait);
-      stepDurationPrinter.before();
+      stepDurationStopwatch.reset();
 
       boolean stepStartTimeRecorded = false;
       double robotTimeInWhichStepStarted = Double.NaN;
@@ -221,7 +224,7 @@ public class LookAndStepSteppingTask
          ThreadTools.sleepSeconds(0.01); // Prevent free spinning
       }
 
-      stepDurationPrinter.after();
+      stepDuration.set(stepDurationStopwatch.lap());
 
       doneWaitingForSwingOutput.run();
    }
