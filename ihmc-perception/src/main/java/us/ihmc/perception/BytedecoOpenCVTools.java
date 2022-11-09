@@ -6,9 +6,7 @@ import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.*;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.idl.IDLSequence;
 
@@ -16,8 +14,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.nio.ByteBuffer;
 
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC3;
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC4;
+import static org.bytedeco.opencv.global.opencv_core.*;
 
 public class BytedecoOpenCVTools
 {
@@ -53,25 +50,18 @@ public class BytedecoOpenCVTools
 
    public static void normalizeGrayscaleTo8UC3(Mat source, Mat destination)
    {
-//      int normType = opencv_core.NORM_MINMAX;
-//      int depthType = opencv_core.CV_8UC3; // converting to 8 bit
-//      Mat mask = opencv_core.noArray(); // no operations
-//      opencv_core.normalize(source, destination, 0.0, 16777215.0, normType, depthType, mask);
+      BytePointer data = source.data();
+
+      Mat lower = new Mat(source.rows(), source.cols(), CV_8UC2, data);
+      Mat upper = new Mat(source.rows(), source.cols(), CV_8UC1);
+      upper.put(new Scalar(0));
 
       MatVector mats = new MatVector();
-      mats.push_back(source);
-      mats.push_back(source);
-
-
-
-      Mat lower = new Mat(1, 1, opencv_core.CV_8UC1);
-      opencv_core.convertScaleAbs(source, lower, );
+      mats.push_back(lower);
+      mats.push_back(upper);
 
       opencv_core.merge(mats, destination);
 
-//      opencv_imgproc.cvtColor(source, destination, opencv_imgproc.COLOR_GRAY2RGB);
-
-//      source.convertTo(destination, opencv_core.CV_8UC3);
    }
 
    public static void convert8BitGrayTo8BitRGBA(Mat source, Mat destination)

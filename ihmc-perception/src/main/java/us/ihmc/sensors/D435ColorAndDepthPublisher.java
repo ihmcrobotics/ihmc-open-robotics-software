@@ -43,7 +43,7 @@ public class D435ColorAndDepthPublisher
    private Mat depthU16C1Image;
 
    private Mat color8UC3Image;
-   private Mat depth8UC3Image = new Mat(1, 1, opencv_core.CV_8UC3);
+   private Mat depth8UC3Image;
 
    private int colorHeight;
    private int colorWidth;
@@ -111,6 +111,7 @@ public class D435ColorAndDepthPublisher
          {
             Instant now = Instant.now();
 
+            long begin = System.currentTimeMillis();
             d435.updateDataBytePointers();
 
             MutableBytePointer depthFrameData = d435.getDepthFrameData();
@@ -121,13 +122,9 @@ public class D435ColorAndDepthPublisher
             color8UC3Image = new Mat(depthHeight, depthWidth, opencv_core.CV_8UC3, colorFrameData);
             setColorExtrinsics(d435);
 
+            depth8UC3Image = new Mat(depthU16C1Image.rows(), depthU16C1Image.cols(), opencv_core.CV_8UC3);
             BytedecoOpenCVTools.normalizeGrayscaleTo8UC3(depthU16C1Image, depth8UC3Image);
 
-            System.out.printf("Depth Before: %s %d Depth After: %s %d \n",
-                              BytedecoOpenCVTools.getTypeString(depthU16C1Image.type()),
-                              depthU16C1Image.channels(),
-                              BytedecoOpenCVTools.getTypeString(depth8UC3Image.type()),
-                              depth8UC3Image.channels());
 
             compressedDepthPointer = new BytePointer();
             compressImage(depth8UC3Image, compressedDepthPointer, compressionParameters);
@@ -138,6 +135,12 @@ public class D435ColorAndDepthPublisher
             compressImage(color8UC3Image, compressedColorPointer, compressionParameters);
             fillVideoPacket(compressedColorPointer, colorVideoPacket, d435.getColorHeight(), d435.getColorWidth());
             ros2Helper.publish(ROS2Tools.D435_VIDEO, colorVideoPacket);
+
+            long end = System.currentTimeMillis();
+
+            LogTools.info("Uncompressed Bytes: {}", depthU16C1Image.rows() * depthU16C1Image.cols() * 2 + color8UC3Image.rows() * color8UC3Image.cols() * 3);
+            LogTools.info("Compressed Bytes: {}", depthVideoPacket.getData().size() + colorVideoPacket.getData().size());
+            LogTools.info("Time Taken: {} ms", end - begin);
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
 //            display(depthU16C1Image, color8UC3Image);
