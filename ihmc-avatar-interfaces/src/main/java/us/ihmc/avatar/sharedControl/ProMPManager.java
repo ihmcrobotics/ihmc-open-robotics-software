@@ -29,7 +29,7 @@ public class ProMPManager
 {
    private final String taskName;
    private final HashMap<String, String> bodyPartsGeometry;
-   // learnedProMPs stores a set of multi-D (e.g., for pose D=6, for position D=3) proMPs (a multi-D proMP for each body part)
+   // learnedProMPs stores a set of multi-D (e.g., for pose D=6, for position D=3) proMPs. We have a multi-D proMP for each body part
    private final HashMap<String, ProMP> learnedProMPs = new HashMap<>();
    private final HashMap<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
    private final ProMPLogger logger = new ProMPLogger();
@@ -62,12 +62,12 @@ public class ProMPManager
       for (int i = 0; i < listOfFiles.length; i++) //get training files
          fileListTraining.add(demoTrainingDirAbs + "/" + (i + 1) + ".csv");
 
-      List<Long> dofs = new ArrayList<>();
       // This is how the dofs are stored in the csv training files (generated using KinematicsRecordReplay in GDXVRKinematicsStreaming)
       // 0,1,2,3: left hand quaternion; 4,5,6: left hand X,Y,Z;
       // 7,8,9,10: right hand quaternion; 11,12,13: right hand X,Y,Z;
       for (String bodyPart : bodyPartsGeometry.keySet())
       {
+         List<Long> dofs = new ArrayList<>();
          if (bodyPartsGeometry.get(bodyPart).equals("Orientation"))
          {
             dofs.add(0L);
@@ -110,8 +110,7 @@ public class ProMPManager
 
          if (logEnabled)
          {
-            LogTools.info("Logging ProMPs for task {}", taskName);
-            LogTools.info("   with bodyPart {}", bodyPart);
+            LogTools.info("Logging ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
             logger.saveDemosAndLearnedTrajectories(bodyPart, learnedProMPs.get(bodyPart), trainingTrajectory);
          }
       }
@@ -134,14 +133,14 @@ public class ProMPManager
       double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
-      LogTools.info("Inferred timesteps: {}", inferredTimesteps);
+      LogTools.info("   - Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
          (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
-
          if (logEnabled)
          {
+            LogTools.info("Logging modulated ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, keyBodyPart);
             logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
          }
       }
@@ -158,20 +157,22 @@ public class ProMPManager
          demoTrajectories.add(trainingTrajectories.get(bodyParts.get(i)).trajectories());
       }
       //concatenate observed trajectories of bodyParts in a single EigenMatrix object
-      EigenMatrixXd observedTrajectory = concatenateEigenMatrix(observedTrajectories.get(0),observedTrajectories.get(1));
+      EigenMatrixXd observedTrajectory = concatenateEigenMatrix(observedTrajectories.get(0), observedTrajectories.get(1));
       for (int i = 2; i < observedFrameTrajectories.size(); i++)
       {
          observedTrajectory = concatenateEigenMatrix(observedTrajectory, observedTrajectories.get(i));
       }
       //concatenate demo trajectories of bodyParts in a single Trajectory Vector object
-      TrajectoryVector demoTrajectory = concatenateTrajectoryVector(demoTrajectories.get(0),demoTrajectories.get(1));;
+      TrajectoryVector demoTrajectory = concatenateTrajectoryVector(demoTrajectories.get(0), demoTrajectories.get(1));
+      ;
       for (int i = 2; i < demoTrajectories.size(); i++)
       {
          demoTrajectory = concatenateTrajectoryVector(demoTrajectory, demoTrajectories.get(i));
       }
-
+      LogTools.info("Inferring closest demo ...");
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectory);
+      LogTools.info("Inferred closest demo: {}", demo);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
       double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
@@ -296,6 +297,7 @@ public class ProMPManager
 
       if (logEnabled)
       {
+         LogTools.info("Logging conditioned ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
          logger.saveConditionedTrajectories(bodyPart, myProMP, conditioningTimestep);
       }
    }
