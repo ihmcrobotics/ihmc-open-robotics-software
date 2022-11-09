@@ -43,6 +43,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Joyst
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
@@ -414,7 +415,8 @@ public class SCS2AvatarSimulationFactory
          else
          {
             stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
-                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters());
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                                      new SnapAndWiggleSingleStepParameters());
             stepSnapperUpdatable.setShouldSnapToRegions(true);
          }
 
