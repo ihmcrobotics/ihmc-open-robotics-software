@@ -66,8 +66,8 @@ public class TrajectoryRecordReplay<T extends Number>
    }
 
    /* Used if we are recording different body parts trajectories but not in the same scope
-    * and we want to concatenate them into one single row rather than having multiple TrajectoryRecordReplay objects
-    * and multiple csv files */
+    * and we want to concatenate them into one single row to have a single csv file
+    * rather than having multiple TrajectoryRecordReplay objects and multiple csv files */
    public void concatenateData()
    {
       for (int i = 0; i < dataMatrix.size(); i = i + numberParts)

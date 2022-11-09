@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static us.ihmc.promp.ProMPUtil.concatenateEigenMatrix;
+import static us.ihmc.promp.ProMPUtil.concatenateTrajectoryVector;
 import static us.ihmc.promp.Trajectory.infer_closest_trajectory;
 import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
 import static us.ihmc.promp.presets.ProMPInfoMapper.EigenVectorXd;
@@ -45,7 +47,7 @@ public class ProMPManager
       ProMPNativeLibrary.load();
    }
 
-   /* learn the ProMPs for the task based demo training trajectories stored in .../promp/etc/demos
+   /* learn the ProMPs for the task based on the demo training trajectories stored in .../promp/etc/demos
     * learn a ProMP for each bodyPart specified in the constructor of this class */
    public void learnTaskFromDemos()
    {
@@ -121,7 +123,7 @@ public class ProMPManager
          learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), 20));
    }
 
-   /* update the speed of the ProMPs of the task based on observation of a body-part trajectory (e.g., RightHand or LeftHand) */
+   /* update the speed of the ProMPs of the task based on observation of a body part trajectory (e.g., RightHand or LeftHand) */
    public void updateTaskSpeed(List<Pose3DReadOnly> observedFrameTrajectory, String bodyPart)
    {
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
@@ -134,18 +136,60 @@ public class ProMPManager
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       LogTools.info("Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
-      for (ProMP proMPBodyPart : learnedProMPs.values())
+      for (String keyBodyPart : learnedProMPs.keySet())
       {
-         proMPBodyPart.update_time_modulation((double) proMPBodyPart.get_traj_length() / inferredTimesteps);
+         (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
 
          if (logEnabled)
          {
-            logger.saveModulatedTrajectories(bodyPart, proMPBodyPart);
+            logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
          }
       }
    }
 
-   /* update the speed of the ProMPs of the task based on observation of a body-part trajectory and goal (e.g., RightHand or LeftHand) */
+   /* update the speed of the ProMPs of the task based on observation of multiple body parts trajectories */
+   public void updateTaskSpeed(List<List<Pose3DReadOnly>> observedFrameTrajectories, List<String> bodyParts)
+   {
+      List<EigenMatrixXd> observedTrajectories = new ArrayList<>();
+      List<TrajectoryVector> demoTrajectories = new ArrayList<>();
+      for (int i = 0; i < observedFrameTrajectories.size(); i++)
+      {
+         observedTrajectories.add(toEigenMatrix(observedFrameTrajectories.get(i), bodyParts.get(i)));
+         demoTrajectories.add(trainingTrajectories.get(bodyParts.get(i)).trajectories());
+      }
+      //concatenate observed trajectories of bodyParts in a single EigenMatrix object
+      EigenMatrixXd observedTrajectory = concatenateEigenMatrix(observedTrajectories.get(0),observedTrajectories.get(1));
+      for (int i = 2; i < observedFrameTrajectories.size(); i++)
+      {
+         observedTrajectory = concatenateEigenMatrix(observedTrajectory, observedTrajectories.get(i));
+      }
+      //concatenate demo trajectories of bodyParts in a single Trajectory Vector object
+      TrajectoryVector demoTrajectory = concatenateTrajectoryVector(demoTrajectories.get(0),demoTrajectories.get(1));;
+      for (int i = 2; i < demoTrajectories.size(); i++)
+      {
+         demoTrajectory = concatenateTrajectoryVector(demoTrajectory, demoTrajectories.get(i));
+      }
+
+      // infer what training demo is the closest to the observed trajectory
+      int demo = infer_closest_trajectory(observedTrajectory, demoTrajectory);
+      // infer the new speed for the demo trajectory based on observed (portion of) trajectory
+      double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      // find equivalent timesteps
+      int inferredTimesteps = (int) (demoTrajectory.get(demo).timesteps() / inferredSpeed);
+      LogTools.info("Inferred timesteps: {}", inferredTimesteps);
+      // update the time modulation of the learned ProMPs with estimated value
+      for (String keyBodyPart : learnedProMPs.keySet())
+      {
+         (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
+
+         if (logEnabled)
+         {
+            logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
+         }
+      }
+   }
+
+   /* update the speed of the ProMPs of the task based on observation of a body part trajectory and goal (e.g., RightHand or LeftHand) */
    public void updateTaskSpeed(List<Pose3DReadOnly> observedFrameTrajectory, Pose3DReadOnly observedGoal, String bodyPart)
    {
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
@@ -161,18 +205,18 @@ public class ProMPManager
       int inferredTimesteps = (int) (meanTrajectoryProMPCurrentTask.timesteps() / inferredSpeed);
       LogTools.info("Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
-      for (ProMP proMPBodyPart : learnedProMPs.values())
+      for (String keyBodyPart : learnedProMPs.keySet())
       {
-         proMPBodyPart.update_time_modulation((double) proMPBodyPart.get_traj_length() / inferredTimesteps);
+         (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
 
          if (logEnabled)
          {
-            logger.saveModulatedTrajectories(bodyPart, proMPBodyPart);
+            logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
          }
       }
    }
 
-   /* transform trajectory from list of setposes to EigenMatrixXd */
+   /* transform trajectory from list of set poses to EigenMatrixXd */
    private EigenMatrixXd toEigenMatrix(List<Pose3DReadOnly> frameList, String bodyPart)
    {
       EigenMatrixXd matrix = null;
@@ -214,7 +258,7 @@ public class ProMPManager
       return matrix;
    }
 
-   /* update the predicted trajectories based on observed setposes */
+   /* update the predicted trajectories based on observed set poses */
    public void updateTaskTrajectories(HashMap<String, Pose3DReadOnly> bodyPartObservedPose, int conditioningTimestep)
    {
       // condition ProMP to reach point at given timestep
@@ -224,7 +268,7 @@ public class ProMPManager
       }
    }
 
-   /* update the predicted trajectory based on observed setpose */
+   /* update the predicted trajectory based on observed set pose */
    public void updateTaskTrajectory(String bodyPart, Pose3DReadOnly observedPose, int conditioningTimestep)
    {
       updateTrajectory(learnedProMPs.get(bodyPart), bodyPart, observedPose, conditioningTimestep);
