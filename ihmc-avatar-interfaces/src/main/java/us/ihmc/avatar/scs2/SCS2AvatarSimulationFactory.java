@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -148,7 +147,7 @@ public class SCS2AvatarSimulationFactory
    protected HumanoidRobotContextData masterContext;
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
-//   protected AvatarStepGeneratorThread stepGeneratorThread;
+   protected AvatarStepGeneratorThread stepGeneratorThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    protected PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
@@ -167,8 +166,8 @@ public class SCS2AvatarSimulationFactory
       setupYoVariableServer();
       setupSimulationOutputWriter();
       setupStateEstimationThread();
-      setupStepGeneratorThread();
       setupControllerThread();
+      setupStepGeneratorThread();
       setupMultiThreadedRobotController();
       setupLidarController();
       initializeStateEstimatorToActual();
@@ -184,7 +183,7 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setMasterContext(masterContext);
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
-//      avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
+      avatarSimulation.setStepGeneratorThread(stepGeneratorThread);
       avatarSimulation.setRobotController(robotController);
       avatarSimulation.setRobot(robot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
@@ -423,25 +422,14 @@ public class SCS2AvatarSimulationFactory
          steppingFactory = joystickPluginFactory;
       }
 
-      if (stepSnapperUpdatable != null)
-      {
-         steppingFactory.addPlanarRegionsListCommandConsumer(stepSnapperUpdatable);
-         steppingFactory.setFootStepPlanAdjustment(stepSnapperUpdatable.getFootstepPlanAdjustment());
-         for (FootstepValidityIndicator footstepValidityIndicator : stepSnapperUpdatable.getFootstepValidityIndicators())
-            steppingFactory.addFootstepValidityIndicator(footstepValidityIndicator);
-         steppingFactory.addUpdatable(stepSnapperUpdatable); // this makes sure to clear it at the beginning of every update
-      }
-      steppingFactory.createStepGeneratorNetworkSubscriber(robotModel.get().getSimpleRobotName(), realtimeROS2Node.get());
-      highLevelHumanoidControllerFactory.get().addControllerPlugin(steppingFactory);
-
-//      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
-//                                                          contextDataFactory,
-//                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-//                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-//                                                          robotModel.get(),
-//                                                          stepSnapperUpdatable,
-//                                                          realtimeROS2Node.get());
-//      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getYoGraphicsListRegistry()));
+      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
+                                                          contextDataFactory,
+                                                          highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                          highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                          robotModel.get(),
+                                                          stepSnapperUpdatable,
+                                                          realtimeROS2Node.get());
+      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getYoGraphicsListRegistry()));
    }
 
    private void setupMultiThreadedRobotController()
@@ -460,11 +448,11 @@ public class SCS2AvatarSimulationFactory
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-//      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
-//                                                                         stepGeneratorThread,
-//                                                                         stepGeneratorDivisor,
-//                                                                         simulationDT.get(),
-//                                                                         masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
+                                                                         stepGeneratorThread,
+                                                                         stepGeneratorDivisor,
+                                                                         simulationDT.get(),
+                                                                         masterFullRobotModel);
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
@@ -511,7 +499,7 @@ public class SCS2AvatarSimulationFactory
       List<HumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
-//      tasks.add(stepGeneratorTask);
+      tasks.add(stepGeneratorTask);
       if (handControlTask != null)
          tasks.add(handControlTask);
 
@@ -534,7 +522,7 @@ public class SCS2AvatarSimulationFactory
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
          builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry()));
-//         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry()));
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
@@ -555,15 +543,15 @@ public class SCS2AvatarSimulationFactory
          yoVariableServer.addRegistry(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry());
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
-//         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry());
-//         stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
-//                                                                                 stepGeneratorThread.getYoVariableRegistry()));
+         yoVariableServer.addRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorThread.getYoGraphicsListRegistry());
+         stepGeneratorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(stepGeneratorThread.getHumanoidRobotContextData().getTimestamp(),
+                                                                                 stepGeneratorThread.getYoVariableRegistry()));
       }
 
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
       mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
-//      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
+      mirroredRegistries.add(setupWithMirroredRegistry(stepGeneratorThread.getYoVariableRegistry(), stepGeneratorTask, robotController.getYoRegistry()));
       if (handControlThread != null)
          mirroredRegistries.add(setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry()));
       robot.getRegistry().addChild(robotController.getYoRegistry());
@@ -583,7 +571,7 @@ public class SCS2AvatarSimulationFactory
             SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
             estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
             controllerThread.initialize();
-//            stepGeneratorThread.initialize();
+            stepGeneratorThread.initialize();
             masterContext.set(estimatorThread.getHumanoidRobotContextData());
 
             robotController.initialize();
@@ -905,7 +893,6 @@ public class SCS2AvatarSimulationFactory
 
    public AvatarStepGeneratorThread getStepGeneratorThread()
    {
-      return null;
-//      return stepGeneratorThread;
+      return stepGeneratorThread;
    }
 }
