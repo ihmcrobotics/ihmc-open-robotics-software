@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
+public class PlanarRegionSnapVisualizer
 {
    private static final int numberOfStepsToVisualize = 3;
    private static final int maximumVertices = 40;
@@ -34,7 +34,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
       parentRegistry.addChild(registry);
    }
 
-   @Override
    public void reset()
    {
       stepsVisualized.set(-1);
@@ -43,7 +42,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
 //         footholdData[i].reset();
    }
 
-   @Override
    public void setFootIndex(int index)
    {
       stepsVisualized.set(index);
@@ -51,7 +49,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
          footholdData[index].reset();
    }
 
-   @Override
    public void recordUnadjustedFootstep(FramePose3DReadOnly footPose, ConvexPolygon2DReadOnly foothold)
    {
       int i = stepsVisualized.getIntegerValue();
@@ -62,7 +59,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
       footholdData[i].unsnappedFootstepPose.set(footPose);
    }
 
-   @Override
    public void recordFootPoseIsOnBoundary()
    {
       if (stepsVisualized.getIntegerValue() >= numberOfStepsToVisualize)
@@ -71,7 +67,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
       footholdData[stepsVisualized.getIntegerValue()].footPoseIsOnBoundaryOfWorld.set(true);
    }
 
-   @Override
    public void recordSnapTransform(RigidBodyTransformReadOnly snapTransform, PlanarRegion regionSnappedTo)
    {
       int i = stepsVisualized.getIntegerValue();
@@ -92,7 +87,6 @@ public class PlanarRegionSnapVisualizer implements PlanarRegionSnapperCallback
       footholdData[i].concaveRegionPose.prependTranslation(0.0, 0.0, 0.001);
    }
 
-   @Override
    public void recordWiggleTransform(RigidBodyTransformReadOnly wiggleTransform)
    {
       int i = stepsVisualized.getIntegerValue();
