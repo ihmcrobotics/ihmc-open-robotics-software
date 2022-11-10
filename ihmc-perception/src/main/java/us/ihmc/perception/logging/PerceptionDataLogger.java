@@ -24,7 +24,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -51,6 +50,9 @@ public class PerceptionDataLogger
 
    private final String D435_DEPTH_NAME = "/d435/depth/";
    private final String D435_COLOR_NAME = "/d435/color/";
+
+   private final String L515_DEPTH_NAME = "/l515/depth/";
+   private final String L515_COLOR_NAME = "/l515/color/";
 
    private HDF5Manager hdf5Manager;
 
@@ -149,17 +151,18 @@ public class PerceptionDataLogger
 
       // Add callback for L515 Depth maps
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH);
-      l515DepthSubscription.addCallback(this::logDepthMap);
+      l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
 
       // Add callback for L515 Depth maps
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_LIDAR, ROS2QosProfile.BEST_EFFORT(), subscriber ->
-      {
-         LogTools.info("Ouster Depth Map Received");
-//         ousterDepthVideoPacket.getData().resetQuick();
-//         subscriber.takeNextData(ousterDepthVideoPacket, depthSampleInfo);
-//         logDepthMap(ousterDepthVideoPacket);
-      });
+      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
+      l515ColorSubscription.addCallback(this::logColorL515);
+      runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
+
+      // Add callback for Ouster depth maps
+      var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_LIDAR);
+      ousterDepthSubscription.addCallback(this::logDepthMap);
+      runnablesToStopLogging.addLast(ousterDepthSubscription::destroy);
 
       realtimeROS2Node.spin();
 
@@ -167,7 +170,6 @@ public class PerceptionDataLogger
 
       //      "D435 Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420
 
-      //      new ROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO.withType(BigVideoPacket.class), this::logBigVideoPacket);
       //      new IHMCROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
       //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
       //      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
@@ -230,6 +232,18 @@ public class PerceptionDataLogger
       storeVideoPacket(D435_DEPTH_NAME, videoPacket);
    }
 
+   public void logDepthL515(VideoPacket videoPacket)
+   {
+      LogTools.info("Logging L515 Depth: ", videoPacket.toString());
+      storeVideoPacket(L515_DEPTH_NAME, videoPacket);
+   }
+
+   public void logColorL515(VideoPacket videoPacket)
+   {
+      LogTools.info("Logging L515 Color: ", videoPacket.toString());
+      storeVideoPacket(L515_COLOR_NAME, videoPacket);
+   }
+
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
    {
       IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
@@ -285,13 +299,15 @@ public class PerceptionDataLogger
 
          byte[] heapArray = buffers.get(namespace);
          int imageCount = counts.get(namespace);
+         IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+
          LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
          counts.put(namespace, imageCount + 1);
 
-         IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+         // Logging into HDF5
          imageEncodedTByteArrayList.toArray(heapArray);
+         HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size());
 
-         HDF5Tools.storeByteArray(group, imageCount, heapArray, packet.getData().size());
          LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
 
       }, "video_packet_logger_thread -> " + namespace);

@@ -1,7 +1,5 @@
 package us.ihmc.perception.logging;
 
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
@@ -10,12 +8,10 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
@@ -23,18 +19,12 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 public class PerceptionDataLoader
 {
    private HDF5Manager hdf5Manager;
-
-   private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
-
-   private int latestSegmentIndex = -1;
-
    private String filePath;
 
    public PerceptionDataLoader(String filePath)
    {
       this.filePath = filePath;
       hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
-
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
@@ -54,21 +44,16 @@ public class PerceptionDataLoader
 
    public void loadImage(String namespace, int index, Mat mat)
    {
-      //ThreadTools.startAThread(()->{
-         Mat display = new Mat();
+      //      ThreadTools.startAThread(()->{
+      LogTools.info("Loading Image: {} {}", namespace, index);
 
-         LogTools.info("Loading Image: {} {}", namespace, index);
+      Group group = hdf5Manager.getGroup(namespace);
+      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
 
-         Group group = hdf5Manager.getGroup(namespace);
-         byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+      mat.put(decompressImage(compressedByteArray));
 
-         Mat decompressedImage = decompressImage(compressedByteArray);
-
-         LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
-
-         imshow("Display", decompressedImage);
-         waitKey(30);
-      //}, "perception_data_loader -> " + namespace);
+      LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
+      //      }, "perception_data_loader -> " + namespace);
    }
 
    private Mat decompressImage(byte[] dataArray)
@@ -79,9 +64,6 @@ public class PerceptionDataLoader
       messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
       messageEncodedBytePointer.limit(dataArray.length);
 
-      int colorWidth = 848;
-      int colorHeight = 480;
-
       Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
       Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
 
@@ -91,40 +73,43 @@ public class PerceptionDataLoader
       // imdecode takes the longest by far out of all this stuff
       opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
 
-      Mat outputMat = new Mat();
+      Mat outputMat = new Mat((int) (inputYUVI420Mat.rows() / 1.5f), inputYUVI420Mat.cols(), opencv_core.CV_8UC4);
+      opencv_imgproc.cvtColor(inputYUVI420Mat, outputMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
 
-      synchronized (this)
-      {
-         // YUV I420 has 1.5 times the height of the image
-         colorWidth = inputYUVI420Mat.cols();
-         colorHeight = (int) (inputYUVI420Mat.rows() / 1.5f);
-
-         outputMat.rows(colorHeight);
-         outputMat.cols(colorWidth);
-
-         //opencv_imgproc.cvtColor(inputYUVI420Mat, outputMat, opencv_imgproc.COLOR_YUV2BGR);
-      }
-      return inputYUVI420Mat;
+      return outputMat;
    }
 
-   public String getFilePath() {
+   public String getFilePath()
+   {
       return filePath;
    }
 
-   public HDF5Manager getHDF5Manager() {
+   public HDF5Manager getHDF5Manager()
+   {
       return hdf5Manager;
    }
 
    public static void main(String[] args)
    {
-//      BytedecoTools.loadOpenCV();
+      //      BytedecoTools.loadOpenCV();
 
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
 
-      for (int i = 1; i < 400; i++)
+      long totalColor = loader.getHDF5Manager().getCount("/d435/color/");
+
+      Mat colorImage = new Mat();
+      Mat depthImage = new Mat();
+      LogTools.info("Total Images: {}", totalColor);
+      for (int i = 1; i < totalColor; i++)
       {
-         loader.loadImage("/d435/depth/", i, null);
+         LogTools.info("Loading Index: {}/{}", i, totalColor);
+         loader.loadImage("/d435/color/", i, colorImage);
+         loader.loadImage("/d435/depth/", i, depthImage);
+
+         imshow("/d435/color", colorImage);
+         imshow("/d435/depth", depthImage);
+         waitKey(30);
       }
    }
 }
