@@ -107,7 +107,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
    private final Throttler parameterOutputThrottler = new Throttler();
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
-   private CollidingScanRegionFilter collisionFilter;
+   private final CollidingScanRegionFilter collisionFilter;
 
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
    {
