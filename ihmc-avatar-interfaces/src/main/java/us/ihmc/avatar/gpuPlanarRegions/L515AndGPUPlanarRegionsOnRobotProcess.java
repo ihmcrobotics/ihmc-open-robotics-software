@@ -49,7 +49,7 @@ import java.util.function.Consumer;
 
 public class L515AndGPUPlanarRegionsOnRobotProcess
 {
-   private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F0000000");
+   private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F0245563");
 
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
@@ -96,7 +96,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
 
-      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH;
+      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH_LARGE;
       LogTools.info("Publishing ROS 2 depth video: {}", depthTopic);
       ros2DepthVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
       ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;

@@ -83,6 +83,12 @@ public class RealSenseHardwareManager
       return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
    }
 
+   public BytedecoRealsense createBytedecoRealsense(String serialNumberToFind, int depthWidth, int depthHeight, int fps)
+   {
+      String sanitizedSerialNumberToFind = serialNumberToFind.toLowerCase();
+      return new BytedecoRealsense(context, createDevice(sanitizedSerialNumberToFind), sanitizedSerialNumberToFind, depthWidth, depthHeight, fps);
+   }
+
    public rs2_device createDevice(String serialNumberToFind)
    {
       int rs2DeviceCount = updateDeviceCount();
