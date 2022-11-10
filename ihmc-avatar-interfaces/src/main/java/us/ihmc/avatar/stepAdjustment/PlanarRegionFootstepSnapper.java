@@ -262,11 +262,11 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                                       PlanarRegion regionToPack,
                                                       ConvexPolygon2DReadOnly footPolygonInWorld)
    {
-      if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld,
-                                                  regionsIntersectingFoothold,
-                                                  Double.POSITIVE_INFINITY,
-                                                  regionToPack,
-                                                  snapTransform))
+      if (!snapper.snapPolygonToRegionsUnderFoot(footPolygonInWorld,
+                                                 regionsIntersectingFoothold,
+                                                 Double.POSITIVE_INFINITY,
+                                                 regionToPack,
+                                                 snapTransform))
       {
          throw new RuntimeException("Snapping failed");
       }
