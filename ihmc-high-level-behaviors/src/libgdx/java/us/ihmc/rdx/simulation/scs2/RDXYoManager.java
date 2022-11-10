@@ -7,7 +7,6 @@ import us.ihmc.scs2.sharedMemory.LinkedBufferProperties;
 import us.ihmc.scs2.sharedMemory.LinkedYoRegistry;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.scs2.sharedMemory.interfaces.LinkedYoVariableFactory;
-import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -26,7 +25,7 @@ public class RDXYoManager
    public void startSession(Session session)
    {
       LogTools.info("Linking YoVariables");
-      rootRegistry = new YoRegistry(SimulationSession.ROOT_REGISTRY_NAME);
+      rootRegistry = session.getRootRegistry();
       linkedYoVariableFactory = session.getLinkedYoVariableFactory();
       linkedRootRegistry = linkedYoVariableFactory.newLinkedYoRegistry(rootRegistry);
       linkedBufferProperties = linkedYoVariableFactory.newLinkedBufferProperties();
