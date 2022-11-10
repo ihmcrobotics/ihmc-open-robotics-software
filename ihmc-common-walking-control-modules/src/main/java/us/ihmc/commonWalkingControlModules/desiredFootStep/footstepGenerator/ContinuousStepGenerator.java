@@ -150,8 +150,6 @@ public class ContinuousStepGenerator implements Updatable
    private final YoDouble desiredTurningVelocity = new YoDouble("desiredTurningVelocity" + variableNameSuffix, registry);
    private final YoVector2D desiredVelocity = new YoVector2D("desiredVelocity" + variableNameSuffix, registry);
    private final ExecutionTimer stepGeneratorTimer = new ExecutionTimer("stepGeneratorTimer" + variableNameSuffix, registry);
-   private final ExecutionTimer adjustmentTimer = new ExecutionTimer("planAdjustmentTimer" + variableNameSuffix, registry);
-   private final ExecutionTimer viabilityTimer = new ExecutionTimer("viabilityTimer" + variableNameSuffix, registry);
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
@@ -355,7 +353,6 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(nextFootstepPose3D);
       }
 
-      adjustmentTimer.startMeasurement();
       // adjust the whole footstep plan for the environment
       if (footstepPlanAdjustment != null)
       {
@@ -374,10 +371,8 @@ public class ContinuousStepGenerator implements Updatable
             footstepPose2D.set(previousFootstepPose);
          }
       }
-      adjustmentTimer.stopMeasurement();
 
       // run through and make sure these adjusted steps are valid.
-      viabilityTimer.startMeasurement();
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
       {
          FootstepDataMessage footstepData = footstepDataListMessage.getFootstepDataList().get(i);
@@ -401,7 +396,6 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(nextFootstepPose3D);
          footstepPose2D.set(nextFootstepPose3D);
       }
-      viabilityTimer.stopMeasurement();
 
       // Update the visualizers
       for (int i = startingIndexToAdjust; i < footstepDataListMessage.getFootstepDataList().size(); i++)
