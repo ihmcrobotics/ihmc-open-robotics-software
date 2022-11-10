@@ -298,7 +298,7 @@ public class ProMPManager
       if (logEnabled)
       {
          LogTools.info("Logging conditioned ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
-         logger.saveConditionedTrajectories(bodyPart, myProMP, conditioningTimestep);
+         logger.saveConditionedTrajectories(bodyPart, myProMP);
       }
    }
 

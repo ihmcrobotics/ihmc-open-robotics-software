@@ -33,7 +33,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    private String currentTask = ""; //detected task
    private int numberObservations = 0; //number of observations used to update the prediction
    private String relevantBodyPart = ""; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
-   private HashMap<String,String> taskRelevantBodyPart = new HashMap<>();
+   private HashMap<String, String> taskRelevantBodyPart = new HashMap<>();
    private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedFrameTrajectory = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
@@ -49,9 +49,10 @@ public class ProMPAssistant implements TeleoperationAssistant
       // read parameters regarding the properties of available learned tasks from json file
       try
       {
-         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"),
-                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-avatar-interfaces/src/main/resources/us/ihmc/avatar/sharedControl/ProMPAssistant.json")
-                                                                                         .toString()));
+         LogTools.info("Looking for configuration file ProMPAssistant.json ...");
+         String configurationFile = "repository-group/ihmc-open-robotics-software/ihmc-avatar-interfaces/src/main/resources/us/ihmc/avatar/sharedControl/ProMPAssistant.json";
+         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"), configurationFile).toString()));
+         LogTools.info("File found: /{}", configurationFile);
          numberObservations = (int) ((long) jsonObject.get("numberObservations"));
          logEnabled = (boolean) jsonObject.get("logging");
          // getting tasks
@@ -95,7 +96,7 @@ public class ProMPAssistant implements TeleoperationAssistant
                                  break;
                            }
                         });
-                        for (int i=0; i<name.size(); i++)
+                        for (int i = 0; i < name.size(); i++)
                            bodyPartsGeometry.put(name.get(i), geometry.get(i));
                      }
                      bodyPartsGeometries.add(bodyPartsGeometry);
@@ -119,15 +120,18 @@ public class ProMPAssistant implements TeleoperationAssistant
          throw new RuntimeException(e);
       }
 
-      for (int i=0; i<taskNames.size(); i++){
+      for (int i = 0; i < taskNames.size(); i++)
+      {
          LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
-         for (int j=0; j<bodyPartsGeometries.size(); j++){
-            for (String key : bodyPartsGeometries.get(j).keySet()){
+         for (int j = 0; j < bodyPartsGeometries.size(); j++)
+         {
+            for (String key : bodyPartsGeometries.get(j).keySet())
+            {
                LogTools.info("     {} {}", key, bodyPartsGeometries.get(j).get(key));
             }
          }
          proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled));
-         taskRelevantBodyPart.put(taskNames.get(i),relevantBodyParts.get(i));
+         taskRelevantBodyPart.put(taskNames.get(i), relevantBodyParts.get(i));
       }
       for (ProMPManager proMPManager : proMPManagers.values())
          proMPManager.learnTaskFromDemos();
@@ -145,8 +149,12 @@ public class ProMPAssistant implements TeleoperationAssistant
             {
                //store observed pose
                Pose3D lastObservedPose = new Pose3D();
-               lastObservedPose.getPosition().set(observedPose.getPosition().getX(),observedPose.getPosition().getY(),observedPose.getPosition().getZ());
-               lastObservedPose.getOrientation().set(observedPose.getOrientation().getX(),observedPose.getOrientation().getY(),observedPose.getOrientation().getZ(),observedPose.getOrientation().getS());
+               lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
+               lastObservedPose.getOrientation()
+                               .set(observedPose.getOrientation().getX(),
+                                    observedPose.getOrientation().getY(),
+                                    observedPose.getOrientation().getZ(),
+                                    observedPose.getOrientation().getS());
                bodyPartObservedFrameTrajectory.get(bodyPart).add(lastObservedPose);
                //update the proMP prediction according to observations and observed goal and generate mean trajectory
                if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
@@ -161,8 +169,12 @@ public class ProMPAssistant implements TeleoperationAssistant
          {
             //store observed pose
             Pose3D lastObservedPose = new Pose3D();
-            lastObservedPose.getPosition().set(observedPose.getPosition().getX(),observedPose.getPosition().getY(),observedPose.getPosition().getZ());
-            lastObservedPose.getOrientation().set(observedPose.getOrientation().getX(),observedPose.getOrientation().getY(),observedPose.getOrientation().getZ(),observedPose.getOrientation().getS());
+            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
+            lastObservedPose.getOrientation()
+                            .set(observedPose.getOrientation().getX(),
+                                 observedPose.getOrientation().getY(),
+                                 observedPose.getOrientation().getZ(),
+                                 observedPose.getOrientation().getS());
             bodyPartObservedFrameTrajectory.get(bodyPart).add(lastObservedPose);
             //update the proMP prediction according to observations and generate mean trajectory
             if (bodyPartObservedFrameTrajectory.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
@@ -228,17 +240,21 @@ public class ProMPAssistant implements TeleoperationAssistant
          bodyPartObservedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
       LogTools.info("   - Updating ProMP speed ...");
       //update speed proMP based on hands observed trajectories
-//      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+      //      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get("rightHand"), "rightHand");
       LogTools.info("   - Updating ProMP trajectories ...");
       //update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedFrameTrajectory.keySet())
       {
          List<Pose3DReadOnly> robotPartObservedTrajectory = bodyPartObservedFrameTrajectory.get(robotPart);
-         for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
-         {
-            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
-         }
+         if (robotPartObservedTrajectory.size() > 0)
+            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart,
+                                               robotPartObservedTrajectory.get(robotPartObservedTrajectory.size() - 1),
+                                               robotPartObservedTrajectory.size() - 1);
+         //         for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
+         //         {
+         //            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
+         //         }
       }
    }
 
