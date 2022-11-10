@@ -69,6 +69,11 @@ public class YoConstraintOptimizerParameters implements ConstraintOptimizerParam
       this.deltaInside.set(distanceInside);
    }
 
+   public void setShouldPerformOptimization(boolean shouldPerformOptimization)
+   {
+      this.shouldPerformOptimization.set(shouldPerformOptimization);
+   }
+
    public void setConstrainMaxAdjustment(boolean constraintMaxAdjustment)
    {
       this.constrainMaxAdjustment.set(constraintMaxAdjustment);

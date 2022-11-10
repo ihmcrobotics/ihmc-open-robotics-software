@@ -67,13 +67,14 @@ public class PlanarRegionSnapVisualizer
       footholdData[stepsVisualized.getIntegerValue()].footPoseIsOnBoundaryOfWorld.set(true);
    }
 
-   public void recordSnapTransform(RigidBodyTransformReadOnly snapTransform, PlanarRegion regionSnappedTo)
+   public void recordSnapTransform(int regionsUnderFoot, RigidBodyTransformReadOnly snapTransform, PlanarRegion regionSnappedTo)
    {
       int i = stepsVisualized.getIntegerValue();
 
       if (i >= numberOfStepsToVisualize)
          return;
 
+      footholdData[i].regionsUnderFoot.set(regionsUnderFoot);
       footholdData[i].footWasSnapped.set(true);
       footholdData[i].footSnapTranslation.set(snapTransform.getTranslation());
 
@@ -120,6 +121,7 @@ public class PlanarRegionSnapVisualizer
       private final YoBoolean footWasSnapped;
       private final YoBoolean footHadRegion;
       private final YoBoolean footPoseIsOnBoundaryOfWorld;
+      private final YoInteger regionsUnderFoot;
 
       private final YoVector3D footSnapTranslation;
       private final YoVector3D footWiggleTranslation;
@@ -135,6 +137,7 @@ public class PlanarRegionSnapVisualizer
          footWasWiggled = new YoBoolean("footWasWiggled" + suffix, registry);
          footWasSnapped = new YoBoolean("footWasSnapped" + suffix, registry);
          footHadRegion = new YoBoolean("footHadRegion" + suffix, registry);
+         regionsUnderFoot = new YoInteger("regionsUnderFoot" + suffix, registry);
          footPoseIsOnBoundaryOfWorld = new YoBoolean("footPoseIsOnBoundaryOfWorld" + suffix, registry);
 
          footSnapTranslation = new YoVector3D("footSnapTranslation" + suffix, registry);
@@ -170,6 +173,7 @@ public class PlanarRegionSnapVisualizer
          footWasWiggled.set(false);
          footWasSnapped.set(false);
          footHadRegion.set(false);
+         regionsUnderFoot.set(-1);
          footPoseIsOnBoundaryOfWorld.set(false);
       }
    }
