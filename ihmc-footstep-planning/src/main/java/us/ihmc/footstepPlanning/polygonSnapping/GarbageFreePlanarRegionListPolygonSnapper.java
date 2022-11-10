@@ -28,7 +28,7 @@ public class GarbageFreePlanarRegionListPolygonSnapper
                                                  PlanarRegion regionToPack,
                                                  RigidBodyTransform snapTransformToPack)
    {
-
+      // TODO I should be able to bypass this part occasionally
       PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo, intersectingRegions);
 
       if (intersectingRegions.isEmpty())
