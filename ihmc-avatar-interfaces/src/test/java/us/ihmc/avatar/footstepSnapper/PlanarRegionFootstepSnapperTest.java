@@ -3,6 +3,7 @@ package us.ihmc.avatar.footstepSnapper;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.*;
@@ -29,7 +30,10 @@ public class PlanarRegionFootstepSnapperTest
       footPolygon.update();
 
       SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
-      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon), steppableRegionsCalculator, new YoRegistry("test"));
+      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon),
+                                                                            steppableRegionsCalculator,
+                                                                            new ConstraintOptimizerParameters(),
+                                                                            new YoRegistry("test"));
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
