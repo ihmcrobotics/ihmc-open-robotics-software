@@ -79,7 +79,7 @@ public abstract class RDXBehaviorUIInterface extends BehaviorTreeNode implements
    {
       setPreviousStatus(externalNode.getPreviousStatus());
       setName(externalNode.getName());
-      setLastTickMillis(externalNode.getLastTickMillis());
+      setLastTickInstant(externalNode.getLastTickInstant());
       setType(externalNode.getType());
 
       if (externalNode instanceof BehaviorTreeControlFlowNodeBasics)
