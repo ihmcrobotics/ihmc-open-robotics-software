@@ -399,14 +399,18 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.clear();
       }
 
-      boolean allAreDeleted = interactablePelvis.isDeleted();
-      for (RobotSide side : interactableHands.sides())
+      boolean allAreDeleted = true;
+      if (interactablesAvailable)
       {
-         allAreDeleted &= interactableHands.get(side).isDeleted();
-      }
-      for (RobotSide side : interactableFeet.sides())
-      {
-         allAreDeleted &= interactableFeet.get(side).isDeleted();
+         allAreDeleted &= interactablePelvis.isDeleted();
+         for (RobotSide side : interactableHands.sides())
+         {
+            allAreDeleted &= interactableHands.get(side).isDeleted();
+         }
+         for (RobotSide side : interactableFeet.sides())
+         {
+            allAreDeleted &= interactableFeet.get(side).isDeleted();
+         }
       }
       desiredRobot.setActive(!allAreDeleted);
    }
