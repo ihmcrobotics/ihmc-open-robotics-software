@@ -52,12 +52,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private final SimpleSteppableRegionsCalculator steppableRegionsCalculator;
 
-
    // temp variables
-   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-   private final RigidBodyTransform snapTransform = new RigidBodyTransform();
-   private final PlanarRegion tempRegion = new PlanarRegion();
-
    private final PlanarRegionSnapVisualizer snapVisualizer;
 
    public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters,
@@ -78,7 +73,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
          footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
       }
 
-      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons, steppableRegionsCalculator)
+      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons, steppableRegionsCalculator, registry)
       {
          @Override
          public void adjustFootstepPlan(FramePose3DReadOnly stanceFootPose,
@@ -92,7 +87,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
          }
       };
       snapVisualizer = new PlanarRegionSnapVisualizer(registry, graphicsListRegistry);
-      stepSnapper.attachPlanarRegionSnapperCallback(snapVisualizer);
+      stepSnapper.attachPlanarRegionSnapVisualizer(snapVisualizer);
 
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
@@ -103,8 +98,6 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 //      footstepValidityIndicators.add(this::isStepSnappable);
       footstepValidityIndicators.add(this::isSafeStepHeight);
       //      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
-
-      registry.addChild(stepSnapper.getRegistry());
    }
 
    public void setShouldSnapToRegions(boolean shouldSnapToRegions)
@@ -148,22 +141,6 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    public List<FootstepValidityIndicator> getFootstepValidityIndicators()
    {
       return footstepValidityIndicators;
-   }
-
-   private boolean isStepSnappable(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
-   {
-      if (steppableRegionsCalculator.getSteppableRegions().isEmpty() || !shouldSnapToRegions.getValue())
-         return true;
-
-      footPolygon.set(stepSnapper.getFootPolygon(swingSide));
-      footPolygon.applyTransform(touchdownPose, false);
-
-      return stepSnapper.getSnapper()
-                        .snapPolygonToPlanarRegionsList(footPolygon,
-                                                        steppableRegionsCalculator.getSteppableRegions(),
-                                                        Double.POSITIVE_INFINITY,
-                                                        tempRegion,
-                                                        snapTransform);
    }
 
    private boolean isSafeStepHeight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
