@@ -76,7 +76,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.footPolygons = footPolygons;
 
       useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
-//      useSimpleSnapping.set(true);
+      useSimpleSnapping.set(true);
 
       wiggleParameters.setDesiredDistanceInside(-0.02);
 
@@ -155,13 +155,13 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
     * @param unsnappedSolePose
     * @param footStepPolygonInSoleFrame
     */
-   private void snapTheFootStraightDown(FramePose3DBasics unsnappedSolePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame)
+   private void snapTheFootStraightDown(FramePose3DBasics solePoseToSnap, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame)
    {
       // If we project the foot vertically down, find all the planar regions that the foothold would intersect
       // FIXME this doesn't require any frames, you can just use the pose directly as a transform.
-      soleFrameBeforeSnapping.setPoseAndUpdate(unsnappedSolePose);
+      soleFrameBeforeSnapping.setPoseAndUpdate(solePoseToSnap);
       unsnappedFootstepPolygonInWorld.set(footStepPolygonInSoleFrame);
-      unsnappedFootstepPolygonInWorld.applyTransform(unsnappedSolePose, false);
+      unsnappedFootstepPolygonInWorld.applyTransform(solePoseToSnap, false);
 
       PlanarRegionTools.findPlanarRegionsIntersectingPolygon(unsnappedFootstepPolygonInWorld,
                                                              steppableRegionsProvider.getSteppableRegions(),
@@ -169,22 +169,20 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
       // If the foot isn't above any planar region, set the height to the closest region. If it is above some regions, set the height to the highest point if
       // vertically projecting
-      FixedFramePoint3DBasics footPosition = unsnappedSolePose.getPosition();
+      FixedFramePoint3DBasics footPosition = solePoseToSnap.getPosition();
       PlanarRegion closestRegion;
       if (regionsIntersectingFoothold.size() == 0)
       {
-         closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(),
-                                                                               footPosition.getY(),
-                                                                               steppableRegionsProvider.getSteppableRegions());
+         closestRegion = null;
+         solePoseToSnap.set(footstepAtSameHeightAsStanceFoot);
       }
       else
       {
          // FIXME this very well may be bad, if the planar regions are at a ridiculous angle.
          closestRegion = findHighestPlanarRegionAtPoint(footPosition.getX(), footPosition.getY(), regionsIntersectingFoothold);
+         // set the height of the footstep as the height on the closest region
+         footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
       }
-
-      // set the height of the footstep as the height on the closest region
-      footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
 
       // Update the visualizer
       if (planarRegionSnapVisualizer != null)
@@ -214,20 +212,31 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          // If the foot isn't above any planar region, set the height to the closest region. If it is above some regions, set the height to the highest point if
          // vertically projecting
          FixedFramePoint3DBasics footPosition = solePose.getPosition();
-         PlanarRegion closestRegion;
+         PlanarRegion closestRegion = null;
          if (regionsIntersectingFoothold.size() == 0)
-            closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(),
-                                                                                  footPosition.getY(),
-                                                                                  steppableRegionsProvider.getSteppableRegions());
+         {
+//            closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(),
+//                                                                                  footPosition.getY(),
+//                                                                                  steppableRegionsProvider.getSteppableRegions());
+            solePose.set(footstepAtSameHeightAsStanceFoot);
+         }
          else
+         {
             closestRegion = findHighestPlanarRegionAtPoint(footPosition.getX(), footPosition.getY(), regionsIntersectingFoothold);
 
-         footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
+            footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
+         }
          // TODO we don't yet need to set the snapped polygon
 //         snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
 
          if (planarRegionSnapVisualizer != null)
+         {
             planarRegionSnapVisualizer.recordFootPoseIsOnBoundary();
+            snapTransform.setToZero();
+            snapTransform.getTranslation().setZ(footPosition.getZ());
+            planarRegionSnapVisualizer.recordSnapTransform(snapTransform, closestRegion);
+         }
+
 
          return;
       }
