@@ -116,29 +116,40 @@ public class SplitFractionFromPositionCalculator
          boolean isABigStepDown = stepHeight < -splitFractionParameters.getStepHeightForLargeStepDown();
          boolean isABigStepUp = stepHeight > splitFractionParameters.getStepHeightForLargeStepUp();
          if (isABigStepDown || isABigStepUp)
-         {  // This step is either a big step up or a big step down.
+         {  // This step is either a big step up or a big step down. So do the calculation accordingly.
+
+            // what constitutes a large step? This determines how far up or down to start shifting.
             double largeStepHeight = isABigStepDown ?
                   splitFractionParameters.getStepHeightForLargeStepDown() :
                   splitFractionParameters.getStepHeightForLargeStepUp();
+            // This determines how far up or down to saturate.
             double largestStepHeight = isABigStepDown ? splitFractionParameters.getLargestStepDownHeight() : splitFractionParameters.getLargestStepUpHeight();
 
+            // This is like an alpha value for how "down" or "up" the step is, and must be between 0 and 1.
             double alpha = Math.min(1.0, (Math.abs(stepHeight) - largeStepHeight) / (largestStepHeight - largeStepHeight));
 
+            // This says what the extreme value of the split fraction should be if stepping or down. If down, we likely want to initially move the CoP very
+            // quickly, and then move it slowly (like loading the foot quickly). If up, we want the opposite.
             double splitFractionAtFullDepth = isABigStepDown ?
                   splitFractionParameters.getTransferSplitFractionAtFullDepth() :
                   splitFractionParameters.getTransferSplitFractionForStepUpAtFullDepth();
 
+            // Figure out what the actual split fraction should be, based on how far up or down they are.
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction, splitFractionAtFullDepth, alpha);
 
-            double currentSplitFraction = transferSplitFractionProvider.applyAsDouble(0);
-            double currentWeightDistribution = transferWeightDistributionProvider.applyAsDouble(0);
-
+            // This says what the extreme value of the weight distribution should be if stepping or down. If down, we likely want to the CoP to be closer to the
+            // upcoming foot. If up, we want the opposite.
             double splitFractionWeightDistributionAtFullDepth = isABigStepDown ?
                   splitFractionParameters.getTransferWeightDistributionAtFullDepth() :
                   splitFractionParameters.getTransferWeightDistributionForStepUpAtFullDepth();
+            // Figure out what the actual weight distribution should be, based on how far up or down they are.
             double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
                                                                                      splitFractionWeightDistributionAtFullDepth,
                                                                                      alpha);
+
+            // Apply the split fraction and weight distribution to the base value set forth by the planner.
+            double currentSplitFraction = transferSplitFractionProvider.applyAsDouble(0);
+            double currentWeightDistribution = transferWeightDistributionProvider.applyAsDouble(0);
 
             double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
             double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution,
@@ -209,6 +220,7 @@ public class SplitFractionFromPositionCalculator
                      splitFractionParameters.getTransferWeightDistributionForStepUpAtFullDepth();
                double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution, weightDistributionAtFullDepth, alpha);
 
+               // Apply the split fraction and weight distribution to the base value set forth by the planner.
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
                double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution,
                                                                                             currentWeightDistribution,
