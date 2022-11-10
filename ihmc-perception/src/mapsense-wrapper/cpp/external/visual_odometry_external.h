@@ -3,6 +3,8 @@
 // #include "core.h"
 #include "application_state.h"
 #include "visual_odometry.h"
+#include "keyframe_external.h"
+#include "landmark_external.h"
 
 class VisualOdometryExternal
 {
@@ -18,6 +20,10 @@ class VisualOdometryExternal
         // void updateMonocular(uint8_t* buffer, int height, int width);
         void updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width);
         
+
+        void getExternalKeyframe(KeyframeExternal* keyframe);
+
+        uint32_t getExternalLandmarks(LandmarkExternal* landmarks, uint32_t maxSize);
 
     private:
         

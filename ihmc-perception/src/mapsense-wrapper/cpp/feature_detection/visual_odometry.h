@@ -6,12 +6,11 @@
 #include "point_landmark.h"
 #include "camera_model.h"
 #include "keyframe.h"
-#include "keyframe_external.h"
-#include "landmark_external.h"
 
 
 using KeyPointVec = std::vector<cv::KeyPoint>;
 using Point2fVec = std::vector<cv::Point2f>;
+using PointLandmarkVec = std::vector<PointLandmark>;
 
 class VisualOdometry
 {
@@ -37,11 +36,11 @@ class VisualOdometry
       void GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv::DMatch>& matches);
       void ExtractMatchesAsPoints(const KeyPointVec& keypoints, Point2fVec& points);
       void FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, float distanceThreshold);
-      void ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, std::vector<PointLandmark>& points3D);
-      void CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D);
+      void ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, PointLandmarkVec& points3D);
+      void CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, PointLandmarkVec& points3D);
       void CalculateOdometry_FAST(Eigen::Matrix4f& transform);
       void TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
-                                   std::vector<PointLandmark>& points3D);
+                                   PointLandmarkVec& points3D);
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const std::vector<cv::DMatch>& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
 
@@ -51,10 +50,13 @@ class VisualOdometry
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       
 
-      void DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& landmarks);
+      void DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks);
       void DrawAllMatches(cv::Mat& image);
       void Display(cv::Mat& image);
       void Show(int delay = 1);
+
+      const Keyframe& GetLastKeyframe() const {return _keyframes[_keyframes.size() - 1]; };
+      const PointLandmarkVec& GetMeasurements3D() const {return _curPoints3D; };
 
    private:
       ApplicationState _appState;
@@ -77,7 +79,7 @@ class VisualOdometry
       std::vector<Keyframe> _keyframes;
       std::vector<cv::DMatch> matchesLeft, matchesRight, prevMatchesStereo, curMatchesStereo;
       KeyPointVec kp_prevLeft, kp_prevRight, kp_curLeft, kp_curRight;
-      std::vector<PointLandmark> _prevPoints3D, _curPoints3D;
+      PointLandmarkVec _prevPoints3D, _curPoints3D;
       Point2fVec prevFeaturesLeft, curFeaturesLeft;
       Point2fVec prevPoints2D, curPoints2D;
       
@@ -93,7 +95,5 @@ class VisualOdometry
 
       double baselineDistance = 0.5;
       
-      std::vector<KeyframeExternal> _externalKeyframes;
-
 };
 

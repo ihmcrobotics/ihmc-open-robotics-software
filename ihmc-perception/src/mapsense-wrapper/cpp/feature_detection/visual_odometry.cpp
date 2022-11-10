@@ -93,7 +93,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 // {
 //    auto start_point = std::chrono::steady_clock::now();
 //    cv::Mat cvPose, points4D;
-//    std::vector<PointLandmark> points3D;
+//    PointLandmarkVec points3D;
 
 //    if (!leftImage.empty() && leftImage.rows > 0 && leftImage.cols > 0 && !rightImage.empty() && rightImage.rows > 0 && rightImage.cols > 0)
 //    {
@@ -211,7 +211,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 // }
 
 
-void VisualOdometry::DrawLandmarks(cv::Mat& img, std::vector<PointLandmark>& landmarks)
+void VisualOdometry::DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks)
 {
    for (uint32_t i = 0; i < landmarks.size(); i++)
    {
@@ -329,7 +329,7 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv:
 
 
 void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
-                                             std::vector<PointLandmark>& points3D)
+                                             PointLandmarkVec& points3D)
 {
    points3D.clear();
    float x1, x2, y1, y2, y_hat, X, Y, Z;
@@ -374,7 +374,7 @@ void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointV
    //   printf("Triangulate(): Total Depth Points: {}", points3D.size());
 }
 
-void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, std::vector<PointLandmark>& points3D)
+void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, PointLandmarkVec& points3D)
 {
    for (auto match: leftMatches)
    {
@@ -455,7 +455,7 @@ void VisualOdometry::FilterMatchesByDistance(std::vector<cv::DMatch>& matches, c
    }
 }
 
-// void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, std::vector<PointLandmark>& points3D)
+// void VisualOdometry::CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, PointLandmarkVec& points3D)
 // {
 //    printf("CalculateOdometry_ORB\n");
 
@@ -637,20 +637,15 @@ void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
 
 void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight)
 {
-   _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight));
+   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight));
 }
 
 void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat)
 {
-   _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight, leftMat.clone(), rightMat.clone()));
+   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight, leftMat.clone(), rightMat.clone()));
 }
 
 void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const cv::Mat& leftMat)
 {
-   _keyframes.emplace_back(Keyframe(pose, descLeft.clone(), kpLeft, leftMat.clone()));
-}
-
-void VisualOdometry::InsertKeyframeExternal(Eigen::Matrix4f pose, KeyPointVec& kpLeft, )
-{
-   _externalKeyframes.emplace_back(Keyframe(pose, descLeft.clone(), kpLeft, leftMat.clone()));
+   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), kpLeft, leftMat.clone()));
 }

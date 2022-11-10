@@ -89,14 +89,24 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
 }
 
-void VisualOdometryExternal::getExternalKeyframe(KeyframeExternal* keyframe, uint32_t* size)
+void VisualOdometryExternal::getExternalKeyframe(KeyframeExternal* keyframe)
 {
-
+    keyframe->keyframeID = _visualOdometry->GetLastKeyframe().id;
+    std::copy(_visualOdometry->GetLastKeyframe().pose.data(),
+                _visualOdometry->GetLastKeyframe().pose.data() + 16,
+                keyframe->odometry);
 }
 
-void VisualOdometryExternal::getExternalLandmarks(LandmarkExternal* landmarks, uint32_t size)
+uint32_t VisualOdometryExternal::getExternalLandmarks(LandmarkExternal* landmarks, uint32_t maxSize)
 {
-
+    auto points3d = _visualOdometry->GetMeasurements3D();
+    for(uint32_t i = 0; i<points3d.size(); i++)
+    {
+        landmarks[i].landmarkID = points3d[i].GetLandmarkID();
+        std::copy(  points3d[i].GetPoint2D().data(), 
+                    points3d[i].GetPoint2D().data() + 1,  
+                    landmarks[i].measurement);
+    }
 }
 
 // void VisualOdometryExternal::testStereoFeatureExtraction(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)

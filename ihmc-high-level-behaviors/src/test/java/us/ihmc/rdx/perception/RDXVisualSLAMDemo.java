@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
@@ -33,17 +34,13 @@ public class RDXVisualSLAMDemo
    private ImageMat displayImageLeft;
 
    private String fileName = "000000.png";
+   private int fileIndex = 0;
 
    public RDXVisualSLAMDemo()
    {
       vslam = new VisualSLAMModule();
 
-      fileName = String.format("%1$6s", frameIndex).replace(' ', '0') + ".png";
-      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
-      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
 
-      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
-      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
 
       executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
 
@@ -75,7 +72,16 @@ public class RDXVisualSLAMDemo
 
    public void update()
    {
-      vslam.update();
+      fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
+      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
+      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
+
+      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
+      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
+
+      vslam.update(currentImageLeft, currentImageRight);
+
+      fileIndex++;
    }
 
    public static void main(String[] args)
