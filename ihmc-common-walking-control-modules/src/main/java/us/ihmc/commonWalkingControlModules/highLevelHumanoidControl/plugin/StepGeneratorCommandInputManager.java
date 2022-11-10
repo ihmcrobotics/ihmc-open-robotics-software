@@ -21,6 +21,7 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -33,6 +34,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private boolean isUnitVelocities = false;
    private final Vector2D desiredVelocity = new Vector2D();
    private double turningVelocity = 0.0;
+   private int ticksToUpdateTheEnvironment = Integer.MAX_VALUE;
    private HighLevelControllerName currentController;
    private ContinuousStepGenerator continuousStepGenerator;
 
@@ -43,6 +45,7 @@ public class StepGeneratorCommandInputManager implements Updatable
    private final AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>(null);
    private final AtomicReference<WalkingStatus> previousWalkingStatus = new AtomicReference<>(null);
    private final AtomicBoolean shouldSubmitNewRegions = new AtomicBoolean(true);
+   private final AtomicInteger ticksSinceUpdatingTheEnvironment = new AtomicInteger(0);
 
    public StepGeneratorCommandInputManager()
    {
@@ -131,6 +134,8 @@ public class StepGeneratorCommandInputManager implements Updatable
          ContinuousStepGeneratorParametersCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorParametersCommand.class);
          ContinuousStepGeneratorParameters parameters = command.getParameters();
 
+         ticksToUpdateTheEnvironment = parameters.getTicksToUpdateTheEnvironment();
+
          if (continuousStepGenerator != null)
          {
             continuousStepGenerator.setFootstepTiming(parameters.getSwingDuration(), parameters.getTransferDuration());
@@ -156,13 +161,24 @@ public class StepGeneratorCommandInputManager implements Updatable
       if (latestFootstepStatusReceived.get() != previousFootstepStatusReceived.get())
          shouldSubmitNewRegions.set(true);
 
+      // If the regions are old, update them
+      if (ticksSinceUpdatingTheEnvironment.get() > ticksToUpdateTheEnvironment)
+         shouldSubmitNewRegions.set(true);
+
       // submit the new planar regions
       if (isOpen && shouldSubmitNewRegions.getAndSet(false) && latestPlanarRegions.get() != null)
       {
          PlanarRegionsListCommand command = latestPlanarRegions.getAndSet(null);
 
-         for (int i = 0; i < planarRegionsListCommandConsumers.size(); i++)
-            planarRegionsListCommandConsumers.get(i).accept(command);
+         if (command != null)
+         {
+            for (int i = 0; i < planarRegionsListCommandConsumers.size(); i++)
+               planarRegionsListCommandConsumers.get(i).accept(command);
+
+            ticksSinceUpdatingTheEnvironment.set(0);
+         }
+
+         ticksSinceUpdatingTheEnvironment.incrementAndGet();
       }
 
       previousWalkingStatus.set(latestWalkingStatus.get());
