@@ -171,11 +171,11 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerGoalGizmo.process3DViewInput(input, selected);
       mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
 
-      if (mouseRingPickSelected && leftMouseReleasedWithoutDrag)
+      if (mouseRingPickSelected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
       {
          becomeModified(true);
       }
-      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && leftMouseReleasedWithoutDrag)
+      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && (leftMouseReleasedWithoutDrag || !footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
       {
          selected = false;
       }
@@ -184,7 +184,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          updateStuff();
       }
-      if (selected && leftMouseReleasedWithoutDrag)
+      if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
       {
          if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
          {

@@ -122,6 +122,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final Color color = Color.ORANGE;
    private final RDXVRPickResult vrPickResult = new RDXVRPickResult();
    private boolean isRingHoveredFromVR = false;
+   private boolean isVRTriggerDown = false;
+   private boolean isNewlyModifiedFromVR = false;
 
    public RDXPathControlRingGizmo()
    {
@@ -238,7 +240,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
 
-      if (!translateDragData.isDragging() && !yawDragData.isDragging())
+      if (!translateDragData.isDragging() && !yawDragData.isDragging() && !isGizmoHoveredFromVR)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
@@ -318,8 +320,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            // Holding onto the right controller trigger button
            if (controller.getTriggerTouchedActionData().bState())
            {
-
-              isNewlyModified = true;
+              isVRTriggerDown = true;
+              isNewlyModifiedFromVR = true;
               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(vrPickRay, closestCollision, Axis3D.Z);
               tempFramePose3D.setToZero(gizmoFrame);
               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
@@ -330,10 +332,17 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 //              this.controlRingPose.set(proposedTeleportPose);
               updateTransforms();
            }
+           else
+           {
+              isVRTriggerDown = false;
+           }
          });
       }
       else
+      {
+         isNewlyModifiedFromVR = false;
          isRingHoveredFromVR = true;
+      }
 
    }
 
@@ -669,38 +678,39 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public boolean getAnyPartPickSelected()
    {
-      return isGizmoHovered
+      return (isGizmoHovered || isGizmoHoveredFromVR)
              && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
    public boolean getAnyArrowPickSelected()
    {
-      return isGizmoHovered && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      return (isGizmoHovered || isGizmoHoveredFromVR)
+             && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
    }
 
    public boolean getHollowCylinderPickSelected()
    {
-      return isGizmoHovered && hollowCylinderIntersects;
+      return (isGizmoHovered || isGizmoHoveredFromVR) && hollowCylinderIntersects;
    }
 
    public boolean getPositiveXArrowPickSelected()
    {
-      return isGizmoHovered && positiveXArrowIntersects;
+      return (isGizmoHovered || isGizmoHoveredFromVR) && positiveXArrowIntersects;
    }
 
    public boolean getPositiveYArrowPickSelected()
    {
-      return isGizmoHovered && positiveYArrowIntersects;
+      return (isGizmoHovered || isGizmoHoveredFromVR) && positiveYArrowIntersects;
    }
 
    public boolean getNegativeXArrowPickSelected()
    {
-      return isGizmoHovered && negativeXArrowIntersects;
+      return (isGizmoHovered || isGizmoHoveredFromVR) && negativeXArrowIntersects;
    }
 
    public boolean getNegativeYArrowPickSelected()
    {
-      return isGizmoHovered && negativeYArrowIntersects;
+      return (isGizmoHovered || isGizmoHoveredFromVR) && negativeYArrowIntersects;
    }
 
    public void setShowArrows(boolean showArrows)
@@ -720,7 +730,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public boolean isNewlyModified()
    {
-      return isNewlyModified;
+      return isNewlyModified || isNewlyModifiedFromVR;
    }
 
    public boolean getGizmoHovered()
@@ -731,5 +741,15 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public boolean isRingHoveredFromVR()
    {
       return isRingHoveredFromVR;
+   }
+
+   public boolean isVRTriggerDown()
+   {
+      return isVRTriggerDown;
+   }
+
+   public boolean isGizmoGrabbedFromVR()
+   {
+      return isVRTriggerDown && isGizmoHoveredFromVR;
    }
 }
