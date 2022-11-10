@@ -201,6 +201,11 @@ public class RDXBehaviorUIManager
       highestLevelUI.getRenderables(renderables, pool);
    }
 
+   public void setBehaviorModuleHost(String hostname)
+   {
+      behaviorModuleHost.set(hostname);
+   }
+
    public void connectViaKryo(String hostname)
    {
       behaviorModuleHost.set(hostname);
