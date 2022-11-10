@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.StatusBasedBipedalSupportPlanarRegionCalculator;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.Axis3D;
@@ -40,7 +41,7 @@ public class LookAndStepPlanarRegionsManager
    private final boolean useSLAMToCombineRegions = true;
 
    private final LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
-   private final StatusBasedBipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
+   private final BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
    private final ROS2SyncedRobotModel syncedRobot;
 
    private final Timer planarRegionsExpirationTimer = new Timer();
@@ -63,7 +64,7 @@ public class LookAndStepPlanarRegionsManager
                                           ROS2SyncedRobotModel syncedRobot)
    {
       this.lookAndStepParameters = lookAndStepParameters;
-      bipedalSupportPlanarRegionCalculator = new StatusBasedBipedalSupportPlanarRegionCalculator(robotModel);
+      bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(robotModel);
       this.syncedRobot = syncedRobot;
    }
 
