@@ -98,6 +98,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private Mat depthYUV420Image;
    private BytePointer depthJPEGImageBytePointer;
    private Mat debugYUV420Image;
+   private Mat flippedDebugImage;
    private BytePointer debugJPEGImageBytePointer;
    private IntPointer compressionParameters;
    private CameraPinholeBrown depthCameraIntrinsics;
@@ -182,6 +183,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthYUV420Image = new Mat();
             depthJPEGImageBytePointer = new BytePointer();
             debugYUV420Image = new Mat();
+            flippedDebugImage = new Mat();
             debugJPEGImageBytePointer = new BytePointer();
 
             if (enableROS1)
@@ -337,7 +339,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthImagePacket.setAcquisitionTimeAdditionalNanos(now.getNano());
             ros2DepthVideoPublisher.publish(depthImagePacket);
 
-            opencv_imgproc.cvtColor(debugExtractionImage.getBytedecoOpenCVMat(), debugYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            BytedecoOpenCVTools.flipY(debugExtractionImage.getBytedecoOpenCVMat(), flippedDebugImage);
+            opencv_imgproc.cvtColor(flippedDebugImage, debugYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
             opencv_imgcodecs.imencode(".jpg", debugYUV420Image, debugJPEGImageBytePointer, compressionParameters);
 
             heapByteArrayData = new byte[debugJPEGImageBytePointer.asBuffer().remaining()];
