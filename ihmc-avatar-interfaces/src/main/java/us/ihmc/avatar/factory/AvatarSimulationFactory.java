@@ -338,7 +338,7 @@ public class AvatarSimulationFactory
          {
             stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
                                                                                       robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
-                                                                                      new SnapAndWiggleSingleStepParameters());
+                                                                                      robotModel.get().getSteppingEnvironmentalConstraintParameters());
             stepSnapperUpdatable.setShouldSnapToRegions(true);
          }
 
