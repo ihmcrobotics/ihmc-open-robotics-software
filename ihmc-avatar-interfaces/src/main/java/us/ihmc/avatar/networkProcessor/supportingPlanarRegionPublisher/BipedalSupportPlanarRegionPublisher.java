@@ -34,7 +34,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private ScheduledFuture<?> task;
 
-   private final StatusBasedBipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
+   private final BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
 
    public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node)
    {
@@ -49,7 +49,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
    private BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
    {
       String robotName = robotModel.getSimpleRobotName();
-      bipedalSupportPlanarRegionCalculator = new StatusBasedBipedalSupportPlanarRegionCalculator(robotModel);
+      bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(robotModel);
 
       manageROS2Node = realtimeROS2Node == null;
       if (realtimeROS2Node == null)
