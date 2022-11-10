@@ -163,15 +163,19 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
       this.concaveHullsVertices.clear();
+      convexHull.clear();
       for (int i = 0; i < concaveHullVertices.size(); i++)
+      {
          this.concaveHullsVertices.add(concaveHullVertices.get(i));
+         convexHull.addVertex(concaveHullVertices.get(i));
+      }
+      convexHull.update();
 
       convexPolygons.clear();
       for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
          convexPolygons.add(planarRegionConvexPolygons.get(i));
 
       updateBoundingBox();
-      updateConvexHull();
 
       regionId = newRegionId;
    }
