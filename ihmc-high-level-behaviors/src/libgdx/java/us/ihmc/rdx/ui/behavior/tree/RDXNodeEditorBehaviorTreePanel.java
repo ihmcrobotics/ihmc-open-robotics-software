@@ -13,8 +13,6 @@ import org.abego.treelayout.TreeLayout;
 import org.abego.treelayout.util.DefaultTreeForTreeLayout;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
-import us.ihmc.commons.Conversions;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
@@ -210,10 +208,8 @@ public class RDXNodeEditorBehaviorTreePanel
 
    private void renderNodeAndChildren(RDXBehaviorUIInterface node, int parentPin, ArrayList<Pair<Integer, Integer>> links)
    {
-      long timeSinceLastTick = -1;
-
-      timeSinceLastTick = System.currentTimeMillis() - node.getLastTickMillis();
-      boolean isTickRecent = timeSinceLastTick < 5000;
+      double timeSinceLastTick = node.getTimeSinceLastTick();
+      boolean isTickRecent = node.hasBeenTicked() && timeSinceLastTick < 5.0;
 
       if (node.getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
       {
@@ -324,32 +320,29 @@ public class RDXNodeEditorBehaviorTreePanel
          tickPlot = new ImGuiMovingPlot("ticks", 1000, 230, 15);
          tickPlots.put(nodeIndex, tickPlot);
       }
-      if (timeSinceLastTick > -1)
+
+      double tickPeriod = 0.2;
+      double recentTickWindow = tickPeriod * 0.75;
+      boolean tickedThisFrame = node.hasBeenTicked() && timeSinceLastTick < recentTickWindow;
+      boolean tickedRecently = node.hasBeenTicked() && timeSinceLastTick < 1.0;
+      BehaviorTreeNodeStatus status = node.getPreviousStatus();
+      tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
+      tickPlot.calculate(status != null && tickedRecently ? status.name() : "", shouldRender);
+
+      if (shouldRender)
       {
-         double tickPeriod = 0.2;
-         double recentTickWindow = tickPeriod * 0.75;
-         //         double v = UnitConversions.hertzToSeconds(Gdx.graphics.getFramesPerSecond());
-         boolean tickedThisFrame = Conversions.millisecondsToSeconds(timeSinceLastTick) < recentTickWindow;
-         boolean tickedRecently = Conversions.millisecondsToSeconds(timeSinceLastTick) < 1.0;
-         BehaviorTreeNodeStatus status = node.getPreviousStatus();
-         tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
-         tickPlot.calculate(status != null && tickedRecently ? status.name() : "", shouldRender);
-
-         if (shouldRender)
+         if (status != null)
          {
-            if (status != null)
-            {
-               ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
-               ImGui.sameLine();
-               ImGui.text("Last status: " + status.name());
-            }
-            else
-            {
-               ImGui.text("Not yet ticked.");
-            }
-
-            node.renderTreeNodeImGuiWidgets();
+            ImGui.text(String.format("Last tick: %.2f s ago", timeSinceLastTick));
+            ImGui.sameLine();
+            ImGui.text("Last status: " + status.name());
          }
+         else
+         {
+            ImGui.text("Not yet ticked.");
+         }
+
+         node.renderTreeNodeImGuiWidgets();
       }
 
       if (!shouldRender)
