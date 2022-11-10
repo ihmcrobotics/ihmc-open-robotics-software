@@ -14,6 +14,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegion
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class PlanarRegionFootstepSnapperTest
 {
@@ -28,7 +29,7 @@ public class PlanarRegionFootstepSnapperTest
       footPolygon.update();
 
       SimpleSteppableRegionsCalculator steppableRegionsCalculator = new SimpleSteppableRegionsCalculator();
-      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon), steppableRegionsCalculator);
+      PlanarRegionFootstepSnapper snapper = new PlanarRegionFootstepSnapper(new SideDependentList<>(footPolygon, footPolygon), steppableRegionsCalculator, new YoRegistry("test"));
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
