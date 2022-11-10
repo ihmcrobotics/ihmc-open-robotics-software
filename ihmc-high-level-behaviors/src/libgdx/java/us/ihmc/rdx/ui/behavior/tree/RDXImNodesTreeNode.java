@@ -41,10 +41,10 @@ public class RDXImNodesTreeNode
 
    public void render(int parentPinIndex, ArrayList<Pair<Integer, Integer>> links)
    {
-      long timeSinceLastTick = -1;
+      long timeSinceLastTickMs = -1;
 
-      timeSinceLastTick = System.currentTimeMillis() - behaviorNodeUI.getLastTickMillis();
-      boolean isTickRecent = timeSinceLastTick < 5000;
+      timeSinceLastTickMs = System.currentTimeMillis() - behaviorNodeUI.getLastTickMillis();
+      boolean isTickRecent = timeSinceLastTickMs < 5000;
 
       int color;
       if (behaviorNodeUI.getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
@@ -132,20 +132,21 @@ public class RDXImNodesTreeNode
          ImNodes.endOutputAttribute();
       }
 
-      if (timeSinceLastTick > -1)
+      if (timeSinceLastTickMs > -1)
       {
          double tickPeriod = 0.2;
          double recentTickWindow = tickPeriod * 0.75;
          //         double v = UnitConversions.hertzToSeconds(Gdx.graphics.getFramesPerSecond());
-         boolean tickedThisFrame = Conversions.millisecondsToSeconds(timeSinceLastTick) < recentTickWindow;
-         boolean tickedRecently = Conversions.millisecondsToSeconds(timeSinceLastTick) < 1.0;
+         boolean tickedThisFrame = Conversions.millisecondsToSeconds(timeSinceLastTickMs) < recentTickWindow;
+         boolean tickedRecently = Conversions.millisecondsToSeconds(timeSinceLastTickMs) < 1.0;
          BehaviorTreeNodeStatus status = behaviorNodeUI.getPreviousStatus();
          tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
          tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);
 
          if (status != null)
          {
-            ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
+            double timeSinceLastTick = Conversions.millisecondsToSeconds(timeSinceLastTickMs);
+            ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick) + " s ago");
             ImGui.sameLine();
             ImGui.text("Last status: " + status.name());
          }
