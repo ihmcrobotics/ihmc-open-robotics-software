@@ -2,8 +2,14 @@ package us.ihmc.avatar.sharedControl;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
+import us.ihmc.promp.ProMPUtil;
+import us.ihmc.promp.SizeTVector;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 import us.ihmc.tools.io.WorkspaceDirectory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProMPAssistantTest
 {
@@ -17,6 +23,7 @@ public class ProMPAssistantTest
       String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
       String demoDirectory = directoryAbsolutePath + "/test/PushDoorTest";
       String testFilePath = demoDirectory + "/1.csv";
+
       // replay that file
       TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2);
       FramePose3D framePose = new FramePose3D();
@@ -42,5 +49,6 @@ public class ProMPAssistantTest
             proMPAssistant.processFrameInformation(framePose, "rightHand");
          }
       }
+      LogTools.info("Test completed successfully! You can visualize plots by running the file .../ihmc-open-robotics-software/promp/etc/1Dplots_ProMPAssistantTest.py");
    }
 }
