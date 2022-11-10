@@ -52,27 +52,27 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCPPVersion = "1.5.7"
+val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.19-")
-   apiBytedecoNatives("opencv", "4.5.5-")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.19-")
-   apiBytedecoNatives("opencv", "4.5.5-")
+   apiBytedecoNatives("openblas", "0.3.21-")
+   apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
-   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 
 slamWrapperDependencies {
@@ -99,7 +99,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.31.0")
+   api("us.ihmc:ihmc-commons-testing:0.32.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

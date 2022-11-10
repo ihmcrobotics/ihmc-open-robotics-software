@@ -1,0 +1,9 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Live Robot Part Interactable" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

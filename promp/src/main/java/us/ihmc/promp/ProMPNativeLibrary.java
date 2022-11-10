@@ -46,6 +46,10 @@ public class ProMPNativeLibrary implements NativeLibraryDescription
 
    public static boolean load() {
       if (!loaded) {
+         // We need to disable javacpp from trying to automatically load libraries.
+         // Otherwise, it will try to load them by name when they aren't in the library path
+         // (LD_LIBRARY_PATH on Linux).
+         System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
          ProMPNativeLibrary prompLib = new ProMPNativeLibrary();
          loaded = NativeLibraryLoader.loadLibrary(prompLib);
       }

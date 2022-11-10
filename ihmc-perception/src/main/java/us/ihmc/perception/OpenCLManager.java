@@ -6,6 +6,7 @@ import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,7 +72,7 @@ public class OpenCLManager
       checkReturnCode();
 
       /* Create Command Queue */
-      IntPointer properties = null;
+      LongPointer properties = null;
       commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
       checkReturnCode();
    }
@@ -108,7 +109,12 @@ public class OpenCLManager
 
    public _cl_program loadProgram(String programName)
    {
-      String sourceAsString = OpenCLTools.readFile(Paths.get("openCL", programName + ".cl"));
+      Path programPath = Paths.get("openCL", programName + ".cl");
+      LogTools.info("Loading OpenCL program: {}", programPath);
+      String sourceAsString = OpenCLTools.readFile(programPath);
+
+      // Support loading from CRLF (Windows) checkouts
+      sourceAsString = sourceAsString.replaceAll("\\r\\n", "\n");
 
       /* Create Kernel program from the read in source */
       int count = 1;
