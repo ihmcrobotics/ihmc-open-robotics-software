@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepPlanSnapper;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionSnapVisualizer;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
@@ -12,7 +14,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepG
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
@@ -52,16 +53,16 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private final SimpleSteppableRegionsCalculator steppableRegionsCalculator;
 
-   // temp variables
    private final PlanarRegionSnapVisualizer snapVisualizer;
 
    public HumanoidSteppingPluginEnvironmentalConstraints(RobotContactPointParameters<RobotSide> contactPointParameters,
                                                          SteppingParameters steppingParameters,
-                                                         SnapAndWiggleSingleStepParameters snapAndWiggleSingleStepParameters)
+                                                         SteppingEnvironmentalConstraintParameters environmentalConstraintParameters)
    {
       this.steppingParameters = steppingParameters;
 
-      steppableRegionsCalculator = new SimpleSteppableRegionsCalculator(snapAndWiggleSingleStepParameters);
+      steppableRegionsCalculator = new SimpleSteppableRegionsCalculator(environmentalConstraintParameters::getMinPlanarRegionAreaForStepping,
+                                                                        environmentalConstraintParameters::getMaxPlanarRegionNormalAngleForStepping);
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
@@ -73,7 +74,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
          footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
       }
 
-      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons, steppableRegionsCalculator, registry)
+      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons,
+                                                        steppableRegionsCalculator,
+                                                        environmentalConstraintParameters.getConstraintOptimizerParameters(),
+                                                        registry)
       {
          @Override
          public void adjustFootstepPlan(FramePose3DReadOnly stanceFootPose,

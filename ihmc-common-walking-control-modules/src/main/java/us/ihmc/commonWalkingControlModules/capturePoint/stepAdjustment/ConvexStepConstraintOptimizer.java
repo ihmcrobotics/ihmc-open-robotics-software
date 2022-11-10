@@ -81,7 +81,6 @@ public class ConvexStepConstraintOptimizer
       iterations = new YoInteger("StepConstrationOptimizerIterations", registry);
    }
 
-
    public void reset()
    {
       iterations.set(0);
