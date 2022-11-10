@@ -270,7 +270,7 @@ public class AtlasLookAndStepBehaviorTest
                                 reachedGoalOrFallen.set();
                              });
 
-      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = new LookAndStepBehaviorParameters();
+      LookAndStepBehaviorParameters lookAndStepBehaviorParameters = robotModel.getLookAndStepParameters();
       StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
       lookAndStepBehaviorParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
       IHMCROS2Publisher<StoredPropertySetMessage> parametersPublisher = new IHMCROS2Publisher<>(ros2Node, LOOK_AND_STEP_PARAMETERS);
