@@ -42,7 +42,7 @@ public class SimpleSteppableRegionsCalculator implements SteppableRegionsProvide
 
          double polygonArea = 0.0;
          for (int regionIdx = 0; regionIdx < candidateRegion.getConvexPolygons().size(); regionIdx++)
-            polygonArea += candidateRegion.getConvexPolygons().get(i).getArea();
+            polygonArea += candidateRegion.getConvexPolygons().get(regionIdx).getArea();
 
          if (polygonArea < minRegionArea.getValue())
             continue;
