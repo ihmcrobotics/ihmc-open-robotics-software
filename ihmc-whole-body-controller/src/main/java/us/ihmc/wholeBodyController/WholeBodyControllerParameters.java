@@ -38,11 +38,6 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
       return new DefaultPushRecoveryControllerParameters();
    }
 
-   default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
-   {
-      return new SteppingEnvironmentalConstraintParameters();
-   }
-
 	public RobotContactPointParameters<E> getContactPointParameters();
 
    public HumanoidRobotSensorInformation getSensorInformation();
