@@ -76,15 +76,25 @@ public class PlanarRegionSnapVisualizer
 
       footholdData[i].footWasSnapped.set(true);
       footholdData[i].footSnapTranslation.set(snapTransform.getTranslation());
-      footholdData[i].regionsSnapped.set(regionSnappedTo);
 
-      footholdData[i].concaveRegionHull.clear();
-      for (int vertex = 0; vertex < Math.min(maximumVertices, regionSnappedTo.getConvexHull().getNumberOfVertices()); vertex++)
-         footholdData[i].concaveRegionHull.addVertex(regionSnappedTo.getConvexHull().getVertex(vertex));
-      footholdData[i].concaveRegionHull.update();
+      if (regionSnappedTo != null)
+      {
+         footholdData[i].footHadRegion.set(true);
+         footholdData[i].concaveRegionHull.clear();
+         for (int vertex = 0; vertex < Math.min(maximumVertices, regionSnappedTo.getConcaveHull().size()); vertex++)
+            footholdData[i].concaveRegionHull.addVertex(regionSnappedTo.getConcaveHullVertex(vertex));
+         footholdData[i].concaveRegionHull.update();
 
-      footholdData[i].concaveRegionPose.set(regionSnappedTo.getTransformToWorld());
-      footholdData[i].concaveRegionPose.prependTranslation(0.0, 0.0, 0.001);
+         footholdData[i].concaveRegionPose.set(regionSnappedTo.getTransformToWorld());
+         footholdData[i].concaveRegionPose.prependTranslation(0.0, 0.0, 0.001);
+      }
+      else
+      {
+         footholdData[i].concaveRegionHull.clear();
+         footholdData[i].concaveRegionPose.setToNaN();
+      }
+
+
    }
 
    public void recordWiggleTransform(RigidBodyTransformReadOnly wiggleTransform)
@@ -100,7 +110,6 @@ public class PlanarRegionSnapVisualizer
 
    private static class FootholdData
    {
-      private final PlanarRegion regionsSnapped = new PlanarRegion();
       private final YoFrameConvexPolygon2D concaveRegionHull;
       private final YoFramePose3D concaveRegionPose;
 
@@ -109,6 +118,7 @@ public class PlanarRegionSnapVisualizer
 
       private final YoBoolean footWasWiggled;
       private final YoBoolean footWasSnapped;
+      private final YoBoolean footHadRegion;
       private final YoBoolean footPoseIsOnBoundaryOfWorld;
 
       private final YoVector3D footSnapTranslation;
@@ -124,6 +134,7 @@ public class PlanarRegionSnapVisualizer
 
          footWasWiggled = new YoBoolean("footWasWiggled" + suffix, registry);
          footWasSnapped = new YoBoolean("footWasSnapped" + suffix, registry);
+         footHadRegion = new YoBoolean("footHadRegion" + suffix, registry);
          footPoseIsOnBoundaryOfWorld = new YoBoolean("footPoseIsOnBoundaryOfWorld" + suffix, registry);
 
          footSnapTranslation = new YoVector3D("footSnapTranslation" + suffix, registry);
@@ -158,6 +169,7 @@ public class PlanarRegionSnapVisualizer
 
          footWasWiggled.set(false);
          footWasSnapped.set(false);
+         footHadRegion.set(false);
          footPoseIsOnBoundaryOfWorld.set(false);
       }
    }
