@@ -28,8 +28,6 @@ public class BoundingBoxCollisionDetector
    // this is the bounding box of "bodyBox", used as an optimization before doing a full collision check
    private final BoundingBox3D boundingBox = new BoundingBox3D();
 
-   private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
-
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
@@ -52,19 +50,11 @@ public class BoundingBoxCollisionDetector
 
    public BodyCollisionData checkForCollision()
    {
-      BodyCollisionData collisionData = new BodyCollisionData();
-      checkForCollision(collisionData);
-
-      return collisionData;
-   }
-
-   public boolean checkForCollision(BodyCollisionData collisionDataToPack)
-   {
       checkInputs();
       setBoundingBoxPosition();
       setDimensions();
 
-      boolean collisionDetected = false;
+      BodyCollisionData collisionData = new BodyCollisionData();
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
@@ -76,20 +66,16 @@ public class BoundingBoxCollisionDetector
             EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
             if (collisionResult.areShapesColliding())
             {
-               collisionDetected = true;
-               if (collisionDataToPack != null)
-               {
-                  collisionDataToPack.setCollisionDetected(true);
-                  collisionDataToPack.setCollisionResult(collisionResult);
-                  collisionDataToPack.getPlanarRegion().set(region);
-                  collisionDataToPack.getBodyBox().set(bodyBox);
-               }
+               collisionData.setCollisionDetected(true);
+               collisionData.setCollisionResult(collisionResult);
+               collisionData.getPlanarRegion().set(region);
+               collisionData.getBodyBox().set(bodyBox);
                break;
             }
          }
       }
 
-      return collisionDetected;
+      return collisionData;
    }
 
    private static double getMinimumPositiveValue(double... values)
