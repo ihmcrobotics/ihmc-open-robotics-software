@@ -1,8 +1,6 @@
 package us.ihmc.avatar.stepAdjustment;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
