@@ -80,14 +80,19 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
 
       if (environmentalConstraints != null)
       {
+         // sets up the environmental constraint manager as a planar region consumer in the input manager
          pluginFactory.addPlanarRegionsListCommandConsumer(environmentalConstraints);
+         // Adds functions that adjust the footholds based on the environment.
          pluginFactory.setFootStepPlanAdjustment(environmentalConstraints.getFootstepPlanAdjustment());
+         // Adds checkers for footholds based on the environment
          for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
 
-         // The update is used to reset the visualizer loop
+         // clear the environment at the beginning of every update
          pluginFactory.addUpdatable(environmentalConstraints);
       }
+
+      // create the callback listeners for the planar regions in the stepping plugin
       if (ros2Node != null)
          pluginFactory.createStepGeneratorNetworkSubscriber(drcRobotModel.getSimpleRobotName(), ros2Node);
 

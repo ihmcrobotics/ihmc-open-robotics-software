@@ -104,22 +104,27 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       //      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
    }
 
+   /**
+    * Sets the boolean as to whether to snap the foothold to the planar regions.
+    */
    public void setShouldSnapToRegions(boolean shouldSnapToRegions)
    {
       this.shouldSnapToRegions.set(shouldSnapToRegions);
    }
 
+   /**
+    * Update called to reset the visualizer
+    */
    @Override
    public void update(double timeInState)
-   {
-      reset();
-   }
-
-   public void reset()
    {
       snapVisualizer.reset();
    }
 
+   /**
+    * Consume the planar regions that are published to the step genreator.
+    * @param planarRegionsListCommand the input argument
+    */
    @Override
    public void accept(PlanarRegionsListCommand planarRegionsListCommand)
    {
@@ -137,11 +142,17 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       return graphicsListRegistry;
    }
 
+   /**
+    * Returns a snapper that will snap a {@link FootstepDataListMessage} to the environment modeled by planar regions
+    */
    public FootstepPlanAdjustment getFootstepPlanAdjustment()
    {
       return stepSnapper;
    }
 
+   /**
+    * Returns the list of validity indicators, that check whether or not a footstep is valid.
+    */
    public List<FootstepValidityIndicator> getFootstepValidityIndicators()
    {
       return footstepValidityIndicators;
