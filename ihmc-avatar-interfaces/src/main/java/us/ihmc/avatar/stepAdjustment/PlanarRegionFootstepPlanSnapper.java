@@ -3,7 +3,6 @@ package us.ihmc.avatar.stepAdjustment;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.SteppableRegionsProvider;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -40,6 +39,7 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
       snapper.attachPlanarRegionSnapVisualizer(planarRegionSnapperCallback);
    }
 
+   /** {@inheritDoc} **/
    @Override
    public void adjustFootstepPlan(FramePose3DReadOnly stanceFootPose, int footstepIndexToStart, FootstepDataListMessage footstepDataListMessageToAdjust)
    {
