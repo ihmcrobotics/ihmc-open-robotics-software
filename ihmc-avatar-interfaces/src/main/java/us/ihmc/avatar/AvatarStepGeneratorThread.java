@@ -85,6 +85,7 @@ public class AvatarStepGeneratorThread implements AvatarControllerThreadInterfac
          for (FootstepValidityIndicator footstepValidityIndicator : environmentalConstraints.getFootstepValidityIndicators())
             pluginFactory.addFootstepValidityIndicator(footstepValidityIndicator);
 
+         // The update is used to reset the visualizer loop
          pluginFactory.addUpdatable(environmentalConstraints);
       }
       if (ros2Node != null)
