@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -42,7 +41,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final YoBoolean useSimpleSnapping;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
-   private final PlanarRegion regionToSnapTo = new PlanarRegion();
+
+   private PlanarRegionSnapVisualizer planarRegionSnapVisualizer;
 
    // temp variables used for calculation
    private final List<PlanarRegion> regionsIntersectingFoothold = new ArrayList<>();
@@ -51,13 +51,18 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final ConvexPolygon2D convexHullOfAllThePlanarRegions = new ConvexPolygon2D();
 
    private final PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", ReferenceFrame.getWorldFrame());
-   private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle",
+                                                                                               ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame soleFrameAfterWiggle = new PoseReferenceFrame("SoleFrameAfterWiggle", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame planarRegionFrame = new PoseReferenceFrame("PlanarRegionFrame", ReferenceFrame.getWorldFrame());
 
-   private final FrameConvexPolygon2D unsnappedFootstepPolygonInWorld = new FrameConvexPolygon2D();
+   // This is the transform that takes the foot pose from zero pitch, roll, and height, onto the planar region at that point.
+   private final RigidBodyTransform snapTransform = new RigidBodyTransform();
+   private final PlanarRegion regionToSnapTo = new PlanarRegion();
 
-   private PlanarRegionSnapVisualizer planarRegionSnapVisualizer;
+   private final ConvexPolygon2D unsnappedFootstepPolygonInWorld = new ConvexPolygon2D();
+   private final ConvexPolygon2D snappedAndWiggledFootstepPolygon = new ConvexPolygon2D();
+
 
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                       SteppableRegionsProvider steppableRegionsProvider,
@@ -70,9 +75,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.footPolygons = footPolygons;
 
       useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
-      useSimpleSnapping.set(true);
+//      useSimpleSnapping.set(true);
 
-      wiggleParameters.setDesiredDistanceInside(0.02);
+      wiggleParameters.setDesiredDistanceInside(-0.02);
 
       parentRegistry.addChild(registry);
    }
@@ -82,7 +87,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.planarRegionSnapVisualizer = planarRegionSnapperCallback;
    }
 
-   private final ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D();
 
    @Override
    public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose,
@@ -116,11 +120,13 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
             if (useSimpleSnapping.getValue())
             {
                snapTheFootStraightDown(adjustedFootstepPose, footPolygonToWiggle);
-               wiggledPolygon.set(footPolygonToWiggle);
+               // TODO we don't need to set the polygon yet.
+//               wiggledPolygon.set(footPolygonToWiggle);
             }
             else
             {
-               snapTheFootToRegionsAndWiggleInside(adjustedFootstepPose, footPolygonToWiggle, wiggledPolygon);
+               // TODO adding the wiggled polygon isn't necessary yet
+               snapTheFootToRegionsAndWiggleInside(adjustedFootstepPose, footPolygonToWiggle);//, wiggledPolygon);
             }
 
             // check to make sure the snap didn't make the adjustment have NaN
@@ -144,6 +150,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    /**
     * Snaps the foot straight down onto the planar regions
+    *
     * @param unsnappedSolePose
     * @param footStepPolygonInSoleFrame
     */
@@ -152,8 +159,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       // If we project the foot vertically down, find all the planar regions that the foothold would intersect
       // FIXME this doesn't require any frames, you can just use the pose directly as a transform.
       soleFrameBeforeSnapping.setPoseAndUpdate(unsnappedSolePose);
-      unsnappedFootstepPolygonInWorld.setIncludingFrame(soleFrameBeforeSnapping, footStepPolygonInSoleFrame);
-      unsnappedFootstepPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      unsnappedFootstepPolygonInWorld.set(footStepPolygonInSoleFrame);
+      unsnappedFootstepPolygonInWorld.applyTransform(unsnappedSolePose, false);
 
       PlanarRegionTools.findPlanarRegionsIntersectingPolygon(unsnappedFootstepPolygonInWorld,
                                                              steppableRegionsProvider.getSteppableRegions(),
@@ -187,13 +194,15 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
    }
 
-   private void snapTheFootToRegionsAndWiggleInside(FramePose3DBasics solePose, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame, ConvexPolygon2DBasics snappedFootstepPolygonToPack)
+   private void snapTheFootToRegionsAndWiggleInside(FramePose3DBasics solePose,
+                                                    ConvexPolygon2DReadOnly footStepPolygonInSoleFrame)
+//                                                    ConvexPolygon2DBasics snappedFootstepPolygonToPack)
    {
       // If we project the foot vertically down, find all the planar regions that the foothold would intersect
       // FIXME this doesn't require any frames, you can just use the pose directly as a transform.
       soleFrameBeforeSnapping.setPoseAndUpdate(solePose);
-      unsnappedFootstepPolygonInWorld.setIncludingFrame(soleFrameBeforeSnapping, footStepPolygonInSoleFrame);
-      unsnappedFootstepPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      unsnappedFootstepPolygonInWorld.set(footStepPolygonInSoleFrame);
+      unsnappedFootstepPolygonInWorld.applyTransform(solePose, false);
 
       if (isFootPolygonOnBoundaryOfPlanarRegions(steppableRegionsProvider.getSteppableRegions(), unsnappedFootstepPolygonInWorld))
       {
@@ -206,12 +215,15 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          FixedFramePoint3DBasics footPosition = solePose.getPosition();
          PlanarRegion closestRegion;
          if (regionsIntersectingFoothold.size() == 0)
-            closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY(), steppableRegionsProvider.getSteppableRegions());
+            closestRegion = findClosestPlanarRegionToPointByProjectionOntoXYPlane(footPosition.getX(),
+                                                                                  footPosition.getY(),
+                                                                                  steppableRegionsProvider.getSteppableRegions());
          else
             closestRegion = findHighestPlanarRegionAtPoint(footPosition.getX(), footPosition.getY(), regionsIntersectingFoothold);
 
          footPosition.setZ(closestRegion.getPlaneZGivenXY(footPosition.getX(), footPosition.getY()));
-         snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
+         // TODO we don't yet need to set the snapped polygon
+//         snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
 
          if (planarRegionSnapVisualizer != null)
             planarRegionSnapVisualizer.recordFootPoseIsOnBoundary();
@@ -219,81 +231,103 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          return;
       }
 
-      doSnapAndWiggle(solePose, footStepPolygonInSoleFrame, unsnappedFootstepPolygonInWorld, snappedFootstepPolygonToPack);
 
-      snappedFootstepPolygonToPack.applyInverseTransform(solePose, false);
+      // Snap the sole pose from where it was spawned to the planar region environment
+      snapFootstepToPlanarRegionEnvironment(solePose, regionToSnapTo, unsnappedFootstepPolygonInWorld);
+      // Wiggle the snapped pose into the planar region environments
+      wiggleFootstepIntoPlanarRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo);
+      // Crop the foothold to match the region
+      // TODO this isn't necessary yet, since we can't pack the polygons
+//      cropFootholdToMatchRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo, snappedFootstepPolygonToPack);
    }
-
-   private final RigidBodyTransform snapTransform = new RigidBodyTransform();
 
    private final RigidBodyTransform transformFromSoleToRegion = new RigidBodyTransform();
    private final ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
 
-   private void doSnapAndWiggle(FramePose3DBasics solePoseToSnapAndWiggle,
-                                ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
-                                FrameConvexPolygon2DReadOnly footPolygonInWorld,
-                                ConvexPolygon2DBasics snappedFootholdInWorldToPack)
+   private void snapFootstepToPlanarRegionEnvironment(FramePose3DBasics solePoseToSnap,
+                                                      PlanarRegion regionToPack,
+                                                      ConvexPolygon2DReadOnly footPolygonInWorld)
    {
       if (!snapper.snapPolygonToPlanarRegionsList(footPolygonInWorld,
                                                   steppableRegionsProvider.getSteppableRegions(),
                                                   Double.POSITIVE_INFINITY,
-                                                  regionToSnapTo,
+                                                  regionToPack,
                                                   snapTransform))
       {
          throw new RuntimeException("Snapping failed");
       }
 
-      solePoseToSnapAndWiggle.setZ(0.0);
-      solePoseToSnapAndWiggle.applyTransform(snapTransform);
+      solePoseToSnap.setZ(0.0);
+      solePoseToSnap.applyTransform(snapTransform);
 
       if (planarRegionSnapVisualizer != null)
-         planarRegionSnapVisualizer.recordSnapTransform(snapTransform, regionToSnapTo);
+         planarRegionSnapVisualizer.recordSnapTransform(snapTransform, regionToPack);
+   }
 
-      planarRegionFrame.setPoseAndUpdate(regionToSnapTo.getTransformToWorld());
-      soleFrameAfterSnapAndBeforeWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
+   private void wiggleFootstepIntoPlanarRegion(FramePose3DBasics solePoseToWiggle,
+                                               ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
+                                               PlanarRegion planarRegionToWiggleInside)
+   {
+      planarRegionFrame.setPoseAndUpdate(planarRegionToWiggleInside.getTransformToWorld());
+      soleFrameAfterSnapAndBeforeWiggle.setPoseAndUpdate(solePoseToWiggle);
 
       soleFrameAfterSnapAndBeforeWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);
       footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
       footPolygonInRegionFrame.applyTransform(transformFromSoleToRegion, false);
 
       stepConstraintOptimizer.reset();
-      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footPolygonInRegionFrame, regionToSnapTo.getConvexHull(), wiggleParameters);
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footPolygonInRegionFrame,
+                                                                                                   planarRegionToWiggleInside.getConvexHull(),
+                                                                                                   wiggleParameters);
 
       if (wiggleTransform == null)
-         solePoseToSnapAndWiggle.setToNaN();
+      { // Wiggle failed, set the pose to NaN
+         solePoseToWiggle.setToNaN();
+      }
       else
       {
-         solePoseToSnapAndWiggle.changeFrame(planarRegionFrame);
-         solePoseToSnapAndWiggle.applyTransform(wiggleTransform);
-         solePoseToSnapAndWiggle.changeFrame(ReferenceFrame.getWorldFrame());
+         // change the footstep pose into the planar region, and then compute where it as after the transform
+         solePoseToWiggle.changeFrame(planarRegionFrame);
+         solePoseToWiggle.applyTransform(wiggleTransform);
+
+         // get the pose of the footstep in the world
+         solePoseToWiggle.changeFrame(ReferenceFrame.getWorldFrame());
 
          if (planarRegionSnapVisualizer != null)
             planarRegionSnapVisualizer.recordWiggleTransform(wiggleTransform);
       }
+   }
 
+   private void cropFootholdToMatchRegion(FramePose3DReadOnly solePose,
+                                          ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
+                                          PlanarRegion planarRegionSnappedTo,
+                                          ConvexPolygon2DBasics snappedFootholdInSoleToPack)
+   {
       // check for partial foothold
       if (wiggleParameters.shouldPerformOptimization() && wiggleParameters.getDesiredDistanceInside() < 0.0)
       {
-         soleFrameAfterWiggle.setPoseAndUpdate(solePoseToSnapAndWiggle);
+         soleFrameAfterWiggle.setPoseAndUpdate(solePose);
          soleFrameAfterWiggle.getTransformToDesiredFrame(transformFromSoleToRegion, planarRegionFrame);
          footPolygonInRegionFrame.set(footStepPolygonInSoleFrame);
          footPolygonInRegionFrame.applyTransform(transformFromSoleToRegion, false);
 
-         convexPolygonTools.computeIntersectionOfPolygons(regionToSnapTo.getConvexHull(), footPolygonInRegionFrame, snappedFootholdInWorldToPack);
+         convexPolygonTools.computeIntersectionOfPolygons(planarRegionSnappedTo.getConvexHull(), footPolygonInRegionFrame, snappedFootholdInSoleToPack);
 
-         snappedFootholdInWorldToPack.applyInverseTransform(transformFromSoleToRegion, false);
+         // transform from the region to the world
+         snappedFootholdInSoleToPack.applyInverseTransform(transformFromSoleToRegion, false);
       }
       else
-      {
-         snappedFootholdInWorldToPack.set(footPolygonInWorld);
+      { // If we're not supposed to crop the foothold, set it to the value in the world
+         snappedFootholdInSoleToPack.set(footStepPolygonInSoleFrame);
       }
    }
 
    /**
     * Checks if the foot polygon extends past the modeled environment.
+    *
     * @return whether the footstep gets out of bounds of the modeled environment.
     */
-   private boolean isFootPolygonOnBoundaryOfPlanarRegions(List<PlanarRegion> planarRegionsList, FrameConvexPolygon2D footPolygonInWorld)
+   private boolean isFootPolygonOnBoundaryOfPlanarRegions(List<PlanarRegion> planarRegionsList, ConvexPolygon2DReadOnly footPolygonInWorld)
    {
       // get the convex hull of all the planar regions in the environment by adding all the convex hulls
       convexHullOfAllThePlanarRegions.clear();
@@ -321,8 +355,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    /**
     * Finds the planar region that is the closest distance in x-y to the point passed in.
     *
-    * @param x x position of the point in question in the world
-    * @param y y position of the point in question in the world
+    * @param x              x position of the point in question in the world
+    * @param y              y position of the point in question in the world
     * @param regionsToCheck regions to check for finding the height
     * @return closest region to the point
     */
@@ -347,8 +381,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    /**
     * Finds the highest planar region at the point
-    * @param x x position of the point in question in the world
-    * @param y y position of the point in question in the world
+    *
+    * @param x                 x position of the point in question in the world
+    * @param y                 y position of the point in question in the world
     * @param regionsBelowPoint regions below the x-y position passed in
     * @return highest region at the point
     */
