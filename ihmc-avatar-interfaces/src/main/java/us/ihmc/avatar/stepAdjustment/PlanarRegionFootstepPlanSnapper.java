@@ -2,6 +2,7 @@ package us.ihmc.avatar.stepAdjustment;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -28,9 +29,10 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
 
    public PlanarRegionFootstepPlanSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                           SteppableRegionsProvider steppableRegionsProvider,
+                                          ConstraintOptimizerParametersReadOnly constraintOptimizerParameters,
                                           YoRegistry parentRegistry)
    {
-      snapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsProvider, parentRegistry);
+      snapper = new PlanarRegionFootstepSnapper(footPolygons, steppableRegionsProvider, constraintOptimizerParameters, parentRegistry);
    }
 
    public void attachPlanarRegionSnapVisualizer(PlanarRegionSnapVisualizer planarRegionSnapperCallback)

@@ -1,5 +1,6 @@
 package us.ihmc.avatar.stepAdjustment;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
@@ -63,14 +64,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    private final ConvexPolygon2D unsnappedFootstepPolygonInWorld = new ConvexPolygon2D();
    private final ConvexPolygon2D snappedAndWiggledFootstepPolygon = new ConvexPolygon2D();
 
-
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                       SteppableRegionsProvider steppableRegionsProvider,
+                                      ConstraintOptimizerParametersReadOnly constraintOptimizerParameters,
                                       YoRegistry parentRegistry)
    {
       this.steppableRegionsProvider = steppableRegionsProvider;
       YoRegistry registry = new YoRegistry("PlanarRegionFootstepSnapper");
-      this.wiggleParameters = new YoConstraintOptimizerParameters(registry);
+      this.wiggleParameters = new YoConstraintOptimizerParameters(constraintOptimizerParameters, registry);
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       this.footPolygons = footPolygons;
 

@@ -4,6 +4,7 @@ import java.io.InputStream;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.DefaultPushRecoveryControllerParameters;
@@ -35,6 +36,11 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    default PushRecoveryControllerParameters getPushRecoveryControllerParameters()
    {
       return new DefaultPushRecoveryControllerParameters();
+   }
+
+   default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
+   {
+      return new SteppingEnvironmentalConstraintParameters();
    }
 
 	public RobotContactPointParameters<E> getContactPointParameters();
