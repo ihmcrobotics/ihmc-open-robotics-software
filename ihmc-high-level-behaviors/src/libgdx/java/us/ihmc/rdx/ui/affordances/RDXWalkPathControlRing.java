@@ -98,16 +98,20 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private DRCRobotModel robotModel;
    private LookAndStepBehaviorParameters lookAndStepBehaviorParameters;
    private BehaviorHelper behaviorHelper = null;
+   private RDXLookAndStepBehaviorUI highestLevelUI = null;
    private ImBoolean useSupportRegion = new ImBoolean(false);
+   private ImBoolean useFlatGround = new ImBoolean(true);
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
                       ROS2SyncedRobotModel syncedRobot,
                       RDXTeleoperationParameters teleoperationParameters,
-                      BehaviorHelper behaviorHelper)
+                      BehaviorHelper behaviorHelper,
+                      RDXLookAndStepBehaviorUI highestLevelUI)
    {
       create(panel3D,robotModel,syncedRobot,teleoperationParameters);
       this.behaviorHelper = behaviorHelper;
+      this.highestLevelUI = highestLevelUI;
    }
 
    public void create(RDX3DPanel panel3D,
@@ -164,6 +168,13 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    private void updateLookAndStepGoal()
    {
+      if(useFlatGround.get())
+      {
+         setupLookAndStepFlatGround();
+      }
+      else
+         setupLookAndStepPlanarRegion();
+
       publishLookAndStepGoal();
    }
 
@@ -271,6 +282,10 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
             case LOOK_AND_STEP -> updateLookAndStepGoal();
          }
       });
+      if (footstepPlanningAlgorithm!=RDXFootstepPlanningAlgorithm.LOOK_AND_STEP)
+      {
+         highestLevelUI.clearGraphics();
+      }
    }
 
    private void updateStuff()
@@ -357,26 +372,18 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.LOOK_AND_STEP;
       }
-      if (ImGui.button(labels.get("Approve Look and Step")))
-      {
-         behaviorHelper.publish(LookAndStepBehaviorAPI.ReviewApproval, true);
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Setup Look-and-step")))
-      {
-         lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.detectFlatGround, false);
-         lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.assumeFlatGround, true);
-         lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.useInitialSupportRegions, useSupportRegion.get());
-         lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.flatGroundBodyPathPlan, true);
-         behaviorHelper.publish(LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepBehaviorParameters));
-         behaviorHelper.publish(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-      }
+//      if (ImGui.button(labels.get("Approve Look and Step")))
+//      {
+//         behaviorHelper.publish(LookAndStepBehaviorAPI.ReviewApproval, true);
+//      }
 
       if (ImGui.checkbox(labels.get("Toggle support region"), useSupportRegion))
       {
          lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.useInitialSupportRegions, useSupportRegion.get());
          behaviorHelper.publish(LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepBehaviorParameters));
       }
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Toggle flat ground mode"), useFlatGround);
 
       ImGui.text("Control ring:");
       ImGui.sameLine();
@@ -467,6 +474,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       selected = false;
       modified = false;
       clearGraphics();
+      highestLevelUI.clearGraphics();
    }
 
    public void clearGraphics()
@@ -554,5 +562,25 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private void publishLookAndStepGoal()
    {
       behaviorHelper.publish(GOAL_INPUT, new Pose3D(goalPose));
+   }
+
+   private void setupLookAndStepFlatGround()
+   {
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.detectFlatGround, false);
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.assumeFlatGround, true);
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.useInitialSupportRegions, useSupportRegion.get());
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.flatGroundBodyPathPlan, true);
+      behaviorHelper.publish(LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepBehaviorParameters));
+      behaviorHelper.publish(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+   }
+
+   private void setupLookAndStepPlanarRegion()
+   {
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.detectFlatGround, false);
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.assumeFlatGround, false);
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.useInitialSupportRegions, useSupportRegion.get());
+      lookAndStepBehaviorParameters.set(LookAndStepBehaviorParameters.flatGroundBodyPathPlan, true);
+      behaviorHelper.publish(LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepBehaviorParameters));
+      behaviorHelper.publish(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
    }
 }

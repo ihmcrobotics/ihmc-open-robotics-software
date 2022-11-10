@@ -20,6 +20,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXLookAndStepBehaviorUI;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIRegistry;
@@ -236,5 +237,10 @@ public class RDXBehaviorUIManager
    public BehaviorHelper getHelper()
    {
       return this.helper;
+   }
+
+   public RDXBehaviorUIInterface getHighestLevelUI()
+   {
+      return highestLevelUI;
    }
 }

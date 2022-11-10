@@ -28,6 +28,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.*;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXLookAndStepBehaviorUI;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.footstepPlanner.RDXFootstepPlanning;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
@@ -101,6 +102,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private boolean isPlacingFootstep = false;
    private BehaviorHelper behaviorHelper = null;
+   private RDXLookAndStepBehaviorUI highestLevelUI = null;
    private final LookAndStepBehaviorParameters lookAndStepBehaviorParameters;
 
    public RDXTeleoperationManager(String robotRepoName,
@@ -115,7 +117,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                   CommunicationHelper communicationHelper,
                                   BehaviorHelper behaviorHelper)
    {
-      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, behaviorHelper, null, null, null, null);
+      this(robotRepoName, robotSubsequentPathToResourceFolder, communicationHelper, behaviorHelper, null, null, null, null, null);
    }
 
    public RDXTeleoperationManager(String robotRepoName,
@@ -130,6 +132,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
            communicationHelper,
            null,
            null,
+           null,
            robotSelfCollisionModel,
            robotEnvironmentCollisionModel,
            yoVariableClientHelper);
@@ -139,6 +142,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
                                   String robotSubsequentPathToResourceFolder,
                                   CommunicationHelper communicationHelper,
                                   BehaviorHelper behaviorHelper,
+                                  RDXLookAndStepBehaviorUI highestLevelUI,
                                   LookAndStepBehaviorParameters lookAndStepBehaviorParameters,
                                   RobotCollisionModel robotSelfCollisionModel,
                                   RobotCollisionModel robotEnvironmentCollisionModel,
@@ -151,6 +155,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       this.behaviorHelper = behaviorHelper;
+      this.highestLevelUI = highestLevelUI;
       this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
       ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
       robotModel = communicationHelper.getRobotModel();
@@ -217,7 +222,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters, behaviorHelper);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, teleoperationParameters, behaviorHelper, highestLevelUI);
 
       if (interactablesAvailable)
       {
