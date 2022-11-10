@@ -1,6 +1,9 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import perception_msgs.msg.dds.BigVideoPacket;
 import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import org.bytedeco.javacpp.BytePointer;
@@ -32,6 +35,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsense;
@@ -89,6 +93,13 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private BytedecoImage depth32FC1Image;
    private int depthWidth;
    private int depthHeight;
+   private Mat depthNormalizedScaled;
+   private Mat depthRGB;
+   private Mat depthYUV420Image;
+   private BytePointer depthJPEGImageBytePointer;
+   private Mat debugYUV420Image;
+   private BytePointer debugJPEGImageBytePointer;
+   private IntPointer compressionParameters;
    private CameraPinholeBrown depthCameraIntrinsics;
    private GPUPlanarRegionExtraction gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
    private final Runnable onPatchSizeResized = this::onPatchSizeResized;
@@ -108,7 +119,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
 
-      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH;
+      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH_JPEG_COLOR;
       LogTools.info("Publishing ROS 2 depth video: {}", depthTopic);
       ros2DepthVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
       ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
@@ -164,6 +175,14 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             depthWidth = l515.getDepthWidth();
             depthHeight = l515.getDepthHeight();
+
+            compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 80);
+            depthNormalizedScaled = new Mat(depthHeight, depthWidth, opencv_core.CV_32FC1);
+            depthRGB = new Mat(depthHeight, depthWidth, opencv_core.CV_8UC3);
+            depthYUV420Image = new Mat();
+            depthJPEGImageBytePointer = new BytePointer();
+            debugYUV420Image = new Mat();
+            debugJPEGImageBytePointer = new BytePointer();
 
             if (enableROS1)
             {
@@ -303,8 +322,13 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
             depth32FC1Image.rewind();
-            byte[] heapByteArrayData = new byte[depth32FC1Image.getBackingDirectByteBuffer().remaining()];
-            depth32FC1Image.getBackingDirectByteBuffer().get(heapByteArrayData);
+            BytedecoOpenCVTools.clampTo8BitUnsignedChar(depth32FC1Image.getBytedecoOpenCVMat(), depthNormalizedScaled, 0.0, 255.0);
+            BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthNormalizedScaled, depthRGB);
+            opencv_imgproc.cvtColor(depthRGB, depthYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            opencv_imgcodecs.imencode(".jpg", depthYUV420Image, depthJPEGImageBytePointer, compressionParameters);
+
+            byte[] heapByteArrayData = new byte[depthJPEGImageBytePointer.asBuffer().remaining()];
+            depthJPEGImageBytePointer.asBuffer().get(heapByteArrayData);
             depthImagePacket.getData().resetQuick();
             depthImagePacket.getData().add(heapByteArrayData);
             depthImagePacket.setImageHeight(depthHeight);
@@ -313,8 +337,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthImagePacket.setAcquisitionTimeAdditionalNanos(now.getNano());
             ros2DepthVideoPublisher.publish(depthImagePacket);
 
-            heapByteArrayData = new byte[debugExtractionImage.getBackingDirectByteBuffer().remaining()];
-            debugExtractionImage.getBackingDirectByteBuffer().get(heapByteArrayData);
+            opencv_imgproc.cvtColor(debugExtractionImage.getBytedecoOpenCVMat(), debugYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+            opencv_imgcodecs.imencode(".jpg", debugYUV420Image, debugJPEGImageBytePointer, compressionParameters);
+
+            heapByteArrayData = new byte[debugJPEGImageBytePointer.asBuffer().remaining()];
+            debugJPEGImageBytePointer.asBuffer().get(heapByteArrayData);
             debugExtractionImagePacket.getData().resetQuick();
             debugExtractionImagePacket.getData().add(heapByteArrayData);
             debugExtractionImagePacket.setImageHeight(debugExtractionImage.getImageHeight());

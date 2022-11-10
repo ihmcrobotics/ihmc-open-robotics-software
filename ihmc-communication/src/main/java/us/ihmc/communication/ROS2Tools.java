@@ -124,6 +124,8 @@ public class ROS2Tools
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<BigVideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<BigVideoPacket> L515_DEPTH_JPEG_COLOR
+         = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth_jpeg_color");
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION
          = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("debug_extraction");
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO
