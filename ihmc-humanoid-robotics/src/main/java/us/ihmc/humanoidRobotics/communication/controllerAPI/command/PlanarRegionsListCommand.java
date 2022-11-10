@@ -22,6 +22,8 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
    public void clear()
    {
       sequenceId = 0;
+      for (int i = 0; i < planarRegions.size(); i++)
+         planarRegions.get(i).clear();
       planarRegions.clear();
    }
 
@@ -40,6 +42,8 @@ public class PlanarRegionsListCommand implements Command<PlanarRegionsListComman
       for (int regionIndex = 0; regionIndex < message.getRegionId().size(); regionIndex++)
       {
          PlanarRegionCommand planarRegionCommand = planarRegions.add();
+         planarRegionCommand.clear();
+
          int regionId = message.getRegionId().get(regionIndex);
          Point3D origin = message.getRegionOrigin().get(regionIndex);
          Vector3D normal = message.getRegionNormal().get(regionIndex);
