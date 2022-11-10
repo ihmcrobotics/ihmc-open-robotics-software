@@ -5,7 +5,7 @@ import us.ihmc.log.LogTools;
 
 /**
  * The JSON file for this property set is located here:
- * nadia-hardware-drivers/src/main/resources/us/ihmc/nadia/perception/PointCloudSegmentationParametersForNadiaOuster.json
+ * atlas/src/main/resources/us/ihmc/atlas/behaviors/LookAndStepParametersForAtlas.json
  */
 public class AtlasLookAndStepParameters extends LookAndStepBehaviorParameters
 {

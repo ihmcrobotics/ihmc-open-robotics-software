@@ -146,7 +146,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
+      LookAndStepBehaviorParameters lookAndStepParameters = helper.getRobotModel().getLookAndStepParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
                                        () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
       stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
