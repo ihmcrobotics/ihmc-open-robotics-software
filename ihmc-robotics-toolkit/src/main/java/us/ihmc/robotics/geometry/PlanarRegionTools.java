@@ -1015,60 +1015,6 @@ public class PlanarRegionTools
       return projectedPolygon;
    }
 
-   //TODO: Should be more efficient way to do this check. And should be moved to Euclid Polygon Tools.
-   public static boolean doPolygonsIntersect(ConvexPolygon2D polygonOne, ConvexPolygon2D polygonTwo, double epsilon)
-   {
-      if (polygonOne.getNumberOfVertices() == 2)
-      {
-         if (polygonTwo.getNumberOfVertices() == 2)
-         {
-            return EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds(new Point3D(polygonOne.getVertex(0)),
-                                                                        new Point3D(polygonOne.getVertex(1)),
-                                                                        new Point3D(polygonTwo.getVertex(0)),
-                                                                        new Point3D(polygonTwo.getVertex(1))) < epsilon;
-         }
-         else
-         {
-            Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonOne.getVertex(0),
-                                                                                                                    polygonOne.getVertex(1),
-                                                                                                                    polygonTwo.getVertexBufferView(),
-                                                                                                                    polygonTwo.getNumberOfVertices(),
-                                                                                                                    polygonTwo.isClockwiseOrdered());
-            return intersections != null;
-         }
-      }
-      else if (polygonTwo.getNumberOfVertices() == 2)
-      {
-         Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonTwo.getVertex(0),
-                                                                                                                 polygonTwo.getVertex(1),
-                                                                                                                 polygonOne.getVertexBufferView(),
-                                                                                                                 polygonOne.getNumberOfVertices(),
-                                                                                                                 polygonOne.isClockwiseOrdered());
-         return intersections != null;
-      }
-
-      //TODO: Inefficient:
-      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
-
-      if (convexPolygonTools.computeIntersectionOfPolygons(polygonOne, polygonTwo, new ConvexPolygon2D()))
-         return true;
-
-      Point2DBasics point1ToPack = new Point2D();
-      Point2DBasics point2ToPack = new Point2D();
-      try
-      {
-         convexPolygonTools.computeMinimumDistancePoints(polygonOne, polygonTwo, point1ToPack, point2ToPack);
-      }
-      catch (Exception e)
-      {
-         System.err.println("polygonOne = " + polygonOne);
-         System.err.println("polygonTwo = " + polygonTwo);
-         e.printStackTrace();
-      }
-
-      return (point1ToPack.distance(point2ToPack) < epsilon);
-   }
-
    private static ConvexPolygon2D createSmallRectangleFromLineSegment(ConvexPolygon2D linePolygon, double rectangleWidth)
    {
       List<? extends Point2DReadOnly> vertices = linePolygon.getPolygonVerticesView();
