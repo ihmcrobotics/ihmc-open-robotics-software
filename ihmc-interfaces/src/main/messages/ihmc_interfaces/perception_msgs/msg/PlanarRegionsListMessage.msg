@@ -6,6 +6,12 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Approximate sensor data aquisition time seconds since epoch
+# Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
+int64 aquisition_seconds_since_epoch
+# Approximate sensor data aquisition time additional nanoseconds
+int64 aquisition_additional_nanos
+
 # ID number referring to each planar region, it should be unique.
 int32[<=3000] region_id
 # The coordinates in world of the origin of each planar region.

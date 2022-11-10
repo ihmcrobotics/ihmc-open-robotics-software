@@ -8,10 +8,12 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import sensor_msgs.Image;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.TypedNotification;
@@ -23,14 +25,21 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -45,6 +54,8 @@ import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class L515AndGPUPlanarRegionsOnRobotProcess
@@ -85,6 +96,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
    private final Throttler parameterOutputThrottler = new Throttler();
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
+   private CollidingScanRegionFilter collisionFilter;
 
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
    {
@@ -112,6 +124,18 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT, polygonizerParametersNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT, concaveHullFactoryNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
+
+      CollisionBoxProvider collisionBoxProvider = robotModel.getCollisionBoxProvider();
+      CollisionShapeTester shapeTester = new CollisionShapeTester();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<JointBasics> joints = new ArrayList<>();
+         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
+         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
+         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
+      }
+      collisionFilter = new CollidingScanRegionFilter(shapeTester);
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -259,7 +283,22 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             gpuPlanarRegionExtraction.growRegionBoundaries();
             gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
             PlanarRegionsList planarRegionsList = gpuPlanarRegionExtraction.getPlanarRegionsList();
-            ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+
+            // Filter out regions that are colliding with the body
+            collisionFilter.update();
+            int regionIndex = 0;
+            while (regionIndex < planarRegionsList.getNumberOfPlanarRegions())
+            {
+               if (!collisionFilter.test(regionIndex, planarRegionsList.getPlanarRegion(regionIndex)))
+                  planarRegionsList.pollPlanarRegion(regionIndex);
+               else
+                  ++regionIndex;
+            }
+
+            PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+            planarRegionsListMessage.setAquisitionSecondsSinceEpoch(now.getEpochSecond());
+            planarRegionsListMessage.setAquisitionAdditionalNanos(now.getNano());
+            ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 

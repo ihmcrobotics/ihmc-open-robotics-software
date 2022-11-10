@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -79,6 +80,7 @@ public class LookAndStepFootstepPlanningTask
    protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
+   protected YoDouble planarRegionDelay;
    protected YoDouble footstepPlanningDuration;
    protected YoDouble moreInclusivePlanningDuration;
 
@@ -114,6 +116,7 @@ public class LookAndStepFootstepPlanningTask
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
+         planarRegionDelay = new YoDouble("planarRegionDelay", lookAndStep.yoRegistry);
          footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
          moreInclusivePlanningDuration = new YoDouble("moreInclusivePlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
@@ -180,6 +183,8 @@ public class LookAndStepFootstepPlanningTask
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
+         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getAquisitionSecondsSinceEpoch(),
+                                                        planarRegionsListMessage.getAquisitionAdditionalNanos()));
          acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       }
 
