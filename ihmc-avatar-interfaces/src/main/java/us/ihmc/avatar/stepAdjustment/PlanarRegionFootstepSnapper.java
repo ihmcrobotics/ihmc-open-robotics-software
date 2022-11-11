@@ -48,9 +48,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    // temp variables used for calculation
    private final List<PlanarRegion> regionsIntersectingFoothold = new ArrayList<>();
 
-   private final Point2D tempPoint = new Point2D();
-   private final ConvexPolygon2D convexHullOfAllThePlanarRegions = new ConvexPolygon2D();
-
    private final PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle",
                                                                                                ReferenceFrame.getWorldFrame());
@@ -207,7 +204,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       unsnappedFootstepPolygonInWorld.set(footStepPolygonInSoleFrame);
       unsnappedFootstepPolygonInWorld.applyTransform(solePose, false);
 
-      if (isFootPolygonOnBoundaryOfPlanarRegions(steppableRegionsProvider.getSteppableRegions(), unsnappedFootstepPolygonInWorld))
+      if (isFootPolygonOnBoundaryOfPlanarRegions(unsnappedFootstepPolygonInWorld))
       {
          PlanarRegionTools.findPlanarRegionsIntersectingPolygon(unsnappedFootstepPolygonInWorld,
                                                                 steppableRegionsProvider.getSteppableRegions(),
@@ -344,26 +341,12 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
     *
     * @return whether the footstep gets out of bounds of the modeled environment.
     */
-   private boolean isFootPolygonOnBoundaryOfPlanarRegions(List<PlanarRegion> planarRegionsList, ConvexPolygon2DReadOnly footPolygonInWorld)
+   private boolean isFootPolygonOnBoundaryOfPlanarRegions(ConvexPolygon2DReadOnly footPolygonInWorld)
    {
-      // get the convex hull of all the planar regions in the environment by adding all the convex hulls
-      convexHullOfAllThePlanarRegions.clear();
-      for (int i = 0; i < planarRegionsList.size(); i++)
-      {
-         PlanarRegion region = planarRegionsList.get(i);
-
-         for (int j = 0; j < region.getConcaveHullSize(); j++)
-         {
-            region.getTransformToWorld().transform(region.getConcaveHullVertex(j), tempPoint, false);
-            convexHullOfAllThePlanarRegions.addVertex(tempPoint);
-         }
-      }
-      convexHullOfAllThePlanarRegions.update();
-
       // Check if the foot polygon is outside this convex hull. That hull represents the entire modeled world.
       for (int i = 0; i < footPolygonInWorld.getNumberOfVertices(); i++)
       {
-         if (!convexHullOfAllThePlanarRegions.isPointInside(footPolygonInWorld.getVertex(i)))
+         if (!steppableRegionsProvider.getConvexHullOfAllRegions().isPointInside(footPolygonInWorld.getVertex(i)))
             return true;
       }
       return false;
