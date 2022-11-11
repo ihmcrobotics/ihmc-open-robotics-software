@@ -221,7 +221,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          double distanceToStance = stanceFootPose.getPosition().distanceXY(footPosition);
          boolean shouldUseProprioceptiveEstimate = distanceToStance < distanceFromStanceToTrustStance;
          shouldUseProprioceptiveEstimate |= distanceToStance < closestRegion.distanceToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
-         if (shouldUseProprioceptiveEstimate)
+         if (true)
          {
             // the sole pose is closer to the stance foot that the region
             solePoseToSnap.set(footstepAtSameHeightAsStanceFoot);

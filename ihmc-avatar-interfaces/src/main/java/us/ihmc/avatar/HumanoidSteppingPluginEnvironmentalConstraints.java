@@ -182,6 +182,6 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
       double offsetY = lateralOffset * Math.cos(soleYaw);
       collisionDetector.setBoxPose(touchdownPose.getX() + offsetX, touchdownPose.getY() + offsetY, touchdownPose.getZ() + heightOffset, soleYaw);
 
-      return !collisionDetector.checkForCollision(null);
+      return collisionDetector.checkForCollision() == null;
    }
 }

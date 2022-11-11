@@ -526,6 +526,7 @@ public class GPUPlanarRegionExtraction
       });
    }
 
+   private boolean printedException = false;
    public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
@@ -545,10 +546,15 @@ public class GPUPlanarRegionExtraction
             }
             catch (NotARotationMatrixException e)
             {
-               LogTools.info("Normal = " + gpuPlanarRegion.getNormal());
-               LogTools.info("Orientation = " + orientation);
+               if (!printedException)
+               {
+                  LogTools.info("Normal = " + gpuPlanarRegion.getNormal());
+                  LogTools.info("Orientation = " + orientation);
 
-               throw e;
+                  printedException = true;
+
+                  throw e;
+               }
             }
 
             // First compute the set of concave hulls for this region
