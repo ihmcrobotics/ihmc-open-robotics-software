@@ -386,6 +386,9 @@ public class ContinuousStepGenerator implements Updatable
          {
             alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
 
+            footstepData.getLocation().set(nextFootstepPose3D.getPosition());
+            footstepData.getOrientation().set(nextFootstepPose3D.getOrientation());
+
             // remove all the other steps after the invalid one.
             while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
             {
