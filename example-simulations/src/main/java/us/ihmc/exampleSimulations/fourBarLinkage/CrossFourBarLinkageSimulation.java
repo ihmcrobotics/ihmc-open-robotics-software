@@ -26,7 +26,7 @@ public class CrossFourBarLinkageSimulation
       scs.setGroundVisible(false);
       scs.setDT(dt, 10);
       scs.startOnAThread();
-      scs.simulate(0.5);
+//      scs.simulate(0.5);
    }
 
    public static void main(String[] args)

@@ -22,7 +22,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
-import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageIDController.SineGenerator;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -55,9 +54,9 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
 
    private final Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointMap;
 
-   private final SineGenerator shoulderFunctionGenerator;
-   private final SineGenerator fourBarFunctionGenerator;
-   private final SineGenerator wristFunctionGenerator;
+   private final CrossFourBarSineGenerator shoulderFunctionGenerator;
+   private final CrossFourBarSineGenerator fourBarFunctionGenerator;
+   private final CrossFourBarSineGenerator wristFunctionGenerator;
    private final RevoluteJointBasics shoulderJoint;
    private final CrossFourBarJoint fourBarJoint;
    private final RevoluteJointBasics wristJoint;
@@ -86,7 +85,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
 
       if (HAS_SHOULDER_JOINT)
       {
-         shoulderFunctionGenerator = new SineGenerator("shoulderFunction", robot.getYoTime(), registry);
+         shoulderFunctionGenerator = new CrossFourBarSineGenerator("shoulderFunction", robot.getYoTime(), registry);
          double shoulderRange = shoulderJoint.getJointLimitUpper() - shoulderJoint.getJointLimitLower();
          shoulderFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * shoulderRange));
          shoulderFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
@@ -98,7 +97,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
          shoulderFunctionGenerator = null;
       }
 
-      fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
+      fourBarFunctionGenerator = new CrossFourBarSineGenerator("fourBarFunction", robot.getYoTime(), registry);
       double actuatedJointMidRange = 0.5 * (fourBarJoint.getJointLimitUpper() + fourBarJoint.getJointLimitLower());
       double actuatedJointMin = EuclidCoreRandomTools.nextDouble(random, fourBarJoint.getJointLimitLower(), actuatedJointMidRange);
       double actuatedJointMax = EuclidCoreRandomTools.nextDouble(random, actuatedJointMidRange, fourBarJoint.getJointLimitUpper());
@@ -109,7 +108,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
 
       if (HAS_WRIST_JOINT)
       {
-         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime(), registry);
+         wristFunctionGenerator = new CrossFourBarSineGenerator("wristFunction", robot.getYoTime(), registry);
          double wristRange = wristJoint.getJointLimitUpper() - wristJoint.getJointLimitLower();
          wristFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * wristRange));
          wristFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));

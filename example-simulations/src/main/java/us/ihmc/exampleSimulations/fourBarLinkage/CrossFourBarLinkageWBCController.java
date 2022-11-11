@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
-import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageIDController.SineGenerator;
 import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -47,9 +46,9 @@ public class CrossFourBarLinkageWBCController implements RobotController
 
    private final Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointMap;
 
-   private final SineGenerator shoulderFunctionGenerator;
-   private final SineGenerator fourBarFunctionGenerator;
-   private final SineGenerator wristFunctionGenerator;
+   private final CrossFourBarSineGenerator shoulderFunctionGenerator;
+   private final CrossFourBarSineGenerator fourBarFunctionGenerator;
+   private final CrossFourBarSineGenerator wristFunctionGenerator;
    private final RevoluteJointBasics shoulderJoint;
    private final RevoluteJointBasics actuatedJoint;
    private final RevoluteJointBasics jointA;
@@ -78,7 +77,7 @@ public class CrossFourBarLinkageWBCController implements RobotController
 
       if (HAS_SHOULDER_JOINT)
       {
-         shoulderFunctionGenerator = new SineGenerator("shoulderFunction", robot.getYoTime(), registry);
+         shoulderFunctionGenerator = new CrossFourBarSineGenerator("shoulderFunction", robot.getYoTime(), registry);
          double shoulderRange = shoulderJoint.getJointLimitUpper() - shoulderJoint.getJointLimitLower();
          shoulderFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * shoulderRange));
          shoulderFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
@@ -90,7 +89,7 @@ public class CrossFourBarLinkageWBCController implements RobotController
          shoulderFunctionGenerator = null;
       }
 
-      fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
+      fourBarFunctionGenerator = new CrossFourBarSineGenerator("fourBarFunction", robot.getYoTime(), registry);
       double actuatedJointMidRange = 0.5 * (actuatedJoint.getJointLimitUpper() + actuatedJoint.getJointLimitLower());
       double actuatedJointMin = EuclidCoreRandomTools.nextDouble(random, actuatedJoint.getJointLimitLower(), actuatedJointMidRange);
       double actuatedJointMax = EuclidCoreRandomTools.nextDouble(random, actuatedJointMidRange, actuatedJoint.getJointLimitUpper());
@@ -101,7 +100,7 @@ public class CrossFourBarLinkageWBCController implements RobotController
 
       if (HAS_WRIST_JOINT)
       {
-         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime(), registry);
+         wristFunctionGenerator = new CrossFourBarSineGenerator("wristFunction", robot.getYoTime(), registry);
          double wristRange = wristJoint.getJointLimitUpper() - wristJoint.getJointLimitLower();
          wristFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * wristRange));
          wristFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
