@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 public class MultiContactSupportRegionSolverVisualizer
 {
    private static final boolean showSupportRegion = true;
+   private static final double visualizationScale = 2e-4;
 
    public MultiContactSupportRegionSolverVisualizer(MultiContactSupportRegionSolverInput input)
    {
@@ -219,7 +220,7 @@ public class MultiContactSupportRegionSolverVisualizer
       for (int i = 0; i < convexPolytope3D.getNumberOfVertices(); i++)
       {
          Vertex3D scaledVertex = new Vertex3D(convexPolytope3D.getVertex(i));
-         scaledVertex.scale(2e-4);
+         scaledVertex.scale(ContactPoint.forceVectorGraphicScale);
          scaledPolytope.addVertex(scaledVertex);
       }
 
