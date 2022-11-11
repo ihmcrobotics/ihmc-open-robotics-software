@@ -1,6 +1,9 @@
 package us.ihmc.avatar.stepAdjustment;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
@@ -15,6 +18,9 @@ public class SimpleSteppableRegionsCalculator implements SteppableRegionsProvide
    private final DoubleProvider maxNormalAngle;
 
    private final RecyclingArrayList<PlanarRegion> steppableRegionsList = new RecyclingArrayList<>(PlanarRegion::new);
+   private final ConvexPolygon2D convexHullOfAllThePlanarRegions = new ConvexPolygon2D();
+
+   private final FramePoint2D tempPoint = new FramePoint2D();
 
    public SimpleSteppableRegionsCalculator()
    {
@@ -53,11 +59,37 @@ public class SimpleSteppableRegionsCalculator implements SteppableRegionsProvide
          PlanarRegion planarRegion = steppableRegionsList.add();
          planarRegion.set(candidateRegion.getTransformToWorld(), candidateRegion.getConvexPolygons(), candidateRegion.getConcaveHullsVertices(), candidateRegion.getRegionId());
       }
+
+      computeBoundaryOfPlanarRegions(steppableRegionsList);
+   }
+
+   private void computeBoundaryOfPlanarRegions(List<PlanarRegion> planarRegionsList)
+   {
+      // get the convex hull of all the planar regions in the environment by adding all the convex hulls
+      convexHullOfAllThePlanarRegions.clear();
+      for (int i = 0; i < planarRegionsList.size(); i++)
+      {
+         PlanarRegion region = planarRegionsList.get(i);
+
+         for (int j = 0; j < region.getConcaveHullSize(); j++)
+         {
+            region.getTransformToWorld().transform(region.getConcaveHullVertex(j), tempPoint, false);
+            convexHullOfAllThePlanarRegions.addVertex(tempPoint);
+         }
+      }
+      convexHullOfAllThePlanarRegions.update();
+
    }
 
    @Override
    public List<PlanarRegion> getSteppableRegions()
    {
       return steppableRegionsList;
+   }
+
+   @Override
+   public ConvexPolygon2DReadOnly getConvexHullOfAllRegions()
+   {
+      return convexHullOfAllThePlanarRegions;
    }
 }
