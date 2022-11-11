@@ -1,12 +1,13 @@
 package us.ihmc.rdx.simulation;
 
-import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXSCS2BulletSimulationSession;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.scs2.examples.simulations.CrossFourBarLinkageDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 
 /**
  * Currently fails to launch with Name collision for new variable: wrist_btappliedforcex.
@@ -32,8 +33,9 @@ public class RDXSCS2FourBarLinkageTest
             scs2SimulationSession = new RDXSCS2BulletSimulationSession();
             scs2SimulationSession.create(baseUI);
 
-            SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
-            CrossFourBarLinkageRobotDefinition robotDefinition = new CrossFourBarLinkageRobotDefinition();
+//            SimulationSession simulationSession = new SimulationSession(BulletPhysicsEngine::new);
+            SimulationSession simulationSession = new SimulationSession();
+            CrossFourBarLinkageDefinition robotDefinition = new CrossFourBarLinkageDefinition();
             simulationSession.addRobot(robotDefinition);
 
             scs2SimulationSession.startSession(simulationSession);
