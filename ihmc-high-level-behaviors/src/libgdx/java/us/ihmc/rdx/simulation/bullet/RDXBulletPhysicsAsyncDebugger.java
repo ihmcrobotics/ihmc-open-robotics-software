@@ -2,25 +2,26 @@ package us.ihmc.rdx.simulation.bullet;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw;
-import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw.DebugDrawModes;
+import org.bytedeco.bullet.LinearMath.btIDebugDraw;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.bytedeco.bullet.LinearMath.btVector3;
+import org.bytedeco.javacpp.BytePointer;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletMultiBodyDynamicsWorld;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTools;
 
 public class RDXBulletPhysicsAsyncDebugger
 {
-   private final btIDebugDraw btIDebugDraw;
-   private int debugMode = DebugDrawModes.DBG_DrawWireframe; // TODO: Provide options in combo box
+   private final btIDebugDraw btDebugDraw;
+   private int debugMode = btIDebugDraw.DBG_DrawWireframe; // TODO: Provide options in combo box
    private final BulletMultiBodyDynamicsWorld multiBodyDynamicsWorld;
    private final RecyclingArrayList<RDXBulletPhysicsDebuggerModel> models = new RecyclingArrayList<>(RDXBulletPhysicsDebuggerModel::new);
    private final RecyclingArrayList<RDXBulletPhysicsDebuggerLineSegment> lineSegmentsToDraw = new RecyclingArrayList<>(RDXBulletPhysicsDebuggerLineSegment::new);
@@ -36,37 +37,37 @@ public class RDXBulletPhysicsAsyncDebugger
    {
       this.multiBodyDynamicsWorld = multiBodyDynamicsWorld;
 
-      btIDebugDraw = new btIDebugDraw()
+      btDebugDraw = new btIDebugDraw()
       {
          @Override
-         public void drawLine(Vector3 from, Vector3 to, Vector3 color)
+         public void drawLine(btVector3 from, btVector3 to, btVector3 color)
          {
             RDXBulletPhysicsDebuggerLineSegment lineSegment = lineSegmentsToDraw.add();
-            LibGDXTools.toEuclid(from, lineSegment.getLineSegment().getFirstEndpoint());
-            LibGDXTools.toEuclid(to, lineSegment.getLineSegment().getSecondEndpoint());
-            LibGDXTools.toLibGDX(color, lineSegment.getColor());
+            BulletTools.toEuclid(from, lineSegment.getLineSegment().getFirstEndpoint());
+            BulletTools.toEuclid(to, lineSegment.getLineSegment().getSecondEndpoint());
+            BulletLibGDXTools.toLibGDX(color, lineSegment.getColor());
          }
 
          @Override
-         public void drawContactPoint(Vector3 PointOnB, Vector3 normalOnB, float distance, int lifeTime, Vector3 color)
+         public void drawContactPoint(btVector3 PointOnB, btVector3 normalOnB, double distance, int lifeTime, btVector3 color)
          {
 
          }
 
          @Override
-         public void drawTriangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 color, float alpha)
+         public void drawTriangle(btVector3 v0, btVector3 v1, btVector3 v2, btVector3 color, double alpha)
          {
 
          }
 
          @Override
-         public void reportErrorWarning(String warningString)
+         public void reportErrorWarning(BytePointer warningString)
          {
-            LogTools.error("Bullet: {}", warningString);
+            LogTools.error("Bullet: {}", BytedecoTools.stringFromByteBuffer(warningString));
          }
 
          @Override
-         public void draw3dText(Vector3 location, String textString)
+         public void draw3dText(btVector3 location, BytePointer textString)
          {
 
          }
@@ -83,7 +84,7 @@ public class RDXBulletPhysicsAsyncDebugger
             return debugMode;
          }
       };
-      multiBodyDynamicsWorld.setBtDebugDrawer(btIDebugDraw);
+      multiBodyDynamicsWorld.setBtDebugDrawer(btDebugDraw);
    }
 
    public void renderImGuiWidgets()

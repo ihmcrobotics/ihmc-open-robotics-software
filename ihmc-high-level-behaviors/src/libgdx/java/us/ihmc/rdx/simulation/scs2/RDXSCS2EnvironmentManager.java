@@ -138,12 +138,13 @@ public class RDXSCS2EnvironmentManager
          avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
          avatarSimulation.setSystemExitOnDestroy(false);
 
-         scs2SimulationSession = new RDXSCS2BulletSimulationSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
+         scs2SimulationSession = new RDXSCS2BulletSimulationSession();
+         scs2SimulationSession.create(baseUI, managerPanel);
+         scs2SimulationSession.startSession(avatarSimulation.getSimulationConstructionSet().getSimulationSession());
          scs2SimulationSession.getOnSessionStartedRunnables().addAll(onSessionStartedRunnables);
 
          avatarSimulation.beforeSessionThreadStart();
 
-         scs2SimulationSession.create(baseUI, managerPanel);
 
          for (String robotToHide : robotsToHide)
          {
