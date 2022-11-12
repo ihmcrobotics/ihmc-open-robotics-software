@@ -12,6 +12,11 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This was a work in progress to see if we could automate the layout of
+ * the behavior tree UI panels. It turned out to be tricky and maybe not
+ * the greatest direction to go in.
+ */
 public class ImNodesAbegoAutoLayout
 {
    private final HashMap<Integer, ImVec2> nodeSizeMap = new HashMap<>();
