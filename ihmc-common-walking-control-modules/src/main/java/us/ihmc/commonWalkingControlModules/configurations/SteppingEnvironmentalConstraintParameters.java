@@ -13,6 +13,7 @@ public class SteppingEnvironmentalConstraintParameters
    private static final double maxPlanarRegionNormalAngleForStepping = Math.toRadians(25.0);
    private static final double distanceFromStanceToTrustEnvironment = 0.2;
    private static final double smallIntersectionAreaToFilter = MathTools.square(0.03);
+   private static final boolean useSimpleSnapping = false;
 
    public ConstraintOptimizerParametersReadOnly getConstraintOptimizerParameters()
    {
@@ -37,5 +38,10 @@ public class SteppingEnvironmentalConstraintParameters
    public double getDistanceFromStanceToTrustEnvironment()
    {
       return distanceFromStanceToTrustEnvironment;
+   }
+
+   public boolean useSimpleSnapping()
+   {
+      return useSimpleSnapping;
    }
 }

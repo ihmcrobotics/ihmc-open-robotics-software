@@ -45,7 +45,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private final SteppingEnvironmentalConstraintParameters environmentalConstraintParameters;
    private final ConstraintOptimizerParametersReadOnly wiggleParameters;
-   private final YoBoolean useSimpleSnapping;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
 
@@ -82,9 +81,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.wiggleParameters = constraintParameters.getConstraintOptimizerParameters();
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       this.footPolygons = footPolygons;
-
-      useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
-      useSimpleSnapping.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -124,7 +120,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          boolean snapFailed;
          try
          {
-            if (useSimpleSnapping.getValue())
+            if (environmentalConstraintParameters.useSimpleSnapping())
             {
                snapTheFootStraightDown(stanceFootPose, adjustedFootstepPose, footPolygonToWiggle);
                // TODO we don't need to set the polygon yet.
