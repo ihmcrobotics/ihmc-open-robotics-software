@@ -57,6 +57,8 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
       printf("Total Matches After: %ld\n", matches.size());
 
+      std::vector<int> keypointIDs(kpCur.size(), -1);
+      TransferKeypointIDs(lastKeyframe.keypointIDs, keypointIDs, matches);
 
       Point2fVec pointsTrain;
       Point2fVec pointsQuery;
@@ -70,7 +72,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       eigenPose.transposeInPlace();
       cameraPose = cameraPose * eigenPose;
 
-      InsertKeyframe(cameraPose, descCur, kpCur, leftImage);
+      InsertKeyframe(cameraPose, descCur, kpCur, keypointIDs, leftImage);
 
 
       // Visualization and Logging Only --------------------------------------------
@@ -211,25 +213,25 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 // }
 
 
-void VisualOdometry::DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks)
-{
-   for (uint32_t i = 0; i < landmarks.size(); i++)
-   {
-      cv::Point2f first(landmarks[i].GetMeasurements2D()[0].x() + leftCamera._cx, landmarks[i].GetMeasurements2D()[0].y() + leftCamera._cy);
-      cv::Point2f second(landmarks[i].GetMeasurements2D()[1].x() + leftCamera._cx, landmarks[i].GetMeasurements2D()[1].y() + leftCamera._cy);
+// void VisualOdometry::DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks)
+// {
+//    for (uint32_t i = 0; i < landmarks.size(); i++)
+//    {
+//       cv::Point2f first(landmarks[i].GetMeasurements2D()[0].x() + leftCamera._cx, landmarks[i].GetMeasurements2D()[0].y() + leftCamera._cy);
+//       cv::Point2f second(landmarks[i].GetMeasurements2D()[1].x() + leftCamera._cx, landmarks[i].GetMeasurements2D()[1].y() + leftCamera._cy);
 
-      float dist = cv::norm(first - second);
-//      printf("DrawLandmark: First({}, {}), Second:({} {}), Dist({}), Total Measurements: {}", first.x, first.y, second.x, second.y, dist, landmarks[i].GetMeasurements2D().size());
+//       float dist = cv::norm(first - second);
+// //      printf("DrawLandmark: First({}, {}), Second:({} {}), Dist({}), Total Measurements: {}", first.x, first.y, second.x, second.y, dist, landmarks[i].GetMeasurements2D().size());
 
-      if(dist < 100)
-      {
-         line(img, first, second, cv::Scalar(0, 255, 0), 3);
-         circle(img, first, 2, cv::Scalar(0, 0, 0), -1);
-         circle(img, second, 2, cv::Scalar(255, 255, 255), -1);
-      }
+//       if(dist < 100)
+//       {
+//          line(img, first, second, cv::Scalar(0, 255, 0), 3);
+//          circle(img, first, 2, cv::Scalar(0, 0, 0), -1);
+//          circle(img, second, 2, cv::Scalar(255, 255, 255), -1);
+//       }
 
-   }
-}
+//    }
+// }
 
 void VisualOdometry::ExtractKeypoints_FAST(cv::Mat img_1, Point2fVec& points1)
 {
@@ -289,7 +291,17 @@ void VisualOdometry::MatchKeypoints(cv::Mat& descTrain, cv::Mat& descQuery, std:
    //   matches = finalMatches
 
    //   printf("MatchKeypoints(): Total Matches: {}", matches.size());
+}
 
+void VisualOdometry::TransferKeypointIDs(const std::vector<int>& trainIDs, std::vector<int>& queryIDs, std::vector<cv::DMatch>& matches)
+{
+   for(uint32_t i = 0; i<matches.size(); i++)
+   {
+      if(trainIDs[matches[i].trainIdx] != -1)
+      {
+         queryIDs[matches[i].queryIdx] = trainIDs[matches[i].trainIdx];
+      }
+   }
 }
 
 void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv::DMatch>& matches)
@@ -365,7 +377,7 @@ void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointV
 
             PointLandmark landmark(point);
             Eigen::Vector2f measurement(x1, y1);
-            landmark.AddMeasurement2D(measurement, match.trainIdx, 0);
+            landmark.SetMeasurement2D(x1, y1);
 
             points3D.emplace_back(landmark);
          }
@@ -374,38 +386,38 @@ void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointV
    //   printf("Triangulate(): Total Depth Points: {}", points3D.size());
 }
 
-void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, PointLandmarkVec& points3D)
-{
-   for (auto match: leftMatches)
-   {
-      for (uint32_t i = 0; i < points3D.size(); i++)
-      {
-         if (points3D[i]._index[0] == match.trainIdx)
-         {
-            Eigen::Vector2f measurement(curLeftKp[match.queryIdx].pt.x - leftCamera._cx,
-                            curLeftKp[match.queryIdx].pt.y - leftCamera._cy);
+// void VisualOdometry::ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, PointLandmarkVec& points3D)
+// {
+//    for (auto match: leftMatches)
+//    {
+//       for (uint32_t i = 0; i < points3D.size(); i++)
+//       {
+//          if (points3D[i]._index[0] == match.trainIdx)
+//          {
+//             Eigen::Vector2f measurement(curLeftKp[match.queryIdx].pt.x - leftCamera._cx,
+//                             curLeftKp[match.queryIdx].pt.y - leftCamera._cy);
 
-            // Eigen::Vector2f prevMeasurement = points3D[i].GetMeasurements2D()[0];
-            // Eigen::Vector2f oneMeasurement = points3D[i].GetMeasurements2D()[1];
+//             // Eigen::Vector2f prevMeasurement = points3D[i].GetMeasurements2D()[0];
+//             // Eigen::Vector2f oneMeasurement = points3D[i].GetMeasurements2D()[1];
 
-//            printf("Match: PrevStereoPoint({}, {})", measurement.x(), measurement.y());
-//            printf("Match: Zero({}, {}), One:({} {})", prevMeasurement.x(), prevMeasurement.y(), oneMeasurement.x(), oneMeasurement.y());
+// //            printf("Match: PrevStereoPoint({}, {})", measurement.x(), measurement.y());
+// //            printf("Match: Zero({}, {}), One:({} {})", prevMeasurement.x(), prevMeasurement.y(), oneMeasurement.x(), oneMeasurement.y());
 
-            points3D[i].AddMeasurement2D(measurement, match.queryIdx, 1);
-         }
-      }
+//             points3D[i].AddMeasurement2D(measurement, match.queryIdx, 1);
+//          }
+//       }
 
-   }
+//    }
 
-   for(int i = points3D.size() - 1; i>=0; i--)
-   {
-      if(points3D[i].GetMeasurements2D().size() != 2)
-      {
-         points3D.erase(points3D.begin() + i);
-      }
-   }
-   printf("Total Overlap PointLandmarks: %ld\n", points3D.size());
-}
+//    for(int i = points3D.size() - 1; i>=0; i--)
+//    {
+//       if(points3D[i].GetMeasurements2D().size() != 2)
+//       {
+//          points3D.erase(points3D.begin() + i);
+//       }
+//    }
+//    printf("Total Overlap PointLandmarks: %ld\n", points3D.size());
+// }
 
 
 
@@ -629,7 +641,14 @@ void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
 
    MatchKeypoints(desc_curLeft, desc_curRight, curMatchesStereo);
 
-   InsertKeyframe(Eigen::Matrix4f::Identity(), desc_curLeft, kp_curLeft, leftImageCur);
+   std::vector<int> kpIDs;
+   for(int i = 0; i<kp_curLeft.size(); i++)
+   {
+      uniqueKeypointID++;
+      kpIDs[i] = uniqueKeypointID;
+   }
+
+   InsertKeyframe(Eigen::Matrix4f::Identity(), desc_curLeft, kp_curLeft, kpIDs, leftImageCur);
 
 
    _initialized = true;
@@ -645,7 +664,7 @@ void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv:
    _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight, leftMat.clone(), rightMat.clone()));
 }
 
-void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const cv::Mat& leftMat)
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat)
 {
-   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), kpLeft, leftMat.clone()));
+   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), kpLeft, kpIDs, leftMat.clone()));
 }

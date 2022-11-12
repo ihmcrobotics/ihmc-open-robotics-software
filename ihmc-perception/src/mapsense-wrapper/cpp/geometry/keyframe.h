@@ -7,8 +7,8 @@ struct Keyframe
 {
    public:
 
-      Keyframe(uint32_t kid, Eigen::Matrix4f pose, cv::Mat desc, KeyPointVec kp, cv::Mat left)
-         : id(kid), pose(pose), descLeft(desc), keypointsLeft(kp), leftImage(left)  {};
+      Keyframe(uint32_t kid, Eigen::Matrix4f pose, cv::Mat desc, KeyPointVec kp, const std::vector<int>& ids, cv::Mat left)
+         : id(kid), pose(pose), descLeft(desc), keypointsLeft(kp), keypointIDs(ids), leftImage(left)  {};
 
       Keyframe(uint32_t kid, Eigen::Matrix4f pose, cv::Mat descLeft, cv::Mat descRight, KeyPointVec kpLeft, KeyPointVec kpRight, cv::Mat left, cv::Mat right)
             : id(kid), pose(pose), descLeft(descLeft), descRight(descRight), keypointsLeft(kpLeft), keypointsRight(kpRight), leftImage(left), rightImage(right) {};
@@ -16,6 +16,8 @@ struct Keyframe
       Keyframe(uint32_t kid, Eigen::Matrix4f pose, cv::Mat descLeft, cv::Mat descRight, KeyPointVec kpLeft, KeyPointVec kpRight)
             : id(kid), pose(pose), descLeft(descLeft), descRight(descRight), keypointsLeft(kpLeft), keypointsRight(kpRight) {};
       
+      uint32_t id = 0;
+
       Eigen::Matrix4f pose;
 
       cv::Mat descLeft;
@@ -24,9 +26,10 @@ struct Keyframe
       KeyPointVec keypointsLeft;
       KeyPointVec keypointsRight;
       
+      std::vector<int> keypointIDs;
+
       cv::Mat leftImage;
       cv::Mat rightImage;
 
-      uint32_t id = 0;
 
 };

@@ -22,6 +22,8 @@ class VisualOdometry
       // void UpdateMonocular(const cv::Mat& image);
       void UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightImageCur);
 
+      void InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat);
+
       void InsertKeyframe(Eigen::Matrix4f pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight);
       void InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat);
       void InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const cv::Mat& leftMat);
@@ -33,10 +35,11 @@ class VisualOdometry
       void ExtractKeypoints(cv::Mat img, KeyPointVec& points, cv::Mat& desc);
       void TrackKeypoints(cv::Mat prev, cv::Mat cur, Point2fVec& prev_pts, Point2fVec& cur_pts);
       void MatchKeypoints(cv::Mat& desc1, cv::Mat& desc2, std::vector<cv::DMatch>& matches);
+      void TransferKeypointIDs(const std::vector<int>& trainIDs, std::vector<int>& queryIDs, std::vector<cv::DMatch>& matches);
       void GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv::DMatch>& matches);
       void ExtractMatchesAsPoints(const KeyPointVec& keypoints, Point2fVec& points);
       void FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, float distanceThreshold);
-      void ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, PointLandmarkVec& points3D);
+      // void ExtractFinalSet(std::vector<cv::DMatch> leftMatches, KeyPointVec curLeftKp, PointLandmarkVec& points3D);
       void CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, PointLandmarkVec& points3D);
       void CalculateOdometry_FAST(Eigen::Matrix4f& transform);
       void TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
@@ -50,13 +53,13 @@ class VisualOdometry
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       
 
-      void DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks);
+      // void DrawLandmarks(cv::Mat& img, PointLandmarkVec& landmarks);
       void DrawAllMatches(cv::Mat& image);
       void Display(cv::Mat& image);
       void Show(int delay = 1);
 
       const Keyframe& GetLastKeyframe() const {return _keyframes[_keyframes.size() - 1]; };
-      const PointLandmarkVec& GetMeasurements3D() const {return _curPoints3D; };
+      const PointLandmarkVec& GetLandmarkVec() const {return _curPoints3D; };
 
    private:
       ApplicationState _appState;
@@ -94,6 +97,8 @@ class VisualOdometry
       CameraModel rightCamera;
 
       double baselineDistance = 0.5;
+
+      int uniqueKeypointID = -1;
       
 };
 

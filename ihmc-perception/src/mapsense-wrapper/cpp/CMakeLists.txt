@@ -34,8 +34,6 @@ set(MS_SOURCES
 
     external/visual_odometry_external.h
     external/visual_odometry_external.cpp
-    external/keyframe_external.h
-    external/landmark_external.h
 
     core/core.h
 

@@ -89,24 +89,31 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
 }
 
-void VisualOdometryExternal::getExternalKeyframe(KeyframeExternal* keyframe)
+void VisualOdometryExternal::getExternalKeyframe(float* odometry, uint32_t* id)
 {
-    keyframe->keyframeID = _visualOdometry->GetLastKeyframe().id;
+    *(id) = _visualOdometry->GetLastKeyframe().id;
     std::copy(_visualOdometry->GetLastKeyframe().pose.data(),
                 _visualOdometry->GetLastKeyframe().pose.data() + 16,
-                keyframe->odometry);
+                odometry);
 }
 
-uint32_t VisualOdometryExternal::getExternalLandmarks(LandmarkExternal* landmarks, uint32_t maxSize)
+uint32_t VisualOdometryExternal::getExternalLandmarks(float* landmarksToPack, uint32_t* idsToPack, uint32_t maxSize)
 {
-    auto points3d = _visualOdometry->GetMeasurements3D();
-    for(uint32_t i = 0; i<points3d.size(); i++)
+    auto landmarksVec = _visualOdometry->GetLandmarkVec();
+    for(uint32_t i = 0; i<landmarksVec.size(); i++)
     {
-        landmarks[i].landmarkID = points3d[i].GetLandmarkID();
-        std::copy(  points3d[i].GetPoint2D().data(), 
-                    points3d[i].GetPoint2D().data() + 1,  
-                    landmarks[i].measurement);
+        if(i < maxSize)
+        {
+            idsToPack[i] = landmarksVec[i].GetLandmarkID();
+
+            landmarksToPack[i*5] = landmarksVec[i].GetMeasurement2D().x();
+            landmarksToPack[i*5 + 1] = landmarksVec[i].GetMeasurement2D().y();
+            landmarksToPack[i*5 + 2] = landmarksVec[i].GetPoint3D().x();
+            landmarksToPack[i*5 + 3] = landmarksVec[i].GetPoint3D().y();
+            landmarksToPack[i*5 + 4] = landmarksVec[i].GetPoint3D().z();
+        }
     }
+    return (landmarksVec.size() < maxSize ? landmarksVec.size() : maxSize);
 }
 
 // void VisualOdometryExternal::testStereoFeatureExtraction(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)

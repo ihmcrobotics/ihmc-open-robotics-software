@@ -3,8 +3,6 @@
 // #include "core.h"
 #include "application_state.h"
 #include "visual_odometry.h"
-#include "keyframe_external.h"
-#include "landmark_external.h"
 
 class VisualOdometryExternal
 {
@@ -21,9 +19,9 @@ class VisualOdometryExternal
         void updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width);
         
 
-        void getExternalKeyframe(KeyframeExternal* keyframe);
+        void getExternalKeyframe(float* odometry, uint32_t* id);
 
-        uint32_t getExternalLandmarks(LandmarkExternal* landmarks, uint32_t maxSize);
+        uint32_t getExternalLandmarks(float* landmarksToPack, uint32_t* idsToPack, uint32_t maxSize);
 
     private:
         
