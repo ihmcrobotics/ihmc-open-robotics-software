@@ -12,12 +12,15 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParamete
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+
+import java.util.Set;
 
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 
@@ -118,16 +121,19 @@ public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (areGraphicsEnabled())
+      if (areGraphicsEnabled() && sceneLevels.contains(RDXSceneLevel.MODEL))
       {
          planarRegionsGraphic.getRenderables(renderables, pool);
       }
-      goalAffordance.getRenderables(renderables, pool);
-      lookAndStepUI.getRenderables(renderables, pool);
-      traverseStairsUI.getRenderables(renderables, pool);
-      doorUI.getRenderables(renderables, pool);
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      {
+         goalAffordance.getRenderables(renderables, pool);
+      }
+      lookAndStepUI.getRenderables(renderables, pool, sceneLevels);
+      traverseStairsUI.getRenderables(renderables, pool, sceneLevels);
+      doorUI.getRenderables(renderables, pool, sceneLevels);
    }
 
    @Override

@@ -50,6 +50,8 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
    private Consumer<Pose3D> placedPoseConsumer;
    private final Notification placedNotification = new Notification();
    private RDXIconTexture locationFlagIcon;
+   private Runnable onStartPositionPlacement;
+   private Runnable onEndPositionPlacement;
 
    public void create(Color color)
    {
@@ -64,13 +66,18 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       arrow = RDXModelBuilder.createArrow(sphereRadius * 6.0, color);
 
       placeGoalActionMap = new RDXUIActionMap(startAction ->
-                                              {
-                                                 placingGoal = true;
-                                                 placingPosition = true;
-                                              });
+      {
+         placingGoal = true;
+         placingPosition = true;
+
+         if (onStartPositionPlacement != null)
+            onStartPositionPlacement.run();
+      });
       placeGoalActionMap.mapAction(RDXUITrigger.POSITION_LEFT_CLICK, trigger ->
       {
          placingPosition = false;
+         if (onEndPositionPlacement != null)
+            onEndPositionPlacement.run();
       });
       placeGoalActionMap.mapAction(RDXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
@@ -81,6 +88,9 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       placeGoalActionMap.mapAction(RDXUITrigger.RIGHT_CLICK, trigger ->
       {
          placingGoal = false;
+
+         if (placingPosition && onEndPositionPlacement != null)
+            onEndPositionPlacement.run();
       });
 
       clear();
@@ -261,10 +271,20 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       else
       {
          LibGDXTools.toLibGDX(pose.getPosition(), sphere.transform);
-         goalZOffset.set((float) pose.getZ());
+//         goalZOffset.set((float) pose.getZ()); // This was useful before we had mouse scene collision
          LibGDXTools.toLibGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
+   }
+
+   public void setOnStartPositionPlacement(Runnable onStartPositionPlacement)
+   {
+      this.onStartPositionPlacement = onStartPositionPlacement;
+   }
+
+   public void setOnEndPositionPlacement(Runnable onEndPositionPlacement)
+   {
+      this.onEndPositionPlacement = onEndPositionPlacement;
    }
 
    public Notification getPlacedNotification()
