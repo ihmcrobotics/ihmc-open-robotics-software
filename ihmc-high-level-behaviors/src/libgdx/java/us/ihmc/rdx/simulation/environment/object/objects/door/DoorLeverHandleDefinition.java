@@ -36,6 +36,13 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);
       addVisualDefinition(modelVisualDefinition);
 
+      VisualDefinition modelVisualDefinitionOtherSide = new VisualDefinition();
+      ModelFileGeometryDefinition geometryDefinitionOtherSide = new ModelFileGeometryDefinition("environmentObjects/door/doorLeverHandle/DoorLeverHandle.g3dj");
+      modelVisualDefinitionOtherSide.setGeometryDefinition(geometryDefinitionOtherSide);
+      modelVisualDefinitionOtherSide.getOriginPose().prependPitchRotation(Math.PI);
+      modelVisualDefinitionOtherSide.getOriginPose().getTranslation().setX(0.0508);
+      addVisualDefinition(modelVisualDefinitionOtherSide);
+
 ////      Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
 //      CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
 //      ModelFileGeometryDefinition collisionShapeGeometryDefinition
