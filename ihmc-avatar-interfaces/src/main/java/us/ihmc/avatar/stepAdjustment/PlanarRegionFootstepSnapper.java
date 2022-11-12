@@ -1,9 +1,11 @@
 package us.ihmc.avatar.stepAdjustment;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -28,7 +30,9 @@ import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
-   private static double distanceFromStanceToTrustStance = 0.2;
+   private static final double distanceFromStanceToTrustStance = 0.2;
+   private static final double smallIntersectionAreaToFilter = MathTools.square(0.03);
+   private static final boolean onlyTrustProprioceptionWhenOffRegion = true;
 
    private final SteppableRegionsProvider steppableRegionsProvider;
 
@@ -49,6 +53,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    // temp variables used for calculation
    private final List<PlanarRegion> regionsIntersectingFoothold = new ArrayList<>();
+   private final TDoubleArrayList intersectAreas = new TDoubleArrayList();
 
    private final PoseReferenceFrame soleFrameBeforeSnapping = new PoseReferenceFrame("SoleFrameBeforeSnapping", ReferenceFrame.getWorldFrame());
    private final PoseReferenceFrame soleFrameAfterSnapAndBeforeWiggle = new PoseReferenceFrame("SoleFrameAfterSnapAndBeforeWiggle",
@@ -166,7 +171,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       unsnappedFootstepPolygonInWorld.set(footStepPolygonInSoleFrame);
       unsnappedFootstepPolygonInWorld.applyTransform(solePoseToSnap, false);
 
-      snapFootExtrapolatingHeight(stanceFootPose, solePoseToSnap);
+      snapFootExtrapolatingHeight(stanceFootPose, unsnappedFootstepPolygonInWorld, solePoseToSnap);
    }
 
    private void snapTheFootToRegionsAndWiggleInside(FramePose3DReadOnly stanceFootPose,
@@ -182,7 +187,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
       if (isFootPolygonOnBoundaryOfPlanarRegions(unsnappedFootstepPolygonInWorld))
       {
-         snapFootExtrapolatingHeight(stanceFootPose, solePose);
+         snapFootExtrapolatingHeight(stanceFootPose, unsnappedFootstepPolygonInWorld, solePose);
 
          // TODO we don't yet need to set the snapped polygon
 //         snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
@@ -203,11 +208,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 //      cropFootholdToMatchRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo, snappedFootstepPolygonToPack);
    }
 
-   private void snapFootExtrapolatingHeight(FramePose3DReadOnly stanceFootPose, FramePose3DBasics solePoseToSnap)
+   private void snapFootExtrapolatingHeight(FramePose3DReadOnly stanceFootPose, ConvexPolygon2DReadOnly footPolygonInWorld, FramePose3DBasics solePoseToSnap)
    {
-      PlanarRegionTools.findPlanarRegionsIntersectingPolygon(unsnappedFootstepPolygonInWorld,
-                                                             steppableRegionsProvider.getSteppableRegions(),
-                                                             regionsIntersectingFoothold);
+      findRegionsUnderFoot(footPolygonInWorld, regionsIntersectingFoothold);
 
       // If the foot isn't above any planar region, set the height to the closest region. If it is above some regions, set the height to the highest point if
       // vertically projecting
@@ -221,7 +224,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          double distanceToStance = stanceFootPose.getPosition().distanceXY(footPosition);
          boolean shouldUseProprioceptiveEstimate = distanceToStance < distanceFromStanceToTrustStance;
          shouldUseProprioceptiveEstimate |= distanceToStance < closestRegion.distanceToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
-         if (true)
+         if (onlyTrustProprioceptionWhenOffRegion || shouldUseProprioceptiveEstimate)
          {
             // the sole pose is closer to the stance foot that the region
             solePoseToSnap.set(footstepAtSameHeightAsStanceFoot);
@@ -245,6 +248,21 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          snapTransform.setToZero();
          snapTransform.getTranslation().setZ(footPosition.getZ());
          planarRegionSnapVisualizer.recordSnapTransform(regionsIntersectingFoothold.size(), snapTransform, closestRegion);
+      }
+   }
+
+   private void findRegionsUnderFoot(ConvexPolygon2DReadOnly footPolygonInWorld, List<PlanarRegion> regionsUnderFootToPack)
+   {
+      PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footPolygonInWorld,
+                                                             steppableRegionsProvider.getSteppableRegions(),
+                                                             regionsUnderFootToPack,
+                                                             intersectAreas);
+
+      // remove the regions that don't intersect the area enough.
+      for (int idx = regionsIntersectingFoothold.size() - 1; idx >= 0; idx--)
+      {
+         if (intersectAreas.get(idx) < smallIntersectionAreaToFilter)
+            regionsUnderFootToPack.remove(idx);
       }
    }
 

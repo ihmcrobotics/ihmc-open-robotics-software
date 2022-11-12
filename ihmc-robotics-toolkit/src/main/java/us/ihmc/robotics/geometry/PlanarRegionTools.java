@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -857,21 +858,42 @@ public class PlanarRegionTools
 
       return null;
    }
-
    /**
     * Find all the planar regions that intersect with the given convex polygon. The algorithm is
     * equivalent to projecting all the regions onto the XY-plane and then finding the regions
     * intersecting with the given convex polygon.
     *
     * @param convexPolygon the query.
-    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    * @param intersectingRegionsToPack the list of planar regions intersecting with the given polygon. Empty when no
     *       region intersects.
+    * @return Returns false when no region intersects.
     */
    public static boolean findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon,
                                                               List<PlanarRegion> regions,
                                                               List<PlanarRegion> intersectingRegionsToPack)
    {
+      return findPlanarRegionsIntersectingPolygon(convexPolygon, regions, intersectingRegionsToPack, null);
+   }
+   
+   /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @param intersectingRegionsToPack the list of planar regions intersecting with the given polygon. Empty when no
+    *        region intersects.
+    * @param intersectionAreasToPack list of the areas of each of the intersecting regions. Empty when no region intersects.
+    * @return Returns false when no region intersects.
+    */
+   public static boolean findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon,
+                                                              List<PlanarRegion> regions,
+                                                              List<PlanarRegion> intersectingRegionsToPack,
+                                                              TDoubleArrayList intersectionAreasToPack)
+   {
       intersectingRegionsToPack.clear();
+      if (intersectionAreasToPack != null)
+         intersectionAreasToPack.reset();
       boolean hasIntersection = false;
 
       for (int i = 0; i < regions.size(); i++)
@@ -880,10 +902,14 @@ public class PlanarRegionTools
          if (candidateRegion.isVertical())
             continue;
 
-         if (candidateRegion.isPolygonIntersecting(convexPolygon))
+         double intersectingArea = candidateRegion.computeIntersectingArea(convexPolygon);
+
+         if (intersectingArea > 0.0)
          {
             hasIntersection = true;
             intersectingRegionsToPack.add(candidateRegion);
+            if (intersectionAreasToPack != null)
+               intersectionAreasToPack.add(intersectingArea);
          }
       }
 

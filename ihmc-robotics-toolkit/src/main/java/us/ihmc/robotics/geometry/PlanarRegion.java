@@ -232,6 +232,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    }
 
    private final ConvexPolygon2D proejctedPolygonTemp = new ConvexPolygon2D();
+   private final ConvexPolygon2D polygonIntersectionTemp = new ConvexPolygon2D();
    /**
     * Check if the given polygon intersects this region projected onto the XY-plane.
     *
@@ -258,6 +259,37 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       // Did not find any intersection
       return false;
    }
+
+   /**
+    * Compute the total intersection area of the given polygon with this region projected onto the XY-plane.
+    *
+    * @param convexPolygonInWorld
+    * @return Total interesecting area. Greater than 0.0 if intersecting
+    */
+   public double computeIntersectingArea(ConvexPolygon2DReadOnly convexPolygonInWorld)
+   {
+      BoundingBox2DReadOnly polygonBoundingBox = convexPolygonInWorld.getBoundingBox();
+      if (!boundingBox3dInWorld.intersectsInclusiveInXYPlane(polygonBoundingBox))
+         return 0.0;
+
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+      projectPolygonVerticallyToRegion(convexPolygonInWorld, proejctedPolygonTemp);
+
+      double intersectionArea = 0.0;
+      // Now, just need to go through each polygon of this region and see there is at least one intersection
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
+         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, proejctedPolygonTemp, polygonIntersectionTemp);
+         if (hasIntersection)
+            intersectionArea += polygonIntersectionTemp.getArea();
+      }
+
+      // Did not find any intersection
+      return intersectionArea;
+   }
+
 
    /**
     * Returns all the intersections when the convexPolygon is projected vertically onto this
