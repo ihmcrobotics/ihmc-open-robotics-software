@@ -7,6 +7,7 @@ import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * This is designed to work along side the plugins. It must be added as a PlanarRegionsList Consumer to the {@link StepGeneratorCommandInputManager} and as an
+ * This is designed to work alongside the plugins. It must be added as a PlanarRegionsList Consumer to the {@link StepGeneratorCommandInputManager} and as an
  * Updatable to clear the graphics to the
  * {@link us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory#addUpdatable(Updatable)}
  */
@@ -45,6 +46,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    private final YoInteger numberOfSteppableRegions;
 
    private final SteppingParameters steppingParameters;
+   private final SteppingEnvironmentalConstraintParameters environmentalConstraintParameters;
 
    private final PlanarRegionFootstepPlanSnapper stepSnapper;
    private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
@@ -60,9 +62,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
                                                          SteppingEnvironmentalConstraintParameters environmentalConstraintParameters)
    {
       this.steppingParameters = steppingParameters;
+      this.environmentalConstraintParameters = new YoSteppingEnvironmentalConstraintParameters(environmentalConstraintParameters, registry);
 
-      steppableRegionsCalculator = new SimpleSteppableRegionsCalculator(environmentalConstraintParameters::getMinPlanarRegionAreaForStepping,
-                                                                        environmentalConstraintParameters::getMaxPlanarRegionNormalAngleForStepping);
+      steppableRegionsCalculator = new SimpleSteppableRegionsCalculator(this.environmentalConstraintParameters::getMinPlanarRegionAreaForStepping,
+                                                                        this.environmentalConstraintParameters::getMaxPlanarRegionNormalAngleForStepping);
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
@@ -74,10 +77,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
          footPolygons.put(robotSide, new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints)));
       }
 
-      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons,
-                                                        steppableRegionsCalculator,
-                                                        environmentalConstraintParameters.getConstraintOptimizerParameters(),
-                                                        registry)
+      stepSnapper = new PlanarRegionFootstepPlanSnapper(footPolygons, steppableRegionsCalculator, this.environmentalConstraintParameters, registry)
       {
          @Override
          public void adjustFootstepPlan(FramePose3DReadOnly stanceFootPose,

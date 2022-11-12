@@ -4,6 +4,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -30,8 +31,6 @@ import java.util.List;
 
 public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 {
-   private static final double distanceFromStanceToTrustStance = 0.2;
-   private static final double smallIntersectionAreaToFilter = MathTools.square(0.03);
    private static final boolean onlyTrustProprioceptionWhenOffRegion = true;
 
    private final SteppableRegionsProvider steppableRegionsProvider;
@@ -44,7 +43,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 
-   private final YoConstraintOptimizerParameters wiggleParameters;
+   private final SteppingEnvironmentalConstraintParameters environmentalConstraintParameters;
+   private final ConstraintOptimizerParametersReadOnly wiggleParameters;
    private final YoBoolean useSimpleSnapping;
 
    private final ConvexStepConstraintOptimizer stepConstraintOptimizer;
@@ -73,20 +73,18 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                       SteppableRegionsProvider steppableRegionsProvider,
-                                      ConstraintOptimizerParametersReadOnly constraintOptimizerParameters,
+                                      SteppingEnvironmentalConstraintParameters constraintParameters,
                                       YoRegistry parentRegistry)
    {
       this.steppableRegionsProvider = steppableRegionsProvider;
       YoRegistry registry = new YoRegistry("PlanarRegionFootstepSnapper");
-      this.wiggleParameters = new YoConstraintOptimizerParameters(constraintOptimizerParameters, registry);
+      this.environmentalConstraintParameters = constraintParameters;
+      this.wiggleParameters = constraintParameters.getConstraintOptimizerParameters();
       this.stepConstraintOptimizer = new ConvexStepConstraintOptimizer(registry);
       this.footPolygons = footPolygons;
 
       useSimpleSnapping = new YoBoolean("useSimpleSnapping", registry);
       useSimpleSnapping.set(true);
-
-      wiggleParameters.setShouldPerformOptimization(false);
-      wiggleParameters.setDesiredDistanceInside(-0.02);
 
       parentRegistry.addChild(registry);
    }
@@ -222,7 +220,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                                                                footPosition.getY(),
                                                                                steppableRegionsProvider.getSteppableRegions());
          double distanceToStance = stanceFootPose.getPosition().distanceXY(footPosition);
-         boolean shouldUseProprioceptiveEstimate = distanceToStance < distanceFromStanceToTrustStance;
+         boolean shouldUseProprioceptiveEstimate = distanceToStance < environmentalConstraintParameters.getDistanceFromStanceToTrustEnvironment();
          shouldUseProprioceptiveEstimate |= distanceToStance < closestRegion.distanceToPointByProjectionOntoXYPlane(footPosition.getX(), footPosition.getY());
          if (onlyTrustProprioceptionWhenOffRegion || shouldUseProprioceptiveEstimate)
          {
@@ -261,7 +259,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       // remove the regions that don't intersect the area enough.
       for (int idx = regionsIntersectingFoothold.size() - 1; idx >= 0; idx--)
       {
-         if (intersectAreas.get(idx) < smallIntersectionAreaToFilter)
+         if (intersectAreas.get(idx) < environmentalConstraintParameters.getSmallIntersectionAreaToFilter())
             regionsUnderFootToPack.remove(idx);
       }
    }
