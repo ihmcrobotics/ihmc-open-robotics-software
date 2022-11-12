@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
@@ -39,6 +40,7 @@ import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -96,10 +98,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
             planarRegionsGraphic.generateMeshesAsync(regions.copy());
       });
       heightMapGraphic.getRenderGroundPlane().set(false);
-      helper.subscribeViaCallback(HEIGHT_MAP_FOR_UI, heightMap ->
-      {
-         heightMapGraphic.generateMeshesAsync(heightMap);
-      });
+      helper.subscribeViaCallback(HEIGHT_MAP_FOR_UI, heightMapGraphic::generateMeshesAsync);
       helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
       {
          if (regions != null)
@@ -148,18 +147,23 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    {
       LookAndStepBehaviorParameters lookAndStepParameters = helper.getRobotModel().getLookAndStepParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
+                                       false,
                                        () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
       stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
+                                           false,
                                            () -> helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings()));
 
       SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
       swingPlannerParameterTuner.create(swingPlannerParameters,
+                                        false,
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
+      goalAffordance.setOnStartPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(true));
+      goalAffordance.setOnEndPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(false));
       subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);
 
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
@@ -313,23 +317,29 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (areGraphicsEnabled())
       {
-         goalAffordance.getRenderables(renderables, pool);
-         subGoalGraphic.getRenderables(renderables, pool);
-         if (impassibilityDetected.get())
-            obstacleBoxVisualizer.getRenderables(renderables, pool);
-         footstepPlanGraphic.getRenderables(renderables, pool);
-         commandedFootstepsGraphic.getRenderables(renderables, pool);
-         startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
-         planarRegionsGraphic.getRenderables(renderables, pool);
-         if (showHeightMap.get())
-            heightMapGraphic.getRenderables(renderables, pool);
-         bodyPathPlanGraphic.getRenderables(renderables, pool);
-         if (showReceivedRegions.get())
-            receivedRegionsGraphic.getRenderables(renderables, pool);
+         if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+         {
+            goalAffordance.getRenderables(renderables, pool);
+            subGoalGraphic.getRenderables(renderables, pool);
+            footstepPlanGraphic.getRenderables(renderables, pool);
+            commandedFootstepsGraphic.getRenderables(renderables, pool);
+            startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
+            bodyPathPlanGraphic.getRenderables(renderables, pool);
+         }
+         if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         {
+            if (impassibilityDetected.get())
+               obstacleBoxVisualizer.getRenderables(renderables, pool);
+            planarRegionsGraphic.getRenderables(renderables, pool);
+            if (showHeightMap.get())
+               heightMapGraphic.getRenderables(renderables, pool);
+            if (showReceivedRegions.get())
+               receivedRegionsGraphic.getRenderables(renderables, pool);
+         }
       }
    }
 

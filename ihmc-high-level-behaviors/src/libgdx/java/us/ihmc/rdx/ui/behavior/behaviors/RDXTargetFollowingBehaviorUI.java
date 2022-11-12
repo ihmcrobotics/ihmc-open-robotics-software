@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -29,6 +30,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.targetFollowing.TargetFollowingBehaviorAPI.*;
@@ -140,14 +142,17 @@ public class RDXTargetFollowingBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (areGraphicsEnabled())
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         targetApproachPoseGraphic.getRenderables(renderables, pool);
+         if (areGraphicsEnabled())
+         {
+            targetApproachPoseGraphic.getRenderables(renderables, pool);
+         }
+         manualTargetAffordance.getRenderables(renderables, pool);
       }
-      manualTargetAffordance.getRenderables(renderables, pool);
-      lookAndStepUI.getRenderables(renderables, pool);
+      lookAndStepUI.getRenderables(renderables, pool, sceneLevels);
    }
 
    private boolean areGraphicsEnabled()
