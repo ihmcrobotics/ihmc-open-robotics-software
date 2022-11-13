@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.environment.object.objects.door;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -17,7 +18,7 @@ public class RDXArUcoVirtualDoorPanel extends RDXVirtualGhostObject
    private final RigidBodyTransform transformToMarker = new RigidBodyTransform();
    private final ReferenceFrame virtualFrame;
 
-   public RDXArUcoVirtualDoorPanel(int id)
+   public RDXArUcoVirtualDoorPanel(int id, String name)
    {
       super("environmentObjects/door/doorPanel/DoorPanel.g3dj");
 
@@ -30,12 +31,15 @@ public class RDXArUcoVirtualDoorPanel extends RDXVirtualGhostObject
          double z = 1.14141;
          transformToMarker.set(new YawPitchRoll(Math.toRadians(180.0), 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
       }
-      else // push door
+      else if (id == 1) // push door
       {
-
+         double x = 0.0;
+         double y = 0.678702;
+         double z = 1.14141;
+         transformToMarker.set(new YawPitchRoll(0.0, 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
       }
 
-      virtualFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, transformToMarker);
+      virtualFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(String.format("%s%dPanel", name, id), markerFrame, transformToMarker);
    }
 
    @Override
