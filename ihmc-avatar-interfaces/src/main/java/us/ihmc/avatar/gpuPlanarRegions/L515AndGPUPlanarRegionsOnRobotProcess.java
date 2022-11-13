@@ -132,9 +132,9 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_INPUT, parametersNotification::set);
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT, polygonizerParametersNotification::set);
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT, concaveHullFactoryNotification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_COMMAND, parametersNotification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_COMMAND, polygonizerParametersNotification::set);
+      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_COMMAND, concaveHullFactoryNotification::set);
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
       CollisionBoxProvider collisionBoxProvider = robotModel.getCollisionBoxProvider();
@@ -286,11 +286,11 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             }
             if (parameterOutputThrottler.run(1.0))
             {
-               ros2Helper.publish(GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT,
+               ros2Helper.publish(GPUPlanarRegionExtractionComms.PARAMETERS_STATUS,
                                   StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getParameters()));
-               ros2Helper.publish(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT,
+               ros2Helper.publish(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_STATUS,
                                   StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getConcaveHullFactoryParameters()));
-               ros2Helper.publish(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT,
+               ros2Helper.publish(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_STATUS,
                                   StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getPolygonizerParameters()));
             }
 

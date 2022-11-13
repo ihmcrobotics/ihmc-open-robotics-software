@@ -40,16 +40,13 @@ public class RDXRemoteGPUPlanarRegionExtractionUI
 
       remoteGPURegionParameters = new ImGuiRemoteROS2StoredPropertySet(ros2Helper,
                                                                        gpuRegionParameters,
-                                                                       GPUPlanarRegionExtractionComms.PARAMETERS_OUTPUT,
-                                                                       GPUPlanarRegionExtractionComms.PARAMETERS_INPUT);
+                                                                       GPUPlanarRegionExtractionComms.PARAMETERS_TOPIC_PAIR);
       remotePolygonizerParameters = new ImGuiRemoteROS2StoredPropertySet(ros2Helper,
                                                                          polygonizerParameters,
-                                                                         GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_OUTPUT,
-                                                                         GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_INPUT);
+                                                                         GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_TOPIC_PAIR);
       remoteConcaveHullFactoryParameters = new ImGuiRemoteROS2StoredPropertySet(ros2Helper,
                                                                                 concaveHullFactoryParameters,
-                                                                                GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_OUTPUT,
-                                                                                GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_INPUT);
+                                                                                GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_TOPIC_PAIR);
    }
 
    public void update()
