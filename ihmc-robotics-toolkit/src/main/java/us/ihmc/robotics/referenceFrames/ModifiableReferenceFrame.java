@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 public class ModifiableReferenceFrame
 {
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
-   private final ReferenceFrame referenceFrame;
+   private ReferenceFrame referenceFrame;
 
    public ModifiableReferenceFrame(ReferenceFrame parentFrame)
    {
@@ -19,6 +19,16 @@ public class ModifiableReferenceFrame
    {
       transformToParentConsumer.accept(transformToParent);
       referenceFrame.update();
+   }
+
+   /**
+    * Warning! Frames that declared this one as the parent or
+    * have this above them in the frame tree are going to be
+    * broken after this change!
+    */
+   public void changeParentFrame(ReferenceFrame parentFrame)
+   {
+      referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transformToParent);
    }
 
    public RigidBodyTransform getTransformToParent()

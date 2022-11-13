@@ -3,8 +3,10 @@ package us.ihmc.rdx.ui.affordances;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -35,6 +37,12 @@ public class RDXInteractableHighlightModel implements RenderableProvider
    {
       tempTransform.set(additionalTransform);
       transformToWorld.transform(tempTransform);
+      setPose(tempTransform);
+   }
+
+   public void setPose(ReferenceFrame referenceFrame)
+   {
+      referenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
       setPose(tempTransform);
    }
 
