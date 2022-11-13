@@ -22,11 +22,9 @@ class VisualOdometry
       // void UpdateMonocular(const cv::Mat& image);
       void UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightImageCur);
 
-      void InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat);
-
-      void InsertKeyframe(Eigen::Matrix4f pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight);
-      void InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat);
-      void InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const cv::Mat& leftMat);
+      void InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat);
+      void InsertKeyframe(Eigen::Matrix4d pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight);
+      void InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat);
 
       bool UpdateStereoOld(const cv::Mat& leftImage, const cv::Mat& rightImage);
 
@@ -43,7 +41,7 @@ class VisualOdometry
       void CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, PointLandmarkVec& points3D);
       void CalculateOdometry_FAST(Eigen::Matrix4f& transform);
       void TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
-                                   PointLandmarkVec& points3D);
+                                   const std::vector<int>& kpIDs, PointLandmarkVec& points3D);
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
       void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const std::vector<cv::DMatch>& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
 
@@ -68,8 +66,8 @@ class VisualOdometry
       bool _initialized = false;
       float scalar = 0.03f;
       uint32_t count = 0;
-      uint32_t kFeatures = 1200;
-      uint32_t kMinFeatures = 1000;
+      uint32_t kFeatures = 400;
+      uint32_t kMinFeatures = 300;
       uint32_t width = 0;
       uint32_t height = 0;
       uint32_t xGridCount = 60;

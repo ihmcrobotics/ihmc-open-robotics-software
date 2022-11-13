@@ -3,6 +3,7 @@
   "windows" : {
     "3D View" : true,
     "VR Settings" : false,
-    "VR Thread Debugger" : false
+    "VR Thread Debugger" : false,
+    "Visual SLAM" : true
   }
 }

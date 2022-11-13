@@ -19,7 +19,7 @@ class VisualOdometryExternal
         void updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width);
         
 
-        void getExternalKeyframe(float* odometry, uint32_t* id);
+        void getExternalKeyframe(double* odometry, uint32_t* id);
 
         uint32_t getExternalLandmarks(float* landmarksToPack, uint32_t* idsToPack, uint32_t maxSize);
 

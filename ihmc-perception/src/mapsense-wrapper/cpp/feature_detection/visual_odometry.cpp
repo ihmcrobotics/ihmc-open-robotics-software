@@ -1,6 +1,8 @@
 #include "visual_odometry.h"
 #include "opencv_tools.h"
 
+#include <Eigen/Geometry>
+
 VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
 {
    leftCamera.SetParams(718.856, 718.856, 607.193, 185.216);
@@ -53,6 +55,12 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       ExtractKeypoints(leftImage, kpCur, descCur);
       MatchKeypoints(descPrev, descCur, matches);
 
+      cv::Mat descCurRight;
+      KeyPointVec kpCurRight;
+      std::vector<cv::DMatch> matchesStereo;
+      ExtractKeypoints(rightImage, kpCurRight, descCurRight);
+      MatchKeypoints(descCur, descCurRight, matchesStereo);
+
       printf("Total Matches Before: %ld\n", matches.size());
       FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
       printf("Total Matches After: %ld\n", matches.size());
@@ -68,11 +76,24 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       cv::Mat pose = EstimateMotion(pointsTrain, pointsQuery, mask, leftCamera);
 
       cv::Mat cvPose = pose;
-      Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cvPose.data));
+      Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPoseFloat(reinterpret_cast<float *>(cvPose.data));
+      Eigen::Matrix4d eigenPose = eigenPoseFloat.cast<double>();
       eigenPose.transposeInPlace();
-      cameraPose = cameraPose * eigenPose;
 
-      InsertKeyframe(cameraPose, descCur, kpCur, keypointIDs, leftImage);
+      Eigen::AngleAxisd rotation(eigenPose.block<3,3>(0,0));
+      // eigenPose.block<3,3>(0,0) = rotation.toRotationMatrix();
+
+      Eigen::Quaterniond quat(rotation);
+      quat.normalize();
+      eigenPose.block<3,3>(0,0) = quat.toRotationMatrix();
+
+      _curPoints3D.clear();
+      TriangulateStereoNormal(kpCur, kpCurRight, matchesStereo, keypointIDs, _curPoints3D);
+
+      std::cout << "Pose:" << std::endl << eigenPose << std::endl;
+      std::cout << "Determinant: " << eigenPose.determinant() << std::endl;
+
+      InsertKeyframe(eigenPose, descCur, kpCur, keypointIDs, leftImage);
 
 
       // Visualization and Logging Only --------------------------------------------
@@ -341,7 +362,7 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv:
 
 
 void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
-                                             PointLandmarkVec& points3D)
+                                             const std::vector<int>& kpIDs, PointLandmarkVec& points3D)
 {
    points3D.clear();
    float x1, x2, y1, y2, y_hat, X, Y, Z;
@@ -374,12 +395,9 @@ void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointV
          if (Z > 0)
          {
             Eigen::Vector3f point(X, Y, Z);
-
-            PointLandmark landmark(point);
             Eigen::Vector2f measurement(x1, y1);
-            landmark.SetMeasurement2D(x1, y1);
 
-            points3D.emplace_back(landmark);
+            points3D.push_back({point, measurement, kpIDs[match.trainIdx]});
          }
       }
    }
@@ -636,35 +654,47 @@ void VisualOdometry::TriangulateKeypointsByDisparity(const KeyPointVec& kp, cons
 
 void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
 {
+   printf("Initialize()\n");
+
+   printf("Extracting Keypoints Left\n");
    ExtractKeypoints(leftImageCur, kp_curLeft, desc_curLeft);
+
+   printf("Extracting Keypoints Right\n");
    ExtractKeypoints(rightImageCur, kp_curRight, desc_curRight);
 
+   printf("Matching Stereo Keypoints\n");
    MatchKeypoints(desc_curLeft, desc_curRight, curMatchesStereo);
 
-   std::vector<int> kpIDs;
-   for(int i = 0; i<kp_curLeft.size(); i++)
+   printf("Assigning Unique Labels: %ld\n", kp_curLeft.size());
+   std::vector<int> kpIDs(kp_curLeft.size(), -1);
+   for(int i = 0; i<(int)kp_curLeft.size(); i++)
    {
       uniqueKeypointID++;
       kpIDs[i] = uniqueKeypointID;
    }
 
-   InsertKeyframe(Eigen::Matrix4f::Identity(), desc_curLeft, kp_curLeft, kpIDs, leftImageCur);
+   printf("Triangulating Stereo Keypoints\n");
+   PointLandmarkVec points3D;
+   TriangulateStereoNormal(kp_curLeft, kp_curRight, curMatchesStereo, kpIDs, points3D);
+
+   printf("Inserting Keyframe Initial\n");
+   InsertKeyframe(Eigen::Matrix4d::Identity(), desc_curLeft, kp_curLeft, kpIDs, leftImageCur);
 
 
    _initialized = true;
 }
 
-void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight)
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4d pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight)
 {
    _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight));
 }
 
-void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat)
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat)
 {
    _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight, leftMat.clone(), rightMat.clone()));
 }
 
-void VisualOdometry::InsertKeyframe(Eigen::Matrix4f pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat)
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat)
 {
    _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), kpLeft, kpIDs, leftMat.clone()));
 }

@@ -9,6 +9,8 @@ class PointLandmark
    public:
       PointLandmark(Eigen::Vector3f point3D) : _point3D(point3D){};
 
+      PointLandmark(Eigen::Vector3f point3D, Eigen::Vector2f measurement2D, int id) : _point3D(point3D), _measurement2D(measurement2D), _id(id){};
+
       const Eigen::Vector3f& GetPoint3D() const {return _point3D;}
 
       const Eigen::Vector2f& GetMeasurement2D() const {return _measurement2D;}
@@ -25,6 +27,6 @@ class PointLandmark
       Eigen::Vector3f _point3D;
       Eigen::Vector2f _measurement2D;
       
-      uint32_t _id;
+      int _id = -1;
 
 };

@@ -14,11 +14,11 @@ void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
-void FactorGraphExternal::addOdometryFactorExtended(float *odometry, int poseId)
+void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId)
 {
     using namespace gtsam;
-    Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(odometry);
-    Pose3 odometryValue(M.cast<double>());
+    Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
+    Pose3 odometryValue(M);
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 

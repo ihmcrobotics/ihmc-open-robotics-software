@@ -51,9 +51,9 @@ public class VisualOdometry extends us.ihmc.bytedeco.mapsenseWrapper.presets.Vis
         public native void updateStereo(@Cast("uint8_t*") byte[] bufferLeft, @Cast("uint8_t*") byte[] bufferRight, int height, int width);
         
 
-        public native void getExternalKeyframe(FloatPointer odometry, @Cast("uint32_t*") IntPointer id);
-        public native void getExternalKeyframe(FloatBuffer odometry, @Cast("uint32_t*") IntBuffer id);
-        public native void getExternalKeyframe(float[] odometry, @Cast("uint32_t*") int[] id);
+        public native void getExternalKeyframe(DoublePointer odometry, @Cast("uint32_t*") IntPointer id);
+        public native void getExternalKeyframe(DoubleBuffer odometry, @Cast("uint32_t*") IntBuffer id);
+        public native void getExternalKeyframe(double[] odometry, @Cast("uint32_t*") int[] id);
 
         public native @Cast("uint32_t") int getExternalLandmarks(FloatPointer landmarksToPack, @Cast("uint32_t*") IntPointer idsToPack, @Cast("uint32_t") int maxSize);
         public native @Cast("uint32_t") int getExternalLandmarks(FloatBuffer landmarksToPack, @Cast("uint32_t*") IntBuffer idsToPack, @Cast("uint32_t") int maxSize);

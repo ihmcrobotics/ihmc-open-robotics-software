@@ -33,8 +33,9 @@ public class VisualSLAMModule
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
       float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-      factorGraphExternal.addPriorPoseFactor(1, poseInitial);
-      factorGraphExternal.setPoseInitialValue(1, poseInitial);
+      LogTools.info("Inserting Prior Pose Factor: x{}", 0);
+      factorGraphExternal.addPriorPoseFactor(0, poseInitial);
+      factorGraphExternal.setPoseInitialValue(0, poseInitial);
    }
 
 
@@ -42,19 +43,23 @@ public class VisualSLAMModule
    {
       visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
 
-      LogTools.info("Inserting: {}", frameIndex+1);
 
-      float[] relativePoseTransformAsArray = new float[16];
+      LogTools.info("Extracting Keyframe External");
+      double[] relativePoseTransformAsArray = new double[16];
       int[] keyframeID = new int[]{-1};
       visualOdometryExternal.getExternalKeyframe(relativePoseTransformAsArray, keyframeID);
 
+      LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0] + 1);
       factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0] + 1);
 
+      LogTools.info("Extracting Landmarks External");
       /* Extract keyframe and landmark measurements from visual odometry module. */
       float[] landmarks = new float[5 * MAX_LANDMARKS];
       int[] landmarkIDs = new int[MAX_LANDMARKS];
       int totalLandmarks = visualOdometryExternal.getExternalLandmarks(landmarks, landmarkIDs, MAX_LANDMARKS);
+      LogTools.info("Total Landmarks: {}", totalLandmarks);
 
+      LogTools.info("Transforming Point to World Frame");
       /* Update sensorToWorldTransform based on last sensor pose and most recent odometry */
       RigidBodyTransform odometryTransform = new RigidBodyTransform();
       odometryTransform.set(relativePoseTransformAsArray);
@@ -63,21 +68,32 @@ public class VisualSLAMModule
       /* Compute and insert keyframe pose in world frame as initial value */
       float[] poseValue = new float[16];
       worldToSensorTransform.get(poseValue);
+      LogTools.info("Setting Initial Pose Value: x{}", keyframeID[0] + 1);
       factorGraphExternal.setPoseInitialValueExtended(keyframeID[0] + 1, poseValue);
 
       /* Insert landmarks and initial estimates into the factor graph. */
+      int totalValidLandmarks = 0;
       for(int i = 0; i<totalLandmarks; i++)
       {
-         /* Insert generic projection factor for each landmark measurement on left camera. */
-         factorGraphExternal.addGenericProjectionFactor(new float[]{landmarks[i*5], landmarks[i*5 + 1]}, landmarkIDs[i], keyframeID[0]);
+         if(landmarkIDs[i] != -1)
+         {
+            /* Insert generic projection factor for each landmark measurement on left camera. */
+            LogTools.info("Inserting Projection Factor: x{} -> p{}", keyframeID[0] + 1, landmarkIDs[i]);
+            factorGraphExternal.addGenericProjectionFactor(new float[]{landmarks[i*5], landmarks[i*5 + 1]}, landmarkIDs[i], keyframeID[0] + 1);
 
-         /* Compute the 3D point initial value in world frame. */
-         Point3D pointInWorld = new Point3D(landmarks[i*5 + 2], landmarks[i*5 + 3], landmarks[i*5 + 4]);
-         worldToSensorTransform.transform(pointInWorld);
+            /* Compute the 3D point initial value in world frame. */
+            Point3D pointInWorld = new Point3D(landmarks[i*5 + 2], landmarks[i*5 + 3], landmarks[i*5 + 4]);
+            worldToSensorTransform.transform(pointInWorld);
 
-         factorGraphExternal.setPointLandmarkInitialValue(landmarkIDs[i], new float[]{pointInWorld.getX32(), pointInWorld.getY32(), pointInWorld.getZ32()});
+            LogTools.info("Setting landmark initial value.");
+            factorGraphExternal.setPointLandmarkInitialValue(landmarkIDs[i], new float[]{pointInWorld.getX32(), pointInWorld.getY32(), pointInWorld.getZ32()});
+
+            totalValidLandmarks++;
+         }
       }
+      LogTools.info("Total Valid Landmarks: {}", totalValidLandmarks);
 
+      LogTools.info("Optimizing Factor Graph");
       // TODO: Try Incremental SAM instead of batch optimizer.
       factorGraphExternal.optimize();
       factorGraphExternal.printResults();

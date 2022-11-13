@@ -89,7 +89,17 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
 }
 
-void VisualOdometryExternal::getExternalKeyframe(float* odometry, uint32_t* id)
+// void VisualOdometryExternal::getExternalKeyframe(float* odometry, uint32_t* id)
+// {
+
+//     *(id) = _visualOdometry->GetLastKeyframe().id;
+//     Eigen::Matrix3f rotation = _visualOdometry->GetLastKeyframe().pose.block<3,3>(0,0);
+//     Eigen::Matrix3f translation = _visualOdometry->GetLastKeyframe().pose.block<3,1>(0,3);
+//     Eigen::Vector3f eulerAngles = rotation.eulerAngles();
+//     odometry[]
+// }
+
+void VisualOdometryExternal::getExternalKeyframe(double* odometry, uint32_t* id)
 {
     *(id) = _visualOdometry->GetLastKeyframe().id;
     std::copy(_visualOdometry->GetLastKeyframe().pose.data(),

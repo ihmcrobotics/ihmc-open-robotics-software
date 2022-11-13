@@ -43,9 +43,9 @@ public static class FactorGraphExternal extends Pointer {
         public native void addOdometryFactor(float[] odometry, int poseId);
 
         // Expects 4x4 homogenous transform matrix to insert Pose3 factor
-        public native void addOdometryFactorExtended(FloatPointer odometry, int poseId);
-        public native void addOdometryFactorExtended(FloatBuffer odometry, int poseId);
-        public native void addOdometryFactorExtended(float[] odometry, int poseId);
+        public native void addOdometryFactorExtended(DoublePointer odometry, int poseId);
+        public native void addOdometryFactorExtended(DoubleBuffer odometry, int poseId);
+        public native void addOdometryFactorExtended(double[] odometry, int poseId);
 
         // Expects packed Vector4
         public native void addOrientedPlaneFactor(FloatPointer lmMean, int lmId, int poseIndex);

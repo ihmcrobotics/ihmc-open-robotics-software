@@ -1,10 +1,12 @@
 package us.ihmc.rdx.perception;
 
+import imgui.ImGui;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -13,16 +15,15 @@ import java.util.concurrent.TimeUnit;
 
 public class RDXVisualSLAMDemo
 {
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
-
-   private final VisualSLAMModule vslam;
-
    private final ScheduledExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(),
                                                                                                            ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
 
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final VisualSLAMModule vslam;
+   private final ImGuiPanel panel = new ImGuiPanel("Visual SLAM");
+
    private static final String LEFT_CAMERA_NAME = "image_0";
    private static final String RIGHT_CAMERA_NAME = "image_1";
-
    private static final String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
 
    private ImageMat currentImageRight;
@@ -30,33 +31,30 @@ public class RDXVisualSLAMDemo
 
    private String leftImageName;
    private String rightImageName;
-
-   private ImageMat displayImageLeft;
-
    private String fileName = "000000.png";
+
    private int fileIndex = 0;
 
    public RDXVisualSLAMDemo()
    {
       vslam = new VisualSLAMModule();
+      panel.setRenderMethod(this::renderImGuiWidgets);
 
+      baseUI.getImGuiPanelManager().addPanel(panel);
 
-
-      executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+      //executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
-
             baseUI.create();
          }
 
          @Override
          public void render()
          {
-
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -68,6 +66,14 @@ public class RDXVisualSLAMDemo
             baseUI.dispose();
          }
       });
+   }
+
+   public void renderImGuiWidgets()
+   {
+      if(ImGui.button("Next"))
+      {
+         update();
+      }
    }
 
    public void update()
