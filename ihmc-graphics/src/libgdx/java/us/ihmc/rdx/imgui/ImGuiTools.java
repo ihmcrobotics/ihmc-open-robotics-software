@@ -149,6 +149,7 @@ public class ImGuiTools
       }
    }
 
+   /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueLabel(String label)
    {
       return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
@@ -159,11 +160,13 @@ public class ImGuiTools
       return label + "###" + id + ":" + label;
    }
 
+   /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueLabel(Object thisObject, String label)
    {
       return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
+   /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueIDOnly(Object thisObject, String label)
    {
       return "###" + thisObject.getClass().getName() + ":" + label;

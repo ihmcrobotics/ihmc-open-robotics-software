@@ -14,6 +14,7 @@ plugins {
 ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    javaDirectory("slam-wrapper", "generated-java")
    configurePublications()
 }
