@@ -1,6 +1,7 @@
 package us.ihmc.rdx.simulation.environment.object.objects.door;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -16,7 +17,7 @@ public class RDXArUcoVirtualDoorFrame extends RDXVirtualGhostObject
    private final RigidBodyTransform transformToMarker = new RigidBodyTransform();
    private final ReferenceFrame virtualFrame;
 
-   public RDXArUcoVirtualDoorFrame(int id)
+   public RDXArUcoVirtualDoorFrame(int id, String name)
    {
       super("environmentObjects/door/doorFrame/DoorFrame.g3dj");
 
@@ -29,12 +30,15 @@ public class RDXArUcoVirtualDoorFrame extends RDXVirtualGhostObject
          double z = 1.14141 + 0.02;
          transformToMarker.set(new YawPitchRoll(Math.toRadians(180.0), 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
       }
-      else // push door
+      else if (id == 1) // push door
       {
-
+         double x = 0.0;
+         double y = 0.678702 + 0.005 - 0.006;
+         double z = 1.14141 + 0.02;
+         transformToMarker.set(new YawPitchRoll(0.0, 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
       }
 
-      virtualFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, transformToMarker);
+      virtualFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(String.format("%s%dFrame", name, id), markerFrame, transformToMarker);
    }
 
    @Override

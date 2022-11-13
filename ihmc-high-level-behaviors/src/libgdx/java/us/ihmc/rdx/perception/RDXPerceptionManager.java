@@ -10,14 +10,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualBox;
-import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualDoorFrame;
-import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualDoorPanel;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class RDXPerceptionManager
 {
@@ -25,12 +25,9 @@ public class RDXPerceptionManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(true);
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private RDXArUcoVirtualDoorPanel pullDoorPanel;
-   private RDXArUcoVirtualDoorFrame pullDoorFrame;
+   private final RDXPerceptionDoorManager pullDoorManager = new RDXPerceptionDoorManager();
+   private final RDXPerceptionDoorManager pushDoorManager = new RDXPerceptionDoorManager();
    private RDXArUcoVirtualBox box;
-   private boolean isPullDoorDetected = false;
-   private boolean isPullDoorDetectedOnce = false;
-   private boolean isFrameLockedIn = false;
    private boolean isBoxDetected = false;
    private final FramePose3D cameraPose = new FramePose3D();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
@@ -41,8 +38,8 @@ public class RDXPerceptionManager
    {
       this.objectDetectionBlackflySimulator = objectDetectionBlackflySimulator;
 
-      pullDoorPanel = new RDXArUcoVirtualDoorPanel(0);
-      pullDoorFrame = new RDXArUcoVirtualDoorFrame(0);
+      pullDoorManager.create(0, "PullDoor");
+      pushDoorManager.create(1, "PushDoor");
       box = new RDXArUcoVirtualBox(2);
 
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
@@ -51,7 +48,8 @@ public class RDXPerceptionManager
                                   objectDetectionBlackflySimulator.getSensorFrame());
       arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-      markersToTrack.add(pullDoorPanel.getArUcoMarker());
+      markersToTrack.add(pullDoorManager.getVirtualDoorPanel().getArUcoMarker());
+      markersToTrack.add(pushDoorManager.getVirtualDoorPanel().getArUcoMarker());
       markersToTrack.add(box.getArUcoMarker());
       arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
 
@@ -63,41 +61,19 @@ public class RDXPerceptionManager
       if (enabled.get())
       {
          arUcoMarkerDetection.update();
-         isPullDoorDetected = arUcoMarkerDetection.isDetected(pullDoorPanel.getArUcoMarker());
+         pullDoorManager.update(arUcoMarkerDetection,
+                                objectDetectionBlackflySimulator.getSensorFrame(),
+                                cameraPose);
+         pushDoorManager.update(arUcoMarkerDetection,
+                                objectDetectionBlackflySimulator.getSensorFrame(),
+                                cameraPose);
          isBoxDetected = arUcoMarkerDetection.isDetected(box.getArUcoMarker());
-         if (isPullDoorDetected)
-         {
-            isPullDoorDetectedOnce = true;
-
-            FramePose3DBasics panelMarkerPose = arUcoMarkerDetection.getPose(pullDoorPanel.getArUcoMarker());
-            panelMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
-            panelMarkerPose.get(pullDoorPanel.getMarkerToWorld());
-
-            // Hack, once we see the door panel up close, lock in the frame pose, because after a while or the panel moves
-            // we won't know where it is anymore
-            if (!isFrameLockedIn)
-            {
-               FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(pullDoorFrame.getArUcoMarker());
-               markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-               markerPose.get(pullDoorFrame.getMarkerToWorld());
-
-               cameraPose.setToZero(objectDetectionBlackflySimulator.getSensorFrame());
-               cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-               double distanceToMarker = markerPose.getPosition().distance(cameraPose.getPosition());
-               if (distanceToMarker < 0.9)
-               {
-                  isFrameLockedIn = true;
-               }
-            }
-         }
          if (isBoxDetected)
          {
             FramePose3DBasics boxMarkerPose = arUcoMarkerDetection.getPose(box.getArUcoMarker());
             boxMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
             boxMarkerPose.get(box.getMarkerToWorld());
          }
-         pullDoorPanel.update();
-         pullDoorFrame.update();
          box.update();
          arUcoMarkerDetectionUI.update();
       }
@@ -109,33 +85,27 @@ public class RDXPerceptionManager
       ImGui.checkbox(labels.get("Show graphics"), showGraphics);
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (showGraphics.get())
       {
-         if (isPullDoorDetected)
-         {
-            pullDoorPanel.getRenderables(renderables, pool);
-         }
-         if (isPullDoorDetectedOnce)
-         {
-            pullDoorFrame.getRenderables(renderables, pool);
-         }
-         if (isBoxDetected)
+         pullDoorManager.getRenderables(renderables, pool, sceneLevels);
+         pushDoorManager.getRenderables(renderables, pool, sceneLevels);
+         if (isBoxDetected && sceneLevels.contains(RDXSceneLevel.MODEL))
          {
             box.getRenderables(renderables, pool);
          }
       }
    }
 
-   public ReferenceFrame getPullDoorPanelFrame()
+   public RDXPerceptionDoorManager getPullDoorManager()
    {
-      return pullDoorPanel.getVirtualFrame();
+      return pullDoorManager;
    }
 
-   public ReferenceFrame getPullDoorFrameFrame()
+   public RDXPerceptionDoorManager getPushDoorManager()
    {
-      return pullDoorFrame.getVirtualFrame();
+      return pushDoorManager;
    }
 
    public ReferenceFrame getBoxFrame()
