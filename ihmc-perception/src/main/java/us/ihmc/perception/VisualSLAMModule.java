@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -18,7 +19,7 @@ public class VisualSLAMModule
    private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
    private final SlamWrapper.FactorGraphExternal factorGraphExternal;
 
-
+   RigidBodyTransform worldToSensorTransform = new RigidBodyTransform();
 
    private int frameIndex = 0;
    private boolean initialized = false;
@@ -39,42 +40,43 @@ public class VisualSLAMModule
 
    public void update(ImageMat leftImage, ImageMat rightImage)
    {
-      //visualOdometryExternal.displayMat(leftImage.getData(), leftImage.getRows(), leftImage.getCols(), 1);
-
       visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
-      //visualOdometryExternal.getKeyframe();
 
       LogTools.info("Inserting: {}", frameIndex+1);
 
-      float[] relativePose = new float[16];
+      float[] relativePoseTransformAsArray = new float[16];
       int[] keyframeID = new int[]{-1};
-      visualOdometryExternal.getExternalKeyframe(relativePose, keyframeID);
-      LogTools.info("ID: {} -> Odometry: {}", keyframeID[0], Arrays.toString(relativePose));
+      visualOdometryExternal.getExternalKeyframe(relativePoseTransformAsArray, keyframeID);
 
-      // TODO: Create a 16-array method for inserting pose factors.
-      float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
-      factorGraphExternal.addOdometryFactor(odometry, frameIndex + 2);
+      factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0] + 1);
 
-
+      /* Extract keyframe and landmark measurements from visual odometry module. */
       float[] landmarks = new float[5 * MAX_LANDMARKS];
       int[] landmarkIDs = new int[MAX_LANDMARKS];
       int totalLandmarks = visualOdometryExternal.getExternalLandmarks(landmarks, landmarkIDs, MAX_LANDMARKS);
-      LogTools.info("Landmark IDs: {}", Arrays.toString(landmarkIDs));
 
+      /* Update sensorToWorldTransform based on last sensor pose and most recent odometry */
+      RigidBodyTransform odometryTransform = new RigidBodyTransform();
+      odometryTransform.set(relativePoseTransformAsArray);
+      worldToSensorTransform.multiply(odometryTransform);
+
+      /* Compute and insert keyframe pose in world frame as initial value */
+      float[] poseValue = new float[16];
+      worldToSensorTransform.get(poseValue);
+      factorGraphExternal.setPoseInitialValueExtended(keyframeID[0] + 1, poseValue);
+
+      /* Insert landmarks and initial estimates into the factor graph. */
       for(int i = 0; i<totalLandmarks; i++)
       {
+         /* Insert generic projection factor for each landmark measurement on left camera. */
          factorGraphExternal.addGenericProjectionFactor(new float[]{landmarks[i*5], landmarks[i*5 + 1]}, landmarkIDs[i], keyframeID[0]);
 
-         // TODO: Compute the 3D point initial value in world frame.
-         Point3D point = new Point3D(landmarks[i*5 + 2], landmarks[i*5 + 3], landmarks[i*5 + 4]);
+         /* Compute the 3D point initial value in world frame. */
+         Point3D pointInWorld = new Point3D(landmarks[i*5 + 2], landmarks[i*5 + 3], landmarks[i*5 + 4]);
+         worldToSensorTransform.transform(pointInWorld);
 
-
-         factorGraphExternal.setPointLandmarkInitialValue(landmarkIDs[i], new float[]{point.getX32(), point.getY32(), point.getZ32()});
+         factorGraphExternal.setPointLandmarkInitialValue(landmarkIDs[i], new float[]{pointInWorld.getX32(), pointInWorld.getY32(), pointInWorld.getZ32()});
       }
-
-      // TODO: Compute and insert keyframe pose in world frame as initial value
-      float[] poseValue = new float[]{0.0f, 0.0f, 0.0f, 1.0f * frameIndex, 0.0f, 0.0f};
-      factorGraphExternal.setPoseInitialValue(frameIndex + 2, poseValue);
 
       // TODO: Try Incremental SAM instead of batch optimizer.
       factorGraphExternal.optimize();

@@ -11,6 +11,9 @@ class FactorGraphExternal
         // Expects packed Pose3
         void addOdometryFactor(float* odometry, int poseId);
 
+        // Expects 4x4 homogenous transform matrix to insert Pose3 factor
+        void addOdometryFactorExtended(float *odometry, int poseId);
+
         // Expects packed Vector4
         void addOrientedPlaneFactor(float* lmMean, int lmId, int poseIndex);
 
@@ -22,6 +25,9 @@ class FactorGraphExternal
 
         // Expects packed Pose3
         void setPoseInitialValue(int index, float* value);
+
+        // Expects 4x4 homogenous transform matrix as initial value for Pose3
+        void setPoseInitialValueExtended(int index, float *value);
 
         // Expects packed OrientedPlane3
         void setOrientedPlaneInitialValue(int landmarkId, float* value);
