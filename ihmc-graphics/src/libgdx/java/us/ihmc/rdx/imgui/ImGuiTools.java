@@ -1,6 +1,7 @@
 package us.ihmc.rdx.imgui;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
@@ -139,6 +140,11 @@ public class ImGuiTools
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
       return ImGui.inputText(label, text, flags);
+   }
+
+   public static void textColored(Color color, String text)
+   {
+      ImGui.textColored(color.r, color.g, color.b, color.a, text);
    }
 
    public static void previousWidgetTooltip(String tooltipText)
