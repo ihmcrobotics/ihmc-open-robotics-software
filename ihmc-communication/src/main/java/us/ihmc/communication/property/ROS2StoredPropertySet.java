@@ -29,6 +29,7 @@ public class ROS2StoredPropertySet
 
    public void update()
    {
+      commandInput.setToAcceptUpdate(); // Always accept updates
       commandInput.update();
 
       // Heartbeat so remote UI tuners can stay up to date
