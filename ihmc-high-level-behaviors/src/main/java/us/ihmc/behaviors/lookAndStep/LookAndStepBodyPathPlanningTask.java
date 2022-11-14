@@ -20,6 +20,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -109,6 +110,7 @@ public class LookAndStepBodyPathPlanningTask
       private TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
       private TimerSnapshotWithExpiration planningFailureTimerSnapshot;
       private LookAndStepBehavior.State behaviorState;
+      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
 
       public void initialize(LookAndStepBehavior lookAndStep)
       {
@@ -116,7 +118,8 @@ public class LookAndStepBodyPathPlanningTask
          helper = lookAndStep.helper;
          uiPublisher = lookAndStep.helper::publish;
          visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
+         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
          operatorReviewEnabled = lookAndStep.operatorReviewEnabledInput::get;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
@@ -224,6 +227,7 @@ public class LookAndStepBodyPathPlanningTask
 
       private void evaluateAndRun()
       {
+         ros2LookAndStepParameters.update();
          mapRegions = mapRegionsInput.getLatest();
          ousterLidarScan = ousterLidarInput.getLatest();
          goal = goalInput.getLatest();

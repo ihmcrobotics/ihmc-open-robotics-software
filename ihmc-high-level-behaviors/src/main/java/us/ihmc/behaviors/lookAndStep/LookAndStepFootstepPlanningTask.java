@@ -15,12 +15,15 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.time.TimeTools;
@@ -90,6 +93,9 @@ public class LookAndStepFootstepPlanningTask
       private ResettableExceptionHandlingExecutorService executor;
       protected ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
+      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
+      private ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
+      private ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> lidarREAPlanarRegionsInput = new TypedInput<>();
@@ -105,9 +111,12 @@ public class LookAndStepFootstepPlanningTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
-         footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
-         swingPlannerParameters = lookAndStep.swingPlannerParameters;
+         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
+         ros2FootstepPlannerParameters = lookAndStep.ros2FootstepPlannerParameters;
+         footstepPlannerParameters = ros2FootstepPlannerParameters.getStoredPropertySet();
+         ros2SwingPlannerParameters = lookAndStep.ros2SwingPlannerParameters;
+         swingPlannerParameters = ros2SwingPlannerParameters.getStoredPropertySet();
          uiPublisher = lookAndStep.helper::publish;
          footstepPlanningModule = lookAndStep.helper.getOrCreateFootstepPlanner();
          defaultFootPolygons = FootstepPlanningModuleLauncher.createFootPolygons(lookAndStep.helper.getRobotModel());
@@ -240,6 +249,9 @@ public class LookAndStepFootstepPlanningTask
 
       private void evaluateAndRun()
       {
+         ros2LookAndStepParameters.update();
+         ros2FootstepPlannerParameters.update();
+         ros2SwingPlannerParameters.update();
          lidarREAPlanarRegions = lidarREAPlanarRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          lidarREAPlanarRegionReceptionTimerSnapshot = lidarREAPlanarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());

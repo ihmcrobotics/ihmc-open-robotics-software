@@ -5,6 +5,8 @@ import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public class ImGuiRemoteROS2StoredPropertySet
@@ -13,6 +15,7 @@ public class ImGuiRemoteROS2StoredPropertySet
    private final StoredPropertySetBasics storedPropertySet;
    private final StoredPropertySetROS2TopicPair topicPair;
    private final StoredPropertySetROS2Input storedPropertySetROS2Input;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiStoredPropertySetTuner imGuiStoredPropertySetTuner;
    private boolean storedPropertySetChangedByImGuiUser = false;
 
@@ -43,6 +46,15 @@ public class ImGuiRemoteROS2StoredPropertySet
       storedPropertySetROS2Input.setToAcceptUpdate();
    }
 
+   public void renderImGuiWidgetsWithUpdateButton()
+   {
+      if (ImGui.button(labels.get("Update parameters from remote")))
+      {
+         storedPropertySetROS2Input.setToAcceptUpdate();
+      }
+      renderImGuiWidgets();
+   }
+
    public void renderImGuiWidgets()
    {
       storedPropertySetROS2Input.update();
@@ -55,12 +67,32 @@ public class ImGuiRemoteROS2StoredPropertySet
       else
       {
          imGuiStoredPropertySetTuner.renderImGuiWidgets();
-
-         if (storedPropertySetChangedByImGuiUser)
-         {
-            storedPropertySetChangedByImGuiUser = false;
-            ros2PublishSubscribeAPI.publish(topicPair.getCommandTopic(), StoredPropertySetMessageTools.newMessage(storedPropertySet));
-         }
+         publishIfNecessary();
       }
+   }
+
+   private void publishIfNecessary()
+   {
+      if (storedPropertySetChangedByImGuiUser)
+      {
+         storedPropertySetChangedByImGuiUser = false;
+         ros2PublishSubscribeAPI.publish(topicPair.getCommandTopic(), StoredPropertySetMessageTools.newMessage(storedPropertySet));
+      }
+   }
+
+   public void setPropertyChanged()
+   {
+      storedPropertySetChangedByImGuiUser = true;
+      publishIfNecessary();
+   }
+
+   public StoredPropertySetBasics getStoredPropertySet()
+   {
+      return storedPropertySet;
+   }
+
+   public ImGuiPanel createPanel()
+   {
+      return new ImGuiPanel(storedPropertySet.getTitle(), this::renderImGuiWidgetsWithUpdateButton);
    }
 }

@@ -111,7 +111,7 @@ public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
    {
       StoredPropertySetMessage storedPropertySetMessage = new StoredPropertySetMessage();
       lookAndStepParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
-      ros2Publisher.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
+//      ros2Publisher.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
    }
 
    private void publishFootstepPlanningParameters()

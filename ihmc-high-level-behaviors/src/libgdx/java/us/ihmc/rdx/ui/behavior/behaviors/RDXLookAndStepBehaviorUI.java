@@ -12,17 +12,14 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.ui.affordances.RDXBallAndArrowPosePlacement;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
@@ -61,7 +58,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
    private final AtomicReference<Boolean> impassibilityDetected;
-   private final ImBoolean stopForImpassibilities = new ImBoolean(true);
+   private ImBooleanWrapper stopForImpassibilities;
    private final ImPlotYoHelperDoublePlotLine footstepPlanningDurationPlot;
    private final ImGuiYoDoublePlot footholdVolumePlot;
    private final ImBoolean invertShowGraphics = new ImBoolean(false);
@@ -80,9 +77,9 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final RDXFootstepPlanGraphic commandedFootstepsGraphic;
    private final RDXFootstepPlanGraphic startAndGoalFootstepsGraphic;
-   private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner = new ImGuiStoredPropertySetTuner("Look and Step Parameters");
-   private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (for Look and Step)");
-   private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
+   private final ImGuiRemoteROS2StoredPropertySet lookAndStepRemotePropertySet;
+   private final ImGuiRemoteROS2StoredPropertySet footstepPlannerRemotePropertySet;
+   private final ImGuiRemoteROS2StoredPropertySet swingPlannerRemotePropertySet;
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
 
@@ -140,26 +137,21 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          obstacleBoxVisualizer.generateMeshAsync(box3D);
       });
       helper.subscribeViaCallback(ResetForUI, goalAffordance::clear);
+      lookAndStepRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
+                                                                          helper.getRobotModel().getLookAndStepParameters(),
+                                                                          LOOK_AND_STEP_PARAMETERS_TOPIC_PAIR);
+      footstepPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
+                                                                              helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"),
+                                                                              FOOTSTEP_PLANNING_PARAMETERS_TOPIC_PAIR);
+      swingPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
+                                                                           helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
+                                                                           SWING_PLANNER_PARAMETERS_TOPIC_PAIR);
+      stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
    }
 
    @Override
    public void create(RDXBaseUI baseUI)
    {
-      LookAndStepBehaviorParameters lookAndStepParameters = helper.getRobotModel().getLookAndStepParameters();
-      lookAndStepParameterTuner.create(lookAndStepParameters,
-                                       false,
-                                       () -> helper.publish(LOOK_AND_STEP_PARAMETERS, StoredPropertySetMessageTools.newMessage(lookAndStepParameters)));
-      stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
-
-      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
-      footstepPlannerParameterTuner.create(footstepPlannerParameters,
-                                           false,
-                                           () -> helper.publish(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings()));
-
-      SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
-      swingPlannerParameterTuner.create(swingPlannerParameters,
-                                        false,
-                                        () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
       goalAffordance.setOnStartPositionPlacement(() -> baseUI.setModelSceneMouseCollisionEnabled(true));
@@ -243,10 +235,13 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanningDurationPlot.renderImGuiWidgets();
 //      ImGui.text("Footstep planning regions recieved:");
 //      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
-      if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
+      stopForImpassibilities.accessImBoolean(stopForImpassibilities ->
       {
-         lookAndStepParameterTuner.changeParameter(LookAndStepBehaviorParameters.stopForImpassibilities, stopForImpassibilities.get());
-      }
+         if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
+         {
+            lookAndStepRemotePropertySet.setPropertyChanged();
+         }
+      });
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
 
@@ -299,9 +294,9 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    @Override
    public void addChildPanels(ImGuiPanel parentPanel)
    {
-      parentPanel.addChild(lookAndStepParameterTuner);
-      parentPanel.addChild(footstepPlannerParameterTuner);
-      parentPanel.addChild(swingPlannerParameterTuner);
+      parentPanel.addChild(lookAndStepRemotePropertySet.createPanel());
+      parentPanel.addChild(footstepPlannerRemotePropertySet.createPanel());
+      parentPanel.addChild(swingPlannerRemotePropertySet.createPanel());
    }
 
    private boolean areGraphicsEnabled()

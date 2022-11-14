@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,7 +21,8 @@ import java.util.List;
 
 public class LookAndStepBehaviorAPI
 {
-   private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step");
+   private static final String MODULE_NAME = ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step";
+   private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
    public static final String REGIONS_FOR_FOOTSTEP_PLANNING = RosTools.MAPSENSE_REGIONS;
    public static final ROS2Topic<PlanarRegionsListMessage> ROS2_REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.RAPID_REGIONS;
@@ -40,8 +42,11 @@ public class LookAndStepBehaviorAPI
     */
    public static final ROS2Topic<Empty> REACHED_GOAL = LOOK_AND_STEP_BEHAVIOR.withOutput().withTypeName(Empty.class);
    /** Look and step behavior parameters */
-   public static final ROS2Topic<StoredPropertySetMessage> LOOK_AND_STEP_PARAMETERS
-         = LOOK_AND_STEP_BEHAVIOR.withType(StoredPropertySetMessage.class).withSuffix("parameters");
+   public static final StoredPropertySetROS2TopicPair LOOK_AND_STEP_PARAMETERS_TOPIC_PAIR = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
+   public static final StoredPropertySetROS2TopicPair FOOTSTEP_PLANNING_PARAMETERS_TOPIC_PAIR
+         = new StoredPropertySetROS2TopicPair(MODULE_NAME, "footstep_planning_parameters");
+   public static final StoredPropertySetROS2TopicPair SWING_PLANNER_PARAMETERS_TOPIC_PAIR
+         = new StoredPropertySetROS2TopicPair(MODULE_NAME, "swing_planner_parameters");
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_FOR_UI = LOOK_AND_STEP_BEHAVIOR.withType(HeightMapMessage.class).withSuffix("height_map_for_ui");
 
    /*
