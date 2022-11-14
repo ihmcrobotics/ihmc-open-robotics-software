@@ -27,7 +27,9 @@ FactorGraphHandler::FactorGraphHandler()
 
    pointLandmarkNoise = gtsam::noiseModel::Isotropic::Sigma(2, 1.0);
 
-   K = gtsam::Cal3_S2::shared_ptr(new gtsam::Cal3_S2(50.0, 50.0, 0.0, 50.0, 50.0));
+   /* TODO: Create setter for camera params.*/
+   // KITTI Left: 718.856, 718.856, 607.193, 185.216
+   K = gtsam::Cal3_S2::shared_ptr(new gtsam::Cal3_S2(718.856, 718.856, 0.0, 607.193, 185.216));
 
 
 }

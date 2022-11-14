@@ -83,6 +83,14 @@ public static class FactorGraphExternal extends Pointer {
         public native void createOrientedPlaneNoiseModel(FloatBuffer lmVariances);
         public native void createOrientedPlaneNoiseModel(float[] lmVariances);
 
+        public native void getResultPoses(DoublePointer poses, @Cast("uint32_t*") IntPointer poseIDs, @Cast("uint32_t") int count);
+        public native void getResultPoses(DoubleBuffer poses, @Cast("uint32_t*") IntBuffer poseIDs, @Cast("uint32_t") int count);
+        public native void getResultPoses(double[] poses, @Cast("uint32_t*") int[] poseIDs, @Cast("uint32_t") int count);
+
+        public native void getResultLandmarks(DoublePointer landmarks, @Cast("uint32_t*") IntPointer landmarkIDs, @Cast("uint32_t") int count);
+        public native void getResultLandmarks(DoubleBuffer landmarks, @Cast("uint32_t*") IntBuffer landmarkIDs, @Cast("uint32_t") int count);
+        public native void getResultLandmarks(double[] landmarks, @Cast("uint32_t*") int[] landmarkIDs, @Cast("uint32_t") int count);
+
         public native void addGenericProjectionFactor(FloatPointer point, int lmId, int poseIndex);
         public native void addGenericProjectionFactor(FloatBuffer point, int lmId, int poseIndex);
         public native void addGenericProjectionFactor(float[] point, int lmId, int poseIndex);

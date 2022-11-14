@@ -78,6 +78,31 @@ void FactorGraphExternal::createOrientedPlaneNoiseModel(float *lmVariances)
 {
 }
 
+void FactorGraphExternal::getResultPoses(double* poses, uint32_t* poseIDs, uint32_t count)
+{
+    for(uint32_t i = 0; i<count; i++)
+    {
+        auto matrix = factorGraphHandler.getResults().at<gtsam::Pose3>(gtsam::Symbol('x', poseIDs[i])).matrix();
+
+        matrix.transposeInPlace();
+
+        std::cout << "GetResultPoses" << std::endl << matrix << std::endl;
+        std::copy(  matrix.data(),
+                    matrix.data() + 16,
+                    poses + 16 * i);
+    }
+}
+
+void FactorGraphExternal::getResultLandmarks(double* landmarks, uint32_t* landmarkIDs, uint32_t count)
+{
+    for(uint32_t i = 0; i<count; i++)
+    {
+        std::copy(  factorGraphHandler.getResults().at<gtsam::Point3>(gtsam::Symbol('p', landmarkIDs[i])).data(),
+                    factorGraphHandler.getResults().at<gtsam::Point3>(gtsam::Symbol('p', landmarkIDs[i])).data() + 3,
+                    landmarks + 3 * i);
+    }
+}
+
 void FactorGraphExternal::printResults()
 {
     factorGraphHandler.getResults().print();

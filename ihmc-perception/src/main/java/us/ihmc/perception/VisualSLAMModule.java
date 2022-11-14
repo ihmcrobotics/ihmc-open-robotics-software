@@ -3,6 +3,7 @@ package us.ihmc.perception;
 import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -99,6 +100,22 @@ public class VisualSLAMModule
       factorGraphExternal.printResults();
 
       frameIndex++;
+   }
+
+   public FramePose3D getSensorPose(int index)
+   {
+      double[] poses = new double[16];
+      int[] indices = new int[]{index};
+      factorGraphExternal.getResultPoses(poses, indices, 1);
+      
+      LogTools.info("Array: {}", Arrays.toString(poses));
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.set(poses);
+
+      FramePose3D pose = new FramePose3D();
+      pose.set(transform);
+      return pose;
    }
 
    public void visualSLAMUpdate()

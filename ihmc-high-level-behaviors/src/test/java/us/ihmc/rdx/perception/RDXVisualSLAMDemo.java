@@ -1,17 +1,27 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import us.ihmc.ihmcPerception.OpenCVTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.ExecutorServiceTools;
+import us.ihmc.utilities.ros.RosTools;
 
+import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class RDXVisualSLAMDemo
 {
@@ -33,6 +43,12 @@ public class RDXVisualSLAMDemo
    private String rightImageName;
    private String fileName = "000000.png";
 
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
+   private ModelInstance modelInstance;
+
+   private ReferenceFrame frame;
+
    private int fileIndex = 0;
 
    public RDXVisualSLAMDemo()
@@ -41,6 +57,7 @@ public class RDXVisualSLAMDemo
       panel.setRenderMethod(this::renderImGuiWidgets);
 
       baseUI.getImGuiPanelManager().addPanel(panel);
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
 
       //executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
 
@@ -70,7 +87,7 @@ public class RDXVisualSLAMDemo
 
    public void renderImGuiWidgets()
    {
-      if(ImGui.button("Next"))
+      if (ImGui.button("Next"))
       {
          update();
       }
@@ -88,6 +105,27 @@ public class RDXVisualSLAMDemo
       vslam.update(currentImageLeft, currentImageRight);
 
       fileIndex++;
+
+      /* For Visualization Only */
+      FramePose3D framePose = vslam.getSensorPose(fileIndex);
+      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+
+      modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1);
+      LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+
+      poseModels.add(modelInstance);
+
+      LogTools.info("Total Model Instances: {}", poseModels.size());
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (ModelInstance model : poseModels)
+      {
+         model.getRenderables(renderables, pool);
+      }
    }
 
    public static void main(String[] args)
