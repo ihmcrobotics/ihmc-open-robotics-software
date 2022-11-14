@@ -69,6 +69,23 @@ public class RDX3DPanel
    private float windowDrawMaxX;
    private float windowDrawMaxY;
 
+  public RDX3DPanel(String panelName)
+   {
+      this(panelName, RDXBaseUI.ANTI_ALIASING, true);
+   }
+
+   /**
+    * @param addFocusSphere show the little red sphere used to tell where the camera focus is
+    */
+   public RDX3DPanel(String panelName, boolean addFocusSphere)
+   {
+      this(panelName, RDXBaseUI.ANTI_ALIASING, addFocusSphere);
+   }
+
+   /**
+    * @param antiAliasing 1, 2, or 4
+    * @param addFocusSphere show the little red sphere used to tell where the camera focus is
+    */
    public RDX3DPanel(String panelName, int antiAliasing, boolean addFocusSphere)
    {
       this.panelName = panelName;
