@@ -23,11 +23,13 @@ import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -95,6 +97,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
+   private final Plane3DMouseDragAlgorithm planeDragAlgorithmVR = new Plane3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private boolean hollowCylinderIntersects;
    private boolean positiveXArrowIntersects;
@@ -115,6 +118,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final FrameVector3D controllerZAxisVector = new FrameVector3D();
    private final Point3D controllerZAxisProjectedToPlanePoint = new Point3D();
    private final Point3D planeRayIntesection = new Point3D();
+   private Point3D intersectionStartPoint = new Point3D();
    private boolean isGizmoHoveredFromVR = false;
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D proposedTeleportPose = new FramePose3D();
@@ -124,6 +128,13 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean isRingHoveredFromVR = false;
    private boolean isVRTriggerDown = false;
    private boolean isNewlyModifiedFromVR = false;
+   private boolean rightTouchPad = false;
+
+   private enum INPUT_MODE
+   {
+      MOUSE, VR
+   }
+   INPUT_MODE inputMode = INPUT_MODE.MOUSE;
 
    public RDXPathControlRingGizmo()
    {
@@ -133,8 +144,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public RDXPathControlRingGizmo(RDXVRContext context)
    {
       this(ReferenceFrame.getWorldFrame());
-      context.addVRInputProcessor(this::calculateVRPick);
-      context.addVRInputProcessor(this::processVRInput);
    }
 
    public RDXPathControlRingGizmo(ReferenceFrame parentReferenceFrame)
@@ -243,7 +252,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       if (!translateDragData.isDragging() && !yawDragData.isDragging() && !isGizmoHoveredFromVR)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
+         determineCurrentSelectionFromPickRay(pickRay, INPUT_MODE.MOUSE);
       }
 
       if (closestCollisionSelection > -1)
@@ -260,7 +269,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
         vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
         vrPickRay.getDirection().set(Axis3D.X);
         vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
-        determineCurrentSelectionFromPickRay(vrPickRay);
+        determineCurrentSelectionFromPickRay(vrPickRay, INPUT_MODE.VR);
 
         vrPickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
         vrPickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -311,6 +320,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void processVRInput(RDXVRContext vrContext)
    {
+      /*
       // The ray from vr is intersecting with control-ring, and it is also hovering on the 'RING'.
       if (isGizmoHoveredFromVR && closestCollisionSelection == 0)
       {
@@ -318,32 +328,59 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
          {
            // Holding onto the right controller trigger button
-           if (controller.getTriggerTouchedActionData().bState())
+            isVRTriggerDown = controller.getClickTriggerActionData().bState();
+           if (isVRTriggerDown)
            {
-              isVRTriggerDown = true;
               isNewlyModifiedFromVR = true;
-              Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(vrPickRay, closestCollision, Axis3D.Z);
+              Vector3D planarMotion = new Vector3D(0.1, 0.0, 0.0);
+              planarMotion.sub(proposedTeleportPose.getPosition(), intersectionStartPoint);
               tempFramePose3D.setToZero(gizmoFrame);
               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
               tempFramePose3D.getPosition().add(planarMotion);
+              tempFramePose3D.set(proposedTeleportPose);
               tempFramePose3D.changeFrame(parentReferenceFrame);
               tempFramePose3D.get(transformToParent);
               closestCollision.add(planarMotion);
-//              this.controlRingPose.set(proposedTeleportPose);
-              updateTransforms();
-           }
-           else
-           {
-              isVRTriggerDown = false;
+              closestCollision.set(proposedTeleportPose.getPosition());
+              // Experiment
+//              tempFramePose3D.set(proposedTeleportPose);
+              intersectionStartPoint = planeRayIntesection;
            }
          });
       }
+      else if (isGizmoHoveredFromVR)
+      {
+         vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+        {
+           rightTouchPad = controller.getTouchpadTouchedActionData().bState();
+        });
+      }
       else
       {
+         rightTouchPad = false;
          isNewlyModifiedFromVR = false;
          isRingHoveredFromVR = true;
       }
+      updateTransforms();
 
+       */
+
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+        // Holding onto the right controller trigger button
+        isVRTriggerDown = controller.getClickTriggerActionData().bState();
+        if (isVRTriggerDown && inputMode == INPUT_MODE.VR)
+        {
+           isNewlyModifiedFromVR = true;
+           tempFramePose3D.setToZero(gizmoFrame);
+           tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+           tempFramePose3D.set(proposedTeleportPose);
+           tempFramePose3D.changeFrame(parentReferenceFrame);
+           tempFramePose3D.get(transformToParent);
+           closestCollision.set(proposedTeleportPose.getPosition());
+        }
+      });
+      updateTransforms();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -506,92 +543,96 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       LibGDXTools.toLibGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
-   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
+   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay, INPUT_MODE inputMode)
    {
-      hollowCylinderIntersects = false;
-      positiveXArrowIntersects = false;
-      positiveYArrowIntersects = false;
-      negativeXArrowIntersects = false;
-      negativeYArrowIntersects = false;
-      closestCollisionSelection = -1;
-      closestCollisionDistance = Double.POSITIVE_INFINITY;
+      if (this.inputMode == inputMode)
+      {
+         hollowCylinderIntersects = false;
+         positiveXArrowIntersects = false;
+         positiveYArrowIntersects = false;
+         negativeXArrowIntersects = false;
+         negativeYArrowIntersects = false;
+         closestCollisionSelection = -1;
+         closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
-                                        controlRingTransformToWorld);
-      double distance = hollowCylinderIntersection.intersect(pickRay);
-      if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-      {
-         hollowCylinderIntersects = true;
-         closestCollisionDistance = distance;
-         closestCollisionSelection = 0;
-         closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
-      }
-      if (showArrows)
-      {
-         positiveXArrowIntersection.update(arrowWidth.get(),
-                                           arrowHeight.get(),
-                                           discThickness.get(),
-                                           new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
-                                           new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
-         distance = positiveXArrowIntersection.intersect(pickRay, 100);
+         hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
+                                           controlRingTransformToWorld);
+         double distance = hollowCylinderIntersection.intersect(pickRay);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
-            positiveXArrowIntersects = true;
+            hollowCylinderIntersects = true;
             closestCollisionDistance = distance;
-            closestCollisionSelection = 1;
-            closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
+            closestCollisionSelection = 0;
+            closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
          }
-         positiveYArrowIntersection.update(arrowWidth.get(),
-                                           arrowHeight.get(),
-                                           discThickness.get(),
-                                           new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
-                                           new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
-         distance = positiveYArrowIntersection.intersect(pickRay, 100);
-         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         if (showArrows)
          {
-            positiveYArrowIntersects = true;
-            closestCollisionDistance = distance;
-            closestCollisionSelection = 2;
-            closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
+            positiveXArrowIntersection.update(arrowWidth.get(),
+                                              arrowHeight.get(),
+                                              discThickness.get(),
+                                              new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
+                                              new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
+            distance = positiveXArrowIntersection.intersect(pickRay, 100);
+            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+            {
+               positiveXArrowIntersects = true;
+               closestCollisionDistance = distance;
+               closestCollisionSelection = 1;
+               closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
+            }
+            positiveYArrowIntersection.update(arrowWidth.get(),
+                                              arrowHeight.get(),
+                                              discThickness.get(),
+                                              new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
+                                              new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
+            distance = positiveYArrowIntersection.intersect(pickRay, 100);
+            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+            {
+               positiveYArrowIntersects = true;
+               closestCollisionDistance = distance;
+               closestCollisionSelection = 2;
+               closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
+            }
+            temporaryTailTransform.set(xArrowTailTransform);
+            controlRingTransformToWorld.transform(temporaryTailTransform);
+            boolean intersects = negativeXArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
+                                                                      arrowTailLengthRatio.get() * arrowHeight.get(),
+                                                                      discThickness.get(),
+                                                                      temporaryTailTransform,
+                                                                      pickRay);
+            distance = negativeXArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
+            if (intersects && distance < closestCollisionDistance)
+            {
+               negativeXArrowIntersects = true;
+               closestCollisionDistance = distance;
+               closestCollisionSelection = 3;
+               closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
+            }
+            temporaryTailTransform.set(yArrowTailTransform);
+            controlRingTransformToWorld.transform(temporaryTailTransform);
+            intersects = negativeYArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
+                                                              arrowTailLengthRatio.get() * arrowHeight.get(),
+                                                              discThickness.get(),
+                                                              temporaryTailTransform,
+                                                              pickRay);
+            distance = negativeYArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
+            if (intersects && distance < closestCollisionDistance)
+            {
+               negativeYArrowIntersects = true;
+               closestCollisionDistance = distance;
+               closestCollisionSelection = 4;
+               closestCollision.set(negativeYArrowIntersection.getFirstIntersectionToPack());
+            }
          }
-         temporaryTailTransform.set(xArrowTailTransform);
-         controlRingTransformToWorld.transform(temporaryTailTransform);
-         boolean intersects = negativeXArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
-                                                                   arrowTailLengthRatio.get() * arrowHeight.get(),
-                                                                   discThickness.get(),
-                                                                   temporaryTailTransform,
-                                                                   pickRay);
-         distance = negativeXArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
-         if (intersects && distance < closestCollisionDistance)
-         {
-            negativeXArrowIntersects = true;
-            closestCollisionDistance = distance;
-            closestCollisionSelection = 3;
-            closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
-         }
-         temporaryTailTransform.set(yArrowTailTransform);
-         controlRingTransformToWorld.transform(temporaryTailTransform);
-         intersects = negativeYArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
-                                                           arrowTailLengthRatio.get() * arrowHeight.get(),
-                                                           discThickness.get(),
-                                                           temporaryTailTransform,
-                                                           pickRay);
-         distance = negativeYArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
-         if (intersects && distance < closestCollisionDistance)
-         {
-            negativeYArrowIntersects = true;
-            closestCollisionDistance = distance;
-            closestCollisionSelection = 4;
-            closestCollision.set(negativeYArrowIntersection.getFirstIntersectionToPack());
-         }
+
+         updateMaterialHighlighting();
       }
 
-      updateMaterialHighlighting();
    }
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = highlightingEnabled && isGizmoHovered || highlightingEnabled && isRingHoveredFromVR;
+      boolean prior = highlightingEnabled && (isGizmoHovered || isRingHoveredFromVR);
       discModel.setMaterial(prior && closestCollisionSelection == 0 ? highlightedMaterial : normalMaterial);
       positiveXArrowModel.setMaterial(prior && closestCollisionSelection == 1 ? highlightedMaterial : normalMaterial);
       positiveYArrowModel.setMaterial(prior && closestCollisionSelection == 2 ? highlightedMaterial : normalMaterial);
@@ -602,6 +643,19 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public ImGuiPanel createTunerPanel(String name)
    {
       return new ImGuiPanel("Footstep Ring Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
+   }
+
+   public void renderImGuiWidgets()
+   {
+      if (ImGui.radioButton("MOUSE", inputMode == INPUT_MODE.MOUSE))
+      {
+         inputMode = INPUT_MODE.MOUSE;
+      }
+      ImGui.sameLine();
+      if (ImGui.radioButton("VR", inputMode == INPUT_MODE.VR))
+      {
+         inputMode = INPUT_MODE.VR;
+      }
    }
 
    public void renderImGuiTuner()
@@ -645,7 +699,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       discModel.getOrCreateModelInstance().getRenderables(renderables, pool);
-      if (showArrows || isRingHoveredFromVR)
+      if (showArrows)
       {
          positiveXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
          positiveYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
@@ -751,5 +805,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public boolean isGizmoGrabbedFromVR()
    {
       return isVRTriggerDown && isGizmoHoveredFromVR;
+   }
+
+   public boolean isRightTouchPad()
+   {
+      return rightTouchPad;
    }
 }

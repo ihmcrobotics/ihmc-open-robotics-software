@@ -24,6 +24,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -175,7 +176,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          becomeModified(true);
       }
-      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && (leftMouseReleasedWithoutDrag || !footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
+      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
       {
          selected = false;
       }
@@ -184,7 +185,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          updateStuff();
       }
-      if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
+      if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isRightTouchPad()))
       {
          if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
          {
@@ -208,6 +209,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          }
          if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
          {
+            LogTools.info("any ARROW pick selected is TRUE");
             footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
             updateStuff();
             queueFootstepPlan();
@@ -326,6 +328,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void renderImGuiWidgets()
    {
+      footstepPlannerGoalGizmo.renderImGuiWidgets();
       if (ImGui.radioButton(labels.get("A* Planner"), footstepPlanningAlgorithm == RDXFootstepPlanningAlgorithm.A_STAR))
       {
          footstepPlanningAlgorithm = RDXFootstepPlanningAlgorithm.A_STAR;
