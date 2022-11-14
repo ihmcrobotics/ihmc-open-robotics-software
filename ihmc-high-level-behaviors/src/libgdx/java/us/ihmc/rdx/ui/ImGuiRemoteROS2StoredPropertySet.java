@@ -12,22 +12,22 @@ public class ImGuiRemoteROS2StoredPropertySet
 {
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final StoredPropertySetBasics storedPropertySet;
-   private final ROS2Topic<StoredPropertySetMessage> outputTopic;
+   private final ROS2Topic<StoredPropertySetMessage> commandTopic;
    private final StoredPropertySetROS2Input storedPropertySetROS2Input;
    private final ImGuiStoredPropertySetTuner imGuiStoredPropertySetTuner;
    private boolean storedPropertySetChangedByImGuiUser = false;
 
    public ImGuiRemoteROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                            StoredPropertySetBasics storedPropertySet,
-                                           ROS2Topic<StoredPropertySetMessage> inputTopic,
-                                           ROS2Topic<StoredPropertySetMessage> outputTopic)
+                                           ROS2Topic<StoredPropertySetMessage> statusTopic,
+                                           ROS2Topic<StoredPropertySetMessage> commandTopic)
    {
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.storedPropertySet = storedPropertySet;
-      this.outputTopic = outputTopic;
-      storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, inputTopic, storedPropertySet);
+      this.commandTopic = commandTopic;
+      storedPropertySetROS2Input = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, statusTopic, storedPropertySet);
       imGuiStoredPropertySetTuner = new ImGuiStoredPropertySetTuner(storedPropertySet.getTitle());
-      imGuiStoredPropertySetTuner.create(storedPropertySet, () -> storedPropertySetChangedByImGuiUser = true);
+      imGuiStoredPropertySetTuner.create(storedPropertySet, false, () -> storedPropertySetChangedByImGuiUser = true);
    }
 
    public void setToAcceptUpdate()
@@ -51,7 +51,7 @@ public class ImGuiRemoteROS2StoredPropertySet
          if (storedPropertySetChangedByImGuiUser)
          {
             storedPropertySetChangedByImGuiUser = false;
-            ros2PublishSubscribeAPI.publish(outputTopic, StoredPropertySetMessageTools.newMessage(storedPropertySet));
+            ros2PublishSubscribeAPI.publish(commandTopic, StoredPropertySetMessageTools.newMessage(storedPropertySet));
          }
       }
    }
