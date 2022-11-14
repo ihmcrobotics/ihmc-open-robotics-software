@@ -26,7 +26,7 @@ public class ROS2StoredPropertySetGroup
    {
       for (ROS2StoredPropertySet<?> ros2StoredPropertySet : ros2StoredPropertySets)
       {
-         ros2StoredPropertySet.updateAndPublishStatus();
+         ros2StoredPropertySet.updateAndPublishThrottledStatus();
       }
    }
 }

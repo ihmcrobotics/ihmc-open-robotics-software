@@ -3,7 +3,6 @@ package us.ihmc.behaviors.lookAndStep;
 import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -104,12 +103,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       ros2SwingPlannerParameters = new ROS2StoredPropertySet<>(helper,
                                                                SWING_PLANNER_PARAMETERS_TOPIC_PAIR,
                                                                helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"));
-      double period = 1.0;
-      MissingThreadTools.startAsDaemon("PropertyStatusPublisher", period, () ->
+      MissingThreadTools.startAsDaemon("PropertyStatusPublisher", ROS2StoredPropertySet.STATUS_PERIOD, () ->
       {
-         ros2LookAndStepParameters.handlePublishStatus();
-         ros2FootstepPlannerParameters.handlePublishStatus();
-         ros2SwingPlannerParameters.handlePublishStatus();
+         ros2LookAndStepParameters.updateAndPublishStatus();
+         ros2FootstepPlannerParameters.updateAndPublishStatus();
+         ros2SwingPlannerParameters.updateAndPublishStatus();
       });
 
       operatorReviewEnabledInput = new AtomicReference<>();

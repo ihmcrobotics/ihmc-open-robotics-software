@@ -11,6 +11,8 @@ import us.ihmc.tools.thread.Throttler;
  */
 public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
 {
+   public static final double STATUS_PERIOD = 1.0;
+
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final StoredPropertySetROS2TopicPair topicPair;
    private final T storedPropertySet;
@@ -27,10 +29,16 @@ public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
       commandInput = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getCommandTopic(), storedPropertySet);
    }
 
+   public void updateAndPublishThrottledStatus()
+   {
+      update();
+      publishThrottledStatus();
+   }
+
    public void updateAndPublishStatus()
    {
       update();
-      handlePublishStatus();
+      publishStatus();
    }
 
    /**
@@ -42,13 +50,18 @@ public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
       commandInput.update();
    }
 
-   public void handlePublishStatus()
+   public void publishThrottledStatus()
    {
       // Heartbeat so remote UI tuners can stay up to date
-      if (parameterOutputThrottler.run(1.0))
+      if (parameterOutputThrottler.run(STATUS_PERIOD))
       {
-         ros2PublishSubscribeAPI.publish(topicPair.getStatusTopic(), StoredPropertySetMessageTools.newMessage(storedPropertySet));
+         publishStatus();
       }
+   }
+
+   public void publishStatus()
+   {
+      ros2PublishSubscribeAPI.publish(topicPair.getStatusTopic(), StoredPropertySetMessageTools.newMessage(storedPropertySet));
    }
 
    public StoredPropertySetROS2Input getCommandInput()

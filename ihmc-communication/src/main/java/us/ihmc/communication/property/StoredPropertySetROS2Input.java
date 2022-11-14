@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.Timer;
 import us.ihmc.tools.property.StoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -21,19 +22,30 @@ public class StoredPropertySetROS2Input
 {
    private final TypedNotification<StoredPropertySetMessage> receptionNotification = new TypedNotification<>();
    private boolean waitingForUpdate = true;
+   private boolean isUpdateAvailable = false;
    private final StoredPropertySetBasics storedPropertySetToUpdate;
    private final AtomicBoolean anyValuesChanged = new AtomicBoolean(false);
    private record PropertyChangeNotification(StoredPropertyKey<?> propertyKey,
                                              Notification notification,
                                              MutableObject<Object> previousValue) { }
    private final ArrayList<PropertyChangeNotification> propertyChangeNotifications = new ArrayList<>();
+   private final double expirationDuration = ROS2StoredPropertySet.STATUS_PERIOD + ROS2StoredPropertySet.STATUS_PERIOD * 0.5; // give it a little extra
+   private final Timer receptionTimer = new Timer();
+   private long numberOfMessagesReceived = 0;
 
    public StoredPropertySetROS2Input(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                      ROS2Topic<StoredPropertySetMessage> inputTopic,
                                      StoredPropertySetBasics storedPropertySetToUpdate)
    {
       this.storedPropertySetToUpdate = storedPropertySetToUpdate;
-      ros2PublishSubscribeAPI.subscribeViaCallback(inputTopic, receptionNotification::set);
+      ros2PublishSubscribeAPI.subscribeViaCallback(inputTopic, this::acceptMessage);
+   }
+
+   private void acceptMessage(StoredPropertySetMessage message)
+   {
+      receptionNotification.set(message);
+      ++numberOfMessagesReceived;
+      receptionTimer.reset();
    }
 
    /**
@@ -58,9 +70,15 @@ public class StoredPropertySetROS2Input
          propertyChangeNotification.previousValue().setValue(storedPropertySetToUpdate.get(propertyChangeNotification.propertyKey));
       }
 
+      if (receptionNotification.peekHasValue())
+      {
+         isUpdateAvailable = !StoredPropertySetMessageTools.valuesAreAllEqual(receptionNotification.peek(), storedPropertySetToUpdate);
+      }
+
       if (waitingForUpdate && receptionNotification.poll())
       {
          waitingForUpdate = false;
+         isUpdateAvailable = false;
          StoredPropertySetMessageTools.copyToStoredPropertySet(receptionNotification.read(),
                                                                storedPropertySetToUpdate,
                                                                () ->
@@ -83,6 +101,21 @@ public class StoredPropertySetROS2Input
    public boolean getWaitingForUpdate()
    {
       return waitingForUpdate;
+   }
+
+   public boolean getUpdateAvailable()
+   {
+      return isUpdateAvailable;
+   }
+
+   public boolean getIsExpired()
+   {
+      return !receptionTimer.isRunning(expirationDuration);
+   }
+
+   public long getNumberOfMessagesReceived()
+   {
+      return numberOfMessagesReceived;
    }
 
    /**

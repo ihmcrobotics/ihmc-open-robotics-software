@@ -1,11 +1,13 @@
 package us.ihmc.rdx.ui;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
 import us.ihmc.communication.property.StoredPropertySetROS2Input;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -18,6 +20,8 @@ public class ImGuiRemoteROS2StoredPropertySet
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiStoredPropertySetTuner imGuiStoredPropertySetTuner;
    private boolean storedPropertySetChangedByImGuiUser = false;
+   private static final Color DARK_RED = new Color(0x781d1dff);
+   private static final Color YELLOW = new Color(0xa6b51bff);
 
    public ImGuiRemoteROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                            StoredPropertySetBasics storedPropertySet,
@@ -48,9 +52,25 @@ public class ImGuiRemoteROS2StoredPropertySet
 
    public void renderImGuiWidgetsWithUpdateButton()
    {
-      if (ImGui.button(labels.get("Update parameters from remote")))
+      ImGui.text("# " + storedPropertySetROS2Input.getNumberOfMessagesReceived() + ": ");
+      ImGui.sameLine();
+      if (storedPropertySetROS2Input.getUpdateAvailable())
       {
-         storedPropertySetROS2Input.setToAcceptUpdate();
+         ImGuiTools.textColored(YELLOW, "[!] Updated parameters are available.");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Accept")))
+         {
+            storedPropertySetROS2Input.setToAcceptUpdate();
+         }
+      }
+      else if (storedPropertySetROS2Input.getIsExpired())
+      {
+         ImGuiTools.textColored(DARK_RED, "[!] Parameters have expired.");
+      }
+      else
+      {
+         ImGui.text("Parameters are up to date.");
+
       }
       renderImGuiWidgets();
    }

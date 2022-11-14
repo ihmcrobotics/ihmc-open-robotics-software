@@ -26,18 +26,12 @@ public class ImGuiRemoteROS2StoredPropertySetGroup
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.button(labels.get("Update parameters from remote")))
+      for (int i = 0; i < remotePropertySets.size(); i++)
       {
-         for (ImGuiRemoteROS2StoredPropertySet remotePropertySet : remotePropertySets)
-         {
-            remotePropertySet.setToAcceptUpdate();
-         }
-      }
-
-      for (ImGuiRemoteROS2StoredPropertySet remotePropertySet : remotePropertySets)
-      {
-         ImGui.separator();
-         remotePropertySet.renderImGuiWidgets();
+         ImGuiRemoteROS2StoredPropertySet remotePropertySet = remotePropertySets.get(i);
+         if (i > 0)
+            ImGui.separator();
+         remotePropertySet.renderImGuiWidgetsWithUpdateButton();
       }
    }
 }
