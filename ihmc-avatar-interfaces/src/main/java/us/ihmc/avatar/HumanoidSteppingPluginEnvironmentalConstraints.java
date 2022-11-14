@@ -12,8 +12,10 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepPlanAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepValidityIndicator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.StepGeneratorCommandInputManager;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
@@ -21,6 +23,7 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -101,6 +104,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
 //      footstepValidityIndicators.add(this::isStepSnappable);
       footstepValidityIndicators.add(this::isSafeStepHeight);
+      footstepValidityIndicators.add(this::isFootHeightRight);
       //      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
    }
 
@@ -162,6 +166,24 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    {
       double heightChange = touchdownPose.getZ() - stancePose.getZ();
       return heightChange < steppingParameters.getMaxStepUp() && heightChange > -steppingParameters.getMaxStepDown();
+   }
+
+   private final FramePoint3D pointInRegion = new FramePoint3D();
+
+   private boolean isFootHeightRight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
+   {
+      double heightAtPoint = Double.MIN_VALUE;
+      for (int i = 0; i < steppableRegionsCalculator.getSteppableRegions().size(); i++)
+      {
+         pointInRegion.set(touchdownPose.getPosition());
+         PlanarRegion region = steppableRegionsCalculator.getSteppableRegions().get(i);
+         region.transformFromWorldToLocal(pointInRegion);
+
+         if (region.isPointInside(pointInRegion.getX(), pointInRegion.getY()))
+            heightAtPoint = Math.max(steppableRegionsCalculator.getSteppableRegions().get(i).getPlaneZGivenXY(touchdownPose.getX(), touchdownPose.getY()), heightAtPoint);
+      }
+
+      return MathTools.epsilonEquals(heightAtPoint, touchdownPose.getZ(), 1e-3);
    }
 
    // FIXME this generates a LOT of garbage
