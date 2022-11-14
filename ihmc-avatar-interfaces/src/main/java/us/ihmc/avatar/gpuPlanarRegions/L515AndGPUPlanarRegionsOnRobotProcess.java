@@ -5,7 +5,6 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import perception_msgs.msg.dds.BigVideoPacket;
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -19,11 +18,13 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.property.StoredPropertySetMessageTools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -83,9 +84,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private ChannelBuffer ros1DebugExtractionImageChannelBuffer;
    private final ROS2Helper ros2Helper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final TypedNotification<StoredPropertySetMessage> parametersNotification = new TypedNotification<>();
-   private final TypedNotification<StoredPropertySetMessage> polygonizerParametersNotification = new TypedNotification<>();
-   private final TypedNotification<StoredPropertySetMessage> concaveHullFactoryNotification = new TypedNotification<>();
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final Notification patchSizeChangedNotification;
    private final TypedNotification<Empty> reconnectROS1Notification = new TypedNotification<>();
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense l515;
@@ -132,9 +132,15 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.PARAMETERS_COMMAND, parametersNotification::set);
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_COMMAND, polygonizerParametersNotification::set);
-      ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_COMMAND, concaveHullFactoryNotification::set);
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+      ROS2StoredPropertySet ros2GPURegionParameters
+            = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS_TOPIC_PAIR, gpuPlanarRegionExtraction.getParameters());
+      patchSizeChangedNotification
+            = ros2GPURegionParameters.getCommandInput().registerPropertyChangedNotification(GPUPlanarRegionExtractionParameters.patchSize);
+      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_TOPIC_PAIR,
+                                                     gpuPlanarRegionExtraction.getPolygonizerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_TOPIC_PAIR,
+                                                     gpuPlanarRegionExtraction.getConcaveHullFactoryParameters());
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
       CollisionBoxProvider collisionBoxProvider = robotModel.getCollisionBoxProvider();
@@ -249,49 +255,20 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                   syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
             // TODO: Wait for frame at time of data aquisition?
 
-            if (parametersNotification.poll())
+            int previousPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
+            ros2PropertySetGroup.update();
+            if (patchSizeChangedNotification.poll())
             {
-               int previousPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
-               StoredPropertySetMessageTools.copyToStoredPropertySet(parametersNotification.read(),
-                                                                     gpuPlanarRegionExtraction.getParameters(),
-                                                                     () ->
+               int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
+               if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
                {
-                  int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
-                  LogTools.info("Accepted new parameters.");
-                  if (previousPatchSize != newPatchSize)
-                  {
-                     if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
-                     {
-                        LogTools.info("New patch size accepted: {}", newPatchSize);
-                        gpuPlanarRegionExtraction.setPatchSizeChanged(true);
-                     }
-                     else
-                     {
-                        gpuPlanarRegionExtraction.getParameters().setPatchSize(previousPatchSize);
-                     }
-                  }
-               });
-            }
-            if (polygonizerParametersNotification.poll())
-            {
-               StoredPropertySetMessageTools.copyToStoredPropertySet(polygonizerParametersNotification.read(),
-                                                                     gpuPlanarRegionExtraction.getPolygonizerParameters(),
-                                                                     () -> LogTools.info("Accepted new polygonizer parameters."));
-            }
-            if (concaveHullFactoryNotification.poll())
-            {
-               StoredPropertySetMessageTools.copyToStoredPropertySet(concaveHullFactoryNotification.read(),
-                                                                     gpuPlanarRegionExtraction.getConcaveHullFactoryParameters(),
-                                                                     () -> LogTools.info("Accepted new concave hull factory parameters."));
-            }
-            if (parameterOutputThrottler.run(1.0))
-            {
-               ros2Helper.publish(GPUPlanarRegionExtractionComms.PARAMETERS_STATUS,
-                                  StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getParameters()));
-               ros2Helper.publish(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_STATUS,
-                                  StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getConcaveHullFactoryParameters()));
-               ros2Helper.publish(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_STATUS,
-                                  StoredPropertySetMessageTools.newMessage(gpuPlanarRegionExtraction.getPolygonizerParameters()));
+                  LogTools.info("New patch size accepted: {}", newPatchSize);
+                  gpuPlanarRegionExtraction.setPatchSizeChanged(true);
+               }
+               else // Reject the parameter and revert to the previous value because it's not an even divisor
+               {
+                  gpuPlanarRegionExtraction.getParameters().setPatchSize(previousPatchSize);
+               }
             }
 
             gpuPlanarRegionExtraction.readFromSourceImage();

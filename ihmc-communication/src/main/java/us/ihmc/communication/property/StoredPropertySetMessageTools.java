@@ -9,6 +9,10 @@ import java.util.List;
 
 public class StoredPropertySetMessageTools
 {
+   /**
+    * @param runIfChanged Will get called only if any properties are not equal to the previous
+    *                     values. The parameter set will have the new values when this is called.
+    */
    public static void copyToStoredPropertySet(StoredPropertySetMessage message, StoredPropertySetBasics setToPack, Runnable runIfChanged)
    {
       List<String> values = Arrays.asList(message.getStrings().toStringArray());
