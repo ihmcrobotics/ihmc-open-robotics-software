@@ -106,7 +106,7 @@ public class RDXROS2ARViaBackgroundDemo
             sensorPoseGizmo.getTransformToParent().getRotation().setToPitchOrientation(Math.toRadians(45.0));
 
             BytedecoImage tempImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
-            arPanel = new RDX3DPanel("AR View", 2, false);
+            arPanel = new RDX3DPanel("AR View", false);
             pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
             baseUI.add3DPanel(arPanel);
             arPanel.getCamera3D().setInputEnabled(false);
