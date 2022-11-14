@@ -9,17 +9,17 @@ import us.ihmc.tools.thread.Throttler;
  * to command parameter updates and gives a periodic status, so they can see the current
  * parameters.
  */
-public class ROS2StoredPropertySet
+public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
 {
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
    private final StoredPropertySetROS2TopicPair topicPair;
-   private final StoredPropertySetBasics storedPropertySet;
+   private final T storedPropertySet;
    private final StoredPropertySetROS2Input commandInput;
    private final Throttler parameterOutputThrottler = new Throttler();
 
    public ROS2StoredPropertySet(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                                 StoredPropertySetROS2TopicPair topicPair,
-                                StoredPropertySetBasics storedPropertySet)
+                                T storedPropertySet)
    {
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.topicPair = topicPair;
@@ -27,11 +27,23 @@ public class ROS2StoredPropertySet
       commandInput = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getCommandTopic(), storedPropertySet);
    }
 
-   public void update()
+   public void updateAndPublishStatus()
+   {
+      update();
+      handlePublishStatus();
+   }
+
+   /**
+    * Synchronized so different threads can call update() without worry.
+    */
+   public synchronized void update()
    {
       commandInput.setToAcceptUpdate(); // Always accept updates
       commandInput.update();
+   }
 
+   public void handlePublishStatus()
+   {
       // Heartbeat so remote UI tuners can stay up to date
       if (parameterOutputThrottler.run(1.0))
       {
@@ -42,5 +54,10 @@ public class ROS2StoredPropertySet
    public StoredPropertySetROS2Input getCommandInput()
    {
       return commandInput;
+   }
+
+   public T getStoredPropertySet()
+   {
+      return storedPropertySet;
    }
 }

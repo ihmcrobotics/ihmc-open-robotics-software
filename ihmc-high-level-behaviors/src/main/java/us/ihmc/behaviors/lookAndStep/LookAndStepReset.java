@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.Timer;
@@ -42,8 +43,10 @@ public class LookAndStepReset
 //      statusLogger.info("Finished walking. Waiting for remaining {} s", lookAndStepParameters.getResetDuration());
 //      }
 
-      lookAndStep.statusLogger.info("Waiting for {} s to expire", lookAndStep.lookAndStepParameters.getResetDuration());
-      resetTimer.sleepUntilExpiration(lookAndStep.lookAndStepParameters.getResetDuration());
+      ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+      ros2LookAndStepParameters.update();
+      lookAndStep.statusLogger.info("Waiting for {} s to expire", ros2LookAndStepParameters.getStoredPropertySet().getResetDuration());
+      resetTimer.sleepUntilExpiration(ros2LookAndStepParameters.getStoredPropertySet().getResetDuration());
 
       runAfterWaitingForWalkingToFinish();
 
