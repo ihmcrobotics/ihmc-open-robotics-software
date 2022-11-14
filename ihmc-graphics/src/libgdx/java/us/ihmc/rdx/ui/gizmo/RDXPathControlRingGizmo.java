@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -129,6 +130,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean isVRTriggerDown = false;
    private boolean isNewlyModifiedFromVR = false;
    private boolean rightTouchPad = false;
+   private boolean sendSteps = false;
 
    private enum INPUT_MODE
    {
@@ -379,8 +381,27 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            tempFramePose3D.get(transformToParent);
            closestCollision.set(proposedTeleportPose.getPosition());
         }
+
+
+        InputDigitalActionData aButton = controller.getAButtonActionData();
+
+        if (inputMode == INPUT_MODE.VR && aButton.bState() && aButton.bChanged())
+        {
+           // send planned footsteps to the ringPose
+            sendSteps = true;
+        }
       });
       updateTransforms();
+   }
+
+   public boolean isSendSteps()
+   {
+      return sendSteps;
+   }
+
+   public void setSendSteps(boolean send)
+   {
+      sendSteps = send;
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
