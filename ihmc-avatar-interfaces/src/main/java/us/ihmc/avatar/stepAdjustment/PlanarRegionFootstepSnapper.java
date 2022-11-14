@@ -90,7 +90,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       this.planarRegionSnapVisualizer = planarRegionSnapperCallback;
    }
 
-
    @Override
    public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose,
                                  FramePose2DReadOnly footstepPoseToAdjust,
@@ -193,6 +192,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
 
 
+      findRegionsUnderFoot(unsnappedFootstepPolygonInWorld, regionsIntersectingFoothold);
+
       // Snap the sole pose from where it was spawned to the planar region environment
       snapFootstepToPlanarRegionEnvironment(regionsIntersectingFoothold, solePose, regionToSnapTo, unsnappedFootstepPolygonInWorld);
       // Wiggle the snapped pose into the planar region environments
@@ -221,7 +222,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          if (onlyTrustProprioceptionWhenOffRegion || shouldUseProprioceptiveEstimate)
          {
             // the sole pose is closer to the stance foot that the region
-            solePoseToSnap.set(footstepAtSameHeightAsStanceFoot);
+            solePoseToSnap.setZ(footstepAtSameHeightAsStanceFoot.getZ());
          }
          else
          {
@@ -247,6 +248,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
    private void findRegionsUnderFoot(ConvexPolygon2DReadOnly footPolygonInWorld, List<PlanarRegion> regionsUnderFootToPack)
    {
+      regionsUnderFootToPack.clear();
+      intersectAreas.reset();
+
       PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footPolygonInWorld,
                                                              steppableRegionsProvider.getSteppableRegions(),
                                                              regionsUnderFootToPack,
@@ -393,7 +397,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
     * @param regionsBelowPoint regions below the x-y position passed in
     * @return highest region at the point
     */
-   private static PlanarRegion findHighestPlanarRegionAtPoint(double x, double y, List<PlanarRegion> regionsBelowPoint)
+   private PlanarRegion findHighestPlanarRegionAtPoint(double x, double y, List<PlanarRegion> regionsBelowPoint)
    {
       double highestPoint = Double.NEGATIVE_INFINITY;
       PlanarRegion highestRegion = null;
