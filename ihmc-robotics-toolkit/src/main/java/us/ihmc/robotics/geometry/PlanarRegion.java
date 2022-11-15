@@ -6,7 +6,6 @@ import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -231,7 +230,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
    }
 
-   private final ConvexPolygon2D proejctedPolygonTemp = new ConvexPolygon2D();
+   private final ConvexPolygon2D projectedPolygonTemp = new ConvexPolygon2D();
    private final ConvexPolygon2D polygonIntersectionTemp = new ConvexPolygon2D();
    /**
     * Check if the given polygon intersects this region projected onto the XY-plane.
@@ -247,12 +246,19 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
-      projectPolygonVerticallyToRegion(convexPolygonInWorld, proejctedPolygonTemp);
+      projectPolygonVerticallyToRegion(convexPolygonInWorld, projectedPolygonTemp);
+
+      if (!convexHull.getBoundingBox().intersectsInclusive(projectedPolygonTemp.getBoundingBox()))
+         return false;
+
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = convexPolygonTools.doPolygonsIntersect(polygonToCheck, proejctedPolygonTemp);
+         if (!polygonToCheck.getBoundingBox().intersectsExclusive(projectedPolygonTemp.getBoundingBox()))
+            continue;
+
+         boolean hasIntersection = convexPolygonTools.doPolygonsIntersect(polygonToCheck, projectedPolygonTemp);
          if (hasIntersection)
             return true;
       }
@@ -264,7 +270,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * Compute the total intersection area of the given polygon with this region projected onto the XY-plane.
     *
     * @param convexPolygonInWorld
-    * @return Total interesecting area. Greater than 0.0 if intersecting
+    * @return Total intersecting area. Greater than 0.0 if intersecting
     */
    public double computeIntersectingArea(ConvexPolygon2DReadOnly convexPolygonInWorld)
    {
@@ -274,14 +280,20 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       // Instead of projecting all the polygons of this region onto the world XY-plane,
       // the given convex polygon is projected along the z-world axis to be snapped onto plane.
-      projectPolygonVerticallyToRegion(convexPolygonInWorld, proejctedPolygonTemp);
+      projectPolygonVerticallyToRegion(convexPolygonInWorld, projectedPolygonTemp);
+
+      if (!convexHull.getBoundingBox().intersectsExclusive(projectedPolygonTemp.getBoundingBox()))
+         return 0.0;
 
       double intersectionArea = 0.0;
       // Now, just need to go through each polygon of this region and see there is at least one intersection
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
       {
          ConvexPolygon2D polygonToCheck = convexPolygons.get(i);
-         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, proejctedPolygonTemp, polygonIntersectionTemp);
+         if (!polygonToCheck.getBoundingBox().intersectsExclusive(projectedPolygonTemp.getBoundingBox()))
+            continue;
+
+         boolean hasIntersection = convexPolygonTools.computeIntersectionOfPolygons(polygonToCheck, projectedPolygonTemp, polygonIntersectionTemp);
          if (hasIntersection)
             intersectionArea += polygonIntersectionTemp.getArea();
       }
