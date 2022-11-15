@@ -190,7 +190,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          updateStuff();
       }
-      if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isRightTouchPad()))
+      if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isVRTriggerPressed()))
       {
          if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
          {
@@ -214,7 +214,6 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          }
          if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
          {
-            LogTools.info("any ARROW pick selected is TRUE");
             footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
             updateStuff();
             queueFootstepPlan();
