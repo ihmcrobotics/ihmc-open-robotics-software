@@ -30,7 +30,7 @@ public interface ContinuousStepGeneratorParametersBasics
    {
       setNumberOfFootstepsToPlan(other.getNumberOfFootstepsToPlan());
       setNumberOfFixedFootsteps(other.getNumberOfFixedFootsteps());
-      setTicksToUpdateTheEnvironment(other.getNumberOfFixedFootsteps());
+      setTicksToUpdateTheEnvironment(other.getTicksToUpdateTheEnvironment());
       setSwingHeight(other.getSwingHeight());
       setSwingDuration(other.getSwingDuration());
       setTransferDuration(other.getTransferDuration());
