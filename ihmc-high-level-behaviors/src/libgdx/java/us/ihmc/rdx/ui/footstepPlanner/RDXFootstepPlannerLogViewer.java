@@ -84,14 +84,23 @@ public class RDXFootstepPlannerLogViewer
       goalGraphic = new RDXSphereAndArrowGraphic();
       goalGraphic.create(0.027, 0.027 * 6.0, Color.GREEN);
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-
+      SideDependentList<Color> goalColors = new SideDependentList<>(new Color(0xc456bdff), new Color(0x56c4c4ff));
+      SideDependentList<Color> startColors = new SideDependentList<>(new Color(0x566cc4ff), new Color(0xb6c456ff));
       for (RobotSide side : RobotSide.values)
       {
-         RDXFootstepGraphic goalPoseGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(), side);
+         RDXFootstepGraphic goalPoseGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints().get(side),
+                                                                     goalColors.get(side));
          goalPoseGraphic.create();
+         goalPoseGraphic.setupTooltip(panel3D, side.name() + " goal footstep");
+         panel3D.addImGui3DViewPickCalculator(goalPoseGraphic::calculate3DViewPick);
+         panel3D.addImGui3DViewInputProcessor(goalPoseGraphic::process3DViewInput);
          goalFootPoses.put(side, goalPoseGraphic);
-         RDXFootstepGraphic startPoseGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(), side);
+         RDXFootstepGraphic startPoseGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints().get(side),
+                                                                      startColors.get(side));
          startPoseGraphic.create();
+         startPoseGraphic.setupTooltip(panel3D, side.name() + " start footstep");
+         panel3D.addImGui3DViewPickCalculator(startPoseGraphic::calculate3DViewPick);
+         panel3D.addImGui3DViewInputProcessor(startPoseGraphic::process3DViewInput);
          startFootPoses.put(side, startPoseGraphic);
       }
    }
@@ -202,6 +211,7 @@ public class RDXFootstepPlannerLogViewer
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       goalGraphic.getRenderables(renderables, pool);
+      footstepPlanGraphic.getRenderables(renderables, pool);
       for (RDXFootstepGraphic goalFootPose : goalFootPoses)
       {
          goalFootPose.getRenderables(renderables, pool);
