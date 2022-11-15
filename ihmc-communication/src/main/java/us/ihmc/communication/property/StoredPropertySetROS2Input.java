@@ -67,7 +67,7 @@ public class StoredPropertySetROS2Input
 
       for (PropertyChangeNotification propertyChangeNotification : propertyChangeNotifications)
       {
-         propertyChangeNotification.previousValue().setValue(storedPropertySetToUpdate.get(propertyChangeNotification.propertyKey));
+         propertyChangeNotification.previousValue().setValue(storedPropertySetToUpdate.get(propertyChangeNotification.propertyKey()));
       }
 
       if (receptionNotification.peekHasValue())
@@ -88,8 +88,11 @@ public class StoredPropertySetROS2Input
 
             for (PropertyChangeNotification propertyChangeNotification : propertyChangeNotifications)
             {
-               if (!propertyChangeNotification.previousValue().getValue().equals(storedPropertySetToUpdate.get(propertyChangeNotification.propertyKey)))
+               Object previousValue = propertyChangeNotification.previousValue().getValue();
+               Object newValue = storedPropertySetToUpdate.get(propertyChangeNotification.propertyKey());
+               if (!previousValue.equals(newValue))
                {
+                  LogTools.info("{} changed. {} -> {}", propertyChangeNotification.propertyKey().getTitleCasedName(), previousValue, newValue);
                   propertyChangeNotification.notification().set();
                }
             }
