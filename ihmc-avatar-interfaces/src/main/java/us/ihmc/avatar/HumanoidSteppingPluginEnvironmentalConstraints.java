@@ -46,6 +46,9 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
    private final YoBoolean shouldSnapToRegions;
+   private final YoBoolean checkFootHeightInWorld;
+   private final YoBoolean checkFootHeightDelta;
+   private final YoBoolean checkStepLengthIsStupid;
    private final YoInteger numberOfSteppableRegions;
 
    private final SteppingParameters steppingParameters;
@@ -71,7 +74,14 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
                                                                         this.environmentalConstraintParameters::getMaxPlanarRegionNormalAngleForStepping);
 
       shouldSnapToRegions = new YoBoolean("shouldSnapToRegions", registry);
+      checkFootHeightInWorld = new YoBoolean("checkFootHeightInWorld", registry);
+      checkFootHeightDelta = new YoBoolean("checkFootHeightDelta", registry);
+      checkStepLengthIsStupid = new YoBoolean("checkStepLengthIsStupid", registry);
       numberOfSteppableRegions = new YoInteger("numberOfSteppableRegions", registry);
+
+      checkFootHeightDelta.set(true);
+      checkFootHeightInWorld.set(false);
+      checkStepLengthIsStupid.set(true);
 
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -105,6 +115,7 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 //      footstepValidityIndicators.add(this::isStepSnappable);
       footstepValidityIndicators.add(this::isSafeStepHeight);
       footstepValidityIndicators.add(this::isFootHeightRight);
+      footstepValidityIndicators.add(this::isStepLengthStupid);
       //      footstepValidityIndicators.add(this::isSafeDistanceFromObstacle);
    }
 
@@ -164,14 +175,28 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
 
    private boolean isSafeStepHeight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
+      if (!checkFootHeightDelta.getBooleanValue())
+         return true;
+
       double heightChange = touchdownPose.getZ() - stancePose.getZ();
       return heightChange < steppingParameters.getMaxStepUp() && heightChange > -steppingParameters.getMaxStepDown();
+   }
+
+   private boolean isStepLengthStupid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
+   {
+      if (!checkStepLengthIsStupid.getValue())
+         return true;
+
+      return touchdownPose.getPosition().distanceXY(stancePose.getPosition()) < 1.2 * steppingParameters.getMaxStepLength();
    }
 
    private final FramePoint3D pointInRegion = new FramePoint3D();
 
    private boolean isFootHeightRight(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
+      if (!checkFootHeightInWorld.getValue() || !shouldSnapToRegions.getValue())
+         return true;
+
       double heightAtPoint = Double.MIN_VALUE;
       for (int i = 0; i < steppableRegionsCalculator.getSteppableRegions().size(); i++)
       {
@@ -183,10 +208,10 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
             heightAtPoint = Math.max(steppableRegionsCalculator.getSteppableRegions().get(i).getPlaneZGivenXY(touchdownPose.getX(), touchdownPose.getY()), heightAtPoint);
       }
 
-      if (Double.isFinite(heightAtPoint)) 
+      if (!Double.isFinite(heightAtPoint))
          heightAtPoint = stancePose.getZ();
 
-      return MathTools.epsilonEquals(heightAtPoint, touchdownPose.getZ(), 1e-3);
+      return MathTools.epsilonEquals(heightAtPoint, touchdownPose.getZ(), 3e-2);
    }
 
    // FIXME this generates a LOT of garbage
