@@ -410,7 +410,12 @@ public class RDXBaseUI
 
    public void add3DPanel(RDX3DPanel panel3D)
    {
-      panel3D.create(RDXInputMode.ImGui, glProfiler, primaryScene);
+      add3DPanel(panel3D, primaryScene);
+   }
+
+   public void add3DPanel(RDX3DPanel panel3D, RDX3DScene scene3D)
+   {
+      panel3D.create(RDXInputMode.ImGui, glProfiler, scene3D);
       panel3D.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
       imGuiWindowAndDockSystem.getPanelManager().addPanel(panel3D.getImGuiPanel());
       additional3DPanels.add(panel3D);

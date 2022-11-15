@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-   /** package-private */ static final String defaultLogsDirectory;
+   public static final String defaultLogsDirectory;
    static
    {
       String incomingLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator;
@@ -61,7 +61,7 @@ public class FootstepPlannerLogger
       }
       defaultLogsDirectory = incomingLogsDirectory;
    }
-   /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
+   public static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    // File names
    static final String requestPacketFileName = "RequestPacket.json";
