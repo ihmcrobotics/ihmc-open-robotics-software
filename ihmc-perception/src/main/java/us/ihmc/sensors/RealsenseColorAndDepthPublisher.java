@@ -5,13 +5,11 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
@@ -131,16 +129,16 @@ public class RealsenseColorAndDepthPublisher
             setColorExtrinsics(sensor);
 
             depth8UC3Image = new Mat(depthU16C1Image.rows(), depthU16C1Image.cols(), opencv_core.CV_8UC3);
-            BytedecoOpenCVTools.normalizeGrayscaleTo8UC3(depthU16C1Image, depth8UC3Image);
+            BytedecoOpenCVTools.transferDepth16UC1ToLower8UC3(depthU16C1Image, depth8UC3Image);
 
 
             compressedDepthPointer = new BytePointer();
-            compressImage(depth8UC3Image, compressedDepthPointer, compressionParameters);
+            BytedecoOpenCVTools.compressRGBImageJPG(depth8UC3Image, compressedDepthPointer, compressionParameters);
             fillVideoPacket(compressedDepthPointer, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(ROS2Tools.D435_DEPTH, depthVideoPacket);
 
             compressedColorPointer = new BytePointer();
-            compressImage(color8UC3Image, compressedColorPointer, compressionParameters);
+            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, compressedColorPointer, compressionParameters);
             fillVideoPacket(compressedColorPointer, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
             ros2Helper.publish(ROS2Tools.D435_VIDEO, colorVideoPacket);
 
@@ -151,7 +149,7 @@ public class RealsenseColorAndDepthPublisher
 //            LogTools.info("Time Taken: {} ms", end - begin);
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
-            display(depthU16C1Image, color8UC3Image);
+//            display(depthU16C1Image, color8UC3Image);
          }
       }
    }
@@ -167,12 +165,7 @@ public class RealsenseColorAndDepthPublisher
       packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
    }
 
-   private void compressImage(Mat image, BytePointer compressedBytes, IntPointer params)
-   {
-      Mat yuv420Image = new Mat();
-      opencv_imgproc.cvtColor(image, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, compressionParameters);
-   }
+
 
    private void setDepthExtrinsics(BytedecoRealsense d435)
    {

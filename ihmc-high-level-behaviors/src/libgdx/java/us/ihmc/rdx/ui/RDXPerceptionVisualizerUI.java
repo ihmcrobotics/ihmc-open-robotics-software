@@ -56,6 +56,8 @@ public class RDXPerceptionVisualizerUI
                                                                                  DomainFactory.PubSubImplementation.FAST_RTPS,
                                                                                  ROS2Tools.L515_DEPTH_LARGE));
 
+            globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("Ouster Depth", ros2Node, ROS2Tools.OUSTER_DEPTH, ROS2VideoFormat.JPEGYUVI420));
+
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Video", ros2Node, ROS2Tools.D435_VIDEO, ROS2VideoFormat.JPEGYUVI420));
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Depth", ros2Node, ROS2Tools.D435_DEPTH, ROS2VideoFormat.JPEGYUVI420));
 

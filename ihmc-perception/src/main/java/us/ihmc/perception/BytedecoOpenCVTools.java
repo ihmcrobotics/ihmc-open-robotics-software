@@ -7,12 +7,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
-import perception_msgs.msg.dds.VideoPacket;
-import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.nio.ByteBuffer;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
 
@@ -48,7 +45,7 @@ public class BytedecoOpenCVTools
       opencv_core.normalize(source, destination, min, max, normType, depthType, mask);
    }
 
-   public static void normalizeGrayscaleTo8UC3(Mat source, Mat destination)
+   public static void transferDepth16UC1ToLower8UC3(Mat source, Mat destination)
    {
       BytePointer data = source.data();
 
@@ -61,6 +58,28 @@ public class BytedecoOpenCVTools
       mats.push_back(upper);
 
       opencv_core.merge(mats, destination);
+
+   }
+
+   public static void extractDepth16FromLower8UC3(Mat source, Mat destination)
+   {
+      MatVector mats = new MatVector();
+      opencv_core.split(source, mats);
+
+      LogTools.info("Previous Depth: {}", mats.size());
+
+
+      MatVector finalMats = new MatVector();
+      finalMats.push_back(mats.get(0));
+      finalMats.push_back(mats.get(2));
+
+      LogTools.info("New Depth: {}", mats.size());
+
+      Mat depth8UC2 = new Mat(source.rows(), source.cols(), CV_8UC2);
+      opencv_core.merge(finalMats, depth8UC2);
+      Mat depth = new Mat(source.rows(), source.cols(), CV_16UC1, depth8UC2.data());
+
+      destination.put(depth);
 
    }
 
@@ -116,6 +135,21 @@ public class BytedecoOpenCVTools
    public static Mat convertBufferedImageToMat(BufferedImage image)
    {
       return Java2DFrameUtils.toMat(image);
+   }
+
+   public static void compressRGBImageJPG(Mat image, BytePointer compressedBytes, IntPointer params)
+   {
+      Mat yuv420Image = new Mat();
+      opencv_imgproc.cvtColor(image, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
+      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, params);
+   }
+
+   public static void compressFloatDepthJPG(Mat image, BytePointer compressedBytes, IntPointer params)
+   {
+      Mat depthRGBAMat = new Mat(image.rows(), image.cols(), CV_8UC4, image.data());
+      Mat yuv420Image = new Mat();
+      opencv_imgproc.cvtColor(depthRGBAMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
+      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, params);
    }
 
    public static String getTypeString(int type)
