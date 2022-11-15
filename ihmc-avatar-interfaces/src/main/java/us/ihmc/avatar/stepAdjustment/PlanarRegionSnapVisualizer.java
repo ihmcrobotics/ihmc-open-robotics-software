@@ -18,8 +18,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PlanarRegionSnapVisualizer
 {
-   private static final int numberOfStepsToVisualize = 3;
-   private static final int maximumVertices = 40;
+   private static final int numberOfStepsToVisualize = 5;
+   private static final int maximumVertices = 60;
 
    private final FootholdData[] footholdData = new FootholdData[numberOfStepsToVisualize];
 
@@ -94,11 +94,9 @@ public class PlanarRegionSnapVisualizer
          footholdData[i].concaveRegionHull.clear();
          footholdData[i].concaveRegionPose.setToNaN();
       }
-
-
    }
 
-   public void recordWiggleTransform(RigidBodyTransformReadOnly wiggleTransform)
+   public void recordWiggleTransform(int wiggleIterations, RigidBodyTransformReadOnly wiggleTransform)
    {
       int i = stepsVisualized.getIntegerValue();
 
@@ -107,6 +105,7 @@ public class PlanarRegionSnapVisualizer
 
       footholdData[i].footWasWiggled.set(true);
       footholdData[i].footWiggleTranslation.set(wiggleTransform.getTranslation());
+      footholdData[i].wiggleIterations.set(wiggleIterations);
    }
 
    private static class FootholdData
@@ -122,6 +121,7 @@ public class PlanarRegionSnapVisualizer
       private final YoBoolean footHadRegion;
       private final YoBoolean footPoseIsOnBoundaryOfWorld;
       private final YoInteger regionsUnderFoot;
+      private final YoInteger wiggleIterations;
 
       private final YoVector3D footSnapTranslation;
       private final YoVector3D footWiggleTranslation;
@@ -142,6 +142,7 @@ public class PlanarRegionSnapVisualizer
 
          footSnapTranslation = new YoVector3D("footSnapTranslation" + suffix, registry);
          footWiggleTranslation = new YoVector3D("footWiggleTranslation" + suffix, registry);
+         wiggleIterations = new YoInteger("wiggleIterations" + suffix, registry);
 
          AppearanceDefinition regionAppearance = YoAppearance.Green();
          regionAppearance.setTransparency(0.75);
@@ -174,6 +175,7 @@ public class PlanarRegionSnapVisualizer
          footWasSnapped.set(false);
          footHadRegion.set(false);
          regionsUnderFoot.set(-1);
+         wiggleIterations.set(-1);
          footPoseIsOnBoundaryOfWorld.set(false);
       }
    }
