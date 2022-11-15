@@ -102,7 +102,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private BytePointer debugJPEGImageBytePointer;
    private IntPointer compressionParameters;
    private CameraPinholeBrown depthCameraIntrinsics;
-   private GPUPlanarRegionExtraction gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
+   private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction;
    private final Runnable onPatchSizeResized = this::onPatchSizeResized;
    private final Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
    private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
@@ -132,6 +132,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
+      gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ROS2StoredPropertySet ros2GPURegionParameters
             = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS_TOPIC_PAIR, gpuPlanarRegionExtraction.getParameters());
@@ -157,6 +158,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
+      LogTools.info("Starting loop.");
       thread.start();
    }
 
@@ -171,6 +173,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       {
          if (nativesLoadedActivator.isNewlyActivated())
          {
+            LogTools.info("Natives loaded.");
+
             realSenseHardwareManager = new RealSenseHardwareManager();
             l515 = realSenseHardwareManager.createFullFeaturedL515(SERIAL_NUMBER);
             if (l515.getDevice() == null)
@@ -216,6 +220,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             if (depthU16C1Image == null)
             {
+               LogTools.info("Is now reading frames.");
+
                MutableBytePointer depthFrameData = l515.getDepthFrameData();
                depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
                depth32FC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_32FC1);
@@ -226,7 +232,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
                depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
 
-               gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
                gpuPlanarRegionExtraction.create(depthWidth,
                                                 depthHeight,
                                                 depth32FC1Image.getBackingDirectByteBuffer(),
@@ -241,6 +246,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                   ros1Helper.attachPublisher(GPUPlanarRegionExtractionComms.DEBUG_EXTRACTION_IMAGE, ros1DebugExtractionImagePublisher);
                }
                onPatchSizeResized();
+
+               LogTools.info("Initialized.");
             }
 
             val0 = Short.toUnsignedInt(depthU16C1Image.ptr(0, 0).getShort());
