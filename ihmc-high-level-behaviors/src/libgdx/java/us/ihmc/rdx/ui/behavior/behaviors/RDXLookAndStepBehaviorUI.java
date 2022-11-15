@@ -64,6 +64,8 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final ImBoolean invertShowGraphics = new ImBoolean(false);
    private final ImBoolean showReceivedRegions = new ImBoolean(false);
    private final ImBoolean showHeightMap = new ImBoolean(true);
+   private final ImBoolean showPlannedSteps = new ImBoolean(true);
+   private final ImBoolean showLastCommandedSteps = new ImBoolean(false);
 
    private boolean reviewingBodyPath = true;
    private final ImString latestFootstepPlannerLogPath = new ImString();
@@ -218,6 +220,12 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Invert"), invertShowGraphics);
       ImGui.checkbox(labels.get("Received Regions"), showReceivedRegions);
+      ImGui.sameLine();
+      ImGui.text("Steps:");
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Planned"), showPlannedSteps);
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Commanded"), showLastCommandedSteps);
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -320,8 +328,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          {
             goalAffordance.getRenderables(renderables, pool);
             subGoalGraphic.getRenderables(renderables, pool);
-            footstepPlanGraphic.getRenderables(renderables, pool);
-            commandedFootstepsGraphic.getRenderables(renderables, pool);
+            if (showPlannedSteps.get())
+               footstepPlanGraphic.getRenderables(renderables, pool);
+            if (showLastCommandedSteps.get())
+               commandedFootstepsGraphic.getRenderables(renderables, pool);
             startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
             bodyPathPlanGraphic.getRenderables(renderables, pool);
          }
