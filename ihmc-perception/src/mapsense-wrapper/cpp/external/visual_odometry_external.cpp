@@ -67,26 +67,6 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
     _visualOdometry->UpdateStereo(matLeft, matRight);
 
-    // Extract keypoints and descriptors from left image
-
-    // Extract keypoints and descriptors from right image
-
-    // Match between left and right feature points
-
-    // Match between previous and current left feature points
-
-    // Match between previous and current right feature points
-
-    // Triangulate points from stereo matches
-
-    // Insert point landmarks into map at 
-
-    // Map is a graph of keyframes and point landmarks. Indexing into list of keyframes and list of point landmarks
-
-    // Estimate pose 2D-2D between previous keyframe(left) and current left frame
-
-    // Find common keypoints among last keyframe map and current stereo common 2d measurements
-
 }
 
 // void VisualOdometryExternal::getExternalKeyframe(float* odometry, uint32_t* id)
@@ -101,6 +81,7 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
 void VisualOdometryExternal::getExternalKeyframe(double* odometry, uint32_t* id)
 {
+    printf("getExternalKeyframe()\n");
     *(id) = _visualOdometry->GetLastKeyframe().id;
     std::copy(_visualOdometry->GetLastKeyframe().pose.data(),
                 _visualOdometry->GetLastKeyframe().pose.data() + 16,
@@ -109,11 +90,20 @@ void VisualOdometryExternal::getExternalKeyframe(double* odometry, uint32_t* id)
 
 uint32_t VisualOdometryExternal::getExternalLandmarks(float* landmarksToPack, uint32_t* idsToPack, uint32_t maxSize)
 {
+    printf("getExternalLandmarks()\n");
     auto landmarksVec = _visualOdometry->GetLandmarkVec();
     for(uint32_t i = 0; i<landmarksVec.size(); i++)
     {
         if(i < maxSize)
         {
+            printf("Landmark External: [%d] (%.2lf, %.2lf) -> (%.2lf, %.2lf, %.2lf)\n", 
+                                                landmarksVec[i].GetLandmarkID(),
+                                                landmarksVec[i].GetMeasurement2D().x(),
+                                                landmarksVec[i].GetMeasurement2D().y(),
+                                                landmarksVec[i].GetPoint3D().x(),
+                                                landmarksVec[i].GetPoint3D().y(),
+                                                landmarksVec[i].GetPoint3D().z());
+
             idsToPack[i] = landmarksVec[i].GetLandmarkID();
 
             landmarksToPack[i*5] = landmarksVec[i].GetMeasurement2D().x();

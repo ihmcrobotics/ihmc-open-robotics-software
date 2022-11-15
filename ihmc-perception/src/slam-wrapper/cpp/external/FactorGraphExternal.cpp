@@ -18,6 +18,9 @@ void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId
 {
     using namespace gtsam;
     Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
+
+    std::cout << "Add Odometry Factor Extended: " << std::endl << M << std::endl;
+
     Pose3 odometryValue(M);
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
@@ -62,6 +65,9 @@ void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
 {
     using namespace gtsam;
     Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
+
+    std::cout << "Set Pose Initial Extended: " << std::endl << M << std::endl;
+
     Pose3 initialValue(M.cast<double>());
     factorGraphHandler.setPoseInitialValue(index, initialValue);
 }

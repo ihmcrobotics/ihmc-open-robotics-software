@@ -44,11 +44,11 @@ public class VisualSLAMModule
    {
       visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
 
-
       LogTools.info("Extracting Keyframe External");
       double[] relativePoseTransformAsArray = new double[16];
       int[] keyframeID = new int[]{-1};
       visualOdometryExternal.getExternalKeyframe(relativePoseTransformAsArray, keyframeID);
+      LogTools.info("Relative Pose: x{} -> {}", keyframeID[0], Arrays.toString(relativePoseTransformAsArray));
 
       LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0] + 1);
       factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0] + 1);
@@ -59,17 +59,22 @@ public class VisualSLAMModule
       int[] landmarkIDs = new int[MAX_LANDMARKS];
       int totalLandmarks = visualOdometryExternal.getExternalLandmarks(landmarks, landmarkIDs, MAX_LANDMARKS);
       LogTools.info("Total Landmarks: {}", totalLandmarks);
+      LogTools.info("Landmarks: {}", Arrays.toString(landmarks));
+      LogTools.info("LandmarkIDs: {}", Arrays.toString(landmarkIDs));
 
       LogTools.info("Transforming Point to World Frame");
       /* Update sensorToWorldTransform based on last sensor pose and most recent odometry */
       RigidBodyTransform odometryTransform = new RigidBodyTransform();
       odometryTransform.set(relativePoseTransformAsArray);
       worldToSensorTransform.multiply(odometryTransform);
+      LogTools.info("Odometry: {}", odometryTransform);
+      LogTools.info("Sensor Transform: {}", worldToSensorTransform);
 
       /* Compute and insert keyframe pose in world frame as initial value */
       float[] poseValue = new float[16];
       worldToSensorTransform.get(poseValue);
-      LogTools.info("Setting Initial Pose Value: x{}", keyframeID[0] + 1);
+      LogTools.info("World to Sensor Transform: {}", worldToSensorTransform);
+      LogTools.info("Setting Initial Pose Value: x{} -> ", keyframeID[0] + 1, Arrays.toString(poseValue));
       factorGraphExternal.setPoseInitialValueExtended(keyframeID[0] + 1, poseValue);
 
       /* Insert landmarks and initial estimates into the factor graph. */
@@ -97,7 +102,7 @@ public class VisualSLAMModule
       LogTools.info("Optimizing Factor Graph");
       // TODO: Try Incremental SAM instead of batch optimizer.
       factorGraphExternal.optimize();
-      factorGraphExternal.printResults();
+      //factorGraphExternal.printResults();
 
       frameIndex++;
    }
@@ -107,7 +112,7 @@ public class VisualSLAMModule
       double[] poses = new double[16];
       int[] indices = new int[]{index};
       factorGraphExternal.getResultPoses(poses, indices, 1);
-      
+
       LogTools.info("Array: {}", Arrays.toString(poses));
 
       RigidBodyTransform transform = new RigidBodyTransform();

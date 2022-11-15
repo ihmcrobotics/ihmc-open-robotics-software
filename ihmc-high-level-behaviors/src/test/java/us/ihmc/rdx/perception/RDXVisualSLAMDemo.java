@@ -22,6 +22,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RDXVisualSLAMDemo
 {
@@ -49,6 +50,9 @@ public class RDXVisualSLAMDemo
 
    private ReferenceFrame frame;
 
+
+
+
    private int fileIndex = 0;
 
    public RDXVisualSLAMDemo()
@@ -59,7 +63,7 @@ public class RDXVisualSLAMDemo
       baseUI.getImGuiPanelManager().addPanel(panel);
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
 
-      //executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -91,10 +95,16 @@ public class RDXVisualSLAMDemo
       {
          update();
       }
+
+      if (ImGui.button("Start"))
+      {
+         executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+      }
    }
 
    public void update()
    {
+      LogTools.info("Loading File Index: {}", fileIndex);
       fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
       leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
       rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
@@ -107,17 +117,19 @@ public class RDXVisualSLAMDemo
       fileIndex++;
 
       /* For Visualization Only */
-      FramePose3D framePose = vslam.getSensorPose(fileIndex);
-      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      poseModels.clear();
+      for(int i = 0; i< fileIndex; i++)
+      {
+         FramePose3D framePose = vslam.getSensorPose(i+1);
+         framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+         LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+         modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1);
+         LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+         poseModels.add(modelInstance);
+         LogTools.info("Total Model Instances: {}", poseModels.size());
+      }
 
-      modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1);
-      LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
-
-      poseModels.add(modelInstance);
-
-      LogTools.info("Total Model Instances: {}", poseModels.size());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
