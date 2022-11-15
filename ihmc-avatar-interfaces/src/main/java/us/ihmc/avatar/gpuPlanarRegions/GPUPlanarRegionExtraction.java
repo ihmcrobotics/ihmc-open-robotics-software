@@ -611,8 +611,8 @@ public class GPUPlanarRegionExtraction
          }
          catch (NotARotationMatrixException notARotationMatrixException)
          {
-            LogTools.error("Normal: {}", gpuPlanarRegion.getNormal());
-            notARotationMatrixException.printStackTrace();
+            LogTools.warn("Not a rotation matrix: {}", gpuPlanarRegion.getNormal());
+//            notARotationMatrixException.printStackTrace();
          }
          catch (RuntimeException e)
          {
