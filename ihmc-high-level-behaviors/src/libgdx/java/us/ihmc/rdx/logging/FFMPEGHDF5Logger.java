@@ -25,6 +25,15 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
 {
    private static final String namespace = "FFMPEGVideo"; //this will need to be changed later to be user-set
    private HDF5Manager hdf5Manager;
+   private Group framesGroup;
+
+   @Override
+   public void stop()
+   {
+      framesGroup.close();
+      super.stop();
+   }
+
    private boolean isInitialized = false;
    protected void initialize()
    {
@@ -93,6 +102,8 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
                                              extraParameters);
          FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
       }
+
+      framesGroup = hdf5Manager.getGroup(namespace);
    }
 
    @Override
@@ -149,8 +160,9 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       // Decompression timestamp in AVStream->time_base units; the time at which the packet is decompressed
       avPacket.stream_index(avStream.index());
 
-      Group group = hdf5Manager.getGroup(namespace);
-      HDF5Tools.storeByteArray(group, presentationTimestamp++, avPacket.data().asByteBuffer().array(), avPacket.size());
+      byte[] rawData = new byte[avPacket.size()];
+      avPacket.data().get(rawData, 0, avPacket.size());
+      HDF5Tools.storeByteArray(framesGroup, presentationTimestamp++, rawData, rawData.length);
 
 //      returnCode = avformat.av_interleaved_write_frame(avFormatContext, avPacket);
 //      FFMPEGTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
