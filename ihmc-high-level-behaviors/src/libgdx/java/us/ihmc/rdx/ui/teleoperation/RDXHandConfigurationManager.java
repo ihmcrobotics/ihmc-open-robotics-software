@@ -24,6 +24,8 @@ import static us.ihmc.robotics.robotSide.RobotSide.RIGHT;
 
 public class RDXHandConfigurationManager
 {
+   private static final boolean ADD_SHIELD_BUTTON = false;
+
    private CommunicationHelper communicationHelper;
    private final SideDependentList<ImInt> handConfigurationIndices = new SideDependentList<>(new ImInt(9), new ImInt(9));
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
@@ -84,37 +86,10 @@ public class RDXHandConfigurationManager
       armHomeButton.setTooltipText("left/right arm home pose");
       armHomeButton.setOnPressed(() -> publishArmHomeCommand(toolbarSelectedSide));
 
-
-      // NOTE: temporary method to test shield holding
-      RDX3DPanelToolbarButton shieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
-      RDXIconTexture shieldIcon = new RDXIconTexture("icons/shield.png");
-      shieldButton.setIcon(shieldIcon);
-      shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
-
-      // NOTE: need to set runnable here to send armTrajectory command >>
-      double[] leftJointAngles = new double[] {-1.01951, 0.72311, -1.29244, -1.26355, -0.51712, -0.04580, -0.00659};
-      double[] rightJointAngles = new double[7];
-      boolean[] invert = new boolean[] {false, true, true, false, true, false, false};
-
-      for (int i = 0; i < leftJointAngles.length; i++)
+      if (ADD_SHIELD_BUTTON)
       {
-         rightJointAngles[i] = (invert[i] ? -1.0 : 1.0) * leftJointAngles[i];
+         setupShieldButton(baseUI, communicationHelper);
       }
-
-      SideDependentList<double[]> armJointAngles = new SideDependentList<>();
-      armJointAngles.put(LEFT, leftJointAngles);
-      armJointAngles.put(RIGHT, rightJointAngles);
-
-      Consumer<RobotSide> armTrajectoryRunnable = robotSide ->
-      {
-         LogTools.info("Calling arm pose, side: " + robotSide);
-
-         double trajectoryTime = 3.0;
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, armJointAngles.get(robotSide));
-//         armTrajectoryMessage.setRequestedMode(ArmTrajectoryMessage.REQUESTED_MODE_POSITION_CONTROL);
-         communicationHelper.publishToController(armTrajectoryMessage);
-      };
-      shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
    }
 
    public void publishArmHomeCommand(RobotSide side)
@@ -205,4 +180,39 @@ public class RDXHandConfigurationManager
       communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
                                   HumanoidMessageTools.createHandDesiredConfigurationMessage(side, handDesiredConfiguration));
    }
+
+   /**
+    * Button for sending Nadia's arm to a position where it's holding a shield in front of the chest.
+    */
+   private void setupShieldButton(RDXBaseUI baseUI, CommunicationHelper communicationHelper)
+   {
+      RDX3DPanelToolbarButton shieldButton = baseUI.getPrimary3DPanel().addToolbarButton();
+      RDXIconTexture shieldIcon = new RDXIconTexture("icons/shield.png");
+      shieldButton.setIcon(shieldIcon);
+      shieldButton.setTooltipText("left/right side - testing shield lifting on Nadia");
+
+      // Hand-tuned joint angles to hold the shield
+      double[] leftJointAngles = new double[] {-1.01951, 0.72311, -1.29244, -1.26355, -0.51712, -0.04580, -0.00659};
+      double[] rightJointAngles = new double[7];
+      boolean[] invert = new boolean[] {false, true, true, false, true, false, false};
+
+      for (int i = 0; i < leftJointAngles.length; i++)
+      {
+         rightJointAngles[i] = (invert[i] ? -1.0 : 1.0) * leftJointAngles[i];
+      }
+
+      SideDependentList<double[]> armJointAngles = new SideDependentList<>();
+      armJointAngles.put(LEFT, leftJointAngles);
+      armJointAngles.put(RIGHT, rightJointAngles);
+
+      Consumer<RobotSide> armTrajectoryRunnable = robotSide ->
+      {
+         double trajectoryTime = 3.0;
+         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, armJointAngles.get(robotSide));
+         communicationHelper.publishToController(armTrajectoryMessage);
+      };
+
+      shieldButton.setOnPressed(()-> armTrajectoryRunnable.accept(toolbarSelectedSide));
+   }
+
 }
