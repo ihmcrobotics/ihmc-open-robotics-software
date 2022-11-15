@@ -183,6 +183,9 @@ public class HumanoidSteppingPluginEnvironmentalConstraints implements Consumer<
             heightAtPoint = Math.max(steppableRegionsCalculator.getSteppableRegions().get(i).getPlaneZGivenXY(touchdownPose.getX(), touchdownPose.getY()), heightAtPoint);
       }
 
+      if (Double.isFinite(heightAtPoint)) 
+         heightAtPoint = stancePose.getZ();
+
       return MathTools.epsilonEquals(heightAtPoint, touchdownPose.getZ(), 1e-3);
    }
 
