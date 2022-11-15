@@ -52,7 +52,7 @@
     "upperBound" : 10.0
   },
   "Search depth limit" : {
-    "value" : 37000,
+    "value" : 45500,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
