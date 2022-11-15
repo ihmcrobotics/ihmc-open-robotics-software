@@ -41,6 +41,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
@@ -70,6 +71,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
    private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
+   private final YoInteger controlTicksIntoStep = new YoInteger(yoNamePrefix + "TicksIntoStep", registry);
 
    private final YoFramePose3D upcomingFootstep = new YoFramePose3D(yoNamePrefix + "UpcomingFootstepPose", worldFrame, registry);
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
@@ -91,9 +93,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final YoDouble initialTime = new YoDouble(yoNamePrefix + "InitialTime", registry);
    private final YoDouble timeInCurrentState = new YoDouble(yoNamePrefix + "TimeInCurrentState", registry);
    private final YoDouble timeRemainingInState = new YoDouble(yoNamePrefix + "TimeRemainingInState", registry);
-
-   private final YoDouble recursionTime = new YoDouble(yoNamePrefix + "RecursionTime", registry);
-   private final YoDouble recursionMultiplier = new YoDouble(yoNamePrefix + "RecursionMultiplier", registry);
 
    private final YoBoolean swingSpeedUpEnabled = new YoBoolean(yoNamePrefix + "SwingSpeedUpEnabled", registry);
    private final YoDouble speedUpTime = new YoDouble(yoNamePrefix + "SpeedUpTime", registry);
@@ -265,6 +264,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       oneStepSafetyHeuristics.reset();
       multiStepCaptureRegionCalculator.reset();
       environmentConstraintProvider.reset();
+      controlTicksIntoStep.set(0);
       nextFootstep = null;
       nextFootstepTiming = null;
    }
@@ -331,6 +331,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       speedUpTime.set(0.0);
       footstepSolution.set(upcomingFootstep);
       totalStepAdjustment.setToZero();
+      controlTicksIntoStep.set(0);
    }
 
    @Override
@@ -342,6 +343,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       if (!isInSwing.getBooleanValue())
          return;
 
+      controlTicksIntoStep.increment();
       footstepWasAdjusted.set(false);
 
       computeTimeInCurrentState(currentTime);
@@ -417,7 +419,9 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       footstepWasAdjusted.set(wasAdjusted);
 
-      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+      // Don't update the "upcoming footstep" if we're at the start of the control state. At this point, we haven't had our swing duration adjusted, so we want
+      // to converge down to an intelligent time
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION && controlTicksIntoStep.getIntegerValue() > 5)
          upcomingFootstep.set(footstepSolution);
    }
 

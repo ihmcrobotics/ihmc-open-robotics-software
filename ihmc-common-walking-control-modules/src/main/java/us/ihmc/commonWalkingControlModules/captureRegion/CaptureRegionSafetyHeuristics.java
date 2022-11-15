@@ -40,7 +40,7 @@ public class CaptureRegionSafetyHeuristics
 
    private final DoubleParameter distanceIntoCaptureRegionForInside = new DoubleParameter("distanceIntoCaptureRegionForInside", registry, 0.05);
    private final DoubleParameter distanceIntoCaptureRegionForEverywhere = new DoubleParameter("distanceIntoCaptureRegionForEverywhere", registry, 0.02);
-   private final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.02);
+   private final DoubleParameter extraDistanceToStepFromStanceFoot = new DoubleParameter("extraDistanceToStepFromStanceFoot", registry, 0.05);
 
    private final List<FixedFramePoint2DBasics> verticesVisibleFromStance = new ArrayList<>();
    private final FramePoint2D stancePosition = new FramePoint2D();
