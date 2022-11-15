@@ -138,15 +138,7 @@ public class LookAndStepSteppingTask
       // TODO: Add combo to look and step UI to chose which steps to visualize
       uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, "Look and Step Last Commanded"));
 
-      ExecutionMode executionMode;
-      if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
-      {
-         executionMode = ExecutionMode.OVERRIDE; // ALPHA. Seems to not work on real robot.
-      }
-      else
-      {
-         executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
-      }
+      ExecutionMode executionMode = ExecutionMode.OVERRIDE; // Always override, which we can do now
       imminentStanceTracker.addCommandedFootsteps(footstepPlan);
 
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
