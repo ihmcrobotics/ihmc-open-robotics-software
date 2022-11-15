@@ -109,6 +109,8 @@ public class HDF5Tools
       dataset.read(p, new DataType(PredType.NATIVE_INT()));
       p.get(intArray, 0, intArray.length);
 
+      dataset.close();
+
       return intArray;
    }
 

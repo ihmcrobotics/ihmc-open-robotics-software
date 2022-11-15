@@ -82,6 +82,12 @@ public class HDF5Manager
    {
       if (groups.containsKey(namespace))
          return groups.get(namespace).getNumObjs();
+      else if (file.nameExists(namespace))
+      {
+         Group group = file.openGroup(namespace);
+         groups.put(namespace, group);
+         return group.getNumObjs();
+      }
       else
          return 0;
    }

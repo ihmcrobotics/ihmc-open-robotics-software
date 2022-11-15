@@ -122,13 +122,15 @@ public class ROS2Tools
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<VideoPacket> D435_DEPTH = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<BigVideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION
          = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("debug_extraction");
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO
          = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left").withType(BigVideoPacket.class).withSuffix("video"),
                                    IHMC_ROOT.withModule(BLACKFLY_NAME + "right").withType(BigVideoPacket.class).withSuffix("video"));
-   public static final ROS2Topic<BigVideoPacket> OUSTER_LIDAR = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth_regular");
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
