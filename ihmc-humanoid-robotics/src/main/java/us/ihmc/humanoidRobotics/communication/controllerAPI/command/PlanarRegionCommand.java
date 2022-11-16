@@ -40,6 +40,8 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
       concaveHullsVertices.clear();
+      for (int i = 0; i < convexPolygons.size(); i++)
+         convexPolygons.get(i).clear();
       convexPolygons.clear();
    }
 
