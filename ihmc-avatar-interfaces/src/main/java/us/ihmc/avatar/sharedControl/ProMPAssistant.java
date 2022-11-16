@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -193,7 +194,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       if (currentTask.isEmpty())
       {
-         //TODO 1. recognize task with object detection algorithm (or Aruco Markers to begin with)
+         //TODO A.1. recognize task with object detection algorithm (or Aruco Markers to begin with)
          currentTask = "PushDoor";
          relevantBodyPart = taskRelevantBodyPart.get(currentTask);
          //initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
@@ -207,7 +208,7 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    private boolean objectPoseEstimated()
    {
-      //TODO 2. identify object pose (with Aruco Markers to begin with)
+      //TODO A.2. identify object pose (with Aruco Markers to begin with)
       //taskGoalPose = ;
       return !(taskGoalPose.equals(new FramePose3D()));
    }
@@ -240,7 +241,11 @@ public class ProMPAssistant implements TeleoperationAssistant
          bodyPartObservedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
       LogTools.info("   - Updating ProMP speed ...");
       //update speed proMP based on hands observed trajectories
-      //      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+//      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+      // TODO B.1. use line above where you compare both hands if relevantBodyPart is both hands and check only main hand if it is one hand
+      // TODO B.2. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
+      // TODO B.3. change relevantBodyPart concept  which now means that bodyPart will reach a goal that can be observed
+      //       Add instead goalBodyPart and change use of relevantBodyPart as the part that is used the most for that task
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get("rightHand"), "rightHand");
       LogTools.info("   - Updating ProMP trajectories ...");
       //update all proMP trajectories based on initial observations (stored observed poses)
@@ -281,22 +286,26 @@ public class ProMPAssistant implements TeleoperationAssistant
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
       //take a sample (frame) from the trajectory
       FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
-      //TODO compute distance from region close to the goal and use this to select the next sample.
+      //TODO C.1.1 IF goal is observable -> compute distance from region close to the goal and use this to select the next sample.
       // If distance is increasing, go back to previous sample
 
       if (bodyPart.equals(relevantBodyPart))
       {
-         //TODO compute distance from region close to the goal and use this to modulate alpha
+         //TODO C.1.2 IF goal is observable -> compute distance from region close to the goal and use this to modulate alpha
          // compute initial distance when goal is detected
          // set alpha according to distance
+         //TODO C.2. Can we re-estimate speed real-time as well to adapt it to user motion and change alpha accordingly?
+         // Not sure it'd be robust but worth a try
       }
-      // shared-control arbitration law
+      // shared-control arbitration law. Shift gradually from user input to robot autonomy
       int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
       if (sampleCounter <= generatedFramePoseTrajectory.size())
       {
-         double x = (sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
-         //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-         double alpha = 1.0 / (1 + 4 * exp(-18 * (x - 0.2)));
+         double x = (double)(sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
+         //define a function that goes from 0 to 1 smoothly, while getting to 1 not too close to the end of the motions
+         double alpha = 1.0 / (1 + 4 * exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
+         if (alpha>=0.9999)
+            alpha=1;
          //set orientation
          FixedFrameQuaternionBasics frameOrientation = framePose.getOrientation();
          FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();

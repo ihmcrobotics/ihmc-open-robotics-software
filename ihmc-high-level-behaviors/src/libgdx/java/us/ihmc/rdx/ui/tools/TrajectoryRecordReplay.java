@@ -30,6 +30,7 @@ public class TrajectoryRecordReplay<T extends Number>
    private boolean savedRecording = true;
    private boolean doneReplaying = true;
    private boolean concatenated = false;
+   private String recordFileName = "";
 
    public TrajectoryRecordReplay(Class<T> clazz, String filePath, int numberParts)
    {
@@ -123,8 +124,12 @@ public class TrajectoryRecordReplay<T extends Number>
          Arrays.setAll(stringValues, j -> "" + dataLine[j]);
          dataLines.add(stringValues);
       }
-
-      String fileName = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ'.csv'").format(new Date());
+      //if recordFile name has not been set, generate file with current date and time as name
+      String fileName = "";
+      if (recordFileName.isEmpty())
+         fileName = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ'.csv'").format(new Date());
+      else
+         fileName = recordFileName;
       File csvFile = new File(filePath + "/" + fileName);
       try (PrintWriter writer = new PrintWriter(csvFile))
       {
@@ -296,5 +301,15 @@ public class TrajectoryRecordReplay<T extends Number>
    public ArrayList<T[]> getConcatenatedData()
    {
       return concatenatedDataMatrix;
+   }
+
+   public String getRecordFileName()
+   {
+      return recordFileName;
+   }
+
+   public void setRecordFileName(String recordFileName)
+   {
+      this.recordFileName = recordFileName;
    }
 }

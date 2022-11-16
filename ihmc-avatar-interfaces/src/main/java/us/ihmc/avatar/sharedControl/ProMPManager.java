@@ -169,10 +169,8 @@ public class ProMPManager
       {
          demoTrajectory = concatenateTrajectoryVector(demoTrajectory, demoTrajectories.get(i));
       }
-      LogTools.info("Inferring closest demo ...");
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectory);
-      LogTools.info("Inferred closest demo: {}", demo);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
       double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
@@ -287,7 +285,7 @@ public class ProMPManager
          for (int j = 0; j < viaPointStdDeviation.cols(); j++)
          {
             if (i == j)
-               viaPointStdDeviation.apply(i, j).put(0.00001); // generally std deviation is low, unless you have high observation uncertainty
+               viaPointStdDeviation.apply(i, j).put(0.00001); // generally keep std deviation this low, unless you have high observation uncertainty
             else
                viaPointStdDeviation.apply(i, j).put(0);
          }
@@ -331,7 +329,7 @@ public class ProMPManager
          for (int j = 0; j < viaPointStdDeviation.cols(); j++)
          {
             if (i == j)
-               viaPointStdDeviation.apply(i, j).put(0.00001); // generally std deviation is low, unless you have high observation uncertainty
+               viaPointStdDeviation.apply(i, j).put(0.00001); // generally keep std deviation this low, unless you have high observation uncertainty
             else
                viaPointStdDeviation.apply(i, j).put(0);
          }
