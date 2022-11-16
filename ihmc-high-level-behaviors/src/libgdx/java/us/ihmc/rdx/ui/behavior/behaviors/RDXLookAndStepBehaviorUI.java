@@ -86,6 +86,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
    private final Notification planningFailedNotification = new Notification();
+   private volatile int numberOfPlannedSteps = 0;
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -121,6 +122,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       helper.subscribeViaCallback(PlannedFootstepsForUI, footsteps ->
       {
          reviewingBodyPath = false;
+         numberOfPlannedSteps = footsteps.size();
          footstepPlanGraphic.generateMeshesAsync(footsteps);
       });
       helper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
@@ -133,6 +135,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons ->
       {
          latestFootstepPlannerRejectionReasons = reasons;
+         numberOfPlannedSteps = 0;
          planningFailedNotification.set();
       });
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
@@ -284,7 +287,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
 //      {
 //      ImGui.separator();
 
-      ImGui.text("Footstep planning:");
+      ImGui.text("Footstep planning: Planned steps: " + numberOfPlannedSteps);
       latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
 //      ImGui.pushItemWidth(ImGui.getWindowWidth() - 3);
       ImGui.pushItemWidth(340.0f);
