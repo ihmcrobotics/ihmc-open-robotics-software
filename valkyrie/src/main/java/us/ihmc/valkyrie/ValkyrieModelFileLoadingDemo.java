@@ -1,134 +1,97 @@
 package us.ihmc.valkyrie;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameEllipsoid3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.*;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.scs2.SimulationConstructionSet2;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
-/**
- * Created by dstephen on 2/7/14.
- */
-public class ValkyrieSDFLoadingDemo
+public class ValkyrieModelFileLoadingDemo
 {
-   private static final boolean SHOW_ELLIPSOIDS = false;
-   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
-   private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
+   private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = true;
    private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
-   private static final boolean SHOW_SIM_COLLISIONS = true;
+   private static final boolean SHOW_SIM_COLLISIONS = false;
 
-   private SimulationConstructionSet scs;
+   private SimulationConstructionSet2 scs;
 
-   public ValkyrieSDFLoadingDemo()
+   public ValkyrieModelFileLoadingDemo()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
-
-      FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      valkyrieRobot.setPositionInWorld(new Vector3D());
-
-      if (SHOW_ELLIPSOIDS)
-      {
-         addIntertialEllipsoidsToVisualizer(valkyrieRobot);
-      }
-
-      if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
-         addJointAxis(valkyrieRobot);
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-
-      if (SHOW_INERTIA_ELLIPSOIDS)
-      {
-         CommonInertiaEllipsoidsVisualizer inertiaVis = new CommonInertiaEllipsoidsVisualizer(fullRobotModel.getElevator(), yoGraphicsListRegistry);
-         inertiaVis.update();
-      }
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DEFAULT);
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
 
       if (SHOW_KINEMATICS_COLLISIONS)
-         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+      {
+         RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+         if (collisionModel != null)
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+                                                                robotDefinition);
+      }
 
       if (SHOW_SIM_COLLISIONS)
       {
          RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "ground");
-         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, collisionModel);
+         if (collisionModel != null)
+            RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
+                                                                robotDefinition);
       }
 
-      scs = new SimulationConstructionSet(valkyrieRobot);
-      scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      scs.setGroundVisible(false);
-      scs.startOnAThread();
+      Robot robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
+
+      YoGraphicGroupDefinition extraViz = new YoGraphicGroupDefinition("ExtraVisualization", new ArrayList<>());
+
+      if (SHOW_COORDINATES_AT_JOINT_ORIGIN)
+         extraViz.addChild(createJointFrameVisualization(robot));
+
+      scs = new SimulationConstructionSet2(PhysicsEngineFactory.newDoNothingPhysicsEngineFactory());
+      scs.addRobot(robot);
+      scs.addYoGraphic(extraViz);
+      scs.start(true, false, false);
    }
 
-   private void addIntertialEllipsoidsToVisualizer(FloatingRootJointRobot valkyrieRobot)
+   public static YoGraphicDefinition createJointFrameVisualization(Robot robot)
    {
-      ArrayList<Joint> joints = new ArrayList<>();
-      joints.add(valkyrieRobot.getRootJoint());
-
-      HashSet<Link> links = getAllLinks(joints, new HashSet<Link>());
-
-      for (Link l : links)
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition("Joint Frames");
+      for (JointBasics joint : robot.getAllJoints())
       {
-         AppearanceDefinition appearance = YoAppearance.Green();
-         appearance.setTransparency(0.6);
-         l.addEllipsoidFromMassProperties(appearance);
-         l.addCoordinateSystemToCOM(0.5);
-         //         l.addBoxFromMassProperties(appearance);
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicCoordinateSystem3D(joint.getName() + " - FrameAfterJoint",
+                                                                                  new FramePose3D(joint.getFrameAfterJoint()),
+                                                                                  0.5,
+                                                                                  ColorDefinitions.Brown()));
       }
+      return group;
    }
 
-   private HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
-   {
-      for (Joint j : joints)
-      {
-         links.add(j.getLink());
-
-         if (!j.getChildrenJoints().isEmpty())
-         {
-            links.addAll(getAllLinks(j.getChildrenJoints(), links));
-         }
-      }
-
-      return links;
-   }
-
-   public static void addJointAxis(FloatingRootJointRobot valkyrieRobot)
-   {
-
-      ArrayList<OneDegreeOfFreedomJoint> joints = new ArrayList<>(Arrays.asList(valkyrieRobot.getOneDegreeOfFreedomJoints()));
-
-      for (OneDegreeOfFreedomJoint joint : joints)
-      {
-         Graphics3DObject linkGraphics = new Graphics3DObject();
-         linkGraphics.addCoordinateSystem(0.5);
-         linkGraphics.combine(joint.getLink().getLinkGraphics());
-         joint.getLink().setLinkGraphics(linkGraphics);
-      }
-   }
-
-   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
+   // This is for external use
+   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, us.ihmc.simulationconstructionset.Robot robot, RobotCollisionModel collisionModel)
    {
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
 
@@ -194,7 +157,7 @@ public class ValkyrieSDFLoadingDemo
 
    public static void main(String[] args)
    {
-      new ValkyrieSDFLoadingDemo();
+      new ValkyrieModelFileLoadingDemo();
    }
 
 }
