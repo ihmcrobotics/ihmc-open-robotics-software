@@ -78,19 +78,22 @@ public class SlamWrapperTest
 
       SlamWrapper.FactorGraphExternal factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
+      factorGraphExternal.visualSLAMTest();
+
 //      factorGraphExternal.helloWorldTest();
 
-      float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-      float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
 
-      factorGraphExternal.addPriorPoseFactor(1, poseInitial);
-      factorGraphExternal.addOdometryFactor(odometry, 2);
-
-      factorGraphExternal.setPoseInitialValue(1, poseInitial);
-      factorGraphExternal.setPoseInitialValue(2, odometry);
-
-      factorGraphExternal.optimize();
-
-      factorGraphExternal.printResults();
+      //float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+      //float[] odometry = new float[]{0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f};
+      //
+      //factorGraphExternal.addPriorPoseFactor(1, poseInitial);
+      //factorGraphExternal.addOdometryFactor(odometry, 2);
+      //
+      //factorGraphExternal.setPoseInitialValue(1, poseInitial);
+      //factorGraphExternal.setPoseInitialValue(2, odometry);
+      //
+      //factorGraphExternal.optimize();
+      //
+      //factorGraphExternal.printResults();
    }
 }

@@ -40,6 +40,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
    if(!_initialized)
    {
       Initialize(leftImage, rightImage);
+      return false;
    }
    else
    {
@@ -53,27 +54,36 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       std::vector<cv::DMatch> matches;
 
       ExtractKeypoints(leftImage, kpCur, descCur);
+      printf("Total Keypoints Left: %ld\n", kpCur.size());
+
       MatchKeypoints(descPrev, descCur, matches);
+      printf("Total Matches Left: %ld\n", matches.size());
 
       cv::Mat descCurRight;
       KeyPointVec kpCurRight;
       std::vector<cv::DMatch> matchesStereo;
       ExtractKeypoints(rightImage, kpCurRight, descCurRight);
-      MatchKeypoints(descCur, descCurRight, matchesStereo);
+      printf("Total Keypoints Right: %ld\n", kpCurRight.size());
 
-      printf("Total Matches Before: %ld\n", matches.size());
+      MatchKeypoints(descCur, descCurRight, matchesStereo);
+      printf("Total Stereo Matches Left: %ld\n", matchesStereo.size());
+
+      printf("Total Matches Before Distance Filter: %ld\n", matches.size());
       FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
-      printf("Total Matches After: %ld\n", matches.size());
+      printf("Total Matches After Distance Filter: %ld\n", matches.size());
 
       std::vector<int> keypointIDs(kpCur.size(), -1);
       TransferKeypointIDs(lastKeyframe.keypointIDs, keypointIDs, matches);
+      printf("Total Keypoints: %ld\n", keypointIDs.size());
 
       Point2fVec pointsTrain;
       Point2fVec pointsQuery;
       ExtractMatchesAsPoints(kpPrev, kpCur, matches, pointsTrain, pointsQuery);
+      printf("Total Motion Correspondences: %ld\n", pointsTrain.size());
 
       cv::Mat mask;
       cv::Mat pose = EstimateMotion(pointsTrain, pointsQuery, mask, leftCamera);
+      printf("Total Motion Correspondences (After Mask): %ld\n", pointsTrain.size());
 
       cv::Mat cvPose = pose;
       Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPoseFloat(reinterpret_cast<float *>(cvPose.data));
@@ -89,15 +99,15 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
 
       _curPoints3D.clear();
       TriangulateStereoNormal(kpCur, kpCurRight, matchesStereo, keypointIDs, _curPoints3D);
+      printf("Total Landmarks Triangulated: %ld\n", _curPoints3D.size());
 
       std::cout << "Pose:" << std::endl << eigenPose << std::endl;
       std::cout << "Determinant: " << eigenPose.determinant() << std::endl;
 
       InsertKeyframe(eigenPose, descCur, kpCur, keypointIDs, leftImage);
-
+      PrintKeyframeIDs();
 
       // Visualization and Logging Only --------------------------------------------
-
 
       std::cout << "Camera Pose: " << std::endl << pose << std::endl;
 
@@ -110,6 +120,16 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
    printf("Total Keyframes: %ld\n", _keyframes.size());
 
    return true;
+}
+
+void VisualOdometry::PrintKeyframeIDs()
+{
+   printf("Keyframes: [");
+   for(auto keyframe : _keyframes)
+   {
+      printf("%d, ", keyframe.id);
+   }
+   printf("]\n");
 }
 
 // bool VisualOdometry::UpdateStereoOld(const cv::Mat& leftImage, const cv::Mat& rightImage)
@@ -395,7 +415,7 @@ void VisualOdometry::TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointV
          if (Z > 0)
          {
             Eigen::Vector3f point(X, Y, Z);
-            Eigen::Vector2f measurement(x1, y1);
+            Eigen::Vector2f measurement(pointsTrain[match.trainIdx].pt.x, pointsTrain[match.trainIdx].pt.y);
 
             points3D.push_back({point, measurement, kpIDs[match.trainIdx]});
          }
@@ -674,12 +694,12 @@ void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
    }
 
    printf("Triangulating Stereo Keypoints\n");
-   PointLandmarkVec points3D;
-   TriangulateStereoNormal(kp_curLeft, kp_curRight, curMatchesStereo, kpIDs, points3D);
+   _curPoints3D.clear();
+   TriangulateStereoNormal(kp_curLeft, kp_curRight, curMatchesStereo, kpIDs, _curPoints3D);
 
    printf("Inserting Keyframe Initial\n");
    InsertKeyframe(Eigen::Matrix4d::Identity(), desc_curLeft, kp_curLeft, kpIDs, leftImageCur);
-
+   PrintKeyframeIDs();
 
    _initialized = true;
 }

@@ -1,10 +1,20 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,11 +24,11 @@ import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.ExecutorServiceTools;
-import us.ihmc.utilities.ros.RosTools;
 
 import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,7 +56,9 @@ public class RDXVisualSLAMDemo
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
+
    private ModelInstance modelInstance;
+   private ModelInstance landmarksLineMesh;
 
    private ReferenceFrame frame;
 
@@ -70,7 +82,26 @@ public class RDXVisualSLAMDemo
          @Override
          public void create()
          {
+
             baseUI.create();
+
+            //ModelBuilder modelBuilder = new ModelBuilder();
+            //modelBuilder.begin();
+            //
+            //RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+            //meshBuilder.addLine(0,0,0, 1, 1, 1, 0.005, Color.WHITE);
+            //Mesh mesh = meshBuilder.generateMesh();
+            //
+            //MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+            //Material material = new Material();
+            //Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+            //material.set(TextureAttribute.createDiffuse(paletteTexture));
+            //material.set(ColorAttribute.createDiffuse(Color.WHITE));
+            //modelBuilder.part(meshPart, material);
+            //
+            //Model model = modelBuilder.end();
+            //landmarksLineMesh = new ModelInstance(model);
+
          }
 
          @Override
@@ -120,15 +151,16 @@ public class RDXVisualSLAMDemo
       poseModels.clear();
       for(int i = 0; i< fileIndex; i++)
       {
-         FramePose3D framePose = vslam.getSensorPose(i+1);
+         FramePose3D framePose = vslam.getSensorPose(i);
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
-         modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.1);
+         //LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+         modelInstance = RDXModelBuilder.createCoordinateFrameInstance(1.0);
          LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
          poseModels.add(modelInstance);
-         LogTools.info("Total Model Instances: {}", poseModels.size());
       }
+
+      LogTools.info("Total Model Instances: {}", poseModels.size());
 
    }
 
@@ -138,6 +170,7 @@ public class RDXVisualSLAMDemo
       {
          model.getRenderables(renderables, pool);
       }
+      //landmarksLineMesh.getRenderables(renderables, pool);
    }
 
    public static void main(String[] args)

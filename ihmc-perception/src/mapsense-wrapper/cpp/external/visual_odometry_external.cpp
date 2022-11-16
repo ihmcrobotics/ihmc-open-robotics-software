@@ -57,7 +57,7 @@ void VisualOdometryExternal::displayMat(uint8_t* buffer, int height, int width, 
 //     _visualOdometry->UpdateMonocular(final);
 // }
 
-void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)
+bool VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRight, int height, int width)
 {
     cv::Mat matLeft(height, width, CV_8UC1, bufferLeft);
     cv::Mat matRight(height, width, CV_8UC1, bufferRight);
@@ -65,8 +65,8 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
     // cv::cvtColor(matLeft, matLeft, cv::COLOR_GRAY2BGR);
     // cv::cvtColor(matRight, matRight, cv::COLOR_GRAY2BGR);
 
-    _visualOdometry->UpdateStereo(matLeft, matRight);
-
+    bool result =_visualOdometry->UpdateStereo(matLeft, matRight);
+    return result;
 }
 
 // void VisualOdometryExternal::getExternalKeyframe(float* odometry, uint32_t* id)
@@ -81,10 +81,15 @@ void VisualOdometryExternal::updateStereo(uint8_t* bufferLeft, uint8_t* bufferRi
 
 void VisualOdometryExternal::getExternalKeyframe(double* odometry, uint32_t* id)
 {
-    printf("getExternalKeyframe()\n");
+    printf("getExternalKeyframe() = %d\n", _visualOdometry->GetLastKeyframe().id);
     *(id) = _visualOdometry->GetLastKeyframe().id;
-    std::copy(_visualOdometry->GetLastKeyframe().pose.data(),
-                _visualOdometry->GetLastKeyframe().pose.data() + 16,
+
+    auto matrix = _visualOdometry->GetLastKeyframe().pose;
+
+    matrix.transposeInPlace();
+
+    std::copy(  matrix.data(),
+                matrix.data() + 16,
                 odometry);
 }
 

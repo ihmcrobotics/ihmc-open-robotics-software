@@ -12,6 +12,7 @@ import us.ihmc.perception.elements.CameraModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class VisualSLAMModule
 {
@@ -39,19 +40,45 @@ public class VisualSLAMModule
       factorGraphExternal.setPoseInitialValue(0, poseInitial);
    }
 
-
+   /*
+            + First Iteration: Odometry is Identity, and Zero Landmarks
+            + 2D measurements are negative
+            + Odometry RigidBodyTransform is wrong
+            + Landmark External printouts are not numerous enough
+            + Initial Pose Values have Zero Translation
+            + Before and After Differ by only 2
+   *
+   * */
    public void update(ImageMat leftImage, ImageMat rightImage)
    {
-      visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
+      boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
 
       LogTools.info("Extracting Keyframe External");
       double[] relativePoseTransformAsArray = new double[16];
       int[] keyframeID = new int[]{-1};
       visualOdometryExternal.getExternalKeyframe(relativePoseTransformAsArray, keyframeID);
-      LogTools.info("Relative Pose: x{} -> {}", keyframeID[0], Arrays.toString(relativePoseTransformAsArray));
+      LogTools.info("Relative Pose: x{} -> x{} = [{}]", keyframeID[0], keyframeID[0] + 1, Arrays.toString(relativePoseTransformAsArray));
 
-      LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0] + 1);
-      factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0] + 1);
+      if(initialized)
+      {
+         LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0]);
+         factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0]);
+
+         LogTools.info("Compute transform world-to-sensor.");
+         /* Update sensorToWorldTransform based on last sensor pose and most recent odometry */
+         RigidBodyTransform odometryTransform = new RigidBodyTransform();
+         odometryTransform.set(relativePoseTransformAsArray);
+         worldToSensorTransform.multiply(odometryTransform);
+         LogTools.info("Odometry: {}", odometryTransform);
+         LogTools.info("Sensor Transform: {}", worldToSensorTransform);
+
+         /* Compute and insert keyframe pose in world frame as initial value */
+         float[] poseValue = new float[16];
+         worldToSensorTransform.get(poseValue);
+         LogTools.info("World to Sensor Transform: {}", worldToSensorTransform);
+         LogTools.info("Setting Initial Pose Value: x{} -> x{} = [{}]", keyframeID[0], Arrays.toString(poseValue));
+         factorGraphExternal.setPoseInitialValueExtended(keyframeID[0], poseValue);
+      }
 
       LogTools.info("Extracting Landmarks External");
       /* Extract keyframe and landmark measurements from visual odometry module. */
@@ -62,20 +89,6 @@ public class VisualSLAMModule
       LogTools.info("Landmarks: {}", Arrays.toString(landmarks));
       LogTools.info("LandmarkIDs: {}", Arrays.toString(landmarkIDs));
 
-      LogTools.info("Transforming Point to World Frame");
-      /* Update sensorToWorldTransform based on last sensor pose and most recent odometry */
-      RigidBodyTransform odometryTransform = new RigidBodyTransform();
-      odometryTransform.set(relativePoseTransformAsArray);
-      worldToSensorTransform.multiply(odometryTransform);
-      LogTools.info("Odometry: {}", odometryTransform);
-      LogTools.info("Sensor Transform: {}", worldToSensorTransform);
-
-      /* Compute and insert keyframe pose in world frame as initial value */
-      float[] poseValue = new float[16];
-      worldToSensorTransform.get(poseValue);
-      LogTools.info("World to Sensor Transform: {}", worldToSensorTransform);
-      LogTools.info("Setting Initial Pose Value: x{} -> ", keyframeID[0] + 1, Arrays.toString(poseValue));
-      factorGraphExternal.setPoseInitialValueExtended(keyframeID[0] + 1, poseValue);
 
       /* Insert landmarks and initial estimates into the factor graph. */
       int totalValidLandmarks = 0;
@@ -83,9 +96,10 @@ public class VisualSLAMModule
       {
          if(landmarkIDs[i] != -1)
          {
+
             /* Insert generic projection factor for each landmark measurement on left camera. */
-            LogTools.info("Inserting Projection Factor: x{} -> p{}", keyframeID[0] + 1, landmarkIDs[i]);
-            factorGraphExternal.addGenericProjectionFactor(new float[]{landmarks[i*5], landmarks[i*5 + 1]}, landmarkIDs[i], keyframeID[0] + 1);
+            LogTools.info("Inserting Projection Factor: x{} -> p{}", keyframeID[0], landmarkIDs[i]);
+            factorGraphExternal.addGenericProjectionFactor(new float[]{landmarks[i*5], landmarks[i*5 + 1]}, landmarkIDs[i], keyframeID[0]);
 
             /* Compute the 3D point initial value in world frame. */
             Point3D pointInWorld = new Point3D(landmarks[i*5 + 2], landmarks[i*5 + 3], landmarks[i*5 + 4]);
@@ -113,7 +127,7 @@ public class VisualSLAMModule
       int[] indices = new int[]{index};
       factorGraphExternal.getResultPoses(poses, indices, 1);
 
-      LogTools.info("Array: {}", Arrays.toString(poses));
+      //LogTools.info("Array: {}", Arrays.toString(poses));
 
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.set(poses);

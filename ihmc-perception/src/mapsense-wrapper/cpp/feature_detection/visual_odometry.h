@@ -55,6 +55,7 @@ class VisualOdometry
       void DrawAllMatches(cv::Mat& image);
       void Display(cv::Mat& image);
       void Show(int delay = 1);
+      void PrintKeyframeIDs();
 
       const Keyframe& GetLastKeyframe() const {return _keyframes[_keyframes.size() - 1]; };
       const PointLandmarkVec& GetLandmarkVec() const {return _curPoints3D; };
