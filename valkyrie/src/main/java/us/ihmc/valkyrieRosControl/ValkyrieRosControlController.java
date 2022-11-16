@@ -70,7 +70,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.fromEnvironment();
 
    public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
-   public static final boolean HAS_LIGHTER_BACKPACK = true;
    public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
 
    private static final String[] torqueControlledJoints;
