@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -21,6 +23,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
@@ -47,6 +50,7 @@ import us.ihmc.tools.gui.YoAppearanceTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
@@ -366,14 +370,18 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.clear();
       }
 
-      boolean allAreDeleted = interactablePelvis.isDeleted();
-      for (RobotSide side : interactableHands.sides())
+      boolean allAreDeleted = true;
+      if (interactablesAvailable)
       {
-         allAreDeleted &= interactableHands.get(side).isDeleted();
-      }
-      for (RobotSide side : interactableFeet.sides())
-      {
-         allAreDeleted &= interactableFeet.get(side).isDeleted();
+         allAreDeleted &= interactablePelvis.isDeleted();
+         for (RobotSide side : interactableHands.sides())
+         {
+            allAreDeleted &= interactableHands.get(side).isDeleted();
+         }
+         for (RobotSide side : interactableFeet.sides())
+         {
+            allAreDeleted &= interactableFeet.get(side).isDeleted();
+         }
       }
       desiredRobot.setActive(!allAreDeleted);
    }
