@@ -233,11 +233,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
       else
       {
-         snapper.snapPolygonToRegionsUnderFoot(footPolygonInWorld,
+         if (!snapper.snapPolygonToRegionsUnderFoot(footPolygonInWorld,
                                                regionsIntersectingFoothold,
                                                Double.POSITIVE_INFINITY,
                                                regionToSnapTo,
-                                               snapTransform);
+                                               snapTransform))
+         {
+            throw new RuntimeException("Snapping failed");
+         }
          footPosition.setZ(0.0);
          footPosition.applyTransform(snapTransform);
       }
