@@ -12,6 +12,7 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -84,6 +85,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final ImGuiRemoteROS2StoredPropertySet swingPlannerRemotePropertySet;
    private final RDXBallAndArrowPosePlacement goalAffordance = new RDXBallAndArrowPosePlacement();
    private final RDXBoxVisualizer obstacleBoxVisualizer = new RDXBoxVisualizer();
+   private final Notification planningFailedNotification = new Notification();
 
    public RDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -128,7 +130,11 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       helper.subscribeViaCallback(ImminentFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       footstepPlanningDurationPlot = new ImPlotYoHelperDoublePlotLine("LookAndStepBehavior.footstepPlanningDuration", 10.0, helper);
       helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
-      helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
+      helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons ->
+      {
+         latestFootstepPlannerRejectionReasons = reasons;
+         planningFailedNotification.set();
+      });
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
       impassibilityDetected = helper.subscribeViaReference(ImpassibilityDetected, false);
       obstacleBoxVisualizer.setColor(Color.RED);
@@ -177,6 +183,10 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    public void update()
    {
       obstacleBoxVisualizer.update();
+      if (planningFailedNotification.poll())
+      {
+         footstepPlanGraphic.clear();
+      }
 
       if (areGraphicsEnabled())
       {
