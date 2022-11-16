@@ -22,7 +22,7 @@ void FactorGraphExternal::addOdometryFactorExtended(double *odometry, int poseId
     using namespace gtsam;
     Eigen::Matrix4d M = Eigen::Map<Eigen::Matrix<double, 4, 4, Eigen::RowMajor> >(odometry);
 
-    std::cout << "Add Odometry Factor Extended: " << std::endl << M << std::endl;
+    // std::cout << "Add Odometry Factor Extended: " << std::endl << M << std::endl;
 
     Pose3 odometryValue(M);
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
@@ -77,7 +77,7 @@ void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
     using namespace gtsam;
     Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
 
-    std::cout << "Set Pose Initial Extended: " << std::endl << M << std::endl;
+    // std::cout << "Set Pose Initial Extended: " << std::endl << M << std::endl;
 
     Pose3 initialValue(M.cast<double>());
     factorGraphHandler.setPoseInitialValue(index, initialValue);
@@ -107,7 +107,7 @@ void FactorGraphExternal::getResultPoses(double* poses, uint32_t* poseIDs, uint3
 
         matrix.transposeInPlace();
 
-        std::cout << "GetResultPoses" << std::endl << matrix << std::endl;
+        // std::cout << "GetResultPoses" << std::endl << matrix << std::endl;
         std::copy(  matrix.data(),
                     matrix.data() + 16,
                     poses + 16 * i);
@@ -131,11 +131,11 @@ void FactorGraphExternal::printResults()
 
 void FactorGraphExternal::helloWorldTest()
 {
-    std::cout << "Hello from native code" << std::endl;
+    // std::cout << "Hello from native code" << std::endl;
 
     for (int i = 0; i < 5; i++)
     {
-       std::cout << "Hello " << i << std::endl;
+    //    std::cout << "Hello " << i << std::endl;
     }
 }
 

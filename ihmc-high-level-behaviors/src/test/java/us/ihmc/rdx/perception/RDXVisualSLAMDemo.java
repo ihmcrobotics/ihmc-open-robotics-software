@@ -1,30 +1,20 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.MeshPart;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
+//import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -43,6 +33,8 @@ public class RDXVisualSLAMDemo
    private final VisualSLAMModule vslam;
    private final ImGuiPanel panel = new ImGuiPanel("Visual SLAM");
 
+   private static final int COUNT_SKIP = 100;
+   private static final int FRAME_SKIP = 1;
    private static final String LEFT_CAMERA_NAME = "image_0";
    private static final String RIGHT_CAMERA_NAME = "image_1";
    private static final String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
@@ -62,9 +54,8 @@ public class RDXVisualSLAMDemo
 
    private ReferenceFrame frame;
 
-
-
-
+   private boolean active = false;
+   private int updateCount = 0;
    private int fileIndex = 0;
 
    public RDXVisualSLAMDemo()
@@ -74,8 +65,6 @@ public class RDXVisualSLAMDemo
 
       baseUI.getImGuiPanelManager().addPanel(panel);
       baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
-
-
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -108,6 +97,16 @@ public class RDXVisualSLAMDemo
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
+
+            if(active)
+            {
+               //if(updateCount % COUNT_SKIP == 0)
+               {
+                  update();
+               }
+               updateCount++;
+            }
+
             baseUI.renderEnd();
          }
 
@@ -129,13 +128,19 @@ public class RDXVisualSLAMDemo
 
       if (ImGui.button("Start"))
       {
-         executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+         active = true;
+         //executor.scheduleAtFixedRate(this::update, 0, 20L, TimeUnit.MILLISECONDS);
+      }
+
+      if (ImGui.button("Pause"))
+      {
+         active = false;
       }
    }
 
    public void update()
    {
-      LogTools.info("Loading File Index: {}", fileIndex);
+      //LogTools.info("Loading File Index: {}", fileIndex);
       fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
       leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
       rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
@@ -143,25 +148,31 @@ public class RDXVisualSLAMDemo
       currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
       currentImageRight = ImageTools.loadAsImageMat(rightImageName);
 
-      vslam.update(currentImageLeft, currentImageRight);
+      boolean initialized = vslam.update(currentImageLeft, currentImageRight);
 
-      fileIndex++;
+      fileIndex += FRAME_SKIP;
 
-      /* For Visualization Only */
-      poseModels.clear();
-      for(int i = 0; i< fileIndex; i++)
+      if(initialized)
       {
-         FramePose3D framePose = vslam.getSensorPose(i);
-         framePose.changeFrame(ReferenceFrame.getWorldFrame());
+         /* For Visualization Only */
+         poseModels.clear();
+         for (int i = 0; i < fileIndex/FRAME_SKIP; i++)
+         {
+            FramePose3D framePose = vslam.getSensorPose(i);
+            framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         //LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
-         modelInstance = RDXModelBuilder.createCoordinateFrameInstance(1.0);
-         LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
-         poseModels.add(modelInstance);
+            ////LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4);
+            LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+            modelInstance.transform.val[Matrix4.M03] *= 0.1;
+            modelInstance.transform.val[Matrix4.M13] *= 0.1;
+            modelInstance.transform.val[Matrix4.M23] *= 0.1;
+            poseModels.add(modelInstance);
+         }
+
+         //vslam.clearISAM2();
       }
-
-      LogTools.info("Total Model Instances: {}", poseModels.size());
-
+      //LogTools.info("Total Model Instances: {}", poseModels.size());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
