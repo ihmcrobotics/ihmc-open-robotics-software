@@ -802,6 +802,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       return isVRTriggerDown && isGizmoHoveredFromVR;
    }
 
+   public boolean isRingHoveredFromVR()
+   {
+      return isGizmoHoveredFromVR && closestCollisionSelection == 0;
+   }
+
    public boolean isVRTriggerPressed()
    {
       return isVRTriggerPressed;
