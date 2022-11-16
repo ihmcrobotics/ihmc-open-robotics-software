@@ -65,20 +65,17 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private DynamicLibGDXModel positiveYArrowModel = new DynamicLibGDXModel();
    private DynamicLibGDXModel negativeXArrowModel = new DynamicLibGDXModel();
    private DynamicLibGDXModel negativeYArrowModel = new DynamicLibGDXModel();
+
+   // Transforms of arrows
    private final RigidBodyTransform xArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform yArrowTailTransform = new RigidBodyTransform();
-   private final RigidBodyTransform temporaryTailTransform = new RigidBodyTransform();
+
    private final Point3D closestCollision = new Point3D();
    private int closestCollisionSelection = -1;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean isGizmoHovered = false;
    private boolean isBeingManipulated = false;
-   private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
-   private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
-   private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
-   private final BoxRayIntersection negativeXArrowIntersection = new BoxRayIntersection();
-   private final BoxRayIntersection negativeYArrowIntersection = new BoxRayIntersection();
    /**
     * The main, source, true, base transform that this thing represents.
     */
@@ -96,13 +93,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private double distanceToCamera;
    private double lastDistanceToCamera = -1.0;
    private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
-   private final Plane3DMouseDragAlgorithm planeDragAlgorithmVR = new Plane3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
-   private boolean hollowCylinderIntersects;
-   private boolean positiveXArrowIntersects;
-   private boolean positiveYArrowIntersects;
-   private boolean negativeXArrowIntersects;
-   private boolean negativeYArrowIntersects;
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
    private boolean isNewlyModified;
@@ -129,6 +120,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean isNewlyModifiedFromVR = false;
    private boolean sendSteps = false;
    private boolean isVRGrabbingGizmo = false;
+
+   // Intersection calculator for mouse and vr
+   private RayToControlRingIntersectionCalculator mouseRayToRingPickCalculator;
+   private RayToControlRingIntersectionCalculator.CollisionType mouseCollisionType = RayToControlRingIntersectionCalculator.CollisionType.NONE;
+   private RayToControlRingIntersectionCalculator vrRayToRingPickCalculator;
+   private RayToControlRingIntersectionCalculator.CollisionType vrCollisionType = RayToControlRingIntersectionCalculator.CollisionType.NONE;
 
    private enum INPUT_MODE
    {
@@ -231,6 +228,28 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                             Y_ARROW_COLOR);
       });
 
+      mouseRayToRingPickCalculator = new RayToControlRingIntersectionCalculator(xArrowTailTransform,
+                                                                                yArrowTailTransform,
+                                                                                discOuterRadius.get(),
+                                                                                discInnerRadius.get(),
+                                                                                discThickness.get(),
+                                                                                arrowWidth.get(),
+                                                                                arrowHeight.get(),
+                                                                                arrowSpacing.get(),
+                                                                                arrowTailWidthRatio.get(),
+                                                                                arrowTailLengthRatio.get());
+
+      vrRayToRingPickCalculator = new RayToControlRingIntersectionCalculator(xArrowTailTransform,
+                                                                             yArrowTailTransform,
+                                                                             discOuterRadius.get(),
+                                                                             discInnerRadius.get(),
+                                                                             discThickness.get(),
+                                                                             arrowWidth.get(),
+                                                                             arrowHeight.get(),
+                                                                             arrowSpacing.get(),
+                                                                             arrowTailWidthRatio.get(),
+                                                                             arrowTailLengthRatio.get());
+
       recreateGraphics();
    }
 
@@ -249,16 +268,16 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
 
+
       if (!translateDragData.isDragging() && !yawDragData.isDragging() && !isGizmoHoveredFromVR)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay, INPUT_MODE.MOUSE);
-      }
-
-      if (closestCollisionSelection > -1)
-      {
-         pickResult.setDistanceToCamera(closestCollisionDistance);
-         input.addPickResult(pickResult);
+         mouseCollisionType = mouseRayToRingPickCalculator.determineCollisionTypeFromRay(pickRay, controlRingTransformToWorld, showArrows);
+         if (mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
+         {
+            pickResult.setDistanceToCamera(closestCollisionDistance);
+            input.addPickResult(pickResult);
+         }
       }
    }
 
@@ -271,7 +290,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
            vrPickRay.getDirection().set(Axis3D.X);
            vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
-           determineCurrentSelectionFromPickRay(vrPickRay, INPUT_MODE.VR);
+
 
            vrPickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
            vrPickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -307,7 +326,8 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            vrRayIntersectionWithGround.get(tempTransform);
 
            // vrRay intersected (collided) with this gizmo
-           if (closestCollisionSelection > -1)
+           vrCollisionType = vrRayToRingPickCalculator.determineCollisionTypeFromRay(vrPickRay, controlRingTransformToWorld, showArrows);
+           if (vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
            {
               vrPickResult.setDistanceToControllerPickPoint(closestCollisionDistance);
               vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
@@ -543,93 +563,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       LibGDXTools.toLibGDX(controlRingTransformToWorld, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
-   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay, INPUT_MODE inputMode)
-   {
-      if (this.inputMode == inputMode)
-      {
-         hollowCylinderIntersects = false;
-         positiveXArrowIntersects = false;
-         positiveYArrowIntersects = false;
-         negativeXArrowIntersects = false;
-         negativeYArrowIntersects = false;
-         closestCollisionSelection = -1;
-         closestCollisionDistance = Double.POSITIVE_INFINITY;
-
-         hollowCylinderIntersection.update(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), discThickness.get() / 2.0,
-                                           controlRingTransformToWorld);
-         double distance = hollowCylinderIntersection.intersect(pickRay);
-         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-         {
-            hollowCylinderIntersects = true;
-            closestCollisionDistance = distance;
-            closestCollisionSelection = 0;
-            closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
-         }
-         if (showArrows)
-         {
-            positiveXArrowIntersection.update(arrowWidth.get(),
-                                              arrowHeight.get(),
-                                              discThickness.get(),
-                                              new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, discThickness.get() / 2.0),
-                                              new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
-            distance = positiveXArrowIntersection.intersect(pickRay, 100);
-            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-            {
-               positiveXArrowIntersects = true;
-               closestCollisionDistance = distance;
-               closestCollisionSelection = 1;
-               closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
-            }
-            positiveYArrowIntersection.update(arrowWidth.get(),
-                                              arrowHeight.get(),
-                                              discThickness.get(),
-                                              new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), discThickness.get() / 2.0),
-                                              new YawPitchRoll(0.0, 0.0, -QUARTER_TURN), controlRingTransformToWorld);
-            distance = positiveYArrowIntersection.intersect(pickRay, 100);
-            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-            {
-               positiveYArrowIntersects = true;
-               closestCollisionDistance = distance;
-               closestCollisionSelection = 2;
-               closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
-            }
-            temporaryTailTransform.set(xArrowTailTransform);
-            controlRingTransformToWorld.transform(temporaryTailTransform);
-            boolean intersects = negativeXArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
-                                                                      arrowTailLengthRatio.get() * arrowHeight.get(),
-                                                                      discThickness.get(),
-                                                                      temporaryTailTransform,
-                                                                      pickRay);
-            distance = negativeXArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
-            if (intersects && distance < closestCollisionDistance)
-            {
-               negativeXArrowIntersects = true;
-               closestCollisionDistance = distance;
-               closestCollisionSelection = 3;
-               closestCollision.set(negativeXArrowIntersection.getFirstIntersectionToPack());
-            }
-            temporaryTailTransform.set(yArrowTailTransform);
-            controlRingTransformToWorld.transform(temporaryTailTransform);
-            intersects = negativeYArrowIntersection.intersect(arrowTailWidthRatio.get() * arrowWidth.get(),
-                                                              arrowTailLengthRatio.get() * arrowHeight.get(),
-                                                              discThickness.get(),
-                                                              temporaryTailTransform,
-                                                              pickRay);
-            distance = negativeYArrowIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
-            if (intersects && distance < closestCollisionDistance)
-            {
-               negativeYArrowIntersects = true;
-               closestCollisionDistance = distance;
-               closestCollisionSelection = 4;
-               closestCollision.set(negativeYArrowIntersection.getFirstIntersectionToPack());
-            }
-         }
-
-         updateMaterialHighlighting();
-      }
-
-   }
-
    private void updateMaterialHighlighting()
    {
       boolean prior = highlightingEnabled && (isGizmoHovered || isGizmoHoveredFromVR);
@@ -730,41 +663,81 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       return gizmoFrame;
    }
 
-   public boolean getAnyPartPickSelected()
+   public boolean getAnyPartPickSelectedMouse()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR)
-             && (hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      return isGizmoHovered && mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE;
    }
 
-   public boolean getAnyArrowPickSelected()
+   public boolean getAnyPartPickSelectedVR()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR)
-             && (positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects);
+      return isGizmoHoveredFromVR && vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE;
    }
 
-   public boolean getHollowCylinderPickSelected()
+   public boolean getAnyArrowPickSelectedMouse()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR) && hollowCylinderIntersects;
+      return isGizmoHovered && mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE
+             && mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
    }
 
-   public boolean getPositiveXArrowPickSelected()
+   public boolean getAnyArrowPickSelectedVR()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR) && positiveXArrowIntersects;
+      return isGizmoHoveredFromVR && vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE
+             && vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
    }
 
-   public boolean getPositiveYArrowPickSelected()
+   // CYLINDER - MOUSE
+   public boolean getHollowCylinderPickSelectedMouse()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR) && positiveYArrowIntersects;
+      return isGizmoHovered && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+   }
+   // CYLINDER - VR
+   public boolean getHollowCylinderPickSelectedVR()
+   {
+      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
    }
 
-   public boolean getNegativeXArrowPickSelected()
+   // POSITIVE X - MOUSE
+   public boolean getPositiveXArrowPickSelectedMouse()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR) && negativeXArrowIntersects;
+      return isGizmoHovered && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_X;
+   }
+   // POSITIVE X - VR
+   public boolean getPositiveXArrowPickSelectedVR()
+   {
+      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_X;
    }
 
-   public boolean getNegativeYArrowPickSelected()
+   // POSITIVE Y - MOUSE
+   public boolean getPositiveYArrowPickSelectedMouse()
    {
-      return (isGizmoHovered || isGizmoHoveredFromVR) && negativeYArrowIntersects;
+      return isGizmoHovered && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_Y;
+   }
+   // POSITIVE Y - VR
+   public boolean getPositiveYArrowPickSelectedVR()
+   {
+      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_Y;
+   }
+
+   // NEGATIVE X - MOUSE
+   public boolean getNegativeXArrowPickSelectedMouse()
+   {
+      return isGizmoHovered && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_X;
+   }
+   // NEGATIVE X - VR
+   public boolean getNegativeXArrowPickSelectedVR()
+   {
+      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_X;
+   }
+
+   // NEGATIVE Y - MOUSE
+   public boolean getNegativeYArrowPickSelectedMouse()
+   {
+      return isGizmoHovered && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_Y;
+   }
+   // NEGATIVE Y - VR
+   public boolean getNegativeYArrowPickSelectedVR()
+   {
+      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_Y;
    }
 
    public void setShowArrows(boolean showArrows)

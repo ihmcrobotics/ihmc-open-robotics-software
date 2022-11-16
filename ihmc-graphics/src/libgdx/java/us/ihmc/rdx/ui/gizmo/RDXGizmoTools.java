@@ -1,6 +1,9 @@
 package us.ihmc.rdx.ui.gizmo;
 
 import com.badlogic.gdx.graphics.Color;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 
 public class RDXGizmoTools
 {

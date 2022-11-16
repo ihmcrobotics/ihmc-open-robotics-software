@@ -24,7 +24,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -175,13 +174,13 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
       footstepPlannerGoalGizmo.process3DViewInput(input, selected);
-      mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelected();
+      mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelectedMouse();
 
       if (mouseRingPickSelected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
       {
          becomeModified(true);
       }
-      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelected() && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
+      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelectedMouse() && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
       {
          selected = false;
       }
@@ -192,27 +191,27 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       }
       if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isVRTriggerPressed()))
       {
-         if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelected())
+         if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelectedMouse())
          {
             walkPathType = RDXWalkPathType.STRAIGHT;
             walkFacingDirection.set(Axis3D.Z, 0.0);
          }
-         else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelected())
+         else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelectedMouse())
          {
             walkPathType = RDXWalkPathType.LEFT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
          }
-         else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelected())
+         else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelectedMouse())
          {
             walkPathType = RDXWalkPathType.REVERSE;
             walkFacingDirection.set(Axis3D.Z, Math.PI);
          }
-         else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelected())
+         else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelectedMouse())
          {
             walkPathType = RDXWalkPathType.RIGHT_SHUFFLE;
             walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
          }
-         if (footstepPlannerGoalGizmo.getAnyArrowPickSelected())
+         if (footstepPlannerGoalGizmo.getAnyArrowPickSelectedMouse())
          {
             footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
             updateStuff();
