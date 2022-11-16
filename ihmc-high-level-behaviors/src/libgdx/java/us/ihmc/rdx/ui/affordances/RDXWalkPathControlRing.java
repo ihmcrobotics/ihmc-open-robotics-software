@@ -168,7 +168,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       footstepPlannerGoalGizmo.calculate3DViewPick(input);
    }
 
-   // This happens after update.
+   // This happens after update. (Currently this also queries for VRStuff from footstepPlannerGoalGizmo.)
    public void process3DViewInput(ImGui3DViewInput input)
    {
       latestInput = input;

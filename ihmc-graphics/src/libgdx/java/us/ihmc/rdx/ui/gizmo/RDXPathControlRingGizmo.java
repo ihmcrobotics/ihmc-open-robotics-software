@@ -24,13 +24,11 @@ import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -110,7 +108,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private boolean isNewlyModified;
    private final double translateSpeedFactor = 0.5;
 
-   // VR moves the control-ring
+   // VR moves the control-ring by calculating interection between the posivie-x direction ray from the controller and the ground.
    private ModelInstance lineModel;
    private final FrameLine3D vrPickRay = new FrameLine3D();
    private final FramePose3D vrPickRayPose = new FramePose3D();
@@ -122,15 +120,13 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private Point3D intersectionStartPoint = new Point3D();
    private boolean isGizmoHoveredFromVR = false;
    private final Vector3D orientationDeterminationVector = new Vector3D();
-   private final FramePose3D proposedTeleportPose = new FramePose3D();
+   private final FramePose3D vrRayIntersectionWithGround = new FramePose3D();
    private double lineLength = 1.0;
    private final Color color = Color.ORANGE;
    private final RDXVRPickResult vrPickResult = new RDXVRPickResult();
-   private boolean isRingHoveredFromVR = false;
    private boolean isVRTriggerDown = false;
    private boolean isVRTriggerPressed = false;
    private boolean isNewlyModifiedFromVR = false;
-   private boolean rightTouchPad = false;
    private boolean sendSteps = false;
    private boolean isVRGrabbingGizmo = false;
 
@@ -297,18 +293,18 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
            orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
 
-           proposedTeleportPose.setToZero(ReferenceFrame.getWorldFrame());
-           proposedTeleportPose.getPosition().set(planeRayIntesection);
+           vrRayIntersectionWithGround.setToZero(ReferenceFrame.getWorldFrame());
+           vrRayIntersectionWithGround.getPosition().set(planeRayIntesection);
            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
                                                                       orientationDeterminationVector,
-                                                                      proposedTeleportPose.getOrientation());
+                                                                      vrRayIntersectionWithGround.getOrientation());
 
-           lineLength = vrPickRayPose.getPosition().distance(proposedTeleportPose.getPosition());
+           lineLength = vrPickRayPose.getPosition().distance(vrRayIntersectionWithGround.getPosition());
            RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
 
            vrPickRayPose.get(tempTransform);
            LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
-           proposedTeleportPose.get(tempTransform);
+           vrRayIntersectionWithGround.get(tempTransform);
 
            // vrRay intersected (collided) with this gizmo
            if (closestCollisionSelection > -1)
@@ -335,7 +331,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            // Holding onto the right controller trigger button
            InputDigitalActionData clickTriggerData = controller.getClickTriggerActionData();
            isVRTriggerDown = clickTriggerData.bState();
-           isVRTriggerPressed = clickTriggerData.bState() && clickTriggerData.bChanged();
+           isVRTriggerPressed = isVRTriggerDown && clickTriggerData.bChanged();
 
            // Grabbing the ring with vrController
            if (!isVRTriggerDown)
@@ -344,19 +340,23 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            }
            if (isVRGrabbingGizmo)
            {
+              // This represents vector from previous intersection to updated (moved) intesection point.
               Vector3D planarMotion = new Vector3D();
-              planarMotion.sub(proposedTeleportPose.getPosition(), intersectionStartPoint);
+              planarMotion.sub(vrRayIntersectionWithGround.getPosition(), intersectionStartPoint);
+              // tempFramePose3D gets updated from all the processes and eventually updates controlRingPose
               tempFramePose3D.setToZero(gizmoFrame);
               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
               tempFramePose3D.getPosition().add(planarMotion);
               tempFramePose3D.changeFrame(parentReferenceFrame);
               tempFramePose3D.get(transformToParent);
+              // also update closestCollision with the vector
               closestCollision.add(planarMotion);
-              intersectionStartPoint = new Point3D(proposedTeleportPose.getPosition());
+              // update previous vrIntersctionPoint with current intersetionPoint.
+              intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
            }
            if (isVRTriggerDown && isGizmoHoveredFromVR && closestCollisionSelection == 0)
            {
-              intersectionStartPoint = new Point3D(proposedTeleportPose.getPosition());
+              intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
               isVRGrabbingGizmo = true;
               isNewlyModifiedFromVR = true;
            }
@@ -364,10 +364,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            {
               isNewlyModifiedFromVR = false;
            }
-           //        if (!isVRTriggerDown)
-           //        {
-           //
-           //        }
         });
          updateTransforms();
       }
@@ -796,11 +792,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       return isGizmoHovered;
    }
 
-   public boolean isRingHoveredFromVR()
-   {
-      return isRingHoveredFromVR;
-   }
-
    public boolean isVRTriggerDown()
    {
       return isVRTriggerDown;
@@ -814,10 +805,5 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public boolean isVRTriggerPressed()
    {
       return isVRTriggerPressed;
-   }
-
-   public boolean isRightTouchPad()
-   {
-      return rightTouchPad;
    }
 }
