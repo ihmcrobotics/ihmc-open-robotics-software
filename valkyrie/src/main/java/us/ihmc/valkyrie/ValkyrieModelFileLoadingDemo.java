@@ -45,7 +45,7 @@ public class ValkyrieModelFileLoadingDemo
 
    public ValkyrieModelFileLoadingDemo()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DEFAULT);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
 
       if (SHOW_KINEMATICS_COLLISIONS)
