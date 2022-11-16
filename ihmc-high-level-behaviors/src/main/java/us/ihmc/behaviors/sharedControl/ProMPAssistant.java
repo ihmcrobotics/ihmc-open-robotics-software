@@ -1,4 +1,4 @@
-package us.ihmc.avatar.sharedControl;
+package us.ihmc.behaviors.sharedControl;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -51,7 +50,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       try
       {
          LogTools.info("Looking for configuration file ProMPAssistant.json ...");
-         String configurationFile = "repository-group/ihmc-open-robotics-software/ihmc-avatar-interfaces/src/main/resources/us/ihmc/avatar/sharedControl/ProMPAssistant.json";
+         String configurationFile = "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"), configurationFile).toString()));
          LogTools.info("File found: /{}", configurationFile);
          numberObservations = (int) ((long) jsonObject.get("numberObservations"));
