@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning;
+package us.ihmc.avatar.footstepPlanning;
 
 import org.junit.jupiter.api.Test;
 import perception_msgs.msg.dds.PlanarRegionMessage;
