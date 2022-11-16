@@ -316,7 +316,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotDefinition;
    }
 
-   private String[] getResourceDirectories()
+   public String[] getResourceDirectories()
    {
       return resourceDirectories;
    }
