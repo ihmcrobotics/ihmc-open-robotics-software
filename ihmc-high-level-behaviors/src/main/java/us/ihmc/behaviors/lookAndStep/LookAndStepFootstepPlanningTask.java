@@ -463,7 +463,7 @@ public class LookAndStepFootstepPlanningTask
             Stopwatch stopwatch = new Stopwatch().start();
             FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
             footstepPlannerLogger.logSessionWithExactFolderName(latestLogDirectory);
-            FootstepPlannerLogger.deleteOldLogs(50);
+            FootstepPlannerLogger.deleteOldLogs(500);
             LogTools.info("Logged footstep planner data in {} s. {} iterations",
                           FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()),
                           iterations);
