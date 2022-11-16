@@ -1,4 +1,4 @@
-package us.ihmc.avatar.sharedControl;
+package us.ihmc.behaviors.sharedControl;
 
 import us.ihmc.promp.*;
 import us.ihmc.promp.presets.ProMPInfoMapper;

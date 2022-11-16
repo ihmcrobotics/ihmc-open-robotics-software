@@ -1,4 +1,4 @@
-package us.ihmc.avatar.sharedControl;
+package us.ihmc.behaviors.sharedControl;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;

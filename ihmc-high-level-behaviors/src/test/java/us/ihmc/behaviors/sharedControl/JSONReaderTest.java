@@ -1,6 +1,11 @@
-package us.ihmc.avatar.sharedControl;
+package us.ihmc.behaviors.sharedControl;
 
 // Java program to read JSON from a file
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -8,10 +13,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
 
 public class JSONReaderTest
 {
@@ -21,7 +22,7 @@ public class JSONReaderTest
       try
       {
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"),
-                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-avatar-interfaces/src/main/resources/us/ihmc/avatar/sharedControl/ProMPAssistant.json")
+                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistant.json")
                                                                                          .toString()));
          int numberObservations = (int) ((long) jsonObject.get("numberObservations"));
          boolean logEnabled = (boolean) jsonObject.get("logging");

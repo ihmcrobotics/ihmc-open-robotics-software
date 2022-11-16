@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import us.ihmc.avatar.sharedControl.ProMPAssistant;
+import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
