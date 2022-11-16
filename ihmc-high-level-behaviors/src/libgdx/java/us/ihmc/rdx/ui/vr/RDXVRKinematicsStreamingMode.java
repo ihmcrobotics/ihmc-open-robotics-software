@@ -44,7 +44,6 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -74,7 +73,6 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled,2);
-   private FrequencyStatisticPrinter frequencyCheck = new FrequencyStatisticPrinter();
    private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(enabled,kinematicsRecorder.isRecordingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
@@ -204,7 +202,6 @@ public class RDXVRKinematicsStreamingMode
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
-         frequencyCheck.ping();
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
