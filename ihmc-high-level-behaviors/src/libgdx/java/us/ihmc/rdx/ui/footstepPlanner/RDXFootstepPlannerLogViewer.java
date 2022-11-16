@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
@@ -14,6 +15,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -26,14 +30,19 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.rdx.visualizers.RDXSphereAndArrowGraphic;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -65,6 +74,13 @@ public class RDXFootstepPlannerLogViewer
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private FootstepPlan footstepPlan;
    private FootstepPlannerRejectionReasonReport rejectionReasonReport;
+   private final ImBoolean probeMode = new ImBoolean(false);
+   private final RDXModelInstance probeSphere;
+   private RDX3DPanelTooltip tooltip;
+   private final SideDependentList<ModifiableReferenceFrame> probedFootFrames
+         = new SideDependentList<>(new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame()),
+                                   new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame()));
+   private final FramePose3D probePose = new FramePose3D();
 
    public RDXFootstepPlannerLogViewer(RDXBaseUI baseUI, DRCRobotModel robotModel)
    {
@@ -75,9 +91,14 @@ public class RDXFootstepPlannerLogViewer
       baseUI.add3DPanel(panel3D, scene3D);
       panel3D.getImGuiPanel().addChild(new ImGuiPanel("Footstep Planner Log Viewer Controls", this::renderImGuiWidgets));
       scene3D.addRenderableProvider(this::getRenderables);
+      panel3D.addImGui3DViewInputProcessor(this::process3DViewInput);
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
       scene3D.addRenderableProvider(planarRegionsGraphic::getRenderables);
+
+      probeSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.005f, Color.VIOLET));
+      tooltip = new RDX3DPanelTooltip(panel3D);
+      panel3D.addImGuiOverlayAddition(this::probeTooltip);
 
       logFolder.set(FootstepPlannerLogger.defaultLogsDirectory);
 
@@ -117,9 +138,25 @@ public class RDXFootstepPlannerLogViewer
 
          rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlannerLog);
          rejectionReasonReport.update();
+
+         // Move the camera to where the data is, so we don't have to find it.
+         panel3D.getCamera3D().setCameraFocusPoint(footstepPlannerLog.getRequestPacket().getStartLeftFootPose().getPosition());
       }
       planarRegionsGraphic.update();
       footstepPlanGraphic.update();
+
+      panel3D.setModelSceneMouseCollisionEnabled(probeMode.get());
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      if (probeMode.get())
+      {
+         tooltip.setInput(input);
+         probeSphere.setPositionInWorldFrame(input.getPickPointInWorld());
+         probePose.setToZero(ReferenceFrame.getWorldFrame());
+         probePose.getPosition().set(input.getPickPointInWorld());
+      }
    }
 
    public void renderImGuiWidgets()
@@ -159,6 +196,8 @@ public class RDXFootstepPlannerLogViewer
          }
       }
       ImGui.endChild();
+
+      ImGui.checkbox(labels.get("Probe mode"), probeMode);
 
       if (footstepPlannerLog != null)
       {
@@ -208,17 +247,47 @@ public class RDXFootstepPlannerLogViewer
       });
    }
 
+   private void probeTooltip()
+   {
+      if (probeMode.get())
+      {
+         if (footstepPlannerLog != null)
+         {
+            probedFootFrames.get(RobotSide.LEFT).update(transformToWorld -> transformToWorld.set(footstepPlannerLog.getRequestPacket().getStartLeftFootPose()));
+            probePose.changeFrame(probedFootFrames.get(RobotSide.LEFT).getReferenceFrame());
+            String tooltipString = "Left start to here: " + EuclidCoreIOTools.getTuple3DString(probePose.getPosition());
+
+            probedFootFrames.get(RobotSide.RIGHT).update(transformToWorld -> transformToWorld.set(footstepPlannerLog.getRequestPacket().getStartRightFootPose()));
+            probePose.changeFrame(probedFootFrames.get(RobotSide.RIGHT).getReferenceFrame());
+            tooltipString += "\nRight start to here: " + EuclidCoreIOTools.getTuple3DString(probePose.getPosition());
+
+            tooltip.render(tooltipString, 2);
+         }
+         else
+         {
+            tooltip.render("No log loaded.", 2);
+         }
+      }
+   }
+
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      goalGraphic.getRenderables(renderables, pool);
-      footstepPlanGraphic.getRenderables(renderables, pool);
-      for (RDXFootstepGraphic goalFootPose : goalFootPoses)
+      if (sceneLevels.contains(RDXSceneLevel.MODEL))
       {
-         goalFootPose.getRenderables(renderables, pool);
+         goalGraphic.getRenderables(renderables, pool);
+         footstepPlanGraphic.getRenderables(renderables, pool);
+         for (RDXFootstepGraphic goalFootPose : goalFootPoses)
+         {
+            goalFootPose.getRenderables(renderables, pool);
+         }
+         for (RDXFootstepGraphic startFootPose : startFootPoses)
+         {
+            startFootPose.getRenderables(renderables, pool);
+         }
       }
-      for (RDXFootstepGraphic startFootPose : startFootPoses)
+      if (probeMode.get() && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         startFootPose.getRenderables(renderables, pool);
+         probeSphere.getRenderables(renderables, pool);
       }
    }
 }
