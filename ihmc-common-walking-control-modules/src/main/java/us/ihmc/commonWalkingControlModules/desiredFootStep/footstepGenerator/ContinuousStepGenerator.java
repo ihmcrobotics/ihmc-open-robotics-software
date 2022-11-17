@@ -333,10 +333,8 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(nextFootstepPose2D);
-         boolean success = true;
          for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
-            success &= footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, nextFootstepPose3D);
-
+            footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, nextFootstepPose3D);
 
 //         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
 //         {
@@ -349,16 +347,6 @@ public class ContinuousStepGenerator implements Updatable
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
          footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
          footstep.setSwingHeight(parameters.getSwingHeight());
-
-         if (!success)
-         {
-            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
-
-            footstep.getLocation().set(nextFootstepPose3D.getPosition());
-            footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
-            break;
-         }
-
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
@@ -970,7 +958,6 @@ public class ContinuousStepGenerator implements Updatable
    {
       alternateStepPose2D.set(stanceFootPose);
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(parameters.getDefaultStepWidth()));
-      // ignore the success or not
       for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
          footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, alternateStepPose2D, swingSide, touchdownPoseToPack);
    }
