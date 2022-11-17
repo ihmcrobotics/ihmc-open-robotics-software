@@ -69,7 +69,7 @@ for bodyPart in bodyParts:
     plotter.xlabel('#samples')
     plotter.ylabel(str(bodyPart) + ' position [m]')
     plotter.grid(True)
-    plotter.savefig(bodyPart + 'Position.png')
+    plotter.savefig(bodyPart + 'PositionLearned.png')
     plotter.show()
     
     fig = plotter.figure()
@@ -90,7 +90,7 @@ for bodyPart in bodyParts:
     plotter.xlabel('#samples')
     plotter.ylabel(str(bodyPart) + ' quaternions [rad]')
     plotter.grid(True)
-    plotter.savefig(bodyPart + 'Orientation.png')
+    plotter.savefig(bodyPart + 'OrientationLearned.png')
     plotter.show()
     
     
