@@ -15,6 +15,9 @@ import static org.bytedeco.opencv.global.opencv_core.*;
 
 public class BytedecoOpenCVTools
 {
+   public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
+   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+
    public static final int FLIP_Y = 0;
    public static final int FLIP_X = 1;
    public static final int FLIP_BOTH = -1;
@@ -144,12 +147,42 @@ public class BytedecoOpenCVTools
       opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, params);
    }
 
-   public static void compressFloatDepthJPG(Mat image, BytePointer compressedBytes, IntPointer params)
+   public static void compressFloatDepthJPG(Mat image, BytePointer compressedBytes)
    {
       Mat depthRGBAMat = new Mat(image.rows(), image.cols(), CV_8UC4, image.data());
       Mat yuv420Image = new Mat();
       opencv_imgproc.cvtColor(depthRGBAMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, params);
+      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, compressionParametersJPG);
+   }
+
+   public static void decompressFloatDepthJPG(Mat image, BytePointer compressedBytes)
+   {
+      Mat inputJPEGMat = new Mat();
+      Mat inputYUVI420Mat = new Mat();
+
+      inputJPEGMat.cols(size);
+      inputJPEGMat.data(dataPointer);
+
+      // imdecode takes the longest by far out of all this stuff
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+
+      // YUV I420 has 1.5 times the height of the image
+      int imageWidth = inputYUVI420Mat.cols();
+      int imageHeight = (int) (inputYUVI420Mat.rows() / 1.5f);
+      Mat outputImage = new Mat(imageHeight, imageWidth, CV_8UC3);
+
+      opencv_imgproc.cvtColor(inputYUVI420Mat, outputImage, opencv_imgproc.COLOR_YUV2BGR_I420);
+   }
+
+   public static void compressFloatDepthPNG(Mat image, BytePointer data)
+   {
+      opencv_imgcodecs.imencode(".png", image, data, compressionParametersPNG);
+   }
+
+   public static void decompressFloatDepthPNG(byte[] data, Mat image)
+   {
+      Mat compressedMat = new Mat(1, data.length, CV_8UC1, new BytePointer(data));
+      opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED);
    }
 
    public static String getTypeString(int type)
@@ -249,7 +282,7 @@ public class BytedecoOpenCVTools
       }
    }
 
-   public static Mat decompressVideoPacketJPEG(BytePointer dataPointer, int size)
+   public static Mat decompressJPEG(BytePointer dataPointer, int size)
    {
       Mat inputJPEGMat = new Mat();
       Mat inputYUVI420Mat = new Mat();
