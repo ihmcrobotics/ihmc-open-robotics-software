@@ -129,10 +129,10 @@ public class ProMPManager
       TrajectoryVector demoTrajectories = trainingTrajectories.get(bodyPart).trajectories();
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
-      LogTools.info("   - Inferred demo: {}", demo);
+      //LogTools.info("   - Inferred demo: {}", demo);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
       double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.5, 2.0, 30);
-      LogTools.info("   - Inferred speed: {}", inferredSpeed);
+      //LogTools.info("   - Inferred speed: {}", inferredSpeed);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       LogTools.info("   - Inferred timesteps: {}", inferredTimesteps);
