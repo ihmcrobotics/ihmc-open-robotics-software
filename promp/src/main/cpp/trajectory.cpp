@@ -117,7 +117,7 @@ namespace promp
             Eigen::MatrixXd do_traj = obs_traj.topRows(min_size-1) - obs_traj.middleRows(1, min_size-1);
 
             scores[i] = (do_traj - dm_traj).cwiseAbs().sum();
-            std::cout << "alpha: " << alphas[i] << " - score: " << scores[i] << std::endl;
+            std::cout << i << " - alpha: " << alphas[i] << " - score: " << scores[i] << std::endl;
         }
 
         int min_distance_idx = std::min_element(scores.begin(), scores.end()) - scores.begin();
