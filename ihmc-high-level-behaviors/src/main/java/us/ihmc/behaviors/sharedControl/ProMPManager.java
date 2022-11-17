@@ -130,7 +130,7 @@ public class ProMPManager
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
-      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.5, 2.0, 30);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       LogTools.info("   - Inferred timesteps: {}", inferredTimesteps);
@@ -292,7 +292,6 @@ public class ProMPManager
       }
       setViaPoint(viaPoint, bodyPart, observedPose);
       myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
-
       if (logEnabled)
       {
          LogTools.info("Logging conditioned ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
