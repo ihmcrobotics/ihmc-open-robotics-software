@@ -35,6 +35,8 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
       concaveHullsVertices.clear();
+      for (int i = 0; i < holes.size(); i++)
+         holes.get(i).clear();
       holes.clear();
    }
 
