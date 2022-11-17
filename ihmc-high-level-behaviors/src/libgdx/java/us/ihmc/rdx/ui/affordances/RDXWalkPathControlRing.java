@@ -294,8 +294,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       // combine changes from mouse and vr
       combineChanges();
-      footstepPlannerGoalGizmo.setShowArrows(selectedVR);
-      footstepPlannerGoalGizmo.setHighlightingEnabled(modifiedVR);
+      footstepPlannerGoalGizmo.setShowArrows(selected);
+      footstepPlannerGoalGizmo.setHighlightingEnabled(modified);
    }
 
    private void updateFromArrowPick(boolean positiveX, boolean positiveY, boolean negativeX, boolean negativeY, boolean anyArrowSelected)

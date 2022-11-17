@@ -339,7 +339,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            }
            if (isVRGrabbingGizmo)
            {
-              // This represents vector from previous intersection to updated (moved) intesection point.
+              // This represents vector from previous intersection to updated (moved) intersection point.
               Vector3D planarMotion = new Vector3D();
               planarMotion.sub(vrRayIntersectionWithGround.getPosition(), intersectionStartPoint);
               // tempFramePose3D gets updated from all the processes and eventually updates controlRingPose
@@ -350,7 +350,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
               tempFramePose3D.get(transformToParent);
               // also update closestCollision with the vector
               closestCollision.add(planarMotion);
-              // update previous vrIntersctionPoint with current intersetionPoint.
+              // update previous vrIntersectionPoint with current intersectionPoint.
               intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
            }
            if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER)
@@ -380,7 +380,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      updateTransforms();
+//      updateTransforms();
 
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
@@ -389,13 +389,14 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          mouseCollisionType = mouseRayToRingPickCalculator.determineCollisionTypeFromRay(pickRay, controlRingTransformToWorld, showArrows);
-         if (mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
-         {
-            pickResult.setDistanceToCamera(mouseRayToRingPickCalculator.getClosestCollisionDistance());
-            input.addPickResult(pickResult);
-            updateMaterialHighlighting();
-         }
+         updateMaterialHighlighting();
       }
+      if (mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
+      {
+         pickResult.setDistanceToCamera(mouseRayToRingPickCalculator.getClosestCollisionDistance());
+         input.addPickResult(pickResult);
+      }
+      updateTransforms();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -424,9 +425,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          {
             if (isRingHoveredMouse)
             {
-               if (leftButtonDown)
-                  LogTools.info("LEFT MOUSE DOWN");
-               LogTools.info("HOVERING");
                if (yawDragData.getDragJustStarted())
                {
                   clockFaceDragAlgorithm.reset();
