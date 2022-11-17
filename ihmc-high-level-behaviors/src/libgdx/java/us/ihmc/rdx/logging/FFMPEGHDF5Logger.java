@@ -19,6 +19,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
 
+import java.nio.ByteBuffer;
 import java.nio.file.Paths;
 
 public class FFMPEGHDF5Logger extends FFMPEGLogger
@@ -160,9 +161,7 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       // Decompression timestamp in AVStream->time_base units; the time at which the packet is decompressed
       avPacket.stream_index(avStream.index());
 
-      byte[] rawData = new byte[avPacket.size()];
-      avPacket.data().get(rawData, 0, avPacket.size());
-      HDF5Tools.storeByteArray(framesGroup, presentationTimestamp++, rawData, rawData.length);
+      HDF5Tools.storeBytesFromPointer(framesGroup, presentationTimestamp++, avPacket.data(), avPacket.size());
 
 //      returnCode = avformat.av_interleaved_write_frame(avFormatContext, avPacket);
 //      FFMPEGTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
