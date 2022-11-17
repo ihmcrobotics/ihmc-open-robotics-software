@@ -136,14 +136,14 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private boolean tuning = false;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean sensorEnabled = new ImBoolean(false);
-   private final ImBoolean renderPointCloudDirectly = new ImBoolean(true);
+   private final ImBoolean renderPointCloudDirectly = new ImBoolean(false);
    private final ImBoolean publishDepthImageROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS1 = new ImBoolean(false);
    private final ImBoolean publishPointCloudROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS2 = new ImBoolean(false);
    private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
 
-   private final ImBoolean useSensorColor = new ImBoolean(true);
+   private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean colorBasedOnWorldZ = new ImBoolean(true);
    private final Color pointColorFromPicker = new Color();
    private final ImFloat pointSize = new ImFloat(0.01f);
