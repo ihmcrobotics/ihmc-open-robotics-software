@@ -56,19 +56,15 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       returnCode = avcodec.avcodec_parameters_from_context(avCodecParameters, avEncoderContext);
       FFMPEGTools.checkNonZeroError(returnCode, "Setting stream parameters to codec context values");
 
-      // Dump information about the stream to a file
-      int streamIndex = 0;
-      int isContextOutput = 1; // Our context is output; we are streaming to file after all
-      avformat.av_dump_format(avFormatContext, streamIndex, fileName, isContextOutput);
-
       FileTools.ensureDirectoryExists(Paths.get(fileName).getParent(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-      AVIOContext avBytestreamIOContext = new AVIOContext();
+      AVIOContext avBytestreamIOContext = new AVIOContext(); //do this instead to handle custom wrtie? https://stackoverflow.com/questions/42400811/looking-for-javacpp-ffmpeg-customio-example
       returnCode = avformat.avio_open(avBytestreamIOContext, fileName, avformat.AVIO_FLAG_WRITE);
       FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
       avFormatContext.pb(avBytestreamIOContext);
 
-      returnCode = avformat.avformat_write_header(avFormatContext, streamFlags);
+      returnCode = avformat.avformat_write_header(avFormatContext, streamFlags); //The current setup works, but creates a (mostly) empty file with the header information. Hopefully setrting a custom AVIOContext can fix this problem, but failing that
+      //creating a temp file and reading it back should work. Not ideal, but considering we can write frames directly it won't cause a performance hit. The same thing will probably have to happen when final data is written to the file at close.
       FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
 
       if (encoderFormatConversionNecessary)
