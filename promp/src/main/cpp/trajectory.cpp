@@ -113,10 +113,12 @@ namespace promp
             // compute derivate mean traj of promp
             int min_size = std::min(obs_traj.rows(), mod_traj.rows());
 
-            Eigen::MatrixXd dm_traj = mod_traj.topRows(min_size-1) - mod_traj.middleRows(1, min_size-1);
-            Eigen::MatrixXd do_traj = obs_traj.topRows(min_size-1) - obs_traj.middleRows(1, min_size-1);
+//            Eigen::MatrixXd dm_traj = mod_traj.topRows(min_size-1) - mod_traj.middleRows(1, min_size-1);
+//            Eigen::MatrixXd do_traj = obs_traj.topRows(min_size-1) - obs_traj.middleRows(1, min_size-1);
+//
+//            scores[i] = (do_traj - dm_traj).cwiseAbs().sum();
 
-            scores[i] = (do_traj - dm_traj).cwiseAbs().sum();
+            scores[i] = (obs_traj.topRows(min_size-1) - mod_traj.topRows(min_size-1)).cwiseAbs().sum();
             std::cout << i << " - alpha: " << alphas[i] << " - score: " << scores[i] << std::endl;
         }
 
