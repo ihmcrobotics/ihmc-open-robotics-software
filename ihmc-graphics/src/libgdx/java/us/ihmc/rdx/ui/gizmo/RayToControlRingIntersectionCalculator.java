@@ -86,16 +86,12 @@ public class RayToControlRingIntersectionCalculator
       collisionType = CollisionType.NONE;
       closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      hollowCylinderIntersection.update(discThickness,
-                                        discOuterRadius,
-                                        discInnerRadius,
-                                        discThickness / 2.0,
-                                        controlRingTransformToWorld);
+      hollowCylinderIntersection.update(discThickness, discOuterRadius, discInnerRadius, discThickness / 2.0, controlRingTransformToWorld);
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
          closestCollisionDistance = distance;
-         collisionType = CollisionType.NONE;
+         collisionType = CollisionType.CYLINDER;
          closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
       }
       if (showArrows)
@@ -162,5 +158,10 @@ public class RayToControlRingIntersectionCalculator
    public CollisionType getCollisionType()
    {
       return collisionType;
+   }
+
+   public double getClosestCollisionDistance()
+   {
+      return closestCollisionDistance;
    }
 }

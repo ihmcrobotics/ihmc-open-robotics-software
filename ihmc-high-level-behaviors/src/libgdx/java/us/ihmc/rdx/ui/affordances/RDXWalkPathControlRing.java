@@ -49,10 +49,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RDXWalkPathControlRing implements PathTypeStepParameters
 {
    private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
-   private boolean selected = false;
-   private boolean modified = false;
-   private boolean newlyModified = false;
-   private boolean mouseRingPickSelected;
+   private boolean selectedMouse = false;
+   private boolean modifiedMouse = false;
+   private boolean newlyModifiedMouse = false;
+   private boolean ringPickSelectedMouse;
    private RDX3DPanel panel3D;
    private RDXTeleoperationParameters teleoperationParameters;
    private MovingReferenceFrame midFeetZUpFrame;
@@ -87,6 +87,15 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    private SteppingParameters steppingParameters;
    private RDXWalkPathType walkPathType = RDXWalkPathType.STRAIGHT;
    private ImGui3DViewInput latestInput;
+
+   private boolean selectedVR = false;
+   private boolean modifiedVR = false;
+   private boolean newlyModifiedVR = false;
+   private boolean ringPickSelectedVR;
+
+   private boolean selected = false;
+   private boolean modified = false;
+   private boolean newlyModified = false;
 
    public void create(RDX3DPanel panel3D,
                       DRCRobotModel robotModel,
@@ -140,7 +149,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
    {
-      if (!modified)
+      if (!modifiedMouse)
       {
          footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
@@ -173,67 +182,150 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       latestInput = input;
       boolean leftMouseReleasedWithoutDrag = input.isWindowHovered() && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
-      footstepPlannerGoalGizmo.process3DViewInput(input, selected);
-      mouseRingPickSelected = footstepPlannerGoalGizmo.getHollowCylinderPickSelectedMouse();
+      footstepPlannerGoalGizmo.process3DViewInput(input, selectedMouse);
+      ringPickSelectedMouse = footstepPlannerGoalGizmo.getHollowCylinderPickSelectedMouse();
 
-      if (mouseRingPickSelected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
+      if (ringPickSelectedMouse && leftMouseReleasedWithoutDrag)
       {
-         becomeModified(true);
+         becomeModifiedMouse(true);
       }
-      if (selected && !footstepPlannerGoalGizmo.getAnyPartPickSelectedMouse() && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isGizmoGrabbedFromVR()))
+      if (selectedMouse && !footstepPlannerGoalGizmo.getAnyPartPickSelectedMouse() && leftMouseReleasedWithoutDrag)
       {
-         selected = false;
+         selectedMouse = false;
       }
 
-      if (modified)
+      if (modifiedMouse)
       {
          updateStuff();
       }
-      if (selected && (leftMouseReleasedWithoutDrag || footstepPlannerGoalGizmo.isVRTriggerPressed()))
+      if (selectedMouse && leftMouseReleasedWithoutDrag)
       {
-         if (footstepPlannerGoalGizmo.getPositiveXArrowPickSelectedMouse())
-         {
-            walkPathType = RDXWalkPathType.STRAIGHT;
-            walkFacingDirection.set(Axis3D.Z, 0.0);
-         }
-         else if (footstepPlannerGoalGizmo.getPositiveYArrowPickSelectedMouse())
-         {
-            walkPathType = RDXWalkPathType.LEFT_SHUFFLE;
-            walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
-         }
-         else if (footstepPlannerGoalGizmo.getNegativeXArrowPickSelectedMouse())
-         {
-            walkPathType = RDXWalkPathType.REVERSE;
-            walkFacingDirection.set(Axis3D.Z, Math.PI);
-         }
-         else if (footstepPlannerGoalGizmo.getNegativeYArrowPickSelectedMouse())
-         {
-            walkPathType = RDXWalkPathType.RIGHT_SHUFFLE;
-            walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
-         }
-         if (footstepPlannerGoalGizmo.getAnyArrowPickSelectedMouse())
-         {
-            footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
-            updateStuff();
-            queueFootstepPlan();
-         }
+         updateFromArrowPick(footstepPlannerGoalGizmo.getPositiveXArrowPickSelectedMouse(),
+                             footstepPlannerGoalGizmo.getPositiveYArrowPickSelectedMouse(),
+                             footstepPlannerGoalGizmo.getNegativeXArrowPickSelectedMouse(),
+                             footstepPlannerGoalGizmo.getNegativeYArrowPickSelectedMouse(),
+                             footstepPlannerGoalGizmo.getAnyArrowPickSelectedMouse());
       }
-      if (selected && footstepPlannerGoalGizmo.isNewlyModified())
+      if (selectedMouse && footstepPlannerGoalGizmo.isNewlyModifiedMouse())
       {
          queueFootstepPlan();
       }
 
-      if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      if (modifiedMouse && selectedMouse && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          delete();
       }
-      if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
+      if (selectedMouse && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
+      {
+         selectedMouse = false;
+      }
+
+      // combine changes from mouse and vr
+      combineChanges();
+      footstepPlannerGoalGizmo.setShowArrows(selected);
+      footstepPlannerGoalGizmo.setHighlightingEnabled(modified);
+   }
+
+   private void combineChanges()
+   {
+      selected = selectedMouse || selectedVR;
+      modified = modifiedMouse || modifiedVR;
+      newlyModified = newlyModifiedMouse || newlyModifiedVR;
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.calculateVRPick(vrContext);
+   }
+
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      footstepPlannerGoalGizmo.processVRInput(vrContext);
+      boolean isVRTriggerPressed = footstepPlannerGoalGizmo.isVRTriggerPressed();
+      ringPickSelectedVR = footstepPlannerGoalGizmo.getHollowCylinderPickSelectedVR();
+
+      if (ringPickSelectedVR && isVRTriggerPressed)
+      {
+         becomeModifiedVR(true);
+      }
+      if (selectedVR && !footstepPlannerGoalGizmo.getAnyPartPickSelectedVR() && isVRTriggerPressed)
+      {
+         selectedVR = false;
+      }
+
+      if (modifiedVR)
+      {
+         updateStuff();
+      }
+      if (selectedVR && isVRTriggerPressed)
+      {
+         updateFromArrowPick(footstepPlannerGoalGizmo.getPositiveXArrowPickSelectedVR(),
+                             footstepPlannerGoalGizmo.getPositiveYArrowPickSelectedVR(),
+                             footstepPlannerGoalGizmo.getNegativeXArrowPickSelectedVR(),
+                             footstepPlannerGoalGizmo.getNegativeYArrowPickSelectedVR(),
+                             footstepPlannerGoalGizmo.getAnyArrowPickSelectedVR());
+      }
+
+      if (selectedVR && footstepPlannerGoalGizmo.isNewlyModifiedVR())
+      {
+         queueFootstepPlan();
+      }
+
+      /* TODO: assign another key for these in vr version?
+      if (modifiedVR && selectedVR && SOMEKEY PRESS FROM JOYSTICK)
+      {
+         delete();
+      }
+      if (selectedVR && footstepPlannerGoalGizmo.isNewlyModifiedVR())
+      {
+         queueFootstepPlan();
+      }
+
+      if (modifiedVR && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
+      {
+         delete();
+      }
+      if (selectedVR && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
          selected = false;
       }
 
-      footstepPlannerGoalGizmo.setShowArrows(selected);
-      footstepPlannerGoalGizmo.setHighlightingEnabled(modified);
+       */
+
+      // combine changes from mouse and vr
+      combineChanges();
+      footstepPlannerGoalGizmo.setShowArrows(selectedVR);
+      footstepPlannerGoalGizmo.setHighlightingEnabled(modifiedVR);
+   }
+
+   private void updateFromArrowPick(boolean positiveX, boolean positiveY, boolean negativeX, boolean negativeY, boolean anyArrowSelected)
+   {
+      if (positiveX)
+      {
+         walkPathType = RDXWalkPathType.STRAIGHT;
+         walkFacingDirection.set(Axis3D.Z, 0.0);
+      }
+      else if (positiveY)
+      {
+         walkPathType = RDXWalkPathType.LEFT_SHUFFLE;
+         walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
+      }
+      else if (negativeX)
+      {
+         walkPathType = RDXWalkPathType.REVERSE;
+         walkFacingDirection.set(Axis3D.Z, Math.PI);
+      }
+      else if (negativeY)
+      {
+         walkPathType = RDXWalkPathType.RIGHT_SHUFFLE;
+         walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
+      }
+      if (anyArrowSelected)
+      {
+         footstepPlannerGoalGizmo.getTransformToParent().appendOrientation(walkFacingDirection);
+         updateStuff();
+         queueFootstepPlan();
+      }
    }
 
    private void queueFootstepPlan()
@@ -349,29 +441,42 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
       ImGui.text("Control ring:");
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Deleted"), !selected && !modified))
+      if (ImGui.radioButton(labels.get("Deleted"), !selectedMouse && !modifiedMouse))
       {
          delete();
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Modified"), !selected && modified))
+      if (ImGui.radioButton(labels.get("Modified"), !selectedMouse && modifiedMouse))
       {
-         becomeModified(false);
+         becomeModifiedMouse(false);
       }
       ImGui.sameLine();
-      if (ImGui.radioButton(labels.get("Selected"), selected && modified))
+      if (ImGui.radioButton(labels.get("Selected"), selectedMouse && modifiedMouse))
       {
-         becomeModified(true);
+         becomeModifiedMouse(true);
       }
    }
 
-   public void becomeModified(boolean selected)
+   public void becomeModifiedMouse(boolean selected)
    {
-      this.selected = selected;
-      if (!modified)
+      this.selectedMouse = selected;
+      if (!modifiedMouse)
       {
-         modified = true;
-         newlyModified = true;
+         modifiedMouse = true;
+         newlyModifiedMouse = true;
+         walkFacingDirection.set(Axis3D.Z, 0.0);
+         updateStuff();
+         queueFootstepPlan();
+      }
+   }
+
+   public void becomeModifiedVR(boolean selected)
+   {
+      this.selectedVR = selected;
+      if (!modifiedVR)
+      {
+         modifiedVR = true;
+         newlyModifiedVR = true;
          walkFacingDirection.set(Axis3D.Z, 0.0);
          updateStuff();
          queueFootstepPlan();
@@ -380,14 +485,15 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public boolean pollIsNewlyModified()
    {
-      boolean newlyModifiedReturn = newlyModified;
-      newlyModified = false;
+      boolean newlyModifiedReturn = newlyModifiedMouse || newlyModifiedVR;
+      newlyModifiedMouse = false;
+      newlyModifiedVR = false;
       return newlyModifiedReturn;
    }
 
    private void renderTooltips()
    {
-      if (selected && footstepPlannerGoalGizmo.getGizmoHovered())
+      if (selectedMouse && footstepPlannerGoalGizmo.isGizmoHoveredMouse())
       {
          float offsetX = 10.0f;
          float offsetY = 10.0f;
@@ -417,7 +523,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (modified)
+      if (modifiedMouse)
       {
          leftStanceFootstepGraphic.getRenderables(renderables, pool);
          rightStanceFootstepGraphic.getRenderables(renderables, pool);
@@ -425,7 +531,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
          foostepPlanGraphic.getRenderables(renderables, pool);
       }
-      if (modified || mouseRingPickSelected || footstepPlannerGoalGizmo.isRingHoveredFromVR())
+      if (modifiedMouse || modifiedVR || ringPickSelectedMouse || ringPickSelectedVR || footstepPlannerGoalGizmo.isRingHoveredFromVR())
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       }
@@ -435,8 +541,10 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void delete()
    {
-      selected = false;
-      modified = false;
+      selectedMouse = false;
+      modifiedMouse = false;
+      selectedVR = false;
+      modifiedVR = false;
       clearGraphics();
    }
 
@@ -517,8 +625,8 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       return footstepPlan;
    }
 
-   public boolean isSelected()
+   public boolean isSelectedMouse()
    {
-      return selected;
+      return selectedMouse;
    }
 }

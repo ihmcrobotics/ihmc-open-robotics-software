@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -23,7 +21,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
@@ -50,7 +47,6 @@ import us.ihmc.tools.gui.YoAppearanceTools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
@@ -390,6 +386,13 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesAvailable && interactablesEnabled.get())
          environmentCollisionModel.calculateVRPick(vrContext);
+      if (interactablesEnabled.get())
+      {
+         if (!manualFootstepPlacement.isPlacingFootstep())
+         {
+            walkPathControlRing.calculateVRPick(vrContext);
+         }
+      }
    }
 
    private void processVRInput(RDXVRContext vrContext)
@@ -500,7 +503,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       if (ImGui.radioButton(labels.get("Path control ring"), legControlMode == RDXLegControlMode.PATH_CONTROL_RING))
       {
          legControlMode = RDXLegControlMode.PATH_CONTROL_RING;
-         walkPathControlRing.becomeModified(true);
+         walkPathControlRing.becomeModifiedMouse(true);
       }
       ImGui.sameLine();
       if (ImGui.radioButton(labels.get("Single support foot posing"), legControlMode == RDXLegControlMode.SINGLE_SUPPORT_FOOT_POSING))
