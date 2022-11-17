@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import org.apache.commons.lang.ArrayUtils;
 import us.ihmc.bytedeco.mapsenseWrapper.VisualOdometry;
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -8,11 +9,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 //import us.ihmc.log.LogTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.elements.CameraModel;
+import us.ihmc.perception.elements.Keyframe;
+import us.ihmc.perception.elements.Landmark;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 public class VisualSLAMModule
 {
@@ -26,7 +28,8 @@ public class VisualSLAMModule
    private int frameIndex = 0;
    private boolean initialized = false;
 
-   private HashMap<Integer, Integer> keypointMeasurementCountMap = new HashMap<>();
+   private HashMap<Integer, Keyframe> keyframes = new HashMap<>();
+   private HashMap<Integer, Landmark> landmarks = new HashMap<>();
 
    public VisualSLAMModule()
    {
@@ -36,10 +39,12 @@ public class VisualSLAMModule
       BytedecoTools.loadGTSAMLibraries();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
 
-      float[] poseInitial = new float[]{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+      float[] poseInitial = new float[] {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
       //LogTools.info("Inserting Prior Pose Factor: x{}", 0);
       factorGraphExternal.addPriorPoseFactor(0, poseInitial);
       factorGraphExternal.setPoseInitialValue(0, poseInitial);
+
+      keyframes.put(0, new Keyframe(0));
    }
 
    /*
@@ -57,11 +62,16 @@ public class VisualSLAMModule
 
       //LogTools.info("Extracting Keyframe External");
       double[] relativePoseTransformAsArray = new double[16];
-      int[] keyframeID = new int[]{-1};
+      int[] keyframeID = new int[] {-1};
       visualOdometryExternal.getExternalKeyframe(relativePoseTransformAsArray, keyframeID);
       //LogTools.info("Relative Pose: x{} -> x{} = [{}]", keyframeID[0], keyframeID[0] + 1, Arrays.toString(relativePoseTransformAsArray));
 
-      if(initialized)
+      if (!keyframes.containsKey(keyframeID[0]))
+      {
+         keyframes.put(keyframeID[0], new Keyframe(keyframeID[0]));
+      }
+
+      if (initialized)
       {
          //LogTools.info("Inserting Odometry Factor: x{}", keyframeID[0]);
          factorGraphExternal.addOdometryFactorExtended(relativePoseTransformAsArray, keyframeID[0]);
@@ -78,15 +88,15 @@ public class VisualSLAMModule
          float[] poseValue = new float[16];
          worldToSensorTransform.get(poseValue);
          //LogTools.info("World to Sensor Transform: {}", worldToSensorTransform);
-         //LogTools.info("Setting Initial Pose Value: x{} -> x{} = [{}]", keyframeID[0], Arrays.toString(poseValue));
+         LogTools.info("Setting Initial Pose Value: x{} = [{}]", keyframeID[0], Arrays.toString(poseValue));
          factorGraphExternal.setPoseInitialValueExtended(keyframeID[0], poseValue);
       }
 
       //LogTools.info("Extracting Landmarks External");
       /* Extract keyframe and landmark measurements from visual odometry module. */
-      float[] landmarks = new float[5 * MAX_LANDMARKS];
+      float[] landmarkFloats = new float[5 * MAX_LANDMARKS];
       int[] landmarkIDs = new int[MAX_LANDMARKS];
-      int totalLandmarks = visualOdometryExternal.getExternalLandmarks(landmarks, landmarkIDs, MAX_LANDMARKS);
+      int totalLandmarks = visualOdometryExternal.getExternalLandmarks(landmarkFloats, landmarkIDs, MAX_LANDMARKS);
       //LogTools.info("Total Landmarks: {}", totalLandmarks);
       //LogTools.info("Landmarks: {}", Arrays.toString(landmarks));
       //LogTools.info("LandmarkIDs: {}", Arrays.toString(landmarkIDs));
@@ -94,20 +104,31 @@ public class VisualSLAMModule
 
       /* Insert landmarks and initial estimates into the factor graph. */
       int totalValidLandmarks = 0;
-      for(int i = 0; i<totalLandmarks; i++)
+      for (int i = 0; i < totalLandmarks; i++)
       {
-         if(landmarkIDs[i] != -1)
+         if (landmarkIDs[i] != -1)
          {
+            if (!landmarks.containsKey(landmarkIDs[i]))
+            {
+               landmarks.put(landmarkIDs[i], new Landmark(landmarkIDs[i]));
+            }
+
+            keyframes.get(keyframeID[0]).addLandmark(landmarkIDs[i]);
+            landmarks.get(landmarkIDs[i]).addKeyframe(keyframeID[0]);
+
+            LogTools.info("Keyframe: {}, Landmark: {}, LandmarkMeasurements: {}", keyframeID[0], landmarkIDs[i], landmarks.get(landmarkIDs[i]).getKeyframeCount());
+
+            //LogTools.info("Inserting Landmark: {}, Count: {}", landmarkIDs[i], landmarks.get(landmarkIDs[i]).getKeyframeCount());
             /* Insert generic projection factor for each landmark measurement on left camera. */
             //LogTools.info("Inserting Projection Factor: x{} -> p{}", keyframeID[0], landmarkIDs[i]);
-            factorGraphExternal.addGenericProjectionFactor(new float[]{landmarks[i*5], landmarks[i*5 + 1]}, landmarkIDs[i], keyframeID[0]);
+            factorGraphExternal.addGenericProjectionFactor(new float[] {landmarkFloats[i * 5], landmarkFloats[i * 5 + 1]}, landmarkIDs[i], keyframeID[0]);
 
             /* Compute the 3D point initial value in world frame. */
-            Point3D pointInWorld = new Point3D(landmarks[i*5 + 2], landmarks[i*5 + 3], landmarks[i*5 + 4]);
+            Point3D pointInWorld = new Point3D(landmarkFloats[i * 5 + 2], landmarkFloats[i * 5 + 3], landmarkFloats[i * 5 + 4]);
             worldToSensorTransform.transform(pointInWorld);
 
             //LogTools.info("Setting landmark initial value.");
-            factorGraphExternal.setPointLandmarkInitialValue(landmarkIDs[i], new float[]{pointInWorld.getX32(), pointInWorld.getY32(), pointInWorld.getZ32()});
+            factorGraphExternal.setPointLandmarkInitialValue(landmarkIDs[i], new float[] {pointInWorld.getX32(), pointInWorld.getY32(), pointInWorld.getZ32()});
 
             totalValidLandmarks++;
          }
@@ -116,10 +137,11 @@ public class VisualSLAMModule
 
       //LogTools.info("Optimizing Factor Graph");
       // TODO: Try Incremental SAM instead of batch optimizer.
-      if(initialized)
+      if (initialized)
       {
-         //factorGraphExternal.optimizeISAM2((byte) 4);
-         factorGraphExternal.optimize();
+            factorGraphExternal.optimize();
+            //factorGraphExternal.optimizeISAM2((byte) 4);
+         //factorGraphExternal.optimize();
       }
       //factorGraphExternal.printResults();
 
@@ -130,13 +152,13 @@ public class VisualSLAMModule
 
    public void clearISAM2()
    {
-      factorGraphExternal.clearISAM2();
+      //factorGraphExternal.clearISAM2();
    }
 
    public FramePose3D getSensorPose(int index)
    {
       double[] poses = new double[16];
-      int[] indices = new int[]{index};
+      int[] indices = new int[] {index};
       factorGraphExternal.getResultPoses(poses, indices, 1);
 
       ////LogTools.info("Array: {}", Arrays.toString(poses));
@@ -149,9 +171,24 @@ public class VisualSLAMModule
       return pose;
    }
 
+   public ArrayList<Point3D> getLandmarkPoints(Set<Integer> ids)
+   {
+      Integer[] idIntObjects = (Integer[]) ids.toArray();
+      int[] idInts = ArrayUtils.toPrimitive(idIntObjects);
+      double[] landmarkPoints = new double[idInts.length * 3];
+      factorGraphExternal.getResultLandmarks(landmarkPoints, idInts, idInts.length);
+
+      ArrayList<Point3D> points = new ArrayList<>();
+      for (int i = 0; i < idInts.length; i++)
+      {
+         points.add(new Point3D(landmarkPoints[i * 3], landmarkPoints[i * 3 + 1], landmarkPoints[i * 3 + 2]));
+      }
+      return points;
+   }
+
    public void visualSLAMUpdate()
    {
-      float[] angles = new float[]{1.5708f, 2.35619f, 3.14159f, -2.35619f, -1.5708f, -0.785398f, -1.83697e-16f, 0.785398f};
+      float[] angles = new float[] {1.5708f, 2.35619f, 3.14159f, -2.35619f, -1.5708f, -0.785398f, -1.83697e-16f, 0.785398f};
 
       double radius = 30.0;
       int i = 0;
@@ -160,20 +197,20 @@ public class VisualSLAMModule
       Point3D target = new Point3D(0, 0, 0);
 
       ArrayList<Point3D> points = new ArrayList<>();
-      points.add(new Point3D(10.0,10.0,10.0));
-      points.add(new Point3D(-10.0,10.0,10.0));
-      points.add(new Point3D(-10.0,-10.0,10.0));
-      points.add(new Point3D(10.0,-10.0,10.0));
-      points.add(new Point3D(10.0,10.0,-10.0));
-      points.add(new Point3D(-10.0,10.0,-10.0));
-      points.add(new Point3D(-10.0,-10.0,-10.0));
-      points.add(new Point3D(10.0,-10.0,-10.0));
+      points.add(new Point3D(10.0, 10.0, 10.0));
+      points.add(new Point3D(-10.0, 10.0, 10.0));
+      points.add(new Point3D(-10.0, -10.0, 10.0));
+      points.add(new Point3D(10.0, -10.0, 10.0));
+      points.add(new Point3D(10.0, 10.0, -10.0));
+      points.add(new Point3D(-10.0, 10.0, -10.0));
+      points.add(new Point3D(-10.0, -10.0, -10.0));
+      points.add(new Point3D(10.0, -10.0, -10.0));
 
       for (; i < 8; ++i, theta += 2 * Math.PI / 8)
       {
          Pose3D pose = new Pose3D();
 
-         CameraModel camera = new CameraModel(50.0f,50.0f,50.0f,50.0f, pose);
+         CameraModel camera = new CameraModel(50.0f, 50.0f, 50.0f, 50.0f, pose);
 
          Point3D position = new Point3D(radius * Math.cos(theta), radius * Math.sin(theta), 0.0);
 
@@ -181,13 +218,17 @@ public class VisualSLAMModule
 
          //LogTools.info("Projection: {}", measurement);
 
-
       }
    }
 
    public void render()
    {
 
+   }
+
+   public Set<Integer> getLandmarkKeys()
+   {
+      return landmarks.keySet();
    }
 
    public static void main(String[] args)
@@ -208,5 +249,4 @@ public class VisualSLAMModule
 
       vslam.update(currentImageLeft, currentImageRight);
    }
-
 }

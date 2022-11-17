@@ -1,26 +1,40 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 //import us.ihmc.log.LogTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -74,23 +88,6 @@ public class RDXVisualSLAMDemo
 
             baseUI.create();
 
-            //ModelBuilder modelBuilder = new ModelBuilder();
-            //modelBuilder.begin();
-            //
-            //RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
-            //meshBuilder.addLine(0,0,0, 1, 1, 1, 0.005, Color.WHITE);
-            //Mesh mesh = meshBuilder.generateMesh();
-            //
-            //MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
-            //Material material = new Material();
-            //Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-            //material.set(TextureAttribute.createDiffuse(paletteTexture));
-            //material.set(ColorAttribute.createDiffuse(Color.WHITE));
-            //modelBuilder.part(meshPart, material);
-            //
-            //Model model = modelBuilder.end();
-            //landmarksLineMesh = new ModelInstance(model);
-
          }
 
          @Override
@@ -117,6 +114,33 @@ public class RDXVisualSLAMDemo
             baseUI.dispose();
          }
       });
+   }
+
+   public void buildLandmarkLineMesh()
+   {
+
+      ModelBuilder modelBuilder = new ModelBuilder();
+      modelBuilder.begin();
+
+      Set<Integer> landmarkIDs = vslam.getLandmarkKeys();
+      ArrayList<Point3D> points = vslam.getLandmarkPoints(landmarkIDs);
+
+      for(Point3D point : points)
+      {
+         RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+         meshBuilder.addLine(0, 0, 0, point.getX(), point.getY(), point.getZ(), 0.005, Color.WHITE);
+         Mesh mesh = meshBuilder.generateMesh();
+
+         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+         Material material = new Material();
+         Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+         material.set(TextureAttribute.createDiffuse(paletteTexture));
+         material.set(ColorAttribute.createDiffuse(Color.WHITE));
+         modelBuilder.part(meshPart, material);
+      }
+
+      Model model = modelBuilder.end();
+      landmarksLineMesh = new ModelInstance(model);
    }
 
    public void renderImGuiWidgets()
@@ -170,7 +194,7 @@ public class RDXVisualSLAMDemo
             poseModels.add(modelInstance);
          }
 
-         //vslam.clearISAM2();
+         vslam.clearISAM2();
       }
       //LogTools.info("Total Model Instances: {}", poseModels.size());
    }

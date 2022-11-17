@@ -10,11 +10,11 @@ FactorGraphHandler::FactorGraphHandler()
    this->isam = gtsam::ISAM2(parameters);
 
    gtsam::Vector6 odomVariance;
-   odomVariance << 1e-1, 1e-1, 1e-1, 1e-1, 1e-1, 1e-1;
+   odomVariance << 1e-3, 1e-3, 1e-3, 1e-3, 1e-3, 1e-3;
    createOdometryNoiseModel(odomVariance);
 
    gtsam::Vector3 lmVariance;
-   lmVariance << 1e-1, 1e-1, 1e-1;
+   lmVariance << 1e-2, 1e-2, 1e-2;
    createOrientedPlaneNoiseModel(lmVariance);
 
    gtsam::Vector6 priorVariance;
@@ -22,7 +22,7 @@ FactorGraphHandler::FactorGraphHandler()
    priorNoise = gtsam::noiseModel::Diagonal::Variances(priorVariance);
 
    gtsam::Vector6 priorVariance2;
-   priorVariance2 << 1e2, 1e2, 1e2, 1e2, 1e2, 1e2;
+   priorVariance2 << 1e-2, 1e-2, 1e-2, 1e-2, 1e-2, 1e-2;
    priorNoise2 = gtsam::noiseModel::Diagonal::Variances(priorVariance2);
 
    pointLandmarkNoise = gtsam::noiseModel::Isotropic::Sigma(2, 1.0);

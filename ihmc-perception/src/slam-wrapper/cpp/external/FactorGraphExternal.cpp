@@ -65,7 +65,7 @@ void FactorGraphExternal::clearISAM2()
 
 void FactorGraphExternal::setPoseInitialValue(int index, float *value)
 {
-    // printf("setPoseInitialValue(%d)\n", index);
+    printf("setPoseInitialValue(%d)\n", index);
     using namespace gtsam;
     Pose3 initialValue(Rot3::Ypr(value[0], value[1], value[2]), Point3(value[3], value[4], value[5]));
     factorGraphHandler.setPoseInitialValue(index, initialValue);
@@ -73,7 +73,7 @@ void FactorGraphExternal::setPoseInitialValue(int index, float *value)
 
 void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
 {
-    // printf("setPoseInitialValueExtended(%d)\n", index);
+    printf("setPoseInitialValueExtended(%d)\n", index);
     using namespace gtsam;
     Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
 
