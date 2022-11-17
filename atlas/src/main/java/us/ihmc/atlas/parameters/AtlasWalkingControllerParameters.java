@@ -278,7 +278,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public List<GroupParameter<PIDGainsReadOnly>> getJointSpaceControlGains()
+   public List<GroupParameter<PIDGainsReadOnly>> getHighLevelJointSpaceControlGains()
    {
       List<GroupParameter<PIDGainsReadOnly>> jointspaceGains = new ArrayList<>();
       jointspaceGains.add(new GroupParameter<>("SpineJoints", jointMap.getSpineJointNamesAsStrings()));

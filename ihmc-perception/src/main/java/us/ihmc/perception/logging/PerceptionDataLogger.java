@@ -44,6 +44,7 @@ public class PerceptionDataLogger
    private final String JOINT_TORQUES_NAME = "/robot/joint_torques/";
 
    private final String OUSTER_CLOUD_NAME = "/os_cloud_node/points/";
+   private final String OUSTER_DEPTH_NAME = "/ouster/depth/";
 
    private final String D435_DEPTH_NAME = "/d435/depth/";
    private final String D435_COLOR_NAME = "/d435/color/";
@@ -156,7 +157,7 @@ public class PerceptionDataLogger
 
       // Add callback for Ouster depth maps
       var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_DEPTH);
-      ousterDepthSubscription.addCallback(this::logDepthMap);
+      ousterDepthSubscription.addCallback(this::logDepthOuster);
       runnablesToStopLogging.addLast(ousterDepthSubscription::destroy);
 
       realtimeROS2Node.spin();
@@ -209,10 +210,10 @@ public class PerceptionDataLogger
       storePointCloud(OUSTER_CLOUD_NAME, ousterCloudPacket);
    }
 
-   public void logDepthMap(VideoPacket packet)
+   public void logDepthOuster(VideoPacket packet)
    {
       LogTools.info("Depth Map Received: {}", packet.data_);
-//      storeDepthMap("/chest_l515/depth/image_compressed/", packet);
+      storeVideoPacket(OUSTER_DEPTH_NAME, packet);
    }
 
    public void logColorD435(VideoPacket videoPacket)

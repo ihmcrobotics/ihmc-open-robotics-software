@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 public class SCS2YoImPlotManager
 {
+   private RDXImGuiPerspectiveManager perspectiveManager;
    private final ArrayList<ImPlotModifiableYoPlotPanel> plotPanels = new ArrayList<>();
    private RDXYoManager yoManager;
    private ImGuiYoVariableSearchPanel yoVariableSearchPanel;
@@ -32,19 +33,55 @@ public class SCS2YoImPlotManager
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString panelToCreateName = new ImString("", 100);
    private HybridFile configurationFile;
+   private boolean perspectiveReloadQueued = false;
+   private int delayedPerspectiveReloadCounter = 0;
 
-   public void create(RDXImGuiPerspectiveManager perspectiveManager, RDXYoManager yoManager, ImGuiPanel parentPanel)
+   public void create(RDXImGuiPerspectiveManager perspectiveManager, ImGuiPanel parentPanel)
    {
-      this.yoManager = yoManager;
+      this.perspectiveManager = perspectiveManager;
       this.parentPanel = parentPanel;
 
-      yoVariableSearchPanel = new ImGuiYoVariableSearchPanel(yoManager.getRootRegistry());
-      parentPanel.addChild(yoVariableSearchPanel.getPanel());
-
+      updateConfigurationFile(perspectiveManager.getPerspectiveDirectory());
       perspectiveManager.getPerspectiveDirectoryUpdatedListeners().add(this::updateConfigurationFile);
       perspectiveManager.getLoadListeners().add(this::loadConfiguration);
       perspectiveManager.getSaveListeners().add(this::saveConfiguration);
-      updateConfigurationFile(perspectiveManager.getPerspectiveDirectory());
+   }
+
+   public void update()
+   {
+      // This is because the panel changes get queued, so we need to wait a couple frames
+      // to make sure we are ready to reload.
+      if (perspectiveReloadQueued)
+      {
+         ++delayedPerspectiveReloadCounter;
+         if (delayedPerspectiveReloadCounter == 2)
+         {
+            delayedPerspectiveReloadCounter = 0;
+            perspectiveReloadQueued = false;
+            perspectiveManager.reloadPerspective();
+         }
+      }
+   }
+
+   public void setupForSession(RDXYoManager yoManager)
+   {
+      this.yoManager = yoManager;
+
+      if (yoVariableSearchPanel == null)
+      {
+         // We are using getRootRegistry which is the session's working copy; i.e. not linked
+         yoVariableSearchPanel = new ImGuiYoVariableSearchPanel(yoManager.getRootRegistry());
+         parentPanel.addChild(yoVariableSearchPanel.getPanel());
+      }
+      else
+      {
+         removeAllPlotPanels();
+         yoVariableSearchPanel.changeYoRegistry(yoManager.getRootRegistry());
+
+         perspectiveReloadQueued = true;
+         delayedPerspectiveReloadCounter = 0;
+      }
+
       loadConfiguration(perspectiveManager.getCurrentConfigurationLocation());
    }
 
@@ -59,6 +96,7 @@ public class SCS2YoImPlotManager
       InputStream inputStream = configurationFile.getInputStream();
       if (inputStream != null)
       {
+         LogTools.info("Loading {}", configurationFile.getLocationOfResourceForReading());
          plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
@@ -74,11 +112,16 @@ public class SCS2YoImPlotManager
                   for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
                   {
                      JsonNode variableNode = variablesNodeInterator.next();
+                     // We are using getRootRegistry which is the session's working copy; i.e. not linked
                      imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
                   }
                }
             }
          });
+      }
+      else
+      {
+         LogTools.error("Failed to load {}", configurationFile.getLocationOfResourceForReading());
       }
    }
 
@@ -145,7 +188,7 @@ public class SCS2YoImPlotManager
    {
       ImPlotModifiableYoPlotPanel plotPanel = new ImPlotModifiableYoPlotPanel(name, yoVariableSearchPanel, yoManager, this::removePlotPanel);
       plotPanel.getIsShowing().set(true);
-      parentPanel.addChild(plotPanel);
+      parentPanel.queueAddChild(plotPanel);
       plotPanels.add(plotPanel);
       return plotPanel;
    }
@@ -158,11 +201,16 @@ public class SCS2YoImPlotManager
 
    public void destroy()
    {
+      removeAllPlotPanels();
+      parentPanel.queueRemoveChild(yoVariableSearchPanel.getPanel());
+   }
+
+   private void removeAllPlotPanels()
+   {
       ImPlotModifiableYoPlotPanel[] plotPanelsArray = plotPanels.toArray(new ImPlotModifiableYoPlotPanel[0]);
       for (ImPlotModifiableYoPlotPanel plotPanel : plotPanelsArray)
       {
          removePlotPanel(plotPanel);
       }
-      parentPanel.queueRemoveChild(yoVariableSearchPanel.getPanel());
    }
 }

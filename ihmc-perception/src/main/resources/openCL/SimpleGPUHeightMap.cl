@@ -68,12 +68,12 @@ int coordinate_to_index(float coordinate, float center, float resolution, int ce
     return clamp_val(index, 0, 2 * centerIndex + 1);
 }
 
-int get_x_idx(float x, float center, read_only float* params)
+int get_x_idx(float x, float center, float* params)
 {
     return coordinate_to_index(x, center, params[RESOLUTION], params[CENTER_INDEX]);
 }
 
-int get_y_idx(float y, float center, read_only float* params)
+int get_y_idx(float y, float center, float* params)
 {
     return coordinate_to_index(y, center, params[RESOLUTION], params[CENTER_INDEX]);
 }
@@ -84,12 +84,12 @@ int indices_to_key(int x_index, int y_index, int centerIndex)
 }
 
 
-int get_idx_in_layer(int idx_x, int idx_y, read_only float* params)
+int get_idx_in_layer(int idx_x, int idx_y, float* params)
 {
     return indices_to_key(idx_x, idx_y, params[CENTER_INDEX]);
 }
 
-bool is_valid(float3 point, float3 sensor, read_only float* params)
+bool is_valid(float3 point, float3 sensor, float* params)
 {
     float d = point_sensor_distance(point, sensor);
     float min = 0.0;

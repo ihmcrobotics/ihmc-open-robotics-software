@@ -72,11 +72,14 @@ public class JointAccelerationIntegrationCommand
     *
     * @param joint the joint for which the desired acceleration is to be integrated to desired velocity
     *              and desired acceleration.
+    * @return the parameter holder for the joint added.
     */
-   public void addJointToComputeDesiredPositionFor(OneDoFJointBasics joint)
+   public JointAccelerationIntegrationParameters addJointToComputeDesiredPositionFor(OneDoFJointBasics joint)
    {
       jointsToComputeDesiredPositionFor.add(joint);
-      jointParameters.add().reset();
+      JointAccelerationIntegrationParameters parameters = jointParameters.add();
+      parameters.reset();
+      return parameters;
    }
 
    /**
