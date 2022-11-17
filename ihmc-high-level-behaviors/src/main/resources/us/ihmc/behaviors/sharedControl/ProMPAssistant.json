@@ -1,6 +1,7 @@
 {
-  "numberObservations": 50,
+  "testNumberUseOnlyForTesting": 1,
   "logging" : true,
+  "numberObservations": 150,
   "tasks":[
     {
       "name":"PushDoor",

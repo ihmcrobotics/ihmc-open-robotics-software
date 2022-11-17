@@ -39,6 +39,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); //to track the last used sample of a generated trajectory
    private boolean doneInitialProcessingTask = false;
+   private int testNumber;
 
    public ProMPAssistant()
    {
@@ -53,8 +54,9 @@ public class ProMPAssistant implements TeleoperationAssistant
          String configurationFile = "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"), configurationFile).toString()));
          LogTools.info("File found: /{}", configurationFile);
-         numberObservations = (int) ((long) jsonObject.get("numberObservations"));
+         testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
          logEnabled = (boolean) jsonObject.get("logging");
+         numberObservations = (int) ((long) jsonObject.get("numberObservations"));
          // getting tasks
          JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
          //iterating tasks
@@ -252,13 +254,15 @@ public class ProMPAssistant implements TeleoperationAssistant
       {
          List<Pose3DReadOnly> robotPartObservedTrajectory = bodyPartObservedFrameTrajectory.get(robotPart);
          if (robotPartObservedTrajectory.size() > 0)
+         {
             proMPManagers.get(currentTask).updateTaskTrajectory(robotPart,
-                                               robotPartObservedTrajectory.get(robotPartObservedTrajectory.size() - 1),
-                                               robotPartObservedTrajectory.size() - 1);
-         //         for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
-         //         {
-         //            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
-         //         }
+                                                                robotPartObservedTrajectory.get(robotPartObservedTrajectory.size() - 1),
+                                                                robotPartObservedTrajectory.size() - 1);
+         }
+//                  for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
+//                  {
+//                     proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
+//                  }
       }
    }
 
@@ -281,6 +285,28 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
+   {
+      List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
+      int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
+      if (sampleCounter < generatedFramePoseTrajectory.size()){
+         //take a sample (frame) from the trajectory
+         FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
+         FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
+         FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
+         framePose.getPosition().set(generatedFramePosition);
+         framePose.getOrientation().set(generatedFrameOrientation);
+
+         //take the next sample from the trajectory next time
+         bodyPartTrajectorySampleCounter.replace(bodyPart, bodyPartTrajectorySampleCounter.get(bodyPart) + 1);
+      }
+      else
+      {
+         reset();
+      }
+   }
+
+   //TODO Edit this function to take into account affordance. Ignore for the moment
+   public void framePoseToPackToAffordance(FramePose3D framePose, String bodyPart)
    {
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
       //take a sample (frame) from the trajectory
@@ -321,8 +347,10 @@ public class ProMPAssistant implements TeleoperationAssistant
          arbitratedFramePosition.setY((1 - alpha) * framePosition.getY() + alpha * generatedFramePosition.getY());
          arbitratedFramePosition.setZ((1 - alpha) * framePosition.getZ() + alpha * generatedFramePosition.getZ());
 
-         framePose.getPosition().set(arbitratedFramePosition);
-         framePose.getOrientation().set(arbitratedFrameOrientation);
+         //         framePose.getPosition().set(arbitratedFramePosition);
+         //         framePose.getOrientation().set(arbitratedFrameOrientation);
+         framePose.getPosition().set(generatedFramePosition);
+         framePose.getOrientation().set(generatedFrameOrientation);
 
          //take the next sample from the trajectory next time
          bodyPartTrajectorySampleCounter.replace(bodyPart, bodyPartTrajectorySampleCounter.get(bodyPart) + 1);
@@ -343,5 +371,10 @@ public class ProMPAssistant implements TeleoperationAssistant
       bodyPartGeneratedFrameTrajectory.clear();
       bodyPartTrajectorySampleCounter.clear();
       doneInitialProcessingTask = false;
+   }
+
+   public int getTestNumber()
+   {
+      return testNumber;
    }
 }

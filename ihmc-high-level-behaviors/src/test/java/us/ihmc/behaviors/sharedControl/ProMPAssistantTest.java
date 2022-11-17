@@ -6,9 +6,15 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.tools.TrajectoryRecordReplay;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+
 public class ProMPAssistantTest
 {
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
       // learn ProMPs
       // Check ProMPAssistant.json if you want to change parameters (e.g, task to learn, body parts to consider in the motion)
@@ -17,7 +23,12 @@ public class ProMPAssistantTest
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
       String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
       String demoDirectory = directoryAbsolutePath + "/test/PushDoorTest";
-      String testFilePath = demoDirectory + "/1.csv";
+      //get test number from config file
+      String testFilePath = demoDirectory + "/" + proMPAssistant.getTestNumber() + ".csv";
+      //copy test file to have it always under same name for faster plotting
+      Path originalPath = Paths.get(testFilePath);
+      Path copyForPlottingPath = Paths.get(demoDirectory + "/test.csv");
+      Files.copy(originalPath, copyForPlottingPath, StandardCopyOption.REPLACE_EXISTING);
 
       // replay that file
       TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2); //2 body parts: the hands
