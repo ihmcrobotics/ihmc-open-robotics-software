@@ -106,7 +106,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       {
          // we don't have any planar regions, so set the footstep pose height to match the stance foot height
          adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
-         return true;
+         return false;
       }
       else
       {
@@ -118,47 +118,47 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
             planarRegionSnapVisualizer.recordUnadjustedFootstep(adjustedFootstepPose, footPolygonToWiggle);
          }
 
-         boolean snapSuccessful;
+         boolean snapFailed;
          try
          {
             if (environmentalConstraintParameters.useSimpleSnapping())
             {
-               snapSuccessful = snapTheFootStraightDown(stanceFootPose, adjustedFootstepPose, footPolygonToWiggle);
+               snapTheFootStraightDown(stanceFootPose, adjustedFootstepPose, footPolygonToWiggle);
                // TODO we don't need to set the polygon yet.
 //               wiggledPolygon.set(footPolygonToWiggle);
             }
             else
             {
                // TODO adding the wiggled polygon isn't necessary yet
-               snapSuccessful = snapTheFootToRegionsAndWiggleInside(stanceFootPose, adjustedFootstepPose, footPolygonToWiggle);//, wiggledPolygon);
+               snapTheFootToRegionsAndWiggleInside(stanceFootPose, adjustedFootstepPose, footPolygonToWiggle);//, wiggledPolygon);
             }
 
             // check to make sure the snap didn't make the adjustment have NaN
-            snapSuccessful &= !adjustedFootstepPose.containsNaN();
+            snapFailed = adjustedFootstepPose.containsNaN();
          }
          catch (RuntimeException e)
          {
-            snapSuccessful = false;
+            snapFailed = false;
          }
 
          // the adjustment results in a NaN or an exception, so use the footstep at the current height.
-         if (snapSuccessful)
-            adjustedPoseToPack.set(adjustedFootstepPose);
-         else
+         if (snapFailed)
             adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
+         else
+            adjustedPoseToPack.set(adjustedFootstepPose);
 
          // return whether it's successful
-         return snapSuccessful;
+         return !snapFailed;
       }
    }
 
    /**
     * Snaps the foot straight down onto the planar regions
     *
+    * @param unsnappedSolePose
     * @param footStepPolygonInSoleFrame
-    * @return returns wether the snap was successful
     */
-   private boolean snapTheFootStraightDown(FramePose3DReadOnly stanceFootPose, FramePose3DBasics solePoseToSnap, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame)
+   private void snapTheFootStraightDown(FramePose3DReadOnly stanceFootPose, FramePose3DBasics solePoseToSnap, ConvexPolygon2DReadOnly footStepPolygonInSoleFrame)
    {
       // If we project the foot vertically down, find all the planar regions that the foothold would intersect
       // FIXME this doesn't require any frames, you can just use the pose directly as a transform.
@@ -166,13 +166,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       unsnappedFootstepPolygonInWorld.set(footStepPolygonInSoleFrame);
       unsnappedFootstepPolygonInWorld.applyTransform(solePoseToSnap, false);
 
-      return snapFootExtrapolatingHeight(stanceFootPose, unsnappedFootstepPolygonInWorld, solePoseToSnap);
+      snapFootExtrapolatingHeight(stanceFootPose, unsnappedFootstepPolygonInWorld, solePoseToSnap);
    }
 
-   /**
-    * @return whether the snap was successful
-    */
-   private boolean snapTheFootToRegionsAndWiggleInside(FramePose3DReadOnly stanceFootPose,
+   private void snapTheFootToRegionsAndWiggleInside(FramePose3DReadOnly stanceFootPose,
                                                     FramePose3DBasics solePose,
                                                     ConvexPolygon2DReadOnly footStepPolygonInSoleFrame)
 //                                                    ConvexPolygon2DBasics snappedFootstepPolygonToPack)
@@ -185,7 +182,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
       if (isFootPolygonOnBoundaryOfPlanarRegions(unsnappedFootstepPolygonInWorld))
       {
-         boolean success = snapFootExtrapolatingHeight(stanceFootPose, unsnappedFootstepPolygonInWorld, solePose);
+         snapFootExtrapolatingHeight(stanceFootPose, unsnappedFootstepPolygonInWorld, solePose);
 
          // TODO we don't yet need to set the snapped polygon
 //         snappedFootstepPolygonToPack.set(footStepPolygonInSoleFrame);
@@ -193,27 +190,22 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          if (planarRegionSnapVisualizer != null)
             planarRegionSnapVisualizer.recordFootPoseIsOnBoundary();
 
-         return success;
+         return;
       }
 
 
       findRegionsUnderFoot(unsnappedFootstepPolygonInWorld, regionsIntersectingFoothold);
 
       // Snap the sole pose from where it was spawned to the planar region environment
-      boolean success = snapFootstepToPlanarRegionEnvironment(regionsIntersectingFoothold, solePose, regionToSnapTo, unsnappedFootstepPolygonInWorld);
+      snapFootstepToPlanarRegionEnvironment(regionsIntersectingFoothold, solePose, regionToSnapTo, unsnappedFootstepPolygonInWorld);
       // Wiggle the snapped pose into the planar region environments
-      success &= wiggleFootstepIntoPlanarRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo);
+      wiggleFootstepIntoPlanarRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo);
       // Crop the foothold to match the region
       // TODO this isn't necessary yet, since we can't pack the polygons
 //      cropFootholdToMatchRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo, snappedFootstepPolygonToPack);
-
-      return success;
    }
 
-   /**
-    * Returns whether the snap was successful
-    */
-   private boolean snapFootExtrapolatingHeight(FramePose3DReadOnly stanceFootPose, ConvexPolygon2DReadOnly footPolygonInWorld, FramePose3DBasics solePoseToSnap)
+   private void snapFootExtrapolatingHeight(FramePose3DReadOnly stanceFootPose, ConvexPolygon2DReadOnly footPolygonInWorld, FramePose3DBasics solePoseToSnap)
    {
       findRegionsUnderFoot(footPolygonInWorld, regionsIntersectingFoothold);
 
@@ -247,8 +239,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                                regionToSnapTo,
                                                snapTransform))
          {
-            solePoseToSnap.setToNaN();
-            return false;
+            throw new RuntimeException("Snapping failed");
          }
          footPosition.setZ(0.0);
          footPosition.applyTransform(snapTransform);
@@ -260,8 +251,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          snapTransform.getTranslation().setZ(footPosition.getZ());
          planarRegionSnapVisualizer.recordSnapTransform(regionsIntersectingFoothold.size(), snapTransform, regionToSnapTo);
       }
-
-      return true;
    }
 
    private void findRegionsUnderFoot(ConvexPolygon2DReadOnly footPolygonInWorld, List<PlanarRegion> regionsUnderFootToPack)
@@ -282,7 +271,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
    }
 
-   private boolean snapFootstepToPlanarRegionEnvironment(List<PlanarRegion> regionsIntersectingFoothold,
+   private void snapFootstepToPlanarRegionEnvironment(List<PlanarRegion> regionsIntersectingFoothold,
                                                       FramePose3DBasics solePoseToSnap,
                                                       PlanarRegion regionToPack,
                                                       ConvexPolygon2DReadOnly footPolygonInWorld)
@@ -293,7 +282,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
                                                  regionToPack,
                                                  snapTransform))
       {
-         return false;
+         throw new RuntimeException("Snapping failed");
       }
 
       solePoseToSnap.setZ(0.0);
@@ -301,16 +290,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
       if (planarRegionSnapVisualizer != null)
          planarRegionSnapVisualizer.recordSnapTransform(regionsIntersectingFoothold.size(), snapTransform, regionToPack);
-
-      return true;
    }
 
-   private boolean wiggleFootstepIntoPlanarRegion(FramePose3DBasics solePoseToWiggle,
+   private void wiggleFootstepIntoPlanarRegion(FramePose3DBasics solePoseToWiggle,
                                                ConvexPolygon2DReadOnly footStepPolygonInSoleFrame,
                                                PlanarRegion planarRegionToWiggleInside)
    {
       if (!wiggleParameters.shouldPerformOptimization())
-         return true;
+         return;
 
       planarRegionFrame.setPoseAndUpdate(planarRegionToWiggleInside.getTransformToWorld());
       soleFrameAfterSnapAndBeforeWiggle.setPoseAndUpdate(solePoseToWiggle);
@@ -323,11 +310,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footPolygonInRegionFrame,
                                                                                                    planarRegionToWiggleInside.getConvexHull(),
                                                                                                    wiggleParameters);
-      boolean success;
+
       if (wiggleTransform == null)
       { // Wiggle failed, set the pose to NaN
          solePoseToWiggle.setToNaN();
-         success = false;
       }
       else
       {
@@ -343,12 +329,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
             {
                solePoseToWiggle.changeFrame(ReferenceFrame.getWorldFrame());
                solePoseToWiggle.setToNaN();
-               success = false;
-               return success;
+               return;
             }
          }
-
-         success = true;
 
          // get the pose of the footstep in the world
          solePoseToWiggle.changeFrame(ReferenceFrame.getWorldFrame());
@@ -356,8 +339,6 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          if (planarRegionSnapVisualizer != null)
             planarRegionSnapVisualizer.recordWiggleTransform(stepConstraintOptimizer.getIterationsInOptimization(), wiggleTransform);
       }
-
-      return success;
    }
 
    private void cropFootholdToMatchRegion(FramePose3DReadOnly solePose,
