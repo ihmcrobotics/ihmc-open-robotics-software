@@ -105,7 +105,7 @@ namespace promp
             // compute promp trajectory given a certain alpha
             Eigen::MatrixXd mod_traj = this->modulate(ratio * this->timesteps(), true).matrix();
             std::ofstream myfile;
-            myfile.open ("my_promp"+i+".csv");
+            myfile.open ("my_promp"+std::to_string(i)+".csv");
             myfile << mod_traj.format(CSVFormat);
             myfile.close();
 
