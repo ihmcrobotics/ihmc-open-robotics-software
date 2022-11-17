@@ -67,6 +67,13 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
             dataMessage.getLocation().set(snappedPose.getPosition());
             dataMessage.getOrientation().set(snappedPose.getOrientation());
          }
+         else
+         {
+            // The snap failed. Remove it, and all the subsequent steps.
+            int stepToRemove = index;
+            while (stepToRemove < footstepDataListMessageToAdjust.getFootstepDataList().size())
+               footstepDataListMessageToAdjust.getFootstepDataList().remove(stepToRemove++);
+         }
       }
    }
 }
