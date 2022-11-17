@@ -60,10 +60,19 @@ public class StepConstraintMessageConverter
    {
       StepConstraintsListMessage message = new StepConstraintsListMessage();
 
+      convertToStepConstraintsListMessage(constraintRegions, message);
+
+       return message;
+   }
+
+   public static void convertToStepConstraintsListMessage(List<StepConstraintRegion> constraintRegions, StepConstraintsListMessage message)
+   {
       Object<Point3D> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
-      for (StepConstraintRegion constraintRegion : constraintRegions)
+      for (int i = 0; i < constraintRegions.size(); i++)
       {
+         StepConstraintRegion constraintRegion = constraintRegions.get(i);
+
          constraintRegion.getTransformToWorld().get(message.getRegionOrientation().add(), message.getRegionOrigin().add());
          constraintRegion.getNormal(message.getRegionNormal().add());
 
@@ -86,8 +95,6 @@ public class StepConstraintMessageConverter
             }
          }
       }
-
-      return message;
    }
 
    public static StepConstraintsListMessage convertToStepConstraintsListMessageFromPlanarRegions(List<PlanarRegion> constraintRegions)

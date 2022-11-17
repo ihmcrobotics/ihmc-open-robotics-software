@@ -1,5 +1,6 @@
 package us.ihmc.avatar.footstepSnapper;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.stepAdjustment.PlanarRegionFootstepSnapper;
 import us.ihmc.avatar.stepAdjustment.SimpleSteppableRegionsCalculator;
@@ -101,13 +102,20 @@ public class PlanarRegionFootstepSnapperTest
       expectedPoseOnBlock.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.3, 0.4, 0.25), new FrameQuaternion());
       expectedPoseOnBlockEdge.set(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, 0.3, 0.25), new FrameQuaternion());
 
-      snapper.adjustFootstep(new FramePose3D(), poseOnGround, RobotSide.LEFT, snappedPoseOnGround);
+      FootstepDataMessage dataMessage = new FootstepDataMessage();
+      snapper.adjustFootstep(new FramePose3D(), poseOnGround, RobotSide.LEFT, dataMessage);
+      snappedPoseOnGround.getPosition().set(dataMessage.getLocation());
+      snappedPoseOnGround.getOrientation().set(dataMessage.getOrientation());
       EuclidFrameTestTools.assertEquals(expectedPoseOnGround, snappedPoseOnGround, 1e-5);
 
-      snapper.adjustFootstep(new FramePose3D(), poseOnBlock, RobotSide.LEFT, snappedPoseOnBlock);
+      snapper.adjustFootstep(new FramePose3D(), poseOnBlock, RobotSide.LEFT, dataMessage);
+      snappedPoseOnBlock.getPosition().set(dataMessage.getLocation());
+      snappedPoseOnBlock.getOrientation().set(dataMessage.getOrientation());
       EuclidFrameTestTools.assertEquals(expectedPoseOnBlock, snappedPoseOnBlock, 1e-5);
 
-      snapper.adjustFootstep(new FramePose3D(), poseOnBlockEdge, RobotSide.LEFT, snappedPoseOnBlockEdge);
+      snapper.adjustFootstep(new FramePose3D(), poseOnBlockEdge, RobotSide.LEFT, dataMessage);
+      snappedPoseOnBlockEdge.getPosition().set(dataMessage.getLocation());
+      snappedPoseOnBlockEdge.getOrientation().set(dataMessage.getOrientation());
       EuclidFrameTestTools.assertEquals(expectedPoseOnBlockEdge, snappedPoseOnBlockEdge, 1e-5);
    }
 
@@ -171,13 +179,21 @@ public class PlanarRegionFootstepSnapperTest
       expectedPoseBackAndYawing.set(steppingBackAndYawingPose);
       expectedPoseBackAndYawing.setZ(stanceFootPose.getZ());
 
-      snapper.adjustFootstep(stanceFootPose, inPlacePose, RobotSide.LEFT, snappedPoseInPlace);
+      FootstepDataMessage dataMessage = new FootstepDataMessage();
+
+      snapper.adjustFootstep(stanceFootPose, inPlacePose, RobotSide.LEFT, dataMessage);
+      snappedPoseInPlace.getPosition().set(dataMessage.getLocation());
+      snappedPoseInPlace.getOrientation().set(dataMessage.getOrientation());
       EuclidFrameTestTools.assertEquals(expectedPoseInPlace, snappedPoseInPlace, 1e-5);
 
-      snapper.adjustFootstep(stanceFootPose, yawingInPlacePose, RobotSide.LEFT, snappedPoseYawingInPlace);
+      snapper.adjustFootstep(stanceFootPose, yawingInPlacePose, RobotSide.LEFT, dataMessage);
+      snappedPoseYawingInPlace.getPosition().set(dataMessage.getLocation());
+      snappedPoseYawingInPlace.getOrientation().set(dataMessage.getOrientation());
       EuclidFrameTestTools.assertEquals(expectedPoseYawingInPlace, snappedPoseYawingInPlace, 1e-5);
 
-      snapper.adjustFootstep(stanceFootPose, steppingBackAndYawingPose, RobotSide.LEFT, snappedPoseBackAndYawing);
+      snapper.adjustFootstep(stanceFootPose, steppingBackAndYawingPose, RobotSide.LEFT, dataMessage);
+      snappedPoseBackAndYawing.getPosition().set(dataMessage.getLocation());
+      snappedPoseBackAndYawing.getOrientation().set(dataMessage.getOrientation());
       EuclidFrameTestTools.assertEquals(expectedPoseBackAndYawing, snappedPoseBackAndYawing, 1e-5);
    }
 
@@ -292,13 +308,21 @@ public class PlanarRegionFootstepSnapperTest
          expectedPose3.set(step3Pose3D);
          expectedPose3.setZ(stanceFootPose.getZ());
 
-         snapper.adjustFootstep(stanceFootPose, step1Pose, RobotSide.LEFT, snapped1Pose);
+         FootstepDataMessage dataMessage = new FootstepDataMessage();
+
+         snapper.adjustFootstep(stanceFootPose, step1Pose, RobotSide.LEFT, dataMessage);
+         snapped1Pose.getPosition().set(dataMessage.getLocation());
+         snapped1Pose.getOrientation().set(dataMessage.getOrientation());
          EuclidFrameTestTools.assertEquals(expectedPose1, snapped1Pose, 1e-5);
 
-         snapper.adjustFootstep(stanceFootPose, step2Pose, RobotSide.LEFT, snapped2Pose);
+         snapper.adjustFootstep(stanceFootPose, step2Pose, RobotSide.LEFT, dataMessage);
+         snapped2Pose.getPosition().set(dataMessage.getLocation());
+         snapped2Pose.getOrientation().set(dataMessage.getOrientation());
          EuclidFrameTestTools.assertEquals(expectedPose2, snapped2Pose, 1e-5);
 
-         snapper.adjustFootstep(stanceFootPose, step3Pose, RobotSide.LEFT, snapped3Pose);
+         snapper.adjustFootstep(stanceFootPose, step3Pose, RobotSide.LEFT, dataMessage);
+         snapped3Pose.getPosition().set(dataMessage.getLocation());
+         snapped3Pose.getOrientation().set(dataMessage.getOrientation());
          EuclidFrameTestTools.assertEquals(expectedPose3, snapped3Pose, 1e-5);
       }
    }

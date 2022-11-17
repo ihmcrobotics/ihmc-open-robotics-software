@@ -20,9 +20,15 @@ public class StepConstraintListConverter
 
    public static StepConstraintRegion convertPlanarRegionToStepConstraintRegion(PlanarRegion planarRegion)
    {
-      StepConstraintRegion constraintRegion = new StepConstraintRegion(planarRegion.getTransformToWorld(), planarRegion.getConcaveHull());
-      constraintRegion.setRegionId(planarRegion.getRegionId());
+      StepConstraintRegion constraintRegion = new StepConstraintRegion();
+      convertPlanarRegionToStepConstraintRegion(planarRegion, constraintRegion);
 
       return constraintRegion;
+   }
+
+   public static void convertPlanarRegionToStepConstraintRegion(PlanarRegion planarRegion, StepConstraintRegion constraintRegion)
+   {
+      constraintRegion.set(planarRegion.getTransformToWorld(), planarRegion.getConcaveHull());
+      constraintRegion.setRegionId(planarRegion.getRegionId());
    }
 }
