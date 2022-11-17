@@ -20,6 +20,8 @@ public class StepConstraintsListCommand implements Command<StepConstraintsListCo
    @Override
    public void clear()
    {
+      for (int i = 0; i < stepsConstraints.size(); i++)
+         stepsConstraints.get(i).clear();
       stepsConstraints.clear();
    }
 

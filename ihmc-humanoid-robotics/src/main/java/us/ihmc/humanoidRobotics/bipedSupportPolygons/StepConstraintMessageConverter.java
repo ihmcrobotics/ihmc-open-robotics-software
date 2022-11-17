@@ -67,6 +67,12 @@ public class StepConstraintMessageConverter
 
    public static void convertToStepConstraintsListMessage(List<StepConstraintRegion> constraintRegions, StepConstraintsListMessage message)
    {
+      message.getRegionOrigin().clear();
+      message.getRegionOrientation().clear();
+      message.getRegionNormal().clear();
+      message.getConcaveHullsSize().reset();
+      message.getNumberOfHolesInRegion().reset();
+      message.getHolePolygonsSize().reset();
       Object<Point3D> vertexBuffer = message.getVertexBuffer();
       vertexBuffer.clear();
       for (int i = 0; i < constraintRegions.size(); i++)
