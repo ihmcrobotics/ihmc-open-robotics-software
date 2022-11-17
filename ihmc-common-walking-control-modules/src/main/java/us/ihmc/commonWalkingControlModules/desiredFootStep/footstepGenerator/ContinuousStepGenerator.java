@@ -333,8 +333,10 @@ public class ContinuousStepGenerator implements Updatable
          nextFootstepPose2D.appendTranslation(xDisplacement, yDisplacement);
 
          nextFootstepPose3D.set(nextFootstepPose2D);
+         FootstepDataMessage footstep = footsteps.add();
+
          for (int adjustorIndex = 0; adjustorIndex < footstepAdjustments.size(); adjustorIndex++)
-            footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, nextFootstepPose3D);
+            footstepAdjustments.get(adjustorIndex).adjustFootstep(currentSupportFootPose, nextFootstepPose2D, swingSide, footstep);
 
 //         if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
 //         {
@@ -342,15 +344,13 @@ public class ContinuousStepGenerator implements Updatable
 //            nextFootstepPose2D.set(nextFootstepPose3D);
 //         }
 
-         FootstepDataMessage footstep = footsteps.add();
          footstep.setRobotSide(swingSide.toByte());
-         footstep.getLocation().set(nextFootstepPose3D.getPosition());
-         footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
          footstep.setSwingHeight(parameters.getSwingHeight());
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
-         previousFootstepPose.set(nextFootstepPose3D);
+         previousFootstepPose.getPosition().set(footstep.getLocation());
+         previousFootstepPose.getOrientation().set(footstep.getOrientation());
       }
 
       // adjust the whole footstep plan for the environment
@@ -384,10 +384,7 @@ public class ContinuousStepGenerator implements Updatable
 
          if (!isStepValid(nextFootstepPose3D, previousFootstepPose, swingSide))
          {
-            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, nextFootstepPose3D);
-
-            footstepData.getLocation().set(nextFootstepPose3D.getPosition());
-            footstepData.getOrientation().set(nextFootstepPose3D.getOrientation());
+            alternateStepChooser.computeStep(footstepPose2D, nextFootstepPose2D, swingSide, footstepData);
 
             // remove all the other steps after the invalid one.
             while (footstepDataListMessage.getFootstepDataList().size() > i + 1)
@@ -396,8 +393,9 @@ public class ContinuousStepGenerator implements Updatable
             }
          }
 
-         previousFootstepPose.set(nextFootstepPose3D);
-         footstepPose2D.set(nextFootstepPose3D);
+         previousFootstepPose.getPosition().set(footstepData.getLocation());
+         previousFootstepPose.getOrientation().set(footstepData.getOrientation());
+         footstepPose2D.set(previousFootstepPose);
       }
 
       // Update the visualizers
@@ -770,10 +768,10 @@ public class ContinuousStepGenerator implements Updatable
          private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
          @Override
-         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPose)
+         public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FootstepDataMessage adjustedPose)
          {
-            adjustedPose.getPosition().set(footstepPose.getPosition());
-            adjustedPose.setZ(supportFootPose.getZ());
+            adjustedPose.getLocation().set(footstepPose.getPosition());
+            adjustedPose.getLocation().setZ(supportFootPose.getZ());
             if (adjustPitchAndRoll)
             {
                yawPitchRoll.set(supportFootPose.getOrientation());
@@ -954,7 +952,7 @@ public class ContinuousStepGenerator implements Updatable
    private void calculateSquareUpStep(FramePose2DReadOnly stanceFootPose,
                                       FramePose2DReadOnly defaultTouchdownPose,
                                       RobotSide swingSide,
-                                      FramePose3D touchdownPoseToPack)
+                                      FootstepDataMessage touchdownPoseToPack)
    {
       alternateStepPose2D.set(stanceFootPose);
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(parameters.getDefaultStepWidth()));

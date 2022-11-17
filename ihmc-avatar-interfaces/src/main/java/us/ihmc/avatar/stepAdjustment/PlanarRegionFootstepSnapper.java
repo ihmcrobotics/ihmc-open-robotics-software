@@ -1,5 +1,6 @@
 package us.ihmc.avatar.stepAdjustment;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
@@ -96,7 +97,7 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    public boolean adjustFootstep(FramePose3DReadOnly stanceFootPose,
                                  FramePose2DReadOnly footstepPoseToAdjust,
                                  RobotSide footSide,
-                                 FixedFramePose3DBasics adjustedPoseToPack)
+                                 FootstepDataMessage adjustedPoseToPack)
    {
       footstepAtSameHeightAsStanceFoot.getPosition().set(footstepPoseToAdjust.getPosition());
       footstepAtSameHeightAsStanceFoot.setZ(stanceFootPose.getZ());
@@ -105,8 +106,9 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
          // we don't have any planar regions, so set the footstep pose height to match the stance foot height
-         adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
-         return false;
+         adjustedPoseToPack.getLocation().set(footstepAtSameHeightAsStanceFoot.getPosition());
+         adjustedPoseToPack.getOrientation().set(footstepAtSameHeightAsStanceFoot.getOrientation());
+         return true;
       }
       else
       {
@@ -143,9 +145,15 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
 
          // the adjustment results in a NaN or an exception, so use the footstep at the current height.
          if (snapFailed)
-            adjustedPoseToPack.set(footstepAtSameHeightAsStanceFoot);
+         {
+            adjustedPoseToPack.getLocation().set(footstepAtSameHeightAsStanceFoot.getPosition());
+            adjustedPoseToPack.getOrientation().set(footstepAtSameHeightAsStanceFoot.getOrientation());
+         }
          else
-            adjustedPoseToPack.set(adjustedFootstepPose);
+         {
+            adjustedPoseToPack.getLocation().set(adjustedFootstepPose.getPosition());
+            adjustedPoseToPack.getOrientation().set(adjustedFootstepPose.getOrientation());
+         }
 
          // return whether it's successful
          return !snapFailed;

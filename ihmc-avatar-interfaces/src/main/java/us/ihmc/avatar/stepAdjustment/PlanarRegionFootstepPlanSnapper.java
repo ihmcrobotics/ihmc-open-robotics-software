@@ -27,7 +27,6 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
 
    // temp variables for calculation
    private final FramePose2D unsnappedPose = new FramePose2D();
-   private final FramePose3D snappedPose = new FramePose3D();
 
    public PlanarRegionFootstepPlanSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                           SteppableRegionsProvider steppableRegionsProvider,
@@ -62,11 +61,7 @@ public class PlanarRegionFootstepPlanSnapper implements FootstepPlanAdjustment
 
          RobotSide side = RobotSide.fromByte(dataMessage.getRobotSide());
 
-         if (snapper.adjustFootstep(stanceFootPose, unsnappedPose, side, snappedPose))
-         {
-            dataMessage.getLocation().set(snappedPose.getPosition());
-            dataMessage.getOrientation().set(snappedPose.getOrientation());
-         }
+         snapper.adjustFootstep(stanceFootPose, unsnappedPose, side, dataMessage);
       }
    }
 }
