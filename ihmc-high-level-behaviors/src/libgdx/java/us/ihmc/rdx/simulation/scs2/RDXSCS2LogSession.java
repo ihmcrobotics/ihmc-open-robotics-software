@@ -35,7 +35,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public RDXSCS2LogSession(LogSession session)
    {
-      super(session);
+      super.startSession(session);
       this.session = session;
       dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
 
