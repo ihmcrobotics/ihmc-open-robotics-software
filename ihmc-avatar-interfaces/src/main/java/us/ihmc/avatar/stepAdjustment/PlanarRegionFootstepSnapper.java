@@ -323,15 +323,15 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          footPolygonInRegionFrame.applyTransform(wiggleTransform);
 
          // check that the wiggle was successful
-         for (int i = 0; i < footPolygonInRegionFrame.getNumberOfVertices(); i++)
-         {
-            if (planarRegionToWiggleInside.getConvexHull().signedDistance(footPolygonInRegionFrame.getVertex(i)) > wiggleParameters.getDesiredDistanceInside())
-            {
-               solePoseToWiggle.changeFrame(ReferenceFrame.getWorldFrame());
-               solePoseToWiggle.setToNaN();
-               return;
-            }
-         }
+//         for (int i = 0; i < footPolygonInRegionFrame.getNumberOfVertices(); i++)
+//         {
+//            if (planarRegionToWiggleInside.getConvexHull().signedDistance(footPolygonInRegionFrame.getVertex(i)) > wiggleParameters.getDesiredDistanceInside())
+//            {
+//               solePoseToWiggle.changeFrame(ReferenceFrame.getWorldFrame());
+//               solePoseToWiggle.setToNaN();
+//               return;
+//            }
+//         }
 
          // get the pose of the footstep in the world
          solePoseToWiggle.changeFrame(ReferenceFrame.getWorldFrame());
