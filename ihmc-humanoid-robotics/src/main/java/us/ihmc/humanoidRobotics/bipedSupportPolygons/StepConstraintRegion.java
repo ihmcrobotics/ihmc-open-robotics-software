@@ -182,7 +182,12 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       convexHull.set(concaveHull);
    }
 
-   public void set(RigidBodyTransform transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices)
+   {
+      set(transformToWorld, concaveHullsVertices, null);
+   }
+
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -196,8 +201,12 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       updateBoundingBox();
 
       this.holesInRegion.clear();
-      for (int i = 0; i < holesInRegion.size(); i++)
-         this.holesInRegion.add(holesInRegion.get(i));
+      if (holesInRegion != null)
+      {
+         // FIXME this isn't copy save
+         for (int i = 0; i < holesInRegion.size(); i++)
+            this.holesInRegion.add(holesInRegion.get(i));
+      }
    }
 
    /**

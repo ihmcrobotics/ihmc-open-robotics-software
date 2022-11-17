@@ -1,23 +1,28 @@
 package us.ihmc.avatar.stepAdjustment;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.StepConstraintsListMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConstraintOptimizerParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ConvexStepConstraintOptimizer;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.YoConstraintOptimizerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
-import us.ihmc.commons.MathTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonSnapping.GarbageFreePlanarRegionListPolygonSnapper;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintListConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -25,7 +30,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,12 +68,18 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
    // This is the transform that takes the foot pose from zero pitch, roll, and height, onto the planar region at that point.
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
    private final PlanarRegion regionToSnapTo = new PlanarRegion();
+   private final StepConstraintRegion constraintRegion = new StepConstraintRegion();
+   private final List<StepConstraintRegion> constraintRegionList = new ArrayList<>();
+   {
+      constraintRegionList.add(constraintRegion);
+   }
 
    private final ConvexPolygon2D unsnappedFootstepPolygonInWorld = new ConvexPolygon2D();
    private final ConvexPolygon2D snappedAndWiggledFootstepPolygon = new ConvexPolygon2D();
 
    private final RigidBodyTransform transformFromSoleToRegion = new RigidBodyTransform();
    private final ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
+   private final StepConstraintsListMessage stepConstraint = new StepConstraintsListMessage();
 
    public PlanarRegionFootstepSnapper(SideDependentList<ConvexPolygon2D> footPolygons,
                                       SteppableRegionsProvider steppableRegionsProvider,
@@ -102,6 +112,8 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       footstepAtSameHeightAsStanceFoot.getPosition().set(footstepPoseToAdjust.getPosition());
       footstepAtSameHeightAsStanceFoot.setZ(stanceFootPose.getZ());
       footstepAtSameHeightAsStanceFoot.getOrientation().set(footstepPoseToAdjust.getOrientation());
+
+      resetStepConstraingRegionMesage(stepConstraint);
 
       if (steppableRegionsProvider == null || steppableRegionsProvider.getSteppableRegions().isEmpty())
       {
@@ -153,6 +165,10 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
          {
             adjustedPoseToPack.getLocation().set(adjustedFootstepPose.getPosition());
             adjustedPoseToPack.getOrientation().set(adjustedFootstepPose.getOrientation());
+
+            // if we've successfully snapped, we have a region.
+            if (stepConstraint.getRegionOrigin().size() > 0)
+               adjustedPoseToPack.getStepConstraints().set(stepConstraint);
          }
 
          // return whether it's successful
@@ -211,6 +227,14 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       // Crop the foothold to match the region
       // TODO this isn't necessary yet, since we can't pack the polygons
 //      cropFootholdToMatchRegion(solePose, footStepPolygonInSoleFrame, regionToSnapTo, snappedFootstepPolygonToPack);
+
+      // If we've snapped, go ahead and set the step constraint.
+      if (!solePose.containsNaN())
+      {
+         StepConstraintListConverter.convertPlanarRegionToStepConstraintRegion(regionToSnapTo, constraintRegion);
+         // The list object here already contains the constraint region by default.
+         StepConstraintMessageConverter.convertToStepConstraintsListMessage(constraintRegionList, stepConstraint);
+      }
    }
 
    private void snapFootExtrapolatingHeight(FramePose3DReadOnly stanceFootPose, ConvexPolygon2DReadOnly footPolygonInWorld, FramePose3DBasics solePoseToSnap)
@@ -441,5 +465,17 @@ public class PlanarRegionFootstepSnapper implements FootstepAdjustment
       }
 
       return highestRegion;
+   }
+
+   private static void resetStepConstraingRegionMesage(StepConstraintsListMessage constraintsListMessage)
+   {
+      constraintsListMessage.setSequenceId(-1);
+      constraintsListMessage.getRegionNormal().clear();
+      constraintsListMessage.getRegionOrigin().clear();
+      constraintsListMessage.getRegionOrientation().clear();
+      constraintsListMessage.getConcaveHullsSize().reset();
+      constraintsListMessage.getNumberOfHolesInRegion().reset();
+      constraintsListMessage.getHolePolygonsSize().reset();
+      constraintsListMessage.getVertexBuffer().clear();
    }
 }
