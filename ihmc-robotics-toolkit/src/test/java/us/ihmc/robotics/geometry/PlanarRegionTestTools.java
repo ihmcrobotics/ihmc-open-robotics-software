@@ -42,6 +42,10 @@ public class PlanarRegionTestTools
       expected.getTransformToWorld(expectedTransform);
       actual.getTransformToWorld(actualTransform);
       EuclidCoreTestTools.assertGeometricallyEquals(expectedTransform, actualTransform, epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getNormal(), actual.getNormal(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getPoint(), actual.getPoint(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getBoundingBox3dInWorld(), actual.getBoundingBox3dInWorld(), epsilon);
+      EuclidCoreTestTools.assertGeometricallyEquals(expected.getConvexHull(), actual.getConvexHull(), epsilon);
 
       assertEquals(expected.getConcaveHullSize(), actual.getConcaveHullSize());
 
@@ -57,8 +61,7 @@ public class PlanarRegionTestTools
       {
          ConvexPolygon2D expectedConvexPolygon = expected.getConvexPolygon(i);
          ConvexPolygon2D actualConvexPolygon = actual.getConvexPolygon(i);
-         assertEquals(expectedConvexPolygon.getNumberOfVertices(), actualConvexPolygon.getNumberOfVertices());
-         assertTrue(expectedConvexPolygon.geometricallyEquals(actualConvexPolygon, epsilon));
+         EuclidCoreTestTools.assertGeometricallyEquals(expectedConvexPolygon, actualConvexPolygon, epsilon);
       }
    }
 }

@@ -35,10 +35,6 @@ public class PlanarRegionEndToEndConversionTest
       PlanarRegionsListCommand listCommand = new PlanarRegionsListCommand();
       RecyclingArrayList<PlanarRegion> planarRegions = new RecyclingArrayList<>(PlanarRegion::new);
 
-
-      int numberOfFailingTests = 0;
-      List<String> failingDatasets = new ArrayList<>();
-      int numberOfTestedDataSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
          DataSet dataset = allDatasets.get(i);
@@ -66,15 +62,6 @@ public class PlanarRegionEndToEndConversionTest
             PlanarRegionTestTools.assertPlanarRegionsGeometricallyEqual(expectedRegion, planarRegions.get(regionIdx), 1e-5);
          }
       }
-
-      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numberOfTestedDataSets;
-      message += "\n Datasets failing: ";
-      for (int i = 0; i < failingDatasets.size(); i++)
-      {
-         message += "\n" + failingDatasets.get(i);
-      }
-
-      assertEquals(message, 0, numberOfFailingTests);
    }
 
    public static Predicate<DataSet> buildFilter(Predicate<PlannerInput> testSpecificFilter)

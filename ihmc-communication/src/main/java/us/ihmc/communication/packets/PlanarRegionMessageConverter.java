@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.PlanarRegionMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -131,7 +132,7 @@ public class PlanarRegionMessageConverter
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
          {
-            ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
+            ConvexPolygon2DReadOnly convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
             message.getConvexPolygonsSize().add(convexPolygon.getNumberOfVertices());
 
             for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
