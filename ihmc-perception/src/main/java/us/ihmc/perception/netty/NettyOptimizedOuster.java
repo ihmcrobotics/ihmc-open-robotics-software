@@ -9,6 +9,8 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.bytedeco.opencl._cl_kernel;
+import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
@@ -99,6 +101,8 @@ public class NettyOptimizedOuster
    private Instant aquisitionInstant;
    private OpenCLManager openCLManager;
    private ByteBuffer lidarPacketBuffer;
+   private _cl_program openCLProgram;
+   private _cl_kernel extractDepthImageKernel;
 
    public NettyOptimizedOuster()
    {
@@ -131,6 +135,8 @@ public class NettyOptimizedOuster
                      depthImageMeters.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); // Initialize to 0
 
                      openCLManager = new OpenCLManager();
+                     openCLProgram = openCLManager.loadProgram("OusterDepthImageUpdater");
+                     extractDepthImageKernel = openCLManager.createKernel(openCLProgram, "extractDepthImage");
 
                      lidarPacketBuffer = ByteBuffer.allocateDirect(lidarPacketSize);
                   }
