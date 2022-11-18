@@ -71,7 +71,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final RigidBodyTransform xArrowTailTransform = new RigidBodyTransform();
    private final RigidBodyTransform yArrowTailTransform = new RigidBodyTransform();
 
-   private final Point3D closestCollision = new Point3D();
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean isGizmoHoveredMouse = false;
    private boolean isBeingManipulated = false;
@@ -349,7 +348,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
               tempFramePose3D.changeFrame(parentReferenceFrame);
               tempFramePose3D.get(transformToParent);
               // also update closestCollision with the vector
-              closestCollision.add(planarMotion);
+              vrRayToRingPickCalculator.getClosestCollision().add(planarMotion);
               // update previous vrIntersectionPoint with current intersectionPoint.
               intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
            }
@@ -380,7 +379,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-//      updateTransforms();
+      updateTransforms();
 
       ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
       ImGuiMouseDragData yawDragData = input.getMouseDragData(ImGuiMouseButton.Right);
@@ -396,7 +395,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          pickResult.setDistanceToCamera(mouseRayToRingPickCalculator.getClosestCollisionDistance());
          input.addPickResult(pickResult);
       }
-      updateTransforms();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -445,17 +443,17 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
                if (translateDragData.isDragging())
                {
-                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, mouseRayToRingPickCalculator.getClosestCollision(), Axis3D.Z);
                   tempFramePose3D.setToZero(gizmoFrame);
                   tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
                   tempFramePose3D.getPosition().add(planarMotion);
                   tempFramePose3D.changeFrame(parentReferenceFrame);
                   tempFramePose3D.get(transformToParent);
-                  closestCollision.add(planarMotion);
+                  mouseRayToRingPickCalculator.getClosestCollision().add(planarMotion);
                }
                else // yaw dragging
                {
-                  if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, controlRingPose))
+                  if (clockFaceDragAlgorithm.calculate(pickRay, mouseRayToRingPickCalculator.getClosestCollision(), Axis3D.Z, controlRingPose))
                   {
                      tempFramePose3D.setToZero(gizmoFrame);
                      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());

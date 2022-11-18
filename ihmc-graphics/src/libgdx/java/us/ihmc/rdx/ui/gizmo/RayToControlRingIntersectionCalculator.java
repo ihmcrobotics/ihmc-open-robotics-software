@@ -164,4 +164,9 @@ public class RayToControlRingIntersectionCalculator
    {
       return closestCollisionDistance;
    }
+
+   public Point3D getClosestCollision()
+   {
+      return closestCollision;
+   }
 }
