@@ -125,11 +125,13 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private RayToControlRingIntersectionCalculator vrRayToRingPickCalculator;
    private RayToControlRingIntersectionCalculator.CollisionType vrCollisionType = RayToControlRingIntersectionCalculator.CollisionType.NONE;
 
-   private enum INPUT_MODE
-   {
-      MOUSE, VR
-   }
-   INPUT_MODE inputMode = INPUT_MODE.MOUSE;
+   // collision types
+   private final RayToControlRingIntersectionCalculator.CollisionType hitCylinder = RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+   private final RayToControlRingIntersectionCalculator.CollisionType hitPositiveX = RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_X;
+   private final RayToControlRingIntersectionCalculator.CollisionType hitPositiveY = RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_Y;
+   private final RayToControlRingIntersectionCalculator.CollisionType hitNegativeX = RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_X;
+   private final RayToControlRingIntersectionCalculator.CollisionType hitNegativeY = RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_Y;
+   private final RayToControlRingIntersectionCalculator.CollisionType hitNone = RayToControlRingIntersectionCalculator.CollisionType.NONE;
 
    public RDXPathControlRingGizmo()
    {
@@ -161,18 +163,10 @@ public class RDXPathControlRingGizmo implements RenderableProvider
       meshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color);
    }
 
-   public void create(RDXFocusBasedCamera camera3D, RDXVRContext context)
-   {
-      create(camera3D);
-      lineModel = RDXModelBuilder.buildModelInstance(this::buildLineMesh, "line");
-//      context.addVRInputProcessor(this::calculateVRPick);
-//      context.addVRInputProcessor(this::processVRInput);
-   }
-
    public void create(RDXFocusBasedCamera camera3D)
    {
       this.camera3D = camera3D;
-
+      lineModel = RDXModelBuilder.buildModelInstance(this::buildLineMesh, "line");
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
       highlightedMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_SELECTED_DEFAULT_COLOR.a);
       discModel.setMesh(meshBuilder ->
@@ -261,110 +255,103 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      if (inputMode == INPUT_MODE.VR)
-      {
-         vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+     {
+        vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
+        vrPickRay.getDirection().set(Axis3D.X);
+        vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+        vrPickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
+        vrPickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+        currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
+        currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
+
+        currentPlayAreaPlane.getNormal().set(Axis3D.Z);
+        currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
+
+        currentPlayAreaPlane.intersectionWith(vrPickRay, planeRayIntesection);
+
+        controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
+        controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+        controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
+        controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
+        currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
+
+        orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
+
+        vrRayIntersectionWithGround.setToZero(ReferenceFrame.getWorldFrame());
+        vrRayIntersectionWithGround.getPosition().set(planeRayIntesection);
+        EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
+                                                                   orientationDeterminationVector,
+                                                                   vrRayIntersectionWithGround.getOrientation());
+
+        lineLength = vrPickRayPose.getPosition().distance(vrRayIntersectionWithGround.getPosition());
+        RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
+
+        vrPickRayPose.get(tempTransform);
+        LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
+        vrRayIntersectionWithGround.get(tempTransform);
+
+        // vrRay intersected (collided) with this gizmo
+        vrCollisionType = vrRayToRingPickCalculator.determineCollisionTypeFromRay(vrPickRay, controlRingTransformToWorld, showArrows);
+        if (vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
         {
-           vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
-           vrPickRay.getDirection().set(Axis3D.X);
-           vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
-
-
-           vrPickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
-           vrPickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-           currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
-           currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
-
-           currentPlayAreaPlane.getNormal().set(Axis3D.Z);
-           currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
-
-           currentPlayAreaPlane.intersectionWith(vrPickRay, planeRayIntesection);
-
-           controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
-           controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-           controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
-           controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
-           currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
-
-           orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
-
-           vrRayIntersectionWithGround.setToZero(ReferenceFrame.getWorldFrame());
-           vrRayIntersectionWithGround.getPosition().set(planeRayIntesection);
-           EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
-                                                                      orientationDeterminationVector,
-                                                                      vrRayIntersectionWithGround.getOrientation());
-
-           lineLength = vrPickRayPose.getPosition().distance(vrRayIntersectionWithGround.getPosition());
-           RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
-
-           vrPickRayPose.get(tempTransform);
-           LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
-           vrRayIntersectionWithGround.get(tempTransform);
-
-           // vrRay intersected (collided) with this gizmo
-           vrCollisionType = vrRayToRingPickCalculator.determineCollisionTypeFromRay(vrPickRay, controlRingTransformToWorld, showArrows);
-           if (vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
-           {
-              vrPickResult.setDistanceToControllerPickPoint(vrRayToRingPickCalculator.getClosestCollisionDistance());
-              vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
-              isGizmoHoveredFromVR = true;
-              updateMaterialHighlighting();
-           }
-           else
-           {
-              isGizmoHoveredFromVR = false;
-           }
-        });
-      }
+           vrPickResult.setDistanceToControllerPickPoint(vrRayToRingPickCalculator.getClosestCollisionDistance());
+           vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
+           isGizmoHoveredFromVR = true;
+           updateMaterialHighlighting();
+        }
+        else
+        {
+           isGizmoHoveredFromVR = false;
+        }
+     });
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (inputMode == INPUT_MODE.VR)
-      {
-         vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
-        {
-           // Holding onto the right controller trigger button
-           InputDigitalActionData clickTriggerData = controller.getClickTriggerActionData();
-           isVRTriggerDown = clickTriggerData.bState();
-           isVRTriggerPressed = isVRTriggerDown && clickTriggerData.bChanged();
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+     {
+        // Holding onto the right controller trigger button
+        InputDigitalActionData clickTriggerData = controller.getClickTriggerActionData();
+        isVRTriggerDown = clickTriggerData.bState();
+        isVRTriggerPressed = isVRTriggerDown && clickTriggerData.bChanged();
 
-           // Grabbing the ring with vrController
-           if (!isVRTriggerDown)
-           {
-              isVRGrabbingGizmo = false;
-           }
-           if (isVRGrabbingGizmo)
-           {
-              // This represents vector from previous intersection to updated (moved) intersection point.
-              Vector3D planarMotion = new Vector3D();
-              planarMotion.sub(vrRayIntersectionWithGround.getPosition(), intersectionStartPoint);
-              // tempFramePose3D gets updated from all the processes and eventually updates controlRingPose
-              tempFramePose3D.setToZero(gizmoFrame);
-              tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-              tempFramePose3D.getPosition().add(planarMotion);
-              tempFramePose3D.changeFrame(parentReferenceFrame);
-              tempFramePose3D.get(transformToParent);
-              // also update closestCollision with the vector
-              vrRayToRingPickCalculator.getClosestCollision().add(planarMotion);
-              // update previous vrIntersectionPoint with current intersectionPoint.
-              intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
-           }
-           if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER)
-           {
-              intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
-              isVRGrabbingGizmo = true;
-              isNewlyModifiedFromVR = true;
-           }
-           else
-           {
-              isNewlyModifiedFromVR = false;
-           }
-        });
-         updateTransforms();
-      }
+        // Grabbing the ring with vrController
+        if (!isVRTriggerDown)
+        {
+           isVRGrabbingGizmo = false;
+        }
+        if (isVRGrabbingGizmo)
+        {
+           // This represents vector from previous intersection to updated (moved) intersection point.
+           Vector3D planarMotion = new Vector3D();
+           planarMotion.sub(vrRayIntersectionWithGround.getPosition(), intersectionStartPoint);
+           // tempFramePose3D gets updated from all the processes and eventually updates controlRingPose
+           tempFramePose3D.setToZero(gizmoFrame);
+           tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+           tempFramePose3D.getPosition().add(planarMotion);
+           tempFramePose3D.changeFrame(parentReferenceFrame);
+           tempFramePose3D.get(transformToParent);
+           // also update closestCollision with the vector
+           vrRayToRingPickCalculator.getClosestCollision().add(planarMotion);
+           // update previous vrIntersectionPoint with current intersectionPoint.
+           intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
+        }
+        if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER)
+        {
+           intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
+           isVRGrabbingGizmo = true;
+           isNewlyModifiedFromVR = true;
+        }
+        else
+        {
+           isNewlyModifiedFromVR = false;
+        }
+     });
+      updateTransforms();
    }
 
    public boolean isSendSteps()
@@ -399,145 +386,141 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (inputMode == INPUT_MODE.MOUSE)
-         process3DViewInput(input, true);
+      process3DViewInput(input, true);
    }
 
    public void process3DViewInput(ImGui3DViewInput input, boolean allowUserInput)
    {
-      if (inputMode == INPUT_MODE.MOUSE)
+      updateTransforms();
+
+      int yawMouseButton = ImGuiMouseButton.Right;
+      ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
+      ImGuiMouseDragData yawDragData = input.getMouseDragData(yawMouseButton);
+
+      isNewlyModifiedMouse = false;
+      isGizmoHoveredMouse = input.isWindowHovered() && pickResult == input.getClosestPick();
+      boolean isRingHoveredMouse = isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+      boolean leftButtonDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
+      boolean rightButtonDown = ImGui.isMouseDown(yawMouseButton);
+
+      if (allowUserInput)
       {
-         updateTransforms();
-
-         int yawMouseButton = ImGuiMouseButton.Right;
-         ImGuiMouseDragData translateDragData = input.getMouseDragData(ImGuiMouseButton.Left);
-         ImGuiMouseDragData yawDragData = input.getMouseDragData(yawMouseButton);
-
-         isNewlyModifiedMouse = false;
-         isGizmoHoveredMouse = input.isWindowHovered() && pickResult == input.getClosestPick();
-         boolean isRingHoveredMouse = isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
-         boolean leftButtonDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
-         boolean rightButtonDown = ImGui.isMouseDown(yawMouseButton);
-
-         if (allowUserInput)
+         if (isRingHoveredMouse)
          {
-            if (isRingHoveredMouse)
+            if (yawDragData.getDragJustStarted())
             {
-               if (yawDragData.getDragJustStarted())
-               {
-                  clockFaceDragAlgorithm.reset();
-                  yawDragData.setObjectBeingDragged(this);
-               }
-               else if (translateDragData.getDragJustStarted())
-               {
-                  translateDragData.setObjectBeingDragged(this);
-               }
+               clockFaceDragAlgorithm.reset();
+               yawDragData.setObjectBeingDragged(this);
             }
-
-            isBeingManipulated = (yawDragData.getObjectBeingDragged() == this && rightButtonDown)
-                                 || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
-            if (isBeingManipulated)
+            else if (translateDragData.getDragJustStarted())
             {
-               isNewlyModifiedMouse = true;
-               Line3DReadOnly pickRay = input.getPickRayInWorld();
+               translateDragData.setObjectBeingDragged(this);
+            }
+         }
 
-               if (translateDragData.isDragging())
+         isBeingManipulated =
+               (yawDragData.getObjectBeingDragged() == this && rightButtonDown) || (translateDragData.getObjectBeingDragged() == this && leftButtonDown);
+         if (isBeingManipulated)
+         {
+            isNewlyModifiedMouse = true;
+            Line3DReadOnly pickRay = input.getPickRayInWorld();
+
+            if (translateDragData.isDragging())
+            {
+               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, mouseRayToRingPickCalculator.getClosestCollision(), Axis3D.Z);
+               tempFramePose3D.setToZero(gizmoFrame);
+               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+               tempFramePose3D.getPosition().add(planarMotion);
+               tempFramePose3D.changeFrame(parentReferenceFrame);
+               tempFramePose3D.get(transformToParent);
+               mouseRayToRingPickCalculator.getClosestCollision().add(planarMotion);
+            }
+            else // yaw dragging
+            {
+               if (clockFaceDragAlgorithm.calculate(pickRay, mouseRayToRingPickCalculator.getClosestCollision(), Axis3D.Z, controlRingPose))
                {
-                  Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, mouseRayToRingPickCalculator.getClosestCollision(), Axis3D.Z);
                   tempFramePose3D.setToZero(gizmoFrame);
                   tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-                  tempFramePose3D.getPosition().add(planarMotion);
+                  clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
                   tempFramePose3D.changeFrame(parentReferenceFrame);
                   tempFramePose3D.get(transformToParent);
-                  mouseRayToRingPickCalculator.getClosestCollision().add(planarMotion);
                }
-               else // yaw dragging
-               {
-                  if (clockFaceDragAlgorithm.calculate(pickRay, mouseRayToRingPickCalculator.getClosestCollision(), Axis3D.Z, controlRingPose))
-                  {
-                     tempFramePose3D.setToZero(gizmoFrame);
-                     tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-                     clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
-                     tempFramePose3D.changeFrame(parentReferenceFrame);
-                     tempFramePose3D.get(transformToParent);
-                  }
-               }
-            }
-
-            // keyboard based controls
-            boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
-            boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
-            boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
-            boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
-            boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
-            isNewlyModifiedMouse |= anyArrowHeld;
-            boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
-            boolean altHeld = ImGui.getIO().getKeyAlt();
-            boolean shiftHeld = ImGui.getIO().getKeyShift();
-            double deltaTime = Gdx.graphics.getDeltaTime();
-
-            if (altHeld) // orientation
-            {
-               double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
-               if (leftArrowHeld) // yaw +
-               {
-                  transformToParent.getRotation().appendYawRotation(amount);
-               }
-               if (rightArrowHeld) // yaw -
-               {
-                  transformToParent.getRotation().appendYawRotation(-amount);
-               }
-            }
-            else if (anyArrowHeld) // translation (only the arrow keys do the moving)
-            {
-               transformFromKeyboardTransformationToWorld.setToZero();
-               transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
-               keyboardTransformationFrame.update();
-               tempFramePose3D.setToZero(keyboardTransformationFrame);
-
-               double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
-               if (upArrowHeld && !ctrlHeld) // x +
-               {
-                  tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
-               }
-               if (downArrowHeld && !ctrlHeld) // x -
-               {
-                  tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
-               }
-               if (leftArrowHeld) // y +
-               {
-                  tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
-               }
-               if (rightArrowHeld) // y -
-               {
-                  tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
-               }
-               if (upArrowHeld && ctrlHeld) // z +
-               {
-                  tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
-               }
-               if (downArrowHeld && ctrlHeld) // z -
-               {
-                  tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
-               }
-
-               tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-               tempFramePose3D.get(tempTransform);
-               transformToParent.getTranslation().add(tempTransform.getTranslation());
             }
          }
 
-         // after things have been modified, update the derivative stuff
-         updateTransforms();
+         // keyboard based controls
+         boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+         boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+         boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+         boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
+         boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+         isNewlyModifiedMouse |= anyArrowHeld;
+         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+         boolean altHeld = ImGui.getIO().getKeyAlt();
+         boolean shiftHeld = ImGui.getIO().getKeyShift();
+         double deltaTime = Gdx.graphics.getDeltaTime();
 
-         LibGDXTools.toEuclid(camera3D.position, cameraPosition);
-         distanceToCamera = cameraPosition.distance(controlRingPose.getPosition());
-         if (lastDistanceToCamera != distanceToCamera)
+         if (altHeld) // orientation
          {
-            lastDistanceToCamera = distanceToCamera;
-            recreateGraphics();
-            updateTransforms();
+            double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            if (leftArrowHeld) // yaw +
+            {
+               transformToParent.getRotation().appendYawRotation(amount);
+            }
+            if (rightArrowHeld) // yaw -
+            {
+               transformToParent.getRotation().appendYawRotation(-amount);
+            }
          }
+         else if (anyArrowHeld) // translation (only the arrow keys do the moving)
+         {
+            transformFromKeyboardTransformationToWorld.setToZero();
+            transformFromKeyboardTransformationToWorld.getRotation().setToYawOrientation(camera3D.getFocusPointPose().getYaw());
+            keyboardTransformationFrame.update();
+            tempFramePose3D.setToZero(keyboardTransformationFrame);
+
+            double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            if (upArrowHeld && !ctrlHeld) // x +
+            {
+               tempFramePose3D.getPosition().addX(getTranslateSpeedFactor() * amount);
+            }
+            if (downArrowHeld && !ctrlHeld) // x -
+            {
+               tempFramePose3D.getPosition().subX(getTranslateSpeedFactor() * amount);
+            }
+            if (leftArrowHeld) // y +
+            {
+               tempFramePose3D.getPosition().addY(getTranslateSpeedFactor() * amount);
+            }
+            if (rightArrowHeld) // y -
+            {
+               tempFramePose3D.getPosition().subY(getTranslateSpeedFactor() * amount);
+            }
+            if (upArrowHeld && ctrlHeld) // z +
+            {
+               tempFramePose3D.getPosition().addZ(getTranslateSpeedFactor() * amount);
+            }
+            if (downArrowHeld && ctrlHeld) // z -
+            {
+               tempFramePose3D.getPosition().subZ(getTranslateSpeedFactor() * amount);
+            }
+
+            tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+            tempFramePose3D.get(tempTransform);
+            transformToParent.getTranslation().add(tempTransform.getTranslation());
+         }
+      }
+
+      // after things have been modified, update the derivative stuff
+      updateTransforms();
+
+      LibGDXTools.toEuclid(camera3D.position, cameraPosition);
+      distanceToCamera = cameraPosition.distance(controlRingPose.getPosition());
+      if (lastDistanceToCamera != distanceToCamera)
+      {
+         lastDistanceToCamera = distanceToCamera;
+         recreateGraphics();
+         updateTransforms();
       }
    }
 
@@ -584,15 +567,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.radioButton("MOUSE", inputMode == INPUT_MODE.MOUSE))
-      {
-         inputMode = INPUT_MODE.MOUSE;
-      }
-      ImGui.sameLine();
-      if (ImGui.radioButton("VR", inputMode == INPUT_MODE.VR))
-      {
-         inputMode = INPUT_MODE.VR;
-      }
+
    }
 
    public void renderImGuiTuner()
@@ -643,7 +618,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          negativeXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
          negativeYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       }
-//      lineModel.getRenderables(renderables, pool);
+      lineModel.getRenderables(renderables, pool);
    }
 
    public void getVRLineRenderable(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -669,79 +644,77 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public boolean getAnyPartPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE;
+      return isGizmoHoveredMouse && mouseCollisionType != hitNone;
    }
 
    public boolean getAnyPartPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE;
+      return isGizmoHoveredFromVR  && vrCollisionType != hitNone;
    }
 
    public boolean getAnyArrowPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE
-             && mouseCollisionType != RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+      return isGizmoHoveredMouse && mouseCollisionType != hitNone && mouseCollisionType != hitCylinder;
    }
 
    public boolean getAnyArrowPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE
-             && vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+      return isGizmoHoveredFromVR  && vrCollisionType != hitNone && vrCollisionType != hitCylinder;
    }
 
    // CYLINDER - MOUSE
    public boolean getHollowCylinderPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+      return isGizmoHoveredMouse && mouseCollisionType == hitCylinder;
    }
    // CYLINDER - VR
    public boolean getHollowCylinderPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+      return isGizmoHoveredFromVR && vrCollisionType == hitCylinder;
    }
 
    // POSITIVE X - MOUSE
    public boolean getPositiveXArrowPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_X;
+      return isGizmoHoveredMouse && mouseCollisionType == hitPositiveX;
    }
    // POSITIVE X - VR
    public boolean getPositiveXArrowPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_X;
+      return isGizmoHoveredFromVR && vrCollisionType == hitPositiveX;
    }
 
    // POSITIVE Y - MOUSE
    public boolean getPositiveYArrowPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_Y;
+      return isGizmoHoveredMouse && mouseCollisionType == hitPositiveY;
    }
    // POSITIVE Y - VR
    public boolean getPositiveYArrowPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_Y;
+      return isGizmoHoveredFromVR && vrCollisionType == hitPositiveY;
    }
 
    // NEGATIVE X - MOUSE
    public boolean getNegativeXArrowPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_X;
+      return isGizmoHoveredMouse && mouseCollisionType == hitNegativeX;
    }
    // NEGATIVE X - VR
    public boolean getNegativeXArrowPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_X;
+      return isGizmoHoveredFromVR && isVRTriggerPressed && vrCollisionType == hitNegativeX;
    }
 
    // NEGATIVE Y - MOUSE
    public boolean getNegativeYArrowPickSelectedMouse()
    {
-      return isGizmoHoveredMouse && mouseCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_Y;
+      return isGizmoHoveredMouse && mouseCollisionType == hitNegativeY;
    }
    // NEGATIVE Y - VR
    public boolean getNegativeYArrowPickSelectedVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_Y;
+      return isGizmoHoveredFromVR && isVRTriggerPressed && vrCollisionType == hitNegativeY;
    }
 
    public void setShowArrows(boolean showArrows)
@@ -786,7 +759,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    public boolean isRingHoveredFromVR()
    {
-      return isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
+      return isGizmoHoveredFromVR && vrCollisionType == hitCylinder;
    }
 
    public boolean isVRTriggerPressed()

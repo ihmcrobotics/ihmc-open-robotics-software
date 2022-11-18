@@ -50,6 +50,8 @@ public class RDXGizmoDemo
             footstepRingGizmo.create(focusBasedCamera);
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(footstepRingGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);
+            baseUI.getVRManager().getContext().addVRPickCalculator(footstepRingGizmo::calculateVRPick);
+            baseUI.getVRManager().getContext().addVRInputProcessor(footstepRingGizmo::processVRInput);
             baseUI.getPrimaryScene().addRenderableProvider(footstepRingGizmo);
             baseUI.getImGuiPanelManager().addPanel(footstepRingGizmo.createTunerPanel(RDXGizmoDemo.class.getSimpleName()));
 

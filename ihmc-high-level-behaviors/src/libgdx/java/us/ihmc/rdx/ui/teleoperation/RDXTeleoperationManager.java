@@ -399,6 +399,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
    {
       if (interactablesAvailable)
       {
+         if (!manualFootstepPlacement.isPlacingFootstep())
+         {
+            walkPathControlRing.processVRInput(vrContext);
+         }
+
          for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
             robotPartInteractable.processVRInput(vrContext);
 

@@ -105,7 +105,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    {
       this.panel3D = panel3D;
       this.teleoperationParameters = teleoperationParameters;
-      footstepPlannerGoalGizmo.create(panel3D.getCamera3D(), context);
+      footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
       panel3D.addImGuiOverlayAddition(this::renderTooltips);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
@@ -149,7 +149,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    public void update(RDXInteractableFootstepPlan plannedFootstepPlacement)
    {
-      if (!modifiedMouse)
+      if (!modified)
       {
          footstepPlannerGoalGizmo.getTransformToParent().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
@@ -248,7 +248,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          becomeModifiedVR(true);
       }
-      if (selectedVR && !footstepPlannerGoalGizmo.getAnyPartPickSelectedVR() && isVRTriggerPressed)
+      if (selectedVR && !footstepPlannerGoalGizmo.getAnyPartPickSelectedVR())
       {
          selectedVR = false;
       }
