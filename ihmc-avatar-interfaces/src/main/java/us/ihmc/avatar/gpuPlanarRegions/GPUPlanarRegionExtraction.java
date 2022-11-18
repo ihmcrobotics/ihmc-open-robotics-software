@@ -541,12 +541,12 @@ public class GPUPlanarRegionExtraction
       .map(gpuPlanarRegion ->
       {
          List<PlanarRegion> planarRegions = new ArrayList<>();
+         FrameQuaternion orientation = new FrameQuaternion();
          try
          {
             // Going through LinearTransform3D first prevents NotARotationMatrix exceptions.
             LinearTransform3D linearTransform3D = new LinearTransform3D(EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
             linearTransform3D.normalize();
-            FrameQuaternion orientation = new FrameQuaternion();
             orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -611,6 +611,8 @@ public class GPUPlanarRegionExtraction
          }
          catch (NotARotationMatrixException notARotationMatrixException)
          {
+            LogTools.info("Normal = " + gpuPlanarRegion.getNormal().toString(null));
+            LogTools.info("Orientation = " + orientation.toString(null));
             LogTools.warn("Not a rotation matrix: {}", gpuPlanarRegion.getNormal());
 //            notARotationMatrixException.printStackTrace();
          }
