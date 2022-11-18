@@ -673,6 +673,20 @@ public class PlanarRegionTest
    }
 
    @Test
+   public void testCopy()
+   {
+      Random random = new Random(1738L);
+
+      for (int i = 0; i < 10000; i++)
+      {
+         PlanarRegion planarRegion1 = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 5.0, 8);
+//         PlanarRegion planarRegion2 = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, 1, 5.0, 8);
+
+         PlanarRegionTestTools.assertPlanarRegionsGeometricallyEqual(planarRegion1, planarRegion1.copy(), 1e-8);
+      }
+   }
+
+   @Test
    public void testGetSupportingVertex()
    {
       Random random = new Random(3290);
