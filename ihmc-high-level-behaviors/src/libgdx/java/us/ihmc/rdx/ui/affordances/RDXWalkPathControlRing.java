@@ -241,14 +241,14 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
    public void processVRInput(RDXVRContext vrContext)
    {
       footstepPlannerGoalGizmo.processVRInput(vrContext);
-      boolean isVRTriggerPressed = footstepPlannerGoalGizmo.isVRTriggerPressed();
+      boolean isVRTriggerClicked = footstepPlannerGoalGizmo.isVRTriggerClicked();
       ringPickSelectedVR = footstepPlannerGoalGizmo.getHollowCylinderPickSelectedVR();
 
-      if (ringPickSelectedVR && isVRTriggerPressed)
+      if (ringPickSelectedVR && isVRTriggerClicked)
       {
          becomeModifiedVR(true);
       }
-      if (selectedVR && !footstepPlannerGoalGizmo.getAnyPartPickSelectedVR())
+      if (selectedVR && !footstepPlannerGoalGizmo.getAnyPartPickSelectedVR() && isVRTriggerClicked)
       {
          selectedVR = false;
       }
@@ -257,7 +257,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       {
          updateStuff();
       }
-      if (selectedVR && isVRTriggerPressed)
+      if (selectedVR && isVRTriggerClicked)
       {
          updateFromArrowPick(footstepPlannerGoalGizmo.getPositiveXArrowPickSelectedVR(),
                              footstepPlannerGoalGizmo.getPositiveYArrowPickSelectedVR(),
@@ -271,7 +271,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
          queueFootstepPlan();
       }
 
-      /* TODO: assign another key for these in vr version?
+      /* TODO: assign another key for these in vr version? (not many buttons left)
       if (modifiedVR && selectedVR && SOMEKEY PRESS FROM JOYSTICK)
       {
          delete();
