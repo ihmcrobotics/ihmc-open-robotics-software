@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
@@ -38,14 +39,14 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
-   private final List<Point2DReadOnly> concaveHullsVertices;
+   private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<>(Point2D::new);
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
     * the plane.
     */
-   private final List<ConvexPolygon2D> convexPolygons;
+   private final RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<>(ConvexPolygon2D::new);
    /** To detect concave hull separation */
-   private List<Boolean> visited;
+   private final List<Boolean> visited = new ArrayList<>();
 
    private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -100,11 +101,15 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-      this.concaveHullsVertices = concaveHullVertices.stream().map(Point2D::new).collect(Collectors.toList());
+      this.concaveHullsVertices.clear();
+      concaveHullVertices.forEach(this.concaveHullsVertices.add()::set);
+
       //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
       checkConcaveHullRepeatVertices(false);
 
-      convexPolygons = planarRegionConvexPolygons;
+      convexPolygons.clear();
+      planarRegionConvexPolygons.forEach(convexPolygons.add()::set);
+
       updateBoundingBox();
       updateConvexHull();
    }
@@ -121,15 +126,15 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-      concaveHullsVertices = new ArrayList<>();
+      concaveHullsVertices.clear();
       for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
-      {
-         concaveHullsVertices.add(new Point2D(convexPolygon.getVertex(i)));
-      }
+         concaveHullsVertices.add().set(convexPolygon.getVertex(i));
+
+      //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
       checkConcaveHullRepeatVertices(false);
 
-      convexPolygons = new ArrayList<>();
-      convexPolygons.add(new ConvexPolygon2D(convexPolygon));
+      convexPolygons.clear();
+      convexPolygons.add().set(convexPolygon);
       updateBoundingBox();
       updateConvexHull();
    }
@@ -148,7 +153,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       convexPolygons.clear();
       for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
-         convexPolygons.add(planarRegionConvexPolygons.get(i));
+         convexPolygons.add().set(planarRegionConvexPolygons.get(i));
 
       updateBoundingBox();
       updateConvexHull();
@@ -162,18 +167,14 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
       this.concaveHullsVertices.clear();
-      convexHull.clear();
       for (int i = 0; i < concaveHullVertices.size(); i++)
-      {
-         this.concaveHullsVertices.add(concaveHullVertices.get(i));
-         convexHull.addVertex(concaveHullVertices.get(i));
-      }
-      convexHull.update();
+         this.concaveHullsVertices.add().set(concaveHullVertices.get(i));
 
       convexPolygons.clear();
       for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
-         convexPolygons.add(planarRegionConvexPolygons.get(i));
+         convexPolygons.add().set(planarRegionConvexPolygons.get(i));
 
+      updateConvexHull();
       updateBoundingBox();
 
       regionId = newRegionId;
@@ -1171,10 +1172,10 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
       convexPolygons.clear();
       for (int i = 0; i < other.getNumberOfConvexPolygons(); i++)
-         convexPolygons.add(new ConvexPolygon2D(other.convexPolygons.get(i)));
+         convexPolygons.add().set(other.convexPolygons.get(i));
       concaveHullsVertices.clear();
       for (int i = 0; i < other.getConcaveHullSize(); i++)
-         concaveHullsVertices.add(new Point2D(other.getConcaveHull().get(i)));
+         concaveHullsVertices.add().set(other.getConcaveHull().get(i));
 
       updateBoundingBox();
       convexHull.set(other.convexHull);
@@ -1239,11 +1240,11 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       else if (convexPolygons.size() == 1)
       {
          for (int i = 0; i < convexPolygons.get(0).getNumberOfVertices(); i++)
-            concaveHullsVertices.add(new Point2D(convexPolygons.get(0).getVertex(i)));
+            concaveHullsVertices.add().set(convexPolygons.get(0).getVertex(i));
          return;
       }
 
-      visited = new ArrayList<>(); // for concave hull separation detection
+      visited.clear(); // for concave hull separation detection
 
       int maximumIterations = 0;
 
@@ -1289,7 +1290,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          }
       }
 
-      concaveHullsVertices.add(new Point2D(convexPolygons.get(minXPolygonIndex).getVertex(0)));
+      concaveHullsVertices.add().set(convexPolygons.get(minXPolygonIndex).getVertex(0));
       visited.set(minXPolygonIndex, true);
       int polygonIndex = minXPolygonIndex;
       int vertexIndex = 0;
@@ -1314,7 +1315,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          }
          else
          {
-            concaveHullsVertices.add(new Point2D(convexPolygons.get(polygonIndex).getVertex(vertexIndex)));
+            concaveHullsVertices.add().set(convexPolygons.get(polygonIndex).getVertex(vertexIndex));
             visited.set(polygonIndex, true);
          }
 
@@ -1413,18 +1414,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    public PlanarRegion copy()
    {
-      RigidBodyTransform transformToWorldCopy = new RigidBodyTransform(fromLocalToWorldTransform);
-      List<Point2D> concaveHullCopy = new ArrayList<>();
-      for (int i = 0; i < concaveHullsVertices.size(); i++)
-         concaveHullCopy.add(new Point2D(concaveHullsVertices.get(i)));
-
-      List<ConvexPolygon2D> convexPolygonsCopy = new ArrayList<>();
-      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
-         convexPolygonsCopy.add(new ConvexPolygon2D(convexPolygons.get(i)));
-
-      PlanarRegion planarRegion = new PlanarRegion(transformToWorldCopy, concaveHullCopy, convexPolygonsCopy);
-      planarRegion.setRegionId(regionId);
-
+      PlanarRegion planarRegion = new PlanarRegion();
+      planarRegion.set(this);
       return planarRegion;
    }
 

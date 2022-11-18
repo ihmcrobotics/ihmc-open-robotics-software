@@ -20,8 +20,8 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class SimpleSteppableRegionsCalculatorTest
 {
-   private static final double minRegionArea = 0.04;
-   private static final double maxRegionAngle = Math.toRadians(30.0);
+   private static final double minRegionArea = 0.005;
+   private static final double maxRegionAngle = Math.toRadians(45.0);
 
    @Test
    public void testFromDataSets()
@@ -34,9 +34,6 @@ public class SimpleSteppableRegionsCalculatorTest
       PlanarRegionsListCommand listCommand = new PlanarRegionsListCommand();
       SimpleSteppableRegionsCalculator calculatorToTest = new SimpleSteppableRegionsCalculator(() -> minRegionArea, () -> maxRegionAngle);
 
-      int numberOfFailingTests = 0;
-      List<String> failingDatasets = new ArrayList<>();
-      int numberOfTestedDataSets = 0;
       for (int i = 0; i < allDatasets.size(); i++)
       {
          DataSet dataset = allDatasets.get(i);
@@ -72,14 +69,5 @@ public class SimpleSteppableRegionsCalculatorTest
             PlanarRegionTestTools.assertPlanarRegionsGeometricallyEqual(expectedRegion, calculatorToTestAgainst.getSteppableRegions().get(regionIdx), 1e-5);
          }
       }
-
-      String message = "Number of failing datasets: " + numberOfFailingTests + " out of " + numberOfTestedDataSets;
-      message += "\n Datasets failing: ";
-      for (int i = 0; i < failingDatasets.size(); i++)
-      {
-         message += "\n" + failingDatasets.get(i);
-      }
-
-      assertEquals(message, 0, numberOfFailingTests);
    }
 }

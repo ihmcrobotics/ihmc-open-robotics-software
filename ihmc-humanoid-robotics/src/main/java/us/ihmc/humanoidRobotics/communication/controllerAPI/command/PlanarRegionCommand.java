@@ -179,4 +179,25 @@ public class PlanarRegionCommand implements Command<PlanarRegionCommand, PlanarR
    {
       return sequenceId;
    }
+
+   @Override
+   public String toString()
+   {
+      StringBuffer buffer = new StringBuffer();
+
+      buffer.append("transformToWorld:\n" + fromLocalToWorldTransform + "\n");
+      buffer.append("number of polygons: " + convexPolygons.size() + "\n");
+
+      int maxNumberOfPolygonsToPrint = 5;
+      for (int i = 0; i < Math.min(maxNumberOfPolygonsToPrint, convexPolygons.size()); i++)
+      {
+         buffer.append(convexPolygons.get(i) + "\n");
+      }
+      if (convexPolygons.size() > maxNumberOfPolygonsToPrint)
+      {
+         buffer.append("...\n");
+      }
+
+      return buffer.toString();
+   }
 }
