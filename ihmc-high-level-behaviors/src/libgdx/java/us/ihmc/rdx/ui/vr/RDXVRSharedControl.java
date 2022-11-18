@@ -10,24 +10,23 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 public class RDXVRSharedControl
 {
-   private ImBoolean enabledKinematicsStreaming;
+   private ImBoolean enabledReplay;
    private ImBoolean enabledRecording;
    private final ImBoolean enabled = new ImBoolean(false);
-   private boolean isActive = false;
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
 
-   public RDXVRSharedControl(ImBoolean enabledKinematicsStreaming, ImBoolean enabledRecording)
+   public RDXVRSharedControl(ImBoolean enabledReplay, ImBoolean enabledRecording)
    {
-      this.enabledKinematicsStreaming = enabledKinematicsStreaming;
+      this.enabledReplay = enabledReplay;
       this.enabledRecording = enabledRecording;
    }
 
    public void processInput(InputDigitalActionData triggerButton)
    {
-      // check streaming is on, shared control is on and trigger button has been pressed once. if button is pressed again shared control is stopped
-      if (enabledKinematicsStreaming.get() && enabled.get() && triggerButton.bChanged() && !triggerButton.bState())
+      // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
+      if (triggerButton.bChanged() && !triggerButton.bState())
       {
-         isActive = !isActive;
+         enabled.set(!enabled.get());
       }
    }
 
@@ -61,13 +60,13 @@ public class RDXVRSharedControl
          this.enabled.set(enabled);
       if (enabled)
       {
-         if (enabledRecording.get())
-            this.enabled.set(false); //check no concurrency with recording
+         if (enabledRecording.get() || enabledReplay.get())
+            this.enabled.set(false); //check no concurrency with recording and replay
       }
    }
 
    public boolean isActive()
    {
-      return this.isActive;
+      return this.enabled.get();
    }
 }

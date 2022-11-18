@@ -75,7 +75,7 @@ public class KinematicsRecordReplay
    {
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
       // Read file with stored trajectories: read setpoint per timestep until file is over
-      Double[] dataPoint = trajectoryRecorder.play();
+      Double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
       // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
       framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
       framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);

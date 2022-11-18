@@ -23,9 +23,10 @@ public class TrajectoryRecordReplay<T extends Number>
 {
    private String filePath;
    private final Class<T> clazz;
-   private int numberParts; //specify the number of body parts you want to record
+   private int numberParts; //specify the number of parts you want to record (e.g., left hand, right hand, chest)
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private ArrayList<T[]> concatenatedDataMatrix = new ArrayList<>();
+   private ArrayList<T[]> splitDataMatrix = new ArrayList<>();
    private int timeStepReplay = 0;
    private boolean savedRecording = true;
    private boolean doneReplaying = true;
@@ -42,10 +43,32 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public T[] play()
    {
+      return this.play(false);
+   }
+
+   public T[] play(boolean split)
+   {
       if (timeStepReplay < 1)
+      {
          this.readCSV();
-      T[] values = dataMatrix.get(timeStepReplay);
-      if (timeStepReplay >= dataMatrix.size() - 1)
+         if (split)
+            this.splitData();
+      }
+      T[] values;
+      int size;
+      if (split)
+      {
+         //read split data (a row for each body part)
+         values = splitDataMatrix.get(timeStepReplay);
+         size = splitDataMatrix.size();
+      }
+      else
+      {
+         //read default data as they are stored in the csv file
+         values = dataMatrix.get(timeStepReplay);
+         size = dataMatrix.size();
+      }
+      if (timeStepReplay >= size - 1)
       {
          doneReplaying = true;
          this.reset();
@@ -66,7 +89,7 @@ public class TrajectoryRecordReplay<T extends Number>
       dataMatrix.add(localValues);
    }
 
-   /* Used if we are recording different body parts trajectories but not in the same scope
+   /* Useful if we are recording trajectories of different parts but not in the same scope
     * and we want to concatenate them into one single row to have a single csv file
     * rather than having multiple TrajectoryRecordReplay objects and multiple csv files */
    public void concatenateData()
@@ -83,9 +106,29 @@ public class TrajectoryRecordReplay<T extends Number>
       concatenated = true;
    }
 
+   /* Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
+    * and we want the info of each part in a separate row.
+    * Not useful if you have different parts with different number of elements */
+   private void splitData()
+   {
+      for (int i = 0; i < dataMatrix.size(); i++)
+      {
+         T[] row = dataMatrix.get(i);
+         T[] splitRow = newNumberArray(row.length / numberParts);
+         for (int n = 0; n < numberParts - 1; n++)
+         {
+            for (int j = 0; j < splitRow.length; j++)
+            {
+               splitRow[j] = row[j + n * splitRow.length];
+            }
+            splitDataMatrix.add(splitRow);
+         }
+      }
+   }
+
    public void saveRecording()
    {
-      if (concatenated)
+      if (concatenated) //save concatenated data (a single row for every body part)
          writeCSV(concatenatedDataMatrix);
       else
          writeCSV(dataMatrix);
@@ -163,6 +206,7 @@ public class TrajectoryRecordReplay<T extends Number>
       dataMatrix.clear();
       concatenated = false;
       concatenatedDataMatrix.clear();
+      splitDataMatrix.clear();
    }
 
    @SuppressWarnings("unchecked")
