@@ -16,7 +16,7 @@ import static org.bytedeco.opencv.global.opencv_core.*;
 public class BytedecoOpenCVTools
 {
    public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
-   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 95);
 
    public static final int FLIP_Y = 0;
    public static final int FLIP_X = 1;
@@ -61,7 +61,6 @@ public class BytedecoOpenCVTools
       mats.push_back(upper);
 
       opencv_core.merge(mats, destination);
-
    }
 
    public static void extractDepth16FromLower8UC3(Mat source, Mat destination)
@@ -70,7 +69,6 @@ public class BytedecoOpenCVTools
       opencv_core.split(source, mats);
 
       LogTools.info("Previous Depth: {}", mats.size());
-
 
       MatVector finalMats = new MatVector();
       finalMats.push_back(mats.get(0));
@@ -83,7 +81,6 @@ public class BytedecoOpenCVTools
       Mat depth = new Mat(source.rows(), source.cols(), CV_16UC1, depth8UC2.data());
 
       destination.put(depth);
-
    }
 
    public static void convert8BitGrayTo8BitRGBA(Mat source, Mat destination)
@@ -150,39 +147,48 @@ public class BytedecoOpenCVTools
    public static void compressFloatDepthJPG(Mat image, BytePointer compressedBytes)
    {
       Mat depthRGBAMat = new Mat(image.rows(), image.cols(), CV_8UC4, image.data());
-      Mat yuv420Image = new Mat();
-      opencv_imgproc.cvtColor(depthRGBAMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, compressionParametersJPG);
+      //Mat yuv420Image = new Mat();
+      //opencv_imgproc.cvtColor(depthRGBAMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
+      opencv_imgcodecs.imencode(".jpg", depthRGBAMat, compressedBytes, compressionParametersJPG);
    }
 
-   public static void decompressFloatDepthJPG(Mat image, BytePointer compressedBytes)
+   public static void decompressFloatDepthJPG(byte[] data, Mat image)
    {
-      Mat inputJPEGMat = new Mat();
-      Mat inputYUVI420Mat = new Mat();
+      BytePointer dataPointer = new BytePointer(data);
+      Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
 
-      inputJPEGMat.cols(size);
-      inputJPEGMat.data(dataPointer);
+      Mat depthRGBA8Mat = new Mat();
 
       // imdecode takes the longest by far out of all this stuff
-      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, depthRGBA8Mat);
 
-      // YUV I420 has 1.5 times the height of the image
-      int imageWidth = inputYUVI420Mat.cols();
-      int imageHeight = (int) (inputYUVI420Mat.rows() / 1.5f);
-      Mat outputImage = new Mat(imageHeight, imageWidth, CV_8UC3);
+      Mat depthImage32FC1 = new Mat(depthRGBA8Mat.rows(), depthRGBA8Mat.cols(), CV_32FC1, depthRGBA8Mat);
 
-      opencv_imgproc.cvtColor(inputYUVI420Mat, outputImage, opencv_imgproc.COLOR_YUV2BGR_I420);
+      image.rows(depthRGBA8Mat.rows());
+      image.cols(depthRGBA8Mat.cols());
+      image.data(depthImage32FC1.data());
    }
 
-   public static void compressFloatDepthPNG(Mat image, BytePointer data)
+   public static void compressDepthPNG(Mat image, BytePointer data)
    {
-      opencv_imgcodecs.imencode(".png", image, data, compressionParametersPNG);
+      Mat depth = null;
+      if (image.type() == opencv_core.CV_32FC1)
+      {
+         depth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC4, image.data());
+      }
+      else if (image.type() == opencv_core.CV_16UC1)
+      {
+         depth = image;
+      }
+      else
+         throw new IllegalArgumentException();
+      opencv_imgcodecs.imencode(".png", depth, data, compressionParametersPNG);
    }
 
-   public static void decompressFloatDepthPNG(byte[] data, Mat image)
+   public static void decompressDepthPNG(byte[] data, Mat image)
    {
       Mat compressedMat = new Mat(1, data.length, CV_8UC1, new BytePointer(data));
-      opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED);
+      opencv_imgcodecs.imdecode(compressedMat, opencv_imgcodecs.IMREAD_UNCHANGED, image);
    }
 
    public static String getTypeString(int type)
