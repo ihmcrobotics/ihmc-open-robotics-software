@@ -686,7 +686,8 @@ public class SCS2AvatarSimulationFactory
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
                                                                                                     pushRecoveryControllerParameters,
-                                                                                                    copTrajectoryParameters);
+                                                                                                    copTrajectoryParameters,
+                                                                                                    robotModel.getSplitFractionCalculatorParameters());
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
