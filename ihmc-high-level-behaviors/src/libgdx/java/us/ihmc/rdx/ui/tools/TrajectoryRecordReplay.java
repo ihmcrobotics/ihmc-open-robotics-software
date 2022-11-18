@@ -1,5 +1,7 @@
 package us.ihmc.rdx.ui.tools;
 
+import us.ihmc.log.LogTools;
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
@@ -114,9 +116,9 @@ public class TrajectoryRecordReplay<T extends Number>
       for (int i = 0; i < dataMatrix.size(); i++)
       {
          T[] row = dataMatrix.get(i);
-         T[] splitRow = newNumberArray(row.length / numberParts);
-         for (int n = 0; n < numberParts - 1; n++)
+         for (int n = 0; n <= numberParts - 1; n++)
          {
+            T[] splitRow = newNumberArray(row.length / numberParts);
             for (int j = 0; j < splitRow.length; j++)
             {
                splitRow[j] = row[j + n * splitRow.length];
