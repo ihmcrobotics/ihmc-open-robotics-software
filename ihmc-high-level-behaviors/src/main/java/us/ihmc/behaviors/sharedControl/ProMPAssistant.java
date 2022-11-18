@@ -234,15 +234,13 @@ public class ProMPAssistant implements TeleoperationAssistant
    private void updateTask()
    {
       //build vector of observed trajectories for the hands
-      List<String> bodyParts = new ArrayList<>();
-      bodyParts.add("leftHand");
-      bodyParts.add("rightHand");
-      List<List<Pose3DReadOnly>> bodyPartObservedFrameTrajectories = new ArrayList<>();
+      Set<String> bodyParts = bodyPartObservedFrameTrajectory.keySet();
+      List<List<Pose3DReadOnly>> observedFrameTrajectories = new ArrayList<>();
       for (String bodyPart : bodyParts)
-         bodyPartObservedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
+         observedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
       LogTools.info("   - Updating ProMP speed ...");
       //update speed proMP based on hands observed trajectories
-//      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectories, bodyParts);
+//      proMPManagers.get(currentTask).updateTaskSpeed(observedFrameTrajectories, bodyParts);
       // TODO B.1. use line above where you compare both hands if relevantBodyPart is both hands and check only main hand if it is one hand
       // TODO B.2. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
       // TODO B.3. change relevantBodyPart concept  which now means that bodyPart will reach a goal that can be observed

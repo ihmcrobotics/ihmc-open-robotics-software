@@ -95,7 +95,7 @@ namespace promp
         assert(obs_traj.rows() > 0);
 
         Eigen::VectorXd alphas = Eigen::VectorXd::LinSpaced(steps, lb, ub);
-        std::cout << "alphas vector " << alphas << std::endl;
+//        std::cout << "alphas vector " << alphas << std::endl;
         
         // Find the alpha that minimizes the distance between the 
         // observed trajectory and the mean trajectory of the ProMP. 
