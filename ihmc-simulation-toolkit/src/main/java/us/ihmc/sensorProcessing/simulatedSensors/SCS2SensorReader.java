@@ -251,6 +251,7 @@ public class SCS2SensorReader implements SensorReader
          if (usePerfectSensor)
             controllerIMUSensors.add(new IMUSensor(definition, null));
          stateEstimatorSensorDefinitions.addIMUSensorDefinition(definition);
+
       }
       catch (Exception e)
       {
