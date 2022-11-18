@@ -1,16 +1,12 @@
 package us.ihmc.avatar.footstepPlanning;
 
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.PlanarRegionMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.shape.tools.EuclidShapeTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerInput;
@@ -26,16 +22,13 @@ import java.util.function.Predicate;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-public class PlanarRegionConversionTest
+public class PlanarRegionEndToEndConversionTest
 {
    @Test
    public void testDataSets()
    {
-      testDataSets(DataSetIOTools.loadDataSets(buildFilter(getTestableFilter())));
-   }
+      List<DataSet> allDatasets = DataSetIOTools.loadDataSets(buildFilter(getTestableFilter()));
 
-   protected void testDataSets(List<DataSet> allDatasets)
-   {
       if (allDatasets.isEmpty())
          Assert.fail("Did not find any datasets to test.");
 
@@ -84,17 +77,17 @@ public class PlanarRegionConversionTest
       assertEquals(message, 0, numberOfFailingTests);
    }
 
-   static Predicate<DataSet> buildFilter(Predicate<PlannerInput> testSpecificFilter)
+   public static Predicate<DataSet> buildFilter(Predicate<PlannerInput> testSpecificFilter)
    {
       return dataSet -> dataSet.hasPlannerInput() && testSpecificFilter.test(dataSet.getPlannerInput());
    }
 
-   private Predicate<PlannerInput> getTestableFilter()
+   public static Predicate<PlannerInput> getTestableFilter()
    {
       return plannerInput -> plannerInput.getStepPlannerIsTestable() && plannerInput.containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
    }
 
-   private String getTestNamePrefix()
+   public static String getTestNamePrefix()
    {
       return "a_star";
    }
