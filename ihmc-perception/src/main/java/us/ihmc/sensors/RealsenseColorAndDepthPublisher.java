@@ -10,6 +10,7 @@ import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
@@ -148,8 +149,10 @@ public class RealsenseColorAndDepthPublisher
 //            LogTools.info("Compressed Bytes: {}", depthVideoPacket.getData().size() + colorVideoPacket.getData().size());
 //            LogTools.info("Time Taken: {} ms", end - begin);
 
+            LogTools.info("Compression Factor: {}", (float)(depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) depthVideoPacket.getData().size());
+
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
-//            display(depthU16C1Image, color8UC3Image);
+            //display(depthU16C1Image, color8UC3Image);
          }
       }
    }

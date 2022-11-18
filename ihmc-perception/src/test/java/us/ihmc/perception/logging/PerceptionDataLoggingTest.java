@@ -3,9 +3,9 @@ package us.ihmc.perception.logging;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.indexer.FloatBufferIndexer;
+import org.bytedeco.javacpp.indexer.ShortBufferIndexer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.junit.jupiter.api.Test;
@@ -129,51 +129,114 @@ public class PerceptionDataLoggingTest
    public void testCompressedFloatDepthLogging()
    {
 
-      hdf5ManagerWriter = new HDF5Manager("/home/bmishra/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
+      hdf5ManagerWriter = new HDF5Manager("/home/quantum/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
 
-      Mat depth = new Mat(128, 128, opencv_core.CV_32FC1);
-      depth.put(new Scalar(1.234));
-
+      Mat depthFloat = new Mat(128, 128, opencv_core.CV_32FC1);
+      depthFloat.put(new Scalar(1.234));
 
       BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressFloatDepthPNG(depth, compressedDepthPointer);
+      BytedecoOpenCVTools.compressDepthPNG(depthFloat, compressedDepthPointer);
 
-      byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
+      byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining() + 4];
+      compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length - 4);
+
+      LogTools.info("Raw Size: {}, Compressed Size: {}", depthFloat.rows() * depthFloat.cols() * 4, dataArray.length);
+
       Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+
+      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+
       HDF5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
 
       writeGroup.close();
       hdf5ManagerWriter.getFile().close();
 
-//      hdf5ManagerReader = new HDF5Manager("/home/bmishra/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_RDONLY());
-//      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
-//
-//      byte[] outputArray = HDF5Tools.loadByteArray(readGroup, 0);
-//
-//      BytePointer messageEncodedBytePointer = new BytePointer(outputArray);
-//      messageEncodedBytePointer.limit(outputArray.length);
-//
-//      Mat inputJPEGMat = new Mat(1, outputArray.length, opencv_core.CV_8UC1, messageEncodedBytePointer);
-//      Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-//      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
-//
-//      Mat finalMat = new Mat((int) (inputYUVI420Mat.rows() / 1.5f), inputYUVI420Mat.cols(), opencv_core.CV_8UC4);
-//
-//      LogTools.info("Height: {}, Width: {}", inputYUVI420Mat.rows(), inputYUVI420Mat.cols());
-//      opencv_imgproc.cvtColor(inputYUVI420Mat, finalMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
-//
-//      Mat finalDepth = new Mat(128, 128, opencv_core.CV_32FC1, finalMat.data());
-//
-//      FloatBufferIndexer indexer = new FloatBufferIndexer(finalDepth.getFloatBuffer());
-//      FloatBufferIndexer indexerActual = new FloatBufferIndexer(depth.getFloatBuffer());
-//
-//      for(int i = 0; i<128; i++)
-//      {
-//         for(int j = 0; j<128; j++)
-//         {
-//            LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
-//            LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
-//         }
-//      }
+      hdf5ManagerReader = new HDF5Manager("/home/quantum/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+
+      byte[] pngCompressedBytes = HDF5Tools.loadByteArray(readGroup, 0);
+
+      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
+
+
+      Mat finalDepthUC4 = new Mat(128, 128, opencv_core.CV_8UC4);
+      BytedecoOpenCVTools.decompressDepthPNG(pngCompressedBytes, finalDepthUC4);
+
+      Mat finalDepthFloat = new Mat(128, 128, opencv_core.CV_32FC1, finalDepthUC4.data());
+
+
+      FloatBufferIndexer indexer = new FloatBufferIndexer(finalDepthFloat.getFloatBuffer());
+      FloatBufferIndexer indexerActual = new FloatBufferIndexer(depthFloat.getFloatBuffer());
+
+      float diff = 0.0f;
+      for(int i = 0; i<128; i++)
+      {
+         for(int j = 0; j<128; j++)
+         {
+            diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
+
+            //LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+            //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+
+         }
+      }
+
+      assertEquals(0.0, diff, 1e-5);
+   }
+
+   @Test
+   public void testCompressedDepthMapLogging()
+   {
+
+      hdf5ManagerWriter = new HDF5Manager("/home/quantum/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
+
+      Mat depth = new Mat(128, 128, opencv_core.CV_16UC1);
+      depth.put(new Scalar(12345));
+
+      BytePointer compressedDepthPointer = new BytePointer();
+      BytedecoOpenCVTools.compressDepthPNG(depth, compressedDepthPointer);
+
+      byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
+      compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length);
+
+      LogTools.info("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
+
+      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+
+      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+
+      HDF5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
+
+      writeGroup.close();
+      hdf5ManagerWriter.getFile().close();
+
+      hdf5ManagerReader = new HDF5Manager("/home/quantum/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+
+      byte[] pngCompressedBytes = HDF5Tools.loadByteArray(readGroup, 0);
+
+      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
+
+
+      Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
+      BytedecoOpenCVTools.decompressDepthPNG(pngCompressedBytes, finalDepth16UC1);
+
+      ShortBufferIndexer indexer = new ShortBufferIndexer(finalDepth16UC1.getShortBuffer());
+      ShortBufferIndexer indexerActual = new ShortBufferIndexer(depth.getShortBuffer());
+
+      short diff = 0;
+      for(int i = 0; i<128; i++)
+      {
+         for(int j = 0; j<128; j++)
+         {
+            diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
+
+            //LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+            //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+
+         }
+      }
+
+      assertEquals(0.0, diff, 1e-5);
    }
 }

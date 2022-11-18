@@ -384,7 +384,7 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLogger logger = new PerceptionDataLogger();
       logger.startLogging(LOG_FILE, "Robot");
 

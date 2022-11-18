@@ -107,7 +107,7 @@ public class PerceptionDataLoader
    {
       //      BytedecoTools.loadOpenCV();
 
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/coffee.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
 
       long totalColor = loader.getHDF5Manager().getCount("/d435/depth/");
@@ -129,7 +129,7 @@ public class PerceptionDataLoader
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
          imshow("/d435/color", colorImage);
-         imshow("/d435/depth", displayDepth);
+         imshow("/d435/depth", finalDisplayDepth);
          int code = waitKeyEx(30);
          if (code == 113)
          {
