@@ -141,12 +141,15 @@ public class NettyOptimizedOuster
                      lidarPacketBuffer = ByteBuffer.allocateDirect(lidarPacketSize);
                   }
 
-                  ByteBuf bufferedData = packet.content().readBytes(lidarPacketSize);
+                  ByteBuf bufferedData = packet.content().readBytes(measurementBlockSize);
 
+                  long measurementID = bufferedData.getUnsignedInt(TIMESTAMP_BYTES);
 
+                  lidarPacketBuffer.position((int) measurementID * measurementBlockSize);
+                  bufferedData.readBytes(lidarPacketBuffer);
 
-
-                  if (onFrameReceived != null)
+                  boolean isLastBlockInFrame = measurementID == (measurementBlocksPerFrame - 1);
+                  if (isLastBlockInFrame && onFrameReceived != null)
                      onFrameReceived.run();
 
                   bufferedData.release();
