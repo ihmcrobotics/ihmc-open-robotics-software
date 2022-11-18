@@ -79,8 +79,8 @@ public class RDXVRTeleporter
          InputDigitalActionData bButton = controller.getBButtonActionData();
          preparingToTeleport = bButton.bState();
          boolean bChanged = bButton.bChanged();
-
-         if (preparingToTeleport || bChanged)
+         RDXVRPickResult rightPick = vrContext.getSelectedPick().get(RobotSide.RIGHT);
+         if (rightPick == null && (preparingToTeleport || bChanged))
          {
             pickRay.setToZero(controller.getXForwardZUpControllerFrame());
             pickRay.getDirection().set(Axis3D.X);

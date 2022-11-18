@@ -318,11 +318,18 @@ public class RDXPathControlRingGizmo implements RenderableProvider
         InputDigitalActionData clickTriggerData = controller.getClickTriggerActionData();
         isVRTriggerDown = clickTriggerData.bState();
         isVRTriggerClicked = isVRTriggerDown && clickTriggerData.bChanged();
+//        controller.get
 
         // Grabbing the ring with vrController
         if (!isVRTriggerDown)
         {
            isVRGrabbingGizmo = false;
+        }
+
+        if (getAnyPartPickSelectedVR())
+        {
+           // need to add every time since this gets cleared every time inside RDXVRContext.
+           vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
         }
 
         if (isVRGrabbingGizmo)
@@ -354,7 +361,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
         }
         // Initial point user starts grabbing the ring.
-        else if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == RayToControlRingIntersectionCalculator.CollisionType.CYLINDER)
+        else if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == hitCylinder)
         {
            intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
            isVRGrabbingGizmo = true;
