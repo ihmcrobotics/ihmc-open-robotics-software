@@ -6,6 +6,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 public class RDXVRSharedControl
@@ -26,7 +27,7 @@ public class RDXVRSharedControl
       // enable if trigger button has been pressed once. if button is pressed again shared control is stopped
       if (triggerButton.bChanged() && !triggerButton.bState())
       {
-         enabled.set(!enabled.get());
+         setEnabled(!enabled.get());
       }
    }
 
@@ -47,7 +48,7 @@ public class RDXVRSharedControl
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
    {
-      ImGui.text("Toggle shared control assistance: Right B button");
+      ImGui.text("Toggle shared control assistance: Left B button");
       if (ImGui.checkbox(labels.get("Shared Control"), enabled))
       {
          setEnabled(enabled.get());
