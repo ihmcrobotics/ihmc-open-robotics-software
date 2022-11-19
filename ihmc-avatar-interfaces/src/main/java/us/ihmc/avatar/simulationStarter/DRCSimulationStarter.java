@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
@@ -531,7 +532,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
          avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript,
-                                                                                         scsInitialSetup.getHeightMap(),
+                                                                                         new HeightMapBasedFootstepAdjustment(scsInitialSetup.getHeightMap()),
                                                                                          walkingScriptParameters);
       else if (addFootstepMessageGenerator)
          avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useHeadingAndVelocityScript, walkingScriptParameters);

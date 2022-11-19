@@ -22,6 +22,10 @@ import us.ihmc.yoVariables.variable.YoBoolean;
  * IHMC
  * </p>
  *
+ * <pre>
+ *            vel_{n} = alpha * vel{n-1} + (1 - alpha) * (pos_{n} - pos_{n-1})
+ * </pre>
+ *
  * @author IHMC Biped Team
  * @version 1.0
  */
