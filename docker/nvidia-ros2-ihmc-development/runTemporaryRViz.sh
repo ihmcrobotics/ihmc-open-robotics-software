@@ -21,4 +21,4 @@ sudo -u root docker run \
     --device /dev/dri:/dev/dri \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    ihmcrobotics/nvidia-ros2-ihmc-development:0.1 rviz2
+    ihmcrobotics/nvidia-ros2-ihmc-development:0.3 rviz2

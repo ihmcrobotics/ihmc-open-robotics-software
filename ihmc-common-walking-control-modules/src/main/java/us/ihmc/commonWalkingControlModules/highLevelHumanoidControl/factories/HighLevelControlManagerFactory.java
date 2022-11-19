@@ -67,7 +67,8 @@ public class HighLevelControlManagerFactory
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
-   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointspaceHighLevelGainMap = new HashMap<>();
+   private final Map<String, PIDGainsReadOnly> jointspaceLowLevelGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
 
@@ -106,7 +107,8 @@ public class HighLevelControlManagerFactory
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
 
       // Transform weights and gains to their parameterized versions.
-      ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getHighLevelJointSpaceControlGains(), jointspaceHighLevelGainMap, jointGainRegistry);
+      ParameterTools.extractJointGainMap(walkingControllerParameters.getLowLevelJointSpaceControlGains(), jointspaceLowLevelGainMap, jointGainRegistry);
       ParameterTools.extract3DGainMap("Orientation",
                                       walkingControllerParameters.getTaskspaceOrientationControlGains(),
                                       taskspaceOrientationGainMap,
@@ -247,7 +249,7 @@ public class HighLevelControlManagerFactory
                                                                     yoTime,
                                                                     graphicsListRegistry,
                                                                     registry);
-      manager.setGains(jointGainMap);
+      manager.setGains(jointspaceHighLevelGainMap, jointspaceLowLevelGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
       rigidBodyManagerMapByBodyName.put(bodyName, manager);
