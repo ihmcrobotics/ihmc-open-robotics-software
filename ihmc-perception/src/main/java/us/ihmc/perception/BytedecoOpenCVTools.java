@@ -16,7 +16,7 @@ import static org.bytedeco.opencv.global.opencv_core.*;
 public class BytedecoOpenCVTools
 {
    public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
-   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 95);
+   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 50);
 
    public static final int FLIP_Y = 0;
    public static final int FLIP_X = 1;
@@ -144,7 +144,7 @@ public class BytedecoOpenCVTools
       opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, params);
    }
 
-   public static void compressFloatDepthJPG(Mat image, BytePointer compressedBytes)
+   public static void compressDepthJPG(Mat image, BytePointer compressedBytes)
    {
       Mat depthRGBAMat = new Mat(image.rows(), image.cols(), CV_8UC4, image.data());
       //Mat yuv420Image = new Mat();
@@ -288,24 +288,10 @@ public class BytedecoOpenCVTools
       }
    }
 
-   public static Mat decompressJPEG(BytePointer dataPointer, int size)
+   public static void decompressDepthJPG(byte[] data, Mat dst)
    {
-      Mat inputJPEGMat = new Mat();
-      Mat inputYUVI420Mat = new Mat();
-
-      inputJPEGMat.cols(size);
-      inputJPEGMat.data(dataPointer);
-
-      // imdecode takes the longest by far out of all this stuff
-      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
-
-      // YUV I420 has 1.5 times the height of the image
-      int imageWidth = inputYUVI420Mat.cols();
-      int imageHeight = (int) (inputYUVI420Mat.rows() / 1.5f);
-      Mat outputImage = new Mat(imageHeight, imageWidth, CV_8UC3);
-
-      opencv_imgproc.cvtColor(inputYUVI420Mat, outputImage, opencv_imgproc.COLOR_YUV2BGR_I420);
-
-      return outputImage;
+      BytePointer dataPointer = new BytePointer(data);
+      Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, dst);
    }
 }
