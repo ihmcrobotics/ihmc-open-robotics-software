@@ -1,0 +1,55 @@
+#ifndef __perception_msgs__msg__GPUGridHeightMapMessage__idl__
+#define __perception_msgs__msg__GPUGridHeightMapMessage__idl__
+
+#include "grid_map_msgs/msg/./GridMapInfo_.idl"
+#include "std_msgs/msg/./Float32MultiArray_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the ETHZ's GPU Height Map Module.
+       * This message contains GPU GridMap Message.
+       * std_msgs/Header header
+       * uint32 seq
+       * time stamp
+       * string frame_id
+       * float64 resolution
+       * float64 length_x
+       * float64 length_y
+       * geometry_msgs/Pose pose
+       * # geometry_msgs/Point position
+       * ## float64 x
+       * ## float64 y
+       * ## float64 z
+       * # geometry_msgs/Quaternion orientation
+       * ## float64 x
+       * ## float64 y
+       * ## float64 z
+       * ## float64 w
+       * std_msgs/MultiArrayLayout layout
+       * # std_msgs/MultiArrayDimension[] dim
+       * ## string label
+       * ## uint32 size
+       * ## uint32 stride
+       * # uint32 data_offset
+       * float32[] data
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::GPUGridHeightMapMessage_")
+      struct GPUGridHeightMapMessage
+      {
+        grid_map_msgs::msg::dds::GridMapInfo info;
+        sequence<string> layers;
+        sequence<string> basic_layers;
+        sequence<std_msgs::msg::dds::Float32MultiArray> data;
+        unsigned short outer_start_index;
+        unsigned short inner_start_index;
+      };
+    };
+  };
+};
+
+#endif

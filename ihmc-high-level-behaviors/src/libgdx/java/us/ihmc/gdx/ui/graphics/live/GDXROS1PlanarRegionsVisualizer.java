@@ -90,7 +90,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
       }
       else
       {
-         subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
+         subscriber = MapsenseTools.createGPUPlanarRegionsROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
       }
    }
 

@@ -115,7 +115,7 @@ public class DelayFixedPlanarRegionsSubscription
       this.ros1Node.attachPublisher("/atlas/sensors/chest_l515/pose", sensorPosePublisher);
       this.ros1Node.attachPublisher("/ihmc/pelvis_pose_world", pelvisPosePublisher);
       rosClockCalculator.subscribeToROS1Topics(ros1Node);
-      subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
+      subscriber = MapsenseTools.createGPUPlanarRegionsROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
    }
 
    public void unsubscribe(RosNodeInterface ros1Node)

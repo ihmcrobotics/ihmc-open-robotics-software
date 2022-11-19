@@ -1,5 +1,5 @@
 package us.ihmc.avatar.sensors.realsense;
-
+import grid_map_msgs.GridMap;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -37,14 +37,33 @@ public class MapsenseTools
       return new DelayFixedPlanarRegionsSubscription(ros2Node, robotModel, topic, callback);
    }
 
-   public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(RosNodeInterface ros1Node, Consumer<RawGPUPlanarRegionList> callback)
+   public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createGPUPlanarRegionsROS1Callback(RosNodeInterface ros1Node, Consumer<RawGPUPlanarRegionList> callback)
    {
-      return createROS1Callback(RosTools.MAPSENSE_REGIONS, ros1Node, callback);
+      return createGPUPlanarRegionsROS1Callback(RosTools.MAPSENSE_REGIONS, ros1Node, callback);
    }
 
-   public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(String topic,
-                                                                                       RosNodeInterface ros1Node,
-                                                                                       Consumer<RawGPUPlanarRegionList> callback)
+   public static AbstractRosTopicSubscriber<GridMap> createROS1HeightMapCallback(RosNodeInterface ros1Node, Consumer<GridMap> callback)
+   {
+      return createROS1HeightMapCallback(RosTools.L515_REGIONS, ros1Node, callback);
+   }
+
+   public static AbstractRosTopicSubscriber<GridMap> createROS1HeightMapCallback(String topic, RosNodeInterface ros1Node, Consumer<GridMap> callback)
+   {
+      AbstractRosTopicSubscriber<GridMap> subscriber = new AbstractRosTopicSubscriber<GridMap>(GridMap._TYPE)
+      {
+         @Override
+         public void onNewMessage(GridMap gridMap)
+         {
+            callback.accept(gridMap);
+         }
+      };
+      ros1Node.attachSubscriber(topic, subscriber);
+      return subscriber;
+   }
+
+   public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createGPUPlanarRegionsROS1Callback(String topic,
+                                                                                                       RosNodeInterface ros1Node,
+                                                                                                       Consumer<RawGPUPlanarRegionList> callback)
    {
       AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber = new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
       {
