@@ -134,7 +134,7 @@ public class RealsenseColorAndDepthPublisher
 
 
             compressedDepthPointer = new BytePointer();
-            BytedecoOpenCVTools.compressRGBImageJPG(depth8UC3Image, compressedDepthPointer, compressionParameters);
+            BytedecoOpenCVTools.compressDepthPNG(depth8UC3Image, compressedDepthPointer);
             fillVideoPacket(compressedDepthPointer, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(ROS2Tools.D435_DEPTH, depthVideoPacket);
 
