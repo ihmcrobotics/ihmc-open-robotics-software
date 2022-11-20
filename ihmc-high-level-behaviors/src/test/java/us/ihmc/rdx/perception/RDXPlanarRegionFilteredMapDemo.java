@@ -20,13 +20,8 @@ public class RDXPlanarRegionFilteredMapDemo
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
-   private final ROS2Node ros2Node;
-   private final ROS2Helper ros2Helper;
-
    public RDXPlanarRegionFilteredMapDemo()
    {
-
-
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -36,10 +31,10 @@ public class RDXPlanarRegionFilteredMapDemo
 
             mapHandler = new PlanarRegionMapHandler();
 
-            graphic.generateMeshes(mapHandler.getMapRegions());
-            graphic.update();
+            //graphic.generateMeshes(mapHandler.getMapRegions());
+            //graphic.update();
 
-            baseUI.getPrimaryScene().addRenderableProvider(graphic);
+            //baseUI.getPrimaryScene().addRenderableProvider(graphic);
          }
 
          @Override
@@ -47,10 +42,10 @@ public class RDXPlanarRegionFilteredMapDemo
          {
             if (mapHandler.getFilteredMap().isModified())
             {
-               graphic.clear();
-               graphic.generateMeshes(mapHandler.getMapRegions());
-               graphic.update();
-               mapHandler.setModified(false);
+               //graphic.clear();
+               //graphic.generateMeshes(mapHandler.getMapRegions());
+               //graphic.update();
+               mapHandler.getFilteredMap().setModified(false);
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -61,7 +56,7 @@ public class RDXPlanarRegionFilteredMapDemo
          public void dispose()
          {
             baseUI.dispose();
-            graphic.destroy();
+            //graphic.destroy();
             super.dispose();
          }
       });
