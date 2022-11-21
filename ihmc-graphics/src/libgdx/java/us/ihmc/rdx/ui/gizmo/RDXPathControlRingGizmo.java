@@ -324,7 +324,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
         {
            vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
         }
-
      });
    }
 
@@ -598,18 +597,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      RayToControlRingIntersectionCalculator.CollisionType cylinder = RayToControlRingIntersectionCalculator.CollisionType.CYLINDER;
-      RayToControlRingIntersectionCalculator.CollisionType positiveX = RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_X;
-      RayToControlRingIntersectionCalculator.CollisionType positiveY = RayToControlRingIntersectionCalculator.CollisionType.POSITIVE_Y;
-      RayToControlRingIntersectionCalculator.CollisionType negativeX = RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_X;
-      RayToControlRingIntersectionCalculator.CollisionType negativeY = RayToControlRingIntersectionCalculator.CollisionType.NEGATIVE_Y;
-
       boolean prior = highlightingEnabled && (isGizmoHoveredMouse || isGizmoHoveredFromVR);
-      discModel.setMaterial(prior && (mouseCollisionType == cylinder || vrCollisionType == cylinder) ? highlightedMaterial : normalMaterial);
-      positiveXArrowModel.setMaterial(prior && (mouseCollisionType == positiveX || vrCollisionType == positiveX) ? highlightedMaterial : normalMaterial);
-      positiveYArrowModel.setMaterial(prior && (mouseCollisionType == positiveY || vrCollisionType == positiveY) ? highlightedMaterial : normalMaterial);
-      negativeXArrowModel.setMaterial(prior && (mouseCollisionType == negativeX || vrCollisionType == negativeX) ? highlightedMaterial : normalMaterial);
-      negativeYArrowModel.setMaterial(prior && (mouseCollisionType == negativeY || vrCollisionType == negativeY) ? highlightedMaterial : normalMaterial);
+      discModel.setMaterial(prior && (mouseCollisionType == hitCylinder || vrCollisionType == hitCylinder) ? highlightedMaterial : normalMaterial);
+      positiveXArrowModel.setMaterial(prior && (mouseCollisionType == hitPositiveX || vrCollisionType == hitPositiveX) ? highlightedMaterial : normalMaterial);
+      positiveYArrowModel.setMaterial(prior && (mouseCollisionType == hitPositiveY || vrCollisionType == hitPositiveY) ? highlightedMaterial : normalMaterial);
+      negativeXArrowModel.setMaterial(prior && (mouseCollisionType == hitNegativeX || vrCollisionType == hitNegativeX) ? highlightedMaterial : normalMaterial);
+      negativeYArrowModel.setMaterial(prior && (mouseCollisionType == hitNegativeY || vrCollisionType == hitNegativeY) ? highlightedMaterial : normalMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)

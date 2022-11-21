@@ -22,6 +22,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.Timer;
 
@@ -184,6 +185,11 @@ public class RDXInteractableFootstep
                          selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getY32(),
                          selectablePose3DGizmo.getPoseGizmo().getPose().getPosition().getZ32());
 
+
+   }
+
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
 
    }
 

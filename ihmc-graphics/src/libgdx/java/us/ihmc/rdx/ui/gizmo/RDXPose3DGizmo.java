@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
@@ -14,13 +15,19 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -36,9 +43,12 @@ import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.rdx.vr.RDXVRContext;
+import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -74,12 +84,13 @@ public class RDXPose3DGizmo implements RenderableProvider
    private SixDoFSelection closestCollisionSelection;
    private double closestCollisionDistance;
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private boolean isGizmoHovered = false;
-   private boolean isBeingManipulated = false;
+   private boolean isGizmoHoveredMouse = false;
+   private boolean isBeingManipulatedMouse = false;
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    private final FramePose3D framePose3D = new FramePose3D();
+   // This pose tracks the changes to the gizmo pose and is used to update the pose of this gizmo, i.e transformToWorld, in UpdateTransforms()
    private final FramePose3D tempFramePose3D = new FramePose3D();
    /** The main, source, true, base transform that this thing represents. */
    private RigidBodyTransform transformToParent;
@@ -99,6 +110,36 @@ public class RDXPose3DGizmo implements RenderableProvider
    private final double translateSpeedFactor = 0.5;
    private boolean queuePopupToOpen = false;
    private final Random random = new Random();
+
+   // VR moves the control-ring by calculating interection between the posivie-x direction ray from the controller and the ground.
+   // VR variables to interact with gizmo.
+   private ModelInstance lineModel;
+   private final FrameLine3D vrPickRay = new FrameLine3D();
+   private final FramePose3D vrPickRayPose = new FramePose3D();
+   private final FramePose3D currentPlayArea = new FramePose3D();
+   private final Plane3D currentPlayAreaPlane = new Plane3D();
+   private final FrameVector3D controllerZAxisVector = new FrameVector3D();
+   private final Point3D controllerZAxisProjectedToPlanePoint = new Point3D();
+   private final Point3D planeRayIntesection = new Point3D();
+   private Point3D intersectionStartPoint = new Point3D();
+   private boolean isGizmoHoveredVR = false;
+   private final Vector3D orientationDeterminationVector = new Vector3D();
+   private final FramePose3D vrRayIntersectionWithGround = new FramePose3D();
+   private double lineLength = 1.0;
+   private final Color color = Color.ORANGE;
+   private final RDXVRPickResult vrPickResult = new RDXVRPickResult();
+   private boolean isVRTriggerDown = false;
+   private boolean isVRTriggerClicked = false;
+   private boolean isNewlyModifiedFromVR = false;
+   private boolean sendSteps = false;
+   private boolean isVRGrabbingGizmo = false;
+   private double vrControllerYaw;
+   private boolean isRingSelectedVR = false;
+   private boolean isVRYawDragging = false;
+
+   // Intersection calculator for vr.
+   private RayToGizmoIntersectionCalculator mouseRayIntersectionCalculator;
+   private RayToGizmoIntersectionCalculator vrRayIntersectionCalculator;
 
    public RDXPose3DGizmo()
    {
@@ -167,6 +208,24 @@ public class RDXPose3DGizmo implements RenderableProvider
             meshBuilder -> meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), resolution, color));
       }
 
+
+      // initialize ray-intersection calculators here.
+      mouseRayIntersectionCalculator = new RayToGizmoIntersectionCalculator(torusRadius.get(),
+                                                                            torusCameraSize.get(),
+                                                                            torusTubeRadiusRatio.get(),
+                                                                            arrowLengthRatio.get(),
+                                                                            arrowHeadBodyLengthRatio.get(),
+                                                                            arrowHeadBodyRadiusRatio.get(),
+                                                                            arrowSpacingFactor.get());
+
+      vrRayIntersectionCalculator = new RayToGizmoIntersectionCalculator(torusRadius.get(),
+                                                                         torusCameraSize.get(),
+                                                                         torusTubeRadiusRatio.get(),
+                                                                         arrowLengthRatio.get(),
+                                                                         arrowHeadBodyLengthRatio.get(),
+                                                                         arrowHeadBodyRadiusRatio.get(),
+                                                                         arrowSpacingFactor.get());
+
       recreateGraphics();
    }
 
@@ -185,11 +244,11 @@ public class RDXPose3DGizmo implements RenderableProvider
          // on this gizmo at any time
 
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-         determineCurrentSelectionFromPickRay(pickRay);
+         mouseRayIntersectionCalculator.determineCollisionSelectionFromRay(pickRay, transformToWorld, tempTransform, torusModels, arrowModels);
 
-         if (closestCollisionSelection != null)
+         if (mouseRayIntersectionCalculator.getClosestCollisionSelection()  != null)
          {
-            pickResult.setDistanceToCamera(closestCollisionDistance);
+            pickResult.setDistanceToCamera(mouseRayIntersectionCalculator.getClosestCollisionDistance());
             input.addPickResult(pickResult);
          }
       }
@@ -201,31 +260,33 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-      isGizmoHovered = input.isWindowHovered() && pickResult == input.getClosestPick();
+      isGizmoHoveredMouse = input.isWindowHovered() && pickResult == input.getClosestPick();
 
-      if (isGizmoHovered && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
+      if (isGizmoHoveredMouse && ImGui.getMouseClickedCount(ImGuiMouseButton.Right) == 1)
       {
          queuePopupToOpen = true;
       }
 
       updateMaterialHighlighting();
 
-      if (isGizmoHovered && manipulationDragData.getDragJustStarted())
+      if (isGizmoHoveredMouse && manipulationDragData.getDragJustStarted())
       {
          clockFaceDragAlgorithm.reset();
          manipulationDragData.setObjectBeingDragged(this);
       }
 
-      isBeingManipulated = manipulationDragData.getObjectBeingDragged() == this;
-      if (isBeingManipulated)
+      isBeingManipulatedMouse = manipulationDragData.getObjectBeingDragged() == this;
+      if (isBeingManipulatedMouse)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
-         if (closestCollisionSelection.isLinear())
+         SixDoFSelection mouseSelection = mouseRayIntersectionCalculator.getClosestCollisionSelection();
+
+         if (mouseSelection.isLinear())
          {
             Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
-                                                                        closestCollision,
-                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                                        mouseRayIntersectionCalculator.getClosestCollision(),
+                                                                        axisRotations.get(mouseSelection.toAxis3D()),
                                                                         transformToWorld);
 
             tempFramePose3D.setToZero(gizmoFrame);
@@ -233,13 +294,13 @@ public class RDXPose3DGizmo implements RenderableProvider
             tempFramePose3D.getPosition().add(linearMotion);
             tempFramePose3D.changeFrame(parentReferenceFrame);
             tempFramePose3D.get(transformToParent);
-            closestCollision.add(linearMotion);
+            mouseRayIntersectionCalculator.getClosestCollision().add(linearMotion);
          }
-         else if (closestCollisionSelection.isAngular())
+         else if (mouseSelection.isAngular())
          {
             if (clockFaceDragAlgorithm.calculate(pickRay,
-                                                 closestCollision,
-                                                 axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                 mouseRayIntersectionCalculator.getClosestCollision(),
+                                                 axisRotations.get(mouseSelection.toAxis3D()),
                                                  transformToWorld))
             {
                tempFramePose3D.setToZero(gizmoFrame);
@@ -361,6 +422,162 @@ public class RDXPose3DGizmo implements RenderableProvider
       }
    }
 
+   public void calculateVRPick(RDXVRContext vrContext)
+   {
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+        // Holding onto the right controller trigger button
+        InputDigitalActionData clickTriggerData = controller.getClickTriggerActionData();
+        isVRTriggerDown = clickTriggerData.bState();
+        isVRTriggerClicked = isVRTriggerDown && clickTriggerData.bChanged();
+
+        vrPickRay.setToZero(controller.getXForwardZUpControllerFrame());
+        vrPickRay.getDirection().set(Axis3D.X);
+        vrPickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+        vrPickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
+        vrPickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+        currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
+        currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
+
+        currentPlayAreaPlane.getNormal().set(Axis3D.Z);
+        currentPlayAreaPlane.getPoint().set(currentPlayArea.getPosition());
+
+        currentPlayAreaPlane.intersectionWith(vrPickRay, planeRayIntesection);
+
+        controllerZAxisVector.setIncludingFrame(controller.getXForwardZUpControllerFrame(), Axis3D.Z);
+        controllerZAxisVector.changeFrame(ReferenceFrame.getWorldFrame());
+
+        controllerZAxisProjectedToPlanePoint.set(planeRayIntesection);
+        controllerZAxisProjectedToPlanePoint.add(controllerZAxisVector);
+        currentPlayAreaPlane.orthogonalProjection(controllerZAxisProjectedToPlanePoint);
+
+        orientationDeterminationVector.sub(controllerZAxisProjectedToPlanePoint, planeRayIntesection);
+
+        vrRayIntersectionWithGround.setToZero(ReferenceFrame.getWorldFrame());
+        vrRayIntersectionWithGround.getPosition().set(planeRayIntesection);
+        EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
+                                                                   orientationDeterminationVector,
+                                                                   vrRayIntersectionWithGround.getOrientation());
+
+        lineLength = vrPickRayPose.getPosition().distance(vrRayIntersectionWithGround.getPosition());
+        RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
+
+        vrPickRayPose.get(tempTransform);
+        LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
+        vrRayIntersectionWithGround.get(tempTransform);
+
+        // vrRay intersected (collided) with this gizmo
+        vrRayIntersectionCalculator.determineCollisionSelectionFromRay(vrPickRay, transformToWorld, tempTransform, torusModels, arrowModels);
+//        vrCollisionType = vrRayToRingPickCalculator.determineCollisionTypeFromRay(vrPickRay, transformToWorld, showArrows);
+        if (vrRayIntersectionCalculator.getClosestCollisionSelection() != null)
+        {
+           vrPickResult.setDistanceToControllerPickPoint(vrRayIntersectionCalculator.getClosestCollisionDistance());
+           vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
+           isGizmoHoveredVR = true;
+           updateMaterialHighlighting();
+        }
+        else
+        {
+           isGizmoHoveredVR = false;
+        }
+
+//        if (isVRTriggerClicked)
+//        {
+//           isRingSelectedVR = getHollowCylinderPickSelectedVR();
+//        }
+
+        if (isRingSelectedVR)
+        {
+           vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
+        }
+     });
+   }
+
+   /*
+   public void processVRInput(RDXVRContext vrContext)
+   {
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+     {
+        // Holding onto the right controller trigger button
+        InputDigitalActionData clickTriggerData = controller.getClickTriggerActionData();
+        InputDigitalActionData bButton = controller.getBButtonActionData();
+        isVRTriggerDown = clickTriggerData.bState();
+        isVRTriggerClicked = isVRTriggerDown && clickTriggerData.bChanged();
+        boolean isVRBButtonDown = bButton.bState();
+
+        // Grabbing the ring with vrController
+        if (!isVRTriggerDown)
+        {
+           isVRGrabbingGizmo = false;
+        }
+
+        if (isRingHoveredFromVR() && isVRBButtonDown)
+        {
+           if (!isVRYawDragging)
+           {
+              // start point of yaw-dragging by VR
+              isVRYawDragging = true;
+              vrClockFaceDragAlgorithm.reset();
+           }
+        }
+
+        if (isVRYawDragging && !isVRBButtonDown)
+           isVRYawDragging = false;
+
+        if (isVRYawDragging)
+        {
+           // yaw drag
+           if (vrClockFaceDragAlgorithm.calculate(vrPickRay, vrRayToRingPickCalculator.getClosestCollision(), Axis3D.Z, controlRingPose))
+           {
+              isNewlyModifiedFromVR = true;
+              tempFramePose3D.setToZero(gizmoFrame);
+              tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+              vrClockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
+              tempFramePose3D.changeFrame(parentReferenceFrame);
+              tempFramePose3D.get(transformToParent);
+           }
+        }
+
+
+        if (isVRGrabbingGizmo)
+        {
+           isNewlyModifiedFromVR = true;
+           // translating gizmo with vr-ray
+           Vector3D planarMotion = new Vector3D();          // This represents vector from previous intersection to updated (moved) intersection point.
+           planarMotion.sub(vrRayIntersectionWithGround.getPosition(), intersectionStartPoint);
+           // tempFramePose3D gets updated from all the processes and eventually updates controlRingPose
+           tempFramePose3D.setToZero(gizmoFrame);
+           tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+           tempFramePose3D.getPosition().add(planarMotion);
+           tempFramePose3D.changeFrame(parentReferenceFrame);
+           tempFramePose3D.get(transformToParent);
+           // also update closestCollision with the vector
+           vrRayToRingPickCalculator.getClosestCollision().add(planarMotion);
+           // update previous vrIntersectionPoint with current intersectionPoint.
+           intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
+        }
+        // Initial point user starts grabbing the ring.
+        else if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == hitCylinder)
+        {
+           intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
+           isVRGrabbingGizmo = true;
+           isNewlyModifiedFromVR = true;
+           vrControllerYaw = controller.getXForwardZUpPose().getYaw();
+        }
+        else if (!isVRYawDragging())
+        {
+           isNewlyModifiedFromVR = false;
+        }
+     });
+      updateTransforms();
+   }
+   
+    */
+
+
+
    private void renderTooltipAndContextMenu()
    {
       if (queuePopupToOpen)
@@ -397,60 +614,15 @@ public class RDXPose3DGizmo implements RenderableProvider
       tempFramePose3D.get(transformToWorld);
    }
 
-   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
-   {
-      closestCollisionSelection = null;
-      closestCollisionDistance = Double.POSITIVE_INFINITY;
-
-      // Optimization: Do one large sphere collision to avoid completely far off picks
-      boundingSphereIntersection.update(1.5 * torusRadius.get(), transformToWorld);
-      if (boundingSphereIntersection.intersect(pickRay))
-      {
-         // collide tori
-         for (Axis3D axis : Axis3D.values)
-         {
-            LibGDXTools.toEuclid(torusModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
-            // TODO: Only update when shape changes?
-            torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
-            double distance = torusIntersection.intersect(pickRay, 100);
-            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-            {
-               closestCollisionDistance = distance;
-               closestCollisionSelection = SixDoFSelection.toAngularSelection(axis);
-               closestCollision.set(torusIntersection.getClosestIntersection());
-            }
-         }
-
-         // collide arrows
-         for (Axis3D axis : Axis3D.values)
-         {
-            LibGDXTools.toEuclid(arrowModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
-
-            for (RobotSide side : RobotSide.values)
-            {
-               double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
-               // TODO: Only update when shape changes?
-               arrowIntersection.update(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
-               double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
-
-               if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-               {
-                  closestCollisionDistance = distance;
-                  closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
-                  closestCollision.set(arrowIntersection.getIntersection());
-               }
-            }
-         }
-      }
-   }
-
    private void updateMaterialHighlighting()
    {
-      boolean prior = (isGizmoHovered || isBeingManipulated) && closestCollisionSelection != null;
+
+      SixDoFSelection mouseSelection = mouseRayIntersectionCalculator.getClosestCollisionSelection();
+      boolean priorMouse = (isGizmoHoveredMouse || isBeingManipulatedMouse) && mouseSelection != null;
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
-         if (prior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (priorMouse && mouseSelection.isAngular() && mouseSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -459,7 +631,7 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (prior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (priorMouse && mouseSelection.isLinear() && mouseSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -529,6 +701,20 @@ public class RDXPose3DGizmo implements RenderableProvider
       arrowHeadLength = arrowHeadBodyLengthRatio.get() * arrowLength;
       arrowSpacing = arrowSpacingFactor.get() * (torusRadius.get() + (torusTubeRadiusRatio.get() * torusRadius.get()));
 
+      mouseRayIntersectionCalculator.updateGizmoDimensions(torusRadius.get(),
+                                                           torusCameraSize.get(),
+                                                           torusTubeRadiusRatio.get(),
+                                                           arrowLengthRatio.get(),
+                                                           arrowHeadBodyLengthRatio.get(),
+                                                           arrowHeadBodyRadiusRatio.get(),
+                                                           arrowSpacingFactor.get());
+      vrRayIntersectionCalculator.updateGizmoDimensions(torusRadius.get(),
+                                                           torusCameraSize.get(),
+                                                           torusTubeRadiusRatio.get(),
+                                                           arrowLengthRatio.get(),
+                                                           arrowHeadBodyLengthRatio.get(),
+                                                           arrowHeadBodyRadiusRatio.get(),
+                                                           arrowSpacingFactor.get());
       updateMaterialHighlighting();
 
       for (Axis3D axis : Axis3D.values)
@@ -546,6 +732,11 @@ public class RDXPose3DGizmo implements RenderableProvider
          arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
          torusModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
       }
+   }
+
+   private void buildLineMesh(RDXMultiColorMeshBuilder meshBuilder)
+   {
+      meshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color);
    }
 
    public FramePose3DReadOnly getPose()
