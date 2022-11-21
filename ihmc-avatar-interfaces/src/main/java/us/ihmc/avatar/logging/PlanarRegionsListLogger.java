@@ -34,6 +34,7 @@ public class PlanarRegionsListLogger
 
    public void start()
    {
+      LogTools.info("Storing PR-Log at: {}", logDirectory + dateFormat.format(new Date()) + "_" + this.getClass().getSimpleName() + ".prllog");
       File file = new File(logDirectory + dateFormat.format(new Date()) + "_" + this.getClass().getSimpleName() + ".prllog");
       try
       {
