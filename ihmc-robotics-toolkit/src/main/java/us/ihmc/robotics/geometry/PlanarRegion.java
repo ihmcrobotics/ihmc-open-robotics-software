@@ -2,10 +2,12 @@ package us.ihmc.robotics.geometry;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -15,6 +17,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -1625,6 +1628,25 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public ConvexPolygonTools getConvexPolygonTools()
    {
       return convexPolygonTools;
+   }
+
+   public void updatePlane(Vector3DReadOnly futureNormal, Point3DReadOnly futureOrigin)
+   {
+      Vector3D normalVector = new Vector3D(normal.getX(), normal.getY(), normal.getZ());
+      Vector3D axis = new Vector3D();
+      axis.cross(normalVector, futureNormal);
+      double angle = EuclidGeometryTools.angleFromFirstToSecondVector3D(normalVector.getX(), normalVector.getY(), normalVector.getZ(),
+                                                                        futureNormal.getX(), futureNormal.getY(), futureNormal.getZ());
+
+      AxisAngle axisAngle = new AxisAngle(axis, angle);
+      Vector3D translation = new Vector3D();
+      translation.sub(futureOrigin, origin);
+
+      fromWorldToLocalTransform.appendOrientation(axisAngle);
+      fromWorldToLocalTransform.appendTranslation(translation);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      updateBoundingBox();
    }
 
    @Override
