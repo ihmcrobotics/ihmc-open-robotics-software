@@ -24,13 +24,14 @@ import java.nio.file.Paths;
 public class FFMPEGHDF5Logger extends FFMPEGLogger
 {
    public static final String NAMESPACE = "FFMPEGVideo"; //this will need to be changed later to be user-set
-   private HDF5Manager hdf5Manager;
+   private final HDF5Manager hdf5Manager;
    private Group framesGroup;
 
    @Override
    public void stop()
    {
       framesGroup.close();
+      hdf5Manager.getFile().close();
       super.stop();
    }
 
