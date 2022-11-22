@@ -124,7 +124,7 @@ public class RealsenseColorAndDepthPublisher
 
             sensor.updateDataBytePointers();
 
-            long begin_acquire = System.currentTimeMillis();
+            long begin_acquire = System.nanoTime();
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
@@ -134,37 +134,34 @@ public class RealsenseColorAndDepthPublisher
             color8UC3Image = new Mat(this.colorHeight, this.colorWidth, opencv_core.CV_8UC3, colorFrameData);
             setColorExtrinsics(sensor);
 
-            //            depth8UC3Image = new Mat(depthU16C1Image.rows(), depthU16C1Image.cols(), opencv_core.CV_8UC3);
-            //            BytedecoOpenCVTools.transferDepth16UC1ToLower8UC3(depthU16C1Image, depth8UC3Image);
-            long begin_depth = System.currentTimeMillis();
+            long end_acquire = System.nanoTime();
+
+            long begin_depth = System.nanoTime();
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);
             fillVideoPacket(compressedDepthPointer, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(this.depthTopic, depthVideoPacket);
 
-            long end_depth = System.currentTimeMillis();
+            long end_depth = System.nanoTime();
 
             compressedColorPointer = new BytePointer();
-            BytedecoOpenCVTools.compressImagePNG(color8UC3Image, compressedColorPointer);
+            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, compressedColorPointer);
             fillVideoPacket(compressedColorPointer, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
             ros2Helper.publish(this.colorTopic, colorVideoPacket);
 
-            long end_color = System.currentTimeMillis();
+            long end_color = System.nanoTime();
 
-            //            LogTools.info("Uncompressed Bytes: {}", depthU16C1Image.rows() * depthU16C1Image.cols() * 2 + color8UC3Image.rows() * color8UC3Image.cols() * 3);
-            //            LogTools.info("Compressed Bytes: {}", depthVideoPacket.getData().size() + colorVideoPacket.getData().size());
-            LogTools.info("Time Taken: {} ms", end - begin);
+            LogTools.info("Acquisition Time: {} ms", (end_acquire - begin_acquire) / 1e6);
 
-            LogTools.info("Raw: {}, Compressed:{}, Factor: {}",
-                          depthU16C1Image.rows() * depthU16C1Image.cols() * 2,
-                          compressedDepthPointer.capacity(),
-                          (float) (depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) compressedDepthPointer.capacity());
+            LogTools.info(String.format("Depth Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
+                          depthU16C1Image.rows() * depthU16C1Image.cols() * 2, compressedDepthPointer.capacity(),
+                          (float) (depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) compressedDepthPointer.capacity(), (end_depth - begin_depth) / 1e6));
 
-            LogTools.info("Raw: {}, Compressed:{}, Factor: {}",
+            LogTools.info(String.format("Color Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
                           color8UC3Image.rows() * color8UC3Image.cols() * 3,
                           compressedColorPointer.capacity(),
-                          (float) (color8UC3Image.rows() * color8UC3Image.cols() * 3) / (float) compressedColorPointer.capacity());
+                          (float) (color8UC3Image.rows() * color8UC3Image.cols() * 3) / (float) compressedColorPointer.capacity(), (end_color - end_depth) / 1e6));
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
             //            display(depthU16C1Image, color8UC3Image);

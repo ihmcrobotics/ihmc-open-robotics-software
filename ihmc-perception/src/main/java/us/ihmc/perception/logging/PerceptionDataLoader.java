@@ -109,18 +109,19 @@ public class PerceptionDataLoader
    {
       //      BytedecoTools.loadOpenCV();
 
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/l515_depth.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
 
-      long totalColor = loader.getHDF5Manager().getCount("/l515/depth/");
+      long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
 
       Mat colorImage = new Mat();
       Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
       LogTools.info("Total Images: {}", totalColor);
+
       for (int i = 0; i < totalColor; i++)
       {
          LogTools.info("Loading Index: {}/{}", i, totalColor);
-//         loader.loadImage("/l515/color/", i, colorImage);
+         loader.loadImage("/l515/color/", i, colorImage);
 
 
          long begin_load = System.nanoTime();
@@ -140,9 +141,9 @@ public class PerceptionDataLoader
          LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
          LogTools.info("Decompression Time: {} ms",(end_decompress - begin_decompress) / 1e6f);
 
-//         imshow("/l515/color", colorImage);
+         imshow("/l515/color", colorImage);
          imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(1);
+         int code = waitKeyEx(300);
          if (code == 113)
          {
             System.exit(0);
