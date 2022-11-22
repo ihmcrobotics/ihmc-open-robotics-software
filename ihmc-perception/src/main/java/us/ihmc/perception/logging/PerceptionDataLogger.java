@@ -296,6 +296,7 @@ public class PerceptionDataLogger
 
    public void storeVideoPacket(String namespace, VideoPacket packet)
    {
+      long begin_store = System.nanoTime();
       Group group = hdf5Manager.getGroup(namespace);
 //      ThreadTools.startAThread(() ->
 //                               {
@@ -310,11 +311,14 @@ public class PerceptionDataLogger
 //                                  LogTools.info("{} ByteArray: {}", namespace, Arrays.toString(heapArray));
 
                                   // Logging into HDF5
-                                  imageEncodedTByteArrayList.toArray(heapArray);
-                                  HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size());
+                                  imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+                                  HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
                                   LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
 //                               }, "video_packet_logger_thread -> " + namespace);
+      long end_store = System.nanoTime();
+
+
    }
 
    public void storePointCloud(String namespace, LidarScanMessage message)

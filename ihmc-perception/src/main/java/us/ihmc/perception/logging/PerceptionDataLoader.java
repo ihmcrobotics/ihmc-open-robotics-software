@@ -64,7 +64,7 @@ public class PerceptionDataLoader
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
 
-      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
+//      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
 
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
 
@@ -109,7 +109,7 @@ public class PerceptionDataLoader
    {
       //      BytedecoTools.loadOpenCV();
 
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/l515_depth.hdf5");
       PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
 
       long totalColor = loader.getHDF5Manager().getCount("/l515/depth/");
@@ -121,19 +121,28 @@ public class PerceptionDataLoader
       {
          LogTools.info("Loading Index: {}/{}", i, totalColor);
 //         loader.loadImage("/l515/color/", i, colorImage);
+
+
+         long begin_load = System.nanoTime();
          loader.loadDepth("/l515/depth/", i, depthImage);
+         long end_load = System.nanoTime();
 
          LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
 
+         long begin_decompress = System.nanoTime();
          Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
          Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
 
          BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+         long end_decompress = System.nanoTime();
+
+         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
+         LogTools.info("Decompression Time: {} ms",(end_decompress - begin_decompress) / 1e6f);
 
 //         imshow("/l515/color", colorImage);
          imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(30);
+         int code = waitKeyEx(1);
          if (code == 113)
          {
             System.exit(0);

@@ -24,12 +24,12 @@ public class PerceptionDataLoggingTest
    private HDF5Manager hdf5ManagerWriter;
 
    @Test
-   public void testLoggingByteArray()
+   public void testLoggingBytesAsIntArray()
    {
       hdf5ManagerWriter = new HDF5Manager("/home/bmishra/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
       Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
 
-      byte[] dataArray = {(byte) 0, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 0};
+      byte[] dataArray = {(byte) 0, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 0, (byte) 11, (byte) 13, (byte) 15};
 
       ByteBuffer buffer = ByteBuffer.wrap(dataArray);
       IntBuffer intBuffer = buffer.asIntBuffer();
@@ -49,6 +49,34 @@ public class PerceptionDataLoggingTest
       ByteBuffer byteBuffer = ByteBuffer.wrap(outputArray);
       IntBuffer outputIntBuffer = byteBuffer.asIntBuffer();
       outputIntBuffer.put(outputIntArray);
+
+      for (int i = 0; i < dataArray.length; i++)
+      {
+         assertEquals(dataArray[i], outputArray[i]);
+      }
+      hdf5ManagerReader.getFile().close();
+   }
+
+   @Test
+   public void testLoggingByteArray()
+   {
+      hdf5ManagerWriter = new HDF5Manager("/home/bmishra/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
+      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+
+      byte[] dataArray = {(byte) 0, (byte) 255, (byte) 1, (byte) 3, (byte) 4, (byte) 42, (byte) 153, (byte) 10, (byte) 11, (byte) 13, (byte) 15};
+
+      HDF5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
+
+      writeGroup.close();
+      hdf5ManagerWriter.getFile().close();
+
+      hdf5ManagerReader = new HDF5Manager("/home/bmishra/Workspace/Data/Sensor_Logs/hdf5_test.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+
+      byte[] outputArray = HDF5Tools.loadByteArray(readGroup, 0);
+
+      LogTools.info("Input: {}", Arrays.toString(dataArray));
+      LogTools.info("Output: {}", Arrays.toString(outputArray));
 
       for (int i = 0; i < dataArray.length; i++)
       {
@@ -332,4 +360,5 @@ public class PerceptionDataLoggingTest
 
       assertEquals(0, diff, 1e-5);
    }
+
 }
