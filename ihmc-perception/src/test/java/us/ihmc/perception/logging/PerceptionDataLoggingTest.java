@@ -135,7 +135,7 @@ public class PerceptionDataLoggingTest
       depthFloat.put(new Scalar(1.234));
 
       BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressDepthPNG(depthFloat, compressedDepthPointer);
+      BytedecoOpenCVTools.compressImagePNG(depthFloat, compressedDepthPointer);
 
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining() + 4];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length - 4);
@@ -194,7 +194,7 @@ public class PerceptionDataLoggingTest
       depth.put(new Scalar(12345));
 
       BytePointer compressedDepthPointer = new BytePointer();
-      BytedecoOpenCVTools.compressDepthPNG(depth, compressedDepthPointer);
+      BytedecoOpenCVTools.compressImagePNG(depth, compressedDepthPointer);
 
       byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
       compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length);
@@ -215,7 +215,7 @@ public class PerceptionDataLoggingTest
 
       byte[] pngCompressedBytes = HDF5Tools.loadByteArray(readGroup, 0);
 
-      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
+//      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
 
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);

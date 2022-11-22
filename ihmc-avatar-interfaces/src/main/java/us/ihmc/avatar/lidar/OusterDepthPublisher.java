@@ -31,7 +31,7 @@ public class OusterDepthPublisher
 
          BytePointer compressedDepthPointer = new BytePointer();
 
-         BytedecoOpenCVTools.compressDepthPNG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer);
+         BytedecoOpenCVTools.compressImagePNG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer);
 
          byte[] heapByteArrayData = new byte[compressedDepthPointer.asBuffer().remaining()];
          compressedDepthPointer.asBuffer().get(heapByteArrayData);
