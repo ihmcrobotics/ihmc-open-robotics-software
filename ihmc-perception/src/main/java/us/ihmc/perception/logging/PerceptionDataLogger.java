@@ -157,6 +157,13 @@ public class PerceptionDataLogger
       counts.put(L515_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
+      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
+      l515ColorSubscription.addCallback(this::logColorL515);
+      runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
+      buffers.put(L515_COLOR_NAME, new byte[25000000]);
+      counts.put(L515_COLOR_NAME, 0);
+
+      // Add callback for L515 Depth maps
 //      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
 //      l515ColorSubscription.addCallback(this::logColorL515);
 //      runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
