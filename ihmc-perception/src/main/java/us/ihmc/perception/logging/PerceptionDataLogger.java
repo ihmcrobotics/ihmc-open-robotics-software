@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
@@ -34,6 +35,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class PerceptionDataLogger
 {
@@ -149,11 +153,13 @@ public class PerceptionDataLogger
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH);
       l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
+      buffers.put(L515_DEPTH_NAME, new byte[25000000]);
+      counts.put(L515_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
-      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
-      l515ColorSubscription.addCallback(this::logColorL515);
-      runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
+//      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
+//      l515ColorSubscription.addCallback(this::logColorL515);
+//      runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
 
       // Add callback for Ouster depth maps
       var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_DEPTH);
@@ -301,6 +307,8 @@ public class PerceptionDataLogger
                                   LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
                                   counts.put(namespace, imageCount + 1);
 
+//                                  LogTools.info("{} ByteArray: {}", namespace, Arrays.toString(heapArray));
+
                                   // Logging into HDF5
                                   imageEncodedTByteArrayList.toArray(heapArray);
                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size());
@@ -384,7 +392,7 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/quantum/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
       PerceptionDataLogger logger = new PerceptionDataLogger();
       logger.startLogging(LOG_FILE, "Robot");
 

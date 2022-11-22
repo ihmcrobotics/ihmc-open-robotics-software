@@ -7,11 +7,14 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class BytedecoOpenCVTools
 {
@@ -169,19 +172,17 @@ public class BytedecoOpenCVTools
       image.data(depthImage32FC1.data());
    }
 
-   public static void compressDepthPNG(Mat image, BytePointer data)
+   public static void compressImagePNG(Mat image, BytePointer data)
    {
       Mat depth = null;
       if (image.type() == opencv_core.CV_32FC1)
       {
          depth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC4, image.data());
       }
-      else if (image.type() == opencv_core.CV_16UC1)
+      else
       {
          depth = image;
       }
-      else
-         throw new IllegalArgumentException();
       opencv_imgcodecs.imencode(".png", depth, data, compressionParametersPNG);
    }
 
@@ -293,5 +294,25 @@ public class BytedecoOpenCVTools
       BytePointer dataPointer = new BytePointer(data);
       Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
       opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, dst);
+   }
+
+   public static void displayVideoPacketDepth(VideoPacket videoPacket)
+   {
+      Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
+      byte[] compressedByteArray = videoPacket.getData().toArray();
+      BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, depthImage);
+
+      Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
+      Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
+
+      BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+
+      imshow("/l515/depth", finalDisplayDepth);
+      int code = waitKeyEx(30);
+      if (code == 113)
+      {
+         System.exit(0);
+      }
    }
 }
