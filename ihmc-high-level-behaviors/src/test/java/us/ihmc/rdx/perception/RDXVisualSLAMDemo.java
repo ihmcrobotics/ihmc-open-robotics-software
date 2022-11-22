@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 //import us.ihmc.log.LogTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageMat;
 import us.ihmc.perception.ImageTools;
 import us.ihmc.perception.VisualSLAMModule;
@@ -32,9 +33,9 @@ import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -60,10 +61,14 @@ public class RDXVisualSLAMDemo
    private String rightImageName;
    private String fileName = "000000.png";
 
+   private final Scanner gtPoseReader;
+
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
+   private final ArrayList<ModelInstance> groundTruthPoseModels = new ArrayList<>();
 
    private ModelInstance modelInstance;
+   private ModelInstance gtModelInstance;
    private ModelInstance landmarksLineMesh;
 
    private ReferenceFrame frame;
@@ -72,8 +77,10 @@ public class RDXVisualSLAMDemo
    private int updateCount = 0;
    private int fileIndex = 0;
 
-   public RDXVisualSLAMDemo()
+   public RDXVisualSLAMDemo() throws FileNotFoundException
    {
+      gtPoseReader = new Scanner(new File("/home/quantum/Workspace/Data/Datasets/poses/00.txt"));
+
       vslam = new VisualSLAMModule();
       panel.setRenderMethod(this::renderImGuiWidgets);
 
@@ -87,7 +94,6 @@ public class RDXVisualSLAMDemo
          {
 
             baseUI.create();
-
          }
 
          @Override
@@ -95,7 +101,7 @@ public class RDXVisualSLAMDemo
          {
             baseUI.renderBeforeOnScreenUI();
 
-            if(active)
+            if (active)
             {
                //if(updateCount % COUNT_SKIP == 0)
                {
@@ -125,7 +131,7 @@ public class RDXVisualSLAMDemo
       Set<Integer> landmarkIDs = vslam.getLandmarkKeys();
       ArrayList<Point3D> points = vslam.getLandmarkPoints(landmarkIDs);
 
-      for(Point3D point : points)
+      for (Point3D point : points)
       {
          RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
          meshBuilder.addLine(0, 0, 0, point.getX(), point.getY(), point.getZ(), 0.005, Color.WHITE);
@@ -165,6 +171,38 @@ public class RDXVisualSLAMDemo
    public void update()
    {
       //LogTools.info("Loading File Index: {}", fileIndex);
+
+      String[] gtPoseSplit = gtPoseReader.nextLine().split(" ");
+
+      LogTools.info("GT Pose: {}", gtPoseReader.nextLine());
+
+      // r11 r12 r13 tx r21 r22 r23 ty r31 r32 r33 tz
+      RigidBodyTransform gtTransform = new RigidBodyTransform();
+      gtTransform.setUnsafe(Double.parseDouble(gtPoseSplit[0]),
+                            Double.parseDouble(gtPoseSplit[1]),
+                            Double.parseDouble(gtPoseSplit[2]),
+                            Double.parseDouble(gtPoseSplit[3]),
+                            Double.parseDouble(gtPoseSplit[4]),
+                            Double.parseDouble(gtPoseSplit[5]),
+                            Double.parseDouble(gtPoseSplit[6]),
+                            Double.parseDouble(gtPoseSplit[7]),
+                            Double.parseDouble(gtPoseSplit[8]),
+                            Double.parseDouble(gtPoseSplit[9]),
+                            Double.parseDouble(gtPoseSplit[10]),
+                            Double.parseDouble(gtPoseSplit[11]));
+
+      FramePose3D gtFramePose = new FramePose3D();
+      gtFramePose.set(gtTransform);
+      gtFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      ////LogTools.info("Optimized Sensor Pose: \n{}\n", gtFramePose);
+      gtModelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4, Color.GREEN);
+      LibGDXTools.toLibGDX(gtFramePose, tempTransform, gtModelInstance.transform);
+      gtModelInstance.transform.val[Matrix4.M03] *= 0.1;
+      gtModelInstance.transform.val[Matrix4.M13] *= 0.1;
+      gtModelInstance.transform.val[Matrix4.M23] *= 0.1;
+      groundTruthPoseModels.add(gtModelInstance);
+
       fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
       leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
       rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
@@ -176,17 +214,17 @@ public class RDXVisualSLAMDemo
 
       fileIndex += FRAME_SKIP;
 
-      if(initialized)
+      if (initialized)
       {
          /* For Visualization Only */
          poseModels.clear();
-         for (int i = 0; i < fileIndex/FRAME_SKIP; i++)
+         for (int i = 0; i < fileIndex / FRAME_SKIP; i++)
          {
             FramePose3D framePose = vslam.getSensorPose(i);
             framePose.changeFrame(ReferenceFrame.getWorldFrame());
 
             ////LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
-            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4);
+            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4, Color.CYAN);
             LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
             modelInstance.transform.val[Matrix4.M03] *= 0.1;
             modelInstance.transform.val[Matrix4.M13] *= 0.1;
@@ -205,10 +243,15 @@ public class RDXVisualSLAMDemo
       {
          model.getRenderables(renderables, pool);
       }
+
+      for(ModelInstance pose : groundTruthPoseModels)
+      {
+         pose.getRenderables(renderables, pool);
+      }
       //landmarksLineMesh.getRenderables(renderables, pool);
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws FileNotFoundException
    {
       new RDXVisualSLAMDemo();
    }
