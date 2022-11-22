@@ -75,7 +75,7 @@ public class RDXVRTeleporter
    private void processVRInput(RDXVRContext vrContext)
    {
       RDXVRPickResult rightPick = vrContext.getSelectedPick().get(RobotSide.RIGHT);
-      // Teleporter is enabled only when rightPick has nothing to free up right B button to act like right mouse Button.
+      // Teleporter is enabled only when rightPick has nothing, to free up right B button to act like right mouse Button.
       if (rightPick == null)
       {
          vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->

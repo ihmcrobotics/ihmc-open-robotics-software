@@ -42,6 +42,8 @@ public class RDXGizmoDemo
             poseGizmo.create(baseUI.getPrimary3DPanel());
             baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(poseGizmo::calculate3DViewPick);
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
+            baseUI.getVRManager().getContext().addVRPickCalculator(poseGizmo::calculateVRPick);
+            baseUI.getVRManager().getContext().addVRInputProcessor(poseGizmo::processVRInput);
             baseUI.getPrimaryScene().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(RDXGizmoDemo.class.getSimpleName()));
 

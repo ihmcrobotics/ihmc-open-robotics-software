@@ -5,10 +5,10 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameLine3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -83,6 +83,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
    private RDXModelInstance pickPoseSphere;
 
+   // my dot for collision with pose3Dgizmo and pathControlRing
+   private final FramePose3D collisionSphereFramePose = new FramePose3D();
+   private final ModifiableReferenceFrame collisionSphereFrame;
+   private RDXModelInstance collisionSphere = null;
+
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
       super(vrPlayAreaYUpZBackFrame);
@@ -98,6 +103,13 @@ public class RDXVRController extends RDXVRTrackedDevice
       pickPoseFrame.getTransformToParent().getTranslation().setZ(-0.017);
       pickPoseFrame.getReferenceFrame().update();
       pickPoseTransformTuner = new ImGuiRigidBodyTransformTuner(pickPoseFrame.getTransformToParent());
+
+      // TODO:
+      collisionSphereFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
+      collisionSphereFrame.getTransformToParent().getTranslation().setX(0.1);
+      collisionSphereFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(0.020));
+      collisionSphereFrame.getTransformToParent().getTranslation().setZ(-0.017);
+      collisionSphereFrame.getReferenceFrame().update();
    }
 
    public void initSystem()
@@ -131,6 +143,23 @@ public class RDXVRController extends RDXVRTrackedDevice
       gripActionData = InputAnalogActionData.create();
    }
 
+   public void updateSphere(ModifiableReferenceFrame frame, FramePose3D pose, RDXModelInstance sphere)
+   {
+      frame.getReferenceFrame().update();
+      pose.setToZero(frame.getReferenceFrame());
+      pose.changeFrame(ReferenceFrame.getWorldFrame());
+      sphere.setPoseInWorldFrame(pose);
+   }
+
+   public void updateCollisionSpherePose(Point3D incomingPoint3DInWorld)
+   {
+      collisionSphereFrame.getReferenceFrame().update();
+      collisionSphereFramePose.setToZero(collisionSphereFrame.getReferenceFrame());
+      collisionSphereFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      collisionSphereFramePose.getPosition().set(incomingPoint3DInWorld);
+      collisionSphere.setPoseInWorldFrame(collisionSphereFramePose);
+   }
+
    public void update(TrackedDevicePose.Buffer trackedDevicePoses)
    {
       VRInput.VRInput_GetOriginTrackedDeviceInfo(inputSourceHandle.get(0), inputOriginInfo.get(0));
@@ -147,10 +176,18 @@ public class RDXVRController extends RDXVRTrackedDevice
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
          }
 
-         pickPoseFrame.getReferenceFrame().update();
-         pickPoseFramePose.setToZero(pickPoseFrame.getReferenceFrame());
-         pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         pickPoseSphere.setPoseInWorldFrame(pickPoseFramePose);
+//         pickPoseFrame.getReferenceFrame().update();
+//         pickPoseFramePose.setToZero(pickPoseFrame.getReferenceFrame());
+//         pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+//         pickPoseSphere.setPoseInWorldFrame(pickPoseFramePose);
+         updateSphere(pickPoseFrame, pickPoseFramePose, pickPoseSphere);
+
+         if (collisionSphere == null)
+         {
+            collisionSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.025f, new Color(Color.VIOLET)));
+         }
+
+         updateSphere(collisionSphereFrame, collisionSphereFramePose, collisionSphere);
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -175,6 +212,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public RDXModelInstance getPickPoseSphere()
    {
       return pickPoseSphere;
+   }
+
+   public RDXModelInstance getCollisionSphere()
+   {
+      return collisionSphere;
    }
 
    public InputDigitalActionData getClickTriggerActionData()

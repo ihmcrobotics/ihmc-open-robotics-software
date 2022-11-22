@@ -304,6 +304,7 @@ public class RDXVRContext
             {
                modelInstance.getRenderables(renderables, pool);
                controller.getPickPoseSphere().getRenderables(renderables, pool);
+               controller.getCollisionSphere().getRenderables(renderables, pool);
             }
          }
       }

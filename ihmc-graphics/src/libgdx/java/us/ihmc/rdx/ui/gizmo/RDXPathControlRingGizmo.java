@@ -97,7 +97,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    private final double translateSpeedFactor = 0.5;
 
    // VR moves the control-ring by calculating interection between the posivie-x direction ray from the controller and the ground.
-   private ModelInstance lineModel;
+//   private ModelInstance lineModel;
    private final FrameLine3D vrPickRay = new FrameLine3D();
    private final FramePose3D vrPickRayPose = new FramePose3D();
    private final FramePose3D currentPlayArea = new FramePose3D();
@@ -168,7 +168,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public void create(RDXFocusBasedCamera camera3D)
    {
       this.camera3D = camera3D;
-      lineModel = RDXModelBuilder.buildModelInstance(this::buildLineMesh, "line");
+//      lineModel = RDXModelBuilder.buildModelInstance(this::buildLineMesh, "line");
       normalMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_DEFAULT_COLOR.a);
       highlightedMaterial = createAlphaPaletteMaterial(RDXGizmoTools.X_AXIS_SELECTED_DEFAULT_COLOR.a);
       discModel.setMesh(meshBuilder ->
@@ -294,17 +294,21 @@ public class RDXPathControlRingGizmo implements RenderableProvider
                                                                    orientationDeterminationVector,
                                                                    vrRayIntersectionWithGround.getOrientation());
 
+
         lineLength = vrPickRayPose.getPosition().distance(vrRayIntersectionWithGround.getPosition());
-        RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
+//        RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
 
         vrPickRayPose.get(tempTransform);
-        LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
+//        LibGDXTools.toLibGDX(tempTransform, lineModel.transform);
         vrRayIntersectionWithGround.get(tempTransform);
 
         // vrRay intersected (collided) with this gizmo
         vrCollisionType = vrRayToRingPickCalculator.determineCollisionTypeFromRay(vrPickRay, controlRingTransformToWorld, showArrows);
         if (vrCollisionType != RayToControlRingIntersectionCalculator.CollisionType.NONE)
         {
+           // FIXME:
+           controller.updateCollisionSpherePose(vrRayToRingPickCalculator.getClosestCollision());
+
            vrPickResult.setDistanceToControllerPickPoint(vrRayToRingPickCalculator.getClosestCollisionDistance());
            vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
            isGizmoHoveredFromVR = true;
@@ -597,8 +601,9 @@ public class RDXPathControlRingGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      boolean prior = highlightingEnabled && (isGizmoHoveredMouse || isGizmoHoveredFromVR);
-      discModel.setMaterial(prior && (mouseCollisionType == hitCylinder || vrCollisionType == hitCylinder) ? highlightedMaterial : normalMaterial);
+      boolean prior = highlightingEnabled && (isGizmoHoveredMouse || isGizmoHoveredFromVR || isVRGrabbingGizmo);
+      discModel.setMaterial((prior &&
+                             (mouseCollisionType == hitCylinder || vrCollisionType == hitCylinder)) || isRingSelectedVR ? highlightedMaterial : normalMaterial);
       positiveXArrowModel.setMaterial(prior && (mouseCollisionType == hitPositiveX || vrCollisionType == hitPositiveX) ? highlightedMaterial : normalMaterial);
       positiveYArrowModel.setMaterial(prior && (mouseCollisionType == hitPositiveY || vrCollisionType == hitPositiveY) ? highlightedMaterial : normalMaterial);
       negativeXArrowModel.setMaterial(prior && (mouseCollisionType == hitNegativeX || vrCollisionType == hitNegativeX) ? highlightedMaterial : normalMaterial);
@@ -663,12 +668,12 @@ public class RDXPathControlRingGizmo implements RenderableProvider
          negativeXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
          negativeYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
       }
-      lineModel.getRenderables(renderables, pool);
+//      lineModel.getRenderables(renderables, pool);
    }
 
    public void getVRLineRenderable(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      lineModel.getRenderables(renderables, pool);
+//      lineModel.getRenderables(renderables, pool);
    }
 
    public Pose3DReadOnly getPose3D()
@@ -795,11 +800,6 @@ public class RDXPathControlRingGizmo implements RenderableProvider
    public boolean isVRTriggerDown()
    {
       return isVRTriggerDown;
-   }
-
-   public boolean isGizmoGrabbedFromVR()
-   {
-      return isVRTriggerDown && isGizmoHoveredFromVR;
    }
 
    public boolean isRingHoveredFromVR()
