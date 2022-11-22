@@ -1,8 +1,6 @@
 package us.ihmc.avatar.lidar;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoSource;
@@ -20,7 +18,6 @@ public class OusterDepthPublisher
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_lidar_publisher_node");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
    private final VideoPacket videoPacket = new VideoPacket();
-   private final IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
    public OusterDepthPublisher()
    {
@@ -34,7 +31,7 @@ public class OusterDepthPublisher
 
          BytePointer compressedDepthPointer = new BytePointer();
 
-         BytedecoOpenCVTools.compressFloatDepthJPG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer, compressionParameters);
+         BytedecoOpenCVTools.compressImagePNG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer);
 
          byte[] heapByteArrayData = new byte[compressedDepthPointer.asBuffer().remaining()];
          compressedDepthPointer.asBuffer().get(heapByteArrayData);

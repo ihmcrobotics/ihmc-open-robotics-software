@@ -246,10 +246,10 @@ public class HDF5Tools
       ByteBuffer buffer = ByteBuffer.wrap(data);
       IntBuffer intBuffer = buffer.asIntBuffer();
 
-      int intCount = (int)(size / Integer.BYTES);
+      int intCount = (int)(size / Integer.BYTES) + 1;
 
       int[] array = new int[intCount];
-      intBuffer.get(array);
+      intBuffer.get(array, 0, intCount-1);
 
       HDF5Tools.storeIntArray(group, index, array, intCount);
    }

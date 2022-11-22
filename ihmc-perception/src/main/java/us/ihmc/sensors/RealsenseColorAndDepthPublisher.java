@@ -2,14 +2,13 @@ package us.ihmc.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
@@ -17,6 +16,7 @@ import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
@@ -28,8 +28,9 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
 /**
  * Publishes color and depth from Realsense D435
- *       ----+ L515 Device Configuration: Serial Number: F0245563, Depth Height 768, Depth Width: 1024, Depth FPS: 15, Color Height 720, Color Width: 1280, Color FPS: 15
- *       ----+ D435: Serial Number: 752112070330, Depth Width: 848, Depth Height: 480, Depth FPS: 30, Color Width: 848, Color Height: 480, Color FPS: 30
+ * ----+ L515 Device Configuration: Serial Number: F0245563, Depth Height 768, Depth Width: 1024, Depth FPS: 15, Color Height 720, Color Width: 1280, Color FPS:
+ * 15
+ * ----+ D435: Serial Number: 752112070330, Depth Width: 848, Depth Height: 480, Depth FPS: 30, Color Width: 848, Color Height: 480, Color FPS: 30
  */
 public class RealsenseColorAndDepthPublisher
 {
@@ -37,6 +38,9 @@ public class RealsenseColorAndDepthPublisher
    private final ROS2Helper ros2Helper;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense sensor;
+
+   private ROS2Topic<VideoPacket> colorTopic;
+   private ROS2Topic<VideoPacket> depthTopic;
 
    private Mat depthU16C1Image;
 
@@ -57,8 +61,6 @@ public class RealsenseColorAndDepthPublisher
    private BytePointer compressedColorPointer;
    private BytePointer compressedDepthPointer;
 
-   private final IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);;
-
    private String serialNumber;
    private int depthHeight;
    private int depthWidth;
@@ -67,7 +69,7 @@ public class RealsenseColorAndDepthPublisher
    private int colorFPS;
    private int depthFPS;
 
-   public RealsenseColorAndDepthPublisher(String serialNumber, int depthWidth, int depthHeight, int depthFPS, int colorWidth, int colorHeight, int colorFPS)
+   public RealsenseColorAndDepthPublisher(String serialNumber, int depthWidth, int depthHeight, int depthFPS, int colorWidth, int colorHeight, int colorFPS, ROS2Topic<VideoPacket> depthTopic, ROS2Topic<VideoPacket> colorTopic)
    {
       this.serialNumber = serialNumber;
       this.depthWidth = depthWidth;
@@ -76,10 +78,12 @@ public class RealsenseColorAndDepthPublisher
       this.colorHeight = colorHeight;
       this.depthFPS = depthFPS;
       this.colorFPS = colorFPS;
+      this.colorTopic = colorTopic;
+      this.depthTopic = depthTopic;
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "d435_color_depth_node");
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_depth_node");
       ros2Helper = new ROS2Helper(ros2Node);
 
       while (running)
@@ -97,6 +101,7 @@ public class RealsenseColorAndDepthPublisher
          {
             realSenseHardwareManager = new RealSenseHardwareManager();
             sensor = realSenseHardwareManager.createBytedecoRealsense(this.serialNumber, this.depthWidth, this.depthHeight, this.depthFPS);
+            //            sensor = realSenseHardwareManager.createFullFeaturedL515(serialNumber, 1024, 768, 30);
 
             if (sensor.getDevice() == null)
             {
@@ -125,31 +130,40 @@ public class RealsenseColorAndDepthPublisher
             setDepthExtrinsics(sensor);
 
             MutableBytePointer colorFrameData = sensor.getColorFrameData();
-            color8UC3Image = new Mat(depthHeight, depthWidth, opencv_core.CV_8UC3, colorFrameData);
+            color8UC3Image = new Mat(this.colorHeight, this.colorWidth, opencv_core.CV_8UC3, colorFrameData);
             setColorExtrinsics(sensor);
 
-            depth8UC3Image = new Mat(depthU16C1Image.rows(), depthU16C1Image.cols(), opencv_core.CV_8UC3);
-            BytedecoOpenCVTools.transferDepth16UC1ToLower8UC3(depthU16C1Image, depth8UC3Image);
-
+            //            depth8UC3Image = new Mat(depthU16C1Image.rows(), depthU16C1Image.cols(), opencv_core.CV_8UC3);
+            //            BytedecoOpenCVTools.transferDepth16UC1ToLower8UC3(depthU16C1Image, depth8UC3Image);
 
             compressedDepthPointer = new BytePointer();
-            BytedecoOpenCVTools.compressRGBImageJPG(depth8UC3Image, compressedDepthPointer, compressionParameters);
+            BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);
             fillVideoPacket(compressedDepthPointer, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
-            ros2Helper.publish(ROS2Tools.D435_DEPTH, depthVideoPacket);
+            ros2Helper.publish(this.depthTopic, depthVideoPacket);
 
             compressedColorPointer = new BytePointer();
-            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, compressedColorPointer, compressionParameters);
+            BytedecoOpenCVTools.compressImagePNG(color8UC3Image, compressedColorPointer);
             fillVideoPacket(compressedColorPointer, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
-            ros2Helper.publish(ROS2Tools.D435_VIDEO, colorVideoPacket);
+            ros2Helper.publish(this.colorTopic, colorVideoPacket);
 
             long end = System.currentTimeMillis();
 
-//            LogTools.info("Uncompressed Bytes: {}", depthU16C1Image.rows() * depthU16C1Image.cols() * 2 + color8UC3Image.rows() * color8UC3Image.cols() * 3);
-//            LogTools.info("Compressed Bytes: {}", depthVideoPacket.getData().size() + colorVideoPacket.getData().size());
-//            LogTools.info("Time Taken: {} ms", end - begin);
+            //            LogTools.info("Uncompressed Bytes: {}", depthU16C1Image.rows() * depthU16C1Image.cols() * 2 + color8UC3Image.rows() * color8UC3Image.cols() * 3);
+            //            LogTools.info("Compressed Bytes: {}", depthVideoPacket.getData().size() + colorVideoPacket.getData().size());
+            //            LogTools.info("Time Taken: {} ms", end - begin);
+
+            LogTools.info("Raw: {}, Compressed:{}, Factor: {}",
+                          depthU16C1Image.rows() * depthU16C1Image.cols() * 2,
+                          compressedDepthPointer.capacity(),
+                          (float) (depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) compressedDepthPointer.capacity());
+
+            LogTools.info("Raw: {}, Compressed:{}, Factor: {}",
+                          color8UC3Image.rows() * color8UC3Image.cols() * 3,
+                          compressedColorPointer.capacity(),
+                          (float) (color8UC3Image.rows() * color8UC3Image.cols() * 3) / (float) compressedColorPointer.capacity());
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
-//            display(depthU16C1Image, color8UC3Image);
+            //            display(depthU16C1Image, color8UC3Image);
          }
       }
    }
@@ -165,24 +179,22 @@ public class RealsenseColorAndDepthPublisher
       packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
    }
 
-
-
-   private void setDepthExtrinsics(BytedecoRealsense d435)
+   private void setDepthExtrinsics(BytedecoRealsense sensor)
    {
-      depthCameraIntrinsics.setFx(d435.getDepthFocalLengthPixelsX());
-      depthCameraIntrinsics.setFy(d435.getDepthFocalLengthPixelsY());
+      depthCameraIntrinsics.setFx(sensor.getDepthFocalLengthPixelsX());
+      depthCameraIntrinsics.setFy(sensor.getDepthFocalLengthPixelsY());
       depthCameraIntrinsics.setSkew(0.0);
-      depthCameraIntrinsics.setCx(d435.getDepthPrincipalOffsetXPixels());
-      depthCameraIntrinsics.setCy(d435.getDepthPrincipalOffsetYPixels());
+      depthCameraIntrinsics.setCx(sensor.getDepthPrincipalOffsetXPixels());
+      depthCameraIntrinsics.setCy(sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   private void setColorExtrinsics(BytedecoRealsense d435)
+   private void setColorExtrinsics(BytedecoRealsense sensor)
    {
-      colorCameraIntrinsics.setFx(d435.getColorFocalLengthPixelsX());
-      colorCameraIntrinsics.setFy(d435.getColorFocalLengthPixelsY());
+      colorCameraIntrinsics.setFx(sensor.getColorFocalLengthPixelsX());
+      colorCameraIntrinsics.setFy(sensor.getColorFocalLengthPixelsY());
       colorCameraIntrinsics.setSkew(0.0);
-      colorCameraIntrinsics.setCx(d435.getColorPrincipalOffsetXPixels());
-      colorCameraIntrinsics.setCy(d435.getColorPrincipalOffsetYPixels());
+      colorCameraIntrinsics.setCx(sensor.getColorPrincipalOffsetXPixels());
+      colorCameraIntrinsics.setCy(sensor.getColorPrincipalOffsetYPixels());
    }
 
    private void display(Mat depth, Mat color)

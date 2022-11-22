@@ -131,6 +131,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
          {
             realSenseHardwareManager = new RealSenseHardwareManager();
             l515 = realSenseHardwareManager.createFullFeaturedL515(SERIAL_NUMBER);
+
             if (l515.getDevice() == null)
             {
                thread.stop();
