@@ -1,5 +1,6 @@
 package us.ihmc.avatar.sensors.realsense;
 
+import grid_map_msgs.GridMap;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -52,6 +53,24 @@ public class MapsenseTools
          public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
          {
             callback.accept(rawGPUPlanarRegionList);
+         }
+      };
+      ros1Node.attachSubscriber(topic, subscriber);
+      return subscriber;
+   }
+
+   public static AbstractRosTopicSubscriber<GridMap> createROS1HeightMapCallback(RosNodeInterface ros1Node, Consumer<GridMap> callback)
+   {
+      return createROS1HeightMapCallback(RosTools.L515_REGIONS, ros1Node, callback);
+   }
+   public static AbstractRosTopicSubscriber<GridMap> createROS1HeightMapCallback(String topic, RosNodeInterface ros1Node, Consumer<GridMap> callback)
+   {
+      AbstractRosTopicSubscriber<GridMap> subscriber = new AbstractRosTopicSubscriber<GridMap>(GridMap._TYPE)
+      {
+         @Override
+         public void onNewMessage(GridMap gridMap)
+         {
+            callback.accept(gridMap);
          }
       };
       ros1Node.attachSubscriber(topic, subscriber);

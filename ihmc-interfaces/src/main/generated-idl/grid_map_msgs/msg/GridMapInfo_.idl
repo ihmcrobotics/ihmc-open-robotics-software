@@ -1,0 +1,36 @@
+#ifndef __grid_map_msgs__msg__GridMapInfo__idl__
+#define __grid_map_msgs__msg__GridMapInfo__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module grid_map_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="grid_map_msgs::msg::dds_::GridMapInfo_")
+      struct GridMapInfo
+      {
+        /**
+         * Resolution of the grid [m/cell].
+         */
+        double resolution;
+        /**
+         * Length in x-direction [m].
+         */
+        double length_x;
+        /**
+         * Length in y-direction [m].
+         */
+        double length_y;
+        /**
+         * Pose of the grid map center in the frame defined in `header` [m].
+         */
+        geometry_msgs::msg::dds::Pose pose;
+      };
+    };
+  };
+};
+
+#endif

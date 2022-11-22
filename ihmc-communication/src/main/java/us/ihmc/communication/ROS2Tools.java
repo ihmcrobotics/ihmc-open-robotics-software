@@ -2,6 +2,7 @@ package us.ihmc.communication;
 
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import grid_map_msgs.msg.dds.GridMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.*;
@@ -63,7 +64,7 @@ public class ROS2Tools
    public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
    public static final String MAPSENSE_MODULE_NAME = "mapsense";
    public static final String HEIGHT_MAP_MODULE_NAME = "height_map";
-
+   public static final String GPU_GRID_HEIGHT_MAP_MODULE_NAME = "gpu_grid_height_map";
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
    public static final String L515_NAME = "l515";
@@ -105,7 +106,7 @@ public class ROS2Tools
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
    public static final ROS2Topic<?> MAPSENSE_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
-
+   public static final ROS2Topic<?> GPU_GRID_HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(GPU_GRID_HEIGHT_MAP_MODULE_NAME);
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
@@ -167,7 +168,7 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    public static final ROS2Topic<Float64> MAPSENSE_REGIONS_DELAY_OFFSET = MAPSENSE_MODULE.withType(Float64.class).withSuffix("delay_offset");
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_OUTPUT = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
-
+   public static final ROS2Topic<GridMap> GPU_GRID_HEIGHT_MAP_OUTPUT = GPU_GRID_HEIGHT_MAP_MODULE.withOutput().withTypeName(GridMap.class);
    public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput();
    public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = ROS2Tools.BEHAVIOR_MODULE.withOutput();
    private static final ROS2Topic<BehaviorControlModePacket> BEHAVIOR_CONTROL_MODE = BEHAVIOR_MODULE_INPUT.withTypeName(BehaviorControlModePacket.class);

@@ -1,0 +1,52 @@
+#ifndef __grid_map_msgs__msg__GridMap__idl__
+#define __grid_map_msgs__msg__GridMap__idl__
+
+#include "grid_map_msgs/msg/./GridMapInfo_.idl"
+#include "std_msgs/msg/./Float32MultiArray_.idl"
+#include "std_msgs/msg/./Header_.idl"
+module grid_map_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="grid_map_msgs::msg::dds_::GridMap_")
+      struct GridMap
+      {
+        /**
+         * Header (time and frame)
+         */
+        std_msgs::msg::dds::Header header;
+        /**
+         * Grid map header
+         */
+        grid_map_msgs::msg::dds::GridMapInfo info;
+        /**
+         * Grid map layer names.
+         */
+        sequence<string> layers;
+        /**
+         * Grid map basic layer names (optional). The basic layers
+         * determine which layers from `layers` need to be valid
+         * in order for a cell of the grid map to be valid.
+         */
+        sequence<string> basic_layers;
+        /**
+         * Grid map data.
+         */
+        sequence<std_msgs::msg::dds::Float32MultiArray> data;
+        /**
+         * Row start index (default 0).
+         */
+        unsigned short outer_start_index;
+        /**
+         * Column start index (default 0).
+         */
+        unsigned short inner_start_index;
+      };
+    };
+  };
+};
+
+#endif
