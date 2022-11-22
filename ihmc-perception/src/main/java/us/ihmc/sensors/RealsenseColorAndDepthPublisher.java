@@ -122,8 +122,9 @@ public class RealsenseColorAndDepthPublisher
          {
             Instant now = Instant.now();
 
-            long begin = System.currentTimeMillis();
             sensor.updateDataBytePointers();
+
+            long begin_acquire = System.currentTimeMillis();
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
@@ -135,22 +136,25 @@ public class RealsenseColorAndDepthPublisher
 
             //            depth8UC3Image = new Mat(depthU16C1Image.rows(), depthU16C1Image.cols(), opencv_core.CV_8UC3);
             //            BytedecoOpenCVTools.transferDepth16UC1ToLower8UC3(depthU16C1Image, depth8UC3Image);
+            long begin_depth = System.currentTimeMillis();
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);
             fillVideoPacket(compressedDepthPointer, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(this.depthTopic, depthVideoPacket);
 
+            long end_depth = System.currentTimeMillis();
+
             compressedColorPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(color8UC3Image, compressedColorPointer);
             fillVideoPacket(compressedColorPointer, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
             ros2Helper.publish(this.colorTopic, colorVideoPacket);
 
-            long end = System.currentTimeMillis();
+            long end_color = System.currentTimeMillis();
 
             //            LogTools.info("Uncompressed Bytes: {}", depthU16C1Image.rows() * depthU16C1Image.cols() * 2 + color8UC3Image.rows() * color8UC3Image.cols() * 3);
             //            LogTools.info("Compressed Bytes: {}", depthVideoPacket.getData().size() + colorVideoPacket.getData().size());
-            //            LogTools.info("Time Taken: {} ms", end - begin);
+            LogTools.info("Time Taken: {} ms", end - begin);
 
             LogTools.info("Raw: {}, Compressed:{}, Factor: {}",
                           depthU16C1Image.rows() * depthU16C1Image.cols() * 2,
