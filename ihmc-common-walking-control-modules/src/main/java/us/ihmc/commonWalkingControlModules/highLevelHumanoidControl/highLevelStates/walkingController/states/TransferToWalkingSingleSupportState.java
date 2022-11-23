@@ -113,7 +113,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
