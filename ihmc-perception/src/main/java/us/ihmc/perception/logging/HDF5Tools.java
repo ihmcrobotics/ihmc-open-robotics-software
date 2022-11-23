@@ -225,11 +225,11 @@ public class HDF5Tools
       dataset.close();
    }
 
-   public static void storeByteArray(Group group, long index, byte[] data, long size)
+   public static void storeByteArray(Group group, long index, byte[] data, int size)
    {
       LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
 
-      ByteBuffer buffer = ByteBuffer.wrap(data);
+      ByteBuffer buffer = ByteBuffer.wrap(data, 0, size);
       IntBuffer intBuffer = buffer.asIntBuffer();
 
       int intCount = (int)(size / Integer.BYTES) + 1;
