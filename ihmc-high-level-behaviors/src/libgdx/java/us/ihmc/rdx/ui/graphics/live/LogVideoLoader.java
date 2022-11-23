@@ -23,7 +23,7 @@ public class LogVideoLoader
 
    private String timestampFilename;
    private Mat image;
-   private VideoCapture cap;
+   private VideoCapture capture;
    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
    private long currentlyShowingRobottimestamp = 0;
