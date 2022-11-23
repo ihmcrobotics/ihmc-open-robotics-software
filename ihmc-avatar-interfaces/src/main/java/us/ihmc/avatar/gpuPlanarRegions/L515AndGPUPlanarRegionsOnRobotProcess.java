@@ -8,11 +8,14 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import sensor_msgs.Image;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -31,10 +34,7 @@ import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.*;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -62,6 +62,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DepthVideoPublisher;
    private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DebugExtractionVideoPublisher;
+   private IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
+
    private final BigVideoPacket depthImagePacket = new BigVideoPacket();
    private final BigVideoPacket debugExtractionImagePacket = new BigVideoPacket();
    private BytedecoImage debugExtractionImage;
@@ -86,6 +88,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final Throttler parameterOutputThrottler = new Throttler();
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
 
+
    public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
    {
       this.enableROS1 = enableROS1;
@@ -102,6 +105,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
       LogTools.info("Publishing ROS 2 debug extraction video: {}", debugExtractionTopic);
       ros2DebugExtractionVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
+      controllerRegionsPublisher = ROS2Tools.createPublisher(realtimeROS2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, robotModel.getSimpleRobotName()));
       realtimeROS2Node.spin();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
@@ -259,7 +263,9 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             gpuPlanarRegionExtraction.growRegionBoundaries();
             gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
             PlanarRegionsList planarRegionsList = gpuPlanarRegionExtraction.getPlanarRegionsList();
-            ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+            PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+            ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, planarRegionsListMessage);
+            controllerRegionsPublisher.publish(planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
