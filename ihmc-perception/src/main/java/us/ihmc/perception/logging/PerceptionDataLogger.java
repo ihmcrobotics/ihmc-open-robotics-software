@@ -29,10 +29,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -403,43 +401,14 @@ public class PerceptionDataLogger
 
    public static void main(String[] args)
    {
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+
+      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
+      String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
+
       PerceptionDataLogger logger = new PerceptionDataLogger();
-      logger.startLogging(LOG_FILE, "Robot");
-
-      //        HDF5Manager h5;
-      //        File f = new File(FILE_NAME);
-      //        if (!f.exists() && !f.isDirectory()) {
-      //
-      //            LogTools.info("Creating HDF5 File: " + FILE_NAME);
-      //            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_TRUNC);
-      //            h5.getFile().openFile(FILE_NAME, H5F_ACC_RDWR);
-      //        } else {
-      //            LogTools.info("Opening Existing HDF5 File: " + FILE_NAME);
-      //            h5 = new HDF5Manager(FILE_NAME, H5F_ACC_RDWR);
-      //        }
-
-      //
-      ////        h5.getFile().createGroup("g1/");
-      ////        h5.getFile().createGroup("g1/g2/");
-      //
-      //        DMatrixRMaj a = new DMatrixRMaj(5,5);
-      //
-      //        // Can assign values the usual way
-      //        for(int i = 0; i< 3;i++)
-      //        {
-      //            for (int j = 0; j < 3; j++) {
-      //                a.set(i, j, i + j + 1);
-      //            }
-      //        }
-      //
-      //        // Direct manipulation of each value is the fastest way to assign/read values
-      //        a.set(1,1, 12);
-      //        a.set(2,3,64);
-      //
-      //        a.print();
-      //
-      //        HDF5Tools.storeMatrix(h5.getGroup("/test/ejml/matrix"), a.data);
+      logger.startLogging(logDirectory + logFileName, "Robot");
    }
 }
 

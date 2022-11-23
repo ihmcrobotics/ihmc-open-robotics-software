@@ -20,19 +20,9 @@ import java.util.Arrays;
 
 public class HDF5Tools
 {
-   static final String FILE_NAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
-   static final String DATASET_NAME = "/os_cloud_node/points/0";
-
    static final int PCD_POINT_SIZE = 3;
    static final int DIM0 = 2048;
    static final int DIM1 = 64;
-
-   static final int IMG_WIDTH = 1024;
-   static final int IMG_HEIGHT = 768;
-
-   static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
-   static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
-   static final String L515_COLOR = "/chest_l515/color/image_rect_raw";
 
    private static int extractShape(DataSet dataSet, int dim)
    {
@@ -122,7 +112,7 @@ public class HDF5Tools
       BytePointer p = new BytePointer(pointsBuffer);
       dataset.read(p, PredType.NATIVE_UINT8());
       p.get(pointsBuffer);
-//      mat.data(p);
+      //      mat.data(p);
    }
 
    public static void storePointCloud(Group group, long index, ArrayList<Point3D> points)
@@ -232,10 +222,10 @@ public class HDF5Tools
       ByteBuffer buffer = ByteBuffer.wrap(data, 0, size);
       IntBuffer intBuffer = buffer.asIntBuffer();
 
-      int intCount = (int)(size / Integer.BYTES) + 1;
+      int intCount = (int) (size / Integer.BYTES) + 1;
 
       int[] array = new int[intCount];
-      intBuffer.get(array, 0, intCount-1);
+      intBuffer.get(array, 0, intCount - 1);
 
       HDF5Tools.storeIntArray(group, index, array, intCount);
    }

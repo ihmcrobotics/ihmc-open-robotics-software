@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 
+import java.io.File;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 
@@ -107,10 +108,11 @@ public class PerceptionDataLoader
 
    public static void main(String[] args)
    {
-      //      BytedecoTools.loadOpenCV();
+      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
+      String logFileName = "experimental.hdf5";
 
-      String LOG_FILE = System.getProperty("perception.log.file", "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5");
-      PerceptionDataLoader loader = new PerceptionDataLoader(LOG_FILE);
+      PerceptionDataLoader loader = new PerceptionDataLoader(LOG_DIRECTORY + logFileName);
 
       long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
 
