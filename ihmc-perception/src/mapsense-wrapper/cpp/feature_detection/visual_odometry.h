@@ -76,7 +76,7 @@ class VisualOdometry
 
 
       cv::Ptr<cv::StereoBM> stereo = cv::StereoBM::create();
-      cv::Ptr<cv::ORB> _orb = cv::ORB::create(kFeatures);
+      cv::Ptr<cv::ORB> _orb;
 
       std::vector<Keyframe> _keyframes;
       std::vector<cv::DMatch> matchesLeft, matchesRight, prevMatchesStereo, curMatchesStereo;

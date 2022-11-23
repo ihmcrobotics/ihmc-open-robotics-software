@@ -9,6 +9,10 @@ VisualOdometry::VisualOdometry(ApplicationState& app) : _appState(app)
 
    cameraPose = Eigen::Matrix4f::Identity();
 
+   kFeatures = app.NUM_VISUAL_FEATURES;
+   kMinFeatures = app.MIN_NUM_VISUAL_FEATURES;
+
+   _orb = cv::ORB::create(kFeatures);
 
 
    stereo->setNumDisparities(app.STEREO_NUM_DISPARITIES * 16);

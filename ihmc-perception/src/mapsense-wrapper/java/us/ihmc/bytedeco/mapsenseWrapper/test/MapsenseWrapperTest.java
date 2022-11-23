@@ -14,7 +14,7 @@ public class MapsenseWrapperTest
       BytedecoTools.loadMapsenseLibraries();
       BytedecoTools.loadOpenCV();
 
-      VisualOdometry.VisualOdometryExternal visualOdometry = new VisualOdometry.VisualOdometryExternal();
+      VisualOdometry.VisualOdometryExternal visualOdometry = new VisualOdometry.VisualOdometryExternal(500, 300);
 
       testBufferTransfer(visualOdometry);
       testImageTransferAndDisplay(visualOdometry);

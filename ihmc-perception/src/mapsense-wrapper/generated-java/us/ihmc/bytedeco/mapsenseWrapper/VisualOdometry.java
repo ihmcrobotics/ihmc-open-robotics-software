@@ -21,18 +21,9 @@ public class VisualOdometry extends us.ihmc.bytedeco.mapsenseWrapper.presets.Vis
     static { Loader.load(); }
     /** Pointer cast constructor. Invokes {@link Pointer#Pointer(Pointer)}. */
     public VisualOdometryExternal(Pointer p) { super(p); }
-    /** Native array allocator. Access with {@link Pointer#position(long)}. */
-    public VisualOdometryExternal(long size) { super((Pointer)null); allocateArray(size); }
-    private native void allocateArray(long size);
-    @Override public VisualOdometryExternal position(long position) {
-        return (VisualOdometryExternal)super.position(position);
-    }
-    @Override public VisualOdometryExternal getPointer(long i) {
-        return new VisualOdometryExternal((Pointer)this).offsetAddress(i);
-    }
 
-        public VisualOdometryExternal() { super((Pointer)null); allocate(); }
-        private native void allocate();
+        public VisualOdometryExternal(@Cast("uint32_t") int nFeatures, @Cast("uint32_t") int minFeatures) { super((Pointer)null); allocate(nFeatures, minFeatures); }
+        private native void allocate(@Cast("uint32_t") int nFeatures, @Cast("uint32_t") int minFeatures);
 
         public native void printMat(FloatPointer buffer, int height, int width);
         public native void printMat(FloatBuffer buffer, int height, int width);

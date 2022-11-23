@@ -34,7 +34,7 @@ public class VisualSLAMModule
    public VisualSLAMModule()
    {
       BytedecoTools.loadMapsenseLibraries();
-      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal();
+      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(500, 400);
 
       BytedecoTools.loadGTSAMLibraries();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
@@ -48,19 +48,19 @@ public class VisualSLAMModule
    }
 
    /*
-            + First Iteration: Odometry is Identity, and Zero Landmarks
-            + 2D measurements are negative
-            + Odometry RigidBodyTransform is wrong
-            + Landmark External printouts are not numerous enough
-            + Initial Pose Values have Zero Translation
-            + Before and After Differ by only 2
-   *
+   *  Update(): Calls the updateStereo() on VisualOdometryExternal to generate visual keypoint measurements and odometry estimate.
+   *  Inserts the landmark measurements and odometry as constraints in the factor graph.
+   *  Performs factor graph optimization and extracts results from the GTSAM wrapper FactorGraphExternal.
    * */
    public boolean update(ImageMat leftImage, ImageMat rightImage)
    {
+      /*
+       *  Compute both relative pose in last key-frame, and 2D-3D keypoint landmark measurements in current camera frame.
+      */
+      LogTools.info("Update Stereo()");
       boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
 
-      //LogTools.info("Extracting Keyframe External");
+      LogTools.info("Extracting Keyframe External");
       double[] relativePoseTransformAsArray = new double[16];
       int[] keyframeID = new int[] {-1};
       visualOdometryExternal.getExternalKeyframe(relativePoseTransformAsArray, keyframeID);
@@ -81,7 +81,7 @@ public class VisualSLAMModule
          RigidBodyTransform odometryTransform = new RigidBodyTransform();
          odometryTransform.set(relativePoseTransformAsArray);
          worldToSensorTransform.multiply(odometryTransform);
-         //LogTools.info("Odometry: {}", odometryTransform);
+         LogTools.info("Odometry: {}", odometryTransform);
          //LogTools.info("Sensor Transform: {}", worldToSensorTransform);
 
          /* Compute and insert keyframe pose in world frame as initial value */
@@ -133,9 +133,9 @@ public class VisualSLAMModule
             totalValidLandmarks++;
          }
       }
-      //LogTools.info("Total Valid Landmarks: {}", totalValidLandmarks);
+      LogTools.info("Total Valid Landmarks: {}", totalValidLandmarks);
 
-      //LogTools.info("Optimizing Factor Graph");
+      LogTools.info("Optimizing Factor Graph");
       // TODO: Try Incremental SAM instead of batch optimizer.
       if (initialized)
       {
@@ -143,10 +143,13 @@ public class VisualSLAMModule
             //factorGraphExternal.optimizeISAM2((byte) 4);
          //factorGraphExternal.optimize();
       }
+
+      LogTools.info("Obtaining Results");
       //factorGraphExternal.printResults();
 
       frameIndex++;
 
+      LogTools.info("Visual SLAM Update End");
       return initialized;
    }
 

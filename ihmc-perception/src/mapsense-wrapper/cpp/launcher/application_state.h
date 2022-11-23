@@ -67,6 +67,9 @@ class ApplicationState
       float DEPTH_CX = 0;
       float DEPTH_CY = 0;
 
+      uint32_t NUM_VISUAL_FEATURES = 600;
+      uint32_t MIN_NUM_VISUAL_FEATURES = 400;
+
       int NUM_SKIP_EDGES = 8;
       int VISUAL_DEBUG_DELAY = 10;
 

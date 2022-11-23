@@ -7,7 +7,7 @@
 class VisualOdometryExternal
 {
     public:
-        VisualOdometryExternal();
+        VisualOdometryExternal(uint32_t nFeatures, uint32_t minFeatures);
         ~VisualOdometryExternal() {delete _visualOdometry;}
 
         void printMat(float* buffer, int height, int width);

@@ -1,9 +1,12 @@
 #include "visual_odometry_external.h"
 #include "iostream"
 
-VisualOdometryExternal::VisualOdometryExternal()
+VisualOdometryExternal::VisualOdometryExternal(uint32_t nFeatures, uint32_t minFeatures)
 {
    std::cout << "VisualOdometryExternal Created" << std::endl;
+
+   _appState.NUM_VISUAL_FEATURES = nFeatures;
+   _appState.MIN_NUM_VISUAL_FEATURES = minFeatures;
 
    _visualOdometry = new VisualOdometry(_appState);
 }

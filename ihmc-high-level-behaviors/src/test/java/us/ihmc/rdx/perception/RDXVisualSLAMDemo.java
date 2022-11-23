@@ -37,7 +37,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class RDXVisualSLAMDemo
 {
@@ -170,8 +169,46 @@ public class RDXVisualSLAMDemo
 
    public void update()
    {
-      //LogTools.info("Loading File Index: {}", fileIndex);
+      getGroundTruthPose();
 
+      fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
+      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
+      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
+
+      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
+      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
+
+      boolean initialized = vslam.update(currentImageLeft, currentImageRight);
+
+      LogTools.info("Visual SLAM Update Completed");
+
+      fileIndex += FRAME_SKIP;
+
+      if (initialized)
+      {
+         /* For Visualization Only */
+         poseModels.clear();
+         for (int i = 0; i < fileIndex / FRAME_SKIP; i++)
+         {
+            FramePose3D framePose = vslam.getSensorPose(i);
+            framePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+            ////LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
+            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4, Color.CYAN);
+            LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
+            modelInstance.transform.val[Matrix4.M03] *= 0.1;
+            modelInstance.transform.val[Matrix4.M13] *= 0.1;
+            modelInstance.transform.val[Matrix4.M23] *= 0.1;
+            poseModels.add(modelInstance);
+         }
+
+         vslam.clearISAM2();
+      }
+      LogTools.info("Total Model Instances: {}", poseModels.size());
+   }
+
+   public void getGroundTruthPose()
+   {
       String[] gtPoseSplit = gtPoseReader.nextLine().split(" ");
 
       LogTools.info("GT Pose: {}", gtPoseReader.nextLine());
@@ -202,39 +239,6 @@ public class RDXVisualSLAMDemo
       gtModelInstance.transform.val[Matrix4.M13] *= 0.1;
       gtModelInstance.transform.val[Matrix4.M23] *= 0.1;
       groundTruthPoseModels.add(gtModelInstance);
-
-      fileName = String.format("%1$6s", fileIndex).replace(' ', '0') + ".png";
-      leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
-      rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
-
-      currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
-      currentImageRight = ImageTools.loadAsImageMat(rightImageName);
-
-      boolean initialized = vslam.update(currentImageLeft, currentImageRight);
-
-      fileIndex += FRAME_SKIP;
-
-      if (initialized)
-      {
-         /* For Visualization Only */
-         poseModels.clear();
-         for (int i = 0; i < fileIndex / FRAME_SKIP; i++)
-         {
-            FramePose3D framePose = vslam.getSensorPose(i);
-            framePose.changeFrame(ReferenceFrame.getWorldFrame());
-
-            ////LogTools.info("Optimized Sensor Pose: \n{}\n", framePose);
-            modelInstance = RDXModelBuilder.createCoordinateFrameInstance(0.4, Color.CYAN);
-            LibGDXTools.toLibGDX(framePose, tempTransform, modelInstance.transform);
-            modelInstance.transform.val[Matrix4.M03] *= 0.1;
-            modelInstance.transform.val[Matrix4.M13] *= 0.1;
-            modelInstance.transform.val[Matrix4.M23] *= 0.1;
-            poseModels.add(modelInstance);
-         }
-
-         vslam.clearISAM2();
-      }
-      //LogTools.info("Total Model Instances: {}", poseModels.size());
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
