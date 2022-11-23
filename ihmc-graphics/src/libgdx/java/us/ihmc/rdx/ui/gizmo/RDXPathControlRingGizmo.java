@@ -308,6 +308,11 @@ public class RDXPathControlRingGizmo implements RenderableProvider
         {
            // FIXME:
            controller.updateCollisionSpherePose(vrRayToRingPickCalculator.getClosestCollision());
+           if (controller.getLineModel() != null)
+           {
+              LibGDXTools.toLibGDX(controlRingTransformToWorld, controller.getLineModel().transform);
+              vrContext.rebuildLineMesh(controller.getLineModel(), vrRayToRingPickCalculator.getClosestCollisionDistance(), Color.ORANGE);
+           }
 
            vrPickResult.setDistanceToControllerPickPoint(vrRayToRingPickCalculator.getClosestCollisionDistance());
            vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
@@ -394,7 +399,7 @@ public class RDXPathControlRingGizmo implements RenderableProvider
            intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
         }
         // Initial point user starts grabbing the ring.
-        else if (isVRTriggerDown && isGizmoHoveredFromVR && vrCollisionType == hitCylinder)
+        else if (isVRTriggerClicked && isGizmoHoveredFromVR && vrCollisionType == hitCylinder)
         {
            intersectionStartPoint = new Point3D(vrRayIntersectionWithGround.getPosition());
            isVRGrabbingGizmo = true;

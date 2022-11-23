@@ -1,6 +1,7 @@
 package us.ihmc.rdx.vr;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
@@ -88,6 +89,10 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final ModifiableReferenceFrame collisionSphereFrame;
    private RDXModelInstance collisionSphere = null;
 
+   private ModelInstance lineModel;
+   private final ModifiableReferenceFrame lineFrame;
+   private double lineLength = 1.0;
+
    public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
       super(vrPlayAreaYUpZBackFrame);
@@ -110,6 +115,9 @@ public class RDXVRController extends RDXVRTrackedDevice
       collisionSphereFrame.getTransformToParent().getTranslation().setY(side.negateIfLeftSide(0.020));
       collisionSphereFrame.getTransformToParent().getTranslation().setZ(-0.017);
       collisionSphereFrame.getReferenceFrame().update();
+
+      lineFrame = new ModifiableReferenceFrame(xForwardZUpControllerFrame);
+
    }
 
    public void initSystem()
@@ -175,19 +183,25 @@ public class RDXVRController extends RDXVRTrackedDevice
          {
             pickPoseSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.0025f, new Color(0x870707ff)));
          }
-
-//         pickPoseFrame.getReferenceFrame().update();
-//         pickPoseFramePose.setToZero(pickPoseFrame.getReferenceFrame());
-//         pickPoseFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-//         pickPoseSphere.setPoseInWorldFrame(pickPoseFramePose);
          updateSphere(pickPoseFrame, pickPoseFramePose, pickPoseSphere);
 
          if (collisionSphere == null)
          {
             collisionSphere = new RDXModelInstance(RDXModelBuilder.createSphere(0.025f, new Color(Color.VIOLET)));
          }
-
          updateSphere(collisionSphereFrame, collisionSphereFramePose, collisionSphere);
+
+         if (lineModel == null)
+         {
+            lineModel = RDXModelBuilder.buildModelInstance(rdxMultiColorMeshBuilder -> rdxMultiColorMeshBuilder.addLine(0.0,
+                                                                                                                        0.0,
+                                                                                                                        0.0,
+                                                                                                                        lineLength,
+                                                                                                                        0.0,
+                                                                                                                        0.0,
+                                                                                                                        0.005,
+                                                                                                                        Color.ORANGE), "line");
+         }
       }
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
@@ -315,5 +329,15 @@ public class RDXVRController extends RDXVRTrackedDevice
    public ReferenceFrame getPickPoseFrame()
    {
       return pickPoseFrame.getReferenceFrame();
+   }
+
+   public ModelInstance getLineModel()
+   {
+      return lineModel;
+   }
+
+   public double getLineLength()
+   {
+      return lineLength;
    }
 }

@@ -485,6 +485,12 @@ public class RDXPose3DGizmo implements RenderableProvider
            {
               vrPickResult.setDistanceToControllerPickPoint(vrRayIntersectionCalculator.getClosestCollisionDistance());
               controller.updateCollisionSpherePose(vrRayIntersectionCalculator.getClosestCollision());
+              if (controller.getLineModel() != null)
+              {
+                 LibGDXTools.toLibGDX(transformToWorld, controller.getLineModel().transform);
+                 vrContext.rebuildLineMesh(controller.getLineModel(), vrRayIntersectionCalculator.getClosestCollisionDistance(), Color.ORANGE);
+              }
+
               vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
               isGizmoHoveredVR = true;
               updateMaterialHighlighting();
@@ -498,14 +504,14 @@ public class RDXPose3DGizmo implements RenderableProvider
         if (vrSelection != null)
         {
            controller.updateCollisionSpherePose(vrRayIntersectionCalculator.getClosestCollision());
+           if (controller.getLineModel() != null)
+           {
+              LibGDXTools.toLibGDX(transformToWorld, controller.getLineModel().transform);
+              vrContext.rebuildLineMesh(controller.getLineModel(), vrRayIntersectionCalculator.getClosestCollisionDistance(), Color.ORANGE);
+           }
            vrContext.addPickResult(RobotSide.RIGHT, vrPickResult);
            updateMaterialHighlighting();
         }
-
-//        if (isVRTriggerClicked)
-//        {
-//           isRingSelectedVR = getHollowCylinderPickSelectedVR();
-//        }
 
         if (isGizmoSelectedVR)
         {
@@ -538,7 +544,7 @@ public class RDXPose3DGizmo implements RenderableProvider
         }
 
         // Initial point of rotation dragging by vr
-        if (isGizmoHoveredVR && isVRTriggerDown && !isVRGrabbingGizmo)
+        if (isGizmoHoveredVR && isVRTriggerClicked && !isVRGrabbingGizmo)
         {
            isVRGrabbingGizmo = true;
            if (vrSelection != null)
@@ -595,6 +601,12 @@ public class RDXPose3DGizmo implements RenderableProvider
               vrClockFaceDragAlgorithm.getMotion().transform(sphereDraggedPosition.getOrientation());
 
               controller.updateCollisionSpherePose(new Point3D(sphereDraggedPosition.getPosition()));
+
+              if (controller.getLineModel() != null)
+              {
+                 LibGDXTools.toLibGDX(tempTransform, controller.getLineModel().transform);
+                 vrContext.rebuildLineMesh(controller.getLineModel(), vrRayIntersectionCalculator.getClosestCollisionDistance(), Color.ORANGE);
+              }
            }
         }
 

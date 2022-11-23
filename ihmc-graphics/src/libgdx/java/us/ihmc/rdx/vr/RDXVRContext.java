@@ -7,6 +7,7 @@ import java.nio.LongBuffer;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -24,8 +25,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceDirectory;
@@ -69,25 +72,28 @@ public class RDXVRContext
    // your thumb is pointing at your face and your index finger pointing right
    // The default orientation of the IHMC Zup frame is such that
    // your thumb is up and your index finger is pointing away from you
-   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
-         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-            Math.toRadians(-90.0),  // rotating around thumb, index goes forward to right
-            Math.toRadians(0.0),    // no rotation about middle finger
-            Math.toRadians(90.0)    // rotating about index finger, thumb goes up to toward you
-         ),
-         new Point3D()
-   );
-   /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
+   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(
+         // For this transformation, we start with IHMC ZUp with index forward and thumb up
+         Math.toRadians(-90.0),
+         // rotating around thumb, index goes forward to right
+         Math.toRadians(0.0),
+         // no rotation about middle finger
+         Math.toRadians(90.0)
+         // rotating about index finger, thumb goes up to toward you
+   ), new Point3D());
+   /**
+    * When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame.
+    */
    private final RigidBodyTransform teleportIHMCZUpToIHMCZUpWorld = new RigidBodyTransform();
-   private final ReferenceFrame teleportFrameIHMCZUp
-         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           teleportIHMCZUpToIHMCZUpWorld);
-   /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
-   private final ReferenceFrame vrPlayAreaYUpZBackFrame
-         = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
-                                                                           teleportFrameIHMCZUp,
-                                                                           openVRYUpToIHMCZUpSpace);
+   private final ReferenceFrame teleportFrameIHMCZUp = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
+                                                                                                                       ReferenceFrame.getWorldFrame(),
+                                                                                                                       teleportIHMCZUpToIHMCZUpWorld);
+   /**
+    * The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame.
+    */
+   private final ReferenceFrame vrPlayAreaYUpZBackFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
+                                                                                                                            teleportFrameIHMCZUp,
+                                                                                                                            openVRYUpToIHMCZUpSpace);
 
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
@@ -95,7 +101,6 @@ public class RDXVRContext
    private final HashMap<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
    private final SideDependentList<ArrayList<RDXVRPickResult>> pickResults = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
    private SideDependentList<RDXVRPickResult> selectedPick = new SideDependentList<>(null, null);
-
 
    private final FrameLine3D pickRay = new FrameLine3D();
    private final FramePoint3D pickIntersection = new FramePoint3D();
@@ -140,7 +145,9 @@ public class RDXVRContext
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
    }
 
-   /** Needs to be on libGDX thread. */
+   /**
+    * Needs to be on libGDX thread.
+    */
    public void setupEyes()
    {
       LogTools.info("VR per eye render size: {} x {}", width, height);
@@ -159,9 +166,11 @@ public class RDXVRContext
       }
    }
 
-   /** This method waits for OpenVR to say "go" and gathers the latest data.
-    *  The goal is to submit frames to the eyes ASAP after this returns,
-    *  then get back to this method before the frame is over. */
+   /**
+    * This method waits for OpenVR to say "go" and gathers the latest data.
+    * The goal is to submit frames to the eyes ASAP after this returns,
+    * then get back to this method before the frame is over.
+    */
    public void waitGetPoses()
    {
       VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
@@ -169,8 +178,8 @@ public class RDXVRContext
    }
 
    /**
-    *  For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
-    *  and https://github.com/ValveSoftware/openvr/issues/1151
+    * For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
+    * and https://github.com/ValveSoftware/openvr/issues/1151
     */
    public void pollEvents()
    {
@@ -305,6 +314,7 @@ public class RDXVRContext
                modelInstance.getRenderables(renderables, pool);
                controller.getPickPoseSphere().getRenderables(renderables, pool);
                controller.getCollisionSphere().getRenderables(renderables, pool);
+//               controller.getLineModel().getRenderables(renderables, pool);
             }
          }
       }
@@ -365,5 +375,11 @@ public class RDXVRContext
    public SideDependentList<RDXVRPickResult> getSelectedPick()
    {
       return selectedPick;
+   }
+
+   public void rebuildLineMesh(ModelInstance lineModel, double lineLength, Color color)
+   {
+      RDXModelBuilder.rebuildMesh(lineModel.nodes.get(0),
+                                  rdxMultiColorMeshBuilder -> rdxMultiColorMeshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color));
    }
 }
