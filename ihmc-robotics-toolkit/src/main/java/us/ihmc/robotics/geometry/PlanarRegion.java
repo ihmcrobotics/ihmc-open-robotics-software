@@ -98,20 +98,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, List<? extends Point2DBasics> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
-      fromLocalToWorldTransform.set(transformToWorld);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-
-      this.concaveHullsVertices.clear();
-      concaveHullVertices.forEach(this.concaveHullsVertices.add()::set);
-
-      //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
-      checkConcaveHullRepeatVertices(false);
-
-      convexPolygons.clear();
-      planarRegionConvexPolygons.forEach(convexPolygons.add()::set);
-
-      updateBoundingBox();
-      updateConvexHull();
+      set(transformToWorld, planarRegionConvexPolygons, concaveHullVertices, regionId);
    }
 
    /**
@@ -122,6 +109,11 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     *           local coordinate system.
     */
    public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier convexPolygon)
+   {
+      set(transformToWorld, convexPolygon);
+   }
+
+   public void set(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier convexPolygon)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -139,17 +131,15 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateConvexHull();
    }
 
-   public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       this.set(transformToWorld, planarRegionConvexPolygons, NO_REGION_ID);
    }
 
-   public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, int newRegionId)
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, int newRegionId)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-
-      concaveHullsVertices.clear();
 
       convexPolygons.clear();
       for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
@@ -157,11 +147,12 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
       updateBoundingBox();
       updateConvexHull();
+      updateConcaveHull();
 
       regionId = newRegionId;
    }
 
-   public void set(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, List<? extends Point2DReadOnly> concaveHullVertices, int newRegionId)
+   public void set(RigidBodyTransformReadOnly transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons, List<? extends Point2DReadOnly> concaveHullVertices, int newRegionId)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
