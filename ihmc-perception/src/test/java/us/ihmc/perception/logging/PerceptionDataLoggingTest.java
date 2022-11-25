@@ -291,7 +291,7 @@ public class PerceptionDataLoggingTest
 
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
-      BytedecoOpenCVTools.decompressDepthJPG(dataArray, finalDepth16UC1);
+      BytedecoOpenCVTools.decompressJPG(dataArray, finalDepth16UC1);
 
       ShortBufferIndexer indexer = new ShortBufferIndexer(finalDepth16UC1.getShortBuffer());
       ShortBufferIndexer indexerActual = new ShortBufferIndexer(depth.getShortBuffer());
@@ -329,7 +329,7 @@ public class PerceptionDataLoggingTest
 //      LogTools.info("PNG Loaded: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
 
       Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
-      BytedecoOpenCVTools.decompressDepthJPG(dataArray, finalDepth16UC1);
+      BytedecoOpenCVTools.decompressJPG(dataArray, finalDepth16UC1);
 
       ShortBufferIndexer indexer = new ShortBufferIndexer(finalDepth16UC1.getShortBuffer());
       ShortBufferIndexer indexerActual = new ShortBufferIndexer(depth.getShortBuffer());

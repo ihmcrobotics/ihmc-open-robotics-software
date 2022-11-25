@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
@@ -140,11 +141,10 @@ public class BytedecoOpenCVTools
       return Java2DFrameUtils.toMat(image);
    }
 
-   public static void compressRGBImageJPG(Mat image, BytePointer compressedBytes)
+   public static void compressRGBImageJPG(Mat image, Mat yuvImageToPack, BytePointer compressedBytes)
    {
-      Mat yuv420Image = new Mat();
-      opencv_imgproc.cvtColor(image, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, compressionParametersJPG);
+      opencv_imgproc.cvtColor(image, yuvImageToPack, opencv_imgproc.COLOR_RGB2YUV_I420);
+      opencv_imgcodecs.imencode(".jpg", yuvImageToPack, compressedBytes, compressionParametersJPG);
    }
 
    /* Not recommended for lossless use cases. */
@@ -173,7 +173,7 @@ public class BytedecoOpenCVTools
    }
 
    /* Not recommended for lossless use cases. */
-   public static void decompressDepthJPG(byte[] data, Mat dst)
+   public static void decompressJPG(byte[] data, Mat dst)
    {
       BytePointer dataPointer = new BytePointer(data);
       Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
@@ -315,5 +315,29 @@ public class BytedecoOpenCVTools
       {
          System.exit(0);
       }
+   }
+
+   public static void displayVideoPacketColor(VideoPacket videoPacket)
+   {
+      Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
+      byte[] compressedByteArray = videoPacket.getData().toArray();
+      BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
+
+      imshow("Color Image", colorImage);
+      int code = waitKeyEx(1);
+      if (code == 113)
+      {
+         System.exit(0);
+      }
+   }
+
+   public static void fillVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width)
+   {
+      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
+      packet.getData().resetQuick();
+      packet.getData().add(heapArray);
+      packet.setImageHeight(height);
+      packet.setImageWidth(width);
+      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
    }
 }
