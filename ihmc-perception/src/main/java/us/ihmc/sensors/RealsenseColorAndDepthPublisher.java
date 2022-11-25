@@ -39,10 +39,14 @@ public class RealsenseColorAndDepthPublisher
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense sensor;
 
+   private final byte[] heapByteArrayData = new byte[1000000];
+
    private ROS2Topic<VideoPacket> colorTopic;
    private ROS2Topic<VideoPacket> depthTopic;
 
    private Mat depthU16C1Image;
+
+   private final Mat yuvColorImage = new Mat();
 
    private Mat color8UC3Image;
    private Mat depth8UC3Image;
@@ -140,14 +144,14 @@ public class RealsenseColorAndDepthPublisher
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);
-            fillVideoPacket(compressedDepthPointer, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
+            BytedecoOpenCVTools.fillVideoPacket(compressedDepthPointer, heapByteArrayData, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(this.depthTopic, depthVideoPacket);
 
             long end_depth = System.nanoTime();
 
             compressedColorPointer = new BytePointer();
-            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, compressedColorPointer);
-            fillVideoPacket(compressedColorPointer, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
+            BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
+            BytedecoOpenCVTools.fillVideoPacket(compressedColorPointer, heapByteArrayData, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
             ros2Helper.publish(this.colorTopic, colorVideoPacket);
 
             long end_color = System.nanoTime();
@@ -167,17 +171,6 @@ public class RealsenseColorAndDepthPublisher
             //            display(depthU16C1Image, color8UC3Image);
          }
       }
-   }
-
-   private void fillVideoPacket(BytePointer compressedBytes, VideoPacket packet, int height, int width)
-   {
-      byte[] heapByteArrayData = new byte[compressedBytes.asBuffer().remaining()];
-      compressedBytes.asBuffer().get(heapByteArrayData);
-      packet.getData().resetQuick();
-      packet.getData().add(heapByteArrayData);
-      packet.setImageHeight(height);
-      packet.setImageWidth(width);
-      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
    }
 
    private void setDepthExtrinsics(BytedecoRealsense sensor)

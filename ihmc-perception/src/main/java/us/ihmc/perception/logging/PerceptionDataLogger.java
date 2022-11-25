@@ -51,6 +51,8 @@ public class PerceptionDataLogger
    private final String D435_DEPTH_NAME = "/d435/depth/";
    private final String D435_COLOR_NAME = "/d435/color/";
 
+   private final String ZED2_COLOR_NAME = "/zed2/color/";
+
    private final String L515_DEPTH_NAME = "/l515/depth/";
    private final String L515_COLOR_NAME = "/l515/color/";
 
@@ -161,6 +163,13 @@ public class PerceptionDataLogger
       buffers.put(L515_COLOR_NAME, new byte[25000000]);
       counts.put(L515_COLOR_NAME, 0);
 
+      // Add callback for D435 Color images
+      var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
+      zed2StereoSubscription.addCallback(this::logColorZED2);
+      runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
+      buffers.put(ZED2_COLOR_NAME, new byte[25000000]);
+      counts.put(ZED2_COLOR_NAME, 0);
+
       // Add callback for L515 Depth maps
 //      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
 //      l515ColorSubscription.addCallback(this::logColorL515);
@@ -249,6 +258,12 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging L515 Color: ", videoPacket.toString());
       storeVideoPacket(L515_COLOR_NAME, videoPacket);
+   }
+
+   public void logColorZED2(VideoPacket videoPacket)
+   {
+      LogTools.info("Logging L515 Color: ", videoPacket.toString());
+      BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
    }
 
    public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
