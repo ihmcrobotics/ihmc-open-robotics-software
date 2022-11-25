@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -576,7 +577,7 @@ public class PlanarRegionTools
       firstEndPointInLocal.applyTransform(transformToLocal);
       secondEndPointInLocal.applyTransform(transformToLocal);
 
-      List<Point2D> concaveHull = query.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = query.getConcaveHull();
 
       List<Point3D> convexPolygon3D = new ArrayList<>();
       for (int i = 0; i < concaveHull.size(); i++)
@@ -857,21 +858,42 @@ public class PlanarRegionTools
 
       return null;
    }
-
    /**
     * Find all the planar regions that intersect with the given convex polygon. The algorithm is
     * equivalent to projecting all the regions onto the XY-plane and then finding the regions
     * intersecting with the given convex polygon.
     *
     * @param convexPolygon the query.
-    * @return the list of planar regions intersecting with the given polygon. Returns null when no
+    * @param intersectingRegionsToPack the list of planar regions intersecting with the given polygon. Empty when no
     *       region intersects.
+    * @return Returns false when no region intersects.
     */
    public static boolean findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon,
                                                               List<PlanarRegion> regions,
                                                               List<PlanarRegion> intersectingRegionsToPack)
    {
+      return findPlanarRegionsIntersectingPolygon(convexPolygon, regions, intersectingRegionsToPack, null);
+   }
+   
+   /**
+    * Find all the planar regions that intersect with the given convex polygon. The algorithm is
+    * equivalent to projecting all the regions onto the XY-plane and then finding the regions
+    * intersecting with the given convex polygon.
+    *
+    * @param convexPolygon the query.
+    * @param intersectingRegionsToPack the list of planar regions intersecting with the given polygon. Empty when no
+    *        region intersects.
+    * @param intersectionAreasToPack list of the areas of each of the intersecting regions. Empty when no region intersects.
+    * @return Returns false when no region intersects.
+    */
+   public static boolean findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon,
+                                                              List<PlanarRegion> regions,
+                                                              List<PlanarRegion> intersectingRegionsToPack,
+                                                              TDoubleArrayList intersectionAreasToPack)
+   {
       intersectingRegionsToPack.clear();
+      if (intersectionAreasToPack != null)
+         intersectionAreasToPack.reset();
       boolean hasIntersection = false;
 
       for (int i = 0; i < regions.size(); i++)
@@ -880,10 +902,14 @@ public class PlanarRegionTools
          if (candidateRegion.isVertical())
             continue;
 
-         if (candidateRegion.isPolygonIntersecting(convexPolygon))
+         double intersectingArea = candidateRegion.computeIntersectingArea(convexPolygon);
+
+         if (intersectingArea > 0.0)
          {
             hasIntersection = true;
             intersectingRegionsToPack.add(candidateRegion);
+            if (intersectionAreasToPack != null)
+               intersectionAreasToPack.add(intersectingArea);
          }
       }
 
@@ -1013,60 +1039,6 @@ public class PlanarRegionTools
       projectedPolygon.update();
 
       return projectedPolygon;
-   }
-
-   //TODO: Should be more efficient way to do this check. And should be moved to Euclid Polygon Tools.
-   public static boolean doPolygonsIntersect(ConvexPolygon2D polygonOne, ConvexPolygon2D polygonTwo, double epsilon)
-   {
-      if (polygonOne.getNumberOfVertices() == 2)
-      {
-         if (polygonTwo.getNumberOfVertices() == 2)
-         {
-            return EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds(new Point3D(polygonOne.getVertex(0)),
-                                                                        new Point3D(polygonOne.getVertex(1)),
-                                                                        new Point3D(polygonTwo.getVertex(0)),
-                                                                        new Point3D(polygonTwo.getVertex(1))) < epsilon;
-         }
-         else
-         {
-            Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonOne.getVertex(0),
-                                                                                                                    polygonOne.getVertex(1),
-                                                                                                                    polygonTwo.getVertexBufferView(),
-                                                                                                                    polygonTwo.getNumberOfVertices(),
-                                                                                                                    polygonTwo.isClockwiseOrdered());
-            return intersections != null;
-         }
-      }
-      else if (polygonTwo.getNumberOfVertices() == 2)
-      {
-         Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonTwo.getVertex(0),
-                                                                                                                 polygonTwo.getVertex(1),
-                                                                                                                 polygonOne.getVertexBufferView(),
-                                                                                                                 polygonOne.getNumberOfVertices(),
-                                                                                                                 polygonOne.isClockwiseOrdered());
-         return intersections != null;
-      }
-
-      //TODO: Inefficient:
-      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
-
-      if (convexPolygonTools.computeIntersectionOfPolygons(polygonOne, polygonTwo, new ConvexPolygon2D()))
-         return true;
-
-      Point2DBasics point1ToPack = new Point2D();
-      Point2DBasics point2ToPack = new Point2D();
-      try
-      {
-         convexPolygonTools.computeMinimumDistancePoints(polygonOne, polygonTwo, point1ToPack, point2ToPack);
-      }
-      catch (Exception e)
-      {
-         System.err.println("polygonOne = " + polygonOne);
-         System.err.println("polygonTwo = " + polygonTwo);
-         e.printStackTrace();
-      }
-
-      return (point1ToPack.distance(point2ToPack) < epsilon);
    }
 
    private static ConvexPolygon2D createSmallRectangleFromLineSegment(ConvexPolygon2D linePolygon, double rectangleWidth)

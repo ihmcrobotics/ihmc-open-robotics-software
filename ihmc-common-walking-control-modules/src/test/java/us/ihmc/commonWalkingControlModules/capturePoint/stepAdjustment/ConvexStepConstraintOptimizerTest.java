@@ -1,10 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -90,6 +93,79 @@ public class ConvexStepConstraintOptimizerTest
       foot.applyTransform(wiggleTransform, false);
       assertTrue(isPolygonDistanceInside(foot, distanceInside, 1e-5, region.getConvexHull()));
 
+   }
+
+   @Disabled
+   @Test
+   public void testWiggleIntoHullBug1()
+   {
+      ConvexPolygon2D polygonToWiggle = new ConvexPolygon2D();
+      polygonToWiggle.addVertex(-0.272, -0.013);
+      polygonToWiggle.addVertex(-0.057, -0.028);
+      polygonToWiggle.addVertex(-0.056, -0.088);
+      polygonToWiggle.addVertex(-0.271, -0.108);
+      polygonToWiggle.update();
+
+      ConvexPolygon2D polygonToWiggleInto = new ConvexPolygon2D();
+      polygonToWiggleInto.addVertex(-0.20, 0.20);
+      polygonToWiggleInto.addVertex(0.20, 0.20);
+      polygonToWiggleInto.addVertex(0.20, -0.20);
+      polygonToWiggleInto.addVertex(-0.20, -0.20);
+      polygonToWiggleInto.update();
+
+      ConvexStepConstraintOptimizer optimizer = new ConvexStepConstraintOptimizer(new YoRegistry("test"));
+      ConstraintOptimizerParameters parameters = new ConstraintOptimizerParameters();
+
+      RigidBodyTransformReadOnly transform = optimizer.findConstraintTransform(polygonToWiggle, polygonToWiggleInto, parameters);
+
+      // check to make sure the original polgyon is outside
+      assertFalse(polygonToWiggle.getVertexBufferView().stream().allMatch(polygonToWiggleInto::isPointInside));
+
+      ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D(polygonToWiggle);
+      wiggledPolygon.applyTransform(transform);
+
+      // check the transform
+      Vector3D expectedTranslation = new Vector3D(0.071, 0.0, 0.0);
+      EuclidCoreTestTools.assertEquals(expectedTranslation, transform.getTranslation(), 1e-4);
+
+      // check to make sure the transformed polgyon is inside
+      assertTrue("Not all points are inside", polygonToWiggle.getVertexBufferView().stream().allMatch(polygonToWiggleInto::isPointInside));
+   }
+
+   @Disabled
+   @Test
+   public void testWiggleIntoHullBug2()
+   {
+      ConvexPolygon2D polygonToWiggle = new ConvexPolygon2D();
+      polygonToWiggle.addVertex(-0.2408766530535793, 0.12750211571302827);
+      polygonToWiggle.addVertex(-0.025876631931942617, 0.11000237520935868);
+      polygonToWiggle.addVertex(-0.0258765595143656, 0.0500023752094024);
+      polygonToWiggle.addVertex(-0.24087653839241568, 0.032502115713097454);
+      polygonToWiggle.update();
+
+      ConvexPolygon2D polygonToWiggleInto = new ConvexPolygon2D();
+      polygonToWiggleInto.addVertex(-0.20, 0.20);
+      polygonToWiggleInto.addVertex(0.20, 0.20);
+      polygonToWiggleInto.addVertex(0.20, -0.20);
+      polygonToWiggleInto.addVertex(-0.20, -0.20);
+      polygonToWiggleInto.update();
+
+      ConvexStepConstraintOptimizer optimizer = new ConvexStepConstraintOptimizer(new YoRegistry("test"));
+      ConstraintOptimizerParameters parameters = new ConstraintOptimizerParameters();
+
+      RigidBodyTransformReadOnly transform = optimizer.findConstraintTransform(polygonToWiggle, polygonToWiggleInto, parameters);
+
+      // check to make sure the original polgyon is outside
+      assertFalse(polygonToWiggle.getVertexBufferView().stream().allMatch(polygonToWiggleInto::isPointInside));
+
+      ConvexPolygon2D wiggledPolygon = new ConvexPolygon2D(polygonToWiggle);
+      wiggledPolygon.applyTransform(transform);
+
+      Vector3D expectedTranslation = new Vector3D(0.071, 0.0, 0.0);
+      EuclidCoreTestTools.assertEquals(expectedTranslation, transform.getTranslation(), 1e-4);
+
+      // check to make sure the transformed polgyon is inside
+      assertTrue(polygonToWiggle.getVertexBufferView().stream().allMatch(polygonToWiggleInto::isPointInside));
    }
 
    private static boolean isPolygonDistanceInside(ConvexPolygon2DReadOnly polygonToTest, double distance, double epsilon, ConvexPolygon2DReadOnly polygon)

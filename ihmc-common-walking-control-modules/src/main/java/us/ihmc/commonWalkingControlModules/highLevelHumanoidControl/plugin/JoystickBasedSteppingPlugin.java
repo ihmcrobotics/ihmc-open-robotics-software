@@ -64,4 +64,9 @@ public class JoystickBasedSteppingPlugin implements HumanoidSteppingPlugin
    {
       latestHighLevelControllerStatus.set(HighLevelControllerName.fromByte(statusMessage.getEndHighLevelControllerName()));
    }
+
+   public void addUpdatable(Updatable updatable)
+   {
+      this.updatables.add(updatable);
+   }
 }

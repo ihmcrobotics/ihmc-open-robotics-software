@@ -4,6 +4,7 @@ import java.util.List;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public interface ConcaveHullMergerListener
 {

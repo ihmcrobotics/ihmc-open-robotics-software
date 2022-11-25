@@ -577,7 +577,7 @@ public class ClusterTools
                                                 RigidBodyTransformReadOnly transformFromHomeRegionToWorld, double zThresholdBeforeOrthogonal,
                                                 PlanarRegion obstacleRegion)
    {
-      List<Point2D> concaveHull = obstacleRegion.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHull = obstacleRegion.getConcaveHull();
 
       RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 

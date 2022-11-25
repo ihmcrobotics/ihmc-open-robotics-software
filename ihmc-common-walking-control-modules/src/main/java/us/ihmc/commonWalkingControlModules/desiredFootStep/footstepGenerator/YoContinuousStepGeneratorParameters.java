@@ -16,6 +16,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    private final YoDouble turnMaxAngleInward, turnMaxAngleOutward;
    private final YoBoolean stepsAreAdjustable;
    private final YoBoolean shiftUpcomingStepsWithTouchdown;
+   private final YoInteger ticksToUpdateTheEnvironment;
 
    public YoContinuousStepGeneratorParameters(String nameSuffix, YoRegistry registry)
    {
@@ -32,6 +33,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
       stepsAreAdjustable = new YoBoolean("stepsAreAdjustable" + nameSuffix, registry);
       shiftUpcomingStepsWithTouchdown = new YoBoolean("shiftUpcomingStepsWithTouchdown" + nameSuffix, registry);
+      ticksToUpdateTheEnvironment = new YoInteger("ticksToUpdateTheEnvironment" + nameSuffix, registry);
    }
 
    @Override
@@ -56,6 +58,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setNumberOfFixedFootsteps(int numberOfFixedFootsteps)
    {
       this.numberOfFixedFootsteps.set(numberOfFixedFootsteps);
+   }
+
+   @Override
+   public void setTicksToUpdateTheEnvironment(int ticksToUpdateTheEnvironment)
+   {
+      this.ticksToUpdateTheEnvironment.set(ticksToUpdateTheEnvironment);
    }
 
    @Override
@@ -122,6 +130,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public int getNumberOfFixedFootsteps()
    {
       return numberOfFixedFootsteps.getValue();
+   }
+
+   @Override
+   public int getTicksToUpdateTheEnvironment()
+   {
+      return ticksToUpdateTheEnvironment.getIntegerValue();
    }
 
    @Override
