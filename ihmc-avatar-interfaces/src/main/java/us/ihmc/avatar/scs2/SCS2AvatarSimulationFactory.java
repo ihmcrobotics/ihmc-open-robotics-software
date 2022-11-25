@@ -422,13 +422,16 @@ public class SCS2AvatarSimulationFactory
          steppingFactory = joystickPluginFactory;
       }
 
+      RealtimeROS2Node ros2Node = null;
+      if (realtimeROS2Node.hasBeenSet())
+         ros2Node = realtimeROS2Node.get();
       stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
                                                           robotModel.get(),
                                                           stepSnapperUpdatable,
-                                                          realtimeROS2Node.get());
+                                                          ros2Node);
       simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getYoGraphicsListRegistry()));
    }
 
