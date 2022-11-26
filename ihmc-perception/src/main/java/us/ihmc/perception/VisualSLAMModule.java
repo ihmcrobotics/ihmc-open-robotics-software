@@ -34,7 +34,7 @@ public class VisualSLAMModule
    public VisualSLAMModule()
    {
       BytedecoTools.loadMapsenseLibraries();
-      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(500, 400);
+      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(1000, 800);
 
       BytedecoTools.loadGTSAMLibraries();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
@@ -57,7 +57,7 @@ public class VisualSLAMModule
       /*
        *  Compute both relative pose in last key-frame, and 2D-3D keypoint landmark measurements in current camera frame.
       */
-      LogTools.info("Update Stereo()");
+      LogTools.info("Update Stereo(Dims: {}, {})", leftImage.getRows(), leftImage.getCols());
       boolean initialized = visualOdometryExternal.updateStereo(leftImage.getData(), rightImage.getData(), leftImage.getRows(), leftImage.getCols());
 
       LogTools.info("Extracting Keyframe External");
@@ -234,22 +234,22 @@ public class VisualSLAMModule
       return landmarks.keySet();
    }
 
-   public static void main(String[] args)
-   {
-      VisualSLAMModule vslam = new VisualSLAMModule();
-
-      String LEFT_CAMERA_NAME = "image_0";
-      String RIGHT_CAMERA_NAME = "image_1";
-
-      String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
-
-      String fileName = String.format("%1$6s", 0).replace(' ', '0') + ".png";
-      String leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
-      String rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
-
-      ImageMat currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
-      ImageMat currentImageRight = ImageTools.loadAsImageMat(rightImageName);
-
-      vslam.update(currentImageLeft, currentImageRight);
-   }
+   //public static void main(String[] args)
+   //{
+   //   VisualSLAMModule vslam = new VisualSLAMModule();
+   //
+   //   String LEFT_CAMERA_NAME = "image_0";
+   //   String RIGHT_CAMERA_NAME = "image_1";
+   //
+   //   String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
+   //
+   //   String fileName = String.format("%1$6s", 0).replace(' ', '0') + ".png";
+   //   String leftImageName = DATASET_PATH + LEFT_CAMERA_NAME + "/" + fileName;
+   //   String rightImageName = DATASET_PATH + RIGHT_CAMERA_NAME + "/" + fileName;
+   //
+   //   ImageMat currentImageLeft = ImageTools.loadAsImageMat(leftImageName);
+   //   ImageMat currentImageRight = ImageTools.loadAsImageMat(rightImageName);
+   //
+   //   vslam.update(currentImageLeft, currentImageRight);
+   //}
 }

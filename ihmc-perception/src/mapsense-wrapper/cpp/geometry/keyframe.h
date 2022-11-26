@@ -7,8 +7,8 @@ struct Keyframe
 {
    public:
 
-      Keyframe(uint32_t kid, Eigen::Matrix4d pose, cv::Mat desc, KeyPointVec kp, const std::vector<int>& ids, cv::Mat left)
-         : id(kid), pose(pose), descLeft(desc), keypointsLeft(kp), keypointIDs(ids), leftImage(left)  {};
+      Keyframe(uint32_t kid, Eigen::Matrix4d pose, cv::Mat desc, KeyPointVec kp, const std::vector<int>& ids)
+         : id(kid), pose(pose), descLeft(desc), keypointsLeft(kp), keypointIDs(ids)  {};
 
       Keyframe(uint32_t kid, Eigen::Matrix4d pose, cv::Mat descLeft, cv::Mat descRight, KeyPointVec kpLeft, KeyPointVec kpRight, cv::Mat left, cv::Mat right)
             : id(kid), pose(pose), descLeft(descLeft), descRight(descRight), keypointsLeft(kpLeft), keypointsRight(kpRight), leftImage(left), rightImage(right) {};

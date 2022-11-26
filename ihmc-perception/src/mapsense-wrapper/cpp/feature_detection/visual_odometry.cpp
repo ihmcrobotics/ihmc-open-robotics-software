@@ -61,7 +61,10 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       printf("Total Keypoints Left: %ld\n", kpCur.size());
 
       MatchKeypoints(descPrev, descCur, matches);
-      printf("Total Matches Left: %ld\n", matches.size());
+      printf("Total Matches to Keyframe: %ld\n", matches.size());
+
+      GridSampleKeypoints(kpPrev, matches);
+      printf("Total Matches After Grid Sampling: %ld\n", matches.size());
 
       cv::Mat descCurRight;
       KeyPointVec kpCurRight;
@@ -72,8 +75,9 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       MatchKeypoints(descCur, descCurRight, matchesStereo);
       printf("Total Stereo Matches Left: %ld\n", matchesStereo.size());
 
+
       printf("Total Matches Before Distance Filter: %ld\n", matches.size());
-      FilterMatchesByDistance(matches, kpPrev, kpCur, 100.0f);
+      FilterMatchesByDistance(matches, kpPrev, kpCur, 150.0f);
       printf("Total Matches After Distance Filter: %ld\n", matches.size());
 
       std::vector<int> keypointIDs(kpCur.size(), -1);
@@ -108,7 +112,8 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       std::cout << "Pose:" << std::endl << eigenPose << std::endl;
       std::cout << "Determinant: " << eigenPose.determinant() << std::endl;
 
-      InsertKeyframe(eigenPose, descCur, kpCur, keypointIDs, leftImage);
+      lastKeyframeImage = leftImage.clone();
+      InsertKeyframe(eigenPose, descCur, kpCur, keypointIDs);
       PrintKeyframeIDs();
 
       // Visualization and Logging Only --------------------------------------------
@@ -116,7 +121,7 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
       std::cout << "Camera Pose: " << std::endl << pose << std::endl;
 
       cv::Mat outImage;
-      OpenCVTools::DrawMatchesDouble(lastKeyframe.leftImage, kpPrev, leftImage, kpCur, matches, outImage);
+      OpenCVTools::DrawMatchesDouble(lastKeyframeImage, kpPrev, leftImage, kpCur, matches, outImage);
       OpenCVTools::DisplayImage("TestMatchKeypointsMonocular", outImage, 1);
 
       // Visualization and Logging Only --------------------------------------------
@@ -357,7 +362,7 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv:
    bool grid[yGridCount][xGridCount];
    memset(grid, false, sizeof(bool) * yGridCount * xGridCount);
 
-   std::vector<cv::DMatch> finalKeypoints;
+   std::vector<cv::DMatch> finalMatches;
    for (uint32_t i = 0; i < matches.size(); i++)
    {
       cv::Point2f point(keypoints[matches[i].trainIdx].pt);
@@ -366,13 +371,13 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv:
       {
          uint32_t xIndex = (uint32_t) ((float) point.x / (float) xStep);
          uint32_t yIndex = (uint32_t) ((float) point.y / (float) yStep);
-         //   printf("i: {}, Size: {} Dims:{} {} Point: {} {} -> {} {}", i, matches.size(), width, height, point.x, point.y, xIndex, yIndex);
+         // printf("i: %d, Size: %ld Dims:%d %d Point: %.3lf %.3lf -> %d %d\n", i, matches.size(), width, height, point.x, point.y, xIndex, yIndex);
 
          if (xIndex < xGridCount && yIndex < yGridCount)
          {
             if (!grid[yIndex][xIndex])
             {
-               finalKeypoints.push_back(matches[i]);
+               finalMatches.push_back(matches[i]);
                grid[yIndex][xIndex] = true;
             }
          }
@@ -380,7 +385,7 @@ void VisualOdometry::GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv:
    }
 
    matches.clear();
-   matches = finalKeypoints;
+   matches = finalMatches;
 }
 
 
@@ -702,7 +707,7 @@ void VisualOdometry::Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur)
    TriangulateStereoNormal(kp_curLeft, kp_curRight, curMatchesStereo, kpIDs, _curPoints3D);
 
    printf("Inserting Keyframe Initial\n");
-   InsertKeyframe(Eigen::Matrix4d::Identity(), desc_curLeft, kp_curLeft, kpIDs, leftImageCur);
+   InsertKeyframe(Eigen::Matrix4d::Identity(), desc_curLeft, kp_curLeft, kpIDs);
    PrintKeyframeIDs();
 
    _initialized = true;
@@ -718,7 +723,7 @@ void VisualOdometry::InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, cv:
    _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), descRight.clone(), kpLeft, kpRight, leftMat.clone(), rightMat.clone()));
 }
 
-void VisualOdometry::InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat)
+void VisualOdometry::InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs)
 {
-   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), kpLeft, kpIDs, leftMat.clone()));
+   _keyframes.emplace_back(Keyframe(_keyframes.size(), pose, descLeft.clone(), kpLeft, kpIDs));
 }

@@ -22,7 +22,7 @@ class VisualOdometry
       // void UpdateMonocular(const cv::Mat& image);
       void UpdateStereoExternal(cv::Mat& leftImageCur, cv::Mat& rightImageCur);
 
-      void InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs, const cv::Mat& leftMat);
+      void InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, KeyPointVec& kpLeft, const std::vector<int>& kpIDs);
       void InsertKeyframe(Eigen::Matrix4d pose, const cv::Mat& descLeft, const cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight);
       void InsertKeyframe(Eigen::Matrix4d pose, cv::Mat& descLeft, cv::Mat& descRight, KeyPointVec& kpLeft, KeyPointVec& kpRight, const cv::Mat& leftMat, const cv::Mat& rightMat);
 
@@ -69,9 +69,9 @@ class VisualOdometry
       uint32_t count = 0;
       uint32_t kFeatures = 400;
       uint32_t kMinFeatures = 300;
-      uint32_t width = 0;
-      uint32_t height = 0;
-      uint32_t xGridCount = 60;
+      uint32_t width = 1241;
+      uint32_t height = 376;
+      uint32_t xGridCount = 80;
       uint32_t yGridCount = 30;
 
 
@@ -85,6 +85,7 @@ class VisualOdometry
       Point2fVec prevFeaturesLeft, curFeaturesLeft;
       Point2fVec prevPoints2D, curPoints2D;
       
+      cv::Mat lastKeyframeImage;
       cv::Mat curDisparity;
       cv::Mat curFinalDisplay, prevFinalDisplay;
       cv::Mat curPoseLeft, curPoseRight;
