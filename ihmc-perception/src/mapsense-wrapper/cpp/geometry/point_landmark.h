@@ -24,6 +24,7 @@ class PointLandmark
       uint32_t GetLandmarkID() const {return _id;};
 
    public:
+      cv::Mat descriptor;
       Eigen::Vector3f _point3D;
       Eigen::Vector2f _measurement2D;
       
