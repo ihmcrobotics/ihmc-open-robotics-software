@@ -8,11 +8,9 @@ import static us.ihmc.commons.lists.ListWrappingIndexTools.previous;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -23,6 +21,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.tools.ArrayTools;
 
 public class ConcaveHullTools
 {
@@ -82,13 +81,27 @@ public class ConcaveHullTools
    public static void ensureClockwiseOrdering(List<? extends Point2DReadOnly> concaveHullVertices)
    {
       if (!isClockwiseOrdered(concaveHullVertices))
-         Collections.reverse(concaveHullVertices);
+         reverse(concaveHullVertices);
    }
 
    public static void ensureCounterClockwiseOrdering(List<? extends Point2DReadOnly> concaveHullVertices)
    {
       if (isClockwiseOrdered(concaveHullVertices))
+         reverse(concaveHullVertices);
+   }
+
+   private static void reverse(List<? extends Point2DReadOnly> concaveHullVertices)
+   {
+      if (concaveHullVertices instanceof RecyclingArrayList<?>)
+         reverse((RecyclingArrayList<?>) concaveHullVertices);
+      else
          Collections.reverse(concaveHullVertices);
+   }
+
+   private static void reverse(RecyclingArrayList<?> list) {
+      int size = list.size();
+         for (int i=0, mid=size>>1, j=size-1; i<mid; i++, j--)
+            list.swap( i, j);
    }
 
    public static double computePerimeter(List<? extends Point2DReadOnly> concaveHullVertices)
