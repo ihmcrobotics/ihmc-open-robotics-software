@@ -12,13 +12,15 @@ using KeyPointVec = std::vector<cv::KeyPoint>;
 using Point2fVec = std::vector<cv::Point2f>;
 using PointLandmarkVec = std::vector<PointLandmark>;
 using KeyframeVec = std::vector<Keyframe>;
+using DMatchVec = std::vector<cv::DMatch>;
 
 class VisualOdometry
 {
    public:
       VisualOdometry(ApplicationState& app);
       
-      void Initialize(cv::Mat& leftImageCur, cv::Mat& rightImageCur);
+      void PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, cv::Mat descCurLeft,  DMatchVec& stereoMatches);
+      // cv::Mat Initialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRight, DMatchVec& stereoMatches, KeyframeVec& keyframes, PointLandmarkVec& landmarks);
       bool UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage);
       // void UpdateMonocular(const cv::Mat& image);
 
@@ -34,20 +36,23 @@ class VisualOdometry
       void ExtractKeypoints_FAST(cv::Mat img_1, Point2fVec& points1);
       void ExtractKeypoints(cv::Mat img, KeyPointVec& points, cv::Mat& desc);
       void TrackKeypoints(cv::Mat prev, cv::Mat cur, Point2fVec& prev_pts, Point2fVec& cur_pts);
-      void MatchKeypoints(cv::Mat& desc1, cv::Mat& desc2, std::vector<cv::DMatch>& matches);
-      void TransferKeypointIDs(const std::vector<int>& trainIDs, std::vector<int>& queryIDs, std::vector<cv::DMatch>& matches);
-      void GridSampleKeypoints(KeyPointVec& keypoints, std::vector<cv::DMatch>& matches);
+      void MatchKeypoints(cv::Mat& desc1, cv::Mat& desc2, DMatchVec& matches);
+      void TransferKeypointIDs(const std::vector<int>& trainIDs, std::vector<int>& queryIDs, DMatchVec& matches);
+      void GridSampleKeypoints(KeyPointVec& keypoints, DMatchVec& matches);
       void ExtractMatchesAsPoints(const KeyPointVec& keypoints, Point2fVec& points);
-      void FilterMatchesByDistance(std::vector<cv::DMatch>& matches, const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, float distanceThreshold);
+      void FilterMatchesByDistance(DMatchVec& matches, const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, float distanceThreshold);
       void CalculateOdometry_ORB(Keyframe& kf, cv::Mat leftImage, cv::Mat rightImage, cv::Mat& cvPose, PointLandmarkVec& points3D);
       void CalculateOdometry_FAST(Eigen::Matrix4f& transform);
-      void TriangulateStereoNormal(KeyPointVec& pointsTrain, KeyPointVec& pointsQuery, std::vector<cv::DMatch>& matches,
-                                   const std::vector<int>& kpIDs, PointLandmarkVec& points3D);
+      
+      void TriangulateLandmarksStereoNormal(const KeyPointVec& pointsTrain, const KeyPointVec& pointsQuery, 
+                                          const cv::Mat& descTrain, const DMatchVec& matches,
+                                          const std::vector<int>& kpIDs, PointLandmarkVec& points3D);
       void TriangulateKeypointsByDisparity(const KeyPointVec& kp, const cv::Mat& disparity, std::vector<Eigen::Vector3f>& points3d);
-      void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const std::vector<cv::DMatch>& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
+      void ExtractMatchesAsPoints(const KeyPointVec& kpTrain, const KeyPointVec& kpQuery, const DMatchVec& matches, Point2fVec& pointsTrain, Point2fVec& pointsQuery);
 
       cv::Mat EstimateMotionPnP(Point2fVec& points2d, const PointLandmarkVec& points3d, cv::Mat& mask, const CameraModel& cam);
       cv::Mat EstimateMotion(Point2fVec& prevFeatures, Point2fVec& curFeatures, cv::Mat& mask, const CameraModel& cam);
+      cv::Mat TrackCameraPose(const KeyPointVec& kp, const cv::Mat& desc, const KeyframeVec& keyframes, const PointLandmarkVec& landmarks);
       cv::Mat TriangulatePoints(Point2fVec& prevPoints, Point2fVec& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       
@@ -63,50 +68,52 @@ class VisualOdometry
 
    private:
       ApplicationState _appState;
-      Eigen::Matrix4f cameraPose;
+      Eigen::Matrix4f _cameraPose;
 
+      bool _preInitialized = false;
       bool _initialized = false;
-      float scalar = 0.03f;
-      uint32_t count = 0;
-      uint32_t kFeatures = 400;
-      uint32_t kMinFeatures = 300;
-      uint32_t width = 1241;
-      uint32_t height = 376;
-      uint32_t xGridCount = 80;
-      uint32_t yGridCount = 30;
+      
+      float _scalar = 0.03f;
+      uint32_t _count = 0;
+      uint32_t _kFeatures = 400;
+      uint32_t _kMinFeatures = 300;
+      uint32_t _width = 1241;
+      uint32_t _height = 376;
+      uint32_t _xGridCount = 80;
+      uint32_t _yGridCount = 30;
 
-      bool useExtrinsicGuess = false;
-      int iterationsCount = 100;
-      float reprojectionError = 2.0;
-      double confidence = 0.999;
+      bool _useExtrinsicGuess = false;
+      int _iterationsCount = 100;
+      float _reprojectionError = 2.0;
+      double _confidence = 0.999;
 
 
-      cv::Ptr<cv::StereoBM> stereo = cv::StereoBM::create();
+      cv::Ptr<cv::StereoBM> _stereo = cv::StereoBM::create();
       cv::Ptr<cv::ORB> _orb;
 
       KeyframeVec _keyframes;
       PointLandmarkVec _landmarks;
 
-      std::vector<cv::DMatch> matchesLeft, matchesRight, prevMatchesStereo, curMatchesStereo;
-      KeyPointVec kp_prevLeft, kp_prevRight, kp_curLeft, kp_curRight;
+      DMatchVec _matchesLeft, _matchesRight, _prevMatchesStereo, _curMatchesStereo;
+      KeyPointVec _kpPrevLeft, _kpPrevRight, _kpCurLeft, _kpCurRight;
       PointLandmarkVec _prevPoints3D, _curPoints3D;
-      Point2fVec prevFeaturesLeft, curFeaturesLeft;
-      Point2fVec prevPoints2D, curPoints2D;
+      Point2fVec _prevFeaturesLeft, _curFeaturesLeft;
+      Point2fVec _prevPoints2D, _curPoints2D;
       
-      cv::Mat lastKeyframeImage;
-      cv::Mat curDisparity;
-      cv::Mat curFinalDisplay, prevFinalDisplay;
-      cv::Mat curPoseLeft, curPoseRight;
-      cv::Mat desc_curRight, desc_curLeft;
+      cv::Mat _lastKeyframeImage;
+      cv::Mat _curDisparity;
+      cv::Mat _curFinalDisplay, _prevFinalDisplay;
+      cv::Mat _curPoseLeft, curPoseRight;
+      cv::Mat _descCurRight, _descCurLeft;
       
-      cv::Mat cvCurPose = cv::Mat::eye(4,4, CV_32F);
+      cv::Mat _cvCurPose = cv::Mat::eye(4,4, CV_32F);
 
-      CameraModel leftCamera;
-      CameraModel rightCamera;
+      CameraModel _leftCamera;
+      CameraModel _rightCamera;
 
-      double baselineDistance = 0.5;
+      double _baselineDistance = 0.5;
 
-      int uniqueKeypointID = -1;
+      int _uniqueKeypointID = -1;
       
 };
 

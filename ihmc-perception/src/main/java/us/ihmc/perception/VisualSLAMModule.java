@@ -18,7 +18,9 @@ import java.util.*;
 
 public class VisualSLAMModule
 {
-   public static final int MAX_LANDMARKS = 300;
+   public static final int MAX_LANDMARKS = 500;
+   public static final int NUMBER_OF_FEATURES = 800;
+   public static final int MIN_NUM_FEATURES = 600;
 
    private final VisualOdometry.VisualOdometryExternal visualOdometryExternal;
    private final SlamWrapper.FactorGraphExternal factorGraphExternal;
@@ -34,7 +36,7 @@ public class VisualSLAMModule
    public VisualSLAMModule()
    {
       BytedecoTools.loadMapsenseLibraries();
-      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(1000, 800);
+      visualOdometryExternal = new VisualOdometry.VisualOdometryExternal(NUMBER_OF_FEATURES, MIN_NUM_FEATURES);
 
       BytedecoTools.loadGTSAMLibraries();
       factorGraphExternal = new SlamWrapper.FactorGraphExternal();
@@ -48,9 +50,9 @@ public class VisualSLAMModule
    }
 
    /*
-   *  Update(): Calls the updateStereo() on VisualOdometryExternal to generate visual keypoint measurements and odometry estimate.
-   *  Inserts the landmark measurements and odometry as constraints in the factor graph.
-   *  Performs factor graph optimization and extracts results from the GTSAM wrapper FactorGraphExternal.
+   *  - Calls the updateStereo() on VisualOdometryExternal to generate visual keypoint measurements and odometry estimate.
+   *  - Inserts the landmark measurements and odometry as constraints in the factor graph.
+   *  - Performs factor graph optimization and extracts results from the GTSAM wrapper FactorGraphExternal.
    * */
    public boolean update(ImageMat leftImage, ImageMat rightImage)
    {
@@ -97,7 +99,7 @@ public class VisualSLAMModule
       float[] landmarkFloats = new float[5 * MAX_LANDMARKS];
       int[] landmarkIDs = new int[MAX_LANDMARKS];
       int totalLandmarks = visualOdometryExternal.getExternalLandmarks(landmarkFloats, landmarkIDs, MAX_LANDMARKS);
-      //LogTools.info("Total Landmarks: {}", totalLandmarks);
+      LogTools.info("Total Landmarks: {}", totalLandmarks);
       //LogTools.info("Landmarks: {}", Arrays.toString(landmarks));
       //LogTools.info("LandmarkIDs: {}", Arrays.toString(landmarkIDs));
 
@@ -106,7 +108,7 @@ public class VisualSLAMModule
       int totalValidLandmarks = 0;
       for (int i = 0; i < totalLandmarks; i++)
       {
-         if (landmarkIDs[i] != -1)
+         if (landmarkIDs[i] != -1) // Only matched keypoints to be inserted
          {
             if (!landmarks.containsKey(landmarkIDs[i]))
             {
@@ -117,8 +119,8 @@ public class VisualSLAMModule
             landmarks.get(landmarkIDs[i]).addKeyframe(keyframeID[0]);
 
             LogTools.info("Keyframe: {}, Landmark: {}, LandmarkMeasurements: {}", keyframeID[0], landmarkIDs[i], landmarks.get(landmarkIDs[i]).getKeyframeCount());
-
             //LogTools.info("Inserting Landmark: {}, Count: {}", landmarkIDs[i], landmarks.get(landmarkIDs[i]).getKeyframeCount());
+
             /* Insert generic projection factor for each landmark measurement on left camera. */
             //LogTools.info("Inserting Projection Factor: x{} -> p{}", keyframeID[0], landmarkIDs[i]);
             factorGraphExternal.addGenericProjectionFactor(new float[] {landmarkFloats[i * 5], landmarkFloats[i * 5 + 1]}, landmarkIDs[i], keyframeID[0]);
