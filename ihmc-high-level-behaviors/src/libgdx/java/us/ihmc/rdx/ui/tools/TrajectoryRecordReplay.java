@@ -172,7 +172,7 @@ public class TrajectoryRecordReplay<T extends Number>
       //if recordFile name has not been set, generate file with current date and time as name
       String fileName = "";
       if (recordFileName.isEmpty())
-         fileName = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ'.csv'").format(new Date());
+         fileName = new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date());
       else
          fileName = recordFileName;
       File csvFile = new File(filePath + "/" + fileName);

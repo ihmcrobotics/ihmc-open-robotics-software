@@ -20,7 +20,7 @@ public class KinematicsRecordReplay
    private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/1.csv").toString());
    private final ImBoolean enablerReplay = new ImBoolean(false);
    private boolean isReplaying = false;
-   private ImBoolean enabledKinematicsStreaming;
+   private final ImBoolean enabledKinematicsStreaming;
 
    public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberParts)
    {
