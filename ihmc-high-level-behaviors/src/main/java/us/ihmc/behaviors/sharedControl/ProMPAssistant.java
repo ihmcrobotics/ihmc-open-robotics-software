@@ -357,7 +357,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
    }
 
-   private void reset()
+   public void reset()
    {
       //reset manager of current task (reset reference of proMP object of current task to initial proMP before any conditioning)
       proMPManagers.get(currentTask).resetTask();

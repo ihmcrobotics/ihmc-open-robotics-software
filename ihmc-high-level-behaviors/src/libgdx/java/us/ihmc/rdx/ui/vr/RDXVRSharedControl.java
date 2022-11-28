@@ -13,11 +13,13 @@ public class RDXVRSharedControl
 {
    private ImBoolean enabledReplay;
    private ImBoolean enabledRecording;
+   private ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
 
-   public RDXVRSharedControl(ImBoolean enabledReplay, ImBoolean enabledRecording)
+   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay, ImBoolean enabledRecording)
    {
+      this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
       this.enabledRecording = enabledRecording;
    }
@@ -57,8 +59,13 @@ public class RDXVRSharedControl
 
    private void setEnabled(boolean enabled)
    {
-      if (enabled != this.enabled.get())
+      if (enabled != this.enabled.get()){
          this.enabled.set(enabled);
+         if (enabled == false){
+            proMPAssistant.reset();
+            enabledIKStreaming.set(false);
+         }
+      }
       if (enabled)
       {
          if (enabledRecording.get() || enabledReplay.get())
