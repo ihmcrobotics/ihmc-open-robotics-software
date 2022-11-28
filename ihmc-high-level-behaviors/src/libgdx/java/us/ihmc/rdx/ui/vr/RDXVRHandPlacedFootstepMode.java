@@ -67,7 +67,10 @@ public class RDXVRHandPlacedFootstepMode
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (vrContext.getSelectedPick() == null)
+      boolean noSelectedPick = true;
+      for (RobotSide side : RobotSide.values)
+         noSelectedPick =  noSelectedPick && vrContext.getSelectedPick().get(side) == null;
+      if (noSelectedPick)
       {
          for (RobotSide side : RobotSide.values)
          {
