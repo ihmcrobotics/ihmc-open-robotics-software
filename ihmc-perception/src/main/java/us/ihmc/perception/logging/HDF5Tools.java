@@ -259,12 +259,4 @@ public class HDF5Tools
          dataset.close();
       }
    }
-
-   public static void main(String[] args)
-   {
-      String HDF5_FILENAME = "/home/bmishra/Workspace/Data/Atlas_Logs/ROSBags/atlas_perception_run_1.hdf5";
-      H5File file = new H5File(HDF5_FILENAME, hdf5.H5F_ACC_RDONLY);
-
-      ArrayList<String> topicNames = HDF5Tools.getTopicNames(file);
-   }
 }
