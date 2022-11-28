@@ -238,7 +238,6 @@ public class ProMPAssistant implements TeleoperationAssistant
       List<List<Pose3DReadOnly>> observedFrameTrajectories = new ArrayList<>();
       for (String bodyPart : bodyParts)
          observedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
-      LogTools.info("   - Updating ProMP speed ...");
       //update speed proMP based on hands observed trajectories
 //      proMPManagers.get(currentTask).updateTaskSpeed(observedFrameTrajectories, bodyParts);
       // TODO B.1. use line above where you compare both hands if relevantBodyPart is both hands and check only main hand if it is one hand
@@ -246,7 +245,6 @@ public class ProMPAssistant implements TeleoperationAssistant
       // TODO B.3. change relevantBodyPart concept  which now means that bodyPart will reach a goal that can be observed
       //       Add instead goalBodyPart and change use of relevantBodyPart as the part that is used the most for that task
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get("rightHand"), "rightHand");
-      LogTools.info("   - Updating ProMP trajectories ...");
       //update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedFrameTrajectory.keySet())
       {
