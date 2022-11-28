@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
@@ -175,7 +177,7 @@ public class CaptureRegionSafetyHeuristics
                                   vertexToProject);
       }
 
-      boolean visibleIndicesAreClockWise = checkIfClockWiseOrdered(verticesVisibleFromStance);
+      boolean visibleIndicesAreClockWise = checkIfClockWiseOrdered(verticesVisibleFromStance, saferCaptureRegion);
       int firstVisibleIndex = visibleIndicesAreClockWise ? 0 : verticesVisibleFromStance.size() - 1;
       int lastVisibleIndex = visibleIndicesAreClockWise ? verticesVisibleFromStance.size() - 1 : 0;
 
@@ -192,7 +194,13 @@ public class CaptureRegionSafetyHeuristics
                                                                        saferCaptureRegion.getNextVertex(firstVertexIndex),
                                                                        croppedPoint))
          {
-            saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
+            if (croppedPoint.distanceSquared(previousVertex) < 1e-4)
+            {
+               saferCaptureRegion.removeVertex(firstVertexIndex);
+               saferCaptureRegion.update();
+            }
+            else
+               saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
          }
       }
 
@@ -209,14 +217,30 @@ public class CaptureRegionSafetyHeuristics
                                                                            saferCaptureRegion.getPreviousVertex(lastVertexIndex),
                                                                            croppedPoint))
          {
-            saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
+            if (croppedPoint.distanceSquared(nextVertex) < 1e-4)
+            {
+               saferCaptureRegion.removeVertex(lastVertexIndex);
+               saferCaptureRegion.update();
+            }
+            else
+               saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
          }
       }
    }
 
-   private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points)
+   private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)
    {
-      return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(points.get(2), points.get(0), points.get(1));
+      if (points.size() < 2)
+         return true;
+      else if (points.size() > 2)
+         return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(points.get(2), points.get(0), points.get(1));
+      else
+      {
+         if (captureRegion.getClosestVertexIndex(points.get(1)) > captureRegion.getClosestVertexIndex(points.get(0)))
+            return captureRegion.isClockwiseOrdered();
+         else
+            return !captureRegion.isClockwiseOrdered();
+      }
    }
 
    /**
