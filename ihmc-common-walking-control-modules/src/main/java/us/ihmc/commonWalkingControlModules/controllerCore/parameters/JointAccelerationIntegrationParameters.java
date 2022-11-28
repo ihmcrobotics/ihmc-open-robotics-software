@@ -275,6 +275,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
             return false;
          if (velocityResetMode != other.getVelocityResetMode())
             return false;
+         if (disableAccelerationIntegration != other.getDisableAccelerationIntegration())
+            return false;
          return true;
       }
       else
