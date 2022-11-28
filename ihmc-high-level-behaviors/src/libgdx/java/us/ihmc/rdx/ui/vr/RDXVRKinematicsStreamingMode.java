@@ -73,7 +73,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled,2);
-   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController,kinematicsRecorder.isReplayingEnabled(),kinematicsRecorder.isRecordingEnabled());
+   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController,kinematicsRecorder.isReplayingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
@@ -160,12 +160,14 @@ public class RDXVRKinematicsStreamingMode
             sendHandCommand(RobotSide.LEFT, handConfiguration);
          }
 
-         // Check if left B button is pressed in order to trigger recording or replay of motion
-         InputDigitalActionData bButton = controller.getBButtonActionData();
-         kinematicsRecorder.processRecordReplayInput(bButton);
+         // Check if left joystick is pressed in order to trigger recording or replay of motion
+         InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
+         kinematicsRecorder.processRecordReplayInput(joystickButton);
          if(kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
-         // or shared control assistance
+
+         // Check if left B button is pressed in order to trigger shared control assistance
+         InputDigitalActionData bButton = controller.getBButtonActionData();
          sharedControlAssistant.processInput(bButton);
       });
 

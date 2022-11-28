@@ -12,16 +12,14 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 public class RDXVRSharedControl
 {
    private ImBoolean enabledReplay;
-   private ImBoolean enabledRecording;
    private ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
 
-   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay, ImBoolean enabledRecording)
+   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
-      this.enabledRecording = enabledRecording;
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -68,8 +66,8 @@ public class RDXVRSharedControl
       }
       if (enabled)
       {
-         if (enabledRecording.get() || enabledReplay.get())
-            this.enabled.set(false); //check no concurrency with recording and replay
+         if (enabledReplay.get())
+            this.enabled.set(false); //check no concurrency with replay
       }
    }
 

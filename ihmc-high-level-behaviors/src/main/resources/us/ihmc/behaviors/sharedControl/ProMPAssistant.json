@@ -1,6 +1,6 @@
 {
   "testNumberUseOnlyForTesting": 2,
-  "logging" : false,
+  "logging" : true,
   "numberObservations": 50,
   "tasks":[
     {
