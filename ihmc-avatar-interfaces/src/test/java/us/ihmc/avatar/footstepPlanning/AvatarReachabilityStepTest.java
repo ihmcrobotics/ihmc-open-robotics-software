@@ -48,7 +48,6 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
    private static final int numberOfStancesToCheck = 10;
    private static final double solutionQualityThreshold = 2.2;
    private static final double initialStanceTime = 1.0;
-   private static final double stepTime = 3.0;
    private static final Random random = new Random(3920);
 
    @BeforeEach
@@ -149,6 +148,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
          // this is the ROS message to command footsteps to the robot
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, step, orientation);
+         footstepData.setSwingDuration(3.0 * robotModel.getWalkingControllerParameters().getDefaultSwingTime());
          footstepDataListMessage.getFootstepDataList().add().set(footstepData);
 
          boolean success = simulationTestHelper.simulateNow(initialStanceTime);
@@ -157,6 +157,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
 
          simulationTestHelper.publishToController(footstepDataListMessage);
 
+         double stepTime = 1.5 * (footstepData.getSwingDuration() + robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime());
          success = simulationTestHelper.simulateNow(stepTime);
          if (!visualize)
             Assertions.assertTrue(success);
