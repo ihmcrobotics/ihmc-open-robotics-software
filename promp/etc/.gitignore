@@ -1,2 +1,4 @@
-*.csv
-*.png
+/*
+!/demos
+!/test
+!*.py
