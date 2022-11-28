@@ -73,7 +73,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled,2);
-   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(kinematicsRecorder.isReplayingEnabled(),kinematicsRecorder.isRecordingEnabled());
+   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController,kinematicsRecorder.isReplayingEnabled(),kinematicsRecorder.isRecordingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
