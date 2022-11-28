@@ -1630,25 +1630,6 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       return convexPolygonTools;
    }
 
-   public void updatePlane(Vector3DReadOnly futureNormal, Point3DReadOnly futureOrigin)
-   {
-      Vector3D normalVector = new Vector3D(normal.getX(), normal.getY(), normal.getZ());
-      Vector3D axis = new Vector3D();
-      axis.cross(normalVector, futureNormal);
-      double angle = EuclidGeometryTools.angleFromFirstToSecondVector3D(normalVector.getX(), normalVector.getY(), normalVector.getZ(),
-                                                                        futureNormal.getX(), futureNormal.getY(), futureNormal.getZ());
-
-      AxisAngle axisAngle = new AxisAngle(axis, angle);
-      Vector3D translation = new Vector3D();
-      translation.sub(futureOrigin, origin);
-
-      fromWorldToLocalTransform.appendOrientation(axisAngle);
-      fromWorldToLocalTransform.appendTranslation(translation);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-
-      updateBoundingBox();
-   }
-
    @Override
    public String toString()
    {

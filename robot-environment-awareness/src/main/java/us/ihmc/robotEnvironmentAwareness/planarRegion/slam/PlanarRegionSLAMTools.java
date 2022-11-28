@@ -40,12 +40,13 @@ public class PlanarRegionSLAMTools
     * Uses the algorithm on the slides at
     * http://resources.mpi-inf.mpg.de/deformableShapeMatching/EG2011_Tutorial/slides/2.1%20Rigid%20ICP.pdf
     * pages 12-14
-    * 
+    *
     * @param matchesWithReferencePoints
     * @return
     */
    public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints,
-                                                                 PlanarRegionSLAMParameters parameters, RigidBodyTransform referenceTransform)
+                                                                 PlanarRegionSLAMParameters parameters,
+                                                                 RigidBodyTransform referenceTransform)
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
 
@@ -214,24 +215,48 @@ public class PlanarRegionSLAMTools
       return returnString;
    }
 
-   public static HashMap<Integer, Integer> findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList newData, float boundingBoxHeight, float normalThreshold)
+   public static HashMap<Integer, Integer> findPlanarRegionMatches(PlanarRegionsList map,
+                                                                   PlanarRegionsList newData,
+                                                                   float normalThreshold,
+                                                                   float normalDistanceThreshold,
+                                                                   float distanceThreshold)
    {
       HashMap<Integer, Integer> matches = new HashMap<>();
 
       List<PlanarRegion> newRegions = newData.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
-      for (int i = 0; i<mapRegions.size(); i++)
+      for (int i = 0; i < mapRegions.size(); i++)
       {
          PlanarRegion mapRegion = mapRegions.get(i);
-         for (int j = 0; j<newRegions.size(); j++)
+         for (int j = 0; j < newRegions.size(); j++)
          {
             PlanarRegion newRegion = newRegions.get(j);
 
-            if (boxesIn3DIntersect(mapRegion, newRegion, boundingBoxHeight))
+            //if (boxesIn3DIntersect(mapRegion, newRegion, mapRegion.getBoundingBox3dInWorld().getMaxZ() - mapRegion.getBoundingBox3dInWorld().getMinZ()))
             {
-               double dot = newRegion.getNormal().dot(mapRegion.getNormal());
-               if (dot > normalThreshold)
+               Point3D newOrigin = new Point3D();
+               newRegion.getOrigin(newOrigin);
+
+               Point3D mapOrigin = new Point3D();
+               mapRegion.getOrigin(mapOrigin);
+
+               Vector3D originVec = new Vector3D();
+               originVec.sub(newOrigin, mapOrigin);
+
+               double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
+               double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
+               double originDistance = originVec.norm();
+
+               boolean wasMatched = normalSimilarity > normalThreshold && normalDistance < normalDistanceThreshold && originDistance < distanceThreshold;
+
+               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)", i,
+                                           mapRegion.getRegionId(), newRegion.getRegionId(),
+                                           normalSimilarity, normalThreshold,
+                                           normalDistance, normalDistanceThreshold,
+                                           originDistance, distanceThreshold) + ": [{}]", wasMatched);
+
+               if (wasMatched)
                {
                   matches.put(i, j);
                }
@@ -280,8 +305,8 @@ public class PlanarRegionSLAMTools
     *                                       one region to the other when slam happens.
     * @param matchesSoFar
     * @return A map from a map PlanarRegion to a PairList of new data PlanarRegions and Point2Ds that
-    *         are points on the new region that we would like to move towards the plane of the map
-    *         region.
+    *       are points on the new region that we would like to move towards the plane of the map
+    *       region.
     */
    public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance,
                                                                                                             double maximumPointProjectionDistance,
@@ -323,10 +348,12 @@ public class PlanarRegionSLAMTools
    }
 
    private static void addCornerPointsOfBoundingBoxIntersectionToMatches(BoundingBox2D mapBoundingBoxInMapLocal,
-                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal, PlanarRegion newDataRegion,
+                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal,
+                                                                         PlanarRegion newDataRegion,
                                                                          RigidBodyTransformReadOnly transformFromWorldToMap,
                                                                          RigidBodyTransformReadOnly transformFromNewDataToWorld,
-                                                                         double maximumPointProjectionDistance, PairList<PlanarRegion, Point2D> shadowMatches)
+                                                                         double maximumPointProjectionDistance,
+                                                                         PairList<PlanarRegion, Point2D> shadowMatches)
    {
       BoundingBox2D intersection = GeometryTools.getIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
@@ -380,7 +407,6 @@ public class PlanarRegionSLAMTools
                             newMaximumPointInNewDataLocal,
                             newDataOtherCornerPointInNewDataLocal,
                             newFinalCornerPointInNewDataLocal);
-
    }
 
    private static void addAllIfAllAreNotNull(PairList<PlanarRegion, Point2D> shadowMatches, PlanarRegion planarRegion, Point2D... pointsToAdd)
@@ -435,7 +461,8 @@ public class PlanarRegionSLAMTools
       return newDataRegionBoundingBoxProjectedToMapLocal;
    }
 
-   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransformReadOnly transformFromWorldToMap,
+   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal,
+                                                                    RigidBodyTransformReadOnly transformFromWorldToMap,
                                                                     RigidBodyTransformReadOnly transformFromNewDataToWorld,
                                                                     double maximumPointProjectionDistance)
    {
@@ -450,7 +477,8 @@ public class PlanarRegionSLAMTools
       return new Point2D(newDataReferencePoint);
    }
 
-   public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map, PlanarRegionsList newData,
+   public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map,
+                                                                                          PlanarRegionsList newData,
                                                                                           double boundingBoxHeight)
    {
       HashMap<PlanarRegion, List<PlanarRegion>> newDataCollisions = new HashMap<>();
