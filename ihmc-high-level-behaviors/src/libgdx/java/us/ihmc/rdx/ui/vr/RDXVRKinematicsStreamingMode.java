@@ -325,9 +325,9 @@ public class RDXVRKinematicsStreamingMode
          sleepToolbox();
       }
       // add widgets for recording/replaying motion in VR
-      ImGui.text("Start/Stop recording: Left B button");
+      ImGui.text("Start/Stop recording: Press Left Joystick");
       kinematicsRecorder.renderRecordWidgets(labels);
-      ImGui.text("Start/Stop replay: Left B button (cannot stream/record if replay)");
+      ImGui.text("Start/Stop replay: Press Left Joystick (cannot stream/record if replay)");
       kinematicsRecorder.renderReplayWidgets(labels);
       // add widget for using shared control assistance in VR
       sharedControlAssistant.renderWidgets(labels);
