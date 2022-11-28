@@ -19,8 +19,6 @@ import java.net.URISyntaxException;
 
 public class RDXPerceptionVisualizerUI
 {
-   private static final String PERCEPTION_LOG_FILE = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5";
-
    private RDXBaseUI baseUI;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
 
