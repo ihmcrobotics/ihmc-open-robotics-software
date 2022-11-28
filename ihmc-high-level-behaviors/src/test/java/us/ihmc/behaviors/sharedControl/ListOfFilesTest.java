@@ -14,6 +14,7 @@ public class ListOfFilesTest
          WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
          String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
          String demoTrainingDirAbs = demoDirAbs + "/PushDoor";
+         System.out.println("Folder is: " + demoTrainingDirAbs);
          // Create a file object
          File demoFolder = new File(demoTrainingDirAbs);
 

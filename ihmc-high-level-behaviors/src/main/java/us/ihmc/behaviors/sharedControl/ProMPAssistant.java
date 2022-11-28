@@ -14,6 +14,7 @@ import us.ihmc.log.LogTools;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -50,10 +51,10 @@ public class ProMPAssistant implements TeleoperationAssistant
       // read parameters regarding the properties of available learned tasks from json file
       try
       {
-         LogTools.info("Looking for configuration file ProMPAssistant.json ...");
-         String configurationFile = "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
-         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"), configurationFile).toString()));
-         LogTools.info("File found: /{}", configurationFile);
+         String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
+         Path pathFile = Paths.get("ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/" + configurationFile);
+         LogTools.info("Loading parameters from resource: {}",configurationFile);
+         JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(pathFile.toAbsolutePath().toString()));
          testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
          logEnabled = (boolean) jsonObject.get("logging");
          numberObservations = (int) ((long) jsonObject.get("numberObservations"));
@@ -108,6 +109,22 @@ public class ProMPAssistant implements TeleoperationAssistant
                }
             }
          }
+         for (int i = 0; i < taskNames.size(); i++)
+         {
+            LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
+            for (int j = 0; j < bodyPartsGeometries.size(); j++)
+            {
+               for (String key : bodyPartsGeometries.get(j).keySet())
+               {
+                  LogTools.info("     {} {}", key, bodyPartsGeometries.get(j).get(key));
+               }
+            }
+            proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled));
+            taskRelevantBodyPart.put(taskNames.get(i), relevantBodyParts.get(i));
+         }
+         for (ProMPManager proMPManager : proMPManagers.values())
+            proMPManager.learnTaskFromDemos();
+         LogTools.info("ProMPs are ready to be used!");
       }
       catch (FileNotFoundException ex)
       {
@@ -121,23 +138,6 @@ public class ProMPAssistant implements TeleoperationAssistant
       {
          throw new RuntimeException(e);
       }
-
-      for (int i = 0; i < taskNames.size(); i++)
-      {
-         LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
-         for (int j = 0; j < bodyPartsGeometries.size(); j++)
-         {
-            for (String key : bodyPartsGeometries.get(j).keySet())
-            {
-               LogTools.info("     {} {}", key, bodyPartsGeometries.get(j).get(key));
-            }
-         }
-         proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled));
-         taskRelevantBodyPart.put(taskNames.get(i), relevantBodyParts.get(i));
-      }
-      for (ProMPManager proMPManager : proMPManagers.values())
-         proMPManager.learnTaskFromDemos();
-      LogTools.info("ProMPs are ready to be used!");
    }
 
    @Override
