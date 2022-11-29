@@ -284,15 +284,23 @@ public class BytedecoOpenCVTools
 
    public static void printMat(Mat image, String prefix)
    {
-      System.out.println("Mat: [" + prefix + "]");
+      LogTools.info(matToString(image, prefix));
+   }
+
+   public static String matToString(Mat image, String prefix)
+   {
+      StringBuilder matString = new StringBuilder("Mat: [" + prefix + "] \n");
+
       for (int i = 0; i < image.rows(); i++)
       {
          for (int j = 0; j < image.cols(); j++)
          {
-            System.out.print(image.ptr(i, j).getShort() + "\t");
+            matString.append(image.ptr(i, j).getShort()).append("\t");
          }
-         System.out.println();
+         matString.append("\n");
       }
+
+      return matString.toString();
    }
 
    public static void displayVideoPacketDepth(VideoPacket videoPacket)
