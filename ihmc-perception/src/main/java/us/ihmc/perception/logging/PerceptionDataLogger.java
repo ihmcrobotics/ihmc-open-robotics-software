@@ -39,6 +39,13 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class PerceptionDataLogger
 {
+
+   /* TODO:
+   *     Remove or fix commented parts of the code.
+   *     Improve multi-threading
+   *     Convert buffer sizes to final constant values
+   *
+   * */
    private final String ROOT_POSITION_NAME = "/robot/root/position/";
    private final String ROOT_ORIENTATION_NAME = "/robot/root/orientation/";
    private final String JOINT_ANGLES_NAME = "/robot/joint_angles/";
@@ -56,48 +63,29 @@ public class PerceptionDataLogger
    private final String L515_DEPTH_NAME = "/l515/depth/";
    private final String L515_COLOR_NAME = "/l515/color/";
 
-   private HDF5Manager hdf5Manager;
-
-   private ROS2Node ros2Node;
-   private RealtimeROS2Node realtimeROS2Node;
-
-   private final CommunicationMode communicationMode;
-
    private final byte[] messageDepthDataArray = new byte[25000000];
+   private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+   private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+   private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
 
    private final HashMap<String, byte[]> buffers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
 
-   private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
+   private final CommunicationMode communicationMode;
+   private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
+   private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                        getClass(),
+                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private final Mat depthMap = new Mat(1, 1, opencv_core.CV_16UC1);
+   private ROS2Node ros2Node;
+   private ROS2Helper ros2Helper;
+   private HDF5Manager hdf5Manager;
+   private RealtimeROS2Node realtimeROS2Node;
 
    private int pointCloudCount = 0;
    private int depthMapCount = 0;
-   private int d435ImageCount = 0;
 
-   private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
-   private LidarScanMessage lidarScanMessage = new LidarScanMessage();
-
-   private final BigVideoPacket videoPacket = new BigVideoPacket();
-
-   private final BigVideoPacket depthVideoPacket = new BigVideoPacket();
-   private final SampleInfo depthSampleInfo = new SampleInfo();
-
-   private final BigVideoPacket ousterDepthVideoPacket = new BigVideoPacket();
-
-   private final SampleInfo ousterSampleInfo = new SampleInfo();
-
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
-                                                                                                  getClass(),
-                                                                                                  ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
-
-   private int depthMessageCounter = 0;
-   private int compressedImageCounter = 0;
-   private ROS2Helper ros2Helper;
 
    public PerceptionDataLogger()
    {

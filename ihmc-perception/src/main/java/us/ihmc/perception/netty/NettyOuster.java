@@ -58,8 +58,6 @@ public class NettyOuster
          {
             aquisitionInstant = Instant.now();
 
-//            LogTools.info("Packet Info: {}", packet.sender().getAddress().toString());
-
             if (!tcpInitialized)
             {
                if (!configureTCP(packet.sender().getAddress().toString().substring(1)))
