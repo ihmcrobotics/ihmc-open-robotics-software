@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.promp.ProMPUtil.concatenateEigenMatrix;
 import static us.ihmc.promp.ProMPUtil.concatenateTrajectoryVector;
@@ -34,16 +35,18 @@ public class ProMPManager
    private final HashMap<String, TrajectoryGroup> trainingTrajectories = new HashMap<>();
    private final ProMPLogger logger = new ProMPLogger();
    private boolean logEnabled = false;
+   private final AtomicBoolean isLastViaPoint;
 
    /* Class constructor
     * @param taskName: name of the task
     * @param bodyPartsGeometry: body part of the robot and geometry (e.g. position, orientation, pose) for which you want to learn the ProMPs
     */
-   public ProMPManager(String taskName, HashMap<String, String> bodyPartsGeometry, boolean logEnabled)
+   public ProMPManager(String taskName, HashMap<String, String> bodyPartsGeometry, boolean logEnabled, AtomicBoolean isLastViaPoint)
    {
       this.taskName = taskName;
       this.bodyPartsGeometry = bodyPartsGeometry;
       this.logEnabled = logEnabled;
+      this.isLastViaPoint = isLastViaPoint;
       ProMPNativeLibrary.load();
    }
 
@@ -129,13 +132,10 @@ public class ProMPManager
       TrajectoryVector demoTrajectories = trainingTrajectories.get(bodyPart).trajectories();
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
-      //LogTools.info("   - Inferred demo: {}", demo);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
       double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.5, 2.0, 30);
-      //LogTools.info("   - Inferred speed: {}", inferredSpeed);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
-      LogTools.info("   - Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
@@ -143,7 +143,7 @@ public class ProMPManager
          if (logEnabled)
          {
             LogTools.info("Logging modulated ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, keyBodyPart);
-            logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
+            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart), "Modulated");
          }
       }
    }
@@ -177,7 +177,6 @@ public class ProMPManager
       double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectory.get(demo).timesteps() / inferredSpeed);
-      LogTools.info("Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
@@ -185,7 +184,7 @@ public class ProMPManager
 
          if (logEnabled)
          {
-            logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
+            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart),"Modulated");
          }
       }
    }
@@ -204,7 +203,6 @@ public class ProMPManager
       double inferredSpeed = meanTrajectoryProMPCurrentTask.infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
       int inferredTimesteps = (int) (meanTrajectoryProMPCurrentTask.timesteps() / inferredSpeed);
-      LogTools.info("Inferred timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
@@ -212,7 +210,7 @@ public class ProMPManager
 
          if (logEnabled)
          {
-            logger.saveModulatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart));
+            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart),"Modulated");
          }
       }
    }
@@ -293,13 +291,16 @@ public class ProMPManager
          }
       }
       setViaPoint(viaPoint, bodyPart, observedPose);
-      LogTools.info("size observed step {}",conditioningTimestep);
-      LogTools.info("{} viaPoint y{} , qz{}",bodyPart,observedPose.getPosition().getY(), observedPose.getOrientation().getZ());
       myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
       if (logEnabled)
       {
-         LogTools.info("Logging conditioned ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
-         logger.saveConditionedTrajectories(bodyPart, myProMP);
+         logger.addViaPoint(bodyPart,viaPoint);
+         if(isLastViaPoint.get()){
+            LogTools.info("Logging conditioned ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
+            logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
+            logger.saveViaPoints(bodyPart);
+            isLastViaPoint.set(false);
+         }
       }
    }
 
@@ -342,7 +343,7 @@ public class ProMPManager
 
       if (logEnabled)
       {
-         logger.saveConditionedGoalTrajectories(bodyPart, myProMP);
+         logger.saveUpdatedTrajectories(bodyPart, myProMP, "ConditionedGoal");
       }
    }
 

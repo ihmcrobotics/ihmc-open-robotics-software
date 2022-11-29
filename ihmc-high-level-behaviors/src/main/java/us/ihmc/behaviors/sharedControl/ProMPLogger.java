@@ -3,8 +3,14 @@ package us.ihmc.behaviors.sharedControl;
 import us.ihmc.promp.*;
 import us.ihmc.promp.presets.ProMPInfoMapper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 public class ProMPLogger
 {
+   private final HashMap<String, List<ProMPInfoMapper.EigenVectorXd>> bodyPartViaPoints = new HashMap<>();
+
    public ProMPLogger()
    {
       ProMPNativeLibrary.load();
@@ -25,35 +31,40 @@ public class ProMPLogger
       ProMPUtil.saveAsCSV(covarianceTrajectory, "/" + bodyPart + "covariance.csv");
    }
 
-   public void saveModulatedTrajectories(String bodyPart, ProMP modulatedProMP)
+   public void saveUpdatedTrajectories(String bodyPart, ProMP myProMP, String updateName)
    {
-      ProMPInfoMapper.EigenMatrixXd meanTrajectory = modulatedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = modulatedProMP.gen_traj_std_dev(meanTrajectory.rows());
-      ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanModulated.csv");
-      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationModulated.csv");
+      ProMPInfoMapper.EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
+      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = myProMP.gen_traj_std_dev(meanTrajectory.rows());
+      ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "mean" + updateName + ".csv");
+      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviation" + updateName + ".csv");
    }
 
-   public void saveConditionedTrajectories(String bodyPart, ProMP conditionedProMP, int timestep)
+   public void addViaPoint(String bodyPart, ProMPInfoMapper.EigenVectorXd viaPoint)
    {
-      ProMPInfoMapper.EigenMatrixXd meanTrajectory = conditionedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev(meanTrajectory.rows());
-      ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanConditioned" + timestep + ".csv");
-      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationConditioned" + timestep + ".csv");
+      if (bodyPartViaPoints.containsKey(bodyPart))
+         bodyPartViaPoints.put(bodyPart, new ArrayList<>());
+      bodyPartViaPoints.get(bodyPart).add(viaPoint);
    }
 
-   public void saveConditionedTrajectories(String bodyPart, ProMP conditionedProMP)
+   public void saveViaPoints(String bodyPart)
    {
-      ProMPInfoMapper.EigenMatrixXd meanTrajectory = conditionedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev(meanTrajectory.rows());
-      ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanConditioned.csv");
-      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationConditioned.csv");
+      ProMPUtil.saveAsCSV(buildViaPointsMatrix(bodyPart), "/" + bodyPart + "viaPoints.csv");
    }
 
-   public void saveConditionedGoalTrajectories(String bodyPart, ProMP conditionedProMP)
+   private ProMPInfoMapper.EigenMatrixXd buildViaPointsMatrix(String bodyPart)
    {
-      ProMPInfoMapper.EigenMatrixXd meanTrajectory = conditionedProMP.generate_trajectory();
-      ProMPInfoMapper.EigenMatrixXd stdDeviationTrajectory = conditionedProMP.gen_traj_std_dev(meanTrajectory.rows());
-      ProMPUtil.saveAsCSV(meanTrajectory, "/" + bodyPart + "meanConditionedGoal.csv");
-      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/" + bodyPart + "stdDeviationConditionedGoal.csv");
+      //build list of viaPoints as matrix: rows = size of List, cols = size of viaPoint EigenVector
+      ProMPInfoMapper.EigenMatrixXd viaPointsMatrix = new ProMPInfoMapper.EigenMatrixXd(bodyPartViaPoints.get(bodyPart).size(),
+                                                                                        (int) bodyPartViaPoints.get(bodyPart).get(0).size());
+      for (int i=0; i<viaPointsMatrix.rows(); i++)
+      {
+         for (int j=0; j<viaPointsMatrix.cols(); j++)
+         {
+            viaPointsMatrix.apply(i,j).put(bodyPartViaPoints.get(bodyPart).get(i).coeff(j));
+         }
+      }
+      //clean in case you want to store and log other data again in the future
+      bodyPartViaPoints.remove(bodyPart);
+      return viaPointsMatrix;
    }
 }
