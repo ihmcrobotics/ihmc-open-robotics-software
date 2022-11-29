@@ -1,6 +1,7 @@
 package us.ihmc.perception.logging;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.list.array.TFloatArrayList;
 import org.apache.commons.lang.ArrayUtils;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
@@ -39,13 +40,14 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class PerceptionDataLogger
 {
-
    /* TODO:
    *     Remove or fix commented parts of the code.
    *     Improve multi-threading
    *     Convert buffer sizes to final constant values
    *
    * */
+   private static final int BUFFER_SIZE = 25000000;
+
    private final String ROOT_POSITION_NAME = "/robot/root/position/";
    private final String ROOT_ORIENTATION_NAME = "/robot/root/orientation/";
    private final String JOINT_ANGLES_NAME = "/robot/joint_angles/";
@@ -63,10 +65,10 @@ public class PerceptionDataLogger
    private final String L515_DEPTH_NAME = "/l515/depth/";
    private final String L515_COLOR_NAME = "/l515/color/";
 
-   private final byte[] messageDepthDataArray = new byte[25000000];
+   private final byte[] messageDepthDataArray = new byte[BUFFER_SIZE];
    private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
    private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private final BytePointer messageEncodedBytePointer = new BytePointer(25000000);
+   private final BytePointer messageEncodedBytePointer = new BytePointer(BUFFER_SIZE);
 
    private final HashMap<String, byte[]> buffers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
@@ -127,35 +129,35 @@ public class PerceptionDataLogger
       var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_VIDEO);
       d435VideoSubscription.addCallback(this::logColorD435);
       runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
-      buffers.put(D435_COLOR_NAME, new byte[25000000]);
+      buffers.put(D435_COLOR_NAME, new byte[BUFFER_SIZE]);
       counts.put(D435_COLOR_NAME, 0);
 
       // Add callback for D435 Depth images
       var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH);
       d435DepthSubscription.addCallback(this::logDepthD435);
       runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
-      buffers.put(D435_DEPTH_NAME, new byte[25000000]);
+      buffers.put(D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
       counts.put(D435_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH);
       l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
-      buffers.put(L515_DEPTH_NAME, new byte[25000000]);
+      buffers.put(L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
       counts.put(L515_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
       var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
       l515ColorSubscription.addCallback(this::logColorL515);
       runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
-      buffers.put(L515_COLOR_NAME, new byte[25000000]);
+      buffers.put(L515_COLOR_NAME, new byte[BUFFER_SIZE]);
       counts.put(L515_COLOR_NAME, 0);
 
       // Add callback for D435 Color images
       var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
       zed2StereoSubscription.addCallback(this::logColorZED2);
       runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
-      buffers.put(ZED2_COLOR_NAME, new byte[25000000]);
+      buffers.put(ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
       counts.put(ZED2_COLOR_NAME, 0);
 
       // Add callback for L515 Depth maps
@@ -366,23 +368,21 @@ public class PerceptionDataLogger
    public void storeFloatArray(String namespace, float[] array)
    {
       Group group = hdf5Manager.getGroup(namespace);
-      Float[] objectArray = ArrayUtils.toObject(array);
-      ArrayList<Float> buffer = hdf5Manager.getBuffer(namespace);
-      buffer.addAll(Arrays.asList(objectArray));
+      TFloatArrayList buffer = hdf5Manager.getBuffer(namespace);
+      buffer.addAll(array);
 
       int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
       LogTools.info("Buffer Index: {} {}", bufferSize, HDF5Manager.MAX_BUFFER_SIZE - 1);
       if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
       {
          LogTools.info("Thread Store Triggered");
-         ArrayList<Float> data = new ArrayList<>(buffer);
          hdf5Manager.resetBuffer(namespace);
 
          ThreadTools.startAThread(() ->
                                   {
                                      long count = hdf5Manager.getCount(namespace);
                                      LogTools.info("Storing Buffer: {}", count);
-                                     HDF5Tools.storeFloatArray2D(group, count, data, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+                                     HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                                      LogTools.info("Done Storing Buffer: {}", count);
                                   }, "float_array_logger_thread -> " + namespace);
       }
