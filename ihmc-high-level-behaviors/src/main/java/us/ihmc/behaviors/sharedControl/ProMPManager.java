@@ -293,6 +293,7 @@ public class ProMPManager
          }
       }
       setViaPoint(viaPoint, bodyPart, observedPose);
+      LogTools.info("{} viaPoint y{} , qz{}",bodyPart,observedPose.getPosition().getY(), observedPose.getOrientation().getZ());
       myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
       if (logEnabled)
       {
