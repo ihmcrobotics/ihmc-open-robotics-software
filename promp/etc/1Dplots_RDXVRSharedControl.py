@@ -141,10 +141,9 @@ for bodyPart in bodyParts:
     plotter.plot(meanZ,colorZ,linewidth=4.0)
     plotter.fill_between(numpy.linspace(0, meanZ.size, num=meanZ.size), meanZ - stdZ, meanZ + stdZ, color=colorZ, alpha=0.2)
 
-    plotter.plot(qXTest,testcolorX)
-    plotter.plot(qYTest,testcolorY)
-    plotter.plot(qZTest,testcolorZ)
-    plotter.plot(qSTest,testcolorS)
+    plotter.plot(xTest,testcolorX)
+    plotter.plot(yTest,testcolorY)
+    plotter.plot(zTest,testcolorZ)
 
     plotter.plot(meanModulatedX,democolorX,linewidth=4.0)
     plotter.plot(meanModulatedY,democolorY,linewidth=4.0)
@@ -166,9 +165,10 @@ for bodyPart in bodyParts:
     plotter.plot(meanQS,colorS,linewidth=4.0)
     plotter.fill_between(numpy.linspace(0, meanQS.size, num=meanQS.size), meanQS - stdQS, meanQS + stdQS, color=colorS, alpha=0.2)
     
-    plotter.plot(xTest,testcolorX)
-    plotter.plot(yTest,testcolorY)
-    plotter.plot(zTest,testcolorZ)
+    plotter.plot(qXTest,testcolorX)
+    plotter.plot(qYTest,testcolorY)
+    plotter.plot(qZTest,testcolorZ)
+    plotter.plot(qSTest,testcolorS)
 
     plotter.plot(meanModulatedQX,democolorX,linewidth=4.0)
     plotter.plot(meanModulatedQY,democolorY,linewidth=4.0)

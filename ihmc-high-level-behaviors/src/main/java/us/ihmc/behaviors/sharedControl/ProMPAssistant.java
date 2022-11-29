@@ -53,7 +53,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       {
          String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
          Path pathFile = Paths.get("ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/" + configurationFile);
-         LogTools.info("Loading parameters from resource: {}",configurationFile);
+         LogTools.info("Loading parameters from resource: {}", configurationFile);
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(pathFile.toAbsolutePath().toString()));
          testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
          logEnabled = (boolean) jsonObject.get("logging");
@@ -86,19 +86,19 @@ public class ProMPAssistant implements TeleoperationAssistant
                         List<String> name = new ArrayList<>();
                         List<String> geometry = new ArrayList<>();
                         jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
-                        {
-                           switch (bodyPartProperty.toString())
-                           {
-                              case "name":
-                                 name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
-                                 break;
-                              case "geometry":
-                                 geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
-                                 break;
-                              default:
-                                 break;
-                           }
-                        });
+                                                            {
+                                                               switch (bodyPartProperty.toString())
+                                                               {
+                                                                  case "name":
+                                                                     name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
+                                                                     break;
+                                                                  case "geometry":
+                                                                     geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
+                                                                     break;
+                                                                  default:
+                                                                     break;
+                                                               }
+                                                            });
                         for (int i = 0; i < name.size(); i++)
                            bodyPartsGeometry.put(name.get(i), geometry.get(i));
                      }
@@ -235,13 +235,12 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       //build vector of observed trajectories for the hands
       Set<String> bodyParts = bodyPartObservedFrameTrajectory.keySet();
-      List<List<Pose3DReadOnly>> observedFrameTrajectories = new ArrayList<>();
-      for (String bodyPart : bodyParts)
-         observedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
-      //update speed proMP based on hands observed trajectories
-//      proMPManagers.get(currentTask).updateTaskSpeed(observedFrameTrajectories, bodyParts);
-      // TODO B.1. use line above where you compare both hands if relevantBodyPart is both hands and check only main hand if it is one hand
-      // TODO B.2. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
+      //      List<List<Pose3DReadOnly>> observedFrameTrajectories = new ArrayList<>();
+      //      for (String bodyPart : bodyParts)
+      //         observedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
+      //      update speed proMP based on hands observed trajectories
+      //      proMPManagers.get(currentTask).updateTaskSpeed(observedFrameTrajectories, bodyParts);
+      // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
       // TODO B.3. change relevantBodyPart concept  which now means that bodyPart will reach a goal that can be observed
       //       Add instead goalBodyPart and change use of relevantBodyPart as the part that is used the most for that task
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedFrameTrajectory.get("rightHand"), "rightHand");
@@ -251,14 +250,15 @@ public class ProMPAssistant implements TeleoperationAssistant
          List<Pose3DReadOnly> robotPartObservedTrajectory = bodyPartObservedFrameTrajectory.get(robotPart);
          if (robotPartObservedTrajectory.size() > 0)
          {
-            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart,
-                                                                robotPartObservedTrajectory.get(robotPartObservedTrajectory.size() - 1),
-                                                                robotPartObservedTrajectory.size() - 1);
+            proMPManagers.get(currentTask)
+                         .updateTaskTrajectory(robotPart,
+                                               robotPartObservedTrajectory.get(robotPartObservedTrajectory.size() - 1),
+                                               robotPartObservedTrajectory.size() - 1);
          }
-//                  for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
-//                  {
-//                     proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
-//                  }
+         //                  for (int i = 0; i < robotPartObservedTrajectory.size(); i++)
+         //                  {
+         //                     proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, robotPartObservedTrajectory.get(i), i);
+         //                  }
       }
    }
 
@@ -284,7 +284,8 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
       int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
-      if (sampleCounter < generatedFramePoseTrajectory.size()){
+      if (sampleCounter < generatedFramePoseTrajectory.size())
+      {
          //take a sample (frame) from the trajectory
          FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
          FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
@@ -302,7 +303,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    }
 
    //TODO Edit this function to take into account affordance. Ignore for the moment
-   public void framePoseToPackToAffordance(FramePose3D framePose, String bodyPart)
+   public void framePoseToAffordance(FramePose3D framePose, String bodyPart)
    {
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedFrameTrajectory.get(bodyPart);
       //take a sample (frame) from the trajectory
@@ -310,23 +311,15 @@ public class ProMPAssistant implements TeleoperationAssistant
       //TODO C.1.1 IF goal is observable -> compute distance from region close to the goal and use this to select the next sample.
       // If distance is increasing, go back to previous sample
 
-      if (bodyPart.equals(relevantBodyPart))
-      {
-         //TODO C.1.2 IF goal is observable -> compute distance from region close to the goal and use this to modulate alpha
-         // compute initial distance when goal is detected
-         // set alpha according to distance
-         //TODO C.2. Can we re-estimate speed real-time as well to adapt it to user motion and change alpha accordingly?
-         // Not sure it'd be robust but worth a try
-      }
       // shared-control arbitration law. Shift gradually from user input to robot autonomy
       int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
       if (sampleCounter <= generatedFramePoseTrajectory.size())
       {
-         double x = (double)(sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
+         double x = (double) (sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
          //define a function that goes from 0 to 1 smoothly, while getting to 1 not too close to the end of the motions
          double alpha = 1.0 / (1 + 4 * exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-         if (alpha>=0.9999)
-            alpha=1;
+         if (alpha >= 0.9999)
+            alpha = 1;
          //set orientation
          FixedFrameQuaternionBasics frameOrientation = framePose.getOrientation();
          FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
