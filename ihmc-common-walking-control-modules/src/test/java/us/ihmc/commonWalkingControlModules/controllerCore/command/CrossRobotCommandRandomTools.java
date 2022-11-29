@@ -451,6 +451,7 @@ public class CrossRobotCommandRandomTools
       next.setMaxVelocityError(random.nextDouble());
       next.setVelocityReferenceAlpha(random.nextDouble());
       next.setVelocityResetMode(nextElementIn(random, JointVelocityIntegratorResetMode.values));
+      next.setDisableAccelerationIntegration(random.nextBoolean());
       return next;
    }
 
