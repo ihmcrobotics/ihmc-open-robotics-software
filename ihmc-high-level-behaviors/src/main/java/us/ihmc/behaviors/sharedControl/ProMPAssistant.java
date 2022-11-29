@@ -40,7 +40,8 @@ public class ProMPAssistant implements TeleoperationAssistant
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); //to track the last used sample of a generated trajectory
    private boolean doneInitialProcessingTask = false;
-   private int testNumber;
+   private boolean doneCurrentTask = false; //used to communicate to higher level classes that the task has been completed
+   private int testNumber = 0;
 
    public ProMPAssistant()
    {
@@ -298,7 +299,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
       else
       {
-         reset();
+         doneCurrentTask = true;
       }
    }
 
@@ -365,5 +366,15 @@ public class ProMPAssistant implements TeleoperationAssistant
    public int getTestNumber()
    {
       return testNumber;
+   }
+
+   public void setCurrentTaskDone(boolean doneCurrentTask)
+   {
+         this.doneCurrentTask = doneCurrentTask;
+   }
+
+   public boolean isCurrentTaskDone()
+   {
+      return this.doneCurrentTask;
    }
 }
