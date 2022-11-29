@@ -1,14 +1,12 @@
 package us.ihmc.perception.logging;
 
+import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.H5File;
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 public class HDF5Manager
@@ -17,7 +15,7 @@ public class HDF5Manager
    public static int MAX_BUFFER_SIZE = 500;
 
    private HashMap<String, Group> groups;
-   private HashMap<String, ArrayList<Float>> buffers;
+   private HashMap<String, TFloatArrayList> buffers;
    private HashMap<String, Integer> counts;
    private H5File file;
 
@@ -49,7 +47,7 @@ public class HDF5Manager
       }
    }
 
-   public ArrayList<Float> getBuffer(String namespace)
+   public TFloatArrayList getBuffer(String namespace)
    {
       if (buffers.containsKey(namespace))
       {
@@ -57,7 +55,7 @@ public class HDF5Manager
       }
       else
       {
-         ArrayList<Float> list = new ArrayList<>();
+         TFloatArrayList list = new TFloatArrayList();
          buffers.put(namespace, list);
          return list;
       }
