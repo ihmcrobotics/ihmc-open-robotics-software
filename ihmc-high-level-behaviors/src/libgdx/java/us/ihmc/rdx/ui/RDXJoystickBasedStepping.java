@@ -161,7 +161,9 @@ public class RDXJoystickBasedStepping
       rightVRController = baseUI.getVRManager().getContext().getController(RobotSide.RIGHT);
       baseUI.getVRManager().getContext().addVRInputProcessor(context ->
       {
-         userNotClickingAnImGuiPanel = context.getSelectedPick() == null;
+         userNotClickingAnImGuiPanel = true;
+         for (RobotSide side : RobotSide.values)
+            userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getSelectedPick().get(side) == null;
       });
    }
 
