@@ -50,7 +50,6 @@ public class HDF5Tools
     * @param group           The HDF5 group where the requested pointcloud is stored
     * @param index           The index of the dataset within the requested group.
     * @param pointListToPack The recycling arraylist to be packed with the 3D points from pointcloud
-    * @return The length of the dataset along the requested dimension or axis
     */
    public static void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> pointListToPack)
    {
