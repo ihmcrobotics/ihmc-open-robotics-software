@@ -110,19 +110,33 @@ public class PlanarRegionFilteredMap
             mapRegion.applyTransform(transform);
 
             // Update Map Region Hull
-            List<Point2D> concaveHullMapRegionVertices = mapRegion.getConcaveHull();
-            List<Point2D> concaveHullRegionVertices = region.getConcaveHull();
-            List<Point2D> mergedConcaveHull = ConcaveHullMerger.mergeConcaveHulls(concaveHullMapRegionVertices, concaveHullRegionVertices, null);
-            ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<>();
-            ConcaveHullDecomposition.recursiveApproximateDecomposition(mergedConcaveHull, 0.001, newPolygonsFromConcaveHull);
+            //List<Point2D> concaveHullMapRegionVertices = mapRegion.getConcaveHull();
+            //List<Point2D> concaveHullRegionVertices = region.getConcaveHull();
+            //List<Point2D> mergedConcaveHull = ConcaveHullMerger.mergeConcaveHulls(concaveHullMapRegionVertices, concaveHullRegionVertices, null);
+            //ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<>();
+            //ConcaveHullDecomposition.recursiveApproximateDecomposition(mergedConcaveHull, 0.001, newPolygonsFromConcaveHull);
+            //
+            //RigidBodyTransform transformToWorld = new RigidBodyTransform();
+            //mapRegion.getTransformToWorld(transformToWorld);
+            //
+            //PlanarRegion planarRegion = new PlanarRegion(transformToWorld, mergedConcaveHull, newPolygonsFromConcaveHull);
+            //planarRegion.setRegionId(mapRegion.getRegionId());
+            //
+            //mapRegion.set(planarRegion);
 
-            RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            mapRegion.getTransformToWorld(transformToWorld);
+            ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(mapRegion, region, 1.0f, null);
 
-            PlanarRegion planarRegion = new PlanarRegion(transformToWorld, mergedConcaveHull, newPolygonsFromConcaveHull);
-            planarRegion.setRegionId(mapRegion.getRegionId());
-
-            mapRegion.set(planarRegion);
+            if(mergedRegion != null)
+            {
+               if(mergedRegion.size() > 0)
+               {
+                  mapRegion.set(mergedRegion.get(0));
+               }
+               else
+               {
+                  // TODO: Figure out how to handle the case where no merged region is generated.
+               }
+            }
          }
 
          uniqueRegionsFound = 0;
