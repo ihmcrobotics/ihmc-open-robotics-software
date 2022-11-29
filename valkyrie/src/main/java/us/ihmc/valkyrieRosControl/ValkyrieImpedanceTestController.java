@@ -21,7 +21,6 @@ import java.util.List;
 public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBridge
 {
    private static final String[] jointNames;
-   private static final double[] desiredJointAngles = new double[]{0.4, -1.0, 0.1, -1.0};
 
    static
    {
@@ -37,12 +36,23 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
 
    private final JointImpedanceHandle[] jointImpedanceHandles = new JointImpedanceHandle[jointNames.length];
 
+   private final YoDouble masterGain = new YoDouble("masterGain", registry);
    private final YoDouble desiredJointStiffness = new YoDouble("desiredJointStiffness", registry);
    private final YoDouble desiredJointDamping = new YoDouble("desiredJointDamping", registry);
+
+   private final YoDouble[] desiredJointAngles = new YoDouble[jointNames.length];
+
    private YoVariableServer yoVariableServer;
 
    public ValkyrieImpedanceTestController()
    {
+      for (int i = 0; i < desiredJointAngles.length; i++)
+      {
+         desiredJointAngles[i] = new YoDouble("qDesired_" + jointNames[i], registry);
+      }
+
+      desiredJointStiffness.set(40.0);
+      desiredJointDamping.set(8.0);
    }
 
    @Override
@@ -55,7 +65,8 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
-      DataServerSettings logSettings = robotModel.getLogSettings();double estimatorDT = robotModel.getEstimatorDT();
+      DataServerSettings logSettings = robotModel.getLogSettings();
+      double estimatorDT = robotModel.getEstimatorDT();
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
       yoVariableServer.start();
@@ -66,15 +77,20 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
    {
       if (firstTick)
       {
+         for (int i = 0; i < jointImpedanceHandles.length; i++)
+         {
+            desiredJointAngles[i].set(jointImpedanceHandles[i].getPosition());
+         }
+
          firstTick = false;
       }
 
       for (int i = 0; i < jointNames.length; i++)
       {
-         jointImpedanceHandles[i].setStiffness(desiredJointStiffness.getDoubleValue());
-         jointImpedanceHandles[i].setDamping(desiredJointDamping.getDoubleValue());
+         jointImpedanceHandles[i].setStiffness(masterGain.getDoubleValue() * desiredJointStiffness.getDoubleValue());
+         jointImpedanceHandles[i].setDamping(masterGain.getDoubleValue() * desiredJointDamping.getDoubleValue());
 
-         jointImpedanceHandles[i].setPosition(desiredJointAngles[i]);
+         jointImpedanceHandles[i].setPosition(desiredJointAngles[i].getDoubleValue());
          jointImpedanceHandles[i].setVelocity(0.0);
       }
 
