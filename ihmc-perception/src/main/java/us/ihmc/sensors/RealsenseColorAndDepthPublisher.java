@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
@@ -104,8 +103,7 @@ public class RealsenseColorAndDepthPublisher
          if (nativesLoadedActivator.isNewlyActivated())
          {
             realSenseHardwareManager = new RealSenseHardwareManager();
-            sensor = realSenseHardwareManager.createBytedecoRealsense(this.serialNumber, this.depthWidth, this.depthHeight, this.depthFPS);
-            //            sensor = realSenseHardwareManager.createFullFeaturedL515(serialNumber, 1024, 768, 30);
+            sensor = realSenseHardwareManager.createBytedecoRealsenseDevice(this.serialNumber, this.depthWidth, this.depthHeight, this.depthFPS);
 
             if (sensor.getDevice() == null)
             {

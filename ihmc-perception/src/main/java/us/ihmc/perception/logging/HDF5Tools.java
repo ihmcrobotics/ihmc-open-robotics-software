@@ -104,17 +104,6 @@ public class HDF5Tools
       return intArray;
    }
 
-   public static void loadImage(Group group, int index, Mat mat)
-   {
-      LogTools.info("Opening Dataset: {}", index);
-      DataSet dataset = group.openDataSet(String.valueOf(index));
-      byte[] pointsBuffer = new byte[mat.rows() * mat.cols() * mat.channels()];
-      BytePointer p = new BytePointer(pointsBuffer);
-      dataset.read(p, PredType.NATIVE_UINT8());
-      p.get(pointsBuffer);
-      //      mat.data(p);
-   }
-
    public static void storePointCloud(Group group, long index, ArrayList<Point3D> points)
    {
       long[] dims = {points.size(), PCD_POINT_SIZE};
@@ -142,6 +131,7 @@ public class HDF5Tools
       dataset.write(data, PredType.NATIVE_UINT8());
    }
 
+   // TODO: Complete this method to load timestamps associated with any HDF5 dataset object.
    public static ArrayList<Float> getTimestamps(Group group)
    {
       ArrayList<Float> timestamps = new ArrayList<>();
@@ -164,16 +154,16 @@ public class HDF5Tools
 
    public static void exploreH5(Group group, ArrayList<String> names, String prefix)
    {
-      int count = 0;
+      int numberOfGroups = 0;
       for (int i = 0; i < group.getNumObjs(); i++)
       {
-         BytePointer objPtr = group.getObjnameByIdx(i);
-         if (group.childObjType(objPtr) == hdf5.H5O_TYPE_GROUP)
+         BytePointer objectBytePointer = group.getObjnameByIdx(i);
+         if (group.childObjType(objectBytePointer) == hdf5.H5O_TYPE_GROUP)
          {
-            count++;
-            String grpName = group.getObjnameByIdx(i).getString();
-            Group grp = group.openGroup(grpName);
-            exploreH5(grp, names, prefix + "/" + grpName);
+            numberOfGroups++;
+            String groupName = group.getObjnameByIdx(i).getString();
+            Group groupHandle = group.openGroup(groupName);
+            exploreH5(groupHandle, names, prefix + "/" + groupName);
          }
          //         if (group.childObjType(objPtr) == H5O_TYPE_DATASET) {
          //            String dsName = group.getObjnameByIdx(i).getString();
@@ -183,7 +173,7 @@ public class HDF5Tools
          //         System.out.println("ExploreH5: " + group.getObjnameByIdx(i).getString());
       }
 
-      if (count == 0)
+      if (numberOfGroups == 0)
       {
          System.out.println("Prefix: " + prefix);
          names.add(prefix);

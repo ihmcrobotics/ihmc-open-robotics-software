@@ -151,8 +151,6 @@ public class BytedecoOpenCVTools
    public static void compressDepthJPG(Mat image, BytePointer compressedBytes)
    {
       Mat depthRGBAMat = new Mat(image.rows(), image.cols(), CV_8UC4, image.data());
-      //Mat yuv420Image = new Mat();
-      //opencv_imgproc.cvtColor(depthRGBAMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
       opencv_imgcodecs.imencode(".jpg", depthRGBAMat, compressedBytes, compressionParametersJPG);
    }
 

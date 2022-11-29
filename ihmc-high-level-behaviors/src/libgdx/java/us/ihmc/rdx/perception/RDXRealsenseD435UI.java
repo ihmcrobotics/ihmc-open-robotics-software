@@ -63,7 +63,7 @@ public class RDXRealsenseD435UI
                {
                   realSenseHardwareManager = new RealSenseHardwareManager(yoRegistry, yoGraphicsListRegistry);
 
-                  d435 = realSenseHardwareManager.createD435("752112070330", 1280, 720, 30);
+                  d435 = realSenseHardwareManager.createBytedecoRealsenseDevice("752112070330", 1280, 720, 30);
 //                  d435.enableColor(1920, 1080, 30);
                   d435.initialize();
                }
