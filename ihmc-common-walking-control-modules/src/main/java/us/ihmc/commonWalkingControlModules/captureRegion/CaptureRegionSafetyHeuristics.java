@@ -111,6 +111,7 @@ public class CaptureRegionSafetyHeuristics
       if (computeVisibiltyOfVerticesFromStance(saferCaptureRegion))
          projectVerticesVisibleToStanceAwayFromTheFoot();
 
+      saferCaptureRegion.notifyVerticesChanged();
       saferCaptureRegion.update();
 
       yoSafetyBiasedCaptureRegion.setMatchingFrame(saferCaptureRegion, false);
@@ -194,13 +195,7 @@ public class CaptureRegionSafetyHeuristics
                                                                        saferCaptureRegion.getNextVertex(firstVertexIndex),
                                                                        croppedPoint))
          {
-            if (croppedPoint.distanceSquared(previousVertex) < 1e-4)
-            {
-               saferCaptureRegion.removeVertex(firstVertexIndex);
-               saferCaptureRegion.update();
-            }
-            else
-               saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
+            saferCaptureRegion.getVertexUnsafe(firstVertexIndex).set(croppedPoint);
          }
       }
 
@@ -217,13 +212,7 @@ public class CaptureRegionSafetyHeuristics
                                                                            saferCaptureRegion.getPreviousVertex(lastVertexIndex),
                                                                            croppedPoint))
          {
-            if (croppedPoint.distanceSquared(nextVertex) < 1e-4)
-            {
-               saferCaptureRegion.removeVertex(lastVertexIndex);
-               saferCaptureRegion.update();
-            }
-            else
-               saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
+            saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
          }
       }
    }
