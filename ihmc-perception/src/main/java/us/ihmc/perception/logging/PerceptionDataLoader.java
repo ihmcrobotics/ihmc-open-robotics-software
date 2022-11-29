@@ -29,9 +29,9 @@ public class PerceptionDataLoader
       hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
    }
 
-   public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points)
+   public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points, int rows, int cols)
    {
-      HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points);
+      HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points, rows, cols);
    }
 
    public FloatBuffer loadCompressedPointCloud(String namespace, int index)

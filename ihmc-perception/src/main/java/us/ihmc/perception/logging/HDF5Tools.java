@@ -19,9 +19,7 @@ import java.util.Arrays;
 
 public class HDF5Tools
 {
-   static final int PCD_POINT_SIZE = 3;
-   static final int DIM0 = 2048;
-   static final int DIM1 = 64;
+   static final int NUMBER_OF_FIELDS_PER_POINT = 3;
 
    /**
     * Extracts the shape of a dataset and outputs the length along the requested dimension/axis (dim)
@@ -32,11 +30,11 @@ public class HDF5Tools
     */
    private static int extractShape(DataSet dataSet, int dim)
    {
-      DataSpace space = dataSet.getSpace();
-      int nbDims = space.getSimpleExtentNdims();
-      long[] shape = new long[nbDims];
-      space.getSimpleExtentDims(shape);
-      if (dim < nbDims)
+      DataSpace dataSpace = dataSet.getSpace();
+      int dimensions = dataSpace.getSimpleExtentNdims();
+      long[] shape = new long[dimensions];
+      dataSpace.getSimpleExtentDims(shape);
+      if (dim < dimensions)
       {
          return (int) shape[dim];
       }
@@ -51,10 +49,10 @@ public class HDF5Tools
     * @param index           The index of the dataset within the requested group.
     * @param pointListToPack The recycling arraylist to be packed with the 3D points from pointcloud
     */
-   public static void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> pointListToPack)
+   public static void loadPointCloud(Group group, int index, RecyclingArrayList<Point3D32> pointListToPack, int rows, int cols)
    {
       DataSet dataset = group.openDataSet(String.valueOf(index));
-      float[] pointsBuffer = new float[DIM0 * DIM1 * 3];
+      float[] pointsBuffer = new float[rows * cols * 3];
       FloatPointer p = new FloatPointer(pointsBuffer);
       dataset.read(p, PredType.NATIVE_FLOAT());
       p.get(pointsBuffer);
@@ -165,14 +163,14 @@ public class HDF5Tools
     */
    public static void storePointCloud(Group group, long index, ArrayList<Point3D> pointListToPack)
    {
-      long[] dims = {pointListToPack.size(), PCD_POINT_SIZE};
+      long[] dims = {pointListToPack.size(), NUMBER_OF_FIELDS_PER_POINT};
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
-      float[] buf = new float[pointListToPack.size() * PCD_POINT_SIZE];
+      float[] buf = new float[pointListToPack.size() * NUMBER_OF_FIELDS_PER_POINT];
       for (int i = 0; i < pointListToPack.size(); i++)
       {
-         buf[i * PCD_POINT_SIZE] = pointListToPack.get(i).getX32();
-         buf[i * PCD_POINT_SIZE + 1] = pointListToPack.get(i).getY32();
-         buf[i * PCD_POINT_SIZE + 2] = pointListToPack.get(i).getZ32();
+         buf[i * NUMBER_OF_FIELDS_PER_POINT] = pointListToPack.get(i).getX32();
+         buf[i * NUMBER_OF_FIELDS_PER_POINT + 1] = pointListToPack.get(i).getY32();
+         buf[i * NUMBER_OF_FIELDS_PER_POINT + 2] = pointListToPack.get(i).getZ32();
       }
 
       dataset.write(new FloatPointer(buf), new DataType(PredType.NATIVE_FLOAT()));
@@ -291,15 +289,11 @@ public class HDF5Tools
 
       int size = extractShape(dataset, 0);
 
-      LogTools.info("Loading Dataset: {} with Shape: {}", index, size);
-
       byte[] byteArray = new byte[size];
 
       BytePointer p = new BytePointer(byteArray);
       dataset.read(p, new DataType(PredType.NATIVE_UCHAR()));
       p.get(byteArray, 0, byteArray.length);
-
-      System.out.println(Arrays.toString(byteArray));
 
       return byteArray;
    }

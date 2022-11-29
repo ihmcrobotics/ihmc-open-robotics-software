@@ -8,6 +8,7 @@ import us.ihmc.log.LogTools;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Handler for an HDF5 file. Also manages intermediate buffers, index counts, and group handles.
@@ -156,13 +157,8 @@ public class HDF5Manager
          String name = path.subpath(0, i + 1).toString();
          if (!file.nameExists(name))
          {
-            //            LogTools.info("Creating Group: {}", name);
             group = file.createGroup(name);
          }
-         //         else
-         //         {
-         ////            LogTools.warn("Not Creating, Exists: /{}", name);
-         //         }
       }
 
       if (group == null)
@@ -178,7 +174,7 @@ public class HDF5Manager
       return file;
    }
 
-   public HashMap<String, Group> getGroups()
+   public Map<String, Group> getGroups()
    {
       return groups;
    }
