@@ -43,10 +43,10 @@ public class RDXVRSharedControl
 
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      if (proMPAssistant.isCurrentTaskDone())
+      if (proMPAssistant.isCurrentTaskDone()) //do not want the assistant to keep recomputing trajectories for the same task over and over
          setEnabled(false); //exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
       else
-         proMPAssistant.framePoseToPack(framePose, bodyPart); //use promp assistance
+         proMPAssistant.framePoseToPack(framePose, bodyPart); //use promp assistance for shared control
    }
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
