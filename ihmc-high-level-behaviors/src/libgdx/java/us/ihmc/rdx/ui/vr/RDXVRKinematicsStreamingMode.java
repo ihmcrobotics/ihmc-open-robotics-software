@@ -72,7 +72,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
-   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled,2);
+   private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled,4); // only for LOGGING. delete later back to 2 parts
    private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController,kinematicsRecorder.isReplayingEnabled());
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
@@ -215,6 +215,7 @@ public class RDXVRKinematicsStreamingMode
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
+               kinematicsRecorder.framePoseToRecord(tempFramePose); // only for LOGGING. delete later
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
                else if (sharedControlAssistant.isActive())
