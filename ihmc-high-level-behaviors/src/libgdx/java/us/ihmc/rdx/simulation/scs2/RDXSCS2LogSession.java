@@ -4,9 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -22,16 +19,14 @@ import java.util.Set;
 
 public class RDXSCS2LogSession extends RDXSCS2Session
 {
-   private LogSession session;
-
-   private LogVideoLoader logVideoLoader;
-   private PerceptionDataLoader loader;
-
-   private final RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(200000, Point3D32::new);
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final ArrayList<RDXOpenCVVideoVisualizer> imagePanels = new ArrayList<>();
 
-   private int cloudIndex = 0;
+   private LogSession session;
+   private LogVideoLoader logVideoLoader;
+
+   // TODO: Use this for loading perception logs sync'ed with robot timestamps
+   private PerceptionDataLoader loader;
+
 
    public RDXSCS2LogSession(LogSession session)
    {
@@ -57,9 +52,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
    {
       super.create(baseUI);
 
-      baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
-      pointCloudRenderer.create(2048 * 64, 1);
-
       for (RDXOpenCVVideoVisualizer visualizer : imagePanels)
       {
          baseUI.getPrimaryScene().addRenderableProvider(visualizer);
@@ -72,16 +64,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
       if (session.getActiveMode() == SessionMode.RUNNING)
       {
-         if (cloudIndex % 100 == 0)
-         {
-            loader.loadPointCloud("/os_cloud_node/points", cloudIndex / 100, points);
-            pointCloudRenderer.setPointsToRender(points);
-            if (!points.isEmpty())
-            {
-               pointCloudRenderer.updateMesh();
-            }
-         }
-
          Mat mat = logVideoLoader.loadNextFrameAsOpenCVMat(session.getLogDataReader().getTimestamp().getValue());
 
          if (mat != null)
@@ -89,8 +71,6 @@ public class RDXSCS2LogSession extends RDXSCS2Session
             imagePanels.get(0).setImage(mat);
          }
       }
-
-      cloudIndex++;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
