@@ -36,6 +36,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    private String relevantBodyPart = ""; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
    private HashMap<String, String> taskRelevantBodyPart = new HashMap<>();
    private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
+   private final FramePose3D noPose = new FramePose3D();
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedFrameTrajectory = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedFrameTrajectory = new HashMap<>();
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); //to track the last used sample of a generated trajectory
@@ -212,7 +213,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       //TODO A.2. identify object pose (with Aruco Markers to begin with)
       //taskGoalPose = ;
-      return !(taskGoalPose.equals(new FramePose3D()));
+      return !(taskGoalPose.equals(noPose));
    }
 
    private void updateTaskWithObjectInfo()
@@ -234,12 +235,12 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    private void updateTask()
    {
-      //build vector of observed trajectories for the hands
-      Set<String> bodyParts = bodyPartObservedFrameTrajectory.keySet();
+      //      //build vector of observed trajectories for the hands
+      //      Set<String> bodyParts = bodyPartObservedFrameTrajectory.keySet();
       //      List<List<Pose3DReadOnly>> observedFrameTrajectories = new ArrayList<>();
       //      for (String bodyPart : bodyParts)
       //         observedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
-      //      update speed proMP based on hands observed trajectories
+      //      //update speed proMP based on hands observed trajectories
       //      proMPManagers.get(currentTask).updateTaskSpeed(observedFrameTrajectories, bodyParts);
       // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
       // TODO B.3. change relevantBodyPart concept  which now means that bodyPart will reach a goal that can be observed
@@ -300,6 +301,12 @@ public class ProMPAssistant implements TeleoperationAssistant
       else
       {
          doneCurrentTask = true;
+         //take previous sample (frame) to avoid jump when exit assistance mode
+         FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart)-1);
+         FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
+         FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
+         framePose.getPosition().set(generatedFramePosition);
+         framePose.getOrientation().set(generatedFrameOrientation);
       }
    }
 
@@ -370,7 +377,7 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    public void setCurrentTaskDone(boolean doneCurrentTask)
    {
-         this.doneCurrentTask = doneCurrentTask;
+      this.doneCurrentTask = doneCurrentTask;
    }
 
    public boolean isCurrentTaskDone()
