@@ -33,7 +33,7 @@ public class RDXVRSharedControl
 
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      proMPAssistant.processFrameInformation(observedPose,bodyPart);
+      proMPAssistant.processFrameInformation(observedPose, bodyPart);
    }
 
    public boolean readyToPack()
@@ -43,7 +43,10 @@ public class RDXVRSharedControl
 
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      proMPAssistant.framePoseToPack(framePose,bodyPart);
+      if (proMPAssistant.isCurrentTaskDone())
+         setEnabled(false); //exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+      else
+         proMPAssistant.framePoseToPack(framePose, bodyPart); //use promp assistance
    }
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
@@ -57,11 +60,15 @@ public class RDXVRSharedControl
 
    private void setEnabled(boolean enabled)
    {
-      if (enabled != this.enabled.get()){
+      if (enabled != this.enabled.get())
+      {
          this.enabled.set(enabled);
-         if (enabled == false){
+         if (enabled == false) // if deactivated
+         {
+            // reset promp assistance
             proMPAssistant.reset();
-            enabledIKStreaming.set(false);
+            proMPAssistant.setCurrentTaskDone(false);
+            enabledIKStreaming.set(false); //stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
          }
       }
       if (enabled)

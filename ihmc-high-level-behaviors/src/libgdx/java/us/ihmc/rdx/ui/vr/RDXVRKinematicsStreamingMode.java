@@ -215,15 +215,16 @@ public class RDXVRKinematicsStreamingMode
                tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                controllerFrameGraphics.get(side).setToReferenceFrame(controller.getXForwardZUpControllerFrame());
                handControlFrameGraphics.get(side).setToReferenceFrame(handDesiredControlFrames.get(side).getReferenceFrame());
-               kinematicsRecorder.framePoseToRecord(tempFramePose); // only for LOGGING. delete later
                if (kinematicsRecorder.isReplaying())
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
                else if (sharedControlAssistant.isActive())
                {
+                  kinematicsRecorder.framePoseToRecord(tempFramePose); // only for LOGGING. delete later
                   if(sharedControlAssistant.readyToPack())
                      sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
                   else
                      sharedControlAssistant.processFrameInformation(tempFramePose, side.getCamelCaseName() + "Hand");
+                  kinematicsRecorder.framePoseToRecord(tempFramePose); // only for LOGGING. delete later
                }
                message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
                message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
@@ -231,7 +232,7 @@ public class RDXVRKinematicsStreamingMode
                                                                                  side.negateIfLeftSide(Math.PI / 2.0),
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
-               kinematicsRecorder.framePoseToRecord(tempFramePose);
+//               kinematicsRecorder.framePoseToRecord(tempFramePose);
             });
          }
 
