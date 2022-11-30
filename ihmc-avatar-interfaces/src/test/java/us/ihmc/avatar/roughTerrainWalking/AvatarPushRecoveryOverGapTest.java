@@ -148,7 +148,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
 
-      double simulationTime = (swingTime + transferTime) * 4 + 1.0;
+      double simulationTime = (swingTime + transferTime) * 4 + 4.0;
       simulationTestHelper.simulateNow(simulationTime);
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
