@@ -1,13 +1,17 @@
 package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.JointImpedanceHandle;
-import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -32,7 +36,9 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
    private boolean firstTick = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
+   private FullHumanoidRobotModel fullRobotModel;
 
    private final JointImpedanceHandle[] jointImpedanceHandles = new JointImpedanceHandle[jointNames.length];
 
@@ -67,8 +73,10 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();
       double estimatorDT = robotModel.getEstimatorDT();
+      fullRobotModel = robotModel.createFullRobotModel();
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getRootBody(), graphicsListRegistry);
       yoVariableServer.start();
    }
 
@@ -87,6 +95,15 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
 
       for (int i = 0; i < jointNames.length; i++)
       {
+         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointNames[i]);
+         joint.setQ(jointImpedanceHandles[i].getPosition());
+         joint.setQd(jointImpedanceHandles[i].getVelocity());
+      }
+
+      fullRobotModel.getRootBody().updateFramesRecursively();
+
+      for (int i = 0; i < jointNames.length; i++)
+      {
          jointImpedanceHandles[i].setStiffness(masterGain.getDoubleValue() * desiredJointStiffness.getDoubleValue());
          jointImpedanceHandles[i].setDamping(masterGain.getDoubleValue() * desiredJointDamping.getDoubleValue());
 
@@ -94,6 +111,6 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
          jointImpedanceHandles[i].setVelocity(0.0);
       }
 
-      yoVariableServer.update(monotonicTimeProvider.getTimestamp());
+      yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
    }
 }
