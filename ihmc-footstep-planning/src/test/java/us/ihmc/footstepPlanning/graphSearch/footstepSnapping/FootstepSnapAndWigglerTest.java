@@ -43,7 +43,7 @@ import java.util.Random;
 
 public class FootstepSnapAndWigglerTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
 
    // For visualizable tests at the bottom
    private static final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();

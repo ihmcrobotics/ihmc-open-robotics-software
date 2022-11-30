@@ -103,7 +103,6 @@ public class WalkingMessageHandler
 
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
-   private final PlanarRegionsListHandler planarRegionsListHandler;
    private final StepConstraintRegionHandler stepConstraintRegionHandler;
 
    private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
@@ -152,7 +151,6 @@ public class WalkingMessageHandler
 
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
-      planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
       stepConstraintRegionHandler = new StepConstraintRegionHandler(registry);
 
       parentRegistry.addChild(registry);
@@ -285,11 +283,6 @@ public class WalkingMessageHandler
       updateVisualization();
    }
 
-   public void handlePlanarRegionsListCommand(PlanarRegionsListCommand planarRegionsListCommand)
-   {
-      planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
-   }
-
    public void handleStepConstraintRegionCommand(StepConstraintRegionCommand stepConstraintRegionCommand)
    {
       stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintRegionCommand);
@@ -298,11 +291,6 @@ public class WalkingMessageHandler
    public void handleStepConstraintsListCommand(StepConstraintsListCommand stepConstraintsListCommand)
    {
       stepConstraintRegionHandler.handleStepConstraintsListCommand(stepConstraintsListCommand);
-   }
-
-   public PlanarRegionsListHandler getPlanarRegionsListHandler()
-   {
-      return planarRegionsListHandler;
    }
 
    public StepConstraintRegionHandler getStepConstraintRegionHandler()
@@ -651,11 +639,6 @@ public class WalkingMessageHandler
       fallingDirection.changeFrame(worldFrame);
       failureStatusMessage.getFallingDirection().set(fallingDirection);
       statusOutputManager.reportStatusMessage(failureStatusMessage);
-   }
-
-   public void requestPlanarRegions()
-   {
-      planarRegionsListHandler.requestPlanarRegions();
    }
 
    public void registerCompletedDesiredFootstep(Footstep completedFesiredFootstep)

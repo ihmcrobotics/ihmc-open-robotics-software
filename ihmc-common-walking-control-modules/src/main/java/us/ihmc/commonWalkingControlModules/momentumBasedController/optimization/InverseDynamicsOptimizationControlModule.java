@@ -181,6 +181,7 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.reset();
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
+      inactiveJointIndices.clear();
    }
 
    public void resetCustomBounds()
