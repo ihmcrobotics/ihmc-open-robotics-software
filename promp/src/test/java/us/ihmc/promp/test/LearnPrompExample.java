@@ -57,8 +57,8 @@ public class LearnPrompExample
       ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/stdDeviation.csv");
       ProMPUtil.saveAsCSV(covarianceTrajectory, "/covariance.csv");
 
-      meanTrajectory.debugPrint("meanTrajectory");
-      stdDeviationTrajectory.debugPrint("stdDeviationTrajectory");
-      covarianceTrajectory.debugPrint("covarianceTrajectory");
+      meanTrajectory.debugPrintMatrix("meanTrajectory");
+      stdDeviationTrajectory.debugPrintMatrix("stdDeviationTrajectory");
+      covarianceTrajectory.debugPrintMatrix("covarianceTrajectory");
    }
 }

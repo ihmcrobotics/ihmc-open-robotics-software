@@ -111,6 +111,7 @@ void ProMP::init(const std::vector<Trajectory>& data, double std_bf)
 	_phase = compute_phase();
 	_phi = generate_basis_function(_phase);
 	train(data);
+	_default_std_via_point = 1e-5 * Eigen::MatrixXd::Identity(_dims, _dims);
 } 
 
 ProMP::ProMP(const Eigen::VectorXd& w, const Eigen::MatrixXd& cov_w, double std_bf, int n_sample, size_t dims, double time_mod) :
@@ -128,6 +129,7 @@ ProMP::ProMP(const Eigen::VectorXd& w, const Eigen::MatrixXd& cov_w, double std_
 
 	_phase = compute_phase();
 	_phi = generate_basis_function(_phase);
+	_default_std_via_point = 1e-5 * Eigen::MatrixXd::Identity(_dims, _dims);
 }
 
 Eigen::VectorXd ProMP::compute_phase(size_t timesteps) const
@@ -430,7 +432,7 @@ void ProMP::condition_via_points(const std::vector<std::tuple<int, Eigen::Vector
 		// equivalent to
 		// auto phi_obs = repeat_block_diagonal(generate_basis_function(phase_obs), _dims);  // TODO optimize (this matrix grow a lot)
 
-		RepeatBlockDiagonalMatrix phi_obs(generate_basis_function(phase_obs), _dims);
+                                                                                                                                                                                                                                                RepeatBlockDiagonalMatrix phi_obs(generate_basis_function(phase_obs), _dims);
 		Eigen::MatrixXd ridge = _conditioning_ridge_factor * Eigen::MatrixXd::Identity(_dims, _dims);
 		Eigen::MatrixXd L = _cov_w * phi_obs * (sig_obs + phi_obs.transpose() * _cov_w * phi_obs +ridge).inverse(); // NOT use auto, broken with RepeatBlockDiagonalMatrix
 

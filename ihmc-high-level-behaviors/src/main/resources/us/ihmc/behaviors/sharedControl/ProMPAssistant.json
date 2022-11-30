@@ -1,5 +1,5 @@
 {
-  "testNumberUseOnlyForTesting": 3,
+  "testNumberUseOnlyForTesting": 2,
   "logging" : true,
   "numberObservations": 50,
   "tasks":[

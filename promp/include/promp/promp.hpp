@@ -199,14 +199,14 @@ namespace promp {
          *	\param	std 	desired standard deviation. <b> typically around \f$ 10^{-6}\f$ for accuracy </b>
          *	\return
          */
-        void condition_goal(const Eigen::VectorXd& goal, const Eigen::MatrixXd& std);
+        void condition_goal(const Eigen::VectorXd& goal, const Eigen::MatrixXd& std = _default_std_via_point);
 
         /** \brief	set desired start/initial point for trajectory
          *	\param 	start 	desired value at start
          *	\param	std   	desired standard deviation.<b> typically around \f$ 10^{-6}\f$ for accuracy </b>
          *	\return
          */
-        void condition_start(const Eigen::VectorXd& start, const Eigen::MatrixXd& std);
+        void condition_start(const Eigen::VectorXd& start, const Eigen::MatrixXd& std = _default_std_via_point);
 
         /**
          * @brief      Generates standard deviation vector with the standard deviation for every time step, with a certain number of time steps
@@ -243,7 +243,7 @@ namespace promp {
          *	\return
          *	\todo Use phase \f$ z_t\f$ instead of time step t.
          */
-        void condition_via_point(int t, const Eigen::VectorXd& via_point, const Eigen::MatrixXd& std);
+        void condition_via_point(int t, const Eigen::VectorXd& via_point, const Eigen::MatrixXd& std = _default_std_via_point);
 
         Eigen::VectorXd get_upper_weights(double K);
 
@@ -354,7 +354,9 @@ namespace promp {
         //! ridge factor
         double _ridge_factor = 0.00000001;
         //!conditioning ridge factor
-        double _conditioning_ridge_factor = 0.01;
+        double _conditioning_ridge_factor = 0.0001;
+        //!default std deviation of observed via points, no noise assumption
+        Eigen::MatrixXd _default_std_via_point;
         //! number of samples used to rescale all the trajectories to same duration
         int _s;
         //! Mean of weights' distribution
