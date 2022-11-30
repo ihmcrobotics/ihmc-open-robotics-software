@@ -42,7 +42,7 @@ public class ProMPAssistantTest
       bodyParts.add("rightHand");
       TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, directoryAbsolutePath, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
-      LogTools.info("Processing trajectory and producing prediction ...");
+      LogTools.info("Processing trajectory ...");
       while (!trajectoryPlayer.hasDoneReplay())
       {
          for (String bodyPart : bodyParts){
@@ -56,8 +56,8 @@ public class ProMPAssistantTest
 
             if (proMPAssistant.readyToPack())
             {
-               //change frame according to generated ProMP
-               proMPAssistant.framePoseToPack(framePose, bodyPart);
+               if (!proMPAssistant.isCurrentTaskDone())
+                  proMPAssistant.framePoseToPack(framePose, bodyPart);  //change frame according to generated ProMP
             }
             else
             {

@@ -35,7 +35,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    private String currentTask = ""; //detected task
    private int numberObservations = 0; //number of observations used to update the prediction
    private String relevantBodyPart = ""; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
-   private HashMap<String, String> taskRelevantBodyPart = new HashMap<>();
+   private final HashMap<String, String> taskRelevantBodyPartMap = new HashMap<>();
    private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
    private final FramePose3D noPose = new FramePose3D();
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedTrajectoryMap = new HashMap<>();
@@ -113,6 +113,9 @@ public class ProMPAssistant implements TeleoperationAssistant
                }
             }
          }
+         int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
+         long speedFactor = ((long) jsonObject.get("allowedIncreaseDecreaseSpeedFactor"));
+         int numberOfInferredSpeeds = (int) ((long) jsonObject.get("numberOfInferredSpeeds"));
          for (int i = 0; i < taskNames.size(); i++)
          {
             LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
@@ -123,8 +126,15 @@ public class ProMPAssistant implements TeleoperationAssistant
                   LogTools.info("     {} {}", key, bodyPartsGeometries.get(j).get(key));
                }
             }
-            proMPManagers.put(taskNames.get(i), new ProMPManager(taskNames.get(i), bodyPartsGeometries.get(i), logEnabled, isLastViaPoint));
-            taskRelevantBodyPart.put(taskNames.get(i), relevantBodyParts.get(i));
+            proMPManagers.put(taskNames.get(i),
+                              new ProMPManager(taskNames.get(i),
+                                               bodyPartsGeometries.get(i),
+                                               logEnabled,
+                                               isLastViaPoint,
+                                               numberBasisFunctions,
+                                               speedFactor,
+                                               numberOfInferredSpeeds));
+            taskRelevantBodyPartMap.put(taskNames.get(i), relevantBodyParts.get(i));
          }
          for (ProMPManager proMPManager : proMPManagers.values())
             proMPManager.learnTaskFromDemos();
@@ -188,6 +198,7 @@ public class ProMPAssistant implements TeleoperationAssistant
                updateTask();
                generateTaskTrajectories();
                doneInitialProcessingTask = true;
+               LogTools.info("Generating prediction ...");
             }
          }
       }
@@ -198,8 +209,9 @@ public class ProMPAssistant implements TeleoperationAssistant
       if (currentTask.isEmpty())
       {
          //TODO A.1. recognize task with object detection algorithm (or Aruco Markers to begin with)
+         //TODO A.2. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
          currentTask = "PushDoor";
-         relevantBodyPart = taskRelevantBodyPart.get(currentTask);
+         relevantBodyPart = taskRelevantBodyPartMap.get(currentTask);
          //initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
          for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
             bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
@@ -250,15 +262,15 @@ public class ProMPAssistant implements TeleoperationAssistant
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
       {
          List<Pose3DReadOnly> observedTrajectory = bodyPartObservedTrajectoryMap.get(robotPart);
-//         if (observedTrajectory.size() > 0)
-//         {
-//            isLastViaPoint.set(true);
-//            proMPManagers.get(currentTask)
-//                         .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
-//         }
+         //         if (observedTrajectory.size() > 0)
+         //         {
+         //            isLastViaPoint.set(true);
+         //            proMPManagers.get(currentTask)
+         //                         .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
+         //         }
          for (int i = 0; i < observedTrajectory.size(); i++)
          {
-            if (i==observedTrajectory.size()-1)
+            if (i == observedTrajectory.size() - 1)
                isLastViaPoint.set(true);
             proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
          }
@@ -301,13 +313,26 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
       else
       {
+         //check that inferred timeesteps are not lower than the observed setpoints.
+         if (generatedFramePoseTrajectory.size() < bodyPartTrajectorySampleCounter.get(bodyPart))
+         {
+            // the predicted motion is already over before being available and assistance should be exited
+            String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
+            LogTools.warn(
+                  "The predicted motion results being faster than the time set to observe it. You can either decrease the number of required observations or increase the range of possible inferred speeds in {}",
+                  configurationFile);
+         }
+         else
+         {
+            //take previous sample (frame) to avoid jump when exit assistance mode
+            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart) - 1);
+            FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
+            FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
+            framePose.getPosition().set(generatedFramePosition);
+            framePose.getOrientation().set(generatedFrameOrientation);
+         }
+         //exit assistance mode
          doneCurrentTask = true;
-         //take previous sample (frame) to avoid jump when exit assistance mode
-         FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart) - 1);
-         FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
-         FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
-         framePose.getPosition().set(generatedFramePosition);
-         framePose.getOrientation().set(generatedFrameOrientation);
       }
    }
 
