@@ -38,7 +38,7 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterface
 {
-   private static final boolean EXPORT_TORQUE_SPEED_DATA = true;
+   private static final boolean EXPORT_TORQUE_SPEED_DATA = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private SCS2AvatarTestingSimulation simulationTestHelper;
@@ -120,7 +120,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
 
       if (disableToeOff)
       {
-         simulationTestHelper.findVariable("ToeOffManager", "doToeOffIfPossibleInDoubleSupport").setValueFromDouble(0);
+         simulationTestHelper.findVariable("GeometricToeOffManager", "doToeOffIfPossibleInDoubleSupport").setValueFromDouble(0);
          simulationTestHelper.findVariable("LegJointLimitsInspector", "doToeOffWhenHittingAnkleLimit").setValueFromDouble(0);
       }
 
