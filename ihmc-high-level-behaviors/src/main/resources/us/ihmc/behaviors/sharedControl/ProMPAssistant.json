@@ -1,7 +1,10 @@
 {
-  "testNumberUseOnlyForTesting": 2,
+  "testNumberUseOnlyForTesting": 3,
   "logging" : true,
-  "numberObservations": 150,
+  "numberBasisFunctions": 20,
+  "numberObservations": 50,
+  "allowedIncreaseDecreaseSpeedFactor": 2,
+  "numberOfInferredSpeeds": 30,
   "tasks":[
     {
       "name":"PushDoor",

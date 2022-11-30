@@ -36,17 +36,30 @@ public class ProMPManager
    private final ProMPLogger logger = new ProMPLogger();
    private boolean logEnabled = false;
    private final AtomicBoolean isLastViaPoint;
+   private final int numberBasisFunctions;
+   private final long speedFactor;
+   private final int numberOfInferredSpeeds;
 
    /* Class constructor
     * @param taskName: name of the task
     * @param bodyPartsGeometry: body part of the robot and geometry (e.g. position, orientation, pose) for which you want to learn the ProMPs
     */
-   public ProMPManager(String taskName, HashMap<String, String> bodyPartsGeometry, boolean logEnabled, AtomicBoolean isLastViaPoint)
+   public ProMPManager(String taskName,
+                       HashMap<String, String> bodyPartsGeometry,
+                       boolean logEnabled,
+                       AtomicBoolean isLastViaPoint,
+                       int numberBasisFunctions,
+                       long speedFactor,
+                       int numberOfInferredSpeeds)
    {
       this.taskName = taskName;
       this.bodyPartsGeometry = bodyPartsGeometry;
       this.logEnabled = logEnabled;
       this.isLastViaPoint = isLastViaPoint;
+      this.numberBasisFunctions = numberBasisFunctions; // 20 rbf functions seems to generalize well
+      this.speedFactor = speedFactor;
+      this.numberOfInferredSpeeds = numberOfInferredSpeeds;
+
       ProMPNativeLibrary.load();
    }
 
@@ -109,7 +122,7 @@ public class ProMPManager
          // make all training trajectories have the same length (= mean length)
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
          trainingTrajectories.put(bodyPart, trainingTrajectory);
-         learnedProMPs.put(bodyPart, new ProMP(trainingTrajectory, 20)); // default 20 rbf functions seems to generalize well
+         learnedProMPs.put(bodyPart, new ProMP(trainingTrajectory, numberBasisFunctions));
 
          if (logEnabled)
          {
@@ -121,7 +134,7 @@ public class ProMPManager
    public void resetTask()
    {
       for (String bodyPart : bodyPartsGeometry.keySet())
-         learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), 20));
+         learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), numberBasisFunctions));
    }
 
    /* update the speed of the ProMPs of the task based on observation of a body part trajectory (e.g., RightHand or LeftHand) */
@@ -132,9 +145,11 @@ public class ProMPManager
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
-      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.5, 2.0, 30);
+      double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 1.0/speedFactor, speedFactor, numberOfInferredSpeeds);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
+      if (logEnabled)
+         LogTools.info("Inferred Timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
@@ -164,7 +179,6 @@ public class ProMPManager
       }
       //concatenate demo trajectories of bodyParts in a single Trajectory Vector object
       TrajectoryVector demoTrajectory = concatenateTrajectoryVector(demoTrajectories.get(0), demoTrajectories.get(1));
-      ;
       for (int i = 2; i < demoTrajectories.size(); i++)
       {
          demoTrajectory = concatenateTrajectoryVector(demoTrajectory, demoTrajectories.get(i));
@@ -175,6 +189,8 @@ public class ProMPManager
       double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectory.get(demo).timesteps() / inferredSpeed);
+      if (logEnabled)
+         LogTools.info("Inferred Timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
@@ -182,7 +198,7 @@ public class ProMPManager
 
          if (logEnabled)
          {
-            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart),"Modulated");
+            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart), "Modulated");
          }
       }
    }
@@ -193,7 +209,7 @@ public class ProMPManager
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
       // create a copy of proMP for current task
       // NOTE. we do not want to condition a proMP that will be modulated afterwards, this will likely corrupt the model
-      ProMP copyProMPCurrentTask = new ProMP(trainingTrajectories.get(bodyPart), 20);
+      ProMP copyProMPCurrentTask = new ProMP(trainingTrajectories.get(bodyPart), numberBasisFunctions);
       // condition proMP to reach observed goal
       updateTrajectoryGoal(copyProMPCurrentTask, bodyPart, observedGoal);
       Trajectory meanTrajectoryProMPCurrentTask = new Trajectory(copyProMPCurrentTask.generate_trajectory(), 1.0);
@@ -201,13 +217,15 @@ public class ProMPManager
       double inferredSpeed = meanTrajectoryProMPCurrentTask.infer_speed(observedTrajectory, 0.25, 4.0, 30);
       // find equivalent timesteps
       int inferredTimesteps = (int) (meanTrajectoryProMPCurrentTask.timesteps() / inferredSpeed);
+      if (logEnabled)
+         LogTools.info("Inferred Timesteps: {}", inferredTimesteps);
       // update the time modulation of the learned ProMPs with estimated value
       for (String keyBodyPart : learnedProMPs.keySet())
       {
          (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
          if (logEnabled)
          {
-            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart),"Modulated");
+            logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart), "Modulated");
          }
       }
    }
@@ -277,8 +295,9 @@ public class ProMPManager
       myProMP.condition_via_point(conditioningTimestep, viaPoint);
       if (logEnabled)
       {
-         logger.addViaPoint(bodyPart,viaPoint);
-         if(isLastViaPoint.get()){
+         logger.addViaPoint(bodyPart, viaPoint);
+         if (isLastViaPoint.get())
+         {
             logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
             logger.saveViaPoints(bodyPart);
             isLastViaPoint.set(false);
