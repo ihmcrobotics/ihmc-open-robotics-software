@@ -297,9 +297,19 @@ void ProMP::condition_start(const Eigen::VectorXd& start, const Eigen::MatrixXd&
 	condition_via_point(0.0, start, std);
 }
 
+void ProMP::condition_start(const Eigen::VectorXd& start)
+{
+	condition_via_point(0.0, start);
+}
+
 void ProMP::condition_goal(const Eigen::VectorXd& goal ,const Eigen::MatrixXd& std)
 {
 	condition_via_point(this->get_traj_length()-1, goal, std);
+}
+
+void ProMP::condition_goal(const Eigen::VectorXd& goal)
+{
+	condition_via_point(this->get_traj_length()-1, goal);
 }
 
 Eigen::MatrixXd ProMP::generate_trajectory(size_t req_num_steps) const
@@ -415,6 +425,11 @@ std::vector<Eigen::MatrixXd> ProMP::generate_trajectory_covariance(size_t req_nu
 void ProMP::condition_via_point(int time, const Eigen::VectorXd& via_point, const Eigen::MatrixXd& std)
 {
 	condition_via_points({std::make_tuple<>(time, via_point, std)});
+}
+
+void ProMP::condition_via_point(int time, const Eigen::VectorXd& via_point)
+{
+	condition_via_points({std::make_tuple<>(time, via_point, _default_std_via_point)});
 }
 
 void ProMP::condition_via_points(const std::vector<std::tuple<int, Eigen::VectorXd, Eigen::MatrixXd>>& via_points)
