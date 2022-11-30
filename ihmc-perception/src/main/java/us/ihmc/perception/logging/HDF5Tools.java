@@ -25,18 +25,18 @@ public class HDF5Tools
     * Extracts the shape of a dataset and outputs the length along the requested dimension/axis (dim)
     *
     * @param dataSet The HDF5 dataset of which the shape is requested
-    * @param dim     The dimension or axis along which the length is requested
+    * @param dimension     The dimension or axis along which the length is requested
     * @return The length of the dataset along the requested dimension or axis
     */
-   private static int extractShape(DataSet dataSet, int dim)
+   private static int extractShape(DataSet dataSet, int dimension)
    {
       DataSpace dataSpace = dataSet.getSpace();
       int dimensions = dataSpace.getSimpleExtentNdims();
       long[] shape = new long[dimensions];
       dataSpace.getSimpleExtentDims(shape);
-      if (dim < dimensions)
+      if (dimension < dimensions)
       {
-         return (int) shape[dim];
+         return (int) shape[dimension];
       }
       else
          return 0;
@@ -103,9 +103,9 @@ public class HDF5Tools
       int size = extractShape(dataset, 0);
       int[] intArray = new int[size];
 
-      IntPointer p = new IntPointer(intArray);
-      dataset.read(p, new DataType(PredType.NATIVE_INT()));
-      p.get(intArray, 0, intArray.length);
+      IntPointer intPointer = new IntPointer(intArray);
+      dataset.read(intPointer, new DataType(PredType.NATIVE_INT()));
+      intPointer.get(intArray, 0, intArray.length);
 
       dataset.close();
 
@@ -143,9 +143,9 @@ public class HDF5Tools
    public static void storeIntArray(Group group, long index, int[] data, long size)
    {
       LogTools.info("Store Int Array: Index: {} Size: {}", index, size);
-      long[] dims = {size};
+      long[] dimensions = {size};
 
-      DataSpace dataSpace = new DataSpace(1, dims);
+      DataSpace dataSpace = new DataSpace(1, dimensions);
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_INT()), dataSpace);
 
       dataset.write(new IntPointer(data), new DataType(PredType.NATIVE_INT()));
@@ -163,17 +163,17 @@ public class HDF5Tools
     */
    public static void storePointCloud(Group group, long index, ArrayList<Point3D> pointListToPack)
    {
-      long[] dims = {pointListToPack.size(), NUMBER_OF_FIELDS_PER_POINT};
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
-      float[] buf = new float[pointListToPack.size() * NUMBER_OF_FIELDS_PER_POINT];
+      long[] dimensions = {pointListToPack.size(), NUMBER_OF_FIELDS_PER_POINT};
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
+      float[] buffer = new float[pointListToPack.size() * NUMBER_OF_FIELDS_PER_POINT];
       for (int i = 0; i < pointListToPack.size(); i++)
       {
-         buf[i * NUMBER_OF_FIELDS_PER_POINT] = pointListToPack.get(i).getX32();
-         buf[i * NUMBER_OF_FIELDS_PER_POINT + 1] = pointListToPack.get(i).getY32();
-         buf[i * NUMBER_OF_FIELDS_PER_POINT + 2] = pointListToPack.get(i).getZ32();
+         buffer[i * NUMBER_OF_FIELDS_PER_POINT] = pointListToPack.get(i).getX32();
+         buffer[i * NUMBER_OF_FIELDS_PER_POINT + 1] = pointListToPack.get(i).getY32();
+         buffer[i * NUMBER_OF_FIELDS_PER_POINT + 2] = pointListToPack.get(i).getZ32();
       }
 
-      dataset.write(new FloatPointer(buf), new DataType(PredType.NATIVE_FLOAT()));
+      dataset.write(new FloatPointer(buffer), new DataType(PredType.NATIVE_FLOAT()));
    }
 
    /**
@@ -187,9 +187,9 @@ public class HDF5Tools
     */
    public static void storeFloatArray2D(Group group, long index, TFloatArrayList data, int rows, int cols)
    {
-      long[] dims = {rows, cols};
+      long[] dimensions = {rows, cols};
 
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dims));
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
       float[] dataObject = data.toArray();
       dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
       dataset.close();
@@ -207,9 +207,9 @@ public class HDF5Tools
 
       for (int i = 0; i < file.getNumObjs(); i++)
       {
-         String obj = file.getObjnameByIdx(i).getString();
-         Group group = file.openGroup(obj);
-         recursivelyExploreHDF5File(group, names, obj);
+         String objectName = file.getObjnameByIdx(i).getString();
+         Group group = file.openGroup(objectName);
+         recursivelyExploreHDF5File(group, names, objectName);
       }
 
       return names;
@@ -251,7 +251,7 @@ public class HDF5Tools
    // TODO: Complete the method to store a double matrix
    public static void storeMatrix(Group group, double[] data)
    {
-      long[] dims = {5, 5};
+      long[] dimensions = {5, 5};
       if (group.nameExists(String.valueOf(0)))
       {
          DataSet dataset = group.openDataSet(String.valueOf(0));
@@ -260,7 +260,7 @@ public class HDF5Tools
       }
       else
       {
-         DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dims));
+         DataSet dataset = group.createDataSet(String.valueOf(0), new DataType(PredType.NATIVE_DOUBLE()), new DataSpace(2, dimensions));
          dataset.close();
       }
    }
@@ -269,10 +269,10 @@ public class HDF5Tools
    public static void storeRawByteArray(Group group, long index, byte[] data, long size)
    {
       LogTools.info("Store Byte Array: {} {}", index, size);
-      long[] dims = {size};
+      long[] dimensions = {size};
       LogTools.info("Creating Dataset: {} {}", group.toString(), String.valueOf(index));
 
-      DataSpace dataSpace = new DataSpace(1, dims);
+      DataSpace dataSpace = new DataSpace(1, dimensions);
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), dataSpace);
 
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
@@ -291,9 +291,9 @@ public class HDF5Tools
 
       byte[] byteArray = new byte[size];
 
-      BytePointer p = new BytePointer(byteArray);
-      dataset.read(p, new DataType(PredType.NATIVE_UCHAR()));
-      p.get(byteArray, 0, byteArray.length);
+      BytePointer bytePointer = new BytePointer(byteArray);
+      dataset.read(bytePointer, new DataType(PredType.NATIVE_UCHAR()));
+      bytePointer.get(byteArray, 0, byteArray.length);
 
       return byteArray;
    }
