@@ -1,0 +1,42 @@
+UI side
+
+- check mission_control.ui is setup properly
+- 
+
+Deploy/test
+
+- deploy normally
+- stop vanguard
+- run docker
+- in docker, do script to setup runtime yaml
+- start vanguard
+
+-- ON LINK --
+sudo systemctl stop val-vanguard
+cd ~/impedanceDocker/link
+./run_docker.sh
+cd runtimeConfigs
+./setup_impedance_config.sh
+./launch_vanguard.sh
+
+(setup jvm)
+sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/zulu-17-amd64/bin/java 1
+sudo update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/zulu-17-amd64/bin/javac 1
+sudo update-alternatives --install /usr/bin/jar jar /usr/lib/jvm/zulu-17-amd64/bin/jar 1
+sudo update-alternatives --config java
+
+(rebuild ihmc_ws)
+cd ~/ihmc_ws
+catkin clean -y
+catkin build
+
+(set JVM)
+export LD_LIBRARY_PATH=/usr/lib/jvm/zulu-17-amd64/lib/server:$LD_LIBRARY_PATH
+
+(optionally, run val core)
+roslaunch val_deploy val_comm_control.launch model_file:=/home/val/val_ws/install/share/val_description/model/urdf/valkyrie_B.urdf io_file:=/home/val/val_ws/src/val_config_files/robonet_io_config/full_main.io
+
+
+
+-- ON CONSOLE --
+
