@@ -391,9 +391,9 @@ public class SCS2AvatarSimulationFactory
       HumanoidSteppingPluginFactory steppingFactory;
       HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
       boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
-      HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParameters.hasValue()
-            ? headingAndVelocityEvaluationScriptParameters.get()
-            : null;
+      HeadingAndVelocityEvaluationScriptParameters parameters = null;
+      if (headingAndVelocityEvaluationScriptParameters.hasValue())
+         parameters = headingAndVelocityEvaluationScriptParameters.get();
       if (useHeadingAndVelocityScript || parameters != null)
       {
          ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
