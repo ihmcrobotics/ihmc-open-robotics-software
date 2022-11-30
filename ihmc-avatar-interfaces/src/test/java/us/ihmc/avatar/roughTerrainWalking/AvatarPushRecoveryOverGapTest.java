@@ -117,7 +117,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       footsteps.getDefaultStepConstraints().set(constraintsListMessage);
       simulationTestHelper.publishToController(footsteps);
 
-      simulationTestHelper.simulateNow(1.0);
    }
 
    @Test
@@ -138,7 +137,9 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    public void testForwardPush()
    {
       setupTest();
+      simulationTestHelper.setKeepSCSUp(true);
 
+      simulationTestHelper.simulateNow(1.0);
       double totalMass = getRobotModel().createFullRobotModel().getTotalMass();
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.LEFT);
       double delay = 0.5 * swingTime;
@@ -152,7 +153,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       simulationTestHelper.simulateNow(simulationTime);
 
       Point3D center = new Point3D(1.05, 0.0, 1.0893768421917251);
-      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      Vector3D plusMinusVector = new Vector3D(0.4, 0.2, 0.5);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
