@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.esotericsoftware.kryo.util.IntMap;
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -13,6 +15,7 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
@@ -26,10 +29,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAMTools
@@ -215,20 +216,21 @@ public class PlanarRegionSLAMTools
       return returnString;
    }
 
-   public static HashMap<Integer, Integer> findPlanarRegionMatches(PlanarRegionsList map,
-                                                                   PlanarRegionsList newData,
-                                                                   float normalThreshold,
-                                                                   float normalDistanceThreshold,
-                                                                   float distanceThreshold)
+   public static IntMap<TIntArrayList> findPlanarRegionMatches(PlanarRegionsList map,
+                                                               PlanarRegionsList newData,
+                                                               float normalThreshold,
+                                                               float normalDistanceThreshold,
+                                                               float distanceThreshold)
    {
-      HashMap<Integer, Integer> matches = new HashMap<>();
+      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
+      IntMap<TIntArrayList> matches = new IntMap<>();
 
       List<PlanarRegion> newRegions = newData.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
-      for (int i = 0; i < mapRegions.size(); i++)
+      for (int mapRegionIndex = 0; mapRegionIndex < mapRegions.size(); mapRegionIndex++)
       {
-         PlanarRegion mapRegion = mapRegions.get(i);
+         PlanarRegion mapRegion = mapRegions.get(mapRegionIndex);
          for (int j = 0; j < newRegions.size(); j++)
          {
             PlanarRegion newRegion = newRegions.get(j);
@@ -246,11 +248,19 @@ public class PlanarRegionSLAMTools
 
                double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
                double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
+
+
                double originDistance = originVec.norm();
 
-               boolean wasMatched = normalSimilarity > normalThreshold && normalDistance < normalDistanceThreshold && originDistance < distanceThreshold;
+               // check to make sure the angles are similar enough
+               boolean wasMatched = normalSimilarity > normalThreshold;
+               // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+               wasMatched &= normalDistance < normalDistanceThreshold;
+               // check that the regions aren't too far from one another
+               if (wasMatched)
+                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) < distanceThreshold;
 
-               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)", i,
+               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)", mapRegionIndex,
                                            mapRegion.getRegionId(), newRegion.getRegionId(),
                                            normalSimilarity, normalThreshold,
                                            normalDistance, normalDistanceThreshold,
@@ -258,7 +268,13 @@ public class PlanarRegionSLAMTools
 
                if (wasMatched)
                {
-                  matches.put(i, j);
+                  TIntArrayList matchList = matches.get(mapRegionIndex);
+                  if (matchList == null)
+                  {
+                     matchList = new TIntArrayList();
+                     matches.put(mapRegionIndex, matchList);
+                  }
+                  matchList.add(j);
                }
             }
          }
