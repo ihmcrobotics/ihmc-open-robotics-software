@@ -90,19 +90,19 @@ public class ProMPAssistant implements TeleoperationAssistant
                         List<String> name = new ArrayList<>();
                         List<String> geometry = new ArrayList<>();
                         jsonBodyPartObject.keySet().forEach(bodyPartProperty ->
-                                                            {
-                                                               switch (bodyPartProperty.toString())
-                                                               {
-                                                                  case "name":
-                                                                     name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
-                                                                     break;
-                                                                  case "geometry":
-                                                                     geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
-                                                                     break;
-                                                                  default:
-                                                                     break;
-                                                               }
-                                                            });
+                        {
+                           switch (bodyPartProperty.toString())
+                           {
+                              case "name":
+                                 name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
+                                 break;
+                              case "geometry":
+                                 geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
+                                 break;
+                              default:
+                                 break;
+                           }
+                        });
                         for (int i = 0; i < name.size(); i++)
                            bodyPartsGeometry.put(name.get(i), geometry.get(i));
                      }
@@ -250,20 +250,18 @@ public class ProMPAssistant implements TeleoperationAssistant
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
       {
          List<Pose3DReadOnly> observedTrajectory = bodyPartObservedTrajectoryMap.get(robotPart);
-         if (observedTrajectory.size() > 0)
-         {
-            isLastViaPoint.set(true);
-            proMPManagers.get(currentTask)
-                         .updateTaskTrajectory(robotPart,
-                                               observedTrajectory.get(observedTrajectory.size() - 1),
-                                               observedTrajectory.size() - 1);
-         }
-//         for (int i = 0; i < observedTrajectory.size(); i++)
+//         if (observedTrajectory.size() > 0)
 //         {
-//            if (i==observedTrajectory.size()-1)
-//               isLastViaPoint.set(true);
-//            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
+//            isLastViaPoint.set(true);
+//            proMPManagers.get(currentTask)
+//                         .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
 //         }
+         for (int i = 0; i < observedTrajectory.size(); i++)
+         {
+            if (i==observedTrajectory.size()-1)
+               isLastViaPoint.set(true);
+            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
+         }
       }
    }
 
@@ -305,7 +303,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       {
          doneCurrentTask = true;
          //take previous sample (frame) to avoid jump when exit assistance mode
-         FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart)-1);
+         FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart) - 1);
          FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
          FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
          framePose.getPosition().set(generatedFramePosition);

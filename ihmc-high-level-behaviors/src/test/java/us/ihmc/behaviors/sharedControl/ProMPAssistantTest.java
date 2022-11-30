@@ -42,6 +42,7 @@ public class ProMPAssistantTest
       bodyParts.add("rightHand");
       TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, directoryAbsolutePath, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
+      LogTools.info("Processing trajectory and producing prediction ...");
       while (!trajectoryPlayer.hasDoneReplay())
       {
          for (String bodyPart : bodyParts){

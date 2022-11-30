@@ -113,7 +113,6 @@ public class ProMPManager
 
          if (logEnabled)
          {
-            LogTools.info("Logging ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
             logger.saveDemosAndLearnedTrajectories(bodyPart, learnedProMPs.get(bodyPart), trainingTrajectory);
          }
       }
@@ -142,7 +141,6 @@ public class ProMPManager
          (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
          if (logEnabled)
          {
-            LogTools.info("Logging modulated ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, keyBodyPart);
             logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart), "Modulated");
          }
       }
@@ -207,7 +205,6 @@ public class ProMPManager
       for (String keyBodyPart : learnedProMPs.keySet())
       {
          (learnedProMPs.get(keyBodyPart)).update_time_modulation((double) (learnedProMPs.get(keyBodyPart)).get_traj_length() / inferredTimesteps);
-
          if (logEnabled)
          {
             logger.saveUpdatedTrajectories(keyBodyPart, learnedProMPs.get(keyBodyPart),"Modulated");
@@ -275,28 +272,13 @@ public class ProMPManager
 
    private void updateTrajectory(ProMP myProMP, String bodyPart, Pose3DReadOnly observedPose, int conditioningTimestep)
    {
-      myProMP.set_conditioning_ridge_factor(0.0001);
-      int proMPDimensions = (int) myProMP.get_dims();
-      EigenVectorXd viaPoint = new EigenVectorXd(proMPDimensions);
-      //build std deviation matrix
-      EigenMatrixXd viaPointStdDeviation = new EigenMatrixXd(proMPDimensions, proMPDimensions);
-      for (int i = 0; i < viaPointStdDeviation.rows(); i++)
-      {
-         for (int j = 0; j < viaPointStdDeviation.cols(); j++)
-         {
-            if (i == j)
-               viaPointStdDeviation.apply(i, j).put(0.00001); // generally keep std deviation this low, unless you have high observation uncertainty
-            else
-               viaPointStdDeviation.apply(i, j).put(0);
-         }
-      }
+      EigenVectorXd viaPoint = new EigenVectorXd((int) myProMP.get_dims());
       setViaPoint(viaPoint, bodyPart, observedPose);
-      myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
+      myProMP.condition_via_point(conditioningTimestep, viaPoint);
       if (logEnabled)
       {
          logger.addViaPoint(bodyPart,viaPoint);
          if(isLastViaPoint.get()){
-            LogTools.info("Logging conditioned ProMPs for task {} {}, in .../ihmc-open-robotics-software/promp/etc/", taskName, bodyPart);
             logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
             logger.saveViaPoints(bodyPart);
             isLastViaPoint.set(false);
@@ -323,24 +305,9 @@ public class ProMPManager
    private void updateTrajectoryGoal(ProMP myProMP, String bodyPart, Pose3DReadOnly observedPose)
    {
       // condition ProMP to reach end point
-      myProMP.set_conditioning_ridge_factor(0.0001);
-      int proMPDimensions = (int) myProMP.get_dims();
-      EigenVectorXd viaPoint = new EigenVectorXd(proMPDimensions);
-      //build std deviation matrix
-      EigenMatrixXd viaPointStdDeviation = new EigenMatrixXd(proMPDimensions, proMPDimensions);
-      for (int i = 0; i < viaPointStdDeviation.rows(); i++)
-      {
-         for (int j = 0; j < viaPointStdDeviation.cols(); j++)
-         {
-            if (i == j)
-               viaPointStdDeviation.apply(i, j).put(0.00001); // generally keep std deviation this low, unless you have high observation uncertainty
-            else
-               viaPointStdDeviation.apply(i, j).put(0);
-         }
-      }
+      EigenVectorXd viaPoint = new EigenVectorXd((int) myProMP.get_dims());
       setViaPoint(viaPoint, bodyPart, observedPose);
-      myProMP.condition_goal(viaPoint, viaPointStdDeviation);
-
+      myProMP.condition_goal(viaPoint);
       if (logEnabled)
       {
          logger.saveUpdatedTrajectories(bodyPart, myProMP, "ConditionedGoal");
