@@ -313,8 +313,8 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
       else
       {
-         //check that inferred timeesteps are not lower than the observed setpoints.
-         if (generatedFramePoseTrajectory.size() < bodyPartTrajectorySampleCounter.get(bodyPart))
+         //check that inferred timesteps are not lower than the observed setpoints.
+         if (generatedFramePoseTrajectory.size() < numberObservations)
          {
             // the predicted motion is already over before being available and assistance should be exited
             String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
@@ -324,7 +324,7 @@ public class ProMPAssistant implements TeleoperationAssistant
          }
          else
          {
-            //take previous sample (frame) to avoid jump when exit assistance mode
+            //take previous sample (frame) to avoid jump when exiting assistance mode
             FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart) - 1);
             FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
             FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
