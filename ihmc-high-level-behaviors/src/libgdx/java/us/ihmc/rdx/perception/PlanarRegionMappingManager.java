@@ -24,8 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 public class PlanarRegionMappingManager
 {
-   private final ROS2Node ros2Node;
-   private final ROS2Helper ros2Helper;
+   private static final boolean ROS2_ENABLED = false;
+
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");;
+   private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
    private PlanarRegionsList planarRegions;
    private PlanarRegionFilteredMap filteredMap;
@@ -46,9 +48,11 @@ public class PlanarRegionMappingManager
    {
       //executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, 100, TimeUnit.MILLISECONDS);
 
-      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
-      ros2Helper = new ROS2Helper(ros2Node);
-      ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, this::planarRegionCallback);
+      if(ROS2_ENABLED)
+      {
+         ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, this::planarRegionCallback);
+      }
+
       filteredMap = new PlanarRegionFilteredMap();
 
 
@@ -79,7 +83,6 @@ public class PlanarRegionMappingManager
 
    public void planarRegionCallback(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      LogTools.info("Regions Received.");
       if (enableCapture)
       {
          if (logger == null)
@@ -119,6 +122,14 @@ public class PlanarRegionMappingManager
    public PlanarRegionFilteredMap getFilteredMap()
    {
       return filteredMap;
+   }
+
+   public void submitRegions(PlanarRegionsList regions)
+   {
+      if(enableLiveMode)
+      {
+         filteredMap.submitRegions(regions);
+      }
    }
 
    public boolean isCaptured()

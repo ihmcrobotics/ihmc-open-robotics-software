@@ -7,10 +7,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 
 public class RDXPlanarRegionFilteredMapDemo
 {
-
    private PlanarRegionMappingManager mapHandler;
    private PlanarRegionFilteredMapUI planarRegionFilteredMapUI;
-
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    public RDXPlanarRegionFilteredMapDemo()
