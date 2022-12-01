@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
 import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
@@ -19,7 +20,7 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 public class BytedecoOpenCVTools
 {
    public static final IntPointer compressionParametersPNG = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION);
-   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 50);
+   public static final IntPointer compressionParametersJPG = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
    public static final int FLIP_Y = 0;
    public static final int FLIP_X = 1;
@@ -140,29 +141,26 @@ public class BytedecoOpenCVTools
       return Java2DFrameUtils.toMat(image);
    }
 
-   public static void compressRGBImageJPG(Mat image, BytePointer compressedBytes, IntPointer params)
+   public static void compressRGBImageJPG(Mat image, Mat yuvImageToPack, BytePointer compressedBytes)
    {
-      Mat yuv420Image = new Mat();
-      opencv_imgproc.cvtColor(image, yuv420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
-      opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedBytes, params);
+      opencv_imgproc.cvtColor(image, yuvImageToPack, opencv_imgproc.COLOR_RGB2YUV_I420);
+      opencv_imgcodecs.imencode(".jpg", yuvImageToPack, compressedBytes, compressionParametersJPG);
    }
 
+   /* Not recommended for lossless use cases. */
    public static void compressDepthJPG(Mat image, BytePointer compressedBytes)
    {
       Mat depthRGBAMat = new Mat(image.rows(), image.cols(), CV_8UC4, image.data());
-      //Mat yuv420Image = new Mat();
-      //opencv_imgproc.cvtColor(depthRGBAMat, yuv420Image, opencv_imgproc.COLOR_RGBA2YUV_I420);
       opencv_imgcodecs.imencode(".jpg", depthRGBAMat, compressedBytes, compressionParametersJPG);
    }
 
-   public static void decompressFloatDepthJPG(byte[] data, Mat image)
+   /* Not recommended for lossless use cases. */
+   public static void decompressImageJPG(byte[] data, Mat image)
    {
       BytePointer dataPointer = new BytePointer(data);
       Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
 
       Mat depthRGBA8Mat = new Mat();
-
-      // imdecode takes the longest by far out of all this stuff
       opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, depthRGBA8Mat);
 
       Mat depthImage32FC1 = new Mat(depthRGBA8Mat.rows(), depthRGBA8Mat.cols(), CV_32FC1, depthRGBA8Mat);
@@ -170,6 +168,14 @@ public class BytedecoOpenCVTools
       image.rows(depthRGBA8Mat.rows());
       image.cols(depthRGBA8Mat.cols());
       image.data(depthImage32FC1.data());
+   }
+
+   /* Not recommended for lossless use cases. */
+   public static void decompressJPG(byte[] data, Mat dst)
+   {
+      BytePointer dataPointer = new BytePointer(data);
+      Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, dst);
    }
 
    public static void compressImagePNG(Mat image, BytePointer data)
@@ -278,22 +284,23 @@ public class BytedecoOpenCVTools
 
    public static void printMat(Mat image, String prefix)
    {
-      System.out.println("Mat: [" + prefix + "]");
+      LogTools.info(matToString(image, prefix));
+   }
+
+   public static String matToString(Mat image, String prefix)
+   {
+      StringBuilder matString = new StringBuilder("Mat: [" + prefix + "] \n");
+
       for (int i = 0; i < image.rows(); i++)
       {
          for (int j = 0; j < image.cols(); j++)
          {
-            System.out.print(image.ptr(i, j).getShort() + "\t");
+            matString.append(image.ptr(i, j).getShort()).append("\t");
          }
-         System.out.println();
+         matString.append("\n");
       }
-   }
 
-   public static void decompressDepthJPG(byte[] data, Mat dst)
-   {
-      BytePointer dataPointer = new BytePointer(data);
-      Mat inputJPEGMat = new Mat(1, data.length, CV_8UC1, dataPointer);
-      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, dst);
+      return matString.toString();
    }
 
    public static void displayVideoPacketDepth(VideoPacket videoPacket)
@@ -314,5 +321,29 @@ public class BytedecoOpenCVTools
       {
          System.exit(0);
       }
+   }
+
+   public static void displayVideoPacketColor(VideoPacket videoPacket)
+   {
+      Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
+      byte[] compressedByteArray = videoPacket.getData().toArray();
+      BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
+
+      imshow("Color Image", colorImage);
+      int code = waitKeyEx(1);
+      if (code == 113)
+      {
+         System.exit(0);
+      }
+   }
+
+   public static void fillVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width)
+   {
+      compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
+      packet.getData().resetQuick();
+      packet.getData().add(heapArray);
+      packet.setImageHeight(height);
+      packet.setImageWidth(width);
+      packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
    }
 }

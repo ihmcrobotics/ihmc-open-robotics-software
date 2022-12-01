@@ -116,7 +116,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
 
    private void queueRenderFusedSensorHeadPointCloud(FusedSensorHeadPointCloudMessage message)
    {
-      LogTools.info("PointCloud Received: Segment Index: {}", message.getSegmentIndex());
       frequencyPlot.recordEvent();
       latestFusedSensorHeadPointCloudMessageReference.set(message);
    }

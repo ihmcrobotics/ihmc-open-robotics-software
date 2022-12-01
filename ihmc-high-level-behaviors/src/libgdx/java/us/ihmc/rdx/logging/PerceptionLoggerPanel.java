@@ -44,7 +44,7 @@ public class PerceptionLoggerPanel extends ImGuiPanel
    public PerceptionLoggerPanel(String panelName)
    {
       super(panelName);
-      setRenderMethod(this::renderImguiWidgets);
+      setRenderMethod(this::renderImGuiWidgets);
    }
 
    public void loadLog(String perceptionLogFile)
@@ -65,12 +65,12 @@ public class PerceptionLoggerPanel extends ImGuiPanel
       }
    }
 
-   public void setPointCloudRenderer(RDXPointCloudRenderer pclRenderer)
+   public void setPointCloudRenderer(RDXPointCloudRenderer pointCloudRenderer)
    {
-      this.pointCloudRenderer = pclRenderer;
+      this.pointCloudRenderer = pointCloudRenderer;
    }
 
-   public void renderImguiWidgets()
+   public void renderImGuiWidgets()
    {
       ImGuiTools.inputText(labels.get("Perception Log"), perceptionLogPath);
       if (ImGui.button(labels.get("Load log")))

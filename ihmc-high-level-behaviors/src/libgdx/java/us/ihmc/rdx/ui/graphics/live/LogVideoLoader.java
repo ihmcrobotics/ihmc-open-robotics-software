@@ -23,18 +23,18 @@ public class LogVideoLoader
 
    private String timestampFilename;
    private Mat image;
-   private VideoCapture cap;
+   private VideoCapture capture;
    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
    private long currentlyShowingRobottimestamp = 0;
-   private long upcomingRobottimestamp = 0;
+   private long upcomingRobotTimestamp = 0;
    private int currentlyShowingIndex = 0;
 
    private File videoFile;
 
    private boolean hasTimebase;
-   private long bmdTimeBaseNum;
-   private long bmdTimeBaseDen;
+   private long bmdTimeBaseNumerator;
+   private long bmdTimeBaseDenominator;
    private boolean interlaced;
    private long[] robotTimestamps;
    private long[] videoTimestamps;
@@ -57,7 +57,7 @@ public class LogVideoLoader
 
    public Mat loadNextFrameAsOpenCVMat(long timestamp)
    {
-      if (timestamp >= currentlyShowingRobottimestamp && timestamp < upcomingRobottimestamp)
+      if (timestamp >= currentlyShowingRobottimestamp && timestamp < upcomingRobotTimestamp)
       {
          return null;
       }
@@ -80,11 +80,11 @@ public class LogVideoLoader
 
       if (currentlyShowingIndex + 1 < robotTimestamps.length)
       {
-         upcomingRobottimestamp = robotTimestamps[currentlyShowingIndex + 1];
+         upcomingRobotTimestamp = robotTimestamps[currentlyShowingIndex + 1];
       }
       else
       {
-         upcomingRobottimestamp = currentlyShowingRobottimestamp;
+         upcomingRobotTimestamp = currentlyShowingRobottimestamp;
       }
 
       if (previousTimestamp == videoTimestamp)
@@ -124,7 +124,7 @@ public class LogVideoLoader
          {
             if ((line = reader.readLine()) != null)
             {
-               bmdTimeBaseNum = Long.valueOf(line);
+               bmdTimeBaseNumerator = Long.valueOf(line);
             }
             else
             {
@@ -133,7 +133,7 @@ public class LogVideoLoader
 
             if ((line = reader.readLine()) != null)
             {
-               bmdTimeBaseDen = Long.valueOf(line);
+               bmdTimeBaseDenominator = Long.valueOf(line);
             }
             else
             {
@@ -209,7 +209,7 @@ public class LogVideoLoader
 
       if (hasTimebase)
       {
-         videoTimestamp = (videoTimestamp * bmdTimeBaseNum * demuxer.getTimescale()) / (bmdTimeBaseDen);
+         videoTimestamp = (videoTimestamp * bmdTimeBaseNumerator * demuxer.getTimescale()) / (bmdTimeBaseDenominator);
       }
 
       return videoTimestamp;

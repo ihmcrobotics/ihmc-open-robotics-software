@@ -1,26 +1,36 @@
 package us.ihmc.perception.logging;
 
+import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.H5File;
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Handler for an HDF5 file. Also manages intermediate buffers, index counts, and group handles.
+ *
+ * @author Bhavyansh Mishra
+ */
 public class HDF5Manager
 {
 
    public static int MAX_BUFFER_SIZE = 500;
 
    private HashMap<String, Group> groups;
-   private HashMap<String, ArrayList<Float>> buffers;
+   private HashMap<String, TFloatArrayList> buffers;
    private HashMap<String, Integer> counts;
    private H5File file;
 
+   /**
+    * Constructor for HDF5Manager
+    *
+    * @param filePath Absolute path to the HDF5 file to be managed
+    * @param flag     The read-write flag to select the mode in which the file needs to be managed
+    */
    public HDF5Manager(String filePath, int flag)
    {
       file = new H5File(filePath, flag);
@@ -28,13 +38,22 @@ public class HDF5Manager
       buffers = new HashMap<>();
    }
 
+   /**
+    * Resets buffers for storing intermediate data before logging.
+    *
+    * @param namespace The string namespace or topic name for which the buffer needs to be reset
+    */
    public void resetBuffer(String namespace)
    {
       buffers.get(namespace).clear();
-//      ArrayList<Float> list = new ArrayList<>();
-//      buffers.put(namespace, list);
    }
 
+   /**
+    * Get the current index within the provided namespace. The number of files in the directory decides the current index value
+    *
+    * @param namespace The string namespace or topic name for which the file-count index needs to be returned
+    * @return File count index for the given namespace or topic name
+    */
    public int getBufferIndex(String namespace)
    {
       if (buffers.containsKey(namespace))
@@ -49,7 +68,13 @@ public class HDF5Manager
       }
    }
 
-   public ArrayList<Float> getBuffer(String namespace)
+   /**
+    * Getter for Buffer belonging to the requested namespace
+    *
+    * @param namespace The string namespace or topic name for which the buffer has been requested
+    * @return Intermediate buffer for the requested namespace or topic name
+    */
+   public TFloatArrayList getBuffer(String namespace)
    {
       if (buffers.containsKey(namespace))
       {
@@ -57,12 +82,18 @@ public class HDF5Manager
       }
       else
       {
-         ArrayList<Float> list = new ArrayList<>();
+         TFloatArrayList list = new TFloatArrayList();
          buffers.put(namespace, list);
          return list;
       }
    }
 
+   /**
+    * Getter to request the HDF5 group for the given topic name
+    *
+    * @param namespace The namespace or topic name for which the HDF5 group object has been requested
+    * @return The HDF5 group object associated with the given namespace or topic name.
+    */
    public Group getGroup(String namespace)
    {
       if (groups.containsKey(namespace))
@@ -78,6 +109,12 @@ public class HDF5Manager
       }
    }
 
+   /**
+    * Get file-count for the provided namespace
+    *
+    * @param namespace The namespace or topic name for which the file count has been requested
+    * @return The file count for the namespace or topic name requested
+    */
    public long getCount(String namespace)
    {
       if (groups.containsKey(namespace))
@@ -92,12 +129,24 @@ public class HDF5Manager
          return 0;
    }
 
+   /**
+    * Open a handle for the group requested in the namespace
+    *
+    * @param namespace The namespace for which a group handle has been requested
+    * @return The HDF5 group handle for the requested namespace
+    */
    public Group openGroup(String namespace)
    {
       Group group = file.openGroup(namespace);
       return group;
    }
 
+   /**
+    * Create a new handle for the group requested in the namespace
+    *
+    * @param namespace The namespace for which a group handle has been requested
+    * @return The HDF5 group handle for the requested namespace
+    */
    public Group createGroup(String namespace)
    {
       Path path = Paths.get(namespace);
@@ -108,13 +157,8 @@ public class HDF5Manager
          String name = path.subpath(0, i + 1).toString();
          if (!file.nameExists(name))
          {
-//            LogTools.info("Creating Group: {}", name);
             group = file.createGroup(name);
          }
-//         else
-//         {
-////            LogTools.warn("Not Creating, Exists: /{}", name);
-//         }
       }
 
       if (group == null)
@@ -130,7 +174,7 @@ public class HDF5Manager
       return file;
    }
 
-   public HashMap<String, Group> getGroups()
+   public Map<String, Group> getGroups()
    {
       return groups;
    }

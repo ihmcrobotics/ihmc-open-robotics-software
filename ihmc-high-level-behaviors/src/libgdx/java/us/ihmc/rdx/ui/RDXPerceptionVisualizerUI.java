@@ -5,7 +5,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -19,16 +18,11 @@ import java.net.URISyntaxException;
 
 public class RDXPerceptionVisualizerUI
 {
-   private static final String PERCEPTION_LOG_FILE = "/home/bmishra/Workspace/Data/Sensor_Logs/experimental.hdf5";
-
    private RDXBaseUI baseUI;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
 
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
-
-   private RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-
    private RDXROS2BigVideoVisualizer blackflyRightVisualizer;
    private RDXROS2VideoVisualizer videoVisualizer;
 
@@ -47,14 +41,10 @@ public class RDXPerceptionVisualizerUI
          @Override
          public void create()
          {
-            pointCloudRenderer.create(400000);
-            baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer);
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
 
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("Ouster Depth", ros2Node, ROS2Tools.OUSTER_DEPTH, ROS2VideoFormat.JPEGYUVI420));
-
-//            globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("L515 Depth", ros2Node, ROS2Tools.L515_DEPTH, ROS2VideoFormat.JPEGYUVI420));
 
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Video", ros2Node, ROS2Tools.D435_VIDEO, ROS2VideoFormat.JPEGYUVI420));
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Depth", ros2Node, ROS2Tools.D435_DEPTH, ROS2VideoFormat.JPEGYUVI420));
@@ -106,8 +96,6 @@ public class RDXPerceptionVisualizerUI
             if (nativesLoadedActivator.poll())
             {
                globalVisualizersUI.update();
-
-               //               pointCloudRenderer.updateMeshFastest();
 
                baseUI.renderBeforeOnScreenUI();
                baseUI.renderEnd();

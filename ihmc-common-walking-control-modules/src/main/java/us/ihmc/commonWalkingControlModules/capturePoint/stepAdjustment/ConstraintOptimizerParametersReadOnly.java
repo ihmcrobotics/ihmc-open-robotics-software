@@ -11,4 +11,6 @@ public interface ConstraintOptimizerParametersReadOnly
    double getMaxY();
 
    boolean getConstrainMaxAdjustment();
+
+   boolean shouldPerformOptimization();
 }

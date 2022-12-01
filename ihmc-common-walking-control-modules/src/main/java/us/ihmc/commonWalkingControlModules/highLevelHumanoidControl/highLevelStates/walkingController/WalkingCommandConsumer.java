@@ -533,17 +533,8 @@ public class WalkingCommandConsumer
 
    public void consumeEnvironmentalModelingCommands()
    {
-      consumePlanarRegionsListCommand();
       consumePlanarRegionStepConstraintCommand();
       consumePlanarRegionStepConstraintsListCommand();
-
-   }
-   public void consumePlanarRegionsListCommand()
-   {
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PlanarRegionsListCommand.class))
-      {
-         walkingMessageHandler.handlePlanarRegionsListCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PlanarRegionsListCommand.class));
-      }
    }
 
    public void consumePlanarRegionStepConstraintCommand()
