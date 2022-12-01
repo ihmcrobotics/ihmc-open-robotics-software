@@ -1,7 +1,6 @@
 package us.ihmc.valkyrieRosControl;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -40,7 +39,8 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
    private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
    private FullHumanoidRobotModel fullRobotModel;
 
-   private final JointImpedanceHandle[] jointImpedanceHandles = new JointImpedanceHandle[jointNames.length];
+   private final EffortJointHandle[] effortHandles = new EffortJointHandle[jointNames.length];
+   private final JointImpedanceHandle[] impedanceHandles = new JointImpedanceHandle[jointNames.length];
 
    private final YoDouble masterGain = new YoDouble("masterGain", registry);
    private final YoDouble desiredJointStiffness = new YoDouble("desiredJointStiffness", registry);
@@ -66,7 +66,8 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
    {
       for (int i = 0; i < jointNames.length; i++)
       {
-         jointImpedanceHandles[i] = createJointImpedanceHandle(jointNames[i]);
+         effortHandles[i] = createEffortJointHandle(jointNames[i]);
+         impedanceHandles[i] = createJointImpedanceHandle(jointNames[i]);
       }
 
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
@@ -85,9 +86,9 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
    {
       if (firstTick)
       {
-         for (int i = 0; i < jointImpedanceHandles.length; i++)
+         for (int i = 0; i < desiredJointAngles.length; i++)
          {
-            desiredJointAngles[i].set(jointImpedanceHandles[i].getPosition());
+            desiredJointAngles[i].set(effortHandles[i].getPosition());
          }
 
          firstTick = false;
@@ -96,19 +97,19 @@ public class ValkyrieImpedanceTestController extends IHMCWholeRobotControlJavaBr
       for (int i = 0; i < jointNames.length; i++)
       {
          OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointNames[i]);
-         joint.setQ(jointImpedanceHandles[i].getPosition());
-         joint.setQd(jointImpedanceHandles[i].getVelocity());
+         joint.setQ(effortHandles[i].getPosition());
+         joint.setQd(effortHandles[i].getVelocity());
       }
 
       fullRobotModel.getRootBody().updateFramesRecursively();
 
       for (int i = 0; i < jointNames.length; i++)
       {
-         jointImpedanceHandles[i].setStiffness(masterGain.getDoubleValue() * desiredJointStiffness.getDoubleValue());
-         jointImpedanceHandles[i].setDamping(masterGain.getDoubleValue() * desiredJointDamping.getDoubleValue());
+         impedanceHandles[i].setStiffness(masterGain.getDoubleValue() * desiredJointStiffness.getDoubleValue());
+         impedanceHandles[i].setDamping(masterGain.getDoubleValue() * desiredJointDamping.getDoubleValue());
 
-         jointImpedanceHandles[i].setPosition(desiredJointAngles[i].getDoubleValue());
-         jointImpedanceHandles[i].setVelocity(0.0);
+         impedanceHandles[i].setPosition(desiredJointAngles[i].getDoubleValue());
+         impedanceHandles[i].setVelocity(0.0);
       }
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
