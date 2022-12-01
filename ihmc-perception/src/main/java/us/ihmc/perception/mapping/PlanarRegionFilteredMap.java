@@ -202,5 +202,10 @@ public class PlanarRegionFilteredMap
    {
       this.modified = modified;
    }
+
+   public PlanarRegionFilteredMapParameters getParameters()
+   {
+      return parameters;
+   }
 }
 
