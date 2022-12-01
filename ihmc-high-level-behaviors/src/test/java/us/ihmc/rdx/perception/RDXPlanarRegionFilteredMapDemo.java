@@ -2,18 +2,15 @@ package us.ihmc.rdx.perception;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.tools.thread.Activator;
 
 public class RDXPlanarRegionFilteredMapDemo
 {
-   private final RDXPlanarRegionsGraphic graphic = new RDXPlanarRegionsGraphic();
 
-   private Activator nativesLoadedActivator;
    private PlanarRegionMappingManager mapHandler;
-
-   private PlanarRegionFilteredMapPanel filteredMapPanel;
+   private PlanarRegionFilteredMapUI planarRegionFilteredMapUI;
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
@@ -25,37 +22,23 @@ public class RDXPlanarRegionFilteredMapDemo
          public void create()
          {
             baseUI.create();
-
             mapHandler = new PlanarRegionMappingManager();
-
-            filteredMapPanel = new PlanarRegionFilteredMapPanel("Filtered Map", mapHandler);
-
-            baseUI.getImGuiPanelManager().addPanel(filteredMapPanel);
-
-            graphic.generateMeshes(mapHandler.getMapRegions());
-            graphic.update();
-
-            baseUI.getPrimaryScene().addRenderableProvider(graphic);
+            planarRegionFilteredMapUI = new PlanarRegionFilteredMapUI("Filtered Map", mapHandler);
+            baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUI.getImGuiPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
-            if(filteredMapPanel.isCaptured())
+            if(planarRegionFilteredMapUI.isCaptured())
             {
-               LogTools.info("Filtered Map Panel Captured: {}", filteredMapPanel.isCaptured());
+               LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUI.isCaptured());
                mapHandler.setCaptured(true);
-               filteredMapPanel.setCaptured(false);
+               planarRegionFilteredMapUI.setCaptured(false);
             }
 
-            if (mapHandler.getFilteredMap().isModified() && mapHandler.getMapRegions().getNumberOfPlanarRegions() > 0)
-            {
-               LogTools.info("Regions Available and Modified: {} {}", mapHandler.getFilteredMap().isModified(), mapHandler.getMapRegions().getNumberOfPlanarRegions());
-               graphic.clear();
-               graphic.generateMeshes(mapHandler.getMapRegions());
-               graphic.update();
-               mapHandler.getFilteredMap().setModified(false);
-            }
+            planarRegionFilteredMapUI.renderPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -65,7 +48,6 @@ public class RDXPlanarRegionFilteredMapDemo
          public void dispose()
          {
             baseUI.dispose();
-            //graphic.destroy();
             super.dispose();
          }
       });
