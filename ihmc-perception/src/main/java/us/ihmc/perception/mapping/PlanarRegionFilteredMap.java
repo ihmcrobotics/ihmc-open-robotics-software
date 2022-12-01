@@ -3,50 +3,42 @@ package us.ihmc.perception.mapping;
 import com.esotericsoftware.kryo.util.IntMap;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 public class PlanarRegionFilteredMap
 {
    private static final double updateAlphaTowardsMatch = 0.05;
 
-   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(25);
+   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
    private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
-   private static final float maxDistanceBetweenRegionsForMatch = 0.15f;
+   private static final float maxDistanceBetweenRegionsForMatch = 1.5f;
 
-   private PlanarRegionsList slamMap;
 
-   private ConcaveHullMerger merger = new ConcaveHullMerger();
+   private boolean initialized = false;
+   private boolean modified = false;
+   private int uniqueRegionsFound = 0;
+   private int uniqueIDtracker = 0;
 
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
 
-   private int uniqueRegionsFound = 0;
-   private int uniqueIDtracker = 0;
-   boolean initialized = false;
-   boolean modified = false;
+   private PlanarRegionsList finalMap;
 
    public PlanarRegionFilteredMap()
    {
-      slamMap = new PlanarRegionsList();
+      finalMap = new PlanarRegionsList();
    }
 
    public void submitRegions(PlanarRegionsList regions)
@@ -54,42 +46,53 @@ public class PlanarRegionFilteredMap
       modified = true;
       if (!initialized)
       {
-         slamMap.addPlanarRegionsList(regions);
-
          for (PlanarRegion region : regions.getPlanarRegionsAsList())
+         {
+            if (region.getRegionId() == -1)
+            {
+               while (mapRegionIDSet.contains(uniqueIDtracker))
+                  uniqueIDtracker++;
+
+               region.setRegionId(uniqueIDtracker);
+               mapRegionIDSet.add(uniqueIDtracker);
+               uniqueRegionsFound++;
+               finalMap.addPlanarRegion(region);
+            }
+
             mapRegionIDSet.add(region.getRegionId());
+         }
 
          initialized = true;
       }
       else
       {
-         IntMap<TIntArrayList> matches = PlanarRegionSLAMTools.findPlanarRegionMatches(slamMap,
+         IntMap<TIntArrayList> matches = PlanarRegionSLAMTools.findPlanarRegionMatches(finalMap,
                                                                                        regions,
                                                                                        (float) Math.cos(angleThresholdBetweenNormalsForMatch),
                                                                                        outOfPlaneDistanceFromOneRegionToAnother,
                                                                                        maxDistanceBetweenRegionsForMatch);
 
-         LogTools.info("Regions Before: {}", regions.getPlanarRegionsAsList().size());
+         //LogTools.info("Regions Before: {}", regions.getPlanarRegionsAsList().size());
 
          for (PlanarRegion region : regions.getPlanarRegionsAsList())
             region.setRegionId(-1);
 
          for (int mapRegionIndex : matches.keys().toArray().toArray())
          {
-            PlanarRegion mapRegion = slamMap.getPlanarRegion(mapRegionIndex);
+            PlanarRegion mapRegion = finalMap.getPlanarRegion(mapRegionIndex);
             for (int matchingRegionIndex : matches.get(mapRegionIndex).toArray())
             {
                PlanarRegion region = regions.getPlanarRegion(matchingRegionIndex);
 
-               LogTools.info(String.format("Merging: Map(%d)[%.3f, %.3f, %.3f] -> Region(%d)[%.3f, %.3f, %.3f]",
-                                           mapRegionIndex,
-                                           mapRegion.getNormal().getX(),
-                                           mapRegion.getNormal().getY(),
-                                           mapRegion.getNormal().getZ(),
-                                           matchingRegionIndex,
-                                           region.getNormal().getX(),
-                                           region.getNormal().getY(),
-                                           region.getNormal().getZ()));
+               //LogTools.info(String.format("Merging: Map(%d)[%.3f, %.3f, %.3f] -> Region(%d)[%.3f, %.3f, %.3f]",
+               //                            mapRegionIndex,
+               //                            mapRegion.getNormal().getX(),
+               //                            mapRegion.getNormal().getY(),
+               //                            mapRegion.getNormal().getZ(),
+               //                            matchingRegionIndex,
+               //                            region.getNormal().getX(),
+               //                            region.getNormal().getY(),
+               //                            region.getNormal().getZ()));
 
                mergeRegionIntoMap(mapRegion, region);
             }
@@ -107,15 +110,15 @@ public class PlanarRegionFilteredMap
                mapRegionIDSet.add(uniqueIDtracker);
                uniqueRegionsFound++;
                //LogTools.info("Found Unique: {}", uniqueIDtracker);
-               slamMap.addPlanarRegion(region);
+               finalMap.addPlanarRegion(region);
             }
          }
-         //slamMap.addPlanarRegionsList(regions);
+         //map.addPlanarRegionsList(regions);
 
          LogTools.info("Regions: {}, Unique: {}, Map: {}",
                        regions.getPlanarRegionsAsList().size(),
                        uniqueRegionsFound,
-                       slamMap.getPlanarRegionsAsList().size());
+                       finalMap.getPlanarRegionsAsList().size());
 
          LogTools.info("Unique Set: [{}]", mapRegionIDSet);
       }
@@ -186,7 +189,7 @@ public class PlanarRegionFilteredMap
 
    public PlanarRegionsList getMapRegions()
    {
-      return slamMap;
+      return finalMap;
    }
 
    public boolean isModified()
