@@ -36,13 +36,15 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ControllerNaturalPostureManager
 {
+   private static final boolean generateDataForPaper = false;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double controlDT;
 
    private final QPObjectiveCommand naturalPostureControlCommand = new QPObjectiveCommand();
 
-   HumanoidRobotNaturalPosture robotNaturalPosture;
+   private final HumanoidRobotNaturalPosture robotNaturalPosture;
    private final DMatrixRMaj npQPobjective = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPweightMatrix = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj npQPselectionMatrix = new DMatrixRMaj(1, 1);
@@ -135,11 +137,7 @@ public class ControllerNaturalPostureManager
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private YoDouble yoTime;
-   private final MovingReferenceFrame midFeetZUpFrame;
-
    // For generating data for the paper
-   boolean generateDataForPaper = false;
    private final YoDouble relativeAngularVelX = new YoDouble("relativeAngularVelX", registry);
    private final YoDouble relativeAngularVelY = new YoDouble("relativeAngularVelY", registry);
    private final YoDouble relativeAngularVelZ = new YoDouble("relativeAngularVelZ", registry);
@@ -151,14 +149,11 @@ public class ControllerNaturalPostureManager
    private final YoDouble centroidalAngularMomentumApproxByACOMZ = new YoDouble("centroidalAngularMomentumApproxByACOMZ", registry);
    
    public ControllerNaturalPostureManager(HumanoidRobotNaturalPosture robotNaturalPosture,
-                                          PID3DGainsReadOnly gains,
                                           HighLevelHumanoidControllerToolbox controllerToolbox,
                                           YoRegistry parentRegistry)
    {
-      yoTime = controllerToolbox.getYoTime();
       controlDT = controllerToolbox.getControlDT();
 
-      midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
 
       npVelocityBreakFrequency.addListener(v -> npVelocityAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(npVelocityBreakFrequency.getDoubleValue(), controlDT), false));
       npVelocityAlpha.addListener(v -> npVelocityBreakFrequency.set(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(npVelocityAlpha.getDoubleValue(), controlDT), false));
@@ -208,9 +203,9 @@ public class ControllerNaturalPostureManager
       pelvisQPselectionMatrix.reshape(3, 3);
       CommonOps_DDRM.setIdentity(pelvisQPselectionMatrix);
       
-      pelvisQPWeightX.set(1.0 * scale1);
-      pelvisQPWeightY.set(1.0 * scale1);
-      pelvisQPWeightZ.set(1.0 * scale1);
+      pelvisQPWeightX.set(scale1);
+      pelvisQPWeightY.set(scale1);
+      pelvisQPWeightZ.set(scale1);
       
       pPosePelvisYaw.set(0.0);
       pPosePelvisPitch.set(0.02);
@@ -225,18 +220,6 @@ public class ControllerNaturalPostureManager
       parentRegistry.addChild(registry);
    }
 
-   //   public void setWeights(Vector3DReadOnly naturalPostureAngularWeight)
-   //   {
-   //      this.naturalPostureAngularWeight = naturalPostureAngularWeight;
-   //   }
-
-   //   public void setSelectionMatrix(SelectionMatrix3D selectionMatrix)
-   //   {
-   //      this.selectionMatrix.set(selectionMatrix);
-   //   }
-
-   //   @Override
-   //   public void doAction(double timeInState)
    public void compute()
    {
       // Update NP values
@@ -262,8 +245,6 @@ public class ControllerNaturalPostureManager
       npYaw.set(yoCurrentNaturalPosture.getYaw());
       npPitch.set(yoCurrentNaturalPosture.getPitch());
       npRoll.set(yoCurrentNaturalPosture.getRoll());
-
-//      npYawDesired.set(midFeetZUpFrame.getTransformToWorldFrame().getRotation().getYaw());
 
       npYawVelocity.update();
       npPitchVelocity.update();
@@ -367,17 +348,11 @@ public class ControllerNaturalPostureManager
       feedbackTermToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   //   @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return naturalPostureControlCommand;
    }
 
-   //   @Override
-   //   public QPObjectiveCommand getQPObjectiveCommand()
-   //   {
-   //      return naturalPostureControlCommand;
-   //   }
 
    // Implements a YPR servo on the pelvis, which is then used for the privileged
    // pose of the pelvis (via task null-space projection)
@@ -454,10 +429,7 @@ public class ControllerNaturalPostureManager
        MomentumData momentumData = computeMomentum(fullRobotModel);
 
        DMatrixRMaj relativeVel = MatrixTools.mult(momentumData.connectionMatrix, momentumData.jointVelocity);
-       
-//       DMatrixRMaj relativeAngularVel = new DMatrixRMaj(3, 1);
-//       int[] srcRow = {0,1,2};
-//       MatrixTools.extractRows(relativeVel, srcRow, relativeVel, 0);
+
        relativeAngularVelX.set(relativeVel.get(0));
        relativeAngularVelY.set(relativeVel.get(1));
        relativeAngularVelZ.set(relativeVel.get(2));
@@ -488,7 +460,7 @@ public class ControllerNaturalPostureManager
    }
    
    
-	final class MomentumData
+	private static class MomentumData
 	{
 	   public DMatrixRMaj jointPositionWithFloatingBase;
 	   public DMatrixRMaj jointVelocityWithFloatingBase;
