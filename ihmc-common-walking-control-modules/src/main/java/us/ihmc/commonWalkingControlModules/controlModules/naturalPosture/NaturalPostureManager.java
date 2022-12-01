@@ -27,7 +27,6 @@ public class NaturalPostureManager
 
    public NaturalPostureManager(HumanoidRobotNaturalPosture naturalPostureMeasurement,
                                 NaturalPostureParameters naturalPostureParameters,
-                                PID3DGainsReadOnly gains,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                 YoRegistry parentRegistry)
    {
@@ -35,7 +34,7 @@ public class NaturalPostureManager
 
       robotNaturalPosture = naturalPostureMeasurement;
 
-      walkingManager = new ControllerNaturalPostureManager(robotNaturalPosture, gains, controllerToolbox, registry);
+      walkingManager = new ControllerNaturalPostureManager(robotNaturalPosture, controllerToolbox, registry);
       naturalPostureTimer = new ExecutionTimer("naturalPostureTimer", registry);
 
       OneDoFJointBasics[] allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
