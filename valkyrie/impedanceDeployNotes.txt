@@ -37,6 +37,10 @@ export LD_LIBRARY_PATH=/usr/lib/jvm/zulu-17-amd64/lib/server:$LD_LIBRARY_PATH
 roslaunch val_deploy val_comm_control.launch model_file:=/home/val/val_ws/install/share/val_description/model/urdf/valkyrie_B.urdf io_file:=/home/val/val_ws/src/val_config_files/robonet_io_config/full_main.io
 
 
+           -v $HOME/impedanceDocker/valkyrie_B_arm_mass_sims.urdf:/home/val/val_ws/install/share/val_description/model/urdf/valkyrie_B_arm_mass_sims.urdf \
+           -v $HOME/impedanceDocker/valkyrie_B.urdf:/home/val/val_ws/install/share/val_description/model/urdf/valkyrie_B.urdf \
 
--- ON CONSOLE --
 
+Notes from Dec 1 run
+- UI builder does park motors but does not reflect it in the ui
+- 
