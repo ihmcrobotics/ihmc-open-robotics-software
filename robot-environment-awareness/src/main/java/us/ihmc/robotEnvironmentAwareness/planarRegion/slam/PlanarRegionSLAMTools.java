@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.esotericsoftware.kryo.util.IntMap;
 import gnu.trove.list.array.TIntArrayList;
@@ -15,7 +16,6 @@ import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
@@ -29,7 +29,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
@@ -216,24 +215,103 @@ public class PlanarRegionSLAMTools
       return returnString;
    }
 
-   public static IntMap<TIntArrayList> findPlanarRegionMatches(PlanarRegionsList map,
-                                                               PlanarRegionsList newData,
+   public static class IncomingRegionMatchData
+   {
+      private final int incomingRegionId;
+      private final List<MatchData> goodMatches = new ArrayList<>();
+      private final List<MatchData> badMatches = new ArrayList<>();
+
+      public IncomingRegionMatchData(int incomingRegionId)
+      {
+         this.incomingRegionId = incomingRegionId;
+      }
+
+      public void reset()
+      {
+         goodMatches.clear();
+         badMatches.clear();
+      }
+
+      public int getIncomingRegionId()
+      {
+         return incomingRegionId;
+      }
+
+      public void addMatchData(MatchData matchData)
+      {
+         if (matchData.getMatchScore() > 50.0)
+            goodMatches.add(matchData);
+         else
+            badMatches.add(matchData);
+      }
+
+      public int getNumberOfGoodMatches()
+      {
+         return goodMatches.size();
+      }
+
+      public int getNumberOfBadMatches()
+      {
+         return badMatches.size();
+      }
+
+      public int getNumberOfMatches()
+      {
+         return getNumberOfGoodMatches() + getNumberOfBadMatches();
+      }
+
+      public MatchData getGoodMatch(int goodMatchNumber)
+      {
+         return goodMatches.get(goodMatchNumber);
+      }
+
+      public MatchData getBadMatch(int badMatchNumber)
+      {
+         return badMatches.get(badMatchNumber);
+      }
+   }
+
+   public static class MatchData
+   {
+      private final int matchingMapRegionId;
+
+      public MatchData(int matchingMapRegionId)
+      {
+         this.matchingMapRegionId = matchingMapRegionId;
+      }
+
+      public int getMatchingMapRegionId()
+      {
+         return matchingMapRegionId;
+      }
+
+      public double getMatchScore()
+      {
+         return 100.0;
+      }
+   }
+
+   public static List<IncomingRegionMatchData> findPlanarRegionMatches(PlanarRegionsList map,
+                                                               PlanarRegionsList incoming,
                                                                float normalThreshold,
                                                                float normalDistanceThreshold,
                                                                float distanceThreshold)
    {
       PlanarRegionTools planarRegionTools = new PlanarRegionTools();
-      IntMap<TIntArrayList> matches = new IntMap<>();
+      List<IncomingRegionMatchData> allMatches = new ArrayList<>();
 
-      List<PlanarRegion> newRegions = newData.getPlanarRegionsAsList();
+      List<PlanarRegion> incomingRegions = incoming.getPlanarRegionsAsList();
       List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
-      for (int mapRegionIndex = 0; mapRegionIndex < mapRegions.size(); mapRegionIndex++)
+      for (int incomingRegionId = 0; incomingRegionId < incomingRegions.size(); incomingRegionId++)
       {
-         PlanarRegion mapRegion = mapRegions.get(mapRegionIndex);
-         for (int j = 0; j < newRegions.size(); j++)
+         PlanarRegion newRegion = incomingRegions.get(incomingRegionId);
+         IncomingRegionMatchData incomingRegionMatchData = new IncomingRegionMatchData(incomingRegionId);
+         allMatches.add(incomingRegionMatchData);
+
+         for (int mapRegionIndex = 0; mapRegionIndex < mapRegions.size(); mapRegionIndex++)
          {
-            PlanarRegion newRegion = newRegions.get(j);
+            PlanarRegion mapRegion = mapRegions.get(mapRegionIndex);
 
             //if (boxesIn3DIntersect(mapRegion, newRegion, mapRegion.getBoundingBox3dInWorld().getMaxZ() - mapRegion.getBoundingBox3dInWorld().getMinZ()))
             {
@@ -249,7 +327,6 @@ public class PlanarRegionSLAMTools
                double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
                double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
 
-
                double originDistance = originVec.norm();
 
                // check to make sure the angles are similar enough
@@ -258,28 +335,33 @@ public class PlanarRegionSLAMTools
                wasMatched &= normalDistance < normalDistanceThreshold;
                // check that the regions aren't too far from one another
                if (wasMatched)
-                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) < distanceThreshold;
+                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
 
-               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)", mapRegionIndex,
-                                           mapRegion.getRegionId(), newRegion.getRegionId(),
-                                           normalSimilarity, normalThreshold,
-                                           normalDistance, normalDistanceThreshold,
-                                           originDistance, distanceThreshold) + ": [{}]", wasMatched);
+               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+                                           mapRegionIndex,
+                                           mapRegion.getRegionId(),
+                                           newRegion.getRegionId(),
+                                           normalSimilarity,
+                                           normalThreshold,
+                                           normalDistance,
+                                           normalDistanceThreshold,
+                                           originDistance,
+                                           distanceThreshold) + ": [{}]", wasMatched);
 
                if (wasMatched)
                {
-                  TIntArrayList matchList = matches.get(mapRegionIndex);
-                  if (matchList == null)
-                  {
-                     matchList = new TIntArrayList();
-                     matches.put(mapRegionIndex, matchList);
-                  }
-                  matchList.add(j);
+                  MatchData matchData = new MatchData(mapRegionIndex);
+                  // TODO assign score for the match
+                  incomingRegionMatchData.addMatchData(matchData);
                }
             }
          }
       }
-      return matches;
+
+      // remove the regions with no matches
+      allMatches = allMatches.stream().filter(data -> data.getNumberOfMatches() > 0).collect(Collectors.toList());
+
+      return allMatches;
    }
 
    public static Map<PlanarRegion, List<PlanarRegion>> filterMatchesBasedOnNormalSimilarity(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar,

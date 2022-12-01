@@ -1,29 +1,20 @@
 package us.ihmc.perception.mapping;
 
-import com.esotericsoftware.kryo.util.IntMap;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class PlanarRegionFilteredMap
 {
@@ -31,11 +22,9 @@ public class PlanarRegionFilteredMap
 
    private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(25);
    private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
-   private static final float maxDistanceBetweenRegionsForMatch = 0.15f;
+   private static final float maxDistanceBetweenRegionsForMatch = 0.0f;
 
    private PlanarRegionsList slamMap;
-
-   private ConcaveHullMerger merger = new ConcaveHullMerger();
 
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
 
@@ -63,53 +52,26 @@ public class PlanarRegionFilteredMap
       }
       else
       {
-         IntMap<TIntArrayList> matches = PlanarRegionSLAMTools.findPlanarRegionMatches(slamMap,
-                                                                                       regions,
-                                                                                       (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-                                                                                       outOfPlaneDistanceFromOneRegionToAnother,
-                                                                                       maxDistanceBetweenRegionsForMatch);
+         // initialize the planar region graph
+         PlanarRegionGraph planarRegionGraph = new PlanarRegionGraph();
+         slamMap.getPlanarRegionsAsList().forEach(planarRegionGraph::addRootOfBranch);
+
+         // assign unique ids to the incoming regions
+         regions.getPlanarRegionsAsList().forEach(region -> region.setRegionId(uniqueIDtracker++));
+
+         addIncomingRegionsToGraph(slamMap,
+                                   regions,
+                                   planarRegionGraph,
+                                   (float) Math.cos(angleThresholdBetweenNormalsForMatch),
+                                   outOfPlaneDistanceFromOneRegionToAnother,
+                                   maxDistanceBetweenRegionsForMatch);
 
          LogTools.info("Regions Before: {}", regions.getPlanarRegionsAsList().size());
 
-         for (PlanarRegion region : regions.getPlanarRegionsAsList())
-            region.setRegionId(-1);
+         planarRegionGraph.collapseGraphByMerging(updateAlphaTowardsMatch);
 
-         for (int mapRegionIndex : matches.keys().toArray().toArray())
-         {
-            PlanarRegion mapRegion = slamMap.getPlanarRegion(mapRegionIndex);
-            for (int matchingRegionIndex : matches.get(mapRegionIndex).toArray())
-            {
-               PlanarRegion region = regions.getPlanarRegion(matchingRegionIndex);
+         slamMap = planarRegionGraph.getAsPlanarRegionsList();
 
-               LogTools.info(String.format("Merging: Map(%d)[%.3f, %.3f, %.3f] -> Region(%d)[%.3f, %.3f, %.3f]",
-                                           mapRegionIndex,
-                                           mapRegion.getNormal().getX(),
-                                           mapRegion.getNormal().getY(),
-                                           mapRegion.getNormal().getZ(),
-                                           matchingRegionIndex,
-                                           region.getNormal().getX(),
-                                           region.getNormal().getY(),
-                                           region.getNormal().getZ()));
-
-               mergeRegionIntoMap(mapRegion, region);
-            }
-         }
-
-         uniqueRegionsFound = 0;
-         for (PlanarRegion region : regions.getPlanarRegionsAsList())
-         {
-            if (region.getRegionId() == -1)
-            {
-               while (mapRegionIDSet.contains(uniqueIDtracker))
-                  uniqueIDtracker++;
-
-               region.setRegionId(uniqueIDtracker);
-               mapRegionIDSet.add(uniqueIDtracker);
-               uniqueRegionsFound++;
-               //LogTools.info("Found Unique: {}", uniqueIDtracker);
-               slamMap.addPlanarRegion(region);
-            }
-         }
          //slamMap.addPlanarRegionsList(regions);
 
          LogTools.info("Regions: {}, Unique: {}, Map: {}",
@@ -121,68 +83,75 @@ public class PlanarRegionFilteredMap
       }
    }
 
-   private void mergeRegionIntoMap(PlanarRegion mapRegion, PlanarRegion region)
+
+   public static void addIncomingRegionsToGraph(PlanarRegionsList map,
+                                                PlanarRegionsList incoming,
+                                                PlanarRegionGraph graphToUpdate,
+                                                float normalThreshold,
+                                                float normalDistanceThreshold,
+                                                float distanceThreshold)
    {
-      region.setRegionId(mapRegion.getRegionId());
+      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
 
-      // Update Map Region Normal and Origin
-      UnitVector3DReadOnly mapNormal = mapRegion.getNormal();
-      Point3DReadOnly mapOrigin = mapRegion.getPoint();
+      List<PlanarRegion> incomingRegions = incoming.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
 
-      UnitVector3DReadOnly regionNormal = region.getNormal();
-      Point3DReadOnly regionOrigin = region.getPoint();
-
-      Vector3D futureNormal = new Vector3D();
-      futureNormal.interpolate(mapNormal, regionNormal, updateAlphaTowardsMatch);
-
-      double futureHeightZ = EuclidCoreTools.interpolate(mapOrigin.getZ(), regionOrigin.getZ(), updateAlphaTowardsMatch);
-
-      Vector3D normalVector = new Vector3D(mapNormal);
-      Vector3D axis = new Vector3D();
-      axis.cross(normalVector, futureNormal);
-      double angle = normalVector.angle(futureNormal);
-
-      Point3D futureOrigin = new Point3D(mapOrigin.getX(), mapOrigin.getY(), futureHeightZ);
-      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
-      Vector3D translationToFutureRegion = new Vector3D();
-      translationToFutureRegion.sub(futureOrigin, mapOrigin);
-
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.appendOrientation(rotationToFutureRegion);
-      transform.appendTranslation(translationToFutureRegion);
-
-      mapRegion.applyTransform(transform);
-
-      // Update Map Region Hull
-      //List<Point2D> concaveHullMapRegionVertices = mapRegion.getConcaveHull();
-      //List<Point2D> concaveHullRegionVertices = region.getConcaveHull();
-      //List<Point2D> mergedConcaveHull = ConcaveHullMerger.mergeConcaveHulls(concaveHullMapRegionVertices, concaveHullRegionVertices, null);
-      //ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<>();
-      //ConcaveHullDecomposition.recursiveApproximateDecomposition(mergedConcaveHull, 0.001, newPolygonsFromConcaveHull);
-      //
-      //RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      //mapRegion.getTransformToWorld(transformToWorld);
-      //
-      //PlanarRegion planarRegion = new PlanarRegion(transformToWorld, mergedConcaveHull, newPolygonsFromConcaveHull);
-      //planarRegion.setRegionId(mapRegion.getRegionId());
-      //
-      //mapRegion.set(planarRegion);
-
-      ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(mapRegion, region, 1.0f, null);
-
-      if(mergedRegion != null)
+      for (int incomingRegionId = 0; incomingRegionId < incomingRegions.size(); incomingRegionId++)
       {
-         if(mergedRegion.size() > 0)
+         PlanarRegion newRegion = incomingRegions.get(incomingRegionId);
+         boolean foundMatch = false;
+
+         for (int mapRegionIndex = 0; mapRegionIndex < mapRegions.size(); mapRegionIndex++)
          {
-            mapRegion.set(mergedRegion.get(0));
+            PlanarRegion mapRegion = mapRegions.get(mapRegionIndex);
+
+            //if (boxesIn3DIntersect(mapRegion, newRegion, mapRegion.getBoundingBox3dInWorld().getMaxZ() - mapRegion.getBoundingBox3dInWorld().getMinZ()))
+            {
+               Point3D newOrigin = new Point3D();
+               newRegion.getOrigin(newOrigin);
+
+               Point3D mapOrigin = new Point3D();
+               mapRegion.getOrigin(mapOrigin);
+
+               Vector3D originVec = new Vector3D();
+               originVec.sub(newOrigin, mapOrigin);
+
+               double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
+               double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
+
+               double originDistance = originVec.norm();
+
+               // check to make sure the angles are similar enough
+               boolean wasMatched = normalSimilarity > normalThreshold;
+               // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+               wasMatched &= normalDistance < normalDistanceThreshold;
+               // check that the regions aren't too far from one another
+               if (wasMatched)
+                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
+
+               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+                                           mapRegionIndex,
+                                           mapRegion.getRegionId(),
+                                           newRegion.getRegionId(),
+                                           normalSimilarity,
+                                           normalThreshold,
+                                           normalDistance,
+                                           normalDistanceThreshold,
+                                           originDistance,
+                                           distanceThreshold) + ": [{}]", wasMatched);
+
+               if (wasMatched)
+               {
+                  graphToUpdate.addEdge(mapRegion, newRegion);
+                  foundMatch = true;
+               }
+            }
          }
-         else
-         {
-            // TODO: Figure out how to handle the case where no merged region is generated.
-         }
+
+         if (!foundMatch)
+            graphToUpdate.addRootOfBranch(newRegion);
       }
    }
-
 
    public PlanarRegionsList getMapRegions()
    {
