@@ -262,18 +262,18 @@ public class ProMPAssistant implements TeleoperationAssistant
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
       {
          List<Pose3DReadOnly> observedTrajectory = bodyPartObservedTrajectoryMap.get(robotPart);
-         //         if (observedTrajectory.size() > 0)
-         //         {
-         //            isLastViaPoint.set(true);
-         //            proMPManagers.get(currentTask)
-         //                         .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
-         //         }
-         for (int i = 0; i < observedTrajectory.size(); i++)
+         if (observedTrajectory.size() > 0)
          {
-            if (i == observedTrajectory.size() - 1)
-               isLastViaPoint.set(true);
-            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
+            isLastViaPoint.set(true);
+            proMPManagers.get(currentTask)
+                         .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
          }
+//         for (int i = 0; i < observedTrajectory.size(); i++)
+//         {
+//            if (i == observedTrajectory.size() - 1)
+//               isLastViaPoint.set(true);
+//            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
+//         }
       }
    }
 
