@@ -43,6 +43,7 @@ public class PlanarRegionFilteredMap
       modified = true;
       if (!initialized)
       {
+         regions.getPlanarRegionsAsList().forEach(region -> region.setRegionId(uniqueIDtracker++));
          slamMap.addPlanarRegionsList(regions);
 
          for (PlanarRegion region : regions.getPlanarRegionsAsList())

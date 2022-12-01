@@ -20,6 +20,9 @@ public class PlanarRegionGraph
 
    public void addEdge(PlanarRegion parent, PlanarRegion child)
    {
+      if (parent.getRegionId() == child.getRegionId())
+         throw new RuntimeException("Can't add the child region with the same Id as the parent.");
+
       boolean containsParent = root.recursivelyContains(parent.getRegionId());
       boolean containsChild = root.recursivelyContains(child.getRegionId());
       if (!containsParent && !containsChild)
@@ -33,7 +36,7 @@ public class PlanarRegionGraph
       {
          PlanarRegionNode parentNode = root.recursivelyGet(parent.getRegionId());
          PlanarRegionNode childNode = root.recursivelyGet(child.getRegionId());
-         makeRootOfBranch(childNode);
+         makeRoot(childNode);
          parentNode.addChildNode(childNode);
       }
       else if (containsParent)
@@ -129,11 +132,11 @@ public class PlanarRegionGraph
       throw new RuntimeException("Shoot");
    }
 
-
-   private static void makeRootOfBranch(PlanarRegionNode node)
+   private static void makeRoot(PlanarRegionNode node)
    {
       PlanarRegionNode parentNode = node.getParentNode();
       node.setParentNode(null);
+
       while (parentNode != null && !parentNode.isRoot())
       {
          node.addChildNode(parentNode);
@@ -170,7 +173,7 @@ public class PlanarRegionGraph
       public void addChildNode(PlanarRegionNode childNode)
       {
          childNodes.add(childNode);
-         childNode.setParentNode(parentNode);
+         childNode.setParentNode(this);
       }
 
       public void setParentNode(PlanarRegionNode parentNode)
