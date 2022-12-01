@@ -49,9 +49,9 @@ public class RDXVisualSLAMDemo
 
    private static final int COUNT_SKIP = 100;
    private static final int FRAME_SKIP = 1;
-   private static final String LEFT_CAMERA_NAME = "image_0";
-   private static final String RIGHT_CAMERA_NAME = "image_1";
-   private static final String DATASET_PATH = "/home/quantum/Workspace/Data/Datasets/sequences/00/";
+   private static final String LEFT_CAMERA_NAME = "image_2";
+   private static final String RIGHT_CAMERA_NAME = "image_3";
+   private static final String DATASET_PATH = "/home/bmishra/Workspace/Data/Datasets/dataset/sequences/00/";
 
    private ImageMat currentImageRight;
    private ImageMat currentImageLeft;
@@ -78,7 +78,7 @@ public class RDXVisualSLAMDemo
 
    public RDXVisualSLAMDemo() throws FileNotFoundException
    {
-      gtPoseReader = new Scanner(new File("/home/quantum/Workspace/Data/Datasets/poses/00.txt"));
+      gtPoseReader = new Scanner(new File(DATASET_PATH + "00.txt"));
 
       vslam = new VisualSLAMModule();
       panel.setRenderMethod(this::renderImGuiWidgets);

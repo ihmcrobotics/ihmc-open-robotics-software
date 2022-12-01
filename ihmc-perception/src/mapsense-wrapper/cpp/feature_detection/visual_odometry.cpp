@@ -59,12 +59,12 @@ bool VisualOdometry::UpdateStereo(cv::Mat& leftImage, cv::Mat& rightImage)
    // }
    else
    {
-      Eigen::Matrix4f trackedPose = TrackCameraPose(_kpCurLeft, _descCurLeft, _keyframes, _landmarks);
+      // Eigen::Matrix4f trackedPose = TrackCameraPose(_kpCurLeft, _descCurLeft, _keyframes[_keyframes.size() - 1], _landmarks);
 
-      if (trackedPose.block<3, 1>(0, 3).norm() > 1)
-      {
-         TriangulateLandmarks(_keyframes, _landmarks);
-      }
+      // if (trackedPose.block<3, 1>(0, 3).norm() > 1)
+      // {
+      //    // TriangulateLandmarks(_keyframes, _landmarks);
+      // }
 
       auto lastKeyframe = _keyframes[_keyframes.size() - 1];
       cv::Mat descPrev = lastKeyframe.descLeft;
@@ -471,13 +471,13 @@ void VisualOdometry::PreInitialize(KeyPointVec& kpCurLeft, KeyPointVec& kpCurRig
 }
 
 
-cv::Mat VisualOdometry::TrackCameraPose(const KeyPointVec& kp, const cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks)
+Eigen::Matrix4f VisualOdometry::TrackCameraPose(const KeyPointVec& kp, const cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks)
 {
 
-   printf("TrackCameraPose: (KFs: %ld, KP:%ld, Desc:(%d, %d), Landmarks:%ld)\n", lastKF.id, 
-            kp.size(), desc.rows, desc.cols, landmarks.size());
+   printf("TrackCameraPose: (KPs: %ld, KF: %d, Desc:(%d, %d), Landmarks:%ld)\n", kp.size(), lastKF.id, 
+            desc.rows, desc.cols, landmarks.size());
 
-   _leftCamera.SetTransform(lastKF.pose.inverse());
+   _leftCamera.SetTransform(lastKF.pose.inverse().cast<float>());
    // Create a list of possible landmark IDs to project onto the camera view
 
    PointLandmarkVec candidateMapPoints;
@@ -498,17 +498,21 @@ cv::Mat VisualOdometry::TrackCameraPose(const KeyPointVec& kp, const cv::Mat& de
 
    // Match 3D descriptors to 2D descriptors
    DMatchVec matchesToMap;
-   MatchKeypointsToLandmarks(_kpCurLeft, _descCurLeft, candidateMapPoints, matchesToMap);
+   // TODO: Fixed this.
+   // MatchKeypointsToLandmarks(_kpCurLeft, _descCurLeft, candidateMapPoints, matchesToMap);
 
 
    // TODO: Extract 2D point vector for PnP estimation.
    
 
    // Estimate world-frame camera pose using PnP
-   cv::Mat cameraWorldPose = EstimateMotionPnP();
+   // cv::Mat cameraWorldPose = EstimateMotionPnP();
+   cv::Mat cameraWorldPose;
 
-   return cameraWorldPose;
-   
+   Eigen::Map<Eigen::Matrix<float, 4, 4>, Eigen::RowMajor> eigenPose(reinterpret_cast<float *>(cameraWorldPose.data));
+   eigenPose.transposeInPlace();
+
+   return eigenPose;
 }
 
 // void VisualOdometry::UpdateLocalMap(const cv::Mat& relativePose, )

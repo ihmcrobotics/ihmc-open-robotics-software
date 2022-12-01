@@ -35,7 +35,6 @@ class VisualOdometry
       void ExtractPoseLinear();
       void ExtractKeypoints_FAST(cv::Mat img_1, Point2fVec& points1);
       void ExtractKeypoints(cv::Mat img, KeyPointVec& points, cv::Mat& desc);
-      void TrackKeypoints(cv::Mat prev, cv::Mat cur, Point2fVec& prev_pts, Point2fVec& cur_pts);
       void MatchKeypoints(cv::Mat& desc1, cv::Mat& desc2, DMatchVec& matches);
       void TransferKeypointIDs(const std::vector<int>& trainIDs, std::vector<int>& queryIDs, DMatchVec& matches);
       void GridSampleKeypoints(KeyPointVec& keypoints, DMatchVec& matches);
@@ -52,7 +51,7 @@ class VisualOdometry
 
       cv::Mat EstimateMotionPnP(Point2fVec& points2d, const PointLandmarkVec& points3d, cv::Mat& mask, const CameraModel& cam);
       cv::Mat EstimateMotion(Point2fVec& prevFeatures, Point2fVec& curFeatures, cv::Mat& mask, const CameraModel& cam);
-      cv::Mat TrackCameraPose(const KeyPointVec& kp, const cv::Mat& desc, const KeyframeVec& keyframes, const PointLandmarkVec& landmarks);
+      Eigen::Matrix4f TrackCameraPose(const KeyPointVec& kp, const cv::Mat& desc, const Keyframe& lastKF, const PointLandmarkVec& landmarks);
       cv::Mat TriangulatePoints(Point2fVec& prevPoints, Point2fVec& curPoints, const CameraModel& cam, cv::Mat relativePose);
       cv::Mat CalculateStereoDepth(cv::Mat left, cv::Mat right);
       
