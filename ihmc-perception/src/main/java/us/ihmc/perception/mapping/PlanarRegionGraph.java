@@ -137,18 +137,6 @@ public class PlanarRegionGraph
                return true;
             }
 
-            PlanarRegionTools planarRegionTools = new PlanarRegionTools();
-            double distance = planarRegionTools.getDistanceBetweenPlanarRegions(parentRegion, childRegion);
-            LogTools.info(distance);
-
-            parentRegion.updateBoundingBox();
-            parentRegion.updateConvexHull();
-            childRegion.updateBoundingBox();
-            childRegion.updateConvexHull();
-
-            mergedRegion = ConcaveHullMerger.mergePlanarRegions(parentRegion, childRegion, 1.0f, null);
-
-            LogTools.info(mergedRegion.size());
             return false;
          }
       }

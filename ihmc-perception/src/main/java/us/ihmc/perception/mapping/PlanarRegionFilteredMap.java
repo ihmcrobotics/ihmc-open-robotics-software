@@ -69,6 +69,15 @@ public class PlanarRegionFilteredMap
 
          LogTools.info("Regions Before: {}", regions.getPlanarRegionsAsList().size());
 
+         // merge all the new regions in
+         planarRegionGraph.collapseGraphByMerging(updateAlphaTowardsMatch);
+
+         // go back through the existing regions and add them to the graph to check for overlap
+         checkMapRegionsForOverlap(planarRegionGraph,
+                                   (float) Math.cos(angleThresholdBetweenNormalsForMatch),
+                                   outOfPlaneDistanceFromOneRegionToAnother,
+                                   maxDistanceBetweenRegionsForMatch);
+
          planarRegionGraph.collapseGraphByMerging(updateAlphaTowardsMatch);
 
          slamMap = planarRegionGraph.getAsPlanarRegionsList();
@@ -151,6 +160,68 @@ public class PlanarRegionFilteredMap
 
          if (!foundMatch)
             graphToUpdate.addRootOfBranch(newRegion);
+      }
+   }
+
+   public static void checkMapRegionsForOverlap(
+                                                PlanarRegionGraph graphToUpdate,
+                                                float normalThreshold,
+                                                float normalDistanceThreshold,
+                                                float distanceThreshold)
+   {
+      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
+
+      List<PlanarRegion> mapRegions = graphToUpdate.getAsPlanarRegionsList().getPlanarRegionsAsList();
+
+      for (int idA = 0; idA < mapRegions.size(); idA++)
+      {
+         PlanarRegion regionA = mapRegions.get(idA);
+
+         for (int idB = idA + 1; idB < mapRegions.size(); idB++)
+         {
+            PlanarRegion regionB = mapRegions.get(idB);
+
+            //if (boxesIn3DIntersect(mapRegion, newRegion, mapRegion.getBoundingBox3dInWorld().getMaxZ() - mapRegion.getBoundingBox3dInWorld().getMinZ()))
+            {
+               Point3D newOrigin = new Point3D();
+               regionA.getOrigin(newOrigin);
+
+               Point3D mapOrigin = new Point3D();
+               regionB.getOrigin(mapOrigin);
+
+               Vector3D originVec = new Vector3D();
+               originVec.sub(newOrigin, mapOrigin);
+
+               double normalDistance = Math.abs(originVec.dot(regionB.getNormal()));
+               double normalSimilarity = regionA.getNormal().dot(regionB.getNormal());
+
+               double originDistance = originVec.norm();
+
+               // check to make sure the angles are similar enough
+               boolean wasMatched = normalSimilarity > normalThreshold;
+               // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+               wasMatched &= normalDistance < normalDistanceThreshold;
+               // check that the regions aren't too far from one another
+               if (wasMatched)
+                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(regionB, regionA) <= distanceThreshold;
+
+               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+                                           idB,
+                                           regionB.getRegionId(),
+                                           regionA.getRegionId(),
+                                           normalSimilarity,
+                                           normalThreshold,
+                                           normalDistance,
+                                           normalDistanceThreshold,
+                                           originDistance,
+                                           distanceThreshold) + ": [{}]", wasMatched);
+
+               if (wasMatched)
+               {
+                  graphToUpdate.addEdge(regionB, regionA);
+               }
+            }
+         }
       }
    }
 
