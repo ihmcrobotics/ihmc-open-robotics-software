@@ -7,8 +7,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.ArrayList;
@@ -66,11 +69,8 @@ public class PlanarRegionGraph
       return root.collectAsPlanarRegionsList();
    }
 
-
    private static boolean mergeRegionIntoParent(PlanarRegion parentRegion, PlanarRegion childRegion, double updateTowardsChildAlpha)
    {
-      childRegion.setRegionId(parentRegion.getRegionId());
-
       // Update Map Region Normal and Origin
       UnitVector3DReadOnly mapNormal = parentRegion.getNormal();
       Point3DReadOnly mapOrigin = parentRegion.getPoint();
@@ -125,6 +125,30 @@ public class PlanarRegionGraph
          }
          else
          {
+            // check if the child region is fully contained by the parent region
+            if (parentRegion.getConvexHull().isPointInside(childRegion.getConvexHull().getVertex(0)))
+            {
+               return true;
+            }
+            // check if the parent region is fully contained by the child region
+            else if (childRegion.getConvexHull().isPointInside(parentRegion.getConvexHull().getVertex(0)))
+            {
+               parentRegion.set(childRegion);
+               return true;
+            }
+
+            PlanarRegionTools planarRegionTools = new PlanarRegionTools();
+            double distance = planarRegionTools.getDistanceBetweenPlanarRegions(parentRegion, childRegion);
+            LogTools.info(distance);
+
+            parentRegion.updateBoundingBox();
+            parentRegion.updateConvexHull();
+            childRegion.updateBoundingBox();
+            childRegion.updateConvexHull();
+
+            mergedRegion = ConcaveHullMerger.mergePlanarRegions(parentRegion, childRegion, 1.0f, null);
+
+            LogTools.info(mergedRegion.size());
             return false;
          }
       }
@@ -144,6 +168,9 @@ public class PlanarRegionGraph
          node = parentNode;
          parentNode = parentNode.getParentNode();
       }
+
+      if (parentNode != null)
+         parentNode.removeChildNode(node);
    }
 
    private static class PlanarRegionNode
@@ -160,7 +187,7 @@ public class PlanarRegionGraph
 
       public boolean isRoot()
       {
-         return planarRegion == null;
+         return parentNode == null;
       }
 
       public int getNodeId()
@@ -242,23 +269,35 @@ public class PlanarRegionGraph
 
       public void recursivelyMergeInChildren(double updateTowardsChildAlpha)
       {
-         childNodes.forEach(node -> node.recursivelyMergeInChildren(updateTowardsChildAlpha));
+         for (int i = 0; i < childNodes.size(); i++)
+            childNodes.get(i).recursivelyMergeInChildren(updateTowardsChildAlpha);
 
          if (planarRegion == null)
             return;
 
          int childIdx = 0;
-         while (childIdx < childNodes.size())
+         boolean changed = false;
+         do
          {
-            if (mergeRegionIntoParent(planarRegion, childNodes.get(childIdx).planarRegion, updateTowardsChildAlpha))
+            changed = false;
+            while (childIdx < childNodes.size())
             {
-               childNodes.remove(childIdx);
-            }
-            else
-            {
-               childIdx++;
+               PlanarRegionNode childNode = childNodes.get(childIdx);
+               if (mergeRegionIntoParent(planarRegion, childNode.planarRegion, updateTowardsChildAlpha))
+               {
+                  changed = true;
+                  childNodes.remove(childIdx);
+                  // inherit the remaining children of the child
+                  for (int i = 0; i < childNode.getNumberOfChildren(); i++)
+                     addChildNode(childNode.getChildNode(childIdx));
+               }
+               else
+               {
+                  childIdx++;
+               }
             }
          }
+         while (changed);
       }
 
       public PlanarRegionsList collectAsPlanarRegionsList()
@@ -268,7 +307,8 @@ public class PlanarRegionGraph
          if (planarRegion != null)
             list.addPlanarRegion(planarRegion);
 
-         childNodes.forEach(child -> list.addPlanarRegionsList(child.collectAsPlanarRegionsList()));
+         for (int i = 0; i < childNodes.size(); i++)
+            list.addPlanarRegionsList(childNodes.get(i).collectAsPlanarRegionsList());
 
          return list;
       }
