@@ -944,11 +944,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             {
                controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
                controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
-            }
 
-            if (bodyManager.getJointDesiredData() != null)
-            {
-               controllerCoreCommand.completeLowLevelJointData(bodyManager.getJointDesiredData());
+               if (bodyManager.getJointDesiredData() != null)
+               {
+                  controllerCoreCommand.completeLowLevelJointData(bodyManager.getJointDesiredData());
+               }
             }
          }
       }
@@ -957,6 +957,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       if ((naturalPostureManager != null) && (useNaturalPostureCommand.getValue()))
       {
          controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getQPObjectiveCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(naturalPostureManager.getJointLimitEnforcementCommand());
+         limitCommandSent.set(false);
       }
 
       // Privileged pelvis control:

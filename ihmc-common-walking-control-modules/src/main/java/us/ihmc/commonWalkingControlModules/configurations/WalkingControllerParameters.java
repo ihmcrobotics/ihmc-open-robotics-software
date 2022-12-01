@@ -805,4 +805,8 @@ public abstract class WalkingControllerParameters
       return null;
    }
 
+   public NaturalPostureParameters getNaturalPostureParameters()
+   {
+      return null;
+   }
 }
