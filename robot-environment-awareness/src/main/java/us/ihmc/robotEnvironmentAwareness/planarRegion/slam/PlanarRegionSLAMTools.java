@@ -260,11 +260,11 @@ public class PlanarRegionSLAMTools
                if (wasMatched)
                   wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) < distanceThreshold;
 
-               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)", mapRegionIndex,
-                                           mapRegion.getRegionId(), newRegion.getRegionId(),
-                                           normalSimilarity, normalThreshold,
-                                           normalDistance, normalDistanceThreshold,
-                                           originDistance, distanceThreshold) + ": [{}]", wasMatched);
+               //LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)", mapRegionIndex,
+               //                            mapRegion.getRegionId(), newRegion.getRegionId(),
+               //                            normalSimilarity, normalThreshold,
+               //                            normalDistance, normalDistanceThreshold,
+               //                            originDistance, distanceThreshold) + ": [{}]", wasMatched);
 
                if (wasMatched)
                {

@@ -4,7 +4,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 public class RDXPlanarRegionFilteredMapDemo
 {
@@ -16,13 +15,14 @@ public class RDXPlanarRegionFilteredMapDemo
 
    public RDXPlanarRegionFilteredMapDemo()
    {
+      mapHandler = new PlanarRegionMappingManager();
+
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
             baseUI.create();
-            mapHandler = new PlanarRegionMappingManager();
             planarRegionFilteredMapUI = new PlanarRegionFilteredMapUI("Filtered Map", mapHandler);
             baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUI.getImGuiPanel());
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
@@ -31,7 +31,7 @@ public class RDXPlanarRegionFilteredMapDemo
          @Override
          public void render()
          {
-            if(planarRegionFilteredMapUI.isCaptured())
+            if (planarRegionFilteredMapUI.isCaptured())
             {
                LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUI.isCaptured());
                mapHandler.setCaptured(true);
