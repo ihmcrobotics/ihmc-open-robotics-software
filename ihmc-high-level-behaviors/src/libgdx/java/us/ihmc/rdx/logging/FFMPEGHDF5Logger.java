@@ -1,5 +1,7 @@
 package us.ihmc.rdx.logging;
 
+import com.google.common.primitives.Longs;
+import org.apache.commons.io.FileUtils;
 import org.bytedeco.ffmpeg.avcodec.AVCodecParameters;
 import org.bytedeco.ffmpeg.avformat.AVIOContext;
 import org.bytedeco.ffmpeg.avutil.AVRational;
@@ -10,35 +12,73 @@ import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.ffmpeg.swscale.SwsFilter;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 public class FFMPEGHDF5Logger extends FFMPEGLogger
 {
-   public static final String NAMESPACE = "FFMPEGVideo"; //this will need to be changed later to be user-set
+   public static final String NAMESPACE_ROOT = "ffmpeg"; //this will need to be changed later to be user-set
    private final HDF5Manager hdf5Manager;
-   private Group framesGroup;
+   private Group ptsGroup;
+   private Group dtsGroup;
+   private Group dataGroup;
+   private Group flagsGroup;
+   private Group sideDataGroup;
+   private Group durationGroup;
+   private Group posGroup;
+   private final String tempFileName;
 
    @Override
    public void stop()
    {
-      framesGroup.close();
-      hdf5Manager.getFile().close();
       super.stop();
+
+      try {
+         Group headerGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/header");
+
+         byte[] headerData = FileUtils.readFileToByteArray(new File(tempFileName));
+         HDF5Tools.storeByteArray(headerGroup, 0, headerData, headerData.length);
+
+         headerGroup.close();
+      }
+      catch (IOException ex) {
+         LogTools.warn("Encountered problem recording header data - video may be corrupt.");
+         LogTools.warn(ex);
+      }
+
+      ptsGroup.close();
+      dtsGroup.close();
+      dataGroup.close();
+      flagsGroup.close();
+      sideDataGroup.close();
+      durationGroup.close();
+      posGroup.close();
+
+      hdf5Manager.getFile().close();
    }
 
    private boolean isInitialized = false;
    protected void initialize()
    {
       isInitialized = true;
+
+      ptsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/pts");
+      dtsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/dts");
+      dataGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/data");
+      flagsGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/flags");
+      sideDataGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/side_data");
+      durationGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/duration");
+      posGroup = hdf5Manager.getGroup(NAMESPACE_ROOT + "/pos");
 
       int returnCode = avcodec.avcodec_open2(avEncoderContext, avEncoderContext.codec(), streamFlags);
       FFMPEGTools.checkNonZeroError(returnCode, "Initializing codec context to use the codec");
@@ -58,13 +98,12 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
 
       FileTools.ensureDirectoryExists(Paths.get(fileName).getParent(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-      AVIOContext avBytestreamIOContext = new AVIOContext(); //do this instead to handle custom wrtie? https://stackoverflow.com/questions/42400811/looking-for-javacpp-ffmpeg-customio-example
+      AVIOContext avBytestreamIOContext = new AVIOContext(); //Possible more robust solution: https://stackoverflow.com/questions/42400811/looking-for-javacpp-ffmpeg-customio-example (use for playback probably)
       returnCode = avformat.avio_open(avBytestreamIOContext, fileName, avformat.AVIO_FLAG_WRITE);
       FFMPEGTools.checkError(returnCode, avBytestreamIOContext, "Creating and initializing the I/O context");
       avFormatContext.pb(avBytestreamIOContext);
 
-      returnCode = avformat.avformat_write_header(avFormatContext, streamFlags); //The current setup works, but creates a (mostly) empty file with the header information. Hopefully setrting a custom AVIOContext can fix this problem, but failing that
-      //creating a temp file and reading it back should work. Not ideal, but considering we can write frames directly it won't cause a performance hit. The same thing will probably have to happen when final data is written to the file at close.
+      returnCode = avformat.avformat_write_header(avFormatContext, streamFlags);
       FFMPEGTools.checkNonZeroError(returnCode, "Allocating the stream private data and writing the stream header to the output media file");
 
       if (encoderFormatConversionNecessary)
@@ -99,8 +138,6 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
                                              extraParameters);
          FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
       }
-
-      framesGroup = hdf5Manager.getGroup(NAMESPACE);
    }
 
    @Override
@@ -109,32 +146,12 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       if (!isInitialized)
          initialize();
 
-      int returnCode;
-      returnCode = avutil.av_frame_make_writable(avFrameToBeEncoded);
-      FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
-
-      if (swsContext == null)
-      {
-         avFrameToBeEncoded.data(0, sourceImage.getBytedecoByteBufferPointer());
-      }
-      else
-      {
-         returnCode = avutil.av_frame_make_writable(avFrameToBeScaled);
-         FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
-
-         avFrameToBeScaled.data(0, sourceImage.getBytedecoByteBufferPointer());
-
-         PointerPointer sourceSlice = avFrameToBeScaled.data();
-         IntPointer sourceStride = avFrameToBeScaled.linesize();
-         int sourceSliceY = 0;
-         int sourceSliceHeight = avEncoderContext.height();
-         PointerPointer destination = avFrameToBeEncoded.data();
-         IntPointer destinationStride = avFrameToBeEncoded.linesize();
-         int heightOfOutputSlice = swscale.sws_scale(swsContext, sourceSlice, sourceStride, sourceSliceY, sourceSliceHeight, destination, destinationStride);
-      }
+      this.prepareFrameForWriting(sourceImage);
 
       // Presentation timestamp in time_base units (time when frame should be shown to user).
       avFrameToBeEncoded.pts(presentationTimestamp);
+
+      int returnCode;
 
       // Try again is returned quite often, citing "Resource temporarily unavailable"
       // Documentation says that the user must try to send input, so we put the send frame in here
@@ -157,10 +174,27 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
       // Decompression timestamp in AVStream->time_base units; the time at which the packet is decompressed
       avPacket.stream_index(avStream.index());
 
-      HDF5Tools.storeBytesFromPointer(framesGroup, presentationTimestamp++, avPacket.data(), avPacket.size());
+      // Write packet data to HDF groups instead of calling av_interleave_frame()
+      HDF5Tools.storeByteArray(ptsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pts()), Long.BYTES);
+      HDF5Tools.storeByteArray(dtsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.dts()), Long.BYTES);
 
-      returnCode = avformat.av_interleaved_write_frame(avFormatContext, avPacket);
-      FFMPEGTools.checkNonZeroError(returnCode, "Writing packet to output media file ensuring correct interleaving");
+      //TODO this copy operation is necessary for data to be properly logged but there might be a faster way to do this. There doesn't seem to be a major speed impact though
+      try (BytePointer data = new BytePointer(avPacket.size())) {
+         BytePointer.memcpy(data, avPacket.data(), avPacket.size());
+         HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.size());
+      }
+
+      HDF5Tools.storeByteArray(flagsGroup, presentationTimestamp++, Longs.toByteArray(avPacket.flags()), Integer.BYTES); // Not a long but that's okay
+
+      if (avPacket.side_data() != null) {
+         try (BytePointer data = new BytePointer(avPacket.side_data().size())) {
+            BytePointer.memcpy(data, avPacket.side_data().data(), avPacket.side_data().size());
+            HDF5Tools.storeBytesFromPointer(dataGroup, presentationTimestamp++, data, avPacket.side_data().size());
+         }
+      }
+
+      HDF5Tools.storeByteArray(durationGroup, presentationTimestamp++, Longs.toByteArray(avPacket.duration()), Long.BYTES);
+      HDF5Tools.storeByteArray(posGroup, presentationTimestamp++, Longs.toByteArray(avPacket.pos()), Long.BYTES);
 
       return returnCode == 0;
    }
@@ -175,9 +209,12 @@ public class FFMPEGHDF5Logger extends FFMPEGLogger
                            String fileName,
                            String preferredVideoEncoder)
    {
-      super(sourceVideoWidth, sourceVideoHeight, lossless, framerate, bitRate, sourcePixelFormat, encoderPixelFormat, fileName, preferredVideoEncoder);
+      // We write some information (such as the header) to a temp file because of the way FFMPEG works - we don't have direct control over this write
+      super(sourceVideoWidth, sourceVideoHeight, lossless, framerate, bitRate, sourcePixelFormat, encoderPixelFormat,
+            System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + fileName.replaceAll("\\W+", "") + ".h264", preferredVideoEncoder);
 
-      fileName += ".hdf5"; //this is going to look like something.mp4.hdf5 for now and should be improved later
+      this.tempFileName = System.getProperty("java.io.tmpdir") + System.getProperty("file.separator") + fileName.replaceAll("\\W+", "") + ".h264";
+
       hdf5Manager = new HDF5Manager(fileName, hdf5.H5F_ACC_TRUNC);
       hdf5Manager.getFile().openFile(fileName, hdf5.H5F_ACC_RDWR);
    }

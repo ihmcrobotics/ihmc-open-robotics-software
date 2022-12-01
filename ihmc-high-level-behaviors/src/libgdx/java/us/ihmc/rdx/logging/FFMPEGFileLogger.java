@@ -98,32 +98,12 @@ public class FFMPEGFileLogger extends FFMPEGLogger
       if (!isInitialized)
          initialize();
 
-      int returnCode;
-      returnCode = avutil.av_frame_make_writable(avFrameToBeEncoded);
-      FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
-
-      if (swsContext == null)
-      {
-         avFrameToBeEncoded.data(0, sourceImage.getBytedecoByteBufferPointer());
-      }
-      else
-      {
-         returnCode = avutil.av_frame_make_writable(avFrameToBeScaled);
-         FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
-
-         avFrameToBeScaled.data(0, sourceImage.getBytedecoByteBufferPointer());
-
-         PointerPointer sourceSlice = avFrameToBeScaled.data();
-         IntPointer sourceStride = avFrameToBeScaled.linesize();
-         int sourceSliceY = 0;
-         int sourceSliceHeight = avEncoderContext.height();
-         PointerPointer destination = avFrameToBeEncoded.data();
-         IntPointer destinationStride = avFrameToBeEncoded.linesize();
-         int heightOfOutputSlice = swscale.sws_scale(swsContext, sourceSlice, sourceStride, sourceSliceY, sourceSliceHeight, destination, destinationStride);
-      }
+      this.prepareFrameForWriting(sourceImage);
 
       // Presentation timestamp in time_base units (time when frame should be shown to user).
       avFrameToBeEncoded.pts(presentationTimestamp++);
+
+      int returnCode;
 
       // Try again is returned quite often, citing "Resource temporarily unavailable"
       // Documentation says that the user must try to send input, so we put the send frame in here

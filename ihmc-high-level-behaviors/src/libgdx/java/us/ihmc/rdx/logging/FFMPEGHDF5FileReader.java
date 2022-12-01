@@ -113,7 +113,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       hdf5Manager = new HDF5Manager(hdf5File, hdf5.H5F_ACC_RDONLY);
       hdf5Manager.getFile().openFile(hdf5File, hdf5.H5F_ACC_RDONLY);
 
-      framesGroup = hdf5Manager.getGroup(FFMPEGHDF5Logger.NAMESPACE);
+      framesGroup = hdf5Manager.getGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
    }
 
    //Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
@@ -146,15 +146,10 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
       {
 
          avformat.av_read_frame(avFormatContext, packet);
-         LogTools.debug("SIZE:::: " + packet.size());
-         System.out.print("[");
-         for (int i = 0; i < packet.size(); i++) {
-            System.out.print("" + packet.data().get(i) + ", ");
-         }
          //get packet from HDF5
          byte[] rawData = HDF5Tools.loadRawByteArray(framesGroup, streamIndex);
          BytePointer packetData = new BytePointer(ByteBuffer.wrap(rawData));
-         packet.data(packetData); //set here
+         BytePointer.memcpy(packet.data(), packetData, rawData.length);
       }
       while (packet.stream_index() != streamIndex);
 

@@ -29,13 +29,13 @@ public class RDXFFMPEGHDF5LoggingDemo
    private BytedecoImage image;
    private final boolean lossless = true;
    private final int framerate = 30;
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + ".mp4",
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + ".hdf5",
                                                                                             avutil.AV_PIX_FMT_RGBA,
                                                                                             avutil.AV_PIX_FMT_YUV420P,
                                                                                             lossless,
                                                                                             framerate,
                                                                                             400000,
-                                                                                            "mpeg4");
+                                                                                            "libopenh264"); // We don't use MP4 here because we don't care about seeking (as we can't write trailer data)
    private final Random random = new Random();
    private final byte[] data = new byte[4];
    private int index = 0;

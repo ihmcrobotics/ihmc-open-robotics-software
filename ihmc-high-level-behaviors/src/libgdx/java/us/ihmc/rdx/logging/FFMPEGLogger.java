@@ -213,6 +213,33 @@ public abstract class FFMPEGLogger
       swscale.sws_freeContext(swsContext);
    }
 
+   protected void prepareFrameForWriting(BytedecoImage sourceImage)
+   {
+      int returnCode;
+      returnCode = avutil.av_frame_make_writable(avFrameToBeEncoded);
+      FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
+
+      if (swsContext == null)
+      {
+         avFrameToBeEncoded.data(0, sourceImage.getBytedecoByteBufferPointer());
+      }
+      else
+      {
+         returnCode = avutil.av_frame_make_writable(avFrameToBeScaled);
+         FFMPEGTools.checkNonZeroError(returnCode, "Ensuring frame data is writable");
+
+         avFrameToBeScaled.data(0, sourceImage.getBytedecoByteBufferPointer());
+
+         PointerPointer sourceSlice = avFrameToBeScaled.data();
+         IntPointer sourceStride = avFrameToBeScaled.linesize();
+         int sourceSliceY = 0;
+         int sourceSliceHeight = avEncoderContext.height();
+         PointerPointer destination = avFrameToBeEncoded.data();
+         IntPointer destinationStride = avFrameToBeEncoded.linesize();
+         int heightOfOutputSlice = swscale.sws_scale(swsContext, sourceSlice, sourceStride, sourceSliceY, sourceSliceHeight, destination, destinationStride);
+      }
+   }
+
    public String getFormatName()
    {
       return formatName;
