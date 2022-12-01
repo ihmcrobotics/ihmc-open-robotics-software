@@ -224,8 +224,8 @@ public class CaptureRegionSafetyHeuristicsTest
 
       heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(),
                                                           icp, supportFootPolygon.getCentroid(), captureRegion);
-
       assertTheShrunkenRegionIsInTheUnshrunkenRegion(captureRegion, heuristics.getCaptureRegionWithSafetyMargin(), 5e-3);
+
 
       if (PLOT_RESULTS)
       {
@@ -236,6 +236,7 @@ public class CaptureRegionSafetyHeuristicsTest
          plotter.addPolygon(captureRegion, Color.green);
          plotter.addFramePoint2d(icp, Color.blue);
          plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.red);
+         plotter.addFrameLine2d(heuristics.getLineOfMinimalAction(), Color.BLUE);
 
          for (int i = 0; i < captureRegion.getNumberOfVertices(); i++)
             plotter.addFramePoint2d(captureRegion.getVertex(i), Color.green);
