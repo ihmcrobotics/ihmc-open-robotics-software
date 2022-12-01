@@ -42,14 +42,28 @@ public class GPUPlanarRegionExtractionParameters extends StoredPropertySet imple
    public static final IntegerStoredPropertyKey boundaryMinPatches = keys.addIntegerKey("Boundary min patches");
    public static final DoubleStoredPropertyKey regionGrowthFactor = keys.addDoubleKey("Region growth factor");
 
+   /**
+    * Loads this property set.
+    */
    public GPUPlanarRegionExtractionParameters()
    {
       this("");
    }
 
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
    public GPUPlanarRegionExtractionParameters(String versionSpecifier)
    {
-      super(keys, GPUPlanarRegionExtractionParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(GPUPlanarRegionExtractionParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public GPUPlanarRegionExtractionParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   {
+      super(keys, classForLoading, GPUPlanarRegionExtractionParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
       load();
    }
 

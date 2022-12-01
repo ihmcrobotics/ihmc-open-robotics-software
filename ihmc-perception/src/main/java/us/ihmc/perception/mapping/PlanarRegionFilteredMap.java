@@ -20,12 +20,12 @@ import java.util.HashSet;
 
 public class PlanarRegionFilteredMap
 {
-   private static final double updateAlphaTowardsMatch = 0.05;
+   private PlanarRegionFilteredMapParameters parameters;
 
-   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
-   private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
-   private static final float maxDistanceBetweenRegionsForMatch = 1.5f;
-
+   private double updateAlphaTowardsMatch = 0.05;
+   private double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
+   private float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
+   private float maxDistanceBetweenRegionsForMatch = 1.5f;
 
    private boolean initialized = false;
    private boolean modified = false;
@@ -38,6 +38,7 @@ public class PlanarRegionFilteredMap
 
    public PlanarRegionFilteredMap()
    {
+      parameters = new PlanarRegionFilteredMapParameters();
       finalMap = new PlanarRegionsList();
    }
 
