@@ -22,9 +22,9 @@ public class PlanarRegionFilteredMap
 
    private static final double updateAlphaTowardsMatch = 0.05;
 
-   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(25);
-   private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.1f;
-   private static final float maxDistanceBetweenRegionsForMatch = 0.15f;
+   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
+   private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
+   private static final float maxDistanceBetweenRegionsForMatch = 0.0f;
 
    private boolean initialized = false;
    private boolean modified = false;
@@ -253,39 +253,51 @@ public class PlanarRegionFilteredMap
          changed = false;
 
          int parentIndex = 0;
-         int childIndex = 1;
+         int childIndex = 0;
 
-         //LogTools.info("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+         LogTools.info("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
 
          while (parentIndex < map.getNumberOfPlanarRegions())
          {
-            //LogTools.info("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
-
+            LogTools.info("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+            childIndex = 0;
             PlanarRegion parentRegion = map.getPlanarRegion(parentIndex);
             while (childIndex < map.getNumberOfPlanarRegions())
             {
-               if (parentIndex != childIndex)
+               if (parentIndex == childIndex)
+               {
+                  childIndex++;
+               }
+               else
                {
                   PlanarRegion childRegion = map.getPlanarRegion(childIndex);
 
-                  //LogTools.info("Child Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+                  LogTools.info("Child Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
 
-                  if(PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, normalThreshold, normalDistanceThreshold, distanceThreshold))
+                  if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, normalThreshold, normalDistanceThreshold, distanceThreshold))
                   {
-                     //LogTools.info("Matched({},{}) -> Merging", parentIndex, childIndex);
+                     LogTools.info("Matched({},{}) -> Merging", parentIndex, childIndex);
                      if (PlanarRegionSLAMTools.mergeRegionIntoParent(parentRegion, childRegion, updateTowardsChildAlpha))
                      {
-                        //LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
+                        LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
 
                         changed = true;
                         map.getPlanarRegionsAsList().remove(childIndex);
+                     }
+                     else {
+                        childIndex++;
                      }
                   }
                   else
                   {
                      childIndex++;
                   }
+
+                  if (changed)
+                     break;
                }
+               if (changed)
+                  break;
             }
             parentIndex++;
          }
@@ -303,7 +315,8 @@ public class PlanarRegionFilteredMap
                                                           float distanceThreshold)
    {
       map.addPlanarRegionsList(regions);
-      map = selfReduceRegionsIteratively(map, (float) updateAlphaTowardsMatch,
+      map = selfReduceRegionsIteratively(map,
+                                         (float) updateAlphaTowardsMatch,
                                          (float) Math.cos(angleThresholdBetweenNormalsForMatch),
                                          outOfPlaneDistanceFromOneRegionToAnother,
                                          maxDistanceBetweenRegionsForMatch);

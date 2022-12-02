@@ -700,7 +700,7 @@ public class PlanarRegionSLAMTools
       originVec.sub(newOrigin, mapOrigin);
 
       double normalDistance = Math.abs(originVec.dot(regionB.getNormal()));
-      double normalSimilarity = regionA.getNormal().dot(regionB.getNormal());
+      double normalSimilarity = Math.abs(regionA.getNormal().dot(regionB.getNormal()));
 
       double originDistance = 0;
 
