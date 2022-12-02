@@ -14,12 +14,14 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -27,8 +29,11 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
@@ -292,10 +297,10 @@ public class PlanarRegionSLAMTools
    }
 
    public static List<IncomingRegionMatchData> findPlanarRegionMatches(PlanarRegionsList map,
-                                                               PlanarRegionsList incoming,
-                                                               float normalThreshold,
-                                                               float normalDistanceThreshold,
-                                                               float distanceThreshold)
+                                                                       PlanarRegionsList incoming,
+                                                                       float normalThreshold,
+                                                                       float normalDistanceThreshold,
+                                                                       float distanceThreshold)
    {
       PlanarRegionTools planarRegionTools = new PlanarRegionTools();
       List<IncomingRegionMatchData> allMatches = new ArrayList<>();
@@ -337,16 +342,16 @@ public class PlanarRegionSLAMTools
                if (wasMatched)
                   wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
 
-               LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
-                                           mapRegionIndex,
-                                           mapRegion.getRegionId(),
-                                           newRegion.getRegionId(),
-                                           normalSimilarity,
-                                           normalThreshold,
-                                           normalDistance,
-                                           normalDistanceThreshold,
-                                           originDistance,
-                                           distanceThreshold) + ": [{}]", wasMatched);
+               //LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+               //                            mapRegionIndex,
+               //                            mapRegion.getRegionId(),
+               //                            newRegion.getRegionId(),
+               //                            normalSimilarity,
+               //                            normalThreshold,
+               //                            normalDistance,
+               //                            normalDistanceThreshold,
+               //                            originDistance,
+               //                            distanceThreshold) + ": [{}]", wasMatched);
 
                if (wasMatched)
                {
@@ -615,5 +620,111 @@ public class PlanarRegionSLAMTools
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
    {
       return a.getBoundingBox3dInWorld().intersectsEpsilon(b.getBoundingBox3dInWorld(), 1e-8);
+   }
+
+   public static boolean mergeRegionIntoParent(PlanarRegion parentRegion, PlanarRegion childRegion, double updateTowardsChildAlpha)
+   {
+      // Update Map Region Normal and Origin
+      UnitVector3DReadOnly mapNormal = parentRegion.getNormal();
+      Point3DReadOnly mapOrigin = parentRegion.getPoint();
+
+      UnitVector3DReadOnly regionNormal = childRegion.getNormal();
+      Point3DReadOnly regionOrigin = childRegion.getPoint();
+
+      Vector3D futureNormal = new Vector3D();
+      futureNormal.interpolate(mapNormal, regionNormal, updateTowardsChildAlpha);
+
+      double futureHeightZ = EuclidCoreTools.interpolate(mapOrigin.getZ(), regionOrigin.getZ(), updateTowardsChildAlpha);
+
+      Vector3D normalVector = new Vector3D(mapNormal);
+      Vector3D axis = new Vector3D();
+      axis.cross(normalVector, futureNormal);
+      double angle = normalVector.angle(futureNormal);
+
+      Point3D futureOrigin = new Point3D(mapOrigin.getX(), mapOrigin.getY(), futureHeightZ);
+      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
+      Vector3D translationToFutureRegion = new Vector3D();
+      translationToFutureRegion.sub(futureOrigin, mapOrigin);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendOrientation(rotationToFutureRegion);
+      transform.appendTranslation(translationToFutureRegion);
+
+      parentRegion.applyTransform(transform);
+
+      ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(parentRegion, childRegion, 1.0f, null);
+
+      if (mergedRegion != null)
+      {
+         if (mergedRegion.size() > 0)
+         {
+            parentRegion.set(mergedRegion.get(0));
+            return true;
+         }
+         else
+         {
+            // check if the child region is fully contained by the parent region
+            if (parentRegion.getConvexHull().isPointInside(childRegion.getConvexHull().getVertex(0)))
+            {
+               return true;
+            }
+            // check if the parent region is fully contained by the child region
+            else if (childRegion.getConvexHull().isPointInside(parentRegion.getConvexHull().getVertex(0)))
+            {
+               parentRegion.set(childRegion);
+               return true;
+            }
+
+            return false;
+         }
+      }
+
+      throw new RuntimeException("Shoot");
+   }
+
+   public static boolean checkRegionsForOverlap(PlanarRegion regionA,
+                                                PlanarRegion regionB,
+                                                float normalThreshold,
+                                                float normalDistanceThreshold,
+                                                float distanceThreshold)
+   {
+      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
+
+      Point3D newOrigin = new Point3D();
+      regionA.getOrigin(newOrigin);
+
+      Point3D mapOrigin = new Point3D();
+      regionB.getOrigin(mapOrigin);
+
+      Vector3D originVec = new Vector3D();
+      originVec.sub(newOrigin, mapOrigin);
+
+      double normalDistance = Math.abs(originVec.dot(regionB.getNormal()));
+      double normalSimilarity = regionA.getNormal().dot(regionB.getNormal());
+
+      double originDistance = 0;
+
+      // check to make sure the angles are similar enough
+      boolean wasMatched = normalSimilarity > normalThreshold;
+      // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+      wasMatched &= normalDistance < normalDistanceThreshold;
+      // check that the regions aren't too far from one another
+      if (wasMatched)
+      {
+         originDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionB, regionA);
+         wasMatched = originDistance <= distanceThreshold;
+      }
+
+      //LogTools.info(String.format("(%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+      //                            regionB.getRegionId(),
+      //                            regionA.getRegionId(),
+      //                            normalSimilarity,
+      //                            normalThreshold,
+      //                            normalDistance,
+      //                            normalDistanceThreshold,
+      //                            originDistance,
+      //                            distanceThreshold) + ": [{}]", wasMatched);
+
+      return wasMatched;
    }
 }

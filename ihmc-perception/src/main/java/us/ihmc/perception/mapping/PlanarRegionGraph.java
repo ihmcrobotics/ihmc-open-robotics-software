@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -69,80 +70,7 @@ public class PlanarRegionGraph
       return root.collectAsPlanarRegionsList();
    }
 
-   private static boolean mergeRegionIntoParent(PlanarRegion parentRegion, PlanarRegion childRegion, double updateTowardsChildAlpha)
-   {
-      // Update Map Region Normal and Origin
-      UnitVector3DReadOnly mapNormal = parentRegion.getNormal();
-      Point3DReadOnly mapOrigin = parentRegion.getPoint();
 
-      UnitVector3DReadOnly regionNormal = childRegion.getNormal();
-      Point3DReadOnly regionOrigin = childRegion.getPoint();
-
-      Vector3D futureNormal = new Vector3D();
-      futureNormal.interpolate(mapNormal, regionNormal, updateTowardsChildAlpha);
-
-      double futureHeightZ = EuclidCoreTools.interpolate(mapOrigin.getZ(), regionOrigin.getZ(), updateTowardsChildAlpha);
-
-      Vector3D normalVector = new Vector3D(mapNormal);
-      Vector3D axis = new Vector3D();
-      axis.cross(normalVector, futureNormal);
-      double angle = normalVector.angle(futureNormal);
-
-      Point3D futureOrigin = new Point3D(mapOrigin.getX(), mapOrigin.getY(), futureHeightZ);
-      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
-      Vector3D translationToFutureRegion = new Vector3D();
-      translationToFutureRegion.sub(futureOrigin, mapOrigin);
-
-      RigidBodyTransform transform = new RigidBodyTransform();
-      transform.appendOrientation(rotationToFutureRegion);
-      transform.appendTranslation(translationToFutureRegion);
-
-      parentRegion.applyTransform(transform);
-
-      // Update Map Region Hull
-      //List<Point2D> concaveHullMapRegionVertices = mapRegion.getConcaveHull();
-      //List<Point2D> concaveHullRegionVertices = region.getConcaveHull();
-      //List<Point2D> mergedConcaveHull = ConcaveHullMerger.mergeConcaveHulls(concaveHullMapRegionVertices, concaveHullRegionVertices, null);
-      //ArrayList<ConvexPolygon2D> newPolygonsFromConcaveHull = new ArrayList<>();
-      //ConcaveHullDecomposition.recursiveApproximateDecomposition(mergedConcaveHull, 0.001, newPolygonsFromConcaveHull);
-      //
-      //RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      //mapRegion.getTransformToWorld(transformToWorld);
-      //
-      //PlanarRegion planarRegion = new PlanarRegion(transformToWorld, mergedConcaveHull, newPolygonsFromConcaveHull);
-      //planarRegion.setRegionId(mapRegion.getRegionId());
-      //
-      //mapRegion.set(planarRegion);
-
-      ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(parentRegion, childRegion, 1.0f, null);
-
-      if (mergedRegion != null)
-      {
-         if (mergedRegion.size() > 0)
-         {
-            parentRegion.set(mergedRegion.get(0));
-            return true;
-         }
-         else
-         {
-            // check if the child region is fully contained by the parent region
-            if (parentRegion.getConvexHull().isPointInside(childRegion.getConvexHull().getVertex(0)))
-            {
-               return true;
-            }
-            // check if the parent region is fully contained by the child region
-            else if (childRegion.getConvexHull().isPointInside(parentRegion.getConvexHull().getVertex(0)))
-            {
-               parentRegion.set(childRegion);
-               return true;
-            }
-
-            return false;
-         }
-      }
-
-      throw new RuntimeException("Shoot");
-   }
 
    private static void makeRoot(PlanarRegionNode node)
    {
@@ -271,7 +199,7 @@ public class PlanarRegionGraph
             while (childIdx < childNodes.size())
             {
                PlanarRegionNode childNode = childNodes.get(childIdx);
-               if (mergeRegionIntoParent(planarRegion, childNode.planarRegion, updateTowardsChildAlpha))
+               if (PlanarRegionSLAMTools.mergeRegionIntoParent(planarRegion, childNode.planarRegion, updateTowardsChildAlpha))
                {
                   changed = true;
                   childNodes.remove(childIdx);
