@@ -107,13 +107,8 @@ public class ValkyrieImpedanceVisualizer implements SCSVisualizerStateListener
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(scs);
 
       sliderBoardConfigurationManager.setSlider(1, "masterGain", registry, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(2, "desiredJointStiffness", registry, 0.0, 140.0);
-      sliderBoardConfigurationManager.setSlider(3, "desiredJointDamping", registry, 0.0, 20.0);
-
-      sliderBoardConfigurationManager.setSlider(5, "qDesired_leftShoulderPitch", registry, -0.7, 0.7);
-      sliderBoardConfigurationManager.setSlider(6, "qDesired_leftShoulderRoll", registry, -1.45, -0.9);
-      sliderBoardConfigurationManager.setSlider(7, "qDesired_leftShoulderYaw", registry, -1.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(8, "qDesired_leftElbowPitch", registry, -0.8, 0.2);
+      sliderBoardConfigurationManager.setSlider(2, "desiredJointStiffness", registry, 0.0, 300.0);
+      sliderBoardConfigurationManager.setSlider(3, "desiredJointDamping", registry, 0.0, 45.0);
    }
 
    public static void main(String[] args)

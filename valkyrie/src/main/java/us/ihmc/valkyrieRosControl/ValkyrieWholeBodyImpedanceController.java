@@ -11,6 +11,8 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -27,8 +29,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.JointImpedanceHandle;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -40,25 +41,35 @@ import java.util.*;
 public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJavaBridge
 {
    private static final String[] allJoints;
-   private static final String[] jointsToServo;
+   private static final String[] impedanceJoints;
 
    static
    {
-      List<String> jointList = new ArrayList<>();
+      List<String> allJointsList = new ArrayList<>();
+      List<String> impedanceJointsList = new ArrayList<>();
 
       // Arms
-      jointList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
-      jointList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
+      allJointsList.addAll(Arrays.asList("leftShoulderPitch", "leftShoulderRoll", "leftShoulderYaw", "leftElbowPitch"));
+      allJointsList.addAll(Arrays.asList("rightShoulderPitch", "rightShoulderRoll", "rightShoulderYaw", "rightElbowPitch"));
 
       // Torso
-      jointList.addAll(Arrays.asList("torsoYaw", "torsoPitch", "torsoRoll"));
+      allJointsList.addAll(Arrays.asList("torsoYaw", "torsoPitch", "torsoRoll"));
 
       // Legs
-      jointList.addAll(Arrays.asList("leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll"));
-      jointList.addAll(Arrays.asList("rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll"));
+      allJointsList.addAll(Arrays.asList("leftHipYaw", "leftHipRoll", "leftHipPitch", "leftKneePitch", "leftAnklePitch", "leftAnkleRoll"));
+      allJointsList.addAll(Arrays.asList("rightHipYaw", "rightHipRoll", "rightHipPitch", "rightKneePitch", "rightAnklePitch", "rightAnkleRoll"));
 
-      allJoints = jointList.toArray(new String[0]);
-      jointsToServo = jointList.toArray(new String[0]);
+      allJoints = allJointsList.toArray(new String[0]);
+
+      for (String joint : allJointsList)
+      {
+         if (!joint.contains("Ankle"))
+         {
+            impedanceJointsList.add(joint);
+         }
+      }
+
+      impedanceJoints = impedanceJointsList.toArray(new String[0]);
    }
 
    private boolean firstTick = true;
@@ -74,7 +85,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
 
    private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "valkyrie_whole_body_impedance_controller");
    private final EffortJointHandle[] effortHandles = new EffortJointHandle[allJoints.length];
-   private final JointImpedanceHandle[] impedanceHandles = new JointImpedanceHandle[jointsToServo.length];
+   private final JointImpedanceHandle[] impedanceHandles = new JointImpedanceHandle[impedanceJoints.length];
 
    private final Map<String, EffortJointHandle> nameToEffortHandleMap = new HashMap<>();
    private final Map<String, JointImpedanceHandle> nameToImpedanceHandleMap = new HashMap<>();
@@ -84,7 +95,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final YoDouble desiredJointDamping = new YoDouble("desiredJointDamping", registry);
 
    private final JointspacePositionControllerState positionControllerState;
-   private final YoLowLevelOneDoFJointDesiredDataHolder jointDesiredOutput;
+   private final YoLowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
 
    private YoVariableServer yoVariableServer;
 
@@ -96,7 +107,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       JointBasics[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
       controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
 
-      desiredJointStiffness.set(180.0);
+      desiredJointStiffness.set(200.0);
       desiredJointDamping.set(35.0);
 
       CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
@@ -105,19 +116,22 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName());
       new ControllerNetworkSubscriber(inputTopic, commandInputManager, outputTopic, statusMessageOutputManager, ros2Node);
 
-      jointDesiredOutput = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
+      jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
       positionControllerState = new JointspacePositionControllerState(HighLevelControllerName.CUSTOM1,
                                                                       commandInputManager,
                                                                       statusMessageOutputManager,
                                                                       controlledOneDoFJoints,
                                                                       yoTime,
-                                                                      robotModel.getHighLevelControllerParameters(),
-                                                                      jointDesiredOutput);
+                                                                      robotModel.getHighLevelControllerParameters(), jointDesiredOutputList);
 
       for (int i = 0; i < allJoints.length; i++)
       {
-         nameToImpedanceHandleMap.put(allJoints[i], impedanceHandles[i]);
          nameToEffortHandleMap.put(allJoints[i], effortHandles[i]);
+      }
+
+      for (int i = 0; i < impedanceJoints.length; i++)
+      {
+         nameToImpedanceHandleMap.put(impedanceJoints[i], impedanceHandles[i]);
       }
 
       ros2Node.spin();
@@ -131,9 +145,9 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          effortHandles[i] = createEffortJointHandle(allJoints[i]);
       }
 
-      for (int i = 0; i < jointsToServo.length; i++)
+      for (int i = 0; i < impedanceJoints.length; i++)
       {
-         impedanceHandles[i] = createJointImpedanceHandle(jointsToServo[i]);
+         impedanceHandles[i] = createJointImpedanceHandle(impedanceJoints[i]);
       }
 
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
@@ -187,16 +201,42 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
 
    private void write()
    {
-      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      for (int i = 0; i < impedanceJoints.length; i++)
       {
-         OneDoFJointBasics joint = controlledOneDoFJoints[i];
-         JointImpedanceHandle impedanceHandle = nameToImpedanceHandleMap.get(joint.getName());
+         String jointName = impedanceJoints[i];
+         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointName);
+         JointImpedanceHandle impedanceHandle = impedanceHandles[i];
 
          impedanceHandle.setStiffness(masterGain.getDoubleValue() * desiredJointStiffness.getDoubleValue());
          impedanceHandle.setDamping(masterGain.getDoubleValue() * desiredJointDamping.getDoubleValue());
 
-         impedanceHandle.setPosition(jointDesiredOutput.getDesiredJointPosition(i));
-         impedanceHandle.setVelocity(jointDesiredOutput.getDesiredJointVelocity(i));
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+
+         double desiredPosition = jointDesiredOutput.getDesiredPosition();
+         double desiredVelocity = jointDesiredOutput.getDesiredVelocity();
+
+         double epsilonNearLimit = Math.toRadians(3.5);
+         double maxVelocity = 4.0;
+
+         /* Clamp desired position */
+         desiredPosition = EuclidCoreTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
+
+         /* Scale down velocities near limits and clamp overall velocity */
+         if (EuclidCoreTools.epsilonEquals(joint.getJointLimitLower(), desiredPosition, epsilonNearLimit) && desiredVelocity < 0.0)
+         {
+            double scale = (desiredPosition - joint.getJointLimitLower()) / epsilonNearLimit;
+            desiredVelocity = scale * desiredVelocity;
+         }
+         else if (EuclidCoreTools.epsilonEquals(joint.getJointLimitUpper(), desiredPosition, epsilonNearLimit) && desiredVelocity > 0.0)
+         {
+            double scale = (joint.getJointLimitUpper() - desiredPosition) / epsilonNearLimit;
+            desiredVelocity = scale * desiredVelocity;
+         }
+
+         desiredVelocity = EuclidCoreTools.clamp(desiredVelocity, maxVelocity);
+
+         impedanceHandle.setPosition(desiredPosition);
+         impedanceHandle.setVelocity(desiredVelocity);
       }
    }
 }
