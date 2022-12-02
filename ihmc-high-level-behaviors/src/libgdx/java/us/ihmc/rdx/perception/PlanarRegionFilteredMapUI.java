@@ -23,8 +23,8 @@ public class PlanarRegionFilteredMapUI
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       this.mappingManager = mappingManager;
 
-      mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
-      mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
+      //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
+      //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
 
       mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
       mapPlanarRegionsGraphic.update();
