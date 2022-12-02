@@ -97,8 +97,10 @@ public class PlanarRegionMappingManager
          enableCapture = false;
       }
 
+      LogTools.info("Callback: Regions Received!");
       if (enableLiveMode)
       {
+            LogTools.info("Callback: Fusing Regions in Live Mode!");
             planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
             filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
       }
@@ -140,6 +142,11 @@ public class PlanarRegionMappingManager
    public void setCaptured(boolean enableCapture)
    {
       this.enableCapture = enableCapture;
+   }
+
+   public boolean isEnabled()
+   {
+      return enableLiveMode;
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)

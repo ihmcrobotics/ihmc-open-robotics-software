@@ -679,7 +679,8 @@ public class PlanarRegionSLAMTools
          }
       }
 
-      throw new RuntimeException("Shoot");
+//      throw new RuntimeException("Shoot");
+      return false;
    }
 
    public static boolean checkRegionsForOverlap(PlanarRegion regionA,

@@ -1,20 +1,15 @@
 package us.ihmc.perception.mapping;
 
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
-import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
 
 public class PlanarRegionFilteredMap
 {
@@ -284,7 +279,8 @@ public class PlanarRegionFilteredMap
                         changed = true;
                         map.getPlanarRegionsAsList().remove(childIndex);
                      }
-                     else {
+                     else
+                     {
                         childIndex++;
                      }
                   }
