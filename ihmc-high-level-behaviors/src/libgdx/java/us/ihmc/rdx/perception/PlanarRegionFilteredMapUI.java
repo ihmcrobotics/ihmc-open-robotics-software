@@ -23,6 +23,7 @@ public class PlanarRegionFilteredMapUI
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       this.mappingManager = mappingManager;
 
+      // TODO: Connect this to UI. JIRA Ticket HS-330 (https://jira.ihmc.us/browse/HS-330)
       //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
       //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
 
