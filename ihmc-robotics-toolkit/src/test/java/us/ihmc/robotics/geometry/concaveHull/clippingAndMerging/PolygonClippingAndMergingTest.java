@@ -664,6 +664,8 @@ public class PolygonClippingAndMergingTest
 
       ConcavePolygon2D mergedOuter = new ConcavePolygon2D();
       PolygonClippingAndMerging.merge(uPolygon, hat, mergedOuter);
+      mergedOuter.notifyVerticesChanged();
+      mergedOuter.update();
 
       //      assertEquals(1, holes.size());
 

@@ -1,5 +1,5 @@
 
-# This message is part of the collection of platform-independent ROS messages.
+# This is part of the IHMC Common message package.
 # This message carries the frame related information needed for some messages such as taskspace trajectories.
 # Valid codes and their associated frames include:"
 int64 WORLD_FRAME=83766130

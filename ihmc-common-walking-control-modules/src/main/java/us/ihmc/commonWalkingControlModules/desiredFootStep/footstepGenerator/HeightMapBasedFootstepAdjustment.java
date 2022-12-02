@@ -21,7 +21,10 @@ public class HeightMapBasedFootstepAdjustment implements FootstepAdjustment
    public boolean adjustFootstep(FramePose3DReadOnly supportFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedPose)
    {
       adjustedPose.getPosition().set(footstepPose.getPosition());
-      adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
+
+      if (heightMap != null)
+         adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
+
       yawPitchRoll.set(supportFootPose.getOrientation());
       yawPitchRoll.setYaw(footstepPose.getYaw());
       adjustedPose.getOrientation().set(yawPitchRoll);

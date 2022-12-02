@@ -7,8 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message contains the controller's estimate of the ground plane.
+       * This is part of the IHMC Common message package.
+       * This message contains a model of the ground plane.
        * It is defined by an origin and a normal
        */
 public class GroundPlaneMessage extends Packet<GroundPlaneMessage> implements Settable<GroundPlaneMessage>, EpsilonComparable<GroundPlaneMessage>
