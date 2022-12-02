@@ -33,6 +33,7 @@ public class PlanarRegionTools
    private final ConvexPolygon2D tempPolygon2 = new ConvexPolygon2D();
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+   private final ConvexPolygon2D regionBPolygonInRegionA = new ConvexPolygon2D();
 
    public PlanarRegionTools()
    {}
@@ -44,7 +45,10 @@ public class PlanarRegionTools
       {
          for (int indexB = 0; indexB < regionB.getNumberOfConvexPolygons(); indexB++)
          {
-            double distance = convexPolygonTools.distanceBetweenTwoConvexPolygon2Ds(regionA.getConvexPolygon(indexA), regionB.getConvexPolygon(indexB));
+            regionBPolygonInRegionA.set(regionB.getConvexPolygon(indexB));
+            regionBPolygonInRegionA.applyTransform(regionB.getTransformToWorld(), false);
+            regionBPolygonInRegionA.applyTransform(regionA.getTransformToLocal(), false);
+            double distance = convexPolygonTools.distanceBetweenTwoConvexPolygon2Ds(regionA.getConvexPolygon(indexA), regionBPolygonInRegionA);
 
             minDistance = Math.min(distance, minDistance);
 

@@ -1187,7 +1187,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       updateBoundingBox();
    }
 
-   private void updateBoundingBox()
+   public void updateBoundingBox()
    {
       boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
@@ -1211,7 +1211,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       this.boundingBox3dInWorld.setMax(maxPoint.getX() + boundingBoxEpsilon, maxPoint.getY() + boundingBoxEpsilon, maxPoint.getZ() + boundingBoxEpsilon);
    }
 
-   private void updateConvexHull()
+   public void updateConvexHull()
    {
       convexHull.clear();
       for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
