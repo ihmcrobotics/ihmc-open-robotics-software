@@ -129,9 +129,10 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
    public void testWalkingOverSteppingStonesForwardPush()
    {
       setupTest();
+      simulationTestHelper.setKeepSCSUp(true);
       double transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
 
-      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(10.0, new YoRegistry("test"));
+      SteppableRegionsCalculator steppableRegionsCalculator = new SteppableRegionsCalculator(100.0, new YoRegistry("test"));
       steppableRegionsCalculator.setPlanarRegions(createPlanarRegionsList());
 
       FootstepDataListMessage footstepDataList = createFootstepsForWalkingOverEasySteppingStones(swingTime, transferTime);
@@ -225,10 +226,8 @@ public abstract class AvatarPushRecoveryOverSteppingStonesTest implements MultiR
       platform.setRegionId(idStart + locations.size() - 2);
 
       planarRegions.add(platform);
-      planarRegions.add(platform);
 
       return planarRegions;
-
    }
 
    private PlanarRegionsListMessage createPlanarRegionsListMessage()

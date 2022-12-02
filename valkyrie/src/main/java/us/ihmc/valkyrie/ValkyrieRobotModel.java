@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -44,6 +45,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
@@ -705,5 +707,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return new ValkyrieDirectRobotInterface(ros2Node, this);
+   }
+
+   @Override
+   public Path getMultiContactScriptPath()
+   {
+      Path folderPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      return folderPath.resolve("valkyrie/src/main/resources/multiContact/scripts").toAbsolutePath().normalize();
    }
 }

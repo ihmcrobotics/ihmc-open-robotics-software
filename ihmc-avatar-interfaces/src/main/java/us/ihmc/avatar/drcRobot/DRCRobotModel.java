@@ -1,5 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
@@ -277,6 +278,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return null;
+   }
+
+   default Path getMultiContactScriptPath()
    {
       return null;
    }
