@@ -66,7 +66,7 @@ public class RDXPlanarRegionBuilder
          ImGui.beginDisabled();
       if (ImGui.button("Add vertices"))
       {
-
+         selectedRegion.addVertex();
       }
       if (selectedRegion == null)
          ImGui.endDisabled();

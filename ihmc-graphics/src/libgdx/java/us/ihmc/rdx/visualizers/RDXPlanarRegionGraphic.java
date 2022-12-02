@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -17,6 +16,7 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.List;
@@ -29,7 +29,7 @@ public class RDXPlanarRegionGraphic implements RenderableProvider
    private final RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private final Color color;
-   private ModelInstance modelInstance;
+   private RDXModelInstance modelInstance;
    private final RigidBodyTransform identityTransform = new RigidBodyTransform();
 
    public RDXPlanarRegionGraphic(Color color)
@@ -56,7 +56,7 @@ public class RDXPlanarRegionGraphic implements RenderableProvider
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       modelBuilder.part(meshPart, material);
 
-      modelInstance = new ModelInstance(modelBuilder.end()); // TODO: Clean up garbage and look into reusing the Model
+      modelInstance = new RDXModelInstance(modelBuilder.end()); // TODO: Clean up garbage and look into reusing the Model
    }
 
    @Override
@@ -64,5 +64,10 @@ public class RDXPlanarRegionGraphic implements RenderableProvider
    {
       if (modelInstance != null)
          modelInstance.getRenderables(renderables, pool);
+   }
+
+   public RDXModelInstance getModelInstance()
+   {
+      return modelInstance;
    }
 }
