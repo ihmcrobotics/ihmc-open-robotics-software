@@ -505,6 +505,21 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    public Point3D intersectWithLine(Line3D projectionLineInWorld)
    {
+      Point3D intersection = new Point3D();
+      boolean intersects = intersectWithLine(projectionLineInWorld, intersection, false);
+      return intersects ? intersection : null;
+   }
+
+   /**
+    * Calculates the intersection between a line and a single planar region. Packs the result.
+    *
+    * @param projectionLineInWorld
+    * @param intersectionToPack
+    * @param if the line is a ray, make sure the intersection is in front and not behind it.
+    * @return intersects - true if intersects, false if not
+    */
+   public boolean intersectWithLine(Line3DReadOnly projectionLineInWorld, Point3D intersectionToPack, boolean lineIsARay)
+   {
       Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
       Point3DReadOnly pointOnPlane = new Point3D(getConvexPolygon(0).getVertex(0));
 
@@ -514,22 +529,28 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       transformFromWorldToLocal(pointOnLineInLocal);
       transformFromWorldToLocal(directionOfLineInLocal);
 
-      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
-                                                                                                     planeNormal,
-                                                                                                     pointOnLineInLocal,
-                                                                                                     directionOfLineInLocal);
-      if (intersectionWithPlaneInLocal == null) // line was parallel to plane
+      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal, directionOfLineInLocal, intersectionToPack);
+      if (intersectionToPack == null) // line was parallel to plane
       {
-         return null;
+         return false;
+      }
+      if (lineIsARay)
+      {
+         Vector3D rayOriginToIntersection = new Vector3D();
+         rayOriginToIntersection.sub(intersectionToPack, directionOfLineInLocal);
+         if (rayOriginToIntersection.dot(directionOfLineInLocal) < 0.0)
+         {
+            return false;
+         }
       }
 
-      if (isPointInside(intersectionWithPlaneInLocal.getX(), intersectionWithPlaneInLocal.getY()))
+      if (isPointInside(intersectionToPack.getX(), intersectionToPack.getY()))
       {
-         transformFromLocalToWorld(intersectionWithPlaneInLocal);
-         return intersectionWithPlaneInLocal;
+         transformFromLocalToWorld(intersectionToPack);
+         return true;
       }
 
-      return null; // line does not intersect
+      return false; // line does not intersect
    }
 
    /**
