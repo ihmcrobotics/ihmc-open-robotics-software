@@ -36,6 +36,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
+   private int numberOfTimesMatched = 0;
 
    /**
     * This transform also represents the pose of the PlanarRegion.
@@ -1651,5 +1652,15 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
 
       return buffer.toString();
+   }
+
+   public int getNumberOfTimesMatched()
+   {
+      return numberOfTimesMatched;
+   }
+
+   public void incrementNumberOfTimesMatched()
+   {
+      numberOfTimesMatched++;
    }
 }

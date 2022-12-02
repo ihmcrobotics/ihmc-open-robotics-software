@@ -77,7 +77,7 @@ public class PlanarRegionMappingManager
    {
       if(enableLiveMode)
       {
-         filteredMap.submitRegions(planarRegions);
+         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
       }
    }
 
@@ -100,7 +100,7 @@ public class PlanarRegionMappingManager
       if (enableLiveMode)
       {
             planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-            filteredMap.submitRegions(planarRegions);
+            filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
       }
    }
 
@@ -109,7 +109,7 @@ public class PlanarRegionMappingManager
       if (prlIndex < prlBuffer.getBufferLength())
       {
          planarRegions = prlBuffer.get(prlIndex);
-         filteredMap.submitRegions(planarRegions);
+         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
          prlIndex++;
       }
    }
@@ -128,7 +128,7 @@ public class PlanarRegionMappingManager
    {
       if(enableLiveMode)
       {
-         filteredMap.submitRegions(regions);
+         filteredMap.submitRegionsUsingIterativeReduction(regions);
       }
    }
 
