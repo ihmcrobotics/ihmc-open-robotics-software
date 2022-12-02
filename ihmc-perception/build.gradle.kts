@@ -47,6 +47,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+
+   apiBytedecoNatives("hdf5", "1.12.2-")
 }
 
 openpnpDependencies {
@@ -56,12 +58,16 @@ openpnpDependencies {
 val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
+   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:ihmc-commons:0.31.0")
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.21-")
    apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
    apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 
@@ -73,6 +79,8 @@ javacvDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
    apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 
