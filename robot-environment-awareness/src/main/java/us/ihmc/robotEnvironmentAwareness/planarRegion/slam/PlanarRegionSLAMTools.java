@@ -605,6 +605,33 @@ public class PlanarRegionSLAMTools
       return newDataCollisions;
    }
 
+   public static HashMap<Integer, Integer> findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList newData, float boundingBoxHeight, float normalThreshold)
+   {
+      HashMap<Integer, Integer> matches = new HashMap<>();
+
+      List<PlanarRegion> newRegions = newData.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+
+      for (int i = 0; i<mapRegions.size(); i++)
+      {
+         PlanarRegion mapRegion = mapRegions.get(i);
+         for (int j = 0; j<newRegions.size(); j++)
+         {
+            PlanarRegion newRegion = newRegions.get(j);
+
+            if (boxesIn3DIntersect(mapRegion, newRegion, boundingBoxHeight))
+            {
+               double dot = newRegion.getNormal().dot(mapRegion.getNormal());
+               if (dot > normalThreshold)
+               {
+                  matches.put(i, j);
+               }
+            }
+         }
+      }
+      return matches;
+   }
+
    public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b, double boxHeight)
    {
       Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorld(a, boxHeight);

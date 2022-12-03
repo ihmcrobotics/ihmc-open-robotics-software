@@ -16,6 +16,9 @@ void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
 
 void FactorGraphExternal::addOrientedPlaneFactor(float *lmMean, int lmId, int poseIndex)
 {
+    using namespace gtsam;
+    Vector4 planeValue(lmMean[0], lmMean[1], lmMean[2], lmMean[3]);
+    factorGraphHandler.addOrientedPlaneFactor(planeValue, lmId, poseIndex);
 }
 
 void FactorGraphExternal::optimize()
@@ -42,6 +45,9 @@ void FactorGraphExternal::setPoseInitialValue(int index, float *value)
 
 void FactorGraphExternal::setOrientedPlaneInitialValue(int landmarkId, float *value)
 {
+    using namespace gtsam;
+    OrientedPlane3 initialValue(value[0], value[1], value[2], value[3]);
+    factorGraphHandler.setOrientedPlaneInitialValue(landmarkId, initialValue);
 }
 
 void FactorGraphExternal::createOdometryNoiseModel(float *odomVariance)
