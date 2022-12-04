@@ -9,6 +9,12 @@ uint32 sequence_id
 # ID number referring to each planar region, it should be unique.
 int32[] region_id
 
+# Position of sensor when the planar region list was generated
+geometry_msgs/Point sensor_position
+
+# Orientation of sensor when the planar region list was generated
+geometry_msgs/Quaternion sensor_orientation
+
 # The coordinates in world of the origin of each planar region.
 geometry_msgs/Point[] region_origin
 

@@ -8,7 +8,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 public class RDXPlanarRegionFilteredMapDemo
 {
    private PlanarRegionMappingManager mapHandler;
-   private PlanarRegionFilteredMapUI planarRegionFilteredMapUI;
+   private PlanarRegionMappingUI planarRegionFilteredMapUI;
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    public RDXPlanarRegionFilteredMapDemo()
@@ -21,7 +21,7 @@ public class RDXPlanarRegionFilteredMapDemo
          public void create()
          {
             baseUI.create();
-            planarRegionFilteredMapUI = new PlanarRegionFilteredMapUI("Filtered Map", mapHandler);
+            planarRegionFilteredMapUI = new PlanarRegionMappingUI("Filtered Map", mapHandler);
             baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUI.getImGuiPanel());
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }

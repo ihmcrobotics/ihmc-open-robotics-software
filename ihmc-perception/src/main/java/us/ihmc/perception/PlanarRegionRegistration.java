@@ -44,8 +44,8 @@ public class PlanarRegionRegistration
    private PlanarRegionsList currentRegions;
    private PlanarRegionsList previousRegions;
 
-//   private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";
-   private String regionFilePath = "/home/bmishra/Workspace/Code/MapSenseROS/Extras/Regions/Archive/Set_06_Circle/";
+   private String regionFilePath = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/";
+   //private String regionFilePath = "/home/bmishra/Workspace/Code/MapSenseROS/Extras/Regions/Archive/Set_06_Circle/";
 
 
 

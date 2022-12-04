@@ -327,6 +327,13 @@ public class PlanarRegionFileTools
 
       HashMap<String, String> regionStrings = new HashMap<>();
 
+      Point3D sensorPosition = new Point3D();
+      AxisAngle sensorOrientation = new AxisAngle();
+
+      readSensorTransform(headerBufferedReader, sensorPosition, sensorOrientation);
+
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(sensorOrientation, sensorPosition);
+
       while (scan.hasNext())
       {
          scan.nextLine(); //Skip past delimiter
@@ -369,7 +376,10 @@ public class PlanarRegionFileTools
 
       headerBufferedReader.close();
 
-      return new PlanarRegionsList(planarRegions);
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
+      planarRegionsList.setSensorToWorldTransform(sensorToWorldTransform);
+
+      return planarRegionsList;
    }
 
    private interface FileCreator
@@ -434,6 +444,27 @@ public class PlanarRegionFileTools
       BufferedReader createReader(String filename);
    }
 
+   private static void readSensorTransform(BufferedReader bufferedReader, Point3D sensorPositionToPack, AxisAngle sensorOrientationToPack) throws IOException
+   {
+      String line = bufferedReader.readLine();
+      line = line.replaceAll("sensor position: ", "");
+      line = line.replaceAll("sensor orientation: ", "");
+      String[] values = line.split(", ");
+
+      int i = 0;
+
+      float xSensorPosition = Float.parseFloat(values[i++]);
+      float ySensorPosition = Float.parseFloat(values[i++]);
+      float zSensorPosition = Float.parseFloat(values[i++]);
+      sensorPositionToPack.set(xSensorPosition, ySensorPosition, zSensorPosition);
+
+      float xSensorOrientation = Float.parseFloat(values[i++]);
+      float ySensorOrientation = Float.parseFloat(values[i++]);
+      float zSensorOrientation = Float.parseFloat(values[i++]);
+      float angleSensorOrientation = Float.parseFloat(values[i++]);
+      sensorOrientationToPack.set(xSensorOrientation, ySensorOrientation, zSensorOrientation, angleSensorOrientation);
+   }
+
    private static String readHeaderLine(BufferedReader bufferedReader,
                                         Point3D originToPack,
                                         AxisAngle orientationToPack,
@@ -443,8 +474,9 @@ public class PlanarRegionFileTools
    {
       String line = bufferedReader.readLine();
       if (line == null)
+      {
          return null;
-
+      }
       String cvsSplitBy = ",";
 
       boolean version2 = line.contains("orientation: ");
@@ -534,10 +566,22 @@ public class PlanarRegionFileTools
       }
    }
 
-   private static HashMap<String, Pair<PlanarRegion, Integer>> writePlanarRegionHeader(OutputStreamWriter fw, PlanarRegionsList planarRegionData) throws IOException
+   private static HashMap<String, Pair<PlanarRegion, Integer>> writePlanarRegionHeader(OutputStreamWriter fw, PlanarRegionsList planarRegionData)
+         throws IOException
    {
       HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();
       Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
+
+      RigidBodyTransformReadOnly sensorToWorldTransform = planarRegionData.getSensorToWorldTransform();
+
+      AxisAngle sensorOrientation = new AxisAngle();
+      sensorToWorldTransform.getRotation().get(sensorOrientation);
+
+      fw.write("sensor position: " + sensorToWorldTransform.getTranslationX() + ", " + sensorToWorldTransform.getTranslationY() + ", "
+               + sensorToWorldTransform.getTranslationZ());
+      fw.write(", sensor orientation: " + sensorOrientation.getX() + ", " + sensorOrientation.getY() + ", " + sensorOrientation.getZ() + ", "
+               + sensorOrientation.getAngle());
+      fw.write("\n");
 
       for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
       {
@@ -722,19 +766,19 @@ public class PlanarRegionFileTools
          String line = reader.readLine();
          String[] words;
          words = line.split(":");
-         if(words[0].equals("NumRegions"))
+         if (words[0].equals("NumRegions"))
          {
             numRegions = Integer.parseInt(words[1]);
-            for(int r = 0; r < numRegions; r++)
+            for (int r = 0; r < numRegions; r++)
             {
 
             }
          }
-         while(line != null)
+         while (line != null)
          {
             words = line.split(":");
             System.out.print(words[0] + "\t");
-            if(words.length > 1)
+            if (words.length > 1)
             {
                System.out.println(words[1]);
             }
@@ -798,6 +842,5 @@ public class PlanarRegionFileTools
    {
       String path = "/home/quantum/Workspace/Code/MapSense/Data/Extras/Regions/Archive/Set_06_Circle/0000.txt";
       PlanarRegionsList regions = loadMapsensePlanarRegionsFromFile(new File(path));
-
    }
 }

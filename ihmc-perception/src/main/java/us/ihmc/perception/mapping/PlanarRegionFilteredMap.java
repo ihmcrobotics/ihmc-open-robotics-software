@@ -1,5 +1,6 @@
 package us.ihmc.perception.mapping;
 
+import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -8,12 +9,15 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
 public class PlanarRegionFilteredMap
 {
    private PlanarRegionFilteredMapParameters parameters;
+   private SlamWrapper.FactorGraphExternal factorGraph;
 
    private static final double updateAlphaTowardsMatch = 0.05;
 
@@ -34,8 +38,11 @@ public class PlanarRegionFilteredMap
 
    public PlanarRegionFilteredMap()
    {
+      factorGraph = new SlamWrapper.FactorGraphExternal();
       parameters = new PlanarRegionFilteredMapParameters();
       finalMap = new PlanarRegionsList();
+
+      factorGraph.addPriorPoseFactor(1, new float[]{0,0,0,0,0,0});
    }
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
@@ -317,6 +324,18 @@ public class PlanarRegionFilteredMap
                                          outOfPlaneDistanceFromOneRegionToAnother,
                                          maxDistanceBetweenRegionsForMatch);
       return map;
+   }
+
+   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, ArrayList<Integer>> matches)
+   {
+      Vector3D translation = new Vector3D();
+      Point3D eulerAngles = new Point3D();
+
+      factorGraph.addOdometryFactor(new float[]{translation.getX32(), translation.getY32(), translation.getZ32(), eulerAngles.getX32(), eulerAngles.getY32(), eulerAngles.getZ32()},2);
+
+      // TODO: Convert to world frame and insert the initial value
+
+      factorGraph.optimize();
    }
 
    public PlanarRegionsList getMapRegions()
