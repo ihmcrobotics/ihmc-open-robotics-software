@@ -16,7 +16,6 @@ import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -628,6 +627,8 @@ public class GPUPlanarRegionExtraction
       {
          planarRegionsList.addPlanarRegions(planarRegions);
       }
+      LogTools.info("Extract Regions: Camera Transform: {}", cameraFrame.getTransformToWorldFrame());
+      planarRegionsList.setSensorToWorldTransform(cameraFrame.getTransformToWorldFrame());
    }
 
    private void calculateDerivativeParameters()

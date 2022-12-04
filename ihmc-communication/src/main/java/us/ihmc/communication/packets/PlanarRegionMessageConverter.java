@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -108,11 +109,17 @@ public class PlanarRegionMessageConverter
 
    public static PlanarRegionsListMessage convertToPlanarRegionsListMessage(PlanarRegionsList planarRegionsList)
    {
+
       PlanarRegionsListMessage message = new PlanarRegionsListMessage();
 
       Object<Point3D> vertexBuffer = message.getVertexBuffer();
 
       vertexBuffer.clear();
+
+      message.getSensorPosition().set(planarRegionsList.getSensorToWorldTransform().getTranslation());
+      message.getSensorOrientation().set(planarRegionsList.getSensorToWorldTransform().getRotation());
+
+      LogTools.info("Message: Transform: {}", message.getSensorPosition());
 
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
@@ -147,6 +154,9 @@ public class PlanarRegionMessageConverter
 
    public static PlanarRegionsList convertToPlanarRegionsList(PlanarRegionsListMessage message)
    {
+      LogTools.info("Convert To List: {}", message.getSensorPosition());
+      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition());
+
       int vertexIndex = 0;
       Object<Vector3D> normals = message.getRegionNormal();
       Object<Point3D> origins = message.getRegionOrigin();
@@ -199,7 +209,12 @@ public class PlanarRegionMessageConverter
          planarRegions.add(planarRegion);
       }
 
-      return new PlanarRegionsList(planarRegions);
+      LogTools.info("Convert to List: Sensor Transform:", sensorToWorldTransform);
+
+      PlanarRegionsList planarRegionsListToReturn = new PlanarRegionsList(planarRegions);
+      planarRegionsListToReturn.setSensorToWorldTransform(sensorToWorldTransform);
+
+      return planarRegionsListToReturn;
    }
 
    public static PlanarRegionsListMessage createPlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)

@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 public class PlanarRegionMappingManager
 {
    private static final boolean ROS2_ENABLED = false;
+   private static final boolean DATASET_MODE_ENABLED = !ROS2_ENABLED;
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");;
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -35,7 +36,7 @@ public class PlanarRegionMappingManager
 
    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
 
-   private boolean enableCapture = false;
+   private boolean enableCapture = true;
    private boolean enableLiveMode = false;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
@@ -55,20 +56,22 @@ public class PlanarRegionMappingManager
 
       filteredMap = new PlanarRegionFilteredMap();
 
-
-      for (File f : logDirectory.listFiles())
+      if(DATASET_MODE_ENABLED)
       {
-         if (f.getName().toUpperCase().endsWith(".PRLLOG"))
+         for (File f : logDirectory.listFiles())
          {
-            try
+            if (f.getName().toUpperCase().endsWith(".PRLLOG"))
             {
-               prlBuffer = new PlanarRegionsListBuffer(f);
+               try
+               {
+                  prlBuffer = new PlanarRegionsListBuffer(f);
+               }
+               catch (IOException ex)
+               {
+                  LogTools.error(ex.getStackTrace());
+               }
+               break;
             }
-            catch (IOException ex)
-            {
-               LogTools.error(ex.getStackTrace());
-            }
-            break;
          }
       }
    }
@@ -111,6 +114,7 @@ public class PlanarRegionMappingManager
       if (prlIndex < prlBuffer.getBufferLength())
       {
          planarRegions = prlBuffer.get(prlIndex);
+         LogTools.info("Transform: {}", planarRegions.getSensorToWorldTransform());
          filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
          prlIndex++;
       }

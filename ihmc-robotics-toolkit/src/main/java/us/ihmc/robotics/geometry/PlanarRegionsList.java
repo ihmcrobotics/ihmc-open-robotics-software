@@ -12,12 +12,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 
 public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
    private transient ArrayList<PlanarRegion> placeholderForRemovingRegions;
+   private RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform();
 
    public PlanarRegionsList()
    {
@@ -543,5 +543,15 @@ public class PlanarRegionsList
       PlanarRegionsList other = (PlanarRegionsList) o;
 
       return this.epsilonEquals(other, 1e-6); //Semi-arbitrary epsilon; smallest number I could get to consistently pass tests
+   }
+
+   public void setSensorToWorldTransform(RigidBodyTransform transform)
+   {
+        this.sensorToWorldTransform.set(transform);
+   }
+
+   public RigidBodyTransformReadOnly getSensorToWorldTransform()
+   {
+      return sensorToWorldTransform;
    }
 }

@@ -23,6 +23,14 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
             */
    public us.ihmc.idl.IDLSequence.Integer  region_id_;
    /**
+            * Position of sensor when the planar region list was generated
+            */
+   public us.ihmc.euclid.tuple3D.Point3D sensor_position_;
+   /**
+            * Orientation of sensor when the planar region list was generated
+            */
+   public us.ihmc.euclid.tuple4D.Quaternion sensor_orientation_;
+   /**
             * The coordinates in world of the origin of each planar region.
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  region_origin_;
@@ -55,6 +63,8 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    {
       region_id_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
 
+      sensor_position_ = new us.ihmc.euclid.tuple3D.Point3D();
+      sensor_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (3000, new geometry_msgs.msg.dds.PointPubSubType());
       region_orientation_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion> (3000, new geometry_msgs.msg.dds.QuaternionPubSubType());
       region_normal_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (3000, new geometry_msgs.msg.dds.Vector3PubSubType());
@@ -79,6 +89,8 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       sequence_id_ = other.sequence_id_;
 
       region_id_.set(other.region_id_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.sensor_position_, sensor_position_);
+      geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.sensor_orientation_, sensor_orientation_);
       region_origin_.set(other.region_origin_);
       region_orientation_.set(other.region_orientation_);
       region_normal_.set(other.region_normal_);
@@ -110,6 +122,24 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    public us.ihmc.idl.IDLSequence.Integer  getRegionId()
    {
       return region_id_;
+   }
+
+
+   /**
+            * Position of sensor when the planar region list was generated
+            */
+   public us.ihmc.euclid.tuple3D.Point3D getSensorPosition()
+   {
+      return sensor_position_;
+   }
+
+
+   /**
+            * Orientation of sensor when the planar region list was generated
+            */
+   public us.ihmc.euclid.tuple4D.Quaternion getSensorOrientation()
+   {
+      return sensor_orientation_;
    }
 
 
@@ -197,6 +227,8 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.region_id_, other.region_id_, epsilon)) return false;
 
+      if (!this.sensor_position_.epsilonEquals(other.sensor_position_, epsilon)) return false;
+      if (!this.sensor_orientation_.epsilonEquals(other.sensor_orientation_, epsilon)) return false;
       if (this.region_origin_.size() != other.region_origin_.size()) { return false; }
       else
       {
@@ -247,6 +279,8 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.region_id_.equals(otherMyClass.region_id_)) return false;
+      if (!this.sensor_position_.equals(otherMyClass.sensor_position_)) return false;
+      if (!this.sensor_orientation_.equals(otherMyClass.sensor_orientation_)) return false;
       if (!this.region_origin_.equals(otherMyClass.region_origin_)) return false;
       if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
       if (!this.region_normal_.equals(otherMyClass.region_normal_)) return false;
@@ -268,6 +302,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);      builder.append(", ");
+      builder.append("sensor_position=");
+      builder.append(this.sensor_position_);      builder.append(", ");
+      builder.append("sensor_orientation=");
+      builder.append(this.sensor_orientation_);      builder.append(", ");
       builder.append("region_origin=");
       builder.append(this.region_origin_);      builder.append(", ");
       builder.append("region_orientation=");
