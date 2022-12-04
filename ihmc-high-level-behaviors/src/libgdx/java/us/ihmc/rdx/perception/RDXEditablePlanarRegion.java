@@ -8,6 +8,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -41,10 +42,9 @@ public class RDXEditablePlanarRegion
    public void addVertex()
    {
       RDXEditablePlanarRegionVertex vertex = new RDXEditablePlanarRegionVertex();
-      FramePoint3D vertexInitialPoint = new FramePoint3D(originGizmo.getPoseGizmo().getGizmoFrame());
-      vertexInitialPoint.setX(0.4);
-      vertexInitialPoint.changeFrame(ReferenceFrame.getWorldFrame());
-      vertex.setPositionInWorld(vertexInitialPoint);
+      vertex.getPosition().setToZero(originGizmo.getPoseGizmo().getGizmoFrame());
+      vertex.getPosition().setX(0.4);
+      vertex.getPosition().changeFrame(ReferenceFrame.getWorldFrame());
       addVertex(vertex);
    }
 
@@ -55,8 +55,14 @@ public class RDXEditablePlanarRegion
 
    public void update()
    {
-      for (RDXEditablePlanarRegionVertex editableVertex : editableVertices)
+      for (int i = 0; i < editableVertices.size(); i++)
       {
+         RDXEditablePlanarRegionVertex editableVertex = editableVertices.get(i);
+         Point2D concaveHullVertex = planarRegion.getConcaveHullVertex(i);
+
+         editableVertex.getPosition().setToZero(originGizmo.getPoseGizmo().getGizmoFrame());
+         editableVertex.getPosition().set(concaveHullVertex);
+
          editableVertex.update();
       }
 
@@ -95,13 +101,16 @@ public class RDXEditablePlanarRegion
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXEditablePlanarRegionVertex editableVertex : editableVertices)
+      for (int i = 0; i < editableVertices.size(); i++)
       {
+         RDXEditablePlanarRegionVertex editableVertex = editableVertices.get(i);
          editableVertex.process3DViewInput(input);
 
          if (editableVertex.isHovered() && ImGui.isMouseDown(ImGuiMouseButton.Left))
          {
-            editableVertex.setPositionInWorld(positionToPack -> planarRegion.getPlane().intersectionWith(input.getPickRayInWorld(), positionToPack));
+            planarRegion.getPlane().intersectionWith(input.getPickRayInWorld(), editableVertex.getPosition());
+            editableVertex.getPosition().changeFrame(originGizmo.getPoseGizmo().getGizmoFrame());
+            planarRegion.getConcaveHullVertex(i).set(editableVertex.getPosition());
          }
       }
 

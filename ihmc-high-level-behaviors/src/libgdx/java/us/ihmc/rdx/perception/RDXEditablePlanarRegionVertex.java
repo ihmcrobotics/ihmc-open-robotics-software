@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -28,9 +30,9 @@ public class RDXEditablePlanarRegionVertex
    private Material highlightMaterial;
    private DynamicLibGDXModel sphereGraphic;
    private final SphereRayIntersection sphereRayIntersection = new SphereRayIntersection();
-   private Point3D positionInWorld = new Point3D();
    private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
    private boolean hovered = false;
+   private FramePoint3D position = new FramePoint3D();
 
    public RDXEditablePlanarRegionVertex()
    {
@@ -50,17 +52,18 @@ public class RDXEditablePlanarRegionVertex
 
    public void update()
    {
-      LibGDXTools.toEuclid(sphereGraphic.getModelInstance().transform, positionInWorld);
+      position.changeFrame(ReferenceFrame.getWorldFrame());
+      LibGDXTools.toEuclid(sphereGraphic.getModelInstance().transform, position);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      sphereRayIntersection.update(radius, positionInWorld);
+      sphereRayIntersection.update(radius, position);
       boolean intersects = sphereRayIntersection.intersect(input.getPickRayInWorld());
 
       if (intersects)
       {
-         pickResult.setDistanceToCamera(positionInWorld.distance(input.getPickRayInWorld().getPoint()));
+         pickResult.setDistanceToCamera(position.distance(input.getPickRayInWorld().getPoint()));
          input.addPickResult(pickResult);
       }
    }
@@ -92,19 +95,13 @@ public class RDXEditablePlanarRegionVertex
       }
    }
 
-   public void setPositionInWorld(Point3DReadOnly position)
-   {
-      LibGDXTools.toLibGDX(position, sphereGraphic.getModelInstance().transform);
-   }
-
-   public void setPositionInWorld(Consumer<Point3DBasics> positionSetter)
-   {
-      positionSetter.accept(positionInWorld);
-      setPositionInWorld(positionInWorld);
-   }
-
    public boolean isHovered()
    {
       return hovered;
+   }
+
+   public FramePoint3D getPosition()
+   {
+      return position;
    }
 }
