@@ -120,8 +120,8 @@ public class REAParametersMessageHelper
       ConcaveHullFactoryParametersMessage message = new ConcaveHullFactoryParametersMessage();
 
       message.setEdgeLengthThreshold(parameters.getEdgeLengthThreshold());
-      message.setRemoveAllTrianglesWithTwoBorderEdges(parameters.doRemoveAllTrianglesWithTwoBorderEdges());
-      message.setAllowSplittingConcaveHull(parameters.isSplittingConcaveHullAllowed());
+      message.setRemoveAllTrianglesWithTwoBorderEdges(parameters.getRemoveAllTrianglesWithTwoBorderEdges());
+      message.setAllowSplittingConcaveHull(parameters.getAllowSplittingConcaveHull());
       message.setMaxNumberOfIterations(parameters.getMaxNumberOfIterations());
       message.setTriangulationTolerance(parameters.getTriangulationTolerance());
 
