@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PlanarRegionMappingManager
 {
-   private static final boolean ROS2_ENABLED = false;
+   private static final boolean ROS2_ENABLED = true;
    private static final boolean DATASET_MODE_ENABLED = !ROS2_ENABLED;
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");;

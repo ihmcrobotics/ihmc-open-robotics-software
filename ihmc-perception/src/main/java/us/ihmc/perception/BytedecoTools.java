@@ -65,7 +65,7 @@ public class BytedecoTools
       return nativesActivated;
    }
 
-   private static void loadGTSAMNatives()
+   public static void loadGTSAMNatives()
    {
       // We need to disable javacpp from trying to automatically load libraries.
       // Otherwise, it will try to load them by name when they aren't in the library path

@@ -8,6 +8,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -47,6 +48,7 @@ public class PlanarRegionFilteredMap
 
    public PlanarRegionFilteredMap()
    {
+      BytedecoTools.loadGTSAMNatives();
       factorGraph = new SlamWrapper.FactorGraphExternal();
       parameters = new PlanarRegionFilteredMapParameters();
       finalMap = new PlanarRegionsList();
