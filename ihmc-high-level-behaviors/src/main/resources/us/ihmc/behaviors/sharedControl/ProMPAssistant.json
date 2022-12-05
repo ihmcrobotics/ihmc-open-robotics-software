@@ -3,12 +3,14 @@
   "logging" : true,
   "numberBasisFunctions": 20,
   "numberObservations": 50,
+  "conditionOnlyLastObservation": true,
   "allowedIncreaseDecreaseSpeedFactor": 2,
   "numberOfInferredSpeeds": 30,
   "tasks":[
     {
       "name":"PushDoor",
-      "relevantBodyPart": "",
+      "bodyPartForRecognition": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
       "bodyParts":[
         { "name":"leftHand", "geometry":"Pose" },
         { "name":"rightHand", "geometry":"Pose" }
