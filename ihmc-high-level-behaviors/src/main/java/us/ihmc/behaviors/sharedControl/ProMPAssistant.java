@@ -34,10 +34,11 @@ public class ProMPAssistant implements TeleoperationAssistant
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); //proMPManagers stores a proMPManager for each task
    private String currentTask = ""; //detected task
    private int numberObservations = 0; //number of observations used to update the prediction
-   private String relevantBodyPart = ""; // e.g., right hand is the robot part being used to reach the handle and open the door in the task "open door"
-   private final HashMap<String, String> taskRelevantBodyPartMap = new HashMap<>();
-   private final FramePose3D taskGoalPose = new FramePose3D(); //detected goal
-   private final FramePose3D noPose = new FramePose3D();
+   private String bodyPartRecognition = "";
+   private String bodyPartGoal = "";
+   private final HashMap<String, String> taskBodyPartRecognitionMap = new HashMap<>();
+   private final HashMap<String, String> taskBodyPartGoalMap = new HashMap<>();
+   private FramePose3D taskGoalPose = null; //detected goal
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedTrajectoryMap = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedTrajectoryMap = new HashMap<>();
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); //to track the last used sample of a generated trajectory
@@ -45,11 +46,13 @@ public class ProMPAssistant implements TeleoperationAssistant
    private boolean doneCurrentTask = false; //used to communicate to higher level classes that the task has been completed
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
+   private boolean conditionOnlyLastObservation = true;
 
    public ProMPAssistant()
    {
       List<String> taskNames = new ArrayList<>();
-      List<String> relevantBodyParts = new ArrayList<>();
+      List<String> bodyPartsRecognition = new ArrayList<>();
+      List<String> bodyPartsGoal = new ArrayList<>();
       List<HashMap<String, String>> bodyPartsGeometries = new ArrayList<>();
       boolean logEnabled = false;
       // read parameters regarding the properties of available learned tasks from json file
@@ -62,6 +65,7 @@ public class ProMPAssistant implements TeleoperationAssistant
          testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
          logEnabled = (boolean) jsonObject.get("logging");
          numberObservations = (int) ((long) jsonObject.get("numberObservations"));
+         conditionOnlyLastObservation = (boolean) jsonObject.get("conditionOnlyLastObservation");
          // getting tasks
          JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
          //iterating tasks
@@ -77,8 +81,11 @@ public class ProMPAssistant implements TeleoperationAssistant
                   case "name":
                      taskNames.add((String) taskPropertyMap.getValue());
                      break;
-                  case "relevantBodyPart":
-                     relevantBodyParts.add((String) taskPropertyMap.getValue());
+                  case "bodyPartForRecognition":
+                     bodyPartsRecognition.add((String) taskPropertyMap.getValue());
+                     break;
+                  case "bodyPartWithObservableGoal":
+                     bodyPartsGoal.add((String) taskPropertyMap.getValue());
                      break;
                   case "bodyParts":
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
@@ -134,7 +141,8 @@ public class ProMPAssistant implements TeleoperationAssistant
                                                numberBasisFunctions,
                                                speedFactor,
                                                numberOfInferredSpeeds));
-            taskRelevantBodyPartMap.put(taskNames.get(i), relevantBodyParts.get(i));
+            taskBodyPartRecognitionMap.put(taskNames.get(i), bodyPartsRecognition.get(i));
+            taskBodyPartGoalMap.put(taskNames.get(i), bodyPartsGoal.get(i));
          }
          for (ProMPManager proMPManager : proMPManagers.values())
             proMPManager.learnTaskFromDemos();
@@ -159,7 +167,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       if (objectDetected())
       {
-         if (!relevantBodyPart.isEmpty()) //the task does have a relevant body part, this means there is a goal a body part can reach
+         if (!bodyPartGoal.isEmpty()) //there is a goal a body part can reach in this task
          {
             if (objectPoseEstimated())
             {
@@ -211,7 +219,8 @@ public class ProMPAssistant implements TeleoperationAssistant
          //TODO A.1. recognize task with object detection algorithm (or Aruco Markers to begin with)
          //TODO A.2. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
          currentTask = "PushDoor";
-         relevantBodyPart = taskRelevantBodyPartMap.get(currentTask);
+         bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
+         bodyPartGoal = taskBodyPartGoalMap.get(currentTask);;
          //initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
          for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
             bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
@@ -225,13 +234,13 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       //TODO A.2. identify object pose (with Aruco Markers to begin with)
       //taskGoalPose = ;
-      return !(taskGoalPose.equals(noPose));
+      return (taskGoalPose!=null);
    }
 
    private void updateTaskWithObjectInfo()
    {
       //update speed proMP based on relevant body part observed trajectory and goal
-      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(relevantBodyPart), taskGoalPose, relevantBodyPart);
+      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartGoal), taskGoalPose, bodyPartGoal);
       //update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
       {
@@ -242,38 +251,35 @@ public class ProMPAssistant implements TeleoperationAssistant
          }
       }
       //update only proMP trajectory of the body part relevant for goal of the task, based on observed goal
-      proMPManagers.get(currentTask).updateTaskTrajectoryGoal(relevantBodyPart, taskGoalPose);
+      proMPManagers.get(currentTask).updateTaskTrajectoryGoal(bodyPartGoal, taskGoalPose);
    }
 
    private void updateTask()
    {
-      //      //build vector of observed trajectories for the hands
-      //      Set<String> bodyParts = bodyPartObservedFrameTrajectory.keySet();
-      //      List<List<Pose3DReadOnly>> observedFrameTrajectories = new ArrayList<>();
-      //      for (String bodyPart : bodyParts)
-      //         observedFrameTrajectories.add(bodyPartObservedFrameTrajectory.get(bodyPart));
-      //      //update speed proMP based on hands observed trajectories
-      //      proMPManagers.get(currentTask).updateTaskSpeed(observedFrameTrajectories, bodyParts);
       // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
-      // TODO B.3. change relevantBodyPart concept  which now means that bodyPart will reach a goal that can be observed
-      //       Add instead goalBodyPart and change use of relevantBodyPart as the part that is used the most for that task
-      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get("rightHand"), "rightHand");
+      proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartRecognition), bodyPartRecognition);
       //update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
       {
          List<Pose3DReadOnly> observedTrajectory = bodyPartObservedTrajectoryMap.get(robotPart);
-         if (observedTrajectory.size() > 0)
+         if(conditionOnlyLastObservation)
          {
-            isLastViaPoint.set(true);
-            proMPManagers.get(currentTask)
-                         .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
+            if (observedTrajectory.size() > 0)
+            {
+               isLastViaPoint.set(true);
+               proMPManagers.get(currentTask)
+                            .updateTaskTrajectory(robotPart, observedTrajectory.get(observedTrajectory.size() - 1), observedTrajectory.size() - 1);
+            }
          }
-//         for (int i = 0; i < observedTrajectory.size(); i++)
-//         {
-//            if (i == observedTrajectory.size() - 1)
-//               isLastViaPoint.set(true);
-//            proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
-//         }
+         else
+         {
+            for (int i = 0; i < observedTrajectory.size(); i++)
+            {
+               if (i == observedTrajectory.size() - 1)
+                  isLastViaPoint.set(true);
+               proMPManagers.get(currentTask).updateTaskTrajectory(robotPart, observedTrajectory.get(i), i);
+            }
+         }
       }
    }
 
@@ -333,54 +339,6 @@ public class ProMPAssistant implements TeleoperationAssistant
          }
          //exit assistance mode
          doneCurrentTask = true;
-      }
-   }
-
-   //TODO Edit this function to take into account affordance. Ignore for the moment
-   public void framePoseToAffordance(FramePose3D framePose, String bodyPart)
-   {
-      List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
-      //take a sample (frame) from the trajectory
-      FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
-      //TODO C.1.1 IF goal is observable -> compute distance from region close to the goal and use this to select the next sample.
-      // If distance is increasing, go back to previous sample
-
-      // shared-control arbitration law. Shift gradually from user input to robot autonomy
-      int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
-      if (sampleCounter <= generatedFramePoseTrajectory.size())
-      {
-         double x = (double) (sampleCounter - numberObservations) / (generatedFramePoseTrajectory.size() - numberObservations);
-         //define a function that goes from 0 to 1 smoothly, while getting to 1 not too close to the end of the motions
-         double alpha = 1.0 / (1 + 4 * exp(-18 * (x - 0.2))); //sigmoid with [X:0,Y:~0],[X:0.6,Y:~1],[X>1,Y:1]
-         if (alpha >= 0.9999)
-            alpha = 1;
-         //set orientation
-         FixedFrameQuaternionBasics frameOrientation = framePose.getOrientation();
-         FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
-         FixedFrameQuaternionBasics arbitratedFrameOrientation = framePose.getOrientation();
-         arbitratedFrameOrientation.set((1 - alpha) * frameOrientation.getX() + alpha * generatedFrameOrientation.getX(),
-                                        (1 - alpha) * frameOrientation.getY() + alpha * generatedFrameOrientation.getY(),
-                                        (1 - alpha) * frameOrientation.getZ() + alpha * generatedFrameOrientation.getZ(),
-                                        (1 - alpha) * frameOrientation.getS() + alpha * generatedFrameOrientation.getS());
-         //set position
-         FixedFramePoint3DBasics framePosition = framePose.getPosition();
-         FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
-         FixedFramePoint3DBasics arbitratedFramePosition = framePose.getPosition();
-         arbitratedFramePosition.setX((1 - alpha) * framePosition.getX() + alpha * generatedFramePosition.getX());
-         arbitratedFramePosition.setY((1 - alpha) * framePosition.getY() + alpha * generatedFramePosition.getY());
-         arbitratedFramePosition.setZ((1 - alpha) * framePosition.getZ() + alpha * generatedFramePosition.getZ());
-
-         //         framePose.getPosition().set(arbitratedFramePosition);
-         //         framePose.getOrientation().set(arbitratedFrameOrientation);
-         framePose.getPosition().set(generatedFramePosition);
-         framePose.getOrientation().set(generatedFrameOrientation);
-
-         //take the next sample from the trajectory next time
-         bodyPartTrajectorySampleCounter.replace(bodyPart, bodyPartTrajectorySampleCounter.get(bodyPart) + 1);
-      }
-      else
-      {
-         reset();
       }
    }
 
