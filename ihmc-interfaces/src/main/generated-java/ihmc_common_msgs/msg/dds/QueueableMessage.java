@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the collection of platform-independent ROS messages.
+       * This is part of the IHMC Common message package.
        * General message carrying the information needed to safely queue messages.
        */
 public class QueueableMessage extends Packet<QueueableMessage> implements Settable<QueueableMessage>, EpsilonComparable<QueueableMessage>

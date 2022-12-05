@@ -199,6 +199,11 @@ public class RDXRigidBody implements RigidBodyBasics
       return rigidBody.getNameId();
    }
 
+   public RigidBodyBasics getRigidBody()
+   {
+      return rigidBody;
+   }
+
    @Override
    public Iterable<? extends RDXRigidBody> subtreeIterable()
    {
