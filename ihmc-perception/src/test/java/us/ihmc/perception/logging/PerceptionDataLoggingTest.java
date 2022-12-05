@@ -12,9 +12,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -44,6 +48,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testLoggingByteArray()
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -73,6 +78,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testLoggingLargeByteArray()
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -114,6 +120,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testLoggingIntArray()
    {
       hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
@@ -141,10 +148,11 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testCompressedFloatDepthLoggingPNG()
    {
-
-      hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
+      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/slam-wrapper/resources");
+      hdf5ManagerWriter = new HDF5Manager(resourcesDirectory.getPathNecessaryForClasspathLoading() + "hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
 
       Mat depthFloat = new Mat(128, 128, opencv_core.CV_32FC1);
       depthFloat.put(new Scalar(1.234));
@@ -200,6 +208,7 @@ public class PerceptionDataLoggingTest
    }
 
    @Test
+   @Disabled
    public void testCompressedDepthMapLoggingPNG()
    {
 
