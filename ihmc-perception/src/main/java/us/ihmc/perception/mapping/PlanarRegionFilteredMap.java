@@ -1,6 +1,10 @@
 package us.ihmc.perception.mapping;
 
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -18,6 +22,11 @@ public class PlanarRegionFilteredMap
 {
    private PlanarRegionFilteredMapParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
+
+   private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform worldToSensorFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
+   private final RigidBodyTransform odoometry = new RigidBodyTransform();
 
    private static final double updateAlphaTowardsMatch = 0.05;
 
@@ -42,7 +51,7 @@ public class PlanarRegionFilteredMap
       parameters = new PlanarRegionFilteredMapParameters();
       finalMap = new PlanarRegionsList();
 
-      factorGraph.addPriorPoseFactor(1, new float[]{0,0,0,0,0,0});
+      factorGraph.addPriorPoseFactor(1, new float[] {0, 0, 0, 0, 0, 0});
    }
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
@@ -326,14 +335,57 @@ public class PlanarRegionFilteredMap
       return map;
    }
 
-   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, ArrayList<Integer>> matches)
+   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, ArrayList<Integer>> matches, int poseIndex)
    {
-      Vector3D translation = new Vector3D();
-      Point3D eulerAngles = new Point3D();
+      RigidBodyTransform currentSensorToWorldFrameTransform = (RigidBodyTransform) regions.getSensorToWorldTransform();
+      worldToSensorFrameTransform.setAndInvert(currentSensorToWorldFrameTransform);
 
-      factorGraph.addOdometryFactor(new float[]{translation.getX32(), translation.getY32(), translation.getZ32(), eulerAngles.getX32(), eulerAngles.getY32(), eulerAngles.getZ32()},2);
+      worldToPreviousSensorFrameTransform.setAndInvert(previousSensorToWorldFrameTransform);
 
-      // TODO: Convert to world frame and insert the initial value
+      odoometry.set(worldToPreviousSensorFrameTransform);
+      odoometry.multiply(currentSensorToWorldFrameTransform);
+
+      // Convert odometry to float array. Add into factor graph using 16-double method for addOdometryFactor().
+      float[] odometryValue = new float[16];
+      odoometry.get(odometryValue);
+      factorGraph.addOdometryFactorExtended(odometryValue, 2);
+
+      //Convert sensor pose to float array. Add 16-float method for setPoseInitialValue().
+      float[] poseValue = new float[16];
+      currentSensorToWorldFrameTransform.get(poseValue);
+      factorGraph.setPoseInitialValueExtended(poseIndex, poseValue);
+
+      for (Integer parent : matches.keySet())
+      {
+         for (Integer child : matches.get(parent))
+         {
+            PlanarRegion childRegion = regions.getPlanarRegion(child);
+
+            // Get origin and normal in sensor frame.
+            Point3D childOrigin = new Point3D();
+            Vector3D childNormal = new Vector3D();
+            childRegion.getOrigin(childOrigin);
+            childRegion.getNormal(childNormal);
+            childOrigin.applyTransform(worldToSensorFrameTransform);
+            childNormal.applyTransform(worldToSensorFrameTransform);
+
+            // Get origin and normal in world frame
+            Point3D childOriginInWorld = new Point3D();
+            Vector3D childNormalInWorld = new Vector3D();
+            childRegion.getOrigin(childOriginInWorld);
+            childRegion.getNormal(childNormalInWorld);
+
+            // Insert plane factor based on planar region normal and origin in sensor frame
+            double localDot = childOrigin.dot(childNormal);
+            float[] planeInSensorFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -localDot};
+            factorGraph.addOrientedPlaneFactor(planeInSensorFrame, parent, poseIndex);
+
+            // Set initial value for plane based on planar region normal and origin in world frame
+            double worldDot = childOriginInWorld.dot(childNormalInWorld);
+            float[] planeInWorldFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -worldDot};
+            factorGraph.setOrientedPlaneInitialValue(parent, planeInWorldFrame);
+         }
+      }
 
       factorGraph.optimize();
    }
