@@ -14,7 +14,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             include = {"include/FactorGraphExternal.h"},
             link = {"slam-wrapper"},
             preload = {
-//                  "tbb",
+                  "tbb",
                   "boost_filesystem",
                   "boost_chrono",
                   "boost_timer",
