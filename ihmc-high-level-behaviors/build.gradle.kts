@@ -18,8 +18,8 @@ mainDependencies {
       exclude(group = "org.openjfx")
       exclude(group = "org.jmonkeyengine")
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
-      api("us.ihmc:promp:source")
    }
+   api("us.ihmc:promp:source")
 }
 
 javafxDependencies {

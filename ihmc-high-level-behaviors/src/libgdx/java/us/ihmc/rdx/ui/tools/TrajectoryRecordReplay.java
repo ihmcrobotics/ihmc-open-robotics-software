@@ -25,7 +25,7 @@ public class TrajectoryRecordReplay<T extends Number>
 {
    private String filePath;
    private final Class<T> clazz;
-   private int numberParts; //specify the number of parts you want to record (e.g., left hand, right hand, chest)
+   private int numberParts; // specify the number of parts you want to record (e.g., left hand, right hand, chest)
    private ArrayList<T[]> dataMatrix = new ArrayList<>();
    private ArrayList<T[]> concatenatedDataMatrix = new ArrayList<>();
    private ArrayList<T[]> splitDataMatrix = new ArrayList<>();
@@ -60,13 +60,13 @@ public class TrajectoryRecordReplay<T extends Number>
       int size;
       if (split)
       {
-         //read split data (a row for each body part)
+         // read split data (a row for each body part)
          values = splitDataMatrix.get(timeStepReplay);
          size = splitDataMatrix.size();
       }
       else
       {
-         //read default data as they are stored in the csv file
+         // read default data as they are stored in the csv file
          values = dataMatrix.get(timeStepReplay);
          size = dataMatrix.size();
       }
@@ -91,7 +91,7 @@ public class TrajectoryRecordReplay<T extends Number>
       dataMatrix.add(localValues);
    }
 
-   /* Useful if we are recording trajectories of different parts but not in the same scope
+   /** Useful if we are recording trajectories of different parts but not in the same scope
     * and we want to concatenate them into one single row to have a single csv file
     * rather than having multiple TrajectoryRecordReplay objects and multiple csv files */
    public void concatenateData()
@@ -108,7 +108,7 @@ public class TrajectoryRecordReplay<T extends Number>
       concatenated = true;
    }
 
-   /* Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
+   /** Useful if we are replaying a csv file where multiple parts have been concatenated in one single row
     * and we want the info of each part in a separate row.
     * Not useful if you have different parts with different number of elements */
    private void splitData()
@@ -130,7 +130,7 @@ public class TrajectoryRecordReplay<T extends Number>
 
    public void saveRecording()
    {
-      if (concatenated) //save concatenated data (a single row for every body part)
+      if (concatenated) // save concatenated data (a single row for every body part)
          writeCSV(concatenatedDataMatrix);
       else
          writeCSV(dataMatrix);
@@ -169,7 +169,7 @@ public class TrajectoryRecordReplay<T extends Number>
          Arrays.setAll(stringValues, j -> "" + dataLine[j]);
          dataLines.add(stringValues);
       }
-      //if recordFile name has not been set, generate file with current date and time as name
+      // if recordFile name has not been set, generate file with current date and time as name
       String fileName = "";
       if (recordFileName.isEmpty())
          fileName = new SimpleDateFormat("yyMMddHHmmssZ'.csv'").format(new Date());
@@ -292,7 +292,7 @@ public class TrajectoryRecordReplay<T extends Number>
       int len2 = Array.getLength(array2);
 
       @SuppressWarnings("unchecked")
-      //the cast is safe due to the previous checks
+      // the cast is safe due to the previous checks
       T result = (T) Array.newInstance(componentType1, len1 + len2);
 
       System.arraycopy(array1, 0, result, 0, len1);
