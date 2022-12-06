@@ -109,6 +109,10 @@ public class ValkyrieImpedanceVisualizer implements SCSVisualizerStateListener
       sliderBoardConfigurationManager.setSlider(1, "masterGain", registry, 0.0, 1.0);
       sliderBoardConfigurationManager.setSlider(2, "desiredJointStiffness", registry, 0.0, 300.0);
       sliderBoardConfigurationManager.setSlider(3, "desiredJointDamping", registry, 0.0, 45.0);
+
+      sliderBoardConfigurationManager.setSlider(5, "highLevelMasterGain", registry, 0.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(6, "highLevelJointStiffness", registry, 0.0, 60.0);
+      sliderBoardConfigurationManager.setSlider(7, "highLevelJointDamping", registry, 0.0, 10.0);
    }
 
    public static void main(String[] args)
