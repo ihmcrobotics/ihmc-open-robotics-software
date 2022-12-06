@@ -8,7 +8,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 public class RDXPlanarRegionFilteredMapDemo
 {
    private PlanarRegionMappingManager mapHandler;
-   private PlanarRegionFilteredMapUI planarRegionFilteredMapUI;
+   private PlanarRegionFilteredMapUIPanel planarRegionFilteredMapUIPanel;
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    public RDXPlanarRegionFilteredMapDemo()
@@ -21,22 +21,22 @@ public class RDXPlanarRegionFilteredMapDemo
          public void create()
          {
             baseUI.create();
-            planarRegionFilteredMapUI = new PlanarRegionFilteredMapUI("Filtered Map", mapHandler);
-            baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUI.getImGuiPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            planarRegionFilteredMapUIPanel = new PlanarRegionFilteredMapUIPanel("Filtered Map", mapHandler);
+            baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUIPanel.getImGuiPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUIPanel::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
-            if (planarRegionFilteredMapUI.isCaptured())
+            if (planarRegionFilteredMapUIPanel.isCaptured())
             {
-               LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUI.isCaptured());
+               LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUIPanel.isCaptured());
                mapHandler.setCaptured(true);
-               planarRegionFilteredMapUI.setCaptured(false);
+               planarRegionFilteredMapUIPanel.setCaptured(false);
             }
 
-            planarRegionFilteredMapUI.renderPlanarRegions();
+            planarRegionFilteredMapUIPanel.renderPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
