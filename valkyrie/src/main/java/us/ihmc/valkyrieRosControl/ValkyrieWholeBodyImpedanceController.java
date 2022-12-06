@@ -1,5 +1,7 @@
 package us.ihmc.valkyrieRosControl;
 
+import gnu.trove.impl.Constants;
+import gnu.trove.map.hash.TIntIntHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -11,10 +13,11 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyJointspaceTrajectoryCommand;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -24,15 +27,21 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.JointImpedanceHandle;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
+import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -63,7 +72,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
 
       for (String joint : allJointsList)
       {
-         if (!joint.contains("Ankle"))
+         if (!joint.contains("Ankle") && !joint.contains("torsoPitch") && !joint.contains("torsoRoll"))
          {
             impedanceJointsList.add(joint);
          }
@@ -72,6 +81,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       impedanceJoints = impedanceJointsList.toArray(new String[0]);
    }
 
+   private static final Map<String, Double> torqueOffsets = ValkyrieTorqueOffsetPrinter.loadTorqueOffsetsFromFile();
    private boolean firstTick = true;
 
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
@@ -79,6 +89,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
+   private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
@@ -94,8 +105,12 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final YoDouble desiredJointStiffness = new YoDouble("desiredJointStiffness", registry);
    private final YoDouble desiredJointDamping = new YoDouble("desiredJointDamping", registry);
 
-   private final JointspacePositionControllerState positionControllerState;
    private final YoLowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
+   private final JointspacePositionControllerState.OneDoFJointManager[] jointManagers;
+
+   private final TIntIntHashMap hashCodeToJointIndexMap = new TIntIntHashMap(40, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
+   private final CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
+   private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
    private YoVariableServer yoVariableServer;
 
@@ -110,19 +125,32 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       desiredJointStiffness.set(200.0);
       desiredJointDamping.set(35.0);
 
-      CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
-      StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
       ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
       ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName());
-      new ControllerNetworkSubscriber(inputTopic, commandInputManager, outputTopic, statusMessageOutputManager, ros2Node);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
+                                                                                                commandInputManager,
+                                                                                                outputTopic,
+                                                                                                statusMessageOutputManager,
+                                                                                                ros2Node);
+      controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
+      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+
+      RobotConfigurationDataPublisherFactory robotConfigurationDataPublisherFactory = new RobotConfigurationDataPublisherFactory();
+      robotConfigurationDataPublisherFactory.setDefinitionsToPublish(fullRobotModel);
+      robotConfigurationDataPublisherFactory.setROS2Info(ros2Node, outputTopic);
+      ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(fullRobotModel.getForceSensorDefinitions());
+      StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
+      SensorProcessing sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, robotModel.getStateEstimatorParameters(), registry);
+      robotConfigurationDataPublisherFactory.setSensorSource(fullRobotModel, forceSensorDataHolder, sensorProcessing);
+      robotConfigurationDataPublisher = robotConfigurationDataPublisherFactory.createRobotConfigurationDataPublisher();
 
       jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
-      positionControllerState = new JointspacePositionControllerState(HighLevelControllerName.CUSTOM1,
-                                                                      commandInputManager,
-                                                                      statusMessageOutputManager,
-                                                                      controlledOneDoFJoints,
-                                                                      yoTime,
-                                                                      robotModel.getHighLevelControllerParameters(), jointDesiredOutputList);
+      jointManagers = new JointspacePositionControllerState.OneDoFJointManager[controlledOneDoFJoints.length];
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         jointManagers[i] = new JointspacePositionControllerState.OneDoFJointManager(controlledOneDoFJoints[i], yoTime, registry);
+         hashCodeToJointIndexMap.put(controlledOneDoFJoints[i].hashCode(), i);
+      }
 
       for (int i = 0; i < allJoints.length; i++)
       {
@@ -134,6 +162,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          nameToImpedanceHandleMap.put(impedanceJoints[i], impedanceHandles[i]);
       }
 
+      new DefaultParameterReader().readParametersInRegistry(registry);
       ros2Node.spin();
    }
 
@@ -157,6 +186,8 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getRootBody(), graphicsListRegistry);
       yoVariableServer.start();
+
+      robotConfigurationDataPublisher.initialize();
    }
 
    @Override
@@ -174,6 +205,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       write();
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
+      robotConfigurationDataPublisher.write();
    }
 
    private void read()
@@ -192,11 +224,39 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    {
       if (firstTick)
       {
-         positionControllerState.onEntry();
+         for (int i = 0; i < jointManagers.length; i++)
+         {
+            jointManagers[i].holdCurrent();
+         }
+
          firstTick = false;
       }
 
-      positionControllerState.doAction(yoTime.getDoubleValue());
+      if (commandInputManager.isNewCommandAvailable(WholeBodyJointspaceTrajectoryCommand.class))
+      {
+         WholeBodyJointspaceTrajectoryCommand command = commandInputManager.pollNewestCommand(WholeBodyJointspaceTrajectoryCommand.class);
+         LogTools.info("Received message " + WholeBodyJointspaceTrajectoryCommand.class.getName());
+
+         for (int commandIdx = 0; commandIdx < command.getNumberOfJoints(); commandIdx++)
+         {
+            int jointHashCode = command.getJointHashCode(commandIdx);
+            OneDoFJointTrajectoryCommand jointTrajectory = command.getJointTrajectoryPointList(commandIdx);
+            int jointIndex = hashCodeToJointIndexMap.get(jointHashCode);
+
+            if (jointIndex == -1)
+            {
+               LogTools.warn("Joint not supported, hash-code: {}", jointHashCode);
+               continue;
+            }
+
+            jointManagers[jointIndex].handleTrajectoryCommand(jointTrajectory, command);
+         }
+      }
+
+      for (int i = 0; i < jointManagers.length; i++)
+      {
+         jointManagers[i].doControl(jointDesiredOutputList.getJointDesiredOutput(controlledOneDoFJoints[i]));
+      }
    }
 
    private void write()
@@ -237,6 +297,25 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
 
          impedanceHandle.setPosition(desiredPosition);
          impedanceHandle.setVelocity(desiredVelocity);
+      }
+
+      writeTorqueOffsets();
+   }
+
+   private void writeTorqueOffsets()
+   {
+      if (torqueOffsets == null)
+         return;
+
+      for (int i = 0; i < allJoints.length; i++)
+      {
+         String joint = allJoints[i];
+         Double offset = torqueOffsets.get(joint);
+
+         if (offset != null)
+         {
+            effortHandles[i].setDesiredEffort(-offset);
+         }
       }
    }
 }
