@@ -1,7 +1,9 @@
 package us.ihmc.bytedeco.slamWrapper.presets;
 
-import org.bytedeco.javacpp.annotation.*;
-import org.bytedeco.javacpp.tools.*;
+import org.bytedeco.javacpp.annotation.Platform;
+import org.bytedeco.javacpp.annotation.Properties;
+import org.bytedeco.javacpp.tools.InfoMap;
+import org.bytedeco.javacpp.tools.InfoMapper;
 
 @Properties(
       value =
@@ -10,7 +12,18 @@ import org.bytedeco.javacpp.tools.*;
             resourcepath = "../",
             linkpath = "../",
             include = {"include/FactorGraphExternal.h"},
-            link = {"slam-wrapper"}
+            link = {"slam-wrapper"},
+            preload = {
+//                  "tbb",
+                  "boost_filesystem",
+                  "boost_chrono",
+                  "boost_timer",
+                  "boost_serialization",
+                  "metis-gtsam",
+                  "gtsam",
+                  "slam-wrapper",
+                  "jniSlamWrapper"
+            }
          ),
       target = "us.ihmc.bytedeco.slamWrapper.SlamWrapper"
 )
