@@ -8,7 +8,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionFilteredMap;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 
@@ -19,10 +18,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class PlanarRegionMappingManager
 {
-   private static final boolean ROS2_ENABLED = false;
-
-   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
-   private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+   private final ROS2Node ros2Node;
+   private final ROS2Helper ros2Helper;
 
    private PlanarRegionsList planarRegions;
    private PlanarRegionFilteredMap filteredMap;
@@ -39,11 +36,13 @@ public class PlanarRegionMappingManager
 
    private int planarRegionListIndex = 0;
 
-   public PlanarRegionMappingManager()
+   public PlanarRegionMappingManager(ROS2Node ros2Node)
    {
       //executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, 100, TimeUnit.MILLISECONDS);
+      this.ros2Node = ros2Node;
+      this.ros2Helper = new ROS2Helper(ros2Node);
 
-      if (ROS2_ENABLED)
+      if(ros2Node != null)
       {
          ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, this::planarRegionCallback);
       }
@@ -90,8 +89,10 @@ public class PlanarRegionMappingManager
          enableCapture = false;
       }
 
+      LogTools.info("Received Planar Regions ROS2");
       if (enableLiveMode)
       {
+         LogTools.info("Registering Regions");
          planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
          filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
       }
