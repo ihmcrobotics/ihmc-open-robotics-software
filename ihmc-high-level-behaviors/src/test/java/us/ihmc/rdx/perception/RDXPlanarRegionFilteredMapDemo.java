@@ -1,9 +1,12 @@
 package us.ihmc.rdx.perception;
 
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.ros2.ROS2Node;
 
 public class RDXPlanarRegionFilteredMapDemo
 {
@@ -11,9 +14,11 @@ public class RDXPlanarRegionFilteredMapDemo
    private PlanarRegionFilteredMapUIPanel planarRegionFilteredMapUIPanel;
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
+
    public RDXPlanarRegionFilteredMapDemo()
    {
-      mapHandler = new PlanarRegionMappingManager();
+      mapHandler = new PlanarRegionMappingManager(ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
