@@ -89,10 +89,10 @@ public class PlanarRegionMappingManager
          enableCapture = false;
       }
 
-      LogTools.info("Received Planar Regions ROS2");
+      LogTools.debug("Received Planar Regions ROS2");
       if (enableLiveMode)
       {
-         LogTools.info("Registering Regions");
+         LogTools.debug("Registering Regions");
          planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
          filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
       }
