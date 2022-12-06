@@ -1,10 +1,7 @@
 package us.ihmc.perception.mapping;
 
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -19,7 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-public class PlanarRegionFilteredMap
+public class PlanarRegionMap
 {
    private PlanarRegionFilteredMapParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
@@ -46,14 +43,17 @@ public class PlanarRegionFilteredMap
 
    private int currentTimeIndex = 0;
 
-   public PlanarRegionFilteredMap()
+   public PlanarRegionMap(boolean smoothing)
    {
-      BytedecoTools.loadGTSAMNatives();
-      factorGraph = new SlamWrapper.FactorGraphExternal();
+      if(smoothing)
+      {
+         BytedecoTools.loadGTSAMNatives();
+         factorGraph = new SlamWrapper.FactorGraphExternal();
+         factorGraph.addPriorPoseFactor(1, new float[] {0, 0, 0, 0, 0, 0});
+      }
+
       parameters = new PlanarRegionFilteredMapParameters();
       finalMap = new PlanarRegionsList();
-
-      factorGraph.addPriorPoseFactor(1, new float[] {0, 0, 0, 0, 0, 0});
    }
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
