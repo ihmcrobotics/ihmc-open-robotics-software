@@ -1,5 +1,6 @@
 package us.ihmc.perception.mapping;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -18,15 +19,18 @@ import java.util.List;
 
 public class PlanarRegionMap
 {
-   private enum MergerType
+   public enum MergingMode
    {
       FILTERING, SMOOTHING
    }
 
-   private enum MatcherType
+   public enum MatchingMode
    {
       ITERATIVE, GRAPHICAL
    }
+
+   private MergingMode merger;
+   private MatchingMode matcher;
 
    private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
@@ -47,16 +51,19 @@ public class PlanarRegionMap
    private int uniqueRegionsFound = 0;
    private int uniqueIDtracker = 0;
 
+   private final HashMap<Integer, TIntArrayList> planarRegionMatches = new HashMap<>();
    private final HashSet<Integer> mapRegionIDSet = new HashSet<>();
 
    private PlanarRegionsList finalMap;
 
    private int currentTimeIndex = 0;
 
-   public PlanarRegionMap(MergerType merger)
+   public PlanarRegionMap(boolean useSmoothingMerger)
    {
-      if(merger == MergerType.SMOOTHING)
+      if(useSmoothingMerger)
       {
+         this.merger = MergingMode.SMOOTHING;
+
          BytedecoTools.loadGTSAMNatives();
          factorGraph = new SlamWrapper.FactorGraphExternal();
          factorGraph.addPriorPoseFactor(1, new float[] {0, 0, 0, 0, 0, 0});
@@ -87,6 +94,7 @@ public class PlanarRegionMap
       else
       {
          LogTools.info("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
+
          // merge all the new regions in
          finalMap = crossReduceRegionsIteratively(finalMap,
                                                   regions,
@@ -95,13 +103,17 @@ public class PlanarRegionMap
                                                   outOfPlaneDistanceFromOneRegionToAnother,
                                                   maxDistanceBetweenRegionsForMatch);
 
+         PlanarRegionSLAMTools.printMatches("Self", planarRegionMatches);
+
          LogTools.info("After Cross: {}", finalMap.getNumberOfPlanarRegions());
          // merge map regions within themselves again
          finalMap = selfReduceRegionsIteratively(finalMap,
                                                  (float) updateAlphaTowardsMatch,
                                                  (float) Math.cos(angleThresholdBetweenNormalsForMatch),
                                                  outOfPlaneDistanceFromOneRegionToAnother,
-                                                 maxDistanceBetweenRegionsForMatch);
+                                                 maxDistanceBetweenRegionsForMatch, planarRegionMatches);
+
+         PlanarRegionSLAMTools.printMatches("Cross", planarRegionMatches);
 
          LogTools.info("After Final Self: {}", finalMap.getPlanarRegionsAsList().size());
 
@@ -261,8 +273,9 @@ public class PlanarRegionMap
                                                          float updateTowardsChildAlpha,
                                                          float normalThreshold,
                                                          float normalDistanceThreshold,
-                                                         float distanceThreshold)
+                                                         float distanceThreshold, HashMap<Integer, TIntArrayList> matches)
    {
+      matches.clear();
       boolean changed = false;
       do
       {
@@ -294,6 +307,8 @@ public class PlanarRegionMap
                   if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, normalThreshold, normalDistanceThreshold, distanceThreshold))
                   {
                      LogTools.info("Matched({},{}) -> Merging", parentIndex, childIndex);
+
+                     matches.get(parentIndex).add(childIndex);
                      if (PlanarRegionSLAMTools.mergeRegionIntoParent(parentRegion, childRegion, updateTowardsChildAlpha))
                      {
                         LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
@@ -337,11 +352,11 @@ public class PlanarRegionMap
                                          (float) updateAlphaTowardsMatch,
                                          (float) Math.cos(angleThresholdBetweenNormalsForMatch),
                                          outOfPlaneDistanceFromOneRegionToAnother,
-                                         maxDistanceBetweenRegionsForMatch);
+                                         maxDistanceBetweenRegionsForMatch, planarRegionMatches);
       return map;
    }
 
-   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, ArrayList<Integer>> matches, int poseIndex)
+   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, int poseIndex)
    {
       RigidBodyTransform currentSensorToWorldFrameTransform = (RigidBodyTransform) regions.getSensorToWorldTransform();
       worldToSensorFrameTransform.setAndInvert(currentSensorToWorldFrameTransform);
@@ -363,7 +378,7 @@ public class PlanarRegionMap
 
       for (Integer parent : matches.keySet())
       {
-         for (Integer child : matches.get(parent))
+         for (Integer child : matches.get(parent).toArray())
          {
             PlanarRegion childRegion = regions.getPlanarRegion(child);
 

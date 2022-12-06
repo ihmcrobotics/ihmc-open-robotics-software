@@ -1,9 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.esotericsoftware.kryo.util.IntMap;
@@ -754,5 +751,16 @@ public class PlanarRegionSLAMTools
       //                            distanceThreshold) + ": [{}]", wasMatched);
 
       return wasMatched;
+   }
+
+   public static void printMatches(String tag, HashMap<Integer, TIntArrayList> matches)
+   {
+      LogTools.info("------------------------------------------------ Printing Matches ({}) ---------------------------------------------", tag);
+      for(Integer key : matches.keySet())
+      {
+         int[] values = matches.get(key).toArray();
+         LogTools.info("Match: {} -> [{}]", key, Arrays.toString(values));
+      }
+      LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
    }
 }
