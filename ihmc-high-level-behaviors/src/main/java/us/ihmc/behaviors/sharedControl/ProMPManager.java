@@ -40,7 +40,7 @@ public class ProMPManager
    private final long speedFactor;
    private final int numberOfInferredSpeeds;
 
-   /* Class constructor
+   /** Class constructor
     * @param taskName: name of the task
     * @param bodyPartsGeometry: body part of the robot and geometry (e.g. position, orientation, pose) for which you want to learn the ProMPs
     */
@@ -63,7 +63,7 @@ public class ProMPManager
       ProMPNativeLibrary.load();
    }
 
-   /* learn the ProMPs for the task based on the demo training trajectories stored in .../promp/etc/demos
+   /** Learn the ProMPs for the task based on the demo training trajectories stored in .../promp/etc/demos
     * learn a ProMP for each bodyPart specified in the constructor of this class */
    public void learnTaskFromDemos()
    {
@@ -112,7 +112,7 @@ public class ProMPManager
             dofs.replaceAll(dof -> dof + 7L);
          }
          TrajectoryGroup trainingTrajectory = new TrajectoryGroup();
-         //training filelist
+         // training filelist
          StringVector fileListStringVectorTraining = new StringVector();
          fileListTraining.forEach(fileListStringVectorTraining::push_back);
          SizeTVector doFsSizeTVector = new SizeTVector();
@@ -137,7 +137,7 @@ public class ProMPManager
          learnedProMPs.replace(bodyPart, new ProMP(trainingTrajectories.get(bodyPart), numberBasisFunctions));
    }
 
-   /* update the speed of the ProMPs of the task based on observation of a body part trajectory (e.g., RightHand or LeftHand) */
+   /** Update the speed of the ProMPs of the task based on observation of a body part trajectory (e.g., RightHand or LeftHand) */
    public void updateTaskSpeed(List<Pose3DReadOnly> observedFrameTrajectory, String bodyPart)
    {
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
@@ -161,7 +161,7 @@ public class ProMPManager
       }
    }
 
-   /* update the speed of the ProMPs of the task based on observation of multiple body parts trajectories */
+   /** Update the speed of the ProMPs of the task based on observation of multiple body parts trajectories */
    public void updateTaskSpeed(List<List<Pose3DReadOnly>> observedFrameTrajectories, List<String> bodyParts)
    {
       List<EigenMatrixXd> observedTrajectories = new ArrayList<>();
@@ -171,13 +171,13 @@ public class ProMPManager
          observedTrajectories.add(toEigenMatrix(observedFrameTrajectories.get(i), bodyParts.get(i)));
          demoTrajectories.add(trainingTrajectories.get(bodyParts.get(i)).trajectories());
       }
-      //concatenate observed trajectories of bodyParts in a single EigenMatrix object
+      // concatenate observed trajectories of bodyParts in a single EigenMatrix object
       EigenMatrixXd observedTrajectory = concatenateEigenMatrix(observedTrajectories.get(0), observedTrajectories.get(1));
       for (int i = 2; i < observedFrameTrajectories.size(); i++)
       {
          observedTrajectory = concatenateEigenMatrix(observedTrajectory, observedTrajectories.get(i));
       }
-      //concatenate demo trajectories of bodyParts in a single Trajectory Vector object
+      // concatenate demo trajectories of bodyParts in a single Trajectory Vector object
       TrajectoryVector demoTrajectory = concatenateTrajectoryVector(demoTrajectories.get(0), demoTrajectories.get(1));
       for (int i = 2; i < demoTrajectories.size(); i++)
       {
@@ -203,7 +203,7 @@ public class ProMPManager
       }
    }
 
-   /* update the speed of the ProMPs of the task based on observation of a body part trajectory and goal (e.g., RightHand or LeftHand) */
+   /** Update the speed of the ProMPs of the task based on observation of a body part trajectory and goal (e.g., RightHand or LeftHand) */
    public void updateTaskSpeed(List<Pose3DReadOnly> observedFrameTrajectory, Pose3DReadOnly observedGoal, String bodyPart)
    {
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
@@ -230,7 +230,7 @@ public class ProMPManager
       }
    }
 
-   /* transform trajectory from list of set poses to EigenMatrixXd */
+   /** Transform trajectory from list of set poses to EigenMatrixXd */
    private EigenMatrixXd toEigenMatrix(List<Pose3DReadOnly> frameList, String bodyPart)
    {
       EigenMatrixXd matrix = null;
@@ -272,7 +272,7 @@ public class ProMPManager
       return matrix;
    }
 
-   /* update the predicted trajectories based on observed set poses */
+   /** Update the predicted trajectories based on observed set poses */
    public void updateTaskTrajectories(HashMap<String, Pose3DReadOnly> bodyPartObservedPose, int conditioningTimestep)
    {
       // condition ProMP to reach point at given timestep
@@ -282,7 +282,7 @@ public class ProMPManager
       }
    }
 
-   /* update the predicted trajectory based on observed set pose */
+   /** Update the predicted trajectory based on observed set pose */
    public void updateTaskTrajectory(String bodyPart, Pose3DReadOnly observedPose, int conditioningTimestep)
    {
       updateTrajectory(learnedProMPs.get(bodyPart), bodyPart, observedPose, conditioningTimestep);
@@ -295,17 +295,15 @@ public class ProMPManager
       myProMP.condition_via_point(conditioningTimestep, viaPoint);
       if (logEnabled)
       {
-         logger.addViaPoint(bodyPart, viaPoint);
          if (isLastViaPoint.get())
          {
             logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
-            logger.saveViaPoints(bodyPart);
             isLastViaPoint.set(false);
          }
       }
    }
 
-   /* update the predicted trajectory based on observed goal */
+   /** Update the predicted trajectory based on observed goal */
    public void updateTaskTrajectoriesGoal(HashMap<String, Pose3DReadOnly> bodyPartObservedPose)
    {
       // condition ProMP to reach end point
@@ -315,7 +313,7 @@ public class ProMPManager
       }
    }
 
-   /* update the predicted trajectory based on observed goal */
+   /** Update the predicted trajectory based on observed goal */
    public void updateTaskTrajectoryGoal(String bodyPart, Pose3DReadOnly observedPose)
    {
       updateTrajectoryGoal(learnedProMPs.get(bodyPart), bodyPart, observedPose);
@@ -360,14 +358,14 @@ public class ProMPManager
       }
    }
 
-   /* generate mean of predicted trajectory as a list of frame poses */
+   /** Generate mean of predicted trajectory as a list of frame poses */
    public List<FramePose3D> generateTaskTrajectory(String bodyPart)
    {
       EigenMatrixXd meanTrajectoryConditioned = learnedProMPs.get(bodyPart).generate_trajectory();
       return toFrameList(meanTrajectoryConditioned, bodyPart);
    }
 
-   /* transform trajectory from list of frame poses to EigenMatrixXd */
+   /** Transform trajectory from list of frame poses to EigenMatrixXd */
    private List<FramePose3D> toFrameList(EigenMatrixXd matrix, String bodyPart)
    {
       List<FramePose3D> frameList = new ArrayList<>();

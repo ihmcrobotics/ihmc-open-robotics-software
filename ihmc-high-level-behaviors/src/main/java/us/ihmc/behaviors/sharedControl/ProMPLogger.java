@@ -53,13 +53,13 @@ public class ProMPLogger
 
    private ProMPInfoMapper.EigenMatrixXd buildViaPointsMatrix(String bodyPart)
    {
-      //build list of viaPoints as matrix: rows = size of List, cols = size of viaPoint EigenVector
+      // build list of viaPoints as matrix: rows = size of List, cols = size of viaPoint EigenVector
       ProMPInfoMapper.EigenMatrixXd viaPointsMatrix = new ProMPInfoMapper.EigenMatrixXd(bodyPartViaPoints.get(bodyPart).size(),
                                                                                         (int) bodyPartViaPoints.get(bodyPart).get(0).size());
       for (int i = 0; i < viaPointsMatrix.rows(); i++)
          for (int j = 0; j < viaPointsMatrix.cols(); j++)
             viaPointsMatrix.apply(i, j).put(bodyPartViaPoints.get(bodyPart).get(i).coeff(j));
-      //clean in case you want to store and log other data again in the future
+      // clean in case you want to store and log other data again in the future
       bodyPartViaPoints.remove(bodyPart);
       return viaPointsMatrix;
    }
