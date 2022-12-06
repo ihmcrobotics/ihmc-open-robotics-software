@@ -118,8 +118,6 @@ public class BytedecoTools
       {
          System.load(new WorkspaceFile(resourcesDirectory, libraryFile).getFilePath().toAbsolutePath().normalize().toString());
       }
-
-      System.setProperty("org.bytedeco.javacpp.loadlibraries", "true");
    }
 
    public static Activator loadOpenCVNativesOnAThread()
