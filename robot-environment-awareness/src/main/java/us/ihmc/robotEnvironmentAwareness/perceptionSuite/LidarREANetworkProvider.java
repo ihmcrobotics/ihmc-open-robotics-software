@@ -10,6 +10,7 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REACurrentStateProvider;
@@ -71,7 +72,7 @@ public class LidarREANetworkProvider implements REANetworkProvider
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PolygonizerParametersMessage.class,
                                                     inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override
