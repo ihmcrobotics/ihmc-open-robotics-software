@@ -14,7 +14,7 @@ import us.ihmc.tools.property.*;
  *
  * If the constant paths have changed, change them in this file and run the main to regenerate.
  */
-public class PlanarRegionFilteredMapParameters extends StoredPropertySet implements PlanarRegionFilteredMapParametersBasics
+public class PlanarRegionMappingParameters extends StoredPropertySet implements PlanarRegionFilteredMapParametersBasics
 {
    public static final String DIRECTORY_NAME_TO_ASSUME_PRESENT = "ihmc-open-robotics-software";
    public static final String SUBSEQUENT_PATH_TO_RESOURCE_FOLDER = "ihmc-avatar-interfaces/src/main/resources";
@@ -30,7 +30,7 @@ public class PlanarRegionFilteredMapParameters extends StoredPropertySet impleme
    /**
     * Loads this property set.
     */
-   public PlanarRegionFilteredMapParameters()
+   public PlanarRegionMappingParameters()
    {
       this("");
    }
@@ -38,30 +38,30 @@ public class PlanarRegionFilteredMapParameters extends StoredPropertySet impleme
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public PlanarRegionFilteredMapParameters(String versionSpecifier)
+   public PlanarRegionMappingParameters(String versionSpecifier)
    {
-      this(PlanarRegionFilteredMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(PlanarRegionMappingParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public PlanarRegionFilteredMapParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   public PlanarRegionMappingParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
    {
-      super(keys, classForLoading, PlanarRegionFilteredMapParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+      super(keys, classForLoading, PlanarRegionMappingParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
       load();
    }
 
-   public PlanarRegionFilteredMapParameters(StoredPropertySetReadOnly other)
+   public PlanarRegionMappingParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, PlanarRegionFilteredMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
+      super(keys, PlanarRegionMappingParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
       StoredPropertySet parameters = new StoredPropertySet(keys,
-                                                           PlanarRegionFilteredMapParameters.class,
+                                                           PlanarRegionMappingParameters.class,
                                                            DIRECTORY_NAME_TO_ASSUME_PRESENT,
                                                            SUBSEQUENT_PATH_TO_RESOURCE_FOLDER);
       parameters.generateJavaFiles(SUBSEQUENT_PATH_TO_JAVA_FOLDER);

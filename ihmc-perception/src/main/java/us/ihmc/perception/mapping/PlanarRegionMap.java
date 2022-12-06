@@ -18,7 +18,17 @@ import java.util.List;
 
 public class PlanarRegionMap
 {
-   private PlanarRegionFilteredMapParameters parameters;
+   private enum MergerType
+   {
+      FILTERING, SMOOTHING
+   }
+
+   private enum MatcherType
+   {
+      ITERATIVE, GRAPHICAL
+   }
+
+   private PlanarRegionMappingParameters parameters;
    private SlamWrapper.FactorGraphExternal factorGraph;
 
    private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
@@ -43,45 +53,39 @@ public class PlanarRegionMap
 
    private int currentTimeIndex = 0;
 
-   public PlanarRegionMap(boolean smoothing)
+   public PlanarRegionMap(MergerType merger)
    {
-      if(smoothing)
+      if(merger == MergerType.SMOOTHING)
       {
          BytedecoTools.loadGTSAMNatives();
          factorGraph = new SlamWrapper.FactorGraphExternal();
          factorGraph.addPriorPoseFactor(1, new float[] {0, 0, 0, 0, 0, 0});
       }
 
-      parameters = new PlanarRegionFilteredMapParameters();
+      parameters = new PlanarRegionMappingParameters();
       finalMap = new PlanarRegionsList();
    }
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
    {
       LogTools.info("-------------------------------------------------------- New Iteration --------------------------------------------------------------");
+      LogTools.info("Incoming: {}", regions.getPlanarRegionsAsList().size());
+
       modified = true;
+
+      // Assign unique IDs to all incoming regions
+      regions.getPlanarRegionsAsList().forEach(region ->
+      {
+         region.setRegionId(uniqueIDtracker++);
+      });
+
       if (!initialized)
       {
-         regions.getPlanarRegionsAsList().forEach(region ->
-                                                  {
-                                                     region.setRegionId(uniqueIDtracker++);
-                                                     mapRegionIDSet.add(region.getRegionId());
-                                                  });
          finalMap.addPlanarRegionsList(regions);
-
          initialized = true;
       }
       else
       {
-         //// merge map regions within themselves
-         //LogTools.info("Before Self First: {}", finalMap.getNumberOfPlanarRegions());
-         //finalMap = selfReduceRegionsIteratively(finalMap,
-         //                                        (float) updateAlphaTowardsMatch,
-         //                                        (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-         //                                        outOfPlaneDistanceFromOneRegionToAnother,
-         //                                        maxDistanceBetweenRegionsForMatch);
-
-         LogTools.info("Incoming: {}", regions.getPlanarRegionsAsList().size());
          LogTools.info("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
          // merge all the new regions in
          finalMap = crossReduceRegionsIteratively(finalMap,
@@ -407,7 +411,7 @@ public class PlanarRegionMap
       this.modified = modified;
    }
 
-   public PlanarRegionFilteredMapParameters getParameters()
+   public PlanarRegionMappingParameters getParameters()
    {
       return parameters;
    }
