@@ -13,7 +13,7 @@ public class SlamWrapperTest
    private static void loadLibraries() throws IOException
    {
       List<String> libraryFiles = new ArrayList<>();
-      //      libraryFiles.add("libtbb.so");
+      libraryFiles.add("libtbb.so");
 
       libraryFiles.add("libboost_filesystem.so");
       libraryFiles.add("libboost_chrono.so");
