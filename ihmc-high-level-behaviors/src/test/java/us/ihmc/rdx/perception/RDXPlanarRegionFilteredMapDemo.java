@@ -13,7 +13,7 @@ public class RDXPlanarRegionFilteredMapDemo
 
    public RDXPlanarRegionFilteredMapDemo()
    {
-      mapHandler = new PlanarRegionMappingManager();
+      mapHandler = new PlanarRegionMappingManager(true);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {

@@ -2,7 +2,7 @@ package us.ihmc.perception.mapping;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.perception.mapping.PlanarRegionFilteredMapParameters.*;
+import static us.ihmc.perception.mapping.PlanarRegionMappingParameters.*;
 
 /**
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
