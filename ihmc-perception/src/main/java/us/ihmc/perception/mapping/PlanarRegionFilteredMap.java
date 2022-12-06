@@ -40,31 +40,23 @@ public class PlanarRegionFilteredMap
 
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
    {
-      LogTools.info("-------------------------------------------------------- New Iteration --------------------------------------------------------------");
+      LogTools.debug("-------------------------------------------------------- New Iteration --------------------------------------------------------------");
       modified = true;
       if (!initialized)
       {
          regions.getPlanarRegionsAsList().forEach(region ->
-                                                  {
-                                                     region.setRegionId(uniqueIDtracker++);
-                                                     mapRegionIDSet.add(region.getRegionId());
-                                                  });
+         {
+            region.setRegionId(uniqueIDtracker++);
+            mapRegionIDSet.add(region.getRegionId());
+         });
          finalMap.addPlanarRegionsList(regions);
 
          initialized = true;
       }
       else
       {
-         //// merge map regions within themselves
-         //LogTools.info("Before Self First: {}", finalMap.getNumberOfPlanarRegions());
-         //finalMap = selfReduceRegionsIteratively(finalMap,
-         //                                        (float) updateAlphaTowardsMatch,
-         //                                        (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-         //                                        outOfPlaneDistanceFromOneRegionToAnother,
-         //                                        maxDistanceBetweenRegionsForMatch);
-
-         LogTools.info("Incoming: {}", regions.getPlanarRegionsAsList().size());
-         LogTools.info("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
+         LogTools.debug("Incoming: {}", regions.getPlanarRegionsAsList().size());
+         LogTools.debug("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
          // merge all the new regions in
          finalMap = crossReduceRegionsIteratively(finalMap,
                                                   regions,
@@ -73,7 +65,7 @@ public class PlanarRegionFilteredMap
                                                   outOfPlaneDistanceFromOneRegionToAnother,
                                                   maxDistanceBetweenRegionsForMatch);
 
-         LogTools.info("After Cross: {}", finalMap.getNumberOfPlanarRegions());
+         LogTools.debug("After Cross: {}", finalMap.getNumberOfPlanarRegions());
          // merge map regions within themselves again
          finalMap = selfReduceRegionsIteratively(finalMap,
                                                  (float) updateAlphaTowardsMatch,
@@ -81,13 +73,11 @@ public class PlanarRegionFilteredMap
                                                  outOfPlaneDistanceFromOneRegionToAnother,
                                                  maxDistanceBetweenRegionsForMatch);
 
-         LogTools.info("After Final Self: {}", finalMap.getPlanarRegionsAsList().size());
-
-         //LogTools.info("Unique Set: [{}]", mapRegionIDSet);
+         LogTools.debug("After Final Self: {}", finalMap.getPlanarRegionsAsList().size());
       }
 
       currentTimeIndex++;
-      LogTools.info("-------------------------------------------------------- Done --------------------------------------------------------------\n");
+      LogTools.debug("-------------------------------------------------------- Done --------------------------------------------------------------\n");
    }
 
    public void submitRegionsUsingGraphicalReduction(PlanarRegionsList regions)
@@ -96,10 +86,10 @@ public class PlanarRegionFilteredMap
       if (!initialized)
       {
          regions.getPlanarRegionsAsList().forEach(region ->
-                                                  {
-                                                     region.setRegionId(uniqueIDtracker++);
-                                                     mapRegionIDSet.add(region.getRegionId());
-                                                  });
+         {
+            region.setRegionId(uniqueIDtracker++);
+            mapRegionIDSet.add(region.getRegionId());
+         });
          finalMap.addPlanarRegionsList(regions);
 
          initialized = true;
@@ -120,8 +110,6 @@ public class PlanarRegionFilteredMap
                                    outOfPlaneDistanceFromOneRegionToAnother,
                                    maxDistanceBetweenRegionsForMatch);
 
-         //LogTools.info("Regions Before: {}", regions.getPlanarRegionsAsList().size());
-
          // merge all the new regions in
          planarRegionGraph.collapseGraphByMerging(updateAlphaTowardsMatch);
 
@@ -135,12 +123,12 @@ public class PlanarRegionFilteredMap
 
          finalMap = planarRegionGraph.getAsPlanarRegionsList();
 
-         LogTools.info("Regions: {}, Unique: {}, Map: {}",
-                       regions.getPlanarRegionsAsList().size(),
-                       uniqueRegionsFound,
-                       finalMap.getPlanarRegionsAsList().size());
+         LogTools.debug("Regions: {}, Unique: {}, Map: {}",
+                        regions.getPlanarRegionsAsList().size(),
+                        uniqueRegionsFound,
+                        finalMap.getPlanarRegionsAsList().size());
 
-         LogTools.info("Unique Set: [{}]", mapRegionIDSet);
+         LogTools.debug("Unique Set: [{}]", mapRegionIDSet);
       }
    }
 
@@ -189,7 +177,7 @@ public class PlanarRegionFilteredMap
                if (wasMatched)
                   wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
 
-               //LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+               //LogTools.debug(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
                //                            mapRegionIndex,
                //                            mapRegion.getRegionId(),
                //                            newRegion.getRegionId(),
@@ -244,17 +232,16 @@ public class PlanarRegionFilteredMap
       boolean changed = false;
       do
       {
-
          changed = false;
 
          int parentIndex = 0;
          int childIndex = 0;
 
-         LogTools.info("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+         LogTools.debug("Change Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
 
          while (parentIndex < map.getNumberOfPlanarRegions())
          {
-            LogTools.info("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+            LogTools.debug("Parent Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
             childIndex = 0;
             PlanarRegion parentRegion = map.getPlanarRegion(parentIndex);
             while (childIndex < map.getNumberOfPlanarRegions())
@@ -267,14 +254,14 @@ public class PlanarRegionFilteredMap
                {
                   PlanarRegion childRegion = map.getPlanarRegion(childIndex);
 
-                  LogTools.info("Child Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
+                  LogTools.debug("Child Iteration: MapTotal({}) - Parent({}) - Child({})", map.getNumberOfPlanarRegions(), parentIndex, childIndex);
 
                   if (PlanarRegionSLAMTools.checkRegionsForOverlap(parentRegion, childRegion, normalThreshold, normalDistanceThreshold, distanceThreshold))
                   {
-                     LogTools.info("Matched({},{}) -> Merging", parentIndex, childIndex);
+                     LogTools.debug("Matched({},{}) -> Merging", parentIndex, childIndex);
                      if (PlanarRegionSLAMTools.mergeRegionIntoParent(parentRegion, childRegion, updateTowardsChildAlpha))
                      {
-                        LogTools.info("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
+                        LogTools.debug("Merged({},{}) -> Removing({})", parentIndex, childIndex, childIndex);
 
                         changed = true;
                         map.getPlanarRegionsAsList().remove(childIndex);

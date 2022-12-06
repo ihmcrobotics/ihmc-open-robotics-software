@@ -70,8 +70,6 @@ public class PlanarRegionGraph
       return root.collectAsPlanarRegionsList();
    }
 
-
-
    private static void makeRoot(PlanarRegionNode node)
    {
       PlanarRegionNode parentNode = node.getParentNode();
@@ -191,25 +189,25 @@ public class PlanarRegionGraph
          if (planarRegion == null)
             return;
 
-         int childIdx = 0;
+         int childIndex = 0;
          boolean changed = false;
          do
          {
             changed = false;
-            while (childIdx < childNodes.size())
+            while (childIndex < childNodes.size())
             {
-               PlanarRegionNode childNode = childNodes.get(childIdx);
+               PlanarRegionNode childNode = childNodes.get(childIndex);
                if (PlanarRegionSLAMTools.mergeRegionIntoParent(planarRegion, childNode.planarRegion, updateTowardsChildAlpha))
                {
                   changed = true;
-                  childNodes.remove(childIdx);
+                  childNodes.remove(childIndex);
                   // inherit the remaining children of the child
                   for (int i = 0; i < childNode.getNumberOfChildren(); i++)
-                     addChildNode(childNode.getChildNode(childIdx));
+                     addChildNode(childNode.getChildNode(childIndex));
                }
                else
                {
-                  childIdx++;
+                  childIndex++;
                }
             }
          }
