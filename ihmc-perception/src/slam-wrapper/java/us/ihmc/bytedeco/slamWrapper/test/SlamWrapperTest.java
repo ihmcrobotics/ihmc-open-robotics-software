@@ -12,46 +12,13 @@ public class SlamWrapperTest
 {
    private static void loadLibraries() throws IOException
    {
-      // We need to disable javacpp from trying to automatically load libraries.
-      // Otherwise, it will try to load them by name when they aren't in the library path
-      // (LD_LIBRARY_PATH on Linux).
-      //
-      // The approach taken here is to use System.load to load each library by explicit
-      // absolute path on disk.
-      System.setProperty("org.bytedeco.javacpp.loadlibraries", "false");
-
       List<String> libraryFiles = new ArrayList<>();
-      libraryFiles.add("libtbb.so");
+      //      libraryFiles.add("libtbb.so");
 
-      libraryFiles.add("libboost_thread.so");
-      libraryFiles.add("libboost_stacktrace_addr2line.so");
       libraryFiles.add("libboost_filesystem.so");
-      libraryFiles.add("libboost_stacktrace_basic.so");
-      libraryFiles.add("libboost_date_time.so");
-      libraryFiles.add("libboost_context.so");
-      libraryFiles.add("libboost_math_c99l.so");
-      libraryFiles.add("libboost_program_options.so");
-      libraryFiles.add("libboost_serialization.so");
-      libraryFiles.add("libboost_stacktrace_noop.so");
-      libraryFiles.add("libboost_prg_exec_monitor.so");
-      libraryFiles.add("libboost_coroutine.so");
       libraryFiles.add("libboost_chrono.so");
       libraryFiles.add("libboost_timer.so");
-      libraryFiles.add("libboost_stacktrace_backtrace.so");
-      libraryFiles.add("libboost_math_c99f.so");
-      libraryFiles.add("libboost_system.so");
-      libraryFiles.add("libboost_wserialization.so");
-      libraryFiles.add("libboost_atomic.so");
-      libraryFiles.add("libboost_math_c99.so");
-      libraryFiles.add("libboost_fiber.so");
-      libraryFiles.add("libboost_unit_test_framework.so");
-      libraryFiles.add("libboost_math_tr1.so");
-      libraryFiles.add("libboost_container.so");
-      libraryFiles.add("libboost_random.so");
-      libraryFiles.add("libboost_type_erasure.so");
-      libraryFiles.add("libboost_math_tr1f.so");
-      libraryFiles.add("libboost_math_tr1l.so");
-      libraryFiles.add("libboost_wave.so");
+      libraryFiles.add("libboost_serialization.so");
 
       libraryFiles.add("libmetis-gtsam.so");
       libraryFiles.add("libgtsam.so");
