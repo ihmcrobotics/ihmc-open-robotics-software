@@ -213,6 +213,31 @@ public class ConvexPolygonTools
       connectingEdge2ToPack.set(polygon2.getVertex(verticesIndices[1][1]), polygon1.getVertex(verticesIndices[0][1]));
    }
 
+   /**
+    * Returns the distance between two polygons. If they intersect, the distance is 0.0
+    * @return distance in meters between the polygons. If they intersect, the distance is 0.0
+    */
+   public double distanceBetweenTwoConvexPolygon2Ds(ConvexPolygon2DReadOnly polygonA, ConvexPolygon2DReadOnly polygonB)
+   {
+      if (doPolygonsIntersect(polygonA, polygonB))
+         return 0.0;
+
+      double minDistance = Double.POSITIVE_INFINITY;
+      for (int indexA = 0; indexA < polygonA.getNumberOfVertices(); indexA++)
+      {
+         for (int indexB = 0; indexB < polygonB.getNumberOfVertices(); indexB++)
+         {
+            double distance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(polygonA.getVertex(indexA),
+                                                               polygonA.getNextVertex(indexA),
+                                                               polygonB.getVertex(indexB),
+                                                               polygonB.getNextVertex(indexB));
+            minDistance = Math.min(minDistance, distance);
+         }
+      }
+
+      return minDistance;
+   }
+
    private transient final Vector2D caliperForPolygonP = new Vector2D();
    private transient final Vector2D caliperForPolygonQ = new Vector2D();
    private transient final Point2D lineStart = new Point2D();
@@ -719,7 +744,7 @@ public class ConvexPolygonTools
       }
    }
 
-   private boolean computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
+   private static boolean computeIfPolygonsIntersectIfOnePolygonHasExactlyTwoVerticesAndTheOtherHasAtLeastTwoVertices(ConvexPolygon2DReadOnly polygonWithExactlyTwoVertices,
                                                                                                                ConvexPolygon2DReadOnly polygonWithAtLeastTwoVertices)
    {
       return EuclidGeometryPolygonMissingTools.doLineSegment2DAndConvexPolygon2DIntersect(polygonWithExactlyTwoVertices.getVertex(0),
