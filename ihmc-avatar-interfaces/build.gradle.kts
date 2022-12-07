@@ -44,7 +44,6 @@ mainDependencies {
    api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
