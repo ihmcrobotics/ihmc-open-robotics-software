@@ -25,7 +25,7 @@ import java.util.Map;
 public class ValkyrieImpedanceVisualizer implements SCSVisualizerStateListener
 {
    public static final int BUFFER_SIZE = 16384;
-   public static final boolean SETUP_SLIDER_BOARD = false;
+   public static final boolean SETUP_SLIDER_BOARD = true;
 
    public ValkyrieImpedanceVisualizer()
    {
@@ -111,8 +111,8 @@ public class ValkyrieImpedanceVisualizer implements SCSVisualizerStateListener
       sliderBoardConfigurationManager.setSlider(3, "desiredJointDamping", registry, 0.0, 45.0);
 
       sliderBoardConfigurationManager.setSlider(5, "highLevelMasterGain", registry, 0.0, 1.0);
-      sliderBoardConfigurationManager.setSlider(6, "highLevelJointStiffness", registry, 0.0, 60.0);
-      sliderBoardConfigurationManager.setSlider(7, "highLevelJointDamping", registry, 0.0, 10.0);
+      sliderBoardConfigurationManager.setSlider(6, "highLevelJointStiffness", registry, 0.0, 75.0);
+      sliderBoardConfigurationManager.setSlider(7, "highLevelJointDamping", registry, 0.0, 12.0);
    }
 
    public static void main(String[] args)
