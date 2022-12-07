@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -56,8 +57,11 @@ public class ProMPAssistant implements TeleoperationAssistant
       // read parameters regarding the properties of available learned tasks from json file
       try
       {
-         String configurationFile = "us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
-         Path pathFile = Paths.get("ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/" + configurationFile);
+         WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
+         String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
+         String configurationFile = "/us/ihmc/behaviors/sharedControl/ProMPAssistant.json";
+         String demoDirectory = directoryAbsolutePath + configurationFile;
+         Path pathFile = Paths.get(demoDirectory);
          LogTools.info("Loading parameters from resource: {}", configurationFile);
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(pathFile.toAbsolutePath().toString()));
          testNumber = (int) ((long) jsonObject.get("testNumberUseOnlyForTesting"));
@@ -370,4 +374,15 @@ public class ProMPAssistant implements TeleoperationAssistant
    {
       return this.doneCurrentTask;
    }
+
+   public ProMPManager getProMPManager(String task)
+   {
+      return proMPManagers.get(task);
+   }
+
+   public Set<String> getTaskNames()
+   {
+      return proMPManagers.keySet();
+   }
+
 }

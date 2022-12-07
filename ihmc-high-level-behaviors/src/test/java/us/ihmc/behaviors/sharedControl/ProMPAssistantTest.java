@@ -13,14 +13,25 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class ProMPAssistantTest
 {
-   public static void main(String[] args) throws IOException
+   @Test
+   public void testProMPTrajectoryGeneration() throws IOException
    {
       // learn ProMPs
       // Check ProMPAssistant.json if you want to change parameters (e.g, task to learn, body parts to consider in the motion)
       ProMPAssistant proMPAssistant = new ProMPAssistant();
+      Set<String> tasks = proMPAssistant.getTaskNames();
+      assertTrue(tasks.size()>0);
+      String task = tasks.iterator().next();
+      ProMPManager myManager = proMPAssistant.getProMPManager(task);
+      assertTrue(myManager!=null);
+      assertTrue(proMPAssistant.getProMPManager(task)!=null);
       // use a csv file with the trajectories of the hands of the robot for testing
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
       String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
@@ -61,6 +72,7 @@ public class ProMPAssistantTest
             }
             else
             {
+               assertTrue(!proMPAssistant.readyToPack());
                //do not change the frame, just observe it in order to generate a prediction later
                proMPAssistant.processFrameInformation(framePose, bodyPart);
             }
@@ -77,6 +89,8 @@ public class ProMPAssistantTest
       }
       //concatenate each set point of hands in single row
       trajectoryRecorder.concatenateData();
+      ArrayList<Double[]> dataConcatenated = trajectoryRecorder.getData();
+      assertTrue(dataConcatenated.size() > 0); // check data is not empty
       //save recording in csv file
       trajectoryRecorder.saveRecording();
 

@@ -6,6 +6,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -16,19 +18,23 @@ import java.util.Map;
 
 public class JSONReaderTest
 {
-   public static void main(String[] args)
+   @Test
+   public void testJSONReader()
    {
-      // parsing file "ProMPAssistant.json"
+      System.out.println("parsing file \"ProMPAssistantTest.json\"");
       try
       {
          JSONObject jsonObject = (JSONObject) new JSONParser().parse(new FileReader(Paths.get(System.getProperty("user.home"),
-                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistant.json")
+                                                                                              "repository-group/ihmc-open-robotics-software/ihmc-high-level-behaviors/src/main/resources/us/ihmc/behaviors/sharedControl/ProMPAssistantTest.json")
                                                                                          .toString()));
-         int numberObservations = (int) ((long) jsonObject.get("numberObservations"));
+         int numberBasisFunctions = (int) ((long) jsonObject.get("numberBasisFunctions"));
          boolean logEnabled = (boolean) jsonObject.get("logging");
 
-         System.out.println(numberObservations);
+         System.out.println(numberBasisFunctions);
+         assertTrue(numberBasisFunctions == 20);
          System.out.println(logEnabled);
+         assertTrue(logEnabled);
+
          // getting tasks
          JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
          //iterating tasks
@@ -44,10 +50,7 @@ public class JSONReaderTest
                   case "name":
                      String taskName = (String) taskPropertyMap.getValue();
                      System.out.println(taskName);
-                     break;
-                  case "relevantBodyPart":
-                     String relevantBodyPart = (String) taskPropertyMap.getValue();
-                     System.out.println(relevantBodyPart);
+                     assertEquals(taskName, "PushDoor");
                      break;
                   case "bodyParts":
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
@@ -61,12 +64,14 @@ public class JSONReaderTest
                                                                   // extract your value here
                                                                   String name = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
                                                                   System.out.println(name);
+                                                                  assertTrue(name.equals("leftHand") || name.equals("rightHand"));
                                                                }
                                                                else if ("geometry".equals(bodyPartProperty.toString()))
                                                                {
                                                                   // extract your value here
                                                                   String geometry = String.valueOf(jsonBodyPartObject.get(bodyPartProperty));
                                                                   System.out.println(geometry);
+                                                                  assertEquals(geometry, "Pose");
                                                                }
                                                             });
                      }
