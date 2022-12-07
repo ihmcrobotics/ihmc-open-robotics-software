@@ -759,7 +759,7 @@ public class PlanarRegionSLAMTools
       for(Integer key : matches.keySet())
       {
          int[] values = matches.get(key).toArray();
-         LogTools.info("Match: {} -> [{}]", key, Arrays.toString(values));
+         LogTools.info("Match: ({}) -> {}", key, Arrays.toString(values));
       }
       LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
    }
