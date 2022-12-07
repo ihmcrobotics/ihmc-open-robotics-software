@@ -26,6 +26,8 @@ public class PlanarRegionMap
       ITERATIVE, GRAPHICAL
    }
 
+   int sensorPoseIndex = 0;
+
    private MergingMode merger;
    private MatchingMode matcher;
 
@@ -108,6 +110,8 @@ public class PlanarRegionMap
                                                   outOfPlaneDistanceFromOneRegionToAnother,
                                                   maxDistanceBetweenRegionsForMatch);
 
+         applyFactorGraphBasedSmoothing(finalMap, regions, planarRegionMatches, sensorPoseIndex);
+
          processUniqueRegions(finalMap);
 
          PlanarRegionSLAMTools.printMatches("Cross", planarRegionMatches);
@@ -126,6 +130,8 @@ public class PlanarRegionMap
 
          //LogTools.info("Unique Set: [{}]", mapRegionIDSet);
       }
+
+      sensorPoseIndex++;
 
       finalMap.getPlanarRegionsAsList().forEach(region -> mapIDs.add(region.getRegionId()));
       regions.getPlanarRegionsAsList().forEach(region -> incomingIDs.add(region.getRegionId()));
@@ -388,6 +394,61 @@ public class PlanarRegionMap
    }
 
    public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches, int poseIndex)
+   {
+      RigidBodyTransform currentSensorToWorldFrameTransform = (RigidBodyTransform) regions.getSensorToWorldTransform();
+      worldToSensorFrameTransform.setAndInvert(currentSensorToWorldFrameTransform);
+
+      worldToPreviousSensorFrameTransform.setAndInvert(previousSensorToWorldFrameTransform);
+
+      odoometry.set(worldToPreviousSensorFrameTransform);
+      odoometry.multiply(currentSensorToWorldFrameTransform);
+
+      // Convert odometry to float array. Add into factor graph using 16-double method for addOdometryFactor().
+      float[] odometryValue = new float[16];
+      odoometry.get(odometryValue);
+      factorGraph.addOdometryFactorExtended(odometryValue, 2);
+
+      //Convert sensor pose to float array. Add 16-float method for setPoseInitialValue().
+      float[] poseValue = new float[16];
+      currentSensorToWorldFrameTransform.get(poseValue);
+      factorGraph.setPoseInitialValueExtended(poseIndex, poseValue);
+
+      for (Integer parent : matches.keySet())
+      {
+         for (Integer child : matches.get(parent).toArray())
+         {
+            PlanarRegion childRegion = regions.getPlanarRegion(child);
+
+            // Get origin and normal in sensor frame.
+            Point3D childOrigin = new Point3D();
+            Vector3D childNormal = new Vector3D();
+            childRegion.getOrigin(childOrigin);
+            childRegion.getNormal(childNormal);
+            childOrigin.applyTransform(worldToSensorFrameTransform);
+            childNormal.applyTransform(worldToSensorFrameTransform);
+
+            // Get origin and normal in world frame
+            Point3D childOriginInWorld = new Point3D();
+            Vector3D childNormalInWorld = new Vector3D();
+            childRegion.getOrigin(childOriginInWorld);
+            childRegion.getNormal(childNormalInWorld);
+
+            // Insert plane factor based on planar region normal and origin in sensor frame
+            double localDot = childOrigin.dot(childNormal);
+            float[] planeInSensorFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -localDot};
+            factorGraph.addOrientedPlaneFactor(planeInSensorFrame, parent, poseIndex);
+
+            // Set initial value for plane based on planar region normal and origin in world frame
+            double worldDot = childOriginInWorld.dot(childNormalInWorld);
+            float[] planeInWorldFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -worldDot};
+            factorGraph.setOrientedPlaneInitialValue(parent, planeInWorldFrame);
+         }
+      }
+
+      factorGraph.optimize();
+   }
+
+   public void initializeFactorGraphForSmoothing(PlanarRegionsList map, int poseIndex)
    {
       RigidBodyTransform currentSensorToWorldFrameTransform = (RigidBodyTransform) regions.getSensorToWorldTransform();
       worldToSensorFrameTransform.setAndInvert(currentSensorToWorldFrameTransform);
