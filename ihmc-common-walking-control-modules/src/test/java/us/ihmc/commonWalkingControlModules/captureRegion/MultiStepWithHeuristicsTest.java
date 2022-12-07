@@ -4,10 +4,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.FrameGeometry2dPlotter;
+import us.ihmc.robotics.geometry.FrameGeometryTestFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,12 +20,15 @@ import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
 import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class MultiStepWithHeuristicsTest
 {
+   private static final boolean VISUALIZE = true;
+
    @Test
    public void testHardwareBug20221207_091601_NadiaControllerFactory()
    {
@@ -89,7 +96,7 @@ public class MultiStepWithHeuristicsTest
       Random random = new Random(1738L);
 
 
-      for (int i = 0; i < 1000; i++)
+      for (int iter = 0; iter < 1000; iter++)
       {
          leftSoleFrame.setPoseAndUpdate(leftFootPose);
          leftSoleZUpFrame.update();
@@ -105,12 +112,42 @@ public class MultiStepWithHeuristicsTest
                                      swingDuration + transferDuration,
                                      omega,
                                      stepsInQueue);
+         double heuristicDistance = heuristics.getCaptureRegionWithSafetyMargin().signedDistance(unadjustedFootstepPositionInWorld);
+
+         boolean allGood = captureRegionCalculator.getCaptureRegion().signedDistance(unadjustedFootstepPosition) < -0.05 &&
+                           heuristicDistance < -0.05 &&
+                           mutliStepCalculator.getCaptureRegion().signedDistance(unadjustedFootstepPositionInWorld) < -0.05;
+         if (!allGood && VISUALIZE)
+         {
+            FrameConvexPolygon2D captureRegionInWorld = new FrameConvexPolygon2D(captureRegionCalculator.getCaptureRegion());
+            captureRegionInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+
+            LogTools.info("Heuristic distance = " + heuristicDistance);
+            FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-5, 5, -5, 5);
+            FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+            plotter.setDrawPointsLarge();
+            plotter.addPolygon(supportInWorld, Color.black);
+            plotter.addFramePoint2d(perterbedCapturePoint, Color.blue);
+            plotter.addFramePoint2d(unadjustedFootstepPositionInWorld, Color.yellow);
+            plotter.addPolygon(captureRegionInWorld, Color.yellow);
+            plotter.addPolygon(heuristics.getCaptureRegionWithSafetyMargin(), Color.red);
+//            plotter.addPolygon(mutliStepCalculator.getCaptureRegion(), Color.green);
+
+            for (int i = 0; i < captureRegionInWorld.getNumberOfVertices(); i++)
+               plotter.addFramePoint2d(captureRegionInWorld.getVertex(i), Color.yellow);
+//            for (int i = 0; i < mutliStepCalculator.getCaptureRegion().getNumberOfVertices(); i++)
+//               plotter.addFramePoint2d(mutliStepCalculator.getCaptureRegion().getVertex(i), Color.green);
+            for (int i = 0; i < heuristics.getCaptureRegionWithSafetyMargin().getNumberOfVertices(); i++)
+               plotter.addFramePoint2d(heuristics.getCaptureRegionWithSafetyMargin().getVertex(i), Color.red);
+
+            ThreadTools.sleepForever();
+         }
 
          assertTrue("capture region doesn't include the foot pose, which it should",
                     captureRegionCalculator.getCaptureRegion().signedDistance(unadjustedFootstepPosition) < -0.05);
 
-         assertTrue("heuristic capture region doesn't include the foot pose, which it should",
-                    heuristics.getCaptureRegionWithSafetyMargin().signedDistance(unadjustedFootstepPositionInWorld) < -0.05);
+         assertTrue("heuristic capture region doesn't include the foot pose, which it should. Distance is " + heuristicDistance,
+                     heuristicDistance < -0.05);
 
          assertTrue("multi-step capture region doesn't include the foot pose, which it should",
                     mutliStepCalculator.getCaptureRegion().signedDistance(unadjustedFootstepPositionInWorld) < -0.05);
