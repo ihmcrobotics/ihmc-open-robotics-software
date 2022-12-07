@@ -1,16 +1,18 @@
 package us.ihmc.behaviors.sharedControl;
 
 import us.ihmc.tools.io.WorkspaceDirectory;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import java.io.File;
 
 public class ListOfFilesTest
 {
-   public static void main(String args[])
+   @Test
+   public void testListOfFiles()
    {
       // try-catch block to handle exceptions
       try {
-
          WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
          String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
          String demoTrainingDirAbs = demoDirAbs + "/PushDoor";
@@ -23,7 +25,7 @@ public class ListOfFilesTest
          File[] files = demoFolder.listFiles();
 
          System.out.println("Files are:");
-
+         assertTrue(files.length>0);
          // Display the names of the files
          for (int i = 0; i < files.length; i++) {
             System.out.println(files[i].getName());
