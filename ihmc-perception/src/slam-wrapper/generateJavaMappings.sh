@@ -11,7 +11,7 @@ make install
 
 # Use the latest release on GitHub
 # https://github.com/bytedeco/javacpp/releases
-JAVACPP_VERSION=1.5.7
+JAVACPP_VERSION=1.5.8
 
 # Copy all Java code from the root of slam-wrapper into the build directory
 cp -r ../java/ .
@@ -42,33 +42,7 @@ cp ../lib/libslam-wrapper.so ../../resources
 cp /usr/local/lib/libgtsam.so ../../resources
 cp /usr/local/lib/libmetis-gtsam.so ../../resources
 cp /usr/lib/x86_64-linux-gnu/libtbb.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_thread.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_addr2line.so ../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_filesystem.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_basic.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_date_time.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_context.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_math_c99l.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_program_options.so ../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_serialization.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_noop.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_prg_exec_monitor.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_coroutine.so ../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_timer.so ../../resources
 cp /usr/lib/x86_64-linux-gnu/libboost_chrono.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_stacktrace_backtrace.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_math_c99f.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_system.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_wserialization.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_atomic.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_math_c99.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_fiber.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_math_tr1.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_container.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_mpi.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_random.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_type_erasure.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_math_tr1f.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_math_tr1l.so ../../resources
-cp /usr/lib/x86_64-linux-gnu/libboost_wave.so ../../resources
