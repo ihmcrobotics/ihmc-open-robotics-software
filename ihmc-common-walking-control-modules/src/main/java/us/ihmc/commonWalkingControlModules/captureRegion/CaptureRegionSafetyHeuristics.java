@@ -182,6 +182,7 @@ public class CaptureRegionSafetyHeuristics
       int firstVisibleIndex = visibleIndicesAreClockWise ? 0 : verticesVisibleFromStance.size() - 1;
       int lastVisibleIndex = visibleIndicesAreClockWise ? verticesVisibleFromStance.size() - 1 : 0;
 
+      /*
       // make sure the first vertex doesn't cause a "wrinkle" by overextending the outer edge of the polygon.
       {
          int firstVertexIndex = saferCaptureRegion.getClosestVertexIndex(verticesVisibleFromStance.get(firstVisibleIndex));
@@ -215,6 +216,8 @@ public class CaptureRegionSafetyHeuristics
             saferCaptureRegion.getVertexUnsafe(lastVertexIndex).set(croppedPoint);
          }
       }
+
+       */
    }
 
    private static boolean checkIfClockWiseOrdered(List<? extends Point2DReadOnly> points, ConvexPolygon2DReadOnly captureRegion)

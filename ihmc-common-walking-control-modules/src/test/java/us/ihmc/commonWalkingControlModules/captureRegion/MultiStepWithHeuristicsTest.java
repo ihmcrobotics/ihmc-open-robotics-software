@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -12,6 +14,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
 
@@ -29,12 +32,13 @@ public class MultiStepWithHeuristicsTest
       ZUpFrame leftSoleZUpFrame = new ZUpFrame(leftSoleFrame, "leftSoleZUpFrame");
       leftSoleFrame.setPoseAndUpdate(leftFootPose);
       leftSoleZUpFrame.update();
-      FrameConvexPolygon2D solePolygon = new FrameConvexPolygon2D(leftSoleFrame);
-      solePolygon.addVertex(-0.057508, 0.012464);
+      FrameConvexPolygon2D solePolygon = new FrameConvexPolygon2D(leftSoleZUpFrame);
+      solePolygon.addVertex(-0.057507737057184344, 0.01246372307278952);
       solePolygon.addVertex(0.087493, 0.0);
       solePolygon.addVertex(0.087504, -0.009977);
       solePolygon.addVertex(-0.057490, -0.027464);
       solePolygon.update();
+      StepAdjustmentParameters.CrossOverReachabilityParameters crossOverReachabilityParameters = new StepAdjustmentParameters.CrossOverReachabilityParameters();
 
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(leftSoleZUpFrame, leftSoleZUpFrame);
       double footWidth = 0.095;
@@ -48,7 +52,21 @@ public class MultiStepWithHeuristicsTest
                                                                                                   registry,
                                                                                                   null);;
       CaptureRegionSafetyHeuristics heuristics = new CaptureRegionSafetyHeuristics(() -> maxLength, registry);
-//      MultiStepCaptureRegionCalculator mutliStepCalculator = new MultiStepCaptureRegionCalculator();
+      StepAdjustmentReachabilityConstraint reachabilityConstraint = new StepAdjustmentReachabilityConstraint(soleZUpFrames,
+                                                                                                             () -> maxLength,
+                                                                                                             () -> maxLength,
+                                                                                                             () -> 0.075,
+                                                                                                             () -> maxLength,
+                                                                                                             () -> 0.25,
+                                                                                                             crossOverReachabilityParameters,
+                                                                                                             "controller",
+                                                                                                             false,
+                                                                                                             registry,
+                                                                                                             null);
+      MultiStepCaptureRegionCalculator mutliStepCalculator = new MultiStepCaptureRegionCalculator(reachabilityConstraint, () -> false, registry);
+      ((YoDouble) registry.findVariable("distanceIntoCaptureRegionForInside")).set(0.05);
+      ((YoDouble) registry.findVariable("distanceIntoCaptureRegionForEverywhere")).set(0.02);
+      ((YoDouble) registry.findVariable("extraDistanceToStepFromStanceFoot")).set(0.05);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
       double timeRemaining = 0.52;
@@ -63,30 +81,48 @@ public class MultiStepWithHeuristicsTest
       FramePoint2D unadjustedFootstepPosition = new FramePoint2D(unadjustedFootstepPositionInWorld);
       unadjustedFootstepPosition.changeFrameAndProjectToXYPlane(leftSoleZUpFrame);
 
-      FramePoint2D modifiedCapturePoint = new FramePoint2D(capturePoint);
+      double maxCapturePointPerturbation = 0.01;
+      FramePoint2D perterbedCapturePoint = new FramePoint2D(capturePoint);
+      FramePose3D perturbedFootPose = new FramePose3D(leftFootPose);
+      FrameConvexPolygon2D perturbedSolePolygon = new FrameConvexPolygon2D(solePolygon);
 
       Random random = new Random(1738L);
-      FrameConvexPolygon2D supportInWorld = new FrameConvexPolygon2D(solePolygon);
-      supportInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
 
       for (int i = 0; i < 1000; i++)
       {
-         captureRegionCalculator.calculateCaptureRegion(swingSide, timeRemaining, capturePoint, omega, solePolygon);
-         heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), capturePoint, supportInWorld.getCentroid(), captureRegionCalculator.getCaptureRegion());
-//         mutliStepCalculator.compute(swingSide.getOppositeSide(),
-//                                     heuristics.getCaptureRegionWithSafetyMargin(),
-//                                     swingDuration + transferDuration,
-//                                     omega,
-//                                     stepsInQueue);
+         leftSoleFrame.setPoseAndUpdate(leftFootPose);
+         leftSoleZUpFrame.update();
+
+         FrameConvexPolygon2D supportInWorld = new FrameConvexPolygon2D(perturbedSolePolygon);
+         supportInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
+
+         captureRegionCalculator.calculateCaptureRegion(swingSide, timeRemaining, perterbedCapturePoint, omega, perturbedSolePolygon);
+         heuristics.computeCaptureRegionWithSafetyHeuristics(swingSide.getOppositeSide(), perterbedCapturePoint, supportInWorld.getCentroid(), captureRegionCalculator.getCaptureRegion());
+         mutliStepCalculator.compute(swingSide.getOppositeSide(),
+                                     heuristics.getCaptureRegionWithSafetyMargin(),
+                                     swingDuration + transferDuration,
+                                     omega,
+                                     stepsInQueue);
 
          assertTrue("capture region doesn't include the foot pose, which it should",
                     captureRegionCalculator.getCaptureRegion().signedDistance(unadjustedFootstepPosition) < -0.05);
 
-         assertTrue("capture region doesn't include the foot pose, which it should",
+         assertTrue("heuristic capture region doesn't include the foot pose, which it should",
                     heuristics.getCaptureRegionWithSafetyMargin().signedDistance(unadjustedFootstepPositionInWorld) < -0.05);
 
-         modifiedCapturePoint.set(capturePoint);
-         modifiedCapturePoint.add(RandomNumbers.nextDouble(random, 0.005), RandomNumbers.nextDouble(random, 0.005));
+         assertTrue("multi-step capture region doesn't include the foot pose, which it should",
+                    mutliStepCalculator.getCaptureRegion().signedDistance(unadjustedFootstepPositionInWorld) < -0.05);
+
+
+
+         perterbedCapturePoint.set(capturePoint);
+         perterbedCapturePoint.add(RandomNumbers.nextDouble(random, maxCapturePointPerturbation), RandomNumbers.nextDouble(random, maxCapturePointPerturbation));
+
+         perturbedFootPose.set(leftFootPose);
+         perturbedSolePolygon.set(solePolygon);
+
       }
 
    }
