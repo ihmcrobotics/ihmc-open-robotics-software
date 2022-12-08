@@ -5,6 +5,7 @@ import java.util.List;
 
 import perception_msgs.msg.dds.PlanarRegionMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -14,9 +15,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionMessageConverter
@@ -116,11 +117,6 @@ public class PlanarRegionMessageConverter
 
       vertexBuffer.clear();
 
-      message.getSensorPosition().set(planarRegionsList.getSensorToWorldTransform().getTranslation());
-      message.getSensorOrientation().set(planarRegionsList.getSensorToWorldTransform().getRotation());
-
-      LogTools.info("Message: Transform: {}", message.getSensorPosition());
-
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -154,9 +150,6 @@ public class PlanarRegionMessageConverter
 
    public static PlanarRegionsList convertToPlanarRegionsList(PlanarRegionsListMessage message)
    {
-      LogTools.info("Convert To List: {}", message.getSensorPosition());
-      RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(message.getSensorOrientation(), message.getSensorPosition());
-
       int vertexIndex = 0;
       Object<Vector3D> normals = message.getRegionNormal();
       Object<Point3D> origins = message.getRegionOrigin();
@@ -172,7 +165,7 @@ public class PlanarRegionMessageConverter
       {
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          if (message.getRegionOrientation().isEmpty()
-               || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+             || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
          {
             AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
             transformToWorld.set(regionOrientation, origins.get(regionIndex));
@@ -209,12 +202,7 @@ public class PlanarRegionMessageConverter
          planarRegions.add(planarRegion);
       }
 
-      LogTools.info("Convert to List: Sensor Transform:", sensorToWorldTransform);
-
-      PlanarRegionsList planarRegionsListToReturn = new PlanarRegionsList(planarRegions);
-      planarRegionsListToReturn.setSensorToWorldTransform(sensorToWorldTransform);
-
-      return planarRegionsListToReturn;
+      return new PlanarRegionsList(planarRegions);
    }
 
    public static PlanarRegionsListMessage createPlanarRegionsListMessage(List<PlanarRegionMessage> planarRegions)
@@ -233,5 +221,27 @@ public class PlanarRegionMessageConverter
             message.getVertexBuffer().add().set(planarRegionMessage.getVertexBuffer().get(i));
       }
       return message;
+   }
+
+   public static PlanarRegionsListWithPose convertToPlanarRegionsListWithPose(PlanarRegionsListWithPoseMessage message)
+   {
+      PlanarRegionsListWithPose planarRegionsListWithPoseToReturn = new PlanarRegionsListWithPose();
+
+      PlanarRegionsList planarRegionsList = convertToPlanarRegionsList(message.getPlanarRegions());
+      planarRegionsListWithPoseToReturn.setPlanarRegionsList(planarRegionsList);
+      planarRegionsListWithPoseToReturn.getSensorToWorldFrameTransform().set(message.getSensorOrientation(), message.getSensorPosition());
+
+      return planarRegionsListWithPoseToReturn;
+   }
+
+   public static PlanarRegionsListWithPoseMessage convertToPlanarRegionsListWithPoseMessage(PlanarRegionsListWithPose listWithPose)
+   {
+      PlanarRegionsListWithPoseMessage messageToReturn = new PlanarRegionsListWithPoseMessage();
+
+      PlanarRegionsListMessage planarRegionsListMessage = convertToPlanarRegionsListMessage(listWithPose.getPlanarRegionsList());
+      messageToReturn.getPlanarRegions().set(planarRegionsListMessage);
+      messageToReturn.getSensorOrientation().set(listWithPose.getSensorToWorldFrameTransform().getRotation());
+
+      return messageToReturn;
    }
 }

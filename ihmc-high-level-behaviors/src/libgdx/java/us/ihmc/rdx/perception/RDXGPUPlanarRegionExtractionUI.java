@@ -33,6 +33,7 @@ import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.perception.ProjectionTools;
 
 import java.nio.ByteBuffer;
@@ -435,6 +436,11 @@ public class RDXGPUPlanarRegionExtractionUI
    public PlanarRegionsList getPlanarRegionsList()
    {
       return gpuPlanarRegionExtraction.getPlanarRegionsList();
+   }
+
+   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
+   {
+      return gpuPlanarRegionExtraction.getPlanarRegionsListWithPose();
    }
 
    public ImBoolean getEnabled()
