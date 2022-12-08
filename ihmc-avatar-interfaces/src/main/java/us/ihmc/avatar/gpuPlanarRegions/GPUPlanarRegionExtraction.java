@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -534,6 +535,7 @@ public class GPUPlanarRegionExtraction
       });
    }
 
+   private boolean printedException = false;
    public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
@@ -611,10 +613,13 @@ public class GPUPlanarRegionExtraction
          }
          catch (NotARotationMatrixException notARotationMatrixException)
          {
-            LogTools.info("Normal = " + gpuPlanarRegion.getNormal().toString(null));
-            LogTools.info("Orientation = " + orientation.toString(null));
-            LogTools.warn("Not a rotation matrix: {}", gpuPlanarRegion.getNormal());
-//            notARotationMatrixException.printStackTrace();
+            if (!printedException)
+            {
+               printedException = true;
+               LogTools.info("Normal = " + gpuPlanarRegion.getNormal().toString(null));
+               LogTools.info("Orientation = " + orientation.toString(null));
+               LogTools.warn("Not a rotation matrix: {}", gpuPlanarRegion.getNormal());
+            }
          }
          catch (RuntimeException e)
          {

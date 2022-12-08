@@ -2,15 +2,19 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,7 +34,12 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
    /** This is used only when the support foot based footstep adjustment is created. */
    private final OptionalFactoryField<Boolean> adjustPitchAndRoll = new OptionalFactoryField<>("csgSupportFootBasedFootstepAdjustmentAdjustPitchAndRoll");
    private final OptionalFactoryField<FootstepAdjustment> primaryFootstepAdjusterField = new OptionalFactoryField<>("csgPrimaryFootstepAdjusterField");
-   private final OptionalFactoryField<List<FootstepAdjustment>> secondaryFootstepAdjusterField = new OptionalFactoryField<>("csgSecondaryFootstepAdjusterFields");
+   private final OptionalFactoryField<FootstepPlanAdjustment> footstepPlanAdjusterField = new OptionalFactoryField<>("csgFootstepPlanAdjusterField");
+   private final List<FootstepAdjustment> secondaryFootstepAdjusters = new ArrayList<>();
+   private final List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
+   private final List<Consumer<PlanarRegionsListCommand>> planarRegionsListCommandConsumers = new ArrayList<>();
+
+   private final List<Updatable> updatables = new ArrayList<>();
 
    public ComponentBasedFootstepDataMessageGeneratorFactory()
    {
@@ -48,16 +57,39 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       registryField.set(new YoRegistry(name));
    }
 
+   @Override
    public void setFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
       primaryFootstepAdjusterField.set(footStepAdjustment);
    }
 
+   @Override
+   public void setFootStepPlanAdjustment(FootstepPlanAdjustment footStepAdjustment)
+   {
+      footstepPlanAdjusterField.set(footStepAdjustment);
+   }
+
+   @Override
+   public void addFootstepValidityIndicator(FootstepValidityIndicator footstepValidityIndicator)
+   {
+      footstepValidityIndicators.add(footstepValidityIndicator);
+   }
+
+   @Override
+   public void addPlanarRegionsListCommandConsumer(Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer)
+   {
+      planarRegionsListCommandConsumers.add(planarRegionsListCommandConsumer);
+   }
+
+   @Override
+   public void addUpdatable(Updatable updatable)
+   {
+      this.updatables.add(updatable);
+   }
+
    public void addSecondaryFootStepAdjustment(FootstepAdjustment footStepAdjustment)
    {
-      if (!secondaryFootstepAdjusterField.hasValue())
-         secondaryFootstepAdjusterField.set(new ArrayList<>());
-      secondaryFootstepAdjusterField.get().add(footStepAdjustment);
+      secondaryFootstepAdjusters.add(footStepAdjustment);
    }
 
    public void setUseHeadingAndVelocityScript(boolean useHeadingAndVelocityScript)
@@ -110,11 +142,14 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       if (createSupportFootBasedFootstepAdjustment.hasValue() && createSupportFootBasedFootstepAdjustment.get())
          continuousStepGenerator.setSupportFootBasedFootstepAdjustment(adjustPitchAndRoll.hasValue() && adjustPitchAndRoll.get());
-      if (secondaryFootstepAdjusterField.hasValue())
-      {
-         for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusterField.get())
-            continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
-      }
+      if (primaryFootstepAdjusterField.hasValue() && primaryFootstepAdjusterField.get() != null)
+         continuousStepGenerator.setFootstepAdjustment(primaryFootstepAdjusterField.get());
+      if (footstepPlanAdjusterField.hasValue() && footstepPlanAdjusterField.get() != null)
+         continuousStepGenerator.setFootstepPlanAdjustment(footstepPlanAdjusterField.get());
+      for (FootstepAdjustment footstepAdjustment : secondaryFootstepAdjusters)
+         continuousStepGenerator.addFootstepAdjustment(footstepAdjustment);
+      for (FootstepValidityIndicator footstepValidityIndicator : footstepValidityIndicators)
+         continuousStepGenerator.addFootstepValidityIndicator(footstepValidityIndicator);
       continuousStepGenerator.setFootstepStatusListener(walkingStatusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
@@ -141,18 +176,17 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
 
       continuousStepGenerator.setFootstepMessenger(walkingCommandInputManager::submitMessage);
 
-      List<Updatable> updatables = new ArrayList<>();
-
       if (yoGraphicsListRegistry != null && contactableFeet != null)
          continuousStepGenerator.setupVisualization(contactableFeet, yoGraphicsListRegistry);
-      if (primaryFootstepAdjusterField.hasValue() && primaryFootstepAdjusterField.get() != null)
-         continuousStepGenerator.setFootstepAdjustment(primaryFootstepAdjusterField.get());
 
       if (useHeadingAndVelocityScriptField.get())
       {
+         HeadingAndVelocityEvaluationScriptParameters parameters = headingAndVelocityEvaluationScriptParametersField.hasValue() ?
+               headingAndVelocityEvaluationScriptParametersField.get() :
+               null;
          HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(updateDT,
                                                                                             timeProvider,
-                                                                                            headingAndVelocityEvaluationScriptParametersField.get(),
+                                                                                            parameters,
                                                                                             registryField.get());
          continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
          continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
@@ -161,11 +195,19 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements Humano
       else if (csgCommandInputManagerField.hasValue())
       {
          StepGeneratorCommandInputManager commandInputManager = csgCommandInputManagerField.get();
+         for (Consumer<PlanarRegionsListCommand> planarRegionsListCommandConsumer : planarRegionsListCommandConsumers)
+            commandInputManager.addPlanarRegionsListCommandConsumer(planarRegionsListCommandConsumer);
+
          continuousStepGenerator.setDesiredVelocityProvider(commandInputManager.createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(commandInputManager.createDesiredTurningVelocityProvider());
          continuousStepGenerator.setWalkInputProvider(commandInputManager.createWalkInputProvider());
          walkingStatusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class,
                                                                        commandInputManager::setHighLevelStateChangeStatusMessage);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(WalkingStatusMessage.class,
+                                                                       commandInputManager::setWalkingStatus);
+         walkingStatusMessageOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, commandInputManager::consumeFootstepStatus);
+         commandInputManager.setFootstepStatusListener(walkingStatusMessageOutputManager);
+
          updatables.add(commandInputManager);
 
          //this is probably not the way the class was intended to be modified.

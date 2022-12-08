@@ -67,6 +67,7 @@ public class ROS2Tools
 
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
+   public static final String ZED2_NAME = "zed2";
    public static final String L515_NAME = "l515";
    public static final String BLACKFLY_NAME = "blackfly";
    public static final String T265_NAME = "t265";
@@ -122,6 +123,7 @@ public class ROS2Tools
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = IHMC_ROOT.withTypeName(BigVideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
+   public static final ROS2Topic<VideoPacket> D435_DEPTH = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<BigVideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<BigVideoPacket> L515_DEPTH_JPEG_COLOR
@@ -135,6 +137,8 @@ public class ROS2Tools
    public static final ROS2Topic<StereoVisionPointCloudMessage> OUSTER_LIDAR_POINTS
          = IHMC_ROOT.withModule("ouster").withType(StereoVisionPointCloudMessage.class).withSuffix("points");
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
+
+   public static final ROS2Topic<VideoPacket> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(VideoPacket.class).withSuffix("color_stereo");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);

@@ -4,19 +4,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import com.esotericsoftware.kryo.util.IntMap;
+import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -24,12 +29,12 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMerger;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.tools.lists.PairList;
 
 public class PlanarRegionSLAMTools
@@ -40,12 +45,13 @@ public class PlanarRegionSLAMTools
     * Uses the algorithm on the slides at
     * http://resources.mpi-inf.mpg.de/deformableShapeMatching/EG2011_Tutorial/slides/2.1%20Rigid%20ICP.pdf
     * pages 12-14
-    * 
+    *
     * @param matchesWithReferencePoints
     * @return
     */
    public static RigidBodyTransform findDriftCorrectionTransform(Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints,
-                                                                 PlanarRegionSLAMParameters parameters, RigidBodyTransform referenceTransform)
+                                                                 PlanarRegionSLAMParameters parameters,
+                                                                 RigidBodyTransform referenceTransform)
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
 
@@ -214,6 +220,155 @@ public class PlanarRegionSLAMTools
       return returnString;
    }
 
+   public static class IncomingRegionMatchData
+   {
+      private final int incomingRegionId;
+      private final List<MatchData> goodMatches = new ArrayList<>();
+      private final List<MatchData> badMatches = new ArrayList<>();
+
+      public IncomingRegionMatchData(int incomingRegionId)
+      {
+         this.incomingRegionId = incomingRegionId;
+      }
+
+      public void reset()
+      {
+         goodMatches.clear();
+         badMatches.clear();
+      }
+
+      public int getIncomingRegionId()
+      {
+         return incomingRegionId;
+      }
+
+      public void addMatchData(MatchData matchData)
+      {
+         if (matchData.getMatchScore() > 50.0)
+            goodMatches.add(matchData);
+         else
+            badMatches.add(matchData);
+      }
+
+      public int getNumberOfGoodMatches()
+      {
+         return goodMatches.size();
+      }
+
+      public int getNumberOfBadMatches()
+      {
+         return badMatches.size();
+      }
+
+      public int getNumberOfMatches()
+      {
+         return getNumberOfGoodMatches() + getNumberOfBadMatches();
+      }
+
+      public MatchData getGoodMatch(int goodMatchNumber)
+      {
+         return goodMatches.get(goodMatchNumber);
+      }
+
+      public MatchData getBadMatch(int badMatchNumber)
+      {
+         return badMatches.get(badMatchNumber);
+      }
+   }
+
+   public static class MatchData
+   {
+      private final int matchingMapRegionId;
+
+      public MatchData(int matchingMapRegionId)
+      {
+         this.matchingMapRegionId = matchingMapRegionId;
+      }
+
+      public int getMatchingMapRegionId()
+      {
+         return matchingMapRegionId;
+      }
+
+      public double getMatchScore()
+      {
+         return 100.0;
+      }
+   }
+
+   public static List<IncomingRegionMatchData> findPlanarRegionMatches(PlanarRegionsList map,
+                                                                       PlanarRegionsList incoming,
+                                                                       float normalThreshold,
+                                                                       float normalDistanceThreshold,
+                                                                       float distanceThreshold)
+   {
+      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
+      List<IncomingRegionMatchData> allMatches = new ArrayList<>();
+
+      List<PlanarRegion> incomingRegions = incoming.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+
+      for (int incomingRegionId = 0; incomingRegionId < incomingRegions.size(); incomingRegionId++)
+      {
+         PlanarRegion newRegion = incomingRegions.get(incomingRegionId);
+         IncomingRegionMatchData incomingRegionMatchData = new IncomingRegionMatchData(incomingRegionId);
+         allMatches.add(incomingRegionMatchData);
+
+         for (int mapRegionIndex = 0; mapRegionIndex < mapRegions.size(); mapRegionIndex++)
+         {
+            PlanarRegion mapRegion = mapRegions.get(mapRegionIndex);
+
+            //if (boxesIn3DIntersect(mapRegion, newRegion, mapRegion.getBoundingBox3dInWorld().getMaxZ() - mapRegion.getBoundingBox3dInWorld().getMinZ()))
+            {
+               Point3D newOrigin = new Point3D();
+               newRegion.getOrigin(newOrigin);
+
+               Point3D mapOrigin = new Point3D();
+               mapRegion.getOrigin(mapOrigin);
+
+               Vector3D originVec = new Vector3D();
+               originVec.sub(newOrigin, mapOrigin);
+
+               double normalDistance = Math.abs(originVec.dot(mapRegion.getNormal()));
+               double normalSimilarity = newRegion.getNormal().dot(mapRegion.getNormal());
+
+               double originDistance = originVec.norm();
+
+               // check to make sure the angles are similar enough
+               boolean wasMatched = normalSimilarity > normalThreshold;
+               // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+               wasMatched &= normalDistance < normalDistanceThreshold;
+               // check that the regions aren't too far from one another
+               if (wasMatched)
+                  wasMatched = planarRegionTools.getDistanceBetweenPlanarRegions(mapRegion, newRegion) <= distanceThreshold;
+
+               //LogTools.info(String.format("(%d): (%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+               //                            mapRegionIndex,
+               //                            mapRegion.getRegionId(),
+               //                            newRegion.getRegionId(),
+               //                            normalSimilarity,
+               //                            normalThreshold,
+               //                            normalDistance,
+               //                            normalDistanceThreshold,
+               //                            originDistance,
+               //                            distanceThreshold) + ": [{}]", wasMatched);
+
+               if (wasMatched)
+               {
+                  MatchData matchData = new MatchData(mapRegionIndex);
+                  // TODO assign score for the match
+                  incomingRegionMatchData.addMatchData(matchData);
+               }
+            }
+         }
+      }
+
+      // remove the regions with no matches
+      allMatches = allMatches.stream().filter(data -> data.getNumberOfMatches() > 0).collect(Collectors.toList());
+
+      return allMatches;
+   }
+
    public static Map<PlanarRegion, List<PlanarRegion>> filterMatchesBasedOnNormalSimilarity(Map<PlanarRegion, List<PlanarRegion>> matchesSoFar,
                                                                                             double threshold)
    {
@@ -253,8 +408,8 @@ public class PlanarRegionSLAMTools
     *                                       one region to the other when slam happens.
     * @param matchesSoFar
     * @return A map from a map PlanarRegion to a PairList of new data PlanarRegions and Point2Ds that
-    *         are points on the new region that we would like to move towards the plane of the map
-    *         region.
+    *       are points on the new region that we would like to move towards the plane of the map
+    *       region.
     */
    public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> filterMatchesBasedOn2DBoundingBoxShadow(double minimumRegionOverlapDistance,
                                                                                                             double maximumPointProjectionDistance,
@@ -296,10 +451,12 @@ public class PlanarRegionSLAMTools
    }
 
    private static void addCornerPointsOfBoundingBoxIntersectionToMatches(BoundingBox2D mapBoundingBoxInMapLocal,
-                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal, PlanarRegion newDataRegion,
+                                                                         BoundingBox2D newDataRegionBoundingBoxProjectedToMapLocal,
+                                                                         PlanarRegion newDataRegion,
                                                                          RigidBodyTransformReadOnly transformFromWorldToMap,
                                                                          RigidBodyTransformReadOnly transformFromNewDataToWorld,
-                                                                         double maximumPointProjectionDistance, PairList<PlanarRegion, Point2D> shadowMatches)
+                                                                         double maximumPointProjectionDistance,
+                                                                         PairList<PlanarRegion, Point2D> shadowMatches)
    {
       BoundingBox2D intersection = GeometryTools.getIntersectionOfTwoBoundingBoxes(mapBoundingBoxInMapLocal, newDataRegionBoundingBoxProjectedToMapLocal);
 
@@ -353,7 +510,6 @@ public class PlanarRegionSLAMTools
                             newMaximumPointInNewDataLocal,
                             newDataOtherCornerPointInNewDataLocal,
                             newFinalCornerPointInNewDataLocal);
-
    }
 
    private static void addAllIfAllAreNotNull(PairList<PlanarRegion, Point2D> shadowMatches, PlanarRegion planarRegion, Point2D... pointsToAdd)
@@ -408,7 +564,8 @@ public class PlanarRegionSLAMTools
       return newDataRegionBoundingBoxProjectedToMapLocal;
    }
 
-   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal, RigidBodyTransformReadOnly transformFromWorldToMap,
+   private static Point2D createNewDataReferencePointInNewDataLocal(Point2DReadOnly pointInMapLocal,
+                                                                    RigidBodyTransformReadOnly transformFromWorldToMap,
                                                                     RigidBodyTransformReadOnly transformFromNewDataToWorld,
                                                                     double maximumPointProjectionDistance)
    {
@@ -423,7 +580,8 @@ public class PlanarRegionSLAMTools
       return new Point2D(newDataReferencePoint);
    }
 
-   public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map, PlanarRegionsList newData,
+   public static Map<PlanarRegion, List<PlanarRegion>> detectLocalBoundingBox3DCollisions(PlanarRegionsList map,
+                                                                                          PlanarRegionsList newData,
                                                                                           double boundingBoxHeight)
    {
       HashMap<PlanarRegion, List<PlanarRegion>> newDataCollisions = new HashMap<>();
@@ -462,5 +620,112 @@ public class PlanarRegionSLAMTools
    public static boolean boundingBoxesIntersect(PlanarRegion a, PlanarRegion b)
    {
       return a.getBoundingBox3dInWorld().intersectsEpsilon(b.getBoundingBox3dInWorld(), 1e-8);
+   }
+
+   public static boolean mergeRegionIntoParent(PlanarRegion parentRegion, PlanarRegion childRegion, double updateTowardsChildAlpha)
+   {
+      // Update Map Region Normal and Origin
+      UnitVector3DReadOnly mapNormal = parentRegion.getNormal();
+      Point3DReadOnly mapOrigin = parentRegion.getPoint();
+
+      UnitVector3DReadOnly regionNormal = childRegion.getNormal();
+      Point3DReadOnly regionOrigin = childRegion.getPoint();
+
+      Vector3D futureNormal = new Vector3D();
+      futureNormal.interpolate(mapNormal, regionNormal, updateTowardsChildAlpha);
+
+      double futureHeightZ = EuclidCoreTools.interpolate(mapOrigin.getZ(), regionOrigin.getZ(), updateTowardsChildAlpha);
+
+      Vector3D normalVector = new Vector3D(mapNormal);
+      Vector3D axis = new Vector3D();
+      axis.cross(normalVector, futureNormal);
+      double angle = normalVector.angle(futureNormal);
+
+      Point3D futureOrigin = new Point3D(mapOrigin.getX(), mapOrigin.getY(), futureHeightZ);
+      AxisAngle rotationToFutureRegion = new AxisAngle(axis, angle);
+      Vector3D translationToFutureRegion = new Vector3D();
+      translationToFutureRegion.sub(futureOrigin, mapOrigin);
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendOrientation(rotationToFutureRegion);
+      transform.appendTranslation(translationToFutureRegion);
+
+      parentRegion.applyTransform(transform);
+
+      ArrayList<PlanarRegion> mergedRegion = ConcaveHullMerger.mergePlanarRegions(parentRegion, childRegion, 1.0f, null);
+
+      if (mergedRegion != null)
+      {
+         if (mergedRegion.size() > 0)
+         {
+            parentRegion.set(mergedRegion.get(0));
+            return true;
+         }
+         else
+         {
+            // check if the child region is fully contained by the parent region
+            if (parentRegion.getConvexHull().isPointInside(childRegion.getConvexHull().getVertex(0)))
+            {
+               return true;
+            }
+            // check if the parent region is fully contained by the child region
+            else if (childRegion.getConvexHull().isPointInside(parentRegion.getConvexHull().getVertex(0)))
+            {
+               parentRegion.set(childRegion);
+               return true;
+            }
+
+            return false;
+         }
+      }
+
+//      throw new RuntimeException("Shoot");
+      return false;
+   }
+
+   public static boolean checkRegionsForOverlap(PlanarRegion regionA,
+                                                PlanarRegion regionB,
+                                                float normalThreshold,
+                                                float normalDistanceThreshold,
+                                                float distanceThreshold)
+   {
+      PlanarRegionTools planarRegionTools = new PlanarRegionTools();
+
+      Point3D newOrigin = new Point3D();
+      regionA.getOrigin(newOrigin);
+
+      Point3D mapOrigin = new Point3D();
+      regionB.getOrigin(mapOrigin);
+
+      Vector3D originVec = new Vector3D();
+      originVec.sub(newOrigin, mapOrigin);
+
+      double normalDistance = Math.abs(originVec.dot(regionB.getNormal()));
+      double normalSimilarity = Math.abs(regionA.getNormal().dot(regionB.getNormal()));
+
+      double originDistance = 0;
+
+      // check to make sure the angles are similar enough
+      boolean wasMatched = normalSimilarity > normalThreshold;
+      // check that the regions aren't too far out of plane with one another. TODO should check this normal distance measure. That's likely a problem
+      wasMatched &= normalDistance < normalDistanceThreshold;
+      // check that the regions aren't too far from one another
+      if (wasMatched)
+      {
+         originDistance = planarRegionTools.getDistanceBetweenPlanarRegions(regionB, regionA);
+         wasMatched = originDistance <= distanceThreshold;
+      }
+
+      //LogTools.info(String.format("(%d -> %d) Metrics: (%.3f > %.3f), (%.3f < %.3f), (%.3f < %.3f)",
+      //                            regionB.getRegionId(),
+      //                            regionA.getRegionId(),
+      //                            normalSimilarity,
+      //                            normalThreshold,
+      //                            normalDistance,
+      //                            normalDistanceThreshold,
+      //                            originDistance,
+      //                            distanceThreshold) + ": [{}]", wasMatched);
+
+      return wasMatched;
    }
 }

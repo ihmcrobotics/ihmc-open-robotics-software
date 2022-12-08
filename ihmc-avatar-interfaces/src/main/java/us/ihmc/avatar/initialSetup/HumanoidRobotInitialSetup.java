@@ -31,7 +31,7 @@ import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    protected double initialYaw = 0.0;
    protected double initialGroundHeight = 0.0;

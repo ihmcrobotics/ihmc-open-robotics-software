@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -79,6 +80,15 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       List<Class<? extends Command<?, ?>>> controllerSupportedCommands = ControllerAPIDefinition.getControllerSupportedCommands();
 
       for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
+      {
+         Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
+         IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+         defaultControllerPublishers.put(messageClass, defaultPublisher);
+      }
+
+      List<Class<? extends Command<?, ?>>> stepGeneratorSupportedCommands = StepGeneratorAPIDefinition.getStepGeneratorSupportedCommands();
+
+      for (Class<? extends Command<?, ?>> command : stepGeneratorSupportedCommands)
       {
          Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
          IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
