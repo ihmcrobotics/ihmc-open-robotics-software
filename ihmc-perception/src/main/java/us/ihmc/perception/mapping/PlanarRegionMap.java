@@ -69,7 +69,6 @@ public class PlanarRegionMap
 
          BytedecoTools.loadGTSAMNatives();
          factorGraph = new SlamWrapper.FactorGraphExternal();
-         factorGraph.addPriorPoseFactor(1, new float[] {0, 0, 0, 0, 0, 0});
       }
 
       parameters = new PlanarRegionMappingParameters();
@@ -98,11 +97,15 @@ public class PlanarRegionMap
       if (!initialized)
       {
          finalMap.addPlanarRegionsList(regions);
+         initializeFactorGraphForSmoothing(finalMap);
          initialized = true;
       }
       else
       {
          LogTools.info("Before Cross: {}", finalMap.getNumberOfPlanarRegions());
+
+         PlanarRegionSLAMTools.printRegionIDs("Map", finalMap);
+         PlanarRegionSLAMTools.printRegionIDs("Incoming", regions);
 
          // merge all the new regions in
          finalMap = crossReduceRegionsIteratively(finalMap,
@@ -112,11 +115,12 @@ public class PlanarRegionMap
                                                   outOfPlaneDistanceFromOneRegionToAnother,
                                                   maxDistanceBetweenRegionsForMatch);
 
-         //applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
-
          processUniqueRegions(finalMap);
+         PlanarRegionSLAMTools.printMatches("Cross", finalMap, regions, planarRegionMatches);
 
-         PlanarRegionSLAMTools.printMatches("Cross", planarRegionMatches);
+         applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
+
+
 
          LogTools.info("After Cross: {}", finalMap.getNumberOfPlanarRegions());
       }
@@ -341,7 +345,6 @@ public class PlanarRegionMap
 
                         changed = true;
                         map.getPlanarRegionsAsList().remove(childIndex);
-
                      }
                      else
                      {
@@ -384,7 +387,11 @@ public class PlanarRegionMap
       return map;
    }
 
-   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map, PlanarRegionsList regions, RigidBodyTransform transform, HashMap<Integer, TIntArrayList> matches, int poseIndex)
+   public void applyFactorGraphBasedSmoothing(PlanarRegionsList map,
+                                              PlanarRegionsList regions,
+                                              RigidBodyTransform transform,
+                                              HashMap<Integer, TIntArrayList> matches,
+                                              int poseIndex)
    {
       worldToSensorFrameTransform.setAndInvert(transform);
 
@@ -396,18 +403,28 @@ public class PlanarRegionMap
       // Convert odometry to float array. Add into factor graph using 16-double method for addOdometryFactor().
       float[] odometryValue = new float[16];
       odoometry.get(odometryValue);
-      factorGraph.addOdometryFactorExtended(odometryValue, 2);
+
+      LogTools.info("Adding odometry factor: x{} -> x{}", poseIndex - 1, poseIndex);
+      factorGraph.addOdometryFactorExtended(odometryValue, poseIndex);
 
       //Convert sensor pose to float array. Add 16-float method for setPoseInitialValue().
       float[] poseValue = new float[16];
       transform.get(poseValue);
+
+      LogTools.info("Adding Pose Initial Value: {}", poseIndex);
       factorGraph.setPoseInitialValueExtended(poseIndex, poseValue);
 
-      for (Integer parent : matches.keySet())
+      for (Integer parentId : matches.keySet())
       {
-         for (Integer child : matches.get(parent).toArray())
+         for (Integer childId : matches.get(parentId).toArray())
          {
-            PlanarRegion childRegion = regions.getPlanarRegion(child);
+            int landmarkId = Math.abs(generatePostMergeId(parentId, childId));
+
+            if(childId >= 0)
+               continue;
+
+            LogTools.info("ParentID: {}, Finding Child Region with ID: {}", parentId, childId);
+            PlanarRegion childRegion = regions.getRegionWithId(childId);
 
             // Get origin and normal in sensor frame.
             Point3D childOrigin = new Point3D();
@@ -426,70 +443,44 @@ public class PlanarRegionMap
             // Insert plane factor based on planar region normal and origin in sensor frame
             double localDot = childOrigin.dot(childNormal);
             float[] planeInSensorFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -localDot};
-            factorGraph.addOrientedPlaneFactor(planeInSensorFrame, parent, poseIndex);
+
+            LogTools.info("Adding plane factor: x{} -> l{}", poseIndex, landmarkId);
+            factorGraph.addOrientedPlaneFactor(planeInSensorFrame, landmarkId, poseIndex);
 
             // Set initial value for plane based on planar region normal and origin in world frame
             double worldDot = childOriginInWorld.dot(childNormalInWorld);
             float[] planeInWorldFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -worldDot};
-            factorGraph.setOrientedPlaneInitialValue(parent, planeInWorldFrame);
+
+            LogTools.info("Setting plane value: {}", landmarkId);
+            factorGraph.setOrientedPlaneInitialValue(landmarkId, planeInWorldFrame);
          }
       }
 
+      LogTools.info("Solving factor graph");
       factorGraph.optimize();
+
+      factorGraph.printResults();
    }
 
-   public void initializeFactorGraphForSmoothing(PlanarRegionsList map, RigidBodyTransform transform, int poseIndex)
+   public void initializeFactorGraphForSmoothing(PlanarRegionsList map)
    {
-      worldToSensorFrameTransform.setAndInvert(transform);
+      factorGraph.addPriorPoseFactor(0, new float[] {0,0,0,0,0,0});
+      factorGraph.setPoseInitialValue(0, new float[] {0,0,0,0,0,0});
 
-      worldToPreviousSensorFrameTransform.setAndInvert(previousSensorToWorldFrameTransform);
+      for (PlanarRegion region : map.getPlanarRegionsAsList())
+      {
+         // Get origin and normal in sensor frame.
+         Point3D childOrigin = new Point3D();
+         Vector3D childNormal = new Vector3D();
+         region.getOrigin(childOrigin);
+         region.getNormal(childNormal);
 
-      odoometry.set(worldToPreviousSensorFrameTransform);
-      odoometry.multiply(transform);
-
-      // Convert odometry to float array. Add into factor graph using 16-double method for addOdometryFactor().
-      float[] odometryValue = new float[16];
-      odoometry.get(odometryValue);
-      factorGraph.addOdometryFactorExtended(odometryValue, 2);
-
-      //Convert sensor pose to float array. Add 16-float method for setPoseInitialValue().
-      float[] poseValue = new float[16];
-      transform.get(poseValue);
-      factorGraph.setPoseInitialValueExtended(poseIndex, poseValue);
-
-      //for (Integer parent : matches.keySet())
-      //{
-      //   for (Integer child : matches.get(parent).toArray())
-      //   {
-      //      PlanarRegion childRegion = regions.getPlanarRegion(child);
-      //
-      //      // Get origin and normal in sensor frame.
-      //      Point3D childOrigin = new Point3D();
-      //      Vector3D childNormal = new Vector3D();
-      //      childRegion.getOrigin(childOrigin);
-      //      childRegion.getNormal(childNormal);
-      //      childOrigin.applyTransform(worldToSensorFrameTransform);
-      //      childNormal.applyTransform(worldToSensorFrameTransform);
-      //
-      //      // Get origin and normal in world frame
-      //      Point3D childOriginInWorld = new Point3D();
-      //      Vector3D childNormalInWorld = new Vector3D();
-      //      childRegion.getOrigin(childOriginInWorld);
-      //      childRegion.getNormal(childNormalInWorld);
-      //
-      //      // Insert plane factor based on planar region normal and origin in sensor frame
-      //      double localDot = childOrigin.dot(childNormal);
-      //      float[] planeInSensorFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -localDot};
-      //      factorGraph.addOrientedPlaneFactor(planeInSensorFrame, parent, poseIndex);
-      //
-      //      // Set initial value for plane based on planar region normal and origin in world frame
-      //      double worldDot = childOriginInWorld.dot(childNormalInWorld);
-      //      float[] planeInWorldFrame = new float[] {childNormalInWorld.getX32(), childNormalInWorld.getY32(), childNormalInWorld.getZ32(), (float) -worldDot};
-      //      factorGraph.setOrientedPlaneInitialValue(parent, planeInWorldFrame);
-      //   }
-      //}
-
-      factorGraph.optimize();
+         // Insert plane factor based on planar region normal and origin in sensor frame
+         double localDot = childOrigin.dot(childNormal);
+         float[] plane = new float[] {childNormal.getX32(), childNormal.getY32(), childNormal.getZ32(), (float) -localDot};
+         factorGraph.addOrientedPlaneFactor(plane, region.getRegionId(), 0);
+         factorGraph.setOrientedPlaneInitialValue(region.getRegionId(), plane);
+      }
    }
 
    private int generatePostMergeId(int parentIndex, int childIndex)
@@ -502,12 +493,13 @@ public class PlanarRegionMap
          return childIndex;
       else if (parentIndex < 0 && childIndex < 0)
          return Math.max(parentIndex, childIndex);
-      else return 0;
+      else
+         return 0;
    }
 
    private void processUniqueRegions(PlanarRegionsList map)
    {
-      for(PlanarRegion region : map.getPlanarRegionsAsList())
+      for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
          region.setRegionId(Math.abs(region.getRegionId()));
       }
