@@ -1,0 +1,61 @@
+#ifndef __perception_msgs__msg__ImageMessage__idl__
+#define __perception_msgs__msg__ImageMessage__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Quaternion_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Image message. It has a large capacity.
+       * It's recommended to reuse instances to avoid excessive memory allocation.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::ImageMessage_")
+      struct ImageMessage
+      {
+        /**
+         * Sequence number. Used for detecting out of order or dropped messages
+         */
+        unsigned long sequence_number;
+        /**
+         * Use precise time measurements to measure delay between processes
+         */
+        unsigned long acquisition_time_seconds_since_epoch;
+        /**
+         * Use precise time measurements to measure delay between processes
+         */
+        unsigned long acquisition_time_additional_nanos;
+        /**
+         * Image width in pixels
+         */
+        unsigned short image_width;
+        /**
+         * Image height in pixels
+         */
+        unsigned short image_height;
+        /**
+         * The raw data for the image
+         */
+        sequence<octet, 25000000> data;
+        /**
+         * The image format. Ordinal of OpenCVImageFormat
+         */
+        unsigned short format;
+        /**
+         * Position of the focal point at sensor data aquisition
+         */
+        geometry_msgs::msg::dds::Point position;
+        /**
+         * Orientation of the focal point at sensor data aquisition
+         */
+        geometry_msgs::msg::dds::Quaternion orientation;
+      };
+    };
+  };
+};
+
+#endif
