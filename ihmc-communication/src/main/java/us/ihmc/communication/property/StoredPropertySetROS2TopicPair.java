@@ -6,6 +6,11 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.tools.string.StringTools;
 
+/**
+ * Command corresponds to the operator changing a parameter in the UI.
+ * Status is for a periodic output of the remote process's current parameters
+ * so the operator can stay informed.
+ */
 public class StoredPropertySetROS2TopicPair
 {
    private final ROS2Topic<StoredPropertySetMessage> commandTopic;
