@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,29 +12,29 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
-public class PlanarRegionsListBuffer
+public class PlanarRegionsReplayBuffer<T>
 {
    private int buffer_length;
-   private HashMap<Integer, Container> indexBuffer;
-   private TreeSet<Container> timeBuffer;
+   private HashMap<Integer, Container<T>> indexBuffer;
+   private TreeSet<Container<T>> timeBuffer;
    private long firstEverTime = Long.MAX_VALUE;
 
    private int index = 0;
 
-   private static class Container
+   private static class Container<T>
    {
-      private PlanarRegionsList list;
+      private T list;
       private long time;
       private int index;
 
-      Container(int index, long time, PlanarRegionsList list)
+      Container(int index, long time, T list)
       {
          this.list = list;
          this.index = index;
          this.time = time;
       }
 
-      public PlanarRegionsList getList()
+      public T getList()
       {
          return list;
       }
@@ -60,7 +61,7 @@ public class PlanarRegionsListBuffer
          return -1;
    };
 
-   public void loadFromLog(File planarRegionListLog) throws IOException
+   public void loadFromLog(File planarRegionListLog, Class<?> type) throws IOException
    {
       indexBuffer = new HashMap<>();
       timeBuffer = new TreeSet<>(customCompare);
@@ -81,7 +82,16 @@ public class PlanarRegionsListBuffer
          {
             IOUtils.copy(new StringReader(in.next()), out);
          }
-         PlanarRegionsList list = PlanarRegionFileTools.importPlanarRegionData(temp);
+
+         Object list;
+
+         LogTools.info("Type: {} {} {}", type, PlanarRegionsListWithPose.class, type == PlanarRegionsListWithPose.class);
+
+         if(type == PlanarRegionsListWithPose.class)
+            list = PlanarRegionFileTools.importPlanarRegionsWithPoseData(temp);
+         else
+            list = PlanarRegionFileTools.importPlanarRegionData(temp);
+
 
          Container container = new Container(index, time, list);
 
@@ -98,22 +108,22 @@ public class PlanarRegionsListBuffer
 
       if (buffer_length <= 0)
       {
-         LogTools.warn("Loaded empty log into PlanarRegionsListBuffer");
+         LogTools.warn("Loaded empty log into TBuffer");
       }
    }
 
-   public PlanarRegionsListBuffer(File planarRegionListLog) throws IOException
+   public PlanarRegionsReplayBuffer(File planarRegionListLog, Class<?> type) throws IOException
    {
-      loadFromLog(planarRegionListLog);
+      loadFromLog(planarRegionListLog, type);
       buffer_length = indexBuffer.size();
    }
 
-   public PlanarRegionsListBuffer()
+   public PlanarRegionsReplayBuffer()
    {
       this(Integer.MAX_VALUE);
    }
 
-   public PlanarRegionsListBuffer(int buffer_length)
+   public PlanarRegionsReplayBuffer(int buffer_length)
    {
       this.buffer_length = buffer_length;
       this.indexBuffer = new HashMap<>();
@@ -128,7 +138,7 @@ public class PlanarRegionsListBuffer
       buffer_length += additionalSize;
    }
 
-   public void putAndTick(long time, PlanarRegionsList list)
+   public void putAndTick(long time, T list)
    {
       Container container = new Container(index, time, list);
 
@@ -147,19 +157,19 @@ public class PlanarRegionsListBuffer
       index++;
    }
 
-   public PlanarRegionsList get(int index)
+   public T get(int index)
    {
       Container container = indexBuffer.get(index);
-      return container == null ? null : container.getList();
+      return container == null ? null : (T) container.getList();
    }
 
-   private Container getNearTimeInternal(long time)
+   private Container<T> getNearTimeInternal(long time)
    {
-      Container lookup = new Container(-1, time, null);
-      Container lower = timeBuffer.lower(lookup);
-      Container higher = timeBuffer.higher(lookup);
+      Container<T> lookup = new Container<T>(-1, time, null);
+      Container<T> lower = timeBuffer.lower(lookup);
+      Container<T> higher = timeBuffer.higher(lookup);
 
-      Container value;
+      Container<T> value;
 
       if (lower == null)
       {
@@ -178,10 +188,10 @@ public class PlanarRegionsListBuffer
       return value;
    }
 
-   public PlanarRegionsList getNearTime(long time)
+   public T getNearTime(long time)
    {
-      Container c = getNearTimeInternal(time);
-      return c != null ? c.getList() : null;
+      Container<T> c = getNearTimeInternal(time);
+      return c != null ? (T) c.getList() : null;
    }
 
    public long getNextTime(long currentTime)
@@ -189,7 +199,7 @@ public class PlanarRegionsListBuffer
       if (indexBuffer.size() < 1)
          return -1;
 
-      Container container = indexBuffer.get(getNearTimeInternal(currentTime + 1).index + 1); //Increment currentTime by 1 to bias towards higher if tied
+      Container<T> container = indexBuffer.get(Objects.requireNonNull(getNearTimeInternal(currentTime + 1)).index + 1); //Increment currentTime by 1 to bias towards higher if tied
 
       return container == null ? Long.MAX_VALUE : container.getTime();
    }

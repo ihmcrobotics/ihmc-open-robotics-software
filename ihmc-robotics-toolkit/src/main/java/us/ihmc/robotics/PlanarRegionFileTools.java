@@ -28,6 +28,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 public class PlanarRegionFileTools
 {
@@ -123,6 +124,28 @@ public class PlanarRegionFileTools
       }
    }
 
+   /**
+    * Creates a single file with the given path and export the data contained in
+    * {@code planarRegionData}.
+    *
+    * @param ostream               the stream to which the data should be written.
+    * @param planarRegionsWithPose the planar regions with pose to be exported. Not modified.
+    * @return whether the exportation succeeded or not.
+    */
+   public static boolean exportPlanarRegionWithPoseDataToStream(OutputStream ostream, PlanarRegionsListWithPose planarRegionsWithPose)
+   {
+      try
+      {
+         writePlanarRegionsWithPoseDataToStream(ostream, planarRegionsWithPose);
+         return true;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
    public static boolean isPlanarRegionFile(File file)
    {
       if (file == null || !file.exists())
@@ -159,6 +182,32 @@ public class PlanarRegionFileTools
             loadedRegions = importPlanarRegionDataFromFileInternal(data);
          if (loadedRegions == null)
             LogTools.error("Could not load the file: " + data.getName());
+         return loadedRegions;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+   }
+
+   /**
+    * Load from the given data folder planar region data that has been previously exported via
+    * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
+    *
+    * @param data the data folder or file containing the planar region data.
+    * @return the planar regions if succeeded, {@code null} otherwise.
+    */
+   public static PlanarRegionsListWithPose importPlanarRegionsWithPoseData(File data)
+   {
+      try
+      {
+         PlanarRegionsListWithPose loadedRegions;
+         loadedRegions = importPlanarRegionWithPoseFromFile(data);
+
+         if (loadedRegions == null)
+            LogTools.error("Could not load the file: " + data.getName());
+
          return loadedRegions;
       }
       catch (IOException e)
@@ -319,19 +368,69 @@ public class PlanarRegionFileTools
    private static PlanarRegionsList importPlanarRegionDataFromFileInternal(File file) throws IOException
    {
       Scanner scan = new Scanner(file);
-      List<PlanarRegion> planarRegions = new ArrayList<>();
-
       scan.useDelimiter("\\*\n");
 
+      List<PlanarRegion> planarRegions = new ArrayList<>();
       BufferedReader headerBufferedReader = new BufferedReader(new StringReader(scan.next()));
+      HashMap<String, String> regionStrings = new HashMap<>();
 
+      while (scan.hasNext())
+      {
+         scan.nextLine(); //Skip past delimiter
+         regionStrings.put(scan.nextLine(), scan.next());
+      }
+
+      while (true)
+      {
+         Point3D origin = new Point3D();
+         AxisAngle orientation = new AxisAngle();
+         MutableInt regionId = new MutableInt();
+         MutableInt concaveHullSize = new MutableInt();
+         TIntArrayList convexPolygonsSize = new TIntArrayList();
+
+         String regionName = readHeaderLine(headerBufferedReader, origin, orientation, regionId, concaveHullSize, convexPolygonsSize);
+
+         if (regionName == null)
+            break;
+
+         if (!regionStrings.containsKey(regionName))
+            continue;
+
+         BufferedReader regionBufferedReader = new BufferedReader(new StringReader(regionStrings.get(regionName)));
+         PlanarRegion loadedRegion = loadPlanarRegionVertices(regionBufferedReader,
+                                                              concaveHullSize.intValue(),
+                                                              convexPolygonsSize.toArray(),
+                                                              regionId.intValue(),
+                                                              origin,
+                                                              orientation);
+         regionBufferedReader.close();
+
+         if (loadedRegion != null)
+            planarRegions.add(loadedRegion);
+         else
+         {
+            headerBufferedReader.close();
+            return null;
+         }
+      }
+
+      headerBufferedReader.close();
+
+      return new PlanarRegionsList(planarRegions);
+   }
+
+   private static PlanarRegionsListWithPose importPlanarRegionWithPoseFromFile(File file) throws IOException
+   {
+      Scanner scan = new Scanner(file);
+      scan.useDelimiter("\\*\n");
+
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+      BufferedReader headerBufferedReader = new BufferedReader(new StringReader(scan.next()));
       HashMap<String, String> regionStrings = new HashMap<>();
 
       Point3D sensorPosition = new Point3D();
       AxisAngle sensorOrientation = new AxisAngle();
-
       readSensorTransform(headerBufferedReader, sensorPosition, sensorOrientation);
-
       RigidBodyTransform sensorToWorldTransform = new RigidBodyTransform(sensorOrientation, sensorPosition);
 
       while (scan.hasNext())
@@ -377,9 +476,9 @@ public class PlanarRegionFileTools
       headerBufferedReader.close();
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(planarRegions);
-      planarRegionsList.setSensorToWorldTransform(sensorToWorldTransform);
+      PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose(planarRegionsList, sensorToWorldTransform);
 
-      return planarRegionsList;
+      return planarRegionsListWithPose;
    }
 
    private interface FileCreator
@@ -572,7 +671,87 @@ public class PlanarRegionFileTools
       HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();
       Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
 
-      RigidBodyTransformReadOnly sensorToWorldTransform = planarRegionData.getSensorToWorldTransform();
+      fw.write("\n");
+
+      for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
+      {
+         Point3D origin = new Point3D();
+         region.getPointInRegion(origin);
+         AxisAngle orientation = new AxisAngle();
+         region.getTransformToWorld().getRotation().get(orientation);
+
+         int numberOfConvexPolygons = region.getNumberOfConvexPolygons();
+
+         int[] convexPolygonsSizes = new int[numberOfConvexPolygons];
+         for (int i = 0; i < numberOfConvexPolygons; i++)
+            convexPolygonsSizes[i] = region.getConvexPolygon(i).getNumberOfVertices();
+
+         int regionId = region.getRegionId();
+         MutableInt regionIndex = regionIdToIndex.getOrDefault(regionId, new MutableInt(0));
+         regionIdToIndex.put(regionId, regionIndex);
+         regionIndex.increment();
+
+         fw.write("regionId: " + Integer.toString(regionId));
+         fw.write(", index: " + Integer.toString(regionIndex.getValue().intValue()));
+         fw.write(", origin: " + origin.getX() + ", " + origin.getY() + ", " + origin.getZ());
+         fw.write(", orientation: " + orientation.getX() + ", " + orientation.getY() + ", " + orientation.getZ() + ", " + orientation.getAngle());
+         fw.write(", concave hull size: " + region.getConcaveHullSize());
+         fw.write(", number of convex polygons: " + numberOfConvexPolygons + ", " + Arrays.toString(convexPolygonsSizes));
+
+         fw.write("\n");
+
+         writeQueue.put(region.getRegionId() + "_" + regionIndex, new Pair<PlanarRegion, Integer>(region, regionIndex.getValue()));
+      }
+
+      return writeQueue;
+   }
+
+   private static void writePlanarRegionsWithPoseDataToStream(OutputStream ostream, PlanarRegionsListWithPose planarRegionsWithPose) throws IOException
+   {
+      OutputStreamWriter ow = new OutputStreamWriter(ostream);
+
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writePlanarRegionsWithPoseHeader(ow, planarRegionsWithPose);
+
+      for (Map.Entry<String, Pair<PlanarRegion, Integer>> entry : writeQueue.entrySet())
+      {
+         int regionIndex = entry.getValue().getSecond();
+         PlanarRegion region = entry.getValue().getFirst();
+
+         ow.write("*\nregion" + entry.getKey() + "\n"); //Separate entries
+         writePlanarRegionVertices(ow, region);
+      }
+
+      ow.flush();
+   }
+
+   private static void writePlanarRegionsWithPoseData(Path folderPath, PlanarRegionsListWithPose planarRegionsWithPose) throws IOException
+   {
+      File header = new File(folderPath.toFile(), "header.txt");
+
+      FileWriter headerWriter = new FileWriter(header);
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writePlanarRegionsWithPoseHeader(headerWriter, planarRegionsWithPose);
+      headerWriter.close();
+
+      for (Map.Entry<String, Pair<PlanarRegion, Integer>> entry : writeQueue.entrySet())
+      {
+         int regionIndex = entry.getValue().getSecond();
+         PlanarRegion region = entry.getValue().getFirst();
+
+         File regionFile = new File(folderPath.toFile(), "region" + entry.getKey());
+         FileWriter fileWriter = new FileWriter(regionFile);
+         writePlanarRegionVertices(fileWriter, region);
+         fileWriter.close();
+      }
+   }
+
+   private static HashMap<String, Pair<PlanarRegion, Integer>> writePlanarRegionsWithPoseHeader(OutputStreamWriter fw,
+                                                                                                PlanarRegionsListWithPose planarRegionsWithPose)
+         throws IOException
+   {
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();
+      Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
+
+      RigidBodyTransformReadOnly sensorToWorldTransform = planarRegionsWithPose.getSensorToWorldFrameTransform();
 
       AxisAngle sensorOrientation = new AxisAngle();
       sensorToWorldTransform.getRotation().get(sensorOrientation);
@@ -583,7 +762,7 @@ public class PlanarRegionFileTools
                + sensorOrientation.getAngle());
       fw.write("\n");
 
-      for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
+      for (PlanarRegion region : planarRegionsWithPose.getPlanarRegionsList().getPlanarRegionsAsList())
       {
          Point3D origin = new Point3D();
          region.getPointInRegion(origin);
