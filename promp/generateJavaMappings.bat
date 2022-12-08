@@ -25,7 +25,7 @@ xcopy /Y promp.dll ..\src\main\resources\promp\windows-x86_64
 
 :: Use the latest release on GitHub
 :: https://github.com/bytedeco/javacpp/releases
-set JAVACPP_VERSION=1.5.7
+set JAVACPP_VERSION=1.5.8
 
 :: Most closely resembles "cp -r" on *nix
 mkdir .\java\us\ihmc\promp\presets

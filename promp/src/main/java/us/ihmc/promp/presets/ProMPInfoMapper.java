@@ -17,7 +17,9 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             include = {"promp/trajectory.hpp",
                        "promp/trajectory_group.hpp",
                        "promp/promp.hpp",},
-            link = "promp"),
+            link = "promp",
+            preload = "jnipromp"
+      ),
       @Platform(
             value = "linux",
             includepath = "../include",
