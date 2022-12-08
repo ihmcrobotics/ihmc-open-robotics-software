@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -78,7 +79,7 @@ public class LookAndStepBodyPathPlanningTask
    protected YoDouble bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
-   protected StereoVisionPointCloudMessage ousterLidarScan;
+   protected FusedSensorHeadPointCloudMessage ousterLidarScan;
    protected Pose3DReadOnly goal;
    protected ROS2SyncedRobotModel syncedRobot;
    protected boolean doPlanarRegionsVisibilityGraphsPlan;
@@ -95,7 +96,7 @@ public class LookAndStepBodyPathPlanningTask
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
-      private final TypedInput<StereoVisionPointCloudMessage> ousterLidarInput = new TypedInput<>();
+      private final TypedInput<FusedSensorHeadPointCloudMessage> ousterLidarInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private final Timer heightMapExpirationTimer = new Timer();
@@ -189,7 +190,7 @@ public class LookAndStepBodyPathPlanningTask
          heightMapExpirationTimer.reset();
       }
 
-      public void acceptOusterLidar(StereoVisionPointCloudMessage ousterLidarScan)
+      public void acceptOusterLidar(FusedSensorHeadPointCloudMessage ousterLidarScan)
       {
          ousterLidarInput.set(ousterLidarScan);
          ousterLidarExpirationTimer.reset();
@@ -271,10 +272,11 @@ public class LookAndStepBodyPathPlanningTask
       }
       else if (doOusterHeightMapPlan)
       {
-         ousterToWorld.set(ousterLidarScan.getSensorOrientation(), ousterLidarScan.getSensorPosition());
+//         ousterToWorld.set(ousterLidarScan.getSensorOrientation(), ousterLidarScan.getSensorPosition());
          ousterFrame.update();
 
-         Point3D[] scanPoints = StereoPointCloudCompression.decompressPointCloudToArray(ousterLidarScan);
+         // TODO: Going to have to reimplement this
+         Point3D[] scanPoints = null;
 
          FramePoint3D scanPoint = new FramePoint3D();
          for (Point3D scanPointToModify : scanPoints)

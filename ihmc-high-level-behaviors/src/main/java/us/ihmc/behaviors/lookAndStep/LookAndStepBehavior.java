@@ -133,7 +133,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          bodyPathPlanning.acceptMapRegions(planarRegionsListMessage);
          footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
       });
-      helper.subscribeViaCallback(ROS2Tools.OUSTER_LIDAR_POINTS, stereoVisionPointCloudMessage ->
+      helper.subscribeViaCallback(ROS2Tools.OUSTER_POINT_CLOUD, stereoVisionPointCloudMessage ->
       {
          bodyPathPlanning.acceptOusterLidar(stereoVisionPointCloudMessage);
       });
