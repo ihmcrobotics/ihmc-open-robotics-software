@@ -45,6 +45,7 @@ libgdxDependencies {
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
+   api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:scs2-simulation:17-0.11.0")
    api("us.ihmc:mecano-graphviz:17-0.11.5")

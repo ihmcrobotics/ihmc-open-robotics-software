@@ -28,7 +28,6 @@ public class GarbageFreePlanarRegionListPolygonSnapper
                                                  PlanarRegion regionToPack,
                                                  RigidBodyTransform snapTransformToPack)
    {
-
       PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo, intersectingRegions);
 
       if (intersectingRegions.isEmpty())
@@ -37,6 +36,15 @@ public class GarbageFreePlanarRegionListPolygonSnapper
          return false;
       }
 
+      return snapPolygonToRegionsUnderFoot(polygonToSnap, intersectingRegions, maximumRegionHeightToConsider, regionToPack, snapTransformToPack);
+   }
+
+   public boolean snapPolygonToRegionsUnderFoot(ConvexPolygon2DReadOnly polygonToSnap,
+                                                 List<PlanarRegion> intersectingRegions,
+                                                 double maximumRegionHeightToConsider,
+                                                 PlanarRegion regionToPack,
+                                                 RigidBodyTransform snapTransformToPack)
+   {
       int numberOfIntersectingRegions = intersectingRegions.size();
 
       double highestZ = Double.NEGATIVE_INFINITY;

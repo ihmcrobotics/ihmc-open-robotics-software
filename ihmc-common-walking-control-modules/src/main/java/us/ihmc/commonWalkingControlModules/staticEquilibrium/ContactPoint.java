@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 class ContactPoint
 {
    public static final double basisVectorGraphicScale = 0.1;
-   public static final double forceVectorGraphicScale = 1.7;
+   public static final double forceVectorGraphicScale = 0.2;
    public static final int basisVectorsPerContactPoint = 4;
 
    private final int contactPointIndex;
@@ -46,7 +46,7 @@ class ContactPoint
          graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), basisVector);
       }
 
-      YoGraphicVector forceVector = new YoGraphicVector("forceGraphic" + contactPointIndex, surfacePose.getPosition(), force,forceVectorGraphicScale, YoAppearance.Red(), true, 0.008);
+      YoGraphicVector forceVector = new YoGraphicVector("forceGraphic" + contactPointIndex, surfacePose.getPosition(), force, forceVectorGraphicScale, YoAppearance.Red(), true, 0.008);
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), forceVector);
 
       for (int i = 0; i < rhoValues.length; i++)

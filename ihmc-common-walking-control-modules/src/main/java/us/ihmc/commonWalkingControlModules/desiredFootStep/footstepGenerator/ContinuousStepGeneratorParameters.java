@@ -6,6 +6,7 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
 {
    private int numberOfFootstepsToPlan = DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN;
    private int numberOfFixedFootsteps = DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS;
+   private int ticksToUpdateTheEnvironment = DEFAULT_TICKS_TO_UPDATE_ENVIRONMENT;
    private double swingHeight;
    private double swingDuration, transferDuration;
    private double maxStepLength;
@@ -50,6 +51,12 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public void setNumberOfFixedFootsteps(int numberOfFixedFootsteps)
    {
       this.numberOfFixedFootsteps = numberOfFixedFootsteps;
+   }
+
+   @Override
+   public void setTicksToUpdateTheEnvironment(int ticksToUpdateTheEnvironment)
+   {
+      this.ticksToUpdateTheEnvironment = ticksToUpdateTheEnvironment;
    }
 
    @Override
@@ -116,6 +123,12 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public int getNumberOfFixedFootsteps()
    {
       return numberOfFixedFootsteps;
+   }
+
+   @Override
+   public int getTicksToUpdateTheEnvironment()
+   {
+      return ticksToUpdateTheEnvironment;
    }
 
    @Override
@@ -187,7 +200,8 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    @Override
    public String toString()
    {
-      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps + ", swing height: "
+      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps +
+             "ticks to update the environment: " + ticksToUpdateTheEnvironment + ", swing height: "
             + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength
             + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
             + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
