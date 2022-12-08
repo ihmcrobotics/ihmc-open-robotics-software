@@ -10,7 +10,9 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -524,6 +526,7 @@ public class GPUPlanarRegionExtraction
       });
    }
 
+   private boolean printedException = false;
    public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
@@ -534,11 +537,25 @@ public class GPUPlanarRegionExtraction
          try
          {
             // Going through LinearTransform3D first prevents NotARotationMatrix exceptions.
-            LinearTransform3D linearTransform3D = new LinearTransform3D(EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
-            linearTransform3D.normalize();
-            FrameQuaternion orientation = new FrameQuaternion();
-            orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
-            orientation.changeFrame(ReferenceFrame.getWorldFrame());
+            if (!MathTools.epsilonEquals(gpuPlanarRegion.getNormal().norm(), 1.0, 1e-4))
+               throw new RuntimeException("The planar region norm isn't valid");
+            FrameQuaternion orientation = new FrameQuaternion(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+            try
+            {
+               orientation.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            catch (NotARotationMatrixException e)
+            {
+               if (!printedException)
+               {
+                  LogTools.info("Normal = " + gpuPlanarRegion.getNormal());
+                  LogTools.info("Orientation = " + orientation);
+
+                  printedException = true;
+
+                  throw e;
+               }
+            }
 
             // First compute the set of concave hulls for this region
             FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());

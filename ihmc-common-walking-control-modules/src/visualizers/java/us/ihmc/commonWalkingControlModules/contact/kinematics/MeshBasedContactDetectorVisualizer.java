@@ -175,7 +175,7 @@ public class MeshBasedContactDetectorVisualizer
 
       if (addRegions)
       {
-         contactDetector.setPlanarRegionsList(regions);
+//         contactDetector.setPlanarRegionsList(regions);
          Graphics3DObject contactPlaneGraphics = new Graphics3DObject();
 
          for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
@@ -185,8 +185,8 @@ public class MeshBasedContactDetectorVisualizer
 
          for (int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
          {
-            ConvexPolytope3DReadOnly contactablePolytope = contactDetector.getContactableVolumeMap().get(regions.getPlanarRegion(i));
-            contactPlaneGraphics.addMeshData(newConvexPolytope3DMesh(contactablePolytope), YoAppearance.Glass(0.4));
+//            ConvexPolytope3DReadOnly contactablePolytope = contactDetector.getContactableVolumeMap().get(regions.getPlanarRegion(i));
+//            contactPlaneGraphics.addMeshData(newConvexPolytope3DMesh(contactablePolytope), YoAppearance.Glass(0.4));
          }
 
          scs.addStaticLinkGraphics(contactPlaneGraphics);
