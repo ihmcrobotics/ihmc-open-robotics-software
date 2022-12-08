@@ -9,15 +9,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.tools.thread.Activator;
 
 import java.io.*;
 import java.net.Socket;
@@ -32,7 +24,7 @@ import java.time.Instant;
  * To test, use the GNU netcat command:
  * netcat -ul 7502
  *
- * Lidar packet format:
+ * Lidar incoming data format:
  *
  * <img src="https://i.imgur.com/tB4dI3H.png" width="800" alt="description of MyImage">
  *
@@ -77,37 +69,29 @@ public class NettyOuster
    private static final int MEASUREMENT_BLOCK_STATUS_BITS = 32;
    private static final int MEASUREMENT_BLOCK_STATUS_BYTES = MEASUREMENT_BLOCK_STATUS_BITS / BITS_PER_BYTE;
 
-   private final Activator nativesLoadedActivator;
-
    // A frame is the whole full width depth image before it's starts repeating again; also a lidar packet
    // A packet is a group of data that comes in one UDP message; also a measurement block
    // A column is a single column of depth data
    // A pixel is one depth measurement; also a channel data block
    private int pixelsPerColumn;
    private int columnsPerFrame;
-   private int columnsPerPacket;
+   private int columnsPerMeasurementBlock;
    private int[] pixelShift;
    private int measurementBlocksPerFrame;
-   private int channelDataBlocksPerBlocksPerPacket;
+   private int channelDataBlocksPerBlocksPerMeasurementBlock;
    private int measurementBlockSize;
-   private int lidarPacketSize;
+   private int lidarFrameSizeBytes;
 
    private boolean tcpInitialized = false;
 
    private final EventLoopGroup group;
    private final Bootstrap bootstrap;
-   private BytedecoImage depthImageMeters;
    private Runnable onFrameReceived = null;
    private Instant aquisitionInstant;
-   private OpenCLManager openCLManager;
-   private ByteBuffer lidarPacketBuffer;
-   private _cl_program openCLProgram;
-   private _cl_kernel extractDepthImageKernel;
+   private ByteBuffer lidarFrameByteBuffer;
 
    public NettyOuster()
    {
-      nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
       group = new NioEventLoopGroup();
       bootstrap = new Bootstrap();
       bootstrap.group(group).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>()
@@ -127,37 +111,29 @@ public class NettyOuster
             }
             else
             {
-               if (nativesLoadedActivator.poll())
+               if (lidarFrameByteBuffer == null)
                {
-                  if (nativesLoadedActivator.isNewlyActivated())
-                  {
-                     depthImageMeters = new BytedecoImage(columnsPerFrame, pixelsPerColumn, opencv_core.CV_32FC1);
-                     depthImageMeters.getBytedecoOpenCVMat().setTo(new Mat(0.0f)); // Initialize to 0
-
-                     openCLManager = new OpenCLManager();
-                     openCLProgram = openCLManager.loadProgram("OusterDepthImageUpdater");
-                     extractDepthImageKernel = openCLManager.createKernel(openCLProgram, "extractDepthImage");
-
-                     lidarPacketBuffer = ByteBuffer.allocateDirect(lidarPacketSize);
-                  }
-
-                  ByteBuf bufferedData = packet.content().readBytes(measurementBlockSize);
-
-                  long measurementID = bufferedData.getUnsignedInt(TIMESTAMP_BYTES);
-
-                  lidarPacketBuffer.position((int) measurementID * measurementBlockSize);
-                  bufferedData.readBytes(lidarPacketBuffer);
-
-                  boolean isLastBlockInFrame = measurementID == (measurementBlocksPerFrame - 1);
-                  if (isLastBlockInFrame && onFrameReceived != null)
-                     onFrameReceived.run();
-
-                  bufferedData.release();
+                  LogTools.info("Ouster is initialized.");
+                  lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
                }
+
+               ByteBuf bufferedData = packet.content().readBytes(measurementBlockSize);
+
+               long measurementID = bufferedData.getUnsignedInt(TIMESTAMP_BYTES);
+
+               lidarFrameByteBuffer.position((int) measurementID * measurementBlockSize);
+               bufferedData.readBytes(lidarFrameByteBuffer);
+
+               // TODO: Make sure to throw errors on missed UDP packets
+               boolean isLastBlockInFrame = measurementID == (measurementBlocksPerFrame - 1);
+               if (isLastBlockInFrame && onFrameReceived != null)
+                  onFrameReceived.run();
+
+               bufferedData.release();
             }
          }
       });
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(lidarPacketSize));
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(lidarFrameSizeBytes));
    }
 
    private boolean configureTCP(String host)
@@ -200,13 +176,18 @@ public class NettyOuster
 
          pixelsPerColumn = root.get("pixels_per_column").asInt();
          columnsPerFrame = root.get("columns_per_frame").asInt();
-         columnsPerPacket = root.get("columns_per_packet").asInt();
-         measurementBlocksPerFrame = columnsPerFrame / columnsPerPacket;
-         channelDataBlocksPerBlocksPerPacket = columnsPerPacket * pixelsPerColumn;
-         measurementBlockSize = HEADER_BLOCK_BYTES + (channelDataBlocksPerBlocksPerPacket * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
-         lidarPacketSize = measurementBlockSize * measurementBlocksPerFrame;
+         columnsPerMeasurementBlock = root.get("columns_per_packet").asInt();
+         measurementBlocksPerFrame = columnsPerFrame / columnsPerMeasurementBlock;
+         channelDataBlocksPerBlocksPerMeasurementBlock = columnsPerMeasurementBlock * pixelsPerColumn;
+         measurementBlockSize = HEADER_BLOCK_BYTES
+                                + (channelDataBlocksPerBlocksPerMeasurementBlock * CHANNEL_DATA_BLOCK_BYTES)
+                                + MEASUREMENT_BLOCK_STATUS_BYTES;
+         lidarFrameSizeBytes = measurementBlockSize * measurementBlocksPerFrame;
 
-         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, Columns Per Packet: {}", pixelsPerColumn, columnsPerFrame, columnsPerPacket);
+         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, Columns Per Measurement Block: {}",
+                       pixelsPerColumn,
+                       columnsPerFrame,
+                       columnsPerMeasurementBlock);
 
          JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
          pixelShift = new int[pixelsPerColumn];
@@ -214,6 +195,8 @@ public class NettyOuster
          {
             pixelShift[i] = pixelShiftNode.get(i).asInt();
          }
+
+         // TODO: Store and print frequency
       }
       catch (JsonProcessingException jsonProcessingException)
       {
@@ -256,14 +239,14 @@ public class NettyOuster
       return tcpInitialized ? pixelsPerColumn : -1;
    }
 
-   public BytedecoImage getDepthImageMeters()
-   {
-      return depthImageMeters;
-   }
-
    public void setOnFrameReceived(Runnable onFrameReceived)
    {
       this.onFrameReceived = onFrameReceived;
+   }
+
+   public ByteBuffer getLidarFrameByteBuffer()
+   {
+      return lidarFrameByteBuffer;
    }
 
    public Instant getAquisitionInstant()
