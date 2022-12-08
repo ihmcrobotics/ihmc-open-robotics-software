@@ -1,4 +1,4 @@
-package us.ihmc.bytedeco.slamWrapper.presets;
+package us.ihmc.perception.slamWrapper.presets;
 
 import org.bytedeco.javacpp.annotation.Platform;
 import org.bytedeco.javacpp.annotation.Properties;
@@ -25,7 +25,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                   "jniSlamWrapper"
             }
          ),
-      target = "us.ihmc.bytedeco.slamWrapper.SlamWrapper"
+      target = "us.ihmc.perception.slamWrapper.SlamWrapper"
 )
 public class SlamWrapperInfoMapper implements InfoMapper
 {
