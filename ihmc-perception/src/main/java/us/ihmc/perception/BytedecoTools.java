@@ -8,7 +8,6 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
-import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.tools.thread.Activator;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
