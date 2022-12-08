@@ -5,6 +5,9 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
 
+/**
+ * Helps manage multiple ROS 2 stored property sets.
+ */
 public class ROS2StoredPropertySetGroup
 {
    private final ROS2PublishSubscribeAPI ros2PublishSubscribeAPI;
