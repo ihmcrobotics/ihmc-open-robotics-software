@@ -1,46 +1,53 @@
 package us.ihmc.avatar.lidar;
 
-import perception_msgs.msg.dds.BigVideoPacket;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import org.bytedeco.javacpp.BytePointer;
+import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 
 public class OusterDepthPublisher
 {
    private final NettyOuster nettyOuster;
-   private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2VideoPublisher;
-   private final BigVideoPacket videoPacket = new BigVideoPacket();
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_lidar_publisher_node");
+   private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+   private final VideoPacket videoPacket = new VideoPacket();
 
    public OusterDepthPublisher()
    {
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_lidar_publisher");
-
-      ROS2Topic<BigVideoPacket> depthVideoTopic = ROS2Tools.OUSTER_LIDAR;
+      ROS2Topic<VideoPacket> depthVideoTopic = ROS2Tools.OUSTER_DEPTH;
       LogTools.info("Publishing ROS 2 ouster lidar depth video: {}", depthVideoTopic);
-      ros2VideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthVideoTopic, ROS2QosProfile.BEST_EFFORT());
 
       nettyOuster = new NettyOuster();
       nettyOuster.setOnFrameReceived(() ->
       {
           nettyOuster.getDepthImageMeters().rewind();
-          byte[] heapByteArrayData = new byte[nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().remaining()];
-          nettyOuster.getDepthImageMeters().getBackingDirectByteBuffer().get(heapByteArrayData);
 
-          videoPacket.getData().resetQuick();
-          videoPacket.getData().add(heapByteArrayData);
+         BytePointer compressedDepthPointer = new BytePointer();
 
-          videoPacket.setImageHeight(nettyOuster.getImageHeight());
-          videoPacket.setImageWidth(nettyOuster.getImageWidth());
-          videoPacket.setAcquisitionTimeSecondsSinceEpoch(nettyOuster.getAquisitionInstant().getEpochSecond());
-          videoPacket.setAcquisitionTimeAdditionalNanos(nettyOuster.getAquisitionInstant().getNano());
+         BytedecoOpenCVTools.compressImagePNG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer);
 
-          ros2VideoPublisher.publish(videoPacket);
+         byte[] heapByteArrayData = new byte[compressedDepthPointer.asBuffer().remaining()];
+         compressedDepthPointer.asBuffer().get(heapByteArrayData);
+         videoPacket.getData().resetQuick();
+         videoPacket.getData().add(heapByteArrayData);
+
+         LogTools.info("Compressed Bytes: {}", heapByteArrayData.length);
+
+         videoPacket.setImageHeight(nettyOuster.getImageHeight());
+         videoPacket.setImageWidth(nettyOuster.getImageWidth());
+         videoPacket.setTimestamp(nettyOuster.getAquisitionInstant().getNano());
+         videoPacket.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
+//         videoPacket.setTimestamp(nettyOuster.getAquisitionInstant().getEpochSecond());
+
+          LogTools.info("Publishing Ouster Depth: {} {} {}", videoPacket.getTimestamp(), videoPacket.getImageHeight(), videoPacket.getImageWidth());
+         ros2Helper.publish(ROS2Tools.OUSTER_DEPTH, videoPacket);
       });
       nettyOuster.bind();
 
