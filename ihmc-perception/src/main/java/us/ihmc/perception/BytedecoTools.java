@@ -7,12 +7,10 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspaceDirectory;
-import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.perception.slamWrapper.SlamWrapperNativeLibrary;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.tools.thread.Activator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class BytedecoTools
@@ -60,30 +58,13 @@ public class BytedecoTools
    public static Activator loadGTSAMNativesOnAThread()
    {
       Activator nativesActivated = new Activator();
-      ThreadTools.startAThread(BytedecoTools::loadGTSAMNatives, "GTSAM Loader");
+      ThreadTools.startAThread(BytedecoTools::loadSlamWrapper, "SlamWrapper loader");
       return nativesActivated;
    }
 
-   public static void loadGTSAMNatives()
+   public static void loadSlamWrapper()
    {
-      List<String> libraryFiles = new ArrayList<>();
-      //      libraryFiles.add("libtbb.so");
-
-      libraryFiles.add("libboost_filesystem.so");
-      libraryFiles.add("libboost_chrono.so");
-      libraryFiles.add("libboost_timer.so");
-      libraryFiles.add("libboost_serialization.so");
-
-      libraryFiles.add("libmetis-gtsam.so");
-      libraryFiles.add("libgtsam.so");
-      libraryFiles.add("libslam-wrapper.so");
-      libraryFiles.add("libjniSlamWrapper.so");
-
-      WorkspaceDirectory resourcesDirectory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/slam-wrapper/resources");
-      for (String libraryFile : libraryFiles)
-      {
-         System.load(new WorkspaceFile(resourcesDirectory, libraryFile).getFilePath().toAbsolutePath().normalize().toString());
-      }
+      SlamWrapperNativeLibrary.load();
    }
 
    public static Activator loadOpenCVNativesOnAThread()
