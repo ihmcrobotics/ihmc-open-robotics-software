@@ -53,6 +53,8 @@ public class RDXPerceptionVisualizerUI
                                                                             DomainFactory.PubSubImplementation.FAST_RTPS,
                                                                             ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT)));
 
+            globalVisualizersUI.addVisualizer(new RDXROS2ColoredDepthVisualizer("L515 Colored Depth", ros2Node, ROS2Tools.L515_DEPTH, ROS2Tools.L515_VIDEO));
+
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Point Cloud",
                                                                               ros2Node,
                                                                               ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class)));

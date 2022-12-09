@@ -154,13 +154,13 @@ public class RealsenseColorAndDepthPublisher
 
             long end_color = System.nanoTime();
 
-            LogTools.info("Acquisition Time: {} ms", (end_acquire - begin_acquire) / 1e6);
+            LogTools.debug("Acquisition Time: {} ms", (end_acquire - begin_acquire) / 1e6);
 
-            LogTools.info(String.format("Depth Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
+            LogTools.debug(String.format("Depth Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
                           depthU16C1Image.rows() * depthU16C1Image.cols() * 2, compressedDepthPointer.capacity(),
                           (float) (depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) compressedDepthPointer.capacity(), (end_depth - begin_depth) / 1e6));
 
-            LogTools.info(String.format("Color Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
+            LogTools.debug(String.format("Color Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
                           color8UC3Image.rows() * color8UC3Image.cols() * 3,
                           compressedColorPointer.capacity(),
                           (float) (color8UC3Image.rows() * color8UC3Image.cols() * 3) / (float) compressedColorPointer.capacity(), (end_color - end_depth) / 1e6));
