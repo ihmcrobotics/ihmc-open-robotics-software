@@ -138,7 +138,7 @@ float4 createRGB(double input)
    return (float4) (r, g, b, 1.0);
 }
 
-kernel void imageToPointCloud(read_only image2d_t depthImageMeters,
+kernel void imageToPointCloud(global float* parameters,
                               read_only image2d_t discretizedDepthImage,
                               global float* pointCloudVertexBuffer)
 {
@@ -213,19 +213,19 @@ kernel void imageToPointCloud(read_only image2d_t depthImageMeters,
                                       rotationMatrixM21,
                                       rotationMatrixM22);
 
-   int pointStartIndex = (imageWidth * y + x) * 8;
+   int pointStartIndex = (depthImageWidth * y + x) * 8;
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudRenderingBuffer[pointStartIndex]     = nan((uint) 0);
-      pointCloudRenderingBuffer[pointStartIndex + 1] = nan((uint) 0);
-      pointCloudRenderingBuffer[pointStartIndex + 2] = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
    }
    else
    {
-      pointCloudRenderingBuffer[pointStartIndex]     = worldFramePoint.x;
-      pointCloudRenderingBuffer[pointStartIndex + 1] = worldFramePoint.y;
-      pointCloudRenderingBuffer[pointStartIndex + 2] = worldFramePoint.z;
+      pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
+      pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 
    float4 rgba8888Color = createRGB(worldFramePoint.z);
@@ -234,9 +234,9 @@ kernel void imageToPointCloud(read_only image2d_t depthImageMeters,
    float pointColorB = (rgba8888Color.z);
    float pointColorA = (rgba8888Color.w);
 
-   pointCloudRenderingBuffer[pointStartIndex + 3] = pointColorR;
-   pointCloudRenderingBuffer[pointStartIndex + 4] = pointColorG;
-   pointCloudRenderingBuffer[pointStartIndex + 5] = pointColorB;
-   pointCloudRenderingBuffer[pointStartIndex + 6] = pointColorA;
-   pointCloudRenderingBuffer[pointStartIndex + 7] = pointSize;
+   pointCloudVertexBuffer[pointStartIndex + 3] = pointColorR;
+   pointCloudVertexBuffer[pointStartIndex + 4] = pointColorG;
+   pointCloudVertexBuffer[pointStartIndex + 5] = pointColorB;
+   pointCloudVertexBuffer[pointStartIndex + 6] = pointColorA;
+   pointCloudVertexBuffer[pointStartIndex + 7] = pointSize;
 }
