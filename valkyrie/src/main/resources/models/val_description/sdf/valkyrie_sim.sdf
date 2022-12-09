@@ -2642,7 +2642,7 @@
       <sensor name='stereo_camera' type='multicamera'>
         <update_rate>10</update_rate>
         <camera name='left'>
-          <horizontal_fov>1.39626</horizontal_fov>
+          <horizontal_fov>1.3962634</horizontal_fov>
           <image>
             <width>1024</width>
             <height>544</height>
@@ -2660,7 +2660,7 @@
         </camera>
         <camera name='right'>
           <pose frame=''>0 -0.07 0 0 -0 0</pose>
-          <horizontal_fov>1.39626</horizontal_fov>
+          <horizontal_fov>1.3962634</horizontal_fov>
           <image>
             <width>1024</width>
             <height>544</height>
@@ -2785,8 +2785,8 @@
             <horizontal>
               <samples>1081</samples>
               <resolution>1</resolution>
-              <min_angle>-2.35619</min_angle>
-              <max_angle>2.35619</max_angle>
+              <min_angle>-2.356194</min_angle>
+              <max_angle>2.356194</max_angle>
             </horizontal>
           </scan>
           <range>
