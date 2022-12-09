@@ -9,6 +9,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
 import java.io.*;
@@ -82,7 +83,7 @@ public class NettyOuster
    private int measurementBlockSize;
    private int lidarFrameSizeBytes;
 
-   private boolean tcpInitialized = false;
+   private volatile boolean tcpInitialized = false;
 
    private final EventLoopGroup group;
    private final Bootstrap bootstrap;
@@ -103,11 +104,10 @@ public class NettyOuster
 
             if (!tcpInitialized)
             {
-               boolean success = configureTCP(packet.sender().getAddress().toString().substring(1));
-               if (!success)
-               { //Address looks like "/192.168.x.x" so we just discard the '/'
-                  LogTools.error("Failed to initialize Ouster using TCP API.");
-               }
+               // Address looks like "/192.168.x.x" so we just discard the '/'
+               String modifiedAddress = packet.sender().getAddress().toString().substring(1);
+               // Do this on a thread so we don't hang up the UDP thread.
+               ThreadTools.startAsDaemon(() -> configureTCP(modifiedAddress), "TCPConfiguration");
             }
             else
             {
@@ -136,7 +136,7 @@ public class NettyOuster
       bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(lidarFrameSizeBytes));
    }
 
-   private boolean configureTCP(String host)
+   private void configureTCP(String host)
    {
       LogTools.info("Attempting to query host " + host);
 
@@ -156,13 +156,11 @@ public class NettyOuster
       catch (UnknownHostException unknownHostException)
       {
          LogTools.error("Ouster host could not be found.");
-         return false;
       }
       catch (IOException ioException)
       {
          LogTools.error(ioException.getMessage());
          LogTools.error(ioException.getStackTrace());
-         return false;
       }
       finally
       {
@@ -201,11 +199,9 @@ public class NettyOuster
       catch (JsonProcessingException jsonProcessingException)
       {
          LogTools.error(jsonProcessingException.getMessage());
-         return false;
       }
 
       tcpInitialized = true;
-      return true;
    }
 
    /**
