@@ -63,9 +63,9 @@ public class RDXPerceptionVisualizerUI
                                                                               ros2Node,
                                                                               ROS2Tools.D435_COLORED_POINT_CLOUD));
 
-            globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
-                                                                              ros2Node,
-                                                                              ROS2Tools.OUSTER_POINT_CLOUD));
+            globalVisualizersUI.addVisualizer(new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
+                                                                                    ros2Node,
+                                                                                    ROS2Tools.OUSTER_DEPTH_IMAGE));
 
             videoVisualizer = new RDXROS2VideoVisualizer("Primary Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
             globalVisualizersUI.addVisualizer(videoVisualizer);
