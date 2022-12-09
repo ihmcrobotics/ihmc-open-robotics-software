@@ -84,6 +84,7 @@ public class NettyOuster
    private int measurementBlockSize;
    private int lidarFrameSizeBytes;
 
+   private volatile boolean tryingTCP = false;
    private volatile boolean tcpInitialized = false;
 
    private final EventLoopGroup group;
@@ -103,12 +104,17 @@ public class NettyOuster
          {
             aquisitionInstant = Instant.now();
 
-            if (!tcpInitialized)
+            if (!tryingTCP && !tcpInitialized)
             {
+               tryingTCP = true;
                // Address looks like "/192.168.x.x" so we just discard the '/'
                String modifiedAddress = packet.sender().getAddress().toString().substring(1);
                // Do this on a thread so we don't hang up the UDP thread.
-               ThreadTools.startAsDaemon(() -> configureTCP(modifiedAddress), "TCPConfiguration");
+               ThreadTools.startAsDaemon(() ->
+               {
+                  configureTCP(modifiedAddress);
+                  tryingTCP = false;
+               }, "TCPConfiguration");
             }
             else
             {
@@ -208,8 +214,7 @@ public class NettyOuster
    }
 
    /**
-    * Bind to UDP, and begin receiving data.
-    * Note that data will not be processed until Ouster's TCP API is queried for image data, which will not happen until after this call.
+    * Bind to UDP and begin receiving data.
     */
    public void bind()
    {
