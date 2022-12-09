@@ -17,12 +17,11 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -63,6 +62,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private String messageSizeString;
    private int depthWidth;
    private int depthHeight;
+   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
    public RDXROS2OusterPointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic)
    {
@@ -158,7 +158,27 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                                       decompressionOutputImage.getBytedecoOpenCVMat());
             decompressionOutputImage.getBackingDirectByteBuffer().rewind();
 
-            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, pointSize.get());
+            // TODO: Create tuners for these
+            double verticalFieldOfView = Math.PI / 2.0;
+            double horizontalFieldOfView = 2.0 * Math.PI;
+
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, (float) horizontalFieldOfView);
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, (float) verticalFieldOfView);
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, sensorTransformToWorld.getTranslation().getX32());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(3, sensorTransformToWorld.getTranslation().getY32());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(4, sensorTransformToWorld.getTranslation().getZ32());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(5, (float) sensorTransformToWorld.getRotation().getM00());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(6, (float) sensorTransformToWorld.getRotation().getM01());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(7, (float) sensorTransformToWorld.getRotation().getM02());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(8, (float) sensorTransformToWorld.getRotation().getM10());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(9, (float) sensorTransformToWorld.getRotation().getM11());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(10, (float) sensorTransformToWorld.getRotation().getM12());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(11, (float) sensorTransformToWorld.getRotation().getM20());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(12, (float) sensorTransformToWorld.getRotation().getM21());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(13, (float) sensorTransformToWorld.getRotation().getM22());
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(14, depthWidth);
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(15, depthHeight);
+            parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(16, pointSize.get());
 
             parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
             decompressionOutputImage.writeOpenCLImage(openCLManager);
