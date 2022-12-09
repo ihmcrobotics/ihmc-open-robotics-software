@@ -164,4 +164,9 @@ public class OusterDepthImagePublisher
       outputImageMessage.setImageHeight(depthHeight);
       ros2Helper.publish(ROS2Tools.OUSTER_DEPTH_IMAGE, outputImageMessage);
    }
+
+   public static void main(String[] args)
+   {
+      new OusterDepthImagePublisher(ReferenceFrame::getWorldFrame);
+   }
 }
