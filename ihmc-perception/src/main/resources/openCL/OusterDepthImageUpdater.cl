@@ -1,4 +1,0 @@
-void kernel extractDepthImage()
-{
-
-} 
