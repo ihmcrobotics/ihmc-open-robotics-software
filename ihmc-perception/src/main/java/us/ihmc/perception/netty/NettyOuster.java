@@ -9,6 +9,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
@@ -133,7 +134,9 @@ public class NettyOuster
             }
          }
       });
-      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(lidarFrameSizeBytes));
+
+      // Ouster OS0-128 uses about 1.5 MB for the buffer, so let's set the allocator to 2 MB to leave a little wiggle room
+      bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(2)));
    }
 
    private void configureTCP(String host)
