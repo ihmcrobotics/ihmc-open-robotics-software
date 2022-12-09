@@ -105,14 +105,14 @@ public class RDXNettyOusterUI
                      pointCloudRenderer.create(numberOfDepthPoints);
                      baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.MODEL);
 
-                     pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * 8, pointCloudRenderer.getVertexBuffer());
-                     ouster.getDepthImageMeters().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-                     pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
-                     parametersBuffer.createOpenCLBufferObject(openCLManager);
+//                     pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * 8, pointCloudRenderer.getVertexBuffer());
+//                     ouster.getDepthImageMeters().createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+//                     pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
+//                     parametersBuffer.createOpenCLBufferObject(openCLManager);
                   }
 
                   frameReadFrequency.ping();
-                  imagePanel.drawFloatImage(ouster.getDepthImageMeters().getBytedecoOpenCVMat());
+//                  imagePanel.drawFloatImage(ouster.getDepthImageMeters().getBytedecoOpenCVMat());
 
                   RigidBodyTransform transformToWorldFrame = ousterInteractable.getReferenceFrame().getTransformToWorldFrame();
 
@@ -133,10 +133,10 @@ public class RDXNettyOusterUI
                   parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) ouster.getImageWidth());
                   parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) ouster.getImageHeight());
 
-                  ouster.getDepthImageMeters().writeOpenCLImage(openCLManager);
-                  parametersBuffer.writeOpenCLBufferObject(openCLManager);
+//                  ouster.getDepthImageMeters().writeOpenCLImage(openCLManager);
+//                  parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
-                  openCLManager.setKernelArgument(createPointCloudKernel, 0, ouster.getDepthImageMeters().getOpenCLImageObject());
+//                  openCLManager.setKernelArgument(createPointCloudKernel, 0, ouster.getDepthImageMeters().getOpenCLImageObject());
                   openCLManager.setKernelArgument(createPointCloudKernel, 1, pointCloudRenderingBuffer.getOpenCLBufferObject());
                   openCLManager.setKernelArgument(createPointCloudKernel, 2, parametersBuffer.getOpenCLBufferObject());
                   openCLManager.execute2D(createPointCloudKernel, ouster.getImageWidth(), ouster.getImageHeight());
