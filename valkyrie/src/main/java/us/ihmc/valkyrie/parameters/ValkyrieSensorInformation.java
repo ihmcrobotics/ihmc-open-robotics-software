@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -15,7 +14,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
@@ -50,33 +48,10 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    }
 
    private static final SideDependentList<String> wristForceSensorNames = null; //new SideDependentList<String>("leftWristPitch", "rightWristPitch");
-   private static final SideDependentList<String> footContactSensorNames = new SideDependentList<>("leftFootContactSensor", "rightFootContactSensor");
    private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("leftFootSixAxis_Offset", "rightFootSixAxis_Offset");
-   public static final SideDependentList<LinkedHashMap<String, LinkedHashMap<String, ContactSensorType>>> contactSensors = new SideDependentList<>();
 
    private static final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = new RigidBodyTransform(new YawPitchRoll(0.0, 0.130899694, -Math.PI),
                                                                                                           new Vector3D(0.183585961, 0.0, 0.075353826));
-
-   public static final boolean USE_JSC_FOOT_MASS_TARING = false;
-
-   static
-   {
-      contactSensors.put(RobotSide.LEFT, new LinkedHashMap<String, LinkedHashMap<String, ContactSensorType>>());
-
-      contactSensors.get(RobotSide.LEFT).put(LEFT_FOOT_FORCE_TORQUE_SENSOR, new LinkedHashMap<String, ContactSensorType>());
-      contactSensors.get(RobotSide.LEFT).get(LEFT_FOOT_FORCE_TORQUE_SENSOR).put(footContactSensorNames.get(RobotSide.LEFT), ContactSensorType.SOLE);
-
-      //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.
-      //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftToeContactSensor", ContactSensorType.TOE);
-      //      contactSensors.get(RobotSide.LEFT).get("LeftAnkle").put("LeftHeelContactSensor", ContactSensorType.HEEL);
-      contactSensors.put(RobotSide.RIGHT, new LinkedHashMap<String, LinkedHashMap<String, ContactSensorType>>());
-      contactSensors.get(RobotSide.RIGHT).put(RIGHT_FOOT_FORCE_TORQUE_SENSOR, new LinkedHashMap<String, ContactSensorType>());
-      contactSensors.get(RobotSide.RIGHT).get(RIGHT_FOOT_FORCE_TORQUE_SENSOR).put(footContactSensorNames.get(RobotSide.RIGHT), ContactSensorType.SOLE);
-
-      //@TODO Need a bit more work before multiple contact sensors can be added to a single rigid body.
-      //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightToeContactSensor", ContactSensorType.TOE);
-      //      contactSensors.get(RobotSide.RIGHT).get("RightAnkle").put("RightHeelContactSensor", ContactSensorType.HEEL);
-   }
 
    private final ArrayList<ImmutableTriple<String, String, RigidBodyTransform>> staticTranformsForRos = new ArrayList<>();
    /**
@@ -442,12 +417,6 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    public ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
       return referenceFrames.getChestFrame();
-   }
-
-   @Override
-   public SideDependentList<String> getFeetContactSensorNames()
-   {
-      return footContactSensorNames;
    }
 
    @Override
