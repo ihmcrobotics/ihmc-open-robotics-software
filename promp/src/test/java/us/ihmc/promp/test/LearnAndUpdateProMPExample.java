@@ -5,14 +5,17 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.promp.Trajectory.infer_closest_trajectory;
 import static us.ihmc.promp.global.promp.EigenMatrixXd;
 import static us.ihmc.promp.presets.ProMPInfoMapper.EigenVectorXd;
 
 public class LearnAndUpdateProMPExample
 {
-   public static void main(String[] args)
+   @Test
+   public void testUpdateProMP()
    {
       ProMPNativeLibrary.load();
       /*
@@ -29,10 +32,12 @@ public class LearnAndUpdateProMPExample
       // 0: waist Z; 1,2,3: right hand X,Y,Z; 5,6,7: left hand X,Y,Z
       for (int i = 0; i < 10; i++) //get training files
          fileListTraining.add(demoTrainingDirAbs + "/pr" + (i + 1) + ".csv");
+      assertTrue(fileListTraining.size() > 0);
 
       List<String> fileListTesting = new ArrayList<>();
       for (int i = 0; i < 6; i++) //get testing files
          fileListTesting.add(demoTestingDirAbs + "/pr" + (i + 1) + ".csv");
+      assertTrue(fileListTesting.size() > 0);
 
       // consider only right hand trajectories
       List<Long> dofs = List.of(1L, 2L, 3L);
@@ -46,6 +51,7 @@ public class LearnAndUpdateProMPExample
       trainingTrajectories.load_csv_trajectories(fileListStringVectorTraining, doFsSizeTVector);
       // make all training trajectories have the same length
       int meanLengthTraining = (int) trainingTrajectories.normalize_length();
+      assertTrue(meanLengthTraining > 0);
 
       //testing filelist
       StringVector fileListStringVectorTesting = new StringVector();
@@ -60,7 +66,11 @@ public class LearnAndUpdateProMPExample
       int n_rbf = 20;
       ProMP myProMP = new ProMP(trainingTrajectories, n_rbf);
       EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
+      assertTrue(meanTrajectory.cols() == dofs.size());
+      assertTrue(meanTrajectory.rows() == meanLengthTraining);
       EigenMatrixXd stdDeviationTrajectory = myProMP.gen_traj_std_dev();
+      assertTrue(stdDeviationTrajectory.cols() == dofs.size());
+      assertTrue(stdDeviationTrajectory.rows() == meanLengthTraining);
       EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
       /*
@@ -86,6 +96,7 @@ public class LearnAndUpdateProMPExample
        */
       // see timesteps of selected demo trajectory
       long timestepDemo = demoTestTrajectories.get(0).timesteps();
+      assertTrue(timestepDemo > 0);
       System.out.println("timestepDemo: " + timestepDemo);
       // infer the new speed for the ProMP based on observed portion of demo trajectory
       //----------------------------- Default way --------------------------------------------------
@@ -95,17 +106,22 @@ public class LearnAndUpdateProMPExample
       for (int i = 0; i < observedTrajectory.rows(); i++)
          for (int j = 0; j < observedTrajectory.cols(); j++)
             observedTrajectory.apply(i, j).put(demoTestTrajectories.get(0).matrix().coeff(i, j));
+
       //estimate the demo training trajectory closest to observed data
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       System.out.println("Inferred closest demo to current observation: " + (demo + 1));
-      // infer the speed of the esitmated demo training trajectory that best matches the observed data
+      assertTrue(demo == 8);
+      // infer the speed of the estimated demo training trajectory that best matches the observed data
       double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      assertTrue( (inferredSpeed <= 1.5) &&  (inferredSpeed >= 0.75));
       System.out.println("Inferred speed for demo trajectory: " + inferredSpeed);
       // The desired timesteps are given by the actual timesteps of the demo trajectory and the inferred speed
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       // generate ProMP mean trajectory with new time modulation
       EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
+      assertTrue(stdDeviationTrajectoryModulated.rows()==inferredTimesteps);
       EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
+      assertTrue(meanTrajectoryModulated.rows()==inferredTimesteps);
       System.out.println("Inferred timestep: " + inferredTimesteps);
       //--------------------------------!Alternative way ------------------------------------------
       //      // infer the new speed for the ProMP based on observed portion of demo trajectory (goal available)
@@ -155,6 +171,7 @@ public class LearnAndUpdateProMPExample
       // update the time modulation of the ProMP object with estimated value
       System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
       myProMP.update_time_modulation((double) myProMP.get_traj_length() / inferredTimesteps);
+      assertTrue(myProMP.get_traj_length()==inferredTimesteps);
       System.out.println("New ProMp timestep: " + myProMP.get_traj_length());
 
       /*
@@ -178,8 +195,11 @@ public class LearnAndUpdateProMPExample
       for (int i = 0; i < viaPoint.size(); i++)
          viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
       myProMP.condition_via_point(conditioningTimestep, viaPoint, viaPointStdDeviation);
+      EigenMatrixXd meanTrajectoryConditioned = myProMP.generate_trajectory();
+      for (int i = 0; i < viaPoint.size(); i++)
+         assertTrue(meanTrajectoryConditioned.coeff(conditioningTimestep,i) >= viaPoint.coeff(i) - 0.01 && meanTrajectoryConditioned.coeff(conditioningTimestep,i) <= viaPoint.coeff(i) + 0.01);
       // condition goal
-      conditioningTimestep = (int) demoTestTrajectories.get(0).timesteps() - 1;
+      conditioningTimestep = myProMP.get_traj_length();
       System.out.print("Conditioning timestep: " + conditioningTimestep);
       System.out.println("; Via point: " + demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, 0) + " " + demoTestTrajectories.get(0)
                                                                                                                                            .matrix()
@@ -191,7 +211,10 @@ public class LearnAndUpdateProMPExample
          viaPoint.apply(i).put(demoTestTrajectories.get(0).matrix().coeff(conditioningTimestep, i));
       myProMP.condition_goal(viaPoint, viaPointStdDeviation);
       //generate updated mean trajectory
-      EigenMatrixXd meanTrajectoryConditioned = myProMP.generate_trajectory();
+      meanTrajectoryConditioned = myProMP.generate_trajectory();
+      assertTrue(meanTrajectoryConditioned.rows() == conditioningTimestep);
+      for (int i = 0; i < viaPoint.size(); i++)
+         assertTrue(meanTrajectoryConditioned.coeff(conditioningTimestep-1,i) >= viaPoint.coeff(i) - 0.01 && meanTrajectoryConditioned.coeff(conditioningTimestep-1,i) <= viaPoint.coeff(i) + 0.01);
       EigenMatrixXd stdDeviationTrajectoryConditioned = myProMP.gen_traj_std_dev(inferredTimesteps);
 
       ProMPUtil.saveAsCSV(meanTrajectoryConditioned, "/meanConditioned.csv");
