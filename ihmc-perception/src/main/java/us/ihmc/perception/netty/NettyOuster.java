@@ -253,4 +253,19 @@ public class NettyOuster
    {
       return aquisitionInstant;
    }
+
+   public int getColumnsPerMeasurementBlock()
+   {
+      return columnsPerMeasurementBlock;
+   }
+
+   public int getPixelsPerColumn()
+   {
+      return pixelsPerColumn;
+   }
+
+   public int getMeasurementBlockSize()
+   {
+      return measurementBlockSize;
+   }
 }
