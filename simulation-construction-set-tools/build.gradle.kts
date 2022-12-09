@@ -14,9 +14,9 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid-frame:0.19.0")
-   api("us.ihmc:euclid-frame-shape:0.19.0")
-   api("us.ihmc:euclid-shape:0.19.0")
+   api("us.ihmc:euclid-frame:0.19.1")
+   api("us.ihmc:euclid-frame-shape:0.19.1")
+   api("us.ihmc:euclid-shape:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:scs2-definition:17-0.11.0")
    api("us.ihmc:scs2-simulation:17-0.11.0")
