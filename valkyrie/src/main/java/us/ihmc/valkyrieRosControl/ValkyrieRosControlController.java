@@ -195,12 +195,10 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
