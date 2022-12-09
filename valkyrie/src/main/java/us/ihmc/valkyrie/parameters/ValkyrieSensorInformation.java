@@ -2,7 +2,6 @@ package us.ihmc.valkyrie.parameters;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutableTriple;
 
@@ -23,32 +22,18 @@ import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
 {
-   private static final String LEFT_FOOT_FORCE_TORQUE_SENSOR = "leftAnkleRoll";
-   private static final String RIGHT_FOOT_FORCE_TORQUE_SENSOR = "rightAnkleRoll";
+   private static final String LEFT_FOOT_FORCE_TORQUE_SENSOR = "leftFootSixAxis";
+   private static final String RIGHT_FOOT_FORCE_TORQUE_SENSOR = "rightFootSixAxis";
    public static final String[] forceSensorNames;
-   public static final Map<String, RigidBodyTransform> forceSensorTransformMap = new HashMap<>();
    private static final SideDependentList<String> feetForceSensorNames;
-   public static final SideDependentList<RigidBodyTransform> transformFromSixAxisMeasurementToAnkleZUpFrames = new SideDependentList<>();
-   static
-   {
-      RigidBodyTransform translateForwardAndDownOnFoot = new RigidBodyTransform();
-      translateForwardAndDownOnFoot.getTranslation().set(0.021564, 0.0, -0.051054);
-      translateForwardAndDownOnFoot.setRotationEulerAndZeroTranslation(Math.PI, 0.0, 0.0);
-
-      transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, translateForwardAndDownOnFoot);
-      transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.RIGHT, new RigidBodyTransform(translateForwardAndDownOnFoot));
-   }
 
    static
    {
       feetForceSensorNames = new SideDependentList<>(LEFT_FOOT_FORCE_TORQUE_SENSOR, RIGHT_FOOT_FORCE_TORQUE_SENSOR);
       forceSensorNames = new String[] {LEFT_FOOT_FORCE_TORQUE_SENSOR, RIGHT_FOOT_FORCE_TORQUE_SENSOR};
-      forceSensorTransformMap.put(LEFT_FOOT_FORCE_TORQUE_SENSOR, transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.LEFT));
-      forceSensorTransformMap.put(RIGHT_FOOT_FORCE_TORQUE_SENSOR, transformFromSixAxisMeasurementToAnkleZUpFrames.get(RobotSide.RIGHT));
    }
 
    private static final SideDependentList<String> wristForceSensorNames = null; //new SideDependentList<String>("leftWristPitch", "rightWristPitch");
-   private static final SideDependentList<String> urdfFeetForceSensorNames = new SideDependentList<>("leftFootSixAxis_Offset", "rightFootSixAxis_Offset");
 
    private static final RigidBodyTransform transformFromHeadToUpperNeckPitchLink = new RigidBodyTransform(new YawPitchRoll(0.0, 0.130899694, -Math.PI),
                                                                                                           new Vector3D(0.183585961, 0.0, 0.075353826));
@@ -238,8 +223,8 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                MULTISENSE_LIDAR_ID);
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT,
                                                                                           left_camera_name,
-// SCS produces an uncompressed image rather than a compressed image                                                                                          
-//                                                                                          left_camera_compressed_topic,
+                                                                                          // SCS produces an uncompressed image rather than a compressed image                                                                                          
+                                                                                          //                                                                                          left_camera_compressed_topic,
                                                                                           left_camera_topic,
                                                                                           left_info_camera_topic,
                                                                                           multisenseHandoffFrame,
@@ -248,8 +233,8 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                           MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT,
                                                                                            right_camera_name,
-// SCS produces an uncompressed image rather than a compressed image                                                     
-//                                                                                           right_camera_compressed_topic,
+                                                                                           // SCS produces an uncompressed image rather than a compressed image                                                     
+                                                                                           //                                                                                           right_camera_compressed_topic,
                                                                                            right_camera_topic,
                                                                                            right_info_camera_topic,
                                                                                            multisenseHandoffFrame,
@@ -264,11 +249,6 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                           MULTISENSE_STEREO_ID);
       }
       setupStaticTransformsForRos();
-   }
-
-   public static String getUrdfFeetForceSensorName(RobotSide side)
-   {
-      return urdfFeetForceSensorNames.get(side);
    }
 
    public HashMap<String, Integer> getImuUSBSerialIds()
@@ -286,11 +266,6 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    public String[] getForceSensorNames()
    {
       return forceSensorNames;
-   }
-
-   public static RigidBodyTransform getForceSensorTransform(String sensorName)
-   {
-      return forceSensorTransformMap.get(sensorName);
    }
 
    @Override
