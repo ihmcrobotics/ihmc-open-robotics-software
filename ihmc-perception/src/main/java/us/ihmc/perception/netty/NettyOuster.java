@@ -71,17 +71,23 @@ public class NettyOuster
    private static final int MEASUREMENT_BLOCK_STATUS_BITS = 32;
    private static final int MEASUREMENT_BLOCK_STATUS_BYTES = MEASUREMENT_BLOCK_STATUS_BITS / BITS_PER_BYTE;
 
-   // A frame is the whole full width depth image before it's starts repeating again; also a lidar packet
-   // A packet is a group of data that comes in one UDP message; also a measurement block
-   // A column is a single column of depth data
-   // A pixel is one depth measurement; also a channel data block
+   // Lidar frames are composed of N UDP datagrams (data packets) containing 16 measurement blocks each
+   // Example: For a OS0-128 running at 2048x10Hz, there will be N = 2048 / 16 = 128 UDP datagrams / scan
+   // The frequency of UDP datagrams in this case would be 128 * 10Hz = 1280 Hz UDP datagram processing.
+   //
+   // UDP datagrams contain 16 measurement blocks
+   // Each measurement block contains a full column of depth data: 32, 64, or 128
+   // Example for OS0-128, each measurement block is (16 + (128 * 12) + 4) = 1556 bytes
+   // and each UDP datagram will be 16 * measurement_block = 16 * 1556 = 24896 bytes
+   //
+   // A channel data block is one part of a measurement block, containing 1 pixel
+   // It's 12 bytes
    private int pixelsPerColumn;
    private int columnsPerFrame;
-   private int columnsPerMeasurementBlock;
+   private static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
    private int[] pixelShift;
-   private int measurementBlocksPerFrame;
-   private int channelDataBlocksPerBlocksPerMeasurementBlock;
    private int measurementBlockSize;
+   private int udpDatagramsPerFrame;
    private int lidarFrameSizeBytes;
 
    private volatile boolean tryingTCP = false;
@@ -92,6 +98,7 @@ public class NettyOuster
    private Runnable onFrameReceived = null;
    private Instant aquisitionInstant;
    private ByteBuffer lidarFrameByteBuffer;
+   private long nextExpectedMeasurementID = -1;
 
    public NettyOuster()
    {
@@ -118,25 +125,24 @@ public class NettyOuster
             }
             else
             {
-               if (lidarFrameByteBuffer == null)
+               ByteBuf content = packet.content();
+
+               // Ouster data is little endian
+               int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
+               if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID)
                {
-                  LogTools.info("Ouster is initialized.");
-                  lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
+                  LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}", nextExpectedMeasurementID, measurementID);
                }
+               nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
 
-               ByteBuf bufferedData = packet.content().readBytes(measurementBlockSize);
+               lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
+               content.readBytes(lidarFrameByteBuffer);
 
-               long measurementID = bufferedData.getUnsignedInt(TIMESTAMP_BYTES);
-
-               lidarFrameByteBuffer.position((int) measurementID * measurementBlockSize);
-               bufferedData.readBytes(lidarFrameByteBuffer);
-
-               // TODO: Make sure to throw errors on missed UDP packets
-               boolean isLastBlockInFrame = measurementID == (measurementBlocksPerFrame - 1);
+               boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
                if (isLastBlockInFrame && onFrameReceived != null)
+               {
                   onFrameReceived.run();
-
-               bufferedData.release();
+               }
             }
          }
       });
@@ -183,18 +189,16 @@ public class NettyOuster
 
          pixelsPerColumn = root.get("pixels_per_column").asInt();
          columnsPerFrame = root.get("columns_per_frame").asInt();
-         columnsPerMeasurementBlock = root.get("columns_per_packet").asInt();
-         measurementBlocksPerFrame = columnsPerFrame / columnsPerMeasurementBlock;
-         channelDataBlocksPerBlocksPerMeasurementBlock = columnsPerMeasurementBlock * pixelsPerColumn;
-         measurementBlockSize = HEADER_BLOCK_BYTES
-                                + (channelDataBlocksPerBlocksPerMeasurementBlock * CHANNEL_DATA_BLOCK_BYTES)
-                                + MEASUREMENT_BLOCK_STATUS_BYTES;
-         lidarFrameSizeBytes = measurementBlockSize * measurementBlocksPerFrame;
+         measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
+         udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
+         lidarFrameSizeBytes = MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM * measurementBlockSize * udpDatagramsPerFrame;
 
-         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, Columns Per Measurement Block: {}",
+         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}",
                        pixelsPerColumn,
                        columnsPerFrame,
-                       columnsPerMeasurementBlock);
+                       udpDatagramsPerFrame);
+
+         lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
 
          JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
          pixelShift = new int[pixelsPerColumn];
@@ -210,6 +214,7 @@ public class NettyOuster
          LogTools.error(jsonProcessingException.getMessage());
       }
 
+      LogTools.info("Ouster is initialized.");
       tcpInitialized = true;
    }
 
@@ -258,14 +263,14 @@ public class NettyOuster
       return aquisitionInstant;
    }
 
-   public int getColumnsPerMeasurementBlock()
-   {
-      return columnsPerMeasurementBlock;
-   }
-
    public int getPixelsPerColumn()
    {
       return pixelsPerColumn;
+   }
+
+   public int getColumnsPerFrame()
+   {
+      return columnsPerFrame;
    }
 
    public int getMeasurementBlockSize()
