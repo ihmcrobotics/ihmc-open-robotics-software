@@ -131,9 +131,8 @@ public class OusterDepthImagePublisher
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, ouster.getColumnsPerMeasurementBlock());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, ouster.getPixelsPerColumn());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, ouster.getMeasurementBlockSize());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, ouster.getColumnsPerFrame());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, ouster.getMeasurementBlockSize());
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);

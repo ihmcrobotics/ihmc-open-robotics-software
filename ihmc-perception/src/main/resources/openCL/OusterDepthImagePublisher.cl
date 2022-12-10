@@ -40,16 +40,14 @@ kernel void extractDepthImage(global float* parameters,
    int x = get_global_id(0);
    int y = get_global_id(1);
 
-   int columnsPerMeasurementBlock = parameters[0]
-   int pixelsPerColumn = parameters[1];
-   int measurementBlockSize = parameters[2];
+   int columnsPerFrame = parameters[0]
+   int measurementBlockSize = parameters[1];
 
-   int measurementBlockIndex = x / columnsPerMeasurementBlock;
-   int columnIndexInMeasurementBlock = x % columnsPerMeasurementBlock;
+   int measurementBlockIndex = x / columnsPerFrame;
 
    int bytesToColumnDataBlockStart = measurementBlockIndex * measurementBlockSize
                                      + HEADER_BLOCK_BYTES
-                                     + columnIndexInMeasurementBlock * CHANNEL_DATA_BLOCK_BYTES;
+                                     + y * CHANNEL_DATA_BLOCK_BYTES;
 
    unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
    unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
