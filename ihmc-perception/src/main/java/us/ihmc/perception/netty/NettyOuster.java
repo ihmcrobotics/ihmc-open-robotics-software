@@ -36,40 +36,40 @@ public class NettyOuster
    public static final int TCP_PORT = 7501;
    public static final int UDP_PORT = 7502;
 
-   private static final int BITS_PER_BYTE = 8;
+   public static final int BITS_PER_BYTE = 8;
 
    // Header block
-   private static final int HEADER_BLOCK_BITS = 128;
-   private static final int HEADER_BLOCK_BYTES = HEADER_BLOCK_BITS / BITS_PER_BYTE;
+   public static final int HEADER_BLOCK_BITS = 128;
+   public static final int HEADER_BLOCK_BYTES = HEADER_BLOCK_BITS / BITS_PER_BYTE;
    // Header block contents
-   private static final int TIMESTAMP_BITS = 64;
-   private static final int TIMESTAMP_BYTES = TIMESTAMP_BITS / BITS_PER_BYTE;
-   private static final int MEASUREMENT_ID_BITS = 16;
-   private static final int MEASUREMENT_ID_BYTES = MEASUREMENT_ID_BITS / BITS_PER_BYTE;
-   private static final int FRAME_ID_BITS = 16;
-   private static final int FRAME_ID_BYTES = FRAME_ID_BITS / BITS_PER_BYTE;
-   private static final int ENCODER_COUNT_BITS = 32;
-   private static final int ENCODER_COUNT_BYTES = ENCODER_COUNT_BITS / BITS_PER_BYTE;
+   public static final int TIMESTAMP_BITS = 64;
+   public static final int TIMESTAMP_BYTES = TIMESTAMP_BITS / BITS_PER_BYTE;
+   public static final int MEASUREMENT_ID_BITS = 16;
+   public static final int MEASUREMENT_ID_BYTES = MEASUREMENT_ID_BITS / BITS_PER_BYTE;
+   public static final int FRAME_ID_BITS = 16;
+   public static final int FRAME_ID_BYTES = FRAME_ID_BITS / BITS_PER_BYTE;
+   public static final int ENCODER_COUNT_BITS = 32;
+   public static final int ENCODER_COUNT_BYTES = ENCODER_COUNT_BITS / BITS_PER_BYTE;
 
    // Channel data block
-   private static final int CHANNEL_DATA_BLOCK_BITS = 96;
-   private static final int CHANNEL_DATA_BLOCK_BYTES = CHANNEL_DATA_BLOCK_BITS / BITS_PER_BYTE;
+   public static final int CHANNEL_DATA_BLOCK_BITS = 96;
+   public static final int CHANNEL_DATA_BLOCK_BYTES = CHANNEL_DATA_BLOCK_BITS / BITS_PER_BYTE;
    // Channel data block contents
-   private static final int RANGE_MM_BITS = 20;
-   private static final int RANGE_MM_BYTES = RANGE_MM_BITS / BITS_PER_BYTE;
-   private static final int UNUSED_BITS = 12;
-   private static final int RANGE_ROW_BYTES = (RANGE_MM_BITS + UNUSED_BITS) / BITS_PER_BYTE;
-   private static final int REFLECTIVITY_BITS = 16;
-   private static final int REFLECTIVITY_BYTES = REFLECTIVITY_BITS / BITS_PER_BYTE;
-   private static final int SIGNAL_PHOTONS_BITS = 16;
-   private static final int SIGNAL_PHOTONS_BYTES = SIGNAL_PHOTONS_BITS / BITS_PER_BYTE;
-   private static final int NEAR_INFRARED_PHOTONS_BITS = 16;
-   private static final int NEAR_INFRARED_PHOTONS_BYTES = NEAR_INFRARED_PHOTONS_BITS / BITS_PER_BYTE;
-   private static final int MORE_UNUSED_BITS = 16;
+   public static final int RANGE_MM_BITS = 20;
+   public static final int RANGE_MM_BYTES = RANGE_MM_BITS / BITS_PER_BYTE;
+   public static final int UNUSED_BITS = 12;
+   public static final int RANGE_ROW_BYTES = (RANGE_MM_BITS + UNUSED_BITS) / BITS_PER_BYTE;
+   public static final int REFLECTIVITY_BITS = 16;
+   public static final int REFLECTIVITY_BYTES = REFLECTIVITY_BITS / BITS_PER_BYTE;
+   public static final int SIGNAL_PHOTONS_BITS = 16;
+   public static final int SIGNAL_PHOTONS_BYTES = SIGNAL_PHOTONS_BITS / BITS_PER_BYTE;
+   public static final int NEAR_INFRARED_PHOTONS_BITS = 16;
+   public static final int NEAR_INFRARED_PHOTONS_BYTES = NEAR_INFRARED_PHOTONS_BITS / BITS_PER_BYTE;
+   public static final int MORE_UNUSED_BITS = 16;
 
    // Measurement block status
-   private static final int MEASUREMENT_BLOCK_STATUS_BITS = 32;
-   private static final int MEASUREMENT_BLOCK_STATUS_BYTES = MEASUREMENT_BLOCK_STATUS_BITS / BITS_PER_BYTE;
+   public static final int MEASUREMENT_BLOCK_STATUS_BITS = 32;
+   public static final int MEASUREMENT_BLOCK_STATUS_BYTES = MEASUREMENT_BLOCK_STATUS_BITS / BITS_PER_BYTE;
 
    // Lidar frames are composed of N UDP datagrams (data packets) containing 16 measurement blocks each
    // Example: For a OS0-128 running at 2048x10Hz, there will be N = 2048 / 16 = 128 UDP datagrams / scan
