@@ -89,6 +89,11 @@ public class BytedecoOpenCVTools
 
    public static void convert8BitGrayTo8BitRGBA(Mat source, Mat destination)
    {
+      convertGrayToRGBA(source, destination);
+   }
+
+   public static void convertGrayToRGBA(Mat source, Mat destination)
+   {
       int destinationChannels = 0; // automatic mode
       opencv_imgproc.cvtColor(source, destination, opencv_imgproc.COLOR_GRAY2RGBA, destinationChannels);
    }

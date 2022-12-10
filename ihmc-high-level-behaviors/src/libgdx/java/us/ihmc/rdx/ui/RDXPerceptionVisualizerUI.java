@@ -44,7 +44,9 @@ public class RDXPerceptionVisualizerUI
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
 
-            globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("Ouster Depth", ros2Node, ROS2Tools.OUSTER_DEPTH, ROS2VideoFormat.JPEGYUVI420));
+            globalVisualizersUI.addVisualizer(new RDXROS2DepthImageVisualizer("Ouster Depth",
+                                                                              DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                              ROS2Tools.OUSTER_DEPTH_IMAGE));
 
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Video", ros2Node, ROS2Tools.D435_VIDEO, ROS2VideoFormat.JPEGYUVI420));
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Depth", ros2Node, ROS2Tools.D435_DEPTH, ROS2VideoFormat.JPEGYUVI420));
