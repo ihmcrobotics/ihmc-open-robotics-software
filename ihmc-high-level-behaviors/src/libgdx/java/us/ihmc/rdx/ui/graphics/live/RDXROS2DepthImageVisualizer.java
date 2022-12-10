@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -84,6 +85,12 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
 
             inputCompressedDepthMat.cols(numberOfBytes);
             inputCompressedDepthMat.data(incomingCompressedImageBytePointer);
+
+            System.out.println(inputCompressedDepthMat.ptr(7, 39).getShort());
+            System.out.println(inputCompressedDepthMat.ptr(7, 56).getShort());
+            System.out.println(inputCompressedDepthMat.ptr(7, 324).getShort());
+            System.out.println(inputCompressedDepthMat.ptr(7, 885).getShort());
+            System.out.println(inputCompressedDepthMat.ptr(7, 1788).getShort());
 
             opencv_imgcodecs.imdecode(inputCompressedDepthMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthMat);
 
