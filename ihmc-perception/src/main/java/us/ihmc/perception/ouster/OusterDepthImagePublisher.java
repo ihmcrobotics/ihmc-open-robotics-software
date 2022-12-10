@@ -165,6 +165,7 @@ public class OusterDepthImagePublisher
       outputImageMessage.setSequenceNumber(sequenceNumber++);
       outputImageMessage.setImageWidth(depthWidth);
       outputImageMessage.setImageHeight(depthHeight);
+      // TODO: Switch to RealtimeROS2Node?
       ros2Helper.publish(ROS2Tools.OUSTER_DEPTH_IMAGE, outputImageMessage);
    }
 
