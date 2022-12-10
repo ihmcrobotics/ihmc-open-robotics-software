@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Color;
+import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
@@ -9,13 +9,18 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -26,7 +31,6 @@ import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
@@ -34,9 +38,26 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements RenderableProvider
 {
+   private final static int FLOATS_PER_POINT = 6;
+   private final static int BYTES_PER_POINT = FLOATS_PER_POINT * 4;
+
+   private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
+
+   private boolean depthInitialized = false;
+   private boolean colorInitialized = false;
+
    private float depthToMetersScalar = 2.500000118743628E-4f;
 
+   private BytedecoImage depth32FC1Image;
+
+   private Mat depthImage;
+   private Mat colorImage;
+
+   private final CameraPinholeBrown depthCameraInstrinsics = new CameraPinholeBrown();
+   private final CameraPinholeBrown colorCameraInstrinsics = new CameraPinholeBrown();
+
    private byte[] heapArrayDepth = new byte[25000000];
+   private byte[] heapArrayColor = new byte[25000000];
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> depthTopic;
    private final ROS2Topic<?> colorTopic;
@@ -46,15 +67,18 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private ByteBuffer decompressionInputDirectBuffer;
-   private final Color color = new Color();
    private OpenCLManager openCLManager;
+   private OpenCLFloatBuffer finalColoredDepthBuffer;
    private _cl_program openCLProgram;
-   private _cl_kernel unpackPointCloudKernel;
+   private _cl_kernel createPointCloudKernel;
    private String messageSizeString;
 
-   private AtomicReference<VideoPacket> colorPacketReference = new AtomicReference<>(null);;
+   private AtomicReference<VideoPacket> colorPacketReference = new AtomicReference<>(null);
+   ;
    private AtomicReference<VideoPacket> depthPacketReference = new AtomicReference<>(null);
+
+   private OpenCLFloatBuffer parametersBuffer;
+   private BytedecoImage color8UC4Image;
 
    public RDXROS2ColoredDepthVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> depthTopic, ROS2Topic<?> colorTopic)
    {
@@ -75,12 +99,13 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
    private void colorCallback(VideoPacket packet)
    {
+      LogTools.info("Received color packet");
       colorPacketReference.set(packet);
    }
 
    private void depthCallback(VideoPacket packet)
    {
-      LogTools.info("Time Now: {}", System.currentTimeMillis());
+      LogTools.info("Received depth packet");
       depthPacketReference.set(packet);
    }
 
@@ -91,8 +116,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
       openCLManager = new OpenCLManager();
       openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("FusedSensorPointCloudSubscriberVisualizer");
-      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "unpackPointCloud");
+      openCLProgram = openCLManager.loadProgram("RealsenseColoredPointCloudCreator");
+      createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
+
+      parametersBuffer = new OpenCLFloatBuffer(23);
+      parametersBuffer.createOpenCLBufferObject(openCLManager);
    }
 
    @Override
@@ -102,19 +130,47 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
       if (subscribed.get() && isActive())
       {
-         if (depthPacketReference.get() != null)
+         VideoPacket depthPacket = this.depthPacketReference.getAndSet(null);
+         if (depthPacket != null)
          {
-            VideoPacket depthPacket = this.depthPacketReference.getAndSet(null);
+            if (!depthInitialized)
+            {
+               depthCameraInstrinsics.setCx(depthPacket.getIntrinsicParameters().getCx());
+               depthCameraInstrinsics.setCy(depthPacket.getIntrinsicParameters().getCy());
+               depthCameraInstrinsics.setFx(depthPacket.getIntrinsicParameters().getFx());
+               depthCameraInstrinsics.setFy(depthPacket.getIntrinsicParameters().getFy());
 
-            Mat depthImage = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_16UC1);
+
+
+
+               depthImage = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_16UC1);
+
+               int totalNumberOfPoints = depthPacket.getImageHeight() * depthPacket.getImageWidth();
+               int bytesPerSegment = totalNumberOfPoints * BYTES_PER_POINT;
+               String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
+               messageSizeString = String.format("Message size: %s KB", kilobytes);
+
+               //               pointCloudRenderer.create(totalNumberOfPoints);
+
+               if (finalColoredDepthBuffer != null)
+                  finalColoredDepthBuffer.destroy(openCLManager);
+               finalColoredDepthBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * FLOATS_PER_POINT);
+               finalColoredDepthBuffer.createOpenCLBufferObject(openCLManager);
+
+               depth32FC1Image = new BytedecoImage(depthPacket.getImageWidth(), depthPacket.getImageHeight(), opencv_core.CV_32FC1);
+               depth32FC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+
+               LogTools.info("Allocated new buffers. {} total points", totalNumberOfPoints);
+
+               depthInitialized = true;
+            }
+
+            LogTools.info("Initialized. Rendering Now");
+
+            // Get the depth image from the packet
             depthPacket.getData().toArray(heapArrayDepth, 0, depthPacket.getData().size());
             BytedecoOpenCVTools.decompressDepthPNG(heapArrayDepth, depthImage);
-
-            Mat depthInMeters = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_32FC1);
-            depthImage.convertTo(depthInMeters, opencv_core.CV_32FC1, depthToMetersScalar, 0.0);
-
-
-
+            depthImage.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, depthToMetersScalar, 0.0);
 
             /* For Display Only */
             Mat displayDepth = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_8UC1);
@@ -134,118 +190,79 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             //
             //LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
             //LogTools.info("Decompression Time: {} ms",(end_decompress - begin_decompress) / 1e6f);
-            //
-            //if (pointsPerSegment != fusedMessage.getPointsPerSegment())
-            //{
-            //   pointsPerSegment = fusedMessage.getPointsPerSegment();
-            //   numberOfSegments = (int) fusedMessage.getNumberOfSegments();
-            //   totalNumberOfPoints = pointsPerSegment * numberOfSegments;
-            //   int bytesPerSegment = pointsPerSegment * DiscretizedColoredPointCloud.DISCRETE_BYTES_PER_POINT;
-            //   String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
-            //   messageSizeString = String.format("Message size: %s KB", kilobytes);
-            //   pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
-            //   decompressionInputDirectBuffer = ByteBuffer.allocateDirect(bytesPerSegment);
-            //   decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
-            //   if (decompressedOpenCLIntBuffer != null)
-            //      decompressedOpenCLIntBuffer.destroy(openCLManager);
-            //   decompressedOpenCLIntBuffer = new OpenCLIntBuffer(pointsPerSegment * DiscretizedColoredPointCloud.DISCRETE_INTS_PER_POINT);
-            //   decompressedOpenCLIntBuffer.createOpenCLBufferObject(openCLManager);
-            //   if (pointCloudVertexBuffer != null)
-            //      pointCloudVertexBuffer.destroy(openCLManager);
-            //   pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
-            //                                                  pointCloudRenderer.getVertexBuffer());
-            //   pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
-            //   LogTools.info("Allocated new buffers. {} points per segment. {} segments.", pointsPerSegment, numberOfSegments);
-            //}
-            //
-            //if (fusedMessage.getSegmentIndex() == pointCloudRenderer.getCurrentSegmentIndex())
-            //{
-            //   decompressionInputDirectBuffer.rewind();
-            //   int numberOfBytes = fusedMessage.getScan().size();
-            //   decompressionInputDirectBuffer.limit(numberOfBytes);
-            //   for (int i = 0; i < numberOfBytes; i++)
-            //   {
-            //      decompressionInputDirectBuffer.put(fusedMessage.getScan().get(i));
-            //   }
-            //   decompressionInputDirectBuffer.flip();
-            //   decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
-            //   // TODO: Look at using bytedeco LZ4 1.9.X, which is supposed to be 12% faster than 1.8.X
-            //   lz4Decompressor.decompress(decompressionInputDirectBuffer, decompressedOpenCLIntBuffer.getBackingDirectByteBuffer());
-            //   decompressedOpenCLIntBuffer.getBackingDirectByteBuffer().rewind();
-            //
-            //   parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(0, pointCloudRenderer.getCurrentSegmentIndex());
-            //   parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(1, pointSize.get());
-            //   parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(2, pointsPerSegment);
-            //   parametersOpenCLFloatBuffer.getBytedecoFloatBufferPointer().put(3, (float) DiscretizedColoredPointCloud.DISCRETE_RESOLUTION);
-            //
-            //   parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-            //   decompressedOpenCLIntBuffer.writeOpenCLBufferObject(openCLManager);
-            //   pointCloudRenderer.updateMeshFastestBeforeKernel();
-            //   pointCloudVertexBuffer.syncWithBackingBuffer();
-            //
-            //   openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-            //   openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressedOpenCLIntBuffer.getOpenCLBufferObject());
-            //   openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-            //   openCLManager.execute1D(unpackPointCloudKernel, pointsPerSegment);
-            //   pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-            //
-            //   pointCloudRenderer.updateMeshFastestAfterKernel();
-            //}
          }
 
-         //LidarScanMessage latestLidarScanMessage = latestLidarScanMessageReference.getAndSet(null);
-         //if (latestLidarScanMessage != null)
-         //{
-         //   int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
-         //   pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
-         //                                        {
-         //                                           float size = pointSize.get();
-         //                                           LidarPointCloudCompression.decompressPointCloud(latestLidarScanMessage.getScan(),
-         //                                                                                           numberOfScanPoints,
-         //                                                                                           (i, x, y, z) ->
-         //                                                                                           {
-         //                                                                                              xyzRGBASizeFloatBuffer.put((float) x);
-         //                                                                                              xyzRGBASizeFloatBuffer.put((float) y);
-         //                                                                                              xyzRGBASizeFloatBuffer.put((float) z);
-         //                                                                                              xyzRGBASizeFloatBuffer.put(color.r);
-         //                                                                                              xyzRGBASizeFloatBuffer.put(color.g);
-         //                                                                                              xyzRGBASizeFloatBuffer.put(color.b);
-         //                                                                                              xyzRGBASizeFloatBuffer.put(color.a);
-         //                                                                                              xyzRGBASizeFloatBuffer.put(size);
-         //                                                                                           });
-         //
-         //                                           return numberOfScanPoints;
-         //                                        });
-         //}
-         //
-         //StereoVisionPointCloudMessage latestStereoVisionMessage = latestStereoVisionMessageReference.getAndSet(null);
-         //if (latestStereoVisionMessage != null)
-         //{
-         //   float size = pointSize.get();
-         //   pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
-         //                                        {
-         //                                           StereoPointCloudCompression.decompressPointCloud(latestStereoVisionMessage, (x, y, z) ->
-         //                                           {
-         //                                              try
-         //                                              {
-         //                                                 xyzRGBASizeFloatBuffer.put((float) x);
-         //                                                 xyzRGBASizeFloatBuffer.put((float) y);
-         //                                                 xyzRGBASizeFloatBuffer.put((float) z);
-         //                                                 xyzRGBASizeFloatBuffer.put(color.r);
-         //                                                 xyzRGBASizeFloatBuffer.put(color.g);
-         //                                                 xyzRGBASizeFloatBuffer.put(color.b);
-         //                                                 xyzRGBASizeFloatBuffer.put(color.a);
-         //                                                 xyzRGBASizeFloatBuffer.put(size);
-         //                                              }
-         //                                              catch (BufferOverflowException e)
-         //                                              {
-         //                                                 e.printStackTrace();
-         //                                              }
-         //                                           });
-         //
-         //                                           return latestStereoVisionMessage.getNumberOfPoints();
-         //                                        });
-         //}
+         // Get the color image from the packet
+         VideoPacket colorPacket = this.colorPacketReference.getAndSet(null);
+         if (colorPacket != null)
+         {
+            if (!colorInitialized)
+            {
+               colorImage = new Mat(colorPacket.getImageHeight(), colorPacket.getImageWidth(), opencv_core.CV_8UC3);
+               color8UC4Image = new BytedecoImage(colorPacket.getImageWidth(), colorPacket.getImageHeight(), opencv_core.CV_8UC4);
+               color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+
+               colorPacket.getImageWidth();
+               colorPacket.getImageHeight();
+
+               colorInitialized = true;
+            }
+
+            colorPacket.getData().toArray(heapArrayColor, 0, colorPacket.getData().size());
+            colorImage = BytedecoOpenCVTools.decompressImageJPGUsingYUV(heapArrayColor);
+
+            imshow("/l515/color", colorImage);
+            int code = waitKeyEx(1);
+            if (code == 113)
+            {
+               System.exit(0);
+            }
+         }
+
+         if (depthInitialized && colorInitialized)
+         {
+            LogTools.info("Creating Fused Point Cloud");
+
+            float l515ColorFocalLength = 0.00254f;
+            float l515ColorCMOSWidth = 0.0036894f;
+            float l515ColorCMOSHeight = 0.0020753f;
+
+            parametersBuffer.getBytedecoFloatBufferPointer().put(0, l515ColorFocalLength);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(1, l515ColorCMOSWidth);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(2, l515ColorCMOSHeight);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(3, transformToWorldFrame.getTranslation().getX32());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(4, transformToWorldFrame.getTranslation().getY32());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(5, transformToWorldFrame.getTranslation().getZ32());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) transformToWorldFrame.getRotation().getM00());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) transformToWorldFrame.getRotation().getM01());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) transformToWorldFrame.getRotation().getM02());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) transformToWorldFrame.getRotation().getM10());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) transformToWorldFrame.getRotation().getM11());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) transformToWorldFrame.getRotation().getM12());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) transformToWorldFrame.getRotation().getM20());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) transformToWorldFrame.getRotation().getM21());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) transformToWorldFrame.getRotation().getM22());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) depthCameraInstrinsics.getCx());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) depthCameraInstrinsics.getCy());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) depthCameraInstrinsics.getFx());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) depthCameraInstrinsics.getFy());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) depthImage.cols());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(20, (float) depthImage.rows());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) colorImage.cols());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) colorImage.rows());
+
+            depth32FC1Image.writeOpenCLImage(openCLManager);
+            color8UC4Image.writeOpenCLImage(openCLManager);
+            parametersBuffer.writeOpenCLBufferObject(openCLManager);
+
+            openCLManager.setKernelArgument(createPointCloudKernel, 0, depth32FC1Image.getOpenCLImageObject());
+            openCLManager.setKernelArgument(createPointCloudKernel, 1, color8UC4Image.getOpenCLImageObject());
+            openCLManager.setKernelArgument(createPointCloudKernel, 2, finalColoredDepthBuffer.getOpenCLBufferObject());
+            openCLManager.setKernelArgument(createPointCloudKernel, 3, parametersBuffer.getOpenCLBufferObject());
+            openCLManager.execute2D(createPointCloudKernel, depthImage.cols(), depthImage.rows());
+            finalColoredDepthBuffer.readOpenCLBufferObject(openCLManager);
+            openCLManager.finish();
+         }
       }
    }
 

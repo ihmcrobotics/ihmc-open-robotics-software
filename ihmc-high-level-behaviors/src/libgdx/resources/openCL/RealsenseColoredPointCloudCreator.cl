@@ -158,10 +158,11 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    int depthImageHeight = parameters[20];
    int colorImageWidth = parameters[21];
    int colorImageHeight = parameters[22];
-   float discreteResolution = parameters[23];
 
    int x = get_global_id(0);
    int y = get_global_id(1);
+
+    // printf("OpenCLKernel -> (x: %d, y: %d)\n", x, y);
 
    float eyeDepthInMeters = read_imagef(depthImageMeters, (int2) (x, y)).x;
 
@@ -231,7 +232,7 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
          color = createRGB((double) worldFramePoint.z);
     }
 
-   int pointStartIndex = (depthImageWidth * rowInSegment + x) * 4;
+   int pointStartIndex = (depthImageWidth * y + x) * 4;
    
    finalPointFloatBuffer[pointStartIndex]     = worldFramePoint.x;
    finalPointFloatBuffer[pointStartIndex + 1] = worldFramePoint.y;
