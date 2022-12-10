@@ -130,11 +130,11 @@ public class RealsenseColorAndDepthPublisher
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
-            setDepthExtrinsics(sensor);
+            setDepthExtrinsics(sensor, depthVideoPacket);
 
             MutableBytePointer colorFrameData = sensor.getColorFrameData();
             color8UC3Image = new Mat(this.colorHeight, this.colorWidth, opencv_core.CV_8UC3, colorFrameData);
-            setColorExtrinsics(sensor);
+            setColorExtrinsics(sensor, colorVideoPacket);
 
             long end_acquire = System.nanoTime();
 
@@ -171,22 +171,22 @@ public class RealsenseColorAndDepthPublisher
       }
    }
 
-   private void setDepthExtrinsics(BytedecoRealsense sensor)
+   private void setDepthExtrinsics(BytedecoRealsense sensor, VideoPacket depthPacket)
    {
-      depthCameraIntrinsics.setFx(sensor.getDepthFocalLengthPixelsX());
-      depthCameraIntrinsics.setFy(sensor.getDepthFocalLengthPixelsY());
-      depthCameraIntrinsics.setSkew(0.0);
-      depthCameraIntrinsics.setCx(sensor.getDepthPrincipalOffsetXPixels());
-      depthCameraIntrinsics.setCy(sensor.getDepthPrincipalOffsetYPixels());
+      depthPacket.getIntrinsicParameters().setFx(sensor.getDepthFocalLengthPixelsX());
+      depthPacket.getIntrinsicParameters().setFy(sensor.getDepthFocalLengthPixelsY());
+      depthPacket.getIntrinsicParameters().setSkew(0.0);
+      depthPacket.getIntrinsicParameters().setCx(sensor.getDepthPrincipalOffsetXPixels());
+      depthPacket.getIntrinsicParameters().setCy(sensor.getDepthPrincipalOffsetYPixels());
    }
 
-   private void setColorExtrinsics(BytedecoRealsense sensor)
+   private void setColorExtrinsics(BytedecoRealsense sensor, VideoPacket depthPacket)
    {
-      colorCameraIntrinsics.setFx(sensor.getColorFocalLengthPixelsX());
-      colorCameraIntrinsics.setFy(sensor.getColorFocalLengthPixelsY());
-      colorCameraIntrinsics.setSkew(0.0);
-      colorCameraIntrinsics.setCx(sensor.getColorPrincipalOffsetXPixels());
-      colorCameraIntrinsics.setCy(sensor.getColorPrincipalOffsetYPixels());
+      depthPacket.getIntrinsicParameters().setFx(sensor.getColorFocalLengthPixelsX());
+      depthPacket.getIntrinsicParameters().setFy(sensor.getColorFocalLengthPixelsY());
+      depthPacket.getIntrinsicParameters().setSkew(0.0);
+      depthPacket.getIntrinsicParameters().setCx(sensor.getColorPrincipalOffsetXPixels());
+      depthPacket.getIntrinsicParameters().setCy(sensor.getColorPrincipalOffsetYPixels());
    }
 
    private void display(Mat depth, Mat color)
