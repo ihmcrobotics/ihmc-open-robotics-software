@@ -36,6 +36,7 @@ public class WholeBodyControllerCore
    private final WholeBodyInverseDynamicsSolver inverseDynamicsSolver;
    private final WholeBodyInverseKinematicsSolver inverseKinematicsSolver;
    private final WholeBodyVirtualModelControlSolver virtualModelControlSolver;
+   private final WholeBodyAdmittanceSolver admittanceSolver;
 
    private final ControllerCoreCommand internalCommandInput = new ControllerCoreCommand();
    private final ControllerCoreOutput controllerCoreOutput;
@@ -77,6 +78,10 @@ public class WholeBodyControllerCore
          inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       else
          inverseDynamicsSolver = null;
+      if (toolbox.isEnableAdmittanceModule())
+         admittanceSolver = new WholeBodyAdmittanceSolver(toolbox, registry);
+      else
+         admittanceSolver = null;
       if (toolbox.isEnableInverseKinematicsModule())
          inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
       else
@@ -86,7 +91,7 @@ public class WholeBodyControllerCore
       else
          virtualModelControlSolver = null;
 
-      if (inverseDynamicsSolver == null && inverseKinematicsSolver == null && virtualModelControlSolver == null)
+      if (inverseDynamicsSolver == null && inverseKinematicsSolver == null && virtualModelControlSolver == null && admittanceSolver == null)
          throw new RuntimeException("Controller core is not properly setup, none of the control modes is enabled.");
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
@@ -114,7 +119,7 @@ public class WholeBodyControllerCore
       DesiredExternalWrenchHolder desiredExternalWrenchHolder;
 
       // When running only the inverse kinematics solver, there is no notion of contact.
-      if (inverseDynamicsSolver != null || virtualModelControlSolver != null)
+      if (inverseDynamicsSolver != null || virtualModelControlSolver != null || admittanceSolver != null)
       {
          desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
          desiredExternalWrenchHolder = toolbox.getDesiredExternalWrenchHolder();
@@ -138,6 +143,8 @@ public class WholeBodyControllerCore
       feedbackController.initialize();
       if (inverseDynamicsSolver != null)
          inverseDynamicsSolver.initialize();
+      if (admittanceSolver != null)
+         admittanceSolver.initialize();
       if (inverseKinematicsSolver != null)
          inverseKinematicsSolver.reset();
       if (virtualModelControlSolver != null)
@@ -156,6 +163,9 @@ public class WholeBodyControllerCore
       {
          case INVERSE_DYNAMICS:
             inverseDynamicsSolver.reset();
+            break;
+         case ADMITTANCE:
+            admittanceSolver.reset();
             break;
          case INVERSE_KINEMATICS:
             inverseKinematicsSolver.reset();
@@ -195,6 +205,9 @@ public class WholeBodyControllerCore
          case INVERSE_DYNAMICS:
             if (inverseDynamicsSolver != null)
                return;
+         case ADMITTANCE:
+            if (admittanceSolver != null)
+               return;
          case INVERSE_KINEMATICS:
             if (inverseKinematicsSolver != null)
                return;
@@ -221,6 +234,9 @@ public class WholeBodyControllerCore
       {
          case INVERSE_DYNAMICS:
             doInverseDynamics();
+            break;
+         case ADMITTANCE:
+            doAdmittance();
             break;
          case INVERSE_KINEMATICS:
             doInverseKinematics();
@@ -260,6 +276,13 @@ public class WholeBodyControllerCore
             numberOfFBControllerEnabled.set(feedbackController.getInverseDynamicsOutput().getNumberOfCommands());
             break;
 
+         case ADMITTANCE:
+            feedbackController.submitFeedbackControlCommandList(currentMode.getValue(), feedbackControlCommandList);
+            feedbackController.computeAdmittance();
+            internalCommandInput.getAdmittanceCommandList().addCommandList(feedbackController.getAdmittanceOutput());
+            numberOfFBControllerEnabled.set(feedbackController.getAdmittanceOutput().getNumberOfCommands());
+            break;
+
          case INVERSE_KINEMATICS:
             feedbackController.submitFeedbackControlCommandList(currentMode.getValue(), feedbackControlCommandList);
             feedbackController.computeInverseKinematics();
@@ -297,6 +320,22 @@ public class WholeBodyControllerCore
          rootJointDesiredConfigurationData.completeWith(inverseDynamicsSolver.getOutputForRootJoint());
       controllerCoreOutput.setLinearMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateLinear());
       controllerCoreOutput.setAngularMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateAngular());
+   }
+
+   private void doAdmittance()
+   {
+      if (internalCommandInput.isReinitializationRequested())
+         admittanceSolver.initialize();
+
+      admittanceSolver.submitInverseDynamicsCommandList(internalCommandInput.getInverseDynamicsCommandList());
+      admittanceSolver.compute();
+      feedbackController.computeAchievedAccelerations();
+
+      jointDesiredOutputList.completeWith(admittanceSolver.getOutput());
+      if (rootJointDesiredConfigurationData != null)
+         rootJointDesiredConfigurationData.completeWith(admittanceSolver.getOutputForRootJoint());
+      controllerCoreOutput.setLinearMomentumRate(admittanceSolver.getAchievedMomentumRateLinear());
+      controllerCoreOutput.setAngularMomentumRate(admittanceSolver.getAchievedMomentumRateAngular());
    }
 
    private void doInverseKinematics()

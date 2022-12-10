@@ -20,6 +20,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 public class ControllerCoreCommand implements ControllerCoreCommandInterface
 {
    private final InverseDynamicsCommandList inverseDynamicsCommandList;
+   private final InverseDynamicsCommandList admittanceCommandList;
    private final InverseKinematicsCommandList inverseKinematicsCommandList;
    private final VirtualModelControlCommandList virtualModelControlCommandList;
    private final FeedbackControlCommandList feedbackControlCommandList;
@@ -40,6 +41,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       this.controllerCoreMode = controllerCoreMode;
 
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
+      admittanceCommandList = new InverseDynamicsCommandList();
       virtualModelControlCommandList = new VirtualModelControlCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
@@ -49,6 +51,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    public ControllerCoreCommand()
    {
       inverseDynamicsCommandList = new InverseDynamicsCommandList();
+      admittanceCommandList = new InverseDynamicsCommandList();
       virtualModelControlCommandList = new VirtualModelControlCommandList();
       feedbackControlCommandList = new FeedbackControlCommandList();
       inverseKinematicsCommandList = new InverseKinematicsCommandList();
@@ -62,6 +65,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    public void clear()
    {
       inverseDynamicsCommandList.clear();
+      admittanceCommandList.clear();
       feedbackControlCommandList.clear();
       inverseKinematicsCommandList.clear();
       lowLevelOneDoFJointDesiredDataHolder.clear();
@@ -77,6 +81,17 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       if (inverseDynamicsCommand != null)
          inverseDynamicsCommandList.addCommand(inverseDynamicsCommand);
+   }
+
+   /**
+    * Adds command to be considered by the admittance controller core.
+    *
+    * @param admittanceCommand command to add to the list
+    */
+   public void addAdmittanceCommand(InverseDynamicsCommand<?> admittanceCommand)
+   {
+      if (admittanceCommand != null)
+         admittanceCommandList.addCommand(admittanceCommand);
    }
 
    /**
@@ -164,6 +179,15 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    }
 
    /**
+    * @return the admittance command list to be considered by the admittance controller core.
+    */
+   @Override
+   public InverseDynamicsCommandList getAdmittanceCommandList()
+   {
+      return admittanceCommandList;
+   }
+
+   /**
     * @return the inverse dynamics command list to be considered by the virtual model controller core.
     */
    @Override
@@ -223,6 +247,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       controllerCoreMode = other.getControllerCoreMode();
       inverseDynamicsCommandList.set(other.getInverseDynamicsCommandList());
+      admittanceCommandList.set(other.getAdmittanceCommandList());
       feedbackControlCommandList.set(other.getFeedbackControlCommandList());
       inverseKinematicsCommandList.set(other.getInverseKinematicsCommandList());
       virtualModelControlCommandList.set(other.getVirtualModelControlCommandList());
@@ -263,6 +288,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       String ret = "Request control mode: " + controllerCoreMode + "\n";
       ret += "ID commands: " + inverseDynamicsCommandList + "\n";
+      ret += "A commands: " + admittanceCommandList + "\n";
       ret += "IK commands: " + inverseKinematicsCommandList + "\n";
       ret += "VMC commands: " + virtualModelControlCommandList + "\n";
       ret += "Feedback commands: " + feedbackControlCommandList + "\n";

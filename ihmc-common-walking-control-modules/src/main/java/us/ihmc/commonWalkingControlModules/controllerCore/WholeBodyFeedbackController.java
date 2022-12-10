@@ -33,6 +33,7 @@ public class WholeBodyFeedbackController
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseDynamicsCommandList inverseDynamicsOutput = new InverseDynamicsCommandList();
+   private final InverseDynamicsCommandList admittanceOutput = new InverseDynamicsCommandList();
    private final InverseKinematicsCommandList inverseKinematicsOutput = new InverseKinematicsCommandList();
    private final VirtualModelControlCommandList virtualModelControlOutput = new VirtualModelControlCommandList();
 
@@ -171,6 +172,28 @@ public class WholeBodyFeedbackController
          }
       }
       feedbackControllerToolbox.registerFeedbackControllerOutput(inverseDynamicsOutput);
+      feedbackControllerTimer.stopMeasurement();
+   }
+
+   public void computeAdmittance()
+   {
+      feedbackControllerTimer.startMeasurement();
+      admittanceOutput.clear();
+
+      for (int i = 0; i < allControllers.size(); i++)
+      {
+         FeedbackControllerInterface controller = allControllers.get(i);
+         if (controller.isEnabled())
+         {
+            controller.computeInverseDynamics();
+            admittanceOutput.addCommand(controller.getInverseDynamicsOutput());
+         }
+         else
+         {
+            controller.initialize();
+         }
+      }
+      feedbackControllerToolbox.registerFeedbackControllerOutput(admittanceOutput);
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -547,6 +570,11 @@ public class WholeBodyFeedbackController
    public InverseDynamicsCommandList getInverseDynamicsOutput()
    {
       return inverseDynamicsOutput;
+   }
+
+   public InverseDynamicsCommandList getAdmittanceOutput()
+   {
+      return admittanceOutput;
    }
 
    public InverseKinematicsCommandList getInverseKinematicsOutput()

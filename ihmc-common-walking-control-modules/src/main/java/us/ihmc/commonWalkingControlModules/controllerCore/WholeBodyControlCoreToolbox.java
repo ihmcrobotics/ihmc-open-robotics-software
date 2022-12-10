@@ -112,6 +112,7 @@ public class WholeBodyControlCoreToolbox
    private WrenchMatrixCalculator wrenchMatrixCalculator;
 
    private boolean enableInverseDynamicsModule = false;
+   private boolean enableAdmittanceModule = false;
    private boolean enableInverseKinematicsModule = false;
    private boolean enableVirtualModelControlModule = false;
 
@@ -266,6 +267,26 @@ public class WholeBodyControlCoreToolbox
    }
 
    /**
+    * Adds the missing information necessary to enable the admittance module and notices the
+    * {@link WholeBodyControllerCore} at construction time that the admittance module has to be
+    * created.
+    * <p>
+    * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
+    * </p>
+    *
+    * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot weight.
+    */
+   public void setupForAdmittanceSolver(List<? extends ContactablePlaneBody> contactablePlaneBodies)
+   {
+      enableAdmittanceModule = true;
+      // TODO add tools specific to the inverse dynamics module here.
+      this.contactablePlaneBodies = contactablePlaneBodies;
+      if (centroidalMomentumCalculator != null)
+         centroidalMomentumCalculator = null;
+      centroidalMomentumRateCalculator = new CentroidalMomentumRateCalculator(multiBodySystemInput, centerOfMassFrame);
+   }
+
+   /**
     * Notices the {@link WholeBodyControllerCore} at construction time that the inverse kinematics
     * module has to be created.
     * <p>
@@ -329,6 +350,16 @@ public class WholeBodyControlCoreToolbox
    public boolean isEnableInverseDynamicsModule()
    {
       return enableInverseDynamicsModule;
+   }
+
+   /**
+    * Informs whereas the admittance module is setup for the controller core using this toolbox.
+    *
+    * @return {@code true} if the admittance module is setup, {@code false} otherwise.
+    */
+   public boolean isEnableAdmittanceModule()
+   {
+      return enableAdmittanceModule;
    }
 
    /**

@@ -17,6 +17,8 @@ public interface ControllerCoreCommandInterface
 
    InverseDynamicsCommandList getInverseDynamicsCommandList();
 
+   InverseDynamicsCommandList getAdmittanceCommandList();
+
    VirtualModelControlCommandList getVirtualModelControlCommandList();
 
    FeedbackControlCommandList getFeedbackControlCommandList();
@@ -42,6 +44,8 @@ public interface ControllerCoreCommandInterface
          if (isReinitializationRequested() != other.isReinitializationRequested())
             return false;
          if (!getInverseDynamicsCommandList().equals(other.getInverseDynamicsCommandList()))
+            return false;
+         if (!getAdmittanceCommandList().equals(other.getAdmittanceCommandList()))
             return false;
          if (!getInverseKinematicsCommandList().equals(other.getInverseKinematicsCommandList()))
             return false;
