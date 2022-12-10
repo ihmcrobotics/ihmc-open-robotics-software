@@ -23,6 +23,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -43,6 +44,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private final ROS2Topic<?> topic;
    private IHMCROS2Callback<ImageMessage> ros2Callback = null;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImGuiPlot skippedMessagesPlot = new ImGuiPlot("Skipped", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
@@ -60,6 +62,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
    private String messageSizeString;
+   private long expectedNextSequenceNumber = -1;
+   private long skippedSequenceNumbers = 0;
    private int depthWidth;
    private int depthHeight;
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
@@ -127,7 +131,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                decompressionInputBuffer = ByteBuffer.allocateDirect(depthWidth * depthHeight * 2);
                decompressionInputBuffer.order(ByteOrder.nativeOrder());
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
-               decompressionInputMat = new Mat();
+               decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
                decompressionOutputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                decompressionOutputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
                pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
@@ -135,6 +139,13 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
                LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
             }
+
+            long sequenceNumber = imageMessage.getSequenceNumber();
+            if (expectedNextSequenceNumber > 0 && sequenceNumber != expectedNextSequenceNumber)
+            {
+               skippedSequenceNumbers++;
+            }
+            expectedNextSequenceNumber = sequenceNumber + 1;
 
             int numberOfBytes = imageMessage.getData().size();
             decompressionInputBuffer.rewind();
@@ -148,9 +159,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
             decompressionInputBytePointer.position(0);
             decompressionInputBytePointer.limit(numberOfBytes);
 
-            decompressionInputMat.data(decompressionInputBytePointer);
-            decompressionInputMat.rows(1);
             decompressionInputMat.cols(numberOfBytes);
+            decompressionInputMat.data(decompressionInputBytePointer);
 
             decompressionOutputImage.getBackingDirectByteBuffer().rewind();
             opencv_imgcodecs.imdecode(decompressionInputMat,
@@ -217,6 +227,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          ImGui.text(messageSizeString);
       }
       frequencyPlot.renderImGuiWidgets();
+      skippedMessagesPlot.render(skippedSequenceNumbers);
    }
 
    @Override
