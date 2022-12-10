@@ -102,6 +102,8 @@ public class OusterDepthImagePublisher
          }
 
          // copy while the ouster thread is blocked
+         lidarFrameByteBufferPointer.position(0);
+         lidarFrameByteBufferPointerCopy.position(0);
          MemoryTools.memoryCopy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
 
          extractCompressAndPublishThread.clearQueueAndExecute(this::extractCompressAndPublish);
@@ -123,7 +125,7 @@ public class OusterDepthImagePublisher
          parametersBuffer.createOpenCLBufferObject(openCLManager);
 
          lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
-         compressionInputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         compressionInputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
 
       // Important not to store as a field, as update() needs to be called each frame
@@ -133,6 +135,8 @@ public class OusterDepthImagePublisher
 
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, ouster.getColumnsPerFrame());
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, ouster.getMeasurementBlockSize());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, NettyOuster.HEADER_BLOCK_BYTES);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(3, NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
