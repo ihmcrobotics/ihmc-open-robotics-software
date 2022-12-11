@@ -25,7 +25,7 @@
   "Reset duration" : 1.0,
   "Goal satisfaction radius" : 0.4,
   "Goal satisfaction orientation delta" : 0.45,
-  "Plan horizon" : 0.4,
+  "Plan horizon" : 0.9,
   "Footstep planner timeout while stopped" : 2.0,
   "Planar regions expiration" : 1.5,
   "Wait time after plan failed" : 2.0,
