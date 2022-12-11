@@ -192,8 +192,8 @@ public class LookAndStepFootstepPlanningTask
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
-         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getAquisitionSecondsSinceEpoch(),
-                                                        planarRegionsListMessage.getAquisitionAdditionalNanos()));
+         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdatedSecondsSinceEpoch(),
+                                                        planarRegionsListMessage.getLastUpdatedAdditionalNanos()));
          acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       }
 

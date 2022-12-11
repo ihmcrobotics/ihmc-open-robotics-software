@@ -132,9 +132,9 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       cdr.write_type_4(data.getSequenceId());
 
-      cdr.write_type_11(data.getAquisitionSecondsSinceEpoch());
+      cdr.write_type_11(data.getLastUpdatedSecondsSinceEpoch());
 
-      cdr.write_type_11(data.getAquisitionAdditionalNanos());
+      cdr.write_type_11(data.getLastUpdatedAdditionalNanos());
 
       if(data.getRegionId().size() <= 3000)
       cdr.write_type_e(data.getRegionId());else
@@ -174,9 +174,9 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       data.setSequenceId(cdr.read_type_4());
       	
-      data.setAquisitionSecondsSinceEpoch(cdr.read_type_11());
+      data.setLastUpdatedSecondsSinceEpoch(cdr.read_type_11());
       	
-      data.setAquisitionAdditionalNanos(cdr.read_type_11());
+      data.setLastUpdatedAdditionalNanos(cdr.read_type_11());
       	
       cdr.read_type_e(data.getRegionId());	
       cdr.read_type_e(data.getRegionOrigin());	
@@ -193,8 +193,8 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    public final void serialize(perception_msgs.msg.dds.PlanarRegionsListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
-      ser.write_type_11("aquisition_seconds_since_epoch", data.getAquisitionSecondsSinceEpoch());
-      ser.write_type_11("aquisition_additional_nanos", data.getAquisitionAdditionalNanos());
+      ser.write_type_11("last_updated_seconds_since_epoch", data.getLastUpdatedSecondsSinceEpoch());
+      ser.write_type_11("last_updated_additional_nanos", data.getLastUpdatedAdditionalNanos());
       ser.write_type_e("region_id", data.getRegionId());
       ser.write_type_e("region_origin", data.getRegionOrigin());
       ser.write_type_e("region_orientation", data.getRegionOrientation());
@@ -209,8 +209,8 @@ public class PlanarRegionsListMessagePubSubType implements us.ihmc.pubsub.TopicD
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.PlanarRegionsListMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
-      data.setAquisitionSecondsSinceEpoch(ser.read_type_11("aquisition_seconds_since_epoch"));
-      data.setAquisitionAdditionalNanos(ser.read_type_11("aquisition_additional_nanos"));
+      data.setLastUpdatedSecondsSinceEpoch(ser.read_type_11("last_updated_seconds_since_epoch"));
+      data.setLastUpdatedAdditionalNanos(ser.read_type_11("last_updated_additional_nanos"));
       ser.read_type_e("region_id", data.getRegionId());
       ser.read_type_e("region_origin", data.getRegionOrigin());
       ser.read_type_e("region_orientation", data.getRegionOrientation());

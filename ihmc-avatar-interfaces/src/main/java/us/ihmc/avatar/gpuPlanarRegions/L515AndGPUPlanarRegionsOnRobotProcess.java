@@ -304,8 +304,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             }
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-            planarRegionsListMessage.setAquisitionSecondsSinceEpoch(now.getEpochSecond());
-            planarRegionsListMessage.setAquisitionAdditionalNanos(now.getNano());
+            planarRegionsListMessage.setLastUpdatedSecondsSinceEpoch(now.getEpochSecond());
+            planarRegionsListMessage.setLastUpdatedAdditionalNanos(now.getNano());
             ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
