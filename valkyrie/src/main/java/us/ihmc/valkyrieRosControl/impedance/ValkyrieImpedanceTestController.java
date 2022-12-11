@@ -1,4 +1,4 @@
-package us.ihmc.valkyrieRosControl;
+package us.ihmc.valkyrieRosControl.impedance;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
