@@ -11,6 +11,7 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.FormattingTools;
@@ -38,13 +39,17 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements RenderableProvider
 {
-   private final static int FLOATS_PER_POINT = 6;
+   private final static int FLOATS_PER_POINT = 8;
    private final static int BYTES_PER_POINT = FLOATS_PER_POINT * 4;
 
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
 
    private boolean depthInitialized = false;
    private boolean colorInitialized = false;
+
+   private int totalNumberOfPoints = 0;
+   private int bytesPerSegment = 0;
+   private String kilobytes = "";
 
    private float depthToMetersScalar = 2.500000118743628E-4f;
 
@@ -53,8 +58,13 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private Mat depthImage;
    private Mat colorImage;
 
+   private Mat finalDisplayDepth;
+   private Mat displayDepth;
+
    private final CameraPinholeBrown depthCameraInstrinsics = new CameraPinholeBrown();
    private final CameraPinholeBrown colorCameraInstrinsics = new CameraPinholeBrown();
+
+   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
 
    private byte[] heapArrayDepth = new byte[25000000];
    private byte[] heapArrayColor = new byte[25000000];
@@ -66,7 +76,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer finalColoredDepthBuffer;
    private _cl_program openCLProgram;
@@ -140,21 +149,22 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                depthCameraInstrinsics.setFx(depthPacket.getIntrinsicParameters().getFx());
                depthCameraInstrinsics.setFy(depthPacket.getIntrinsicParameters().getFy());
 
-
-
-
                depthImage = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_16UC1);
 
-               int totalNumberOfPoints = depthPacket.getImageHeight() * depthPacket.getImageWidth();
-               int bytesPerSegment = totalNumberOfPoints * BYTES_PER_POINT;
-               String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
+               // Visualization Only
+               displayDepth = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_8UC1);
+               finalDisplayDepth = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_8UC3);
+
+               totalNumberOfPoints = depthPacket.getImageHeight() * depthPacket.getImageWidth();
+               bytesPerSegment = totalNumberOfPoints * BYTES_PER_POINT;
+               kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
                messageSizeString = String.format("Message size: %s KB", kilobytes);
 
-               //               pointCloudRenderer.create(totalNumberOfPoints);
+               pointCloudRenderer.create(totalNumberOfPoints);
 
                if (finalColoredDepthBuffer != null)
                   finalColoredDepthBuffer.destroy(openCLManager);
-               finalColoredDepthBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * FLOATS_PER_POINT);
+               finalColoredDepthBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * FLOATS_PER_POINT, pointCloudRenderer.getVertexBuffer());
                finalColoredDepthBuffer.createOpenCLBufferObject(openCLManager);
 
                depth32FC1Image = new BytedecoImage(depthPacket.getImageWidth(), depthPacket.getImageHeight(), opencv_core.CV_32FC1);
@@ -173,17 +183,16 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             depthImage.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, depthToMetersScalar, 0.0);
 
             /* For Display Only */
-            Mat displayDepth = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_8UC1);
-            Mat finalDisplayDepth = new Mat(depthPacket.getImageHeight(), depthPacket.getImageWidth(), opencv_core.CV_8UC3);
+
             BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
             BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
-            imshow("/l515/depth", finalDisplayDepth);
-            int code = waitKeyEx(1);
-            if (code == 113)
-            {
-               System.exit(0);
-            }
+            //imshow("/l515/depth", finalDisplayDepth);
+            //int code = waitKeyEx(1);
+            //if (code == 113)
+            //{
+            //   System.exit(0);
+            //}
             /* Display Ends */
 
             //long end_decompress = System.nanoTime();
@@ -202,21 +211,20 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                color8UC4Image = new BytedecoImage(colorPacket.getImageWidth(), colorPacket.getImageHeight(), opencv_core.CV_8UC4);
                color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-               colorPacket.getImageWidth();
-               colorPacket.getImageHeight();
-
                colorInitialized = true;
             }
 
             colorPacket.getData().toArray(heapArrayColor, 0, colorPacket.getData().size());
             colorImage = BytedecoOpenCVTools.decompressImageJPGUsingYUV(heapArrayColor);
 
-            imshow("/l515/color", colorImage);
-            int code = waitKeyEx(1);
-            if (code == 113)
-            {
-               System.exit(0);
-            }
+            opencv_imgproc.cvtColor(colorImage, color8UC4Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+
+            //imshow("/l515/color", colorImage);
+            //int code = waitKeyEx(1);
+            //if (code == 113)
+            //{
+            //   System.exit(0);
+            //}
          }
 
          if (depthInitialized && colorInitialized)
@@ -255,6 +263,14 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             color8UC4Image.writeOpenCLImage(openCLManager);
             parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
+            imshow("/l515/depth", finalDisplayDepth);
+            imshow("/l515/color", color8UC4Image.getBytedecoOpenCVMat());
+            int code = waitKeyEx(1);
+            if (code == 113)
+            {
+               System.exit(0);
+            }
+
             openCLManager.setKernelArgument(createPointCloudKernel, 0, depth32FC1Image.getOpenCLImageObject());
             openCLManager.setKernelArgument(createPointCloudKernel, 1, color8UC4Image.getOpenCLImageObject());
             openCLManager.setKernelArgument(createPointCloudKernel, 2, finalColoredDepthBuffer.getOpenCLBufferObject());
@@ -262,6 +278,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             openCLManager.execute2D(createPointCloudKernel, depthImage.cols(), depthImage.rows());
             finalColoredDepthBuffer.readOpenCLBufferObject(openCLManager);
             openCLManager.finish();
+
+            pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
          }
       }
    }

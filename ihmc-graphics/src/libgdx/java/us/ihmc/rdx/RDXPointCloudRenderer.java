@@ -12,6 +12,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
@@ -224,12 +225,17 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
    public void updateMeshFastest(int numberOfPoints)
    {
-      updateMeshFastest(numberOfPoints, currentSegmentIndex);
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+      floatBuffer.position(0);
+      floatBuffer.limit(numberOfPoints * floatsPerVertex);
+      renderable.meshPart.size = numberOfPoints;
+      //updateMeshFastest(numberOfPoints, currentSegmentIndex);
    }
 
    public void updateMeshFastest(int numberOfPoints, int segmentToUpdate)
    {
       FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+      LogTools.info("Number of Points: {}, Points Per Segment {}", numberOfPoints, pointsPerSegment);
       if (numberOfPoints < pointsPerSegment) // special use case here
       {
          if (numberOfPoints == 0) // prevents errors when no point are there

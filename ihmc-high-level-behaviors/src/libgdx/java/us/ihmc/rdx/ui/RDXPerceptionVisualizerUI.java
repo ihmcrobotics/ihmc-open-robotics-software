@@ -58,9 +58,11 @@ public class RDXPerceptionVisualizerUI
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Point Cloud",
                                                                               ros2Node,
                                                                               ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class)));
+
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Colored Point Cloud",
                                                                               ros2Node,
                                                                               ROS2Tools.FUSED_SENSOR_HEAD_POINT_CLOUD));
+
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("D435 Colored Point Cloud",
                                                                               ros2Node,
                                                                               ROS2Tools.D435_COLORED_POINT_CLOUD));

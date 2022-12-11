@@ -232,10 +232,32 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
          color = createRGB((double) worldFramePoint.z);
     }
 
-   int pointStartIndex = (depthImageWidth * y + x) * 4;
+   int pointStartIndex = (depthImageWidth * y + x) * 8;
    
    finalPointFloatBuffer[pointStartIndex]     = worldFramePoint.x;
    finalPointFloatBuffer[pointStartIndex + 1] = worldFramePoint.y;
    finalPointFloatBuffer[pointStartIndex + 2] = worldFramePoint.z;
    finalPointFloatBuffer[pointStartIndex + 3] = color;
+
+    int rInt = (color >> 24) & 0xFF;
+    int gInt = (color >> 16) & 0xFF;
+    int bInt = (color >> 8) & 0xFF;
+    int aInt = color & 0xFF;
+
+    float r = rInt / 255.0;
+    float g = gInt / 255.0;
+    float b = bInt / 255.0;
+    float a = aInt / 255.0;
+
+    // float r = 1.0;
+    // float g = 1.0;
+    // float b = 1.0;
+    // float a = 1.0;
+
+    finalPointFloatBuffer[pointStartIndex + 3] = r;
+    finalPointFloatBuffer[pointStartIndex + 4] = g;
+    finalPointFloatBuffer[pointStartIndex + 5] = b;
+    finalPointFloatBuffer[pointStartIndex + 6] = a;
+
+    finalPointFloatBuffer[pointStartIndex + 7] = 0.01f;
 }
