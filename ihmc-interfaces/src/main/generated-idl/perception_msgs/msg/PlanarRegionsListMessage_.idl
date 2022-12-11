@@ -25,14 +25,14 @@ module perception_msgs
          */
         unsigned long sequence_id;
         /**
-         * Approximate sensor data aquisition time seconds since epoch
+         * Approximate last update time seconds since epoch
          * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
          */
-        long long aquisition_seconds_since_epoch;
+        long long last_updated_seconds_since_epoch;
         /**
-         * Approximate sensor data aquisition time additional nanoseconds
+         * Approximate last update time additional nanoseconds
          */
-        long long aquisition_additional_nanos;
+        long long last_updated_additional_nanos;
         /**
          * ID number referring to each planar region, it should be unique.
          */

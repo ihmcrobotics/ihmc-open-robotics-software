@@ -19,14 +19,14 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
             */
    public long sequence_id_;
    /**
-            * Approximate sensor data aquisition time seconds since epoch
+            * Approximate last update time seconds since epoch
             * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
             */
-   public long aquisition_seconds_since_epoch_;
+   public long last_updated_seconds_since_epoch_;
    /**
-            * Approximate sensor data aquisition time additional nanoseconds
+            * Approximate last update time additional nanoseconds
             */
-   public long aquisition_additional_nanos_;
+   public long last_updated_additional_nanos_;
    /**
             * ID number referring to each planar region, it should be unique.
             */
@@ -87,9 +87,9 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    {
       sequence_id_ = other.sequence_id_;
 
-      aquisition_seconds_since_epoch_ = other.aquisition_seconds_since_epoch_;
+      last_updated_seconds_since_epoch_ = other.last_updated_seconds_since_epoch_;
 
-      aquisition_additional_nanos_ = other.aquisition_additional_nanos_;
+      last_updated_additional_nanos_ = other.last_updated_additional_nanos_;
 
       region_id_.set(other.region_id_);
       region_origin_.set(other.region_origin_);
@@ -117,35 +117,35 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    }
 
    /**
-            * Approximate sensor data aquisition time seconds since epoch
+            * Approximate last update time seconds since epoch
             * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
             */
-   public void setAquisitionSecondsSinceEpoch(long aquisition_seconds_since_epoch)
+   public void setLastUpdatedSecondsSinceEpoch(long last_updated_seconds_since_epoch)
    {
-      aquisition_seconds_since_epoch_ = aquisition_seconds_since_epoch;
+      last_updated_seconds_since_epoch_ = last_updated_seconds_since_epoch;
    }
    /**
-            * Approximate sensor data aquisition time seconds since epoch
+            * Approximate last update time seconds since epoch
             * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
             */
-   public long getAquisitionSecondsSinceEpoch()
+   public long getLastUpdatedSecondsSinceEpoch()
    {
-      return aquisition_seconds_since_epoch_;
+      return last_updated_seconds_since_epoch_;
    }
 
    /**
-            * Approximate sensor data aquisition time additional nanoseconds
+            * Approximate last update time additional nanoseconds
             */
-   public void setAquisitionAdditionalNanos(long aquisition_additional_nanos)
+   public void setLastUpdatedAdditionalNanos(long last_updated_additional_nanos)
    {
-      aquisition_additional_nanos_ = aquisition_additional_nanos;
+      last_updated_additional_nanos_ = last_updated_additional_nanos;
    }
    /**
-            * Approximate sensor data aquisition time additional nanoseconds
+            * Approximate last update time additional nanoseconds
             */
-   public long getAquisitionAdditionalNanos()
+   public long getLastUpdatedAdditionalNanos()
    {
-      return aquisition_additional_nanos_;
+      return last_updated_additional_nanos_;
    }
 
 
@@ -240,9 +240,9 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.aquisition_seconds_since_epoch_, other.aquisition_seconds_since_epoch_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.last_updated_seconds_since_epoch_, other.last_updated_seconds_since_epoch_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.aquisition_additional_nanos_, other.aquisition_additional_nanos_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.last_updated_additional_nanos_, other.last_updated_additional_nanos_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.region_id_, other.region_id_, epsilon)) return false;
 
@@ -295,9 +295,9 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.aquisition_seconds_since_epoch_ != otherMyClass.aquisition_seconds_since_epoch_) return false;
+      if(this.last_updated_seconds_since_epoch_ != otherMyClass.last_updated_seconds_since_epoch_) return false;
 
-      if(this.aquisition_additional_nanos_ != otherMyClass.aquisition_additional_nanos_) return false;
+      if(this.last_updated_additional_nanos_ != otherMyClass.last_updated_additional_nanos_) return false;
 
       if (!this.region_id_.equals(otherMyClass.region_id_)) return false;
       if (!this.region_origin_.equals(otherMyClass.region_origin_)) return false;
@@ -319,10 +319,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       builder.append("PlanarRegionsListMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("aquisition_seconds_since_epoch=");
-      builder.append(this.aquisition_seconds_since_epoch_);      builder.append(", ");
-      builder.append("aquisition_additional_nanos=");
-      builder.append(this.aquisition_additional_nanos_);      builder.append(", ");
+      builder.append("last_updated_seconds_since_epoch=");
+      builder.append(this.last_updated_seconds_since_epoch_);      builder.append(", ");
+      builder.append("last_updated_additional_nanos=");
+      builder.append(this.last_updated_additional_nanos_);      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);      builder.append(", ");
       builder.append("region_origin=");
