@@ -236,14 +236,14 @@ public class RDXGPUPlanarRegionExtractionUI
 
    private void render2DPanels()
    {
-      blurredDepthPanel.drawFloatImage(gpuPlanarRegionExtraction.getBlurredDepthImage().getBytedecoOpenCVMat());
-      filteredDepthPanel.drawFloatImage(gpuPlanarRegionExtraction.getFilteredDepthImage().getBytedecoOpenCVMat());
-      nxImagePanel.drawFloatImage(gpuPlanarRegionExtraction.getNxImage().getBytedecoOpenCVMat());
-      nyImagePanel.drawFloatImage(gpuPlanarRegionExtraction.getNyImage().getBytedecoOpenCVMat());
-      nzImagePanel.drawFloatImage(gpuPlanarRegionExtraction.getNzImage().getBytedecoOpenCVMat());
-      gxImagePanel.drawFloatImage(gpuPlanarRegionExtraction.getCxImage().getBytedecoOpenCVMat());
-      gyImagePanel.drawFloatImage(gpuPlanarRegionExtraction.getCyImage().getBytedecoOpenCVMat());
-      gzImagePanel.drawFloatImage(gpuPlanarRegionExtraction.getCzImage().getBytedecoOpenCVMat());
+      blurredDepthPanel.drawDepthImage(gpuPlanarRegionExtraction.getBlurredDepthImage().getBytedecoOpenCVMat());
+      filteredDepthPanel.drawDepthImage(gpuPlanarRegionExtraction.getFilteredDepthImage().getBytedecoOpenCVMat());
+      nxImagePanel.drawDepthImage(gpuPlanarRegionExtraction.getNxImage().getBytedecoOpenCVMat());
+      nyImagePanel.drawDepthImage(gpuPlanarRegionExtraction.getNyImage().getBytedecoOpenCVMat());
+      nzImagePanel.drawDepthImage(gpuPlanarRegionExtraction.getNzImage().getBytedecoOpenCVMat());
+      gxImagePanel.drawDepthImage(gpuPlanarRegionExtraction.getCxImage().getBytedecoOpenCVMat());
+      gyImagePanel.drawDepthImage(gpuPlanarRegionExtraction.getCyImage().getBytedecoOpenCVMat());
+      gzImagePanel.drawDepthImage(gpuPlanarRegionExtraction.getCzImage().getBytedecoOpenCVMat());
       debugExtractionPanel.draw();
    }
 
