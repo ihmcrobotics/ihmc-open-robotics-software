@@ -44,10 +44,13 @@ public class PlanarRegionFilteredMap
       finalMap.clear();
    }
 
+   private boolean shouldThrowException = true;
+
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
    {
       LogTools.debug("-------------------------------------------------------- New Iteration --------------------------------------------------------------");
       modified = true;
+
       if (!initialized)
       {
          regions.getPlanarRegionsAsList().forEach(region ->
