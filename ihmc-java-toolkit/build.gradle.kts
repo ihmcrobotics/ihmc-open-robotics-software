@@ -24,10 +24,10 @@ mainDependencies {
 
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:euclid:0.19.0")
-   api("us.ihmc:euclid-frame:0.19.0")
-   api("us.ihmc:euclid-shape:0.19.0")
-   api("us.ihmc:euclid-geometry:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-frame:0.19.1")
+   api("us.ihmc:euclid-shape:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
    api("us.ihmc:ihmc-graphics-description:0.19.8")
 }
 

@@ -248,10 +248,10 @@ public class CaptureRegionSafetyHeuristics
       double A = maxDistanceToProjectedPoint;
       double a = Math.PI - Math.abs(projectionAngle);
       double B = distanceToPointToProject;
-      double b = Math.asin(B * Math.sin(a) / A);
+      double sinA = Math.sin(a);
+      double b = Math.asin(B * sinA / A);
       double c = Math.PI - b - a;
-
-      return Math.sqrt(A * A + B * B - 2.0 * A * B * Math.cos(c));
+      return Math.sin(c) * A / sinA;
    }
 
    /**
