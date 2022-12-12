@@ -62,7 +62,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DepthVideoPublisher;
    private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DebugExtractionVideoPublisher;
-   private IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
 
    private final BigVideoPacket depthImagePacket = new BigVideoPacket();
    private final BigVideoPacket debugExtractionImagePacket = new BigVideoPacket();
@@ -105,7 +104,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
       LogTools.info("Publishing ROS 2 debug extraction video: {}", debugExtractionTopic);
       ros2DebugExtractionVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
-      controllerRegionsPublisher = ROS2Tools.createPublisher(realtimeROS2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, robotModel.getSimpleRobotName()));
       realtimeROS2Node.spin();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
@@ -265,7 +263,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             PlanarRegionsList planarRegionsList = gpuPlanarRegionExtraction.getPlanarRegionsList();
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
             ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, planarRegionsListMessage);
-            controllerRegionsPublisher.publish(planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 

@@ -18,7 +18,7 @@ public class RDXPlanarRegionFilteredMapDemo
 
    public RDXPlanarRegionFilteredMapDemo()
    {
-      mapHandler = new PlanarRegionMappingManager(ros2Node);
+      mapHandler = new PlanarRegionMappingManager("", ros2Node);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
