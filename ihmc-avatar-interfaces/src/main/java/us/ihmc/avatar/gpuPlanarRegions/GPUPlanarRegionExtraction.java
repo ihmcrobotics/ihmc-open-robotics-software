@@ -16,7 +16,6 @@ import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -41,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -529,6 +529,8 @@ public class GPUPlanarRegionExtraction
    private boolean printedException = false;
    public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
+      AtomicBoolean listCaughtException = new AtomicBoolean(false);
+
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
       .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
       .map(gpuPlanarRegion ->
@@ -546,6 +548,8 @@ public class GPUPlanarRegionExtraction
             }
             catch (NotARotationMatrixException e)
             {
+               listCaughtException.set(true);
+
                if (!printedException)
                {
                   LogTools.info("Normal = " + gpuPlanarRegion.getNormal());
@@ -624,9 +628,12 @@ public class GPUPlanarRegionExtraction
       })
       .collect(Collectors.toList());
       planarRegionsList.clear();
-      for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
+      if (!listCaughtException.get())
       {
-         planarRegionsList.addPlanarRegions(planarRegions);
+         for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
+         {
+            planarRegionsList.addPlanarRegions(planarRegions);
+         }
       }
    }
 

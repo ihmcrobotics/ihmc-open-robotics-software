@@ -38,6 +38,12 @@ public class PlanarRegionFilteredMap
       finalMap = new PlanarRegionsList();
    }
 
+   public void reset()
+   {
+      initialized = false;
+      finalMap.clear();
+   }
+
    public void submitRegionsUsingIterativeReduction(PlanarRegionsList regions)
    {
       LogTools.debug("-------------------------------------------------------- New Iteration --------------------------------------------------------------");

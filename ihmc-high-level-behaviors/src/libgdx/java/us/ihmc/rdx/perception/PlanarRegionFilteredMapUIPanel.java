@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -16,6 +17,7 @@ public class PlanarRegionFilteredMapUIPanel
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private PlanarRegionMappingManager mappingManager;
    private ImGuiPanel imGuiPanel;
+   private final ImBoolean liveModeEnabled = new ImBoolean();
 
    public PlanarRegionFilteredMapUIPanel(String name, PlanarRegionMappingManager mappingManager)
    {
@@ -25,6 +27,7 @@ public class PlanarRegionFilteredMapUIPanel
       // TODO: Connect this to UI. JIRA Ticket HS-330 (https://jira.ihmc.us/browse/HS-330)
       //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
       //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
+
 
       mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
       mapPlanarRegionsGraphic.update();
@@ -42,9 +45,14 @@ public class PlanarRegionFilteredMapUIPanel
          mappingManager.nextButtonCallback();
       }
 
-      if (ImGui.button("Enable Live Mode"))
+      if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
       {
-         mappingManager.setEnableLiveMode(true);
+         mappingManager.setEnableLiveMode(liveModeEnabled.get());
+      }
+
+      if (ImGui.button("Reset map"))
+      {
+         mappingManager.resetMap();
       }
    }
 
