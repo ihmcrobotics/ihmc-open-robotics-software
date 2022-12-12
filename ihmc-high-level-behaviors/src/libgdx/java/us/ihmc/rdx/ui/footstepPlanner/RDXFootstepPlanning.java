@@ -112,7 +112,7 @@ public class RDXFootstepPlanning
                     output.getFootstepPlan().getNumberOfSteps());
 
       footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(500), "FootstepPlanLogDeletion");
+      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(), "FootstepPlanLogDeletion");
 
       boolean plannerFailed = output.getFootstepPlan().getNumberOfSteps() < 1;
       if (plannerFailed)
