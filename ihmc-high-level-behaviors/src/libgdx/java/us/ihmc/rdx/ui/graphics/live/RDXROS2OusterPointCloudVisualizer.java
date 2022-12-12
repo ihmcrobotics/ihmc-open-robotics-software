@@ -159,14 +159,20 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
             decompressionInputBytePointer.position(0);
             decompressionInputBytePointer.limit(numberOfBytes);
 
-            decompressionInputMat.cols(numberOfBytes);
+            decompressionInputMat.rows(depthHeight);
+            decompressionInputMat.cols(depthWidth);
             decompressionInputMat.data(decompressionInputBytePointer);
 
-            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
-            opencv_imgcodecs.imdecode(decompressionInputMat,
-                                      opencv_imgcodecs.IMREAD_UNCHANGED,
-                                      decompressionOutputImage.getBytedecoOpenCVMat());
-            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+            decompressionInputMat.copyTo(decompressionOutputImage.getBytedecoOpenCVMat());
+
+//            decompressionInputMat.cols(numberOfBytes);
+//            decompressionInputMat.data(decompressionInputBytePointer);
+//
+//            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+//            opencv_imgcodecs.imdecode(decompressionInputMat,
+//                                      opencv_imgcodecs.IMREAD_UNCHANGED,
+//                                      decompressionOutputImage.getBytedecoOpenCVMat());
+//            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
 
             // TODO: Create tuners for these
             double verticalFieldOfView = Math.PI / 2.0;
