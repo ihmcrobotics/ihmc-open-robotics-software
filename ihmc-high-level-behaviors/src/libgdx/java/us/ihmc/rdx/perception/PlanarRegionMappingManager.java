@@ -10,22 +10,29 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionFilteredMap;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class PlanarRegionMappingManager
 {
+   private final static long PUBLISH_MILLISECONDS = 100;
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
 
-   private PlanarRegionsList planarRegions;
    private PlanarRegionFilteredMap filteredMap;
    private PlanarRegionsListLogger logger;
 
-   private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
+                                                                                                        getClass(),
+                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+
+   private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
+   private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForPublishing = new AtomicReference<>(null);
 
    private boolean enableCapture = false;
    private boolean enableLiveMode = false;
@@ -38,12 +45,12 @@ public class PlanarRegionMappingManager
 
    public PlanarRegionMappingManager(ROS2Node ros2Node)
    {
-      //executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, 100, TimeUnit.MILLISECONDS);
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
 
       if(ros2Node != null)
       {
+         executorService.scheduleAtFixedRate(this::publishLatestRegions, 0, PUBLISH_MILLISECONDS, TimeUnit.MILLISECONDS)
          ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, this::planarRegionCallback);
       }
 
@@ -66,16 +73,20 @@ public class PlanarRegionMappingManager
       }
    }
 
-   private void scheduledUpdate()
+   public synchronized void publishLatestRegions()
    {
-      if (enableLiveMode)
+      PlanarRegionsList regionsToPublish = latestPlanarRegionsForPublishing.getAndSet(null);
+      if (regionsToPublish != null)
       {
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
+         PlanarRegionsListMessage planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionsToPublish);
       }
+
    }
 
    public void planarRegionCallback(PlanarRegionsListMessage planarRegionsListMessage)
    {
+      PlanarRegionsList planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+
       if (enableCapture)
       {
          if (logger == null)
@@ -83,7 +94,6 @@ public class PlanarRegionMappingManager
             logger = new PlanarRegionsListLogger("planar-region-logger", 1);
             logger.start();
          }
-         planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
 
          logger.update(System.currentTimeMillis(), planarRegions);
          enableCapture = false;
@@ -93,8 +103,7 @@ public class PlanarRegionMappingManager
       if (enableLiveMode)
       {
          LogTools.debug("Registering Regions");
-         planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
+         updateMapWithNewRegions(planarRegions);
       }
    }
 
@@ -102,28 +111,37 @@ public class PlanarRegionMappingManager
    {
       if (planarRegionListIndex < planarRegionsListBuffer.getBufferLength())
       {
-         planarRegions = planarRegionsListBuffer.get(planarRegionListIndex);
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
+         PlanarRegionsList planarRegions = planarRegionsListBuffer.get(planarRegionListIndex);
+         updateMapWithNewRegions(planarRegions);
          planarRegionListIndex++;
       }
    }
 
-   public PlanarRegionsList getMapRegions()
+   public PlanarRegionsList pollMapRegions()
    {
-      return filteredMap.getMapRegions().copy();
+      return latestPlanarRegionsForRendering.getAndSet(null);
    }
 
-   public PlanarRegionFilteredMap getFilteredMap()
+   public boolean pollIsModified()
    {
-      return filteredMap;
+      boolean modified = filteredMap.isModified();
+      filteredMap.setModified(modified);
+      return modified;
    }
 
-   public void submitRegions(PlanarRegionsList regions)
+   public boolean hasPlanarRegionsToRender()
    {
-      if (enableLiveMode)
-      {
-         filteredMap.submitRegionsUsingIterativeReduction(regions);
-      }
+      if (latestPlanarRegionsForRendering.get() == null)
+         return false;
+
+      return latestPlanarRegionsForRendering.get().getNumberOfPlanarRegions() > 0;
+   }
+
+   public void updateMapWithNewRegions(PlanarRegionsList regions)
+   {
+      filteredMap.submitRegionsUsingIterativeReduction(regions);
+      latestPlanarRegionsForRendering.set(filteredMap.getMapRegions().copy());
+      latestPlanarRegionsForPublishing.set(filteredMap.getMapRegions().copy());
    }
 
    public boolean isCaptured()

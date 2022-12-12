@@ -26,7 +26,7 @@ public class PlanarRegionFilteredMapUIPanel
       //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
       //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
 
-      mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
+      mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
       mapPlanarRegionsGraphic.update();
    }
 
@@ -50,12 +50,11 @@ public class PlanarRegionFilteredMapUIPanel
 
    public void renderPlanarRegions()
    {
-      if (mappingManager.getFilteredMap().isModified() && mappingManager.getMapRegions().getNumberOfPlanarRegions() > 0)
+      if (mappingManager.pollIsModified() && mappingManager.hasPlanarRegionsToRender())
       {
          mapPlanarRegionsGraphic.clear();
-         mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
+         mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
          mapPlanarRegionsGraphic.update();
-         mappingManager.getFilteredMap().setModified(false);
       }
    }
 
