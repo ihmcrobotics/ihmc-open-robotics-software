@@ -137,12 +137,12 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
       gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ROS2StoredPropertySet<?> ros2GPURegionParameters
-            = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS_TOPIC_PAIR, gpuPlanarRegionExtraction.getParameters());
+            = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS, gpuPlanarRegionExtraction.getParameters());
       patchSizeChangedNotification
             = ros2GPURegionParameters.getCommandInput().registerPropertyChangedNotification(GPUPlanarRegionExtractionParameters.patchSize);
-      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS_TOPIC_PAIR,
+      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS,
                                                      gpuPlanarRegionExtraction.getPolygonizerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS_TOPIC_PAIR,
+      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS,
                                                      gpuPlanarRegionExtraction.getConcaveHullFactoryParameters());
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
