@@ -140,7 +140,7 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
       double estimatorDT = robotModel.getEstimatorDT();
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
-      yoVariableServer.setMainRegistry(registry, fullRobotModel.getRootBody(), graphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       yoVariableServer.start();
    }
 
