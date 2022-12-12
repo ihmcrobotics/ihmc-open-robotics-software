@@ -41,7 +41,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
 
 public class RDXGPUPlanarRegionExtractionUI
 {
