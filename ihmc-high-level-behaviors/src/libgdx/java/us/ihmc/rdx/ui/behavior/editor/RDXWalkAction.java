@@ -283,7 +283,7 @@ public class RDXWalkAction implements RDXBehaviorAction
 
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(500), "FootstepPlanLogDeletion");
+      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(), "FootstepPlanLogDeletion");
 
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {

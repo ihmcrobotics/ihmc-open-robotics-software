@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
+   private static final int RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP = 500;
    public static final String defaultLogsDirectory;
    static
    {
@@ -115,11 +116,19 @@ public class FootstepPlannerLogger
       return logSession(defaultLogsDirectory);
    }
 
-   public static void deleteOldLogs(int numberOflogsToKeep)
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs()
    {
-      deleteOldLogs(numberOflogsToKeep, defaultLogsDirectory);
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, defaultLogsDirectory);
    }
 
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs(String directory)
+   {
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, directory);
+   }
+
+   /** It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging. */
    public static void deleteOldLogs(int numberOflogsToKeep, String directory)
    {
       SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
