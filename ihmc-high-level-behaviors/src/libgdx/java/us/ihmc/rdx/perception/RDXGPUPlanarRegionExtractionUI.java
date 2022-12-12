@@ -182,96 +182,11 @@ public class RDXGPUPlanarRegionExtractionUI
          if (!processing)
          {
             processing = true;
-
             setParametersFromImGuiWidgets();
-
             wholeAlgorithmDurationStopwatch.start();
-
             gpuDurationStopwatch.start();
-
             gpuPlanarRegionExtraction.readFromSourceImage();
-
-            Runnable runInThread = () ->
-            {
-               Runnable onPatchSizeChanged = () ->
-               {
-                  int patchImageWidth = gpuPlanarRegionExtraction.getPatchImageWidth();
-                  int patchImageHeight = gpuPlanarRegionExtraction.getPatchImageHeight();
-                  OpenCLManager openCLManager = gpuPlanarRegionExtraction.getOpenCLManager();
-                  nxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-                  nyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-                  nzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-                  gxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-                  gyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-                  gzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-                  debugExtractionPanel.resize(patchImageWidth, patchImageHeight, openCLManager);
-               };
-               gpuPlanarRegionExtraction.extractPlanarRegions(onPatchSizeChanged);
-
-               gpuDurationStopwatch.suspend();
-
-               if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && (drawPatches.get() || drawBoundaries.get()))
-                  debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
-
-               depthFirstSearchDurationStopwatch.start();
-               Consumer<GPUPlanarRegionIsland> forDrawingRegionsInDebugPanel = island ->
-               {
-                  if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawPatches.get())
-                  {
-                     for (Point2D regionIndex : island.planarRegion.getRegionIndices())
-                     {
-                        int x = (int) regionIndex.getX();
-                        int y = (int) regionIndex.getY();
-                        int r = (island.planarRegionIslandIndex + 1) * 312 % 255;
-                        int g = (island.planarRegionIslandIndex + 1) * 123 % 255;
-                        int b = (island.planarRegionIslandIndex + 1) * 231 % 255;
-                        BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
-                        pixel.put(0, (byte) r);
-                        pixel.put(1, (byte) g);
-                        pixel.put(2, (byte) b);
-                     }
-                  }
-               };
-               gpuPlanarRegionExtraction.findRegions(forDrawingRegionsInDebugPanel);
-               Consumer<GPURegionRing> forDrawingRingsInDebugPanel = regionRing ->
-               {
-                  if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawBoundaries.get())
-                  {
-                     for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
-                     {
-                        int x = (int) boundaryIndex.getX();
-                        int y = (int) boundaryIndex.getY();
-                        int r = (regionRing.getIndex() + 1) * 130 % 255;
-                        int g = (regionRing.getIndex() + 1) * 227 % 255;
-                        int b = (regionRing.getIndex() + 1) * 332 % 255;
-                        BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
-                        pixel.put(0, (byte) r);
-                        pixel.put(1, (byte) g);
-                        pixel.put(2, (byte) b);
-                     }
-                  }
-               };
-               gpuPlanarRegionExtraction.findBoundariesAndHoles(forDrawingRingsInDebugPanel);
-               gpuPlanarRegionExtraction.growRegionBoundaries();
-               depthFirstSearchDurationStopwatch.suspend();
-
-               planarRegionsSegmentationDurationStopwatch.start();
-               gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
-               planarRegionsSegmentationDurationStopwatch.suspend();
-
-               gpuHeightMapStopwatch.start();
-               //      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
-               gpuHeightMapStopwatch.suspend();
-
-               wholeAlgorithmDurationStopwatch.suspend();
-               wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
-
-               if (runWhenFinished != null)
-                  runWhenFinished.run();
-
-               needToDraw = true;
-            };
-            ThreadTools.startAsDaemon(runInThread, getClass().getSimpleName() + "Processing");
+            ThreadTools.startAsDaemon(() -> processingThread(runWhenFinished), getClass().getSimpleName() + "Processing");
          }
 
          if (needToDraw)
@@ -284,6 +199,90 @@ public class RDXGPUPlanarRegionExtractionUI
             renderBoundaryPoints(cameraFrame);
 
             processing = false;
+         }
+      }
+   }
+
+   private void processingThread(Runnable runWhenFinished)
+   {
+      gpuPlanarRegionExtraction.extractPlanarRegions(this::onPatchSizeChanged);
+
+      gpuDurationStopwatch.suspend();
+
+      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && (drawPatches.get() || drawBoundaries.get()))
+         debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
+
+      depthFirstSearchDurationStopwatch.start();
+      gpuPlanarRegionExtraction.findRegions(this::forDrawingRegionsInDebugPanel);
+      gpuPlanarRegionExtraction.findBoundariesAndHoles(this::forDrawingRingsInDebugPanel);
+      gpuPlanarRegionExtraction.growRegionBoundaries();
+      depthFirstSearchDurationStopwatch.suspend();
+
+      planarRegionsSegmentationDurationStopwatch.start();
+      gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
+      planarRegionsSegmentationDurationStopwatch.suspend();
+
+      gpuHeightMapStopwatch.start();
+      //      simpleGPUHeightMapUpdater.computeFromDepthMap(cameraFrame.getTransformToWorldFrame());
+      gpuHeightMapStopwatch.suspend();
+
+      wholeAlgorithmDurationStopwatch.suspend();
+      wholeAlgorithmDuration.set(wholeAlgorithmDurationStopwatch.lapElapsed());
+
+      if (runWhenFinished != null)
+         runWhenFinished.run();
+
+      needToDraw = true;
+   }
+
+   private void onPatchSizeChanged()
+   {
+      int patchImageWidth = gpuPlanarRegionExtraction.getPatchImageWidth();
+      int patchImageHeight = gpuPlanarRegionExtraction.getPatchImageHeight();
+      OpenCLManager openCLManager = gpuPlanarRegionExtraction.getOpenCLManager();
+      nxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+      nyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+      nzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+      gxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+      gyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+      gzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+      debugExtractionPanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+   }
+
+   private void forDrawingRegionsInDebugPanel(GPUPlanarRegionIsland island)
+   {
+      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawPatches.get())
+      {
+         for (Point2D regionIndex : island.planarRegion.getRegionIndices())
+         {
+            int x = (int) regionIndex.getX();
+            int y = (int) regionIndex.getY();
+            int r = (island.planarRegionIslandIndex + 1) * 312 % 255;
+            int g = (island.planarRegionIslandIndex + 1) * 123 % 255;
+            int b = (island.planarRegionIslandIndex + 1) * 231 % 255;
+            BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
+            pixel.put(0, (byte) r);
+            pixel.put(1, (byte) g);
+            pixel.put(2, (byte) b);
+         }
+      }
+   }
+
+   private void forDrawingRingsInDebugPanel(GPURegionRing regionRing)
+   {
+      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawBoundaries.get())
+      {
+         for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
+         {
+            int x = (int) boundaryIndex.getX();
+            int y = (int) boundaryIndex.getY();
+            int r = (regionRing.getIndex() + 1) * 130 % 255;
+            int g = (regionRing.getIndex() + 1) * 227 % 255;
+            int b = (regionRing.getIndex() + 1) * 332 % 255;
+            BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
+            pixel.put(0, (byte) r);
+            pixel.put(1, (byte) g);
+            pixel.put(2, (byte) b);
          }
       }
    }
