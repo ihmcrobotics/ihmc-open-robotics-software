@@ -140,7 +140,7 @@ public class RDXHighLevelDepthSensorDemo
 
                image.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null, depthBuffer);
                mainViewDepthPanel.resize(aliasedRenderedAreaWidth, aliasedRenderedAreaHeight, null);
-               mainViewDepthPanel.drawFloatImage(image.getBytedecoOpenCVMat());
+               mainViewDepthPanel.drawDepthImage(image.getBytedecoOpenCVMat());
             }
 
             frustumVisualizer.generateMeshAsync(baseUI.getPrimary3DPanel().getCamera3D().frustum);

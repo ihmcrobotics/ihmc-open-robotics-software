@@ -12,7 +12,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.*;
 import java.net.Socket;
@@ -100,18 +99,6 @@ public class NettyOuster
    private Instant aquisitionInstant;
    private ByteBuffer lidarFrameByteBuffer;
    private long nextExpectedMeasurementID = -1;
-   private long numberOfTimesZero = 0;
-   private double hash = 0.0;
-   private double hash2 = 0.0;
-
-   private final FrequencyStatisticPrinter printer = new FrequencyStatisticPrinter(this::onLogReport);
-
-   private void onLogReport()
-   {
-      LogTools.info("Number of times position was 0: {}", numberOfTimesZero);
-      LogTools.info("Hash: {}", hash);
-      LogTools.info("Hash2: {}", hash2);
-   }
 
    public NettyOuster()
    {
@@ -148,30 +135,18 @@ public class NettyOuster
                }
                nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
 
-//               lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
+               lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
+               content.getBytes(0, lidarFrameByteBuffer);
+
 //               content.resetReaderIndex();
 
-               ByteBuffer slice = lidarFrameByteBuffer.slice(measurementID * measurementBlockSize, measurementBlockSize);
+//               ByteBuffer slice = lidarFrameByteBuffer.slice(measurementID * measurementBlockSize, measurementBlockSize);
 
-               if (lidarFrameByteBuffer.position() == 0)
-                  ++numberOfTimesZero;
+//               if (lidarFrameByteBuffer.position() == 0)
+//                  ++numberOfTimesZero;
 
 //               content.readBytes(lidarFrameByteBuffer);
-               content.readBytes(slice);
-
-               content.resetReaderIndex();
-
-               hash = 1.0;
-//               for (int i = 0; i < content.readableBytes(); i++)
-//               {
-//                  hash += Byte.toUnsignedInt(content.getByte(i));
-//               }
-
-               hash2 = 1.0;
-//               for (int i = 0; i < lidarFrameByteBuffer.capacity(); i++)
-//               {
-//                  hash2 += Byte.toUnsignedInt(lidarFrameByteBuffer.get(i));
-//               }
+//               content.readBytes(slice);
 
                boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
                if (isLastBlockInFrame && onFrameReceived != null)

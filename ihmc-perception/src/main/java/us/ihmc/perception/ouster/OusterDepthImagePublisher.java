@@ -6,7 +6,6 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -17,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.memory.MemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Activator;
@@ -46,7 +46,7 @@ public class OusterDepthImagePublisher
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private _cl_kernel extractDepthImageKernel;
-   private OpenCLFloatBuffer parametersBuffer;
+   private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private _cl_mem lidarFrameBufferObject;
    private BytedecoImage compressionInputImage;
    private ByteBuffer pngImageBuffer;
@@ -104,7 +104,7 @@ public class OusterDepthImagePublisher
          // copy while the ouster thread is blocked
          lidarFrameByteBufferPointer.position(0);
          lidarFrameByteBufferPointerCopy.position(0);
-//         MemoryTools.memoryCopy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
+         MemoryTools.memoryCopy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
 
          lidarFrameByteBufferCopy.put(ouster.getLidarFrameByteBuffer());
 
@@ -123,9 +123,6 @@ public class OusterDepthImagePublisher
          openCLProgram = openCLManager.loadProgram(getClass().getSimpleName());
          extractDepthImageKernel = openCLManager.createKernel(openCLProgram, "extractDepthImage");
 
-         parametersBuffer = new OpenCLFloatBuffer(19);
-         parametersBuffer.createOpenCLBufferObject(openCLManager);
-
          lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
          compressionInputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
       }
@@ -135,11 +132,11 @@ public class OusterDepthImagePublisher
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, ouster.getColumnsPerFrame());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, ouster.getMeasurementBlockSize());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, NettyOuster.HEADER_BLOCK_BYTES);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(3, NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(4, NettyOuster.MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
+      parametersBuffer.setParameter(ouster.getColumnsPerFrame());
+      parametersBuffer.setParameter(ouster.getMeasurementBlockSize());
+      parametersBuffer.setParameter(NettyOuster.HEADER_BLOCK_BYTES);
+      parametersBuffer.setParameter(NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
+      parametersBuffer.setParameter(NettyOuster.MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
