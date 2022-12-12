@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.visualizer;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
@@ -51,27 +52,36 @@ public class ValkyrieImpedanceTuningVisualizer implements SCSVisualizerStateList
 
       for (ValkyrieJointList.ValkyrieImpedanceJoint impedanceJoint : ValkyrieJointList.ValkyrieImpedanceJoint.values())
       {
-         sliderBoardConfigurationManager.setSlider(1, "masterGain", registry, 0.0, 1.0);
-         sliderBoardConfigurationManager.setSlider(3, impedanceJoint.name() + "Stiffness" + suffixString, registry, 0.0, 300.0);
-         sliderBoardConfigurationManager.setSlider(4, impedanceJoint.name() + "Damping" + suffixString, registry, 0.0, 50.0);
+         sliderBoardConfigurationManager.setSlider(1, "masterTorqueGain", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(2, "masterImpedanceGain", registry, 0.0, 1.0);
+         sliderBoardConfigurationManager.setSlider(3, "tuningMasterGain", registry, 0.0, 1.0);
 
-         sliderBoardConfigurationManager.setSlider(5, impedanceJoint.name() + "Offset" + suffixString, registry, -0.5, 0.5);
-         sliderBoardConfigurationManager.setSlider(6, impedanceJoint.name() + "Amp" + suffixString, registry, 0.0, 0.5);
-         sliderBoardConfigurationManager.setSlider(7, impedanceJoint.name() + "Freq" + suffixString, registry, 0.2, 2.0);
+         sliderBoardConfigurationManager.setSlider(4, impedanceJoint.name() + "LowLevelStiffness" + suffixString, registry, 0.0, 300.0);
+         sliderBoardConfigurationManager.setSlider(5, impedanceJoint.name() + "LowLevelDamping" + suffixString, registry, 0.0, 50.0);
+
+         sliderBoardConfigurationManager.setSlider(6, impedanceJoint.name() + "Offset", registry, -0.5, 0.5);
+         sliderBoardConfigurationManager.setSlider(7, impedanceJoint.name() + "Amp", registry, 0.0, 0.5);
+         sliderBoardConfigurationManager.setSlider(8, impedanceJoint.name() + "Freq", registry, 0.1, 0.8);
 
          sliderBoardConfigurationManager.saveConfiguration(impedanceJoint.name());
          sliderBoardConfigurationManager.clearControls();
       }
 
-      selectedJoint.set(ValkyrieJointList.ValkyrieImpedanceJoint.rightElbowPitch);
+      ValkyrieJointList.ValkyrieImpedanceJoint initialJoint = ValkyrieJointList.ValkyrieImpedanceJoint.rightElbowPitch;
+
+      selectedJoint.set(initialJoint);
+      YoEnum<?> requestedTuningJoint = (YoEnum<?>) scs.findVariable("requestedTuningJoint");
+      requestedTuningJoint.set(initialJoint.ordinal());
 
       YoVariableChangedListener listener = v ->
       {
          LogTools.info("SliderBoardMode: " + selectedJoint.getEnumValue().toString());
          sliderBoardConfigurationManager.loadConfiguration(selectedJoint.getEnumValue().toString());
+         requestedTuningJoint.set(selectedJoint.getEnumValue().ordinal());
       };
 
       selectedJoint.addListener(listener);
+      sliderBoardConfigurationManager.loadConfiguration(initialJoint.name());
    }
 
    public static void main(String[] args)

@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -44,7 +45,9 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
-   private final YoDouble masterGain = new YoDouble("masterGain", registry);
+   private final YoDouble masterTorqueGain = new YoDouble("masterTorqueGain", registry);
+   private final YoDouble masterImpedanceGain = new YoDouble("masterImpedanceGain", registry);
+   private final YoDouble tuningMasterGain = new YoDouble("tuningMasterGain", registry);
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
@@ -61,6 +64,7 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
    private final YoEnum<ValkyrieJointList.ValkyrieImpedanceJoint> requestedTuningJoint = new YoEnum<>("requestedTuningJoint", registry, ValkyrieJointList.ValkyrieImpedanceJoint.class, true);
    private ValkyrieJointList.ValkyrieImpedanceJoint jointToTune = null;
    private final YoFunctionGeneratorNew[] functionGenerators;
+   private final HashMap<String, YoFunctionGeneratorNew> nameToFunctionGeneratorMap = new HashMap<>();
 
    private final YoLowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
    private YoVariableServer yoVariableServer;
@@ -77,6 +81,10 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
       functionGenerators = new YoFunctionGeneratorNew[controlledJoints.length];
 
+      masterTorqueGain.set(0.6);
+      masterImpedanceGain.set(0.1);
+      tuningMasterGain.set(0.1);
+
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
          OneDoFJointBasics joint = controlledOneDoFJoints[i];
@@ -92,20 +100,21 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
 
          if (impedanceJoints.contains(jointName))
          {
-            jointDesiredOutput.setMasterGain(0.1);
             jointDesiredOutput.setStiffness(200.0);
             jointDesiredOutput.setDamping(35.0);
          }
          else
          {
-            jointDesiredOutput.setMasterGain(0.6);
             jointDesiredOutput.setStiffness(55.0);
             jointDesiredOutput.setDamping(5.0);
          }
 
          YoFunctionGeneratorNew functionGenerator = new YoFunctionGeneratorNew(jointName, robotModel.getControllerDT(), registry);
          functionGenerator.setMode(YoFunctionGeneratorMode.SINE);
+         functionGenerator.setFrequency(0.2);
          functionGenerators[i] = functionGenerator;
+
+         nameToFunctionGeneratorMap.put(jointName, functionGenerator);
       }
 
       new DefaultParameterReader().readParametersInRegistry(registry);
@@ -169,18 +178,63 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
 
    private void doControl()
    {
+      ValkyrieJointList.ValkyrieImpedanceJoint requestedTuningJoint = this.requestedTuningJoint.getValue();
+      if (requestedTuningJoint != null)
+      {
+         if (jointToTune != null)
+         {
+            nameToFunctionGeneratorMap.get(jointToTune.name()).setAmplitude(0.0);
+         }
+
+         jointToTune = requestedTuningJoint;
+         this.requestedTuningJoint.set(null);
+      }
+
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
-         String jointName = controlledOneDoFJoints[i].getName();
-         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(controlledOneDoFJoints[i]);
-         YoFunctionGeneratorNew functionGenerator = functionGenerators[i];
+         OneDoFJointBasics joint = controlledOneDoFJoints[i];
+         String jointName = joint.getName();
+         JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
 
-         functionGenerator.update();
-         jointDesiredOutput.setDesiredPosition(jointHome.getSetpoint(jointName) + functionGenerator.getValue());
-         jointDesiredOutput.setDesiredVelocity(functionGenerator.getValueDot());
+         if (jointToTune != null && jointToTune.name().equals(jointName))
+         {
+            YoFunctionGeneratorNew functionGenerator = functionGenerators[i];
 
-         /* Keep one master gain for all joints, easier to turn off */
-         jointDesiredOutput.setMasterGain(masterGain.getValue());
+            functionGenerator.update();
+            double positionEpsilon = 0.05;
+            double velocityEpsilon = 0.15;
+            double desiredPosition = EuclidCoreTools.clamp(jointHome.getSetpoint(jointName) + functionGenerator.getValue(), joint.getJointLimitLower() + positionEpsilon, joint.getJointLimitUpper() - positionEpsilon);
+            double desiredVelocity = functionGenerator.getValueDot();
+
+            if (EuclidCoreTools.epsilonEquals(desiredPosition, joint.getJointLimitLower(), velocityEpsilon))
+            {
+               double scale = (desiredPosition - joint.getJointLimitLower()) / velocityEpsilon;
+               desiredVelocity *= scale;
+            }
+            else if (EuclidCoreTools.epsilonEquals(desiredPosition, joint.getJointLimitUpper(), velocityEpsilon))
+            {
+               double scale = (joint.getJointLimitUpper() - desiredPosition) / velocityEpsilon;
+               desiredVelocity *= scale;
+            }
+
+            jointDesiredOutput.setDesiredPosition(desiredPosition);
+            jointDesiredOutput.setDesiredVelocity(desiredVelocity);
+            jointDesiredOutput.setMasterGain(tuningMasterGain.getValue());
+         }
+         else
+         {
+            jointDesiredOutput.setDesiredPosition(jointHome.getSetpoint(jointName));
+            jointDesiredOutput.setDesiredVelocity(0.0);
+
+            if (impedanceJoints.contains(jointName))
+            {
+               jointDesiredOutput.setMasterGain(masterImpedanceGain.getValue());
+            }
+            else
+            {
+               jointDesiredOutput.setMasterGain(masterTorqueGain.getValue());
+            }
+         }
       }
    }
 }
