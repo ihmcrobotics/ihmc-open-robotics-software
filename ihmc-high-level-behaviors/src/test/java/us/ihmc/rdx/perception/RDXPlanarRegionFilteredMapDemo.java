@@ -28,7 +28,7 @@ public class RDXPlanarRegionFilteredMapDemo
             baseUI.create();
             planarRegionFilteredMapUIPanel = new PlanarRegionFilteredMapUIPanel("Filtered Map", mapHandler);
             baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUIPanel.getImGuiPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUIPanel::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUIPanel::getVirtualRenderables, RDXSceneLevel.MODEL);
          }
 
          @Override

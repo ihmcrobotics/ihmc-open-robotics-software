@@ -16,6 +16,7 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -32,6 +33,7 @@ public class PlanarRegionMappingManager
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                         getClass(),
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledFuture<?> updateMapFuture;
 
    private final AtomicReference<PlanarRegionsListMessage> latestIncomingRegions = new AtomicReference<>(null);
    private final AtomicReference<PlanarRegionsList> latestPlanarRegionsForRendering = new AtomicReference<>(null);
@@ -53,7 +55,7 @@ public class PlanarRegionMappingManager
 
       if(ros2Node != null)
       {
-         executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_MILLISECONDS, TimeUnit.MILLISECONDS);
+         launchMapper();
          controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
          ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, latestIncomingRegions::set);
       }
@@ -75,6 +77,11 @@ public class PlanarRegionMappingManager
 //            break;
 //         }
 //      }
+   }
+
+   private void launchMapper()
+   {
+      updateMapFuture = executorService.scheduleAtFixedRate(this::updateMap, 0, PUBLISH_MILLISECONDS, TimeUnit.MILLISECONDS);
    }
 
    public synchronized void updateMap()
@@ -152,6 +159,14 @@ public class PlanarRegionMappingManager
       filteredMap.reset();
       latestPlanarRegionsForRendering.set(new PlanarRegionsList());
       filteredMap.setModified(true);
+      if (updateMapFuture.isCancelled() || updateMapFuture.isDone())
+         launchMapper();
+   }
+
+   public void hardResetTheMap()
+   {
+      updateMapFuture.cancel(true);
+      resetMap();
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)

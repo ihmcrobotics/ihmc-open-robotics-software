@@ -18,6 +18,7 @@ public class PlanarRegionFilteredMapUIPanel
    private PlanarRegionMappingManager mappingManager;
    private ImGuiPanel imGuiPanel;
    private final ImBoolean liveModeEnabled = new ImBoolean();
+   private final ImBoolean renderEnabled = new ImBoolean();
 
    public PlanarRegionFilteredMapUIPanel(String name, PlanarRegionMappingManager mappingManager)
    {
@@ -49,10 +50,15 @@ public class PlanarRegionFilteredMapUIPanel
       {
          mappingManager.setEnableLiveMode(liveModeEnabled.get());
       }
+      ImGui.checkbox("Render live mode", renderEnabled);
 
       if (ImGui.button("Reset map"))
       {
          mappingManager.resetMap();
+      }
+      if (ImGui.button("Hard reset map"))
+      {
+         mappingManager.hardResetTheMap();
       }
    }
 
@@ -68,7 +74,8 @@ public class PlanarRegionFilteredMapUIPanel
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      mapPlanarRegionsGraphic.getRenderables(renderables, pool);
+      if (renderEnabled.get())
+         mapPlanarRegionsGraphic.getRenderables(renderables, pool);
    }
 
    public void setCaptured(boolean captured)
