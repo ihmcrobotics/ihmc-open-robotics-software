@@ -9,8 +9,10 @@ kernel void extractDepthImage(global float* parameters,
    int measurementBlockSize = parameters[1];
    int headerBlockBytes = parameters[2];
    int channelDataBlockBytes = parameters[3];
+   int columnsPerMeasurementBlock = parameters[4];
 
-   int measurementBlockIndex = x / columnsPerFrame;
+   // For example, x is 0 - 2047; There's 16 columns per measurementBlock
+   int measurementBlockIndex = x / columnsPerMeasurementBlock;
 
    int bytesToColumnDataBlockStart = measurementBlockIndex * measurementBlockSize
                                      + headerBlockBytes

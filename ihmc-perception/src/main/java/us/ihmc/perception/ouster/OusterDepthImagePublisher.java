@@ -104,7 +104,9 @@ public class OusterDepthImagePublisher
          // copy while the ouster thread is blocked
          lidarFrameByteBufferPointer.position(0);
          lidarFrameByteBufferPointerCopy.position(0);
-         MemoryTools.memoryCopy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
+//         MemoryTools.memoryCopy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
+
+         lidarFrameByteBufferCopy.put(ouster.getLidarFrameByteBuffer());
 
          extractCompressAndPublishThread.clearQueueAndExecute(this::extractCompressAndPublish);
       }
@@ -137,6 +139,7 @@ public class OusterDepthImagePublisher
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, ouster.getMeasurementBlockSize());
       parametersBuffer.getBytedecoFloatBufferPointer().put(2, NettyOuster.HEADER_BLOCK_BYTES);
       parametersBuffer.getBytedecoFloatBufferPointer().put(3, NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(4, NettyOuster.MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
@@ -148,9 +151,11 @@ public class OusterDepthImagePublisher
       compressionInputImage.readOpenCLImage(openCLManager);
       openCLManager.finish();
 
-      pngImageBuffer.position(0);
-      pngImageBuffer.limit(pngImageBuffer.capacity());
-      opencv_imgcodecs.imencode(".png", compressionInputImage.getBytedecoOpenCVMat(), pngImageBuffer);
+//      pngImageBuffer.position(0);
+//      pngImageBuffer.limit(pngImageBuffer.capacity());
+//      opencv_imgcodecs.imencode(".png", compressionInputImage.getBytedecoOpenCVMat(), pngImageBuffer);
+
+      pngImageBuffer.put(compressionInputImage.getBackingDirectByteBuffer());
 
       outputImageMessage.getPosition().set(cameraPose.getPosition());
       outputImageMessage.getOrientation().set(cameraPose.getOrientation());

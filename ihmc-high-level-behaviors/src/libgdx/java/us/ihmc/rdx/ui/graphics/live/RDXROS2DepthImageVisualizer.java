@@ -83,16 +83,22 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
                incomingCompressedImageBuffer.flip();
             }
 
-            inputCompressedDepthMat.cols(numberOfBytes);
+            inputCompressedDepthMat.rows(depthHeight);
+            inputCompressedDepthMat.cols(depthWidth);
             inputCompressedDepthMat.data(incomingCompressedImageBytePointer);
 
-            System.out.println(inputCompressedDepthMat.ptr(7, 39).getShort());
-            System.out.println(inputCompressedDepthMat.ptr(7, 56).getShort());
-            System.out.println(inputCompressedDepthMat.ptr(7, 324).getShort());
-            System.out.println(inputCompressedDepthMat.ptr(7, 885).getShort());
-            System.out.println(inputCompressedDepthMat.ptr(7, 1788).getShort());
+            inputCompressedDepthMat.copyTo(decompressedDepthMat);
 
-            opencv_imgcodecs.imdecode(inputCompressedDepthMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthMat);
+//            inputCompressedDepthMat.cols(numberOfBytes);
+//            inputCompressedDepthMat.data(incomingCompressedImageBytePointer);
+
+//            System.out.println(inputCompressedDepthMat.ptr(7, 39).getShort());
+//            System.out.println(inputCompressedDepthMat.ptr(7, 56).getShort());
+//            System.out.println(inputCompressedDepthMat.ptr(7, 324).getShort());
+//            System.out.println(inputCompressedDepthMat.ptr(7, 885).getShort());
+//            System.out.println(inputCompressedDepthMat.ptr(7, 1788).getShort());
+
+//            opencv_imgcodecs.imdecode(inputCompressedDepthMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthMat);
 
             BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedDepthMat, normalizedScaledImage, 0.0, 255.0);
 
