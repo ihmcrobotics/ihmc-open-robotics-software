@@ -16,7 +16,7 @@ public class BehaviorVisualizer extends SCSVisualizer
       setShowOverheadView(false);
 
       YoVariableClient client = new YoVariableClient(this);
-      client.start();
+      client.startWithHostSelector();
    }
 
    public static void main(String[] args)

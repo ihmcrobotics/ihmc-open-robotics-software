@@ -47,7 +47,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-simulation:17-0.11.0")
+   api("us.ihmc:scs2-simulation:17-0.11.1")
    api("us.ihmc:mecano-graphviz:17-0.11.5")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
@@ -63,8 +63,8 @@ testDependencies {
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
-   api("us.ihmc:scs2-examples:17-0.11.0")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.11.0")
+   api("us.ihmc:scs2-examples:17-0.11.1")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.11.1")
    api("us.ihmc:example-simulations:source")
 }
 
