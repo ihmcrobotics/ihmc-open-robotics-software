@@ -148,15 +148,13 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          obstacleBoxVisualizer.generateMeshAsync(box3D);
       });
       helper.subscribeViaCallback(ResetForUI, goalAffordance::clear);
-      lookAndStepRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
-                                                                          helper.getRobotModel().getLookAndStepParameters(),
-                                                                          LOOK_AND_STEP_PARAMETERS_TOPIC_PAIR);
+      lookAndStepRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper, helper.getRobotModel().getLookAndStepParameters(), PARAMETERS);
       footstepPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
                                                                               helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"),
-                                                                              FOOTSTEP_PLANNING_PARAMETERS_TOPIC_PAIR);
+                                                                              FOOTSTEP_PLANNING_PARAMETERS);
       swingPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
                                                                            helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
-                                                                           SWING_PLANNER_PARAMETERS_TOPIC_PAIR);
+                                                                           SWING_PLANNER_PARAMETERS);
       stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
    }
 

@@ -94,14 +94,10 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
-      ros2LookAndStepParameters = new ROS2StoredPropertySet<>(helper,
-                                                              LOOK_AND_STEP_PARAMETERS_TOPIC_PAIR,
-                                                              helper.getRobotModel().getLookAndStepParameters());
-      ros2FootstepPlannerParameters = new ROS2StoredPropertySet<>(helper,
-                                                                  FOOTSTEP_PLANNING_PARAMETERS_TOPIC_PAIR,
+      ros2LookAndStepParameters = new ROS2StoredPropertySet<>(helper, PARAMETERS, helper.getRobotModel().getLookAndStepParameters());
+      ros2FootstepPlannerParameters = new ROS2StoredPropertySet<>(helper, FOOTSTEP_PLANNING_PARAMETERS,
                                                                   helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep"));
-      ros2SwingPlannerParameters = new ROS2StoredPropertySet<>(helper,
-                                                               SWING_PLANNER_PARAMETERS_TOPIC_PAIR,
+      ros2SwingPlannerParameters = new ROS2StoredPropertySet<>(helper, SWING_PLANNER_PARAMETERS,
                                                                helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"));
       MissingThreadTools.startAsDaemon("PropertyStatusPublisher", ROS2StoredPropertySet.STATUS_PERIOD, () ->
       {
