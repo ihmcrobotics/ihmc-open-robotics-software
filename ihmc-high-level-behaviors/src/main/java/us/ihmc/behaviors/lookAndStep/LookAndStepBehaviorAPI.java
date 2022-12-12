@@ -2,7 +2,6 @@ package us.ihmc.behaviors.lookAndStep;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
@@ -42,11 +41,10 @@ public class LookAndStepBehaviorAPI
     */
    public static final ROS2Topic<Empty> REACHED_GOAL = LOOK_AND_STEP_BEHAVIOR.withOutput().withTypeName(Empty.class);
    /** Look and step behavior parameters */
-   public static final StoredPropertySetROS2TopicPair LOOK_AND_STEP_PARAMETERS_TOPIC_PAIR = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
-   public static final StoredPropertySetROS2TopicPair FOOTSTEP_PLANNING_PARAMETERS_TOPIC_PAIR
-         = new StoredPropertySetROS2TopicPair(MODULE_NAME, "footstep_planning_parameters");
-   public static final StoredPropertySetROS2TopicPair SWING_PLANNER_PARAMETERS_TOPIC_PAIR
-         = new StoredPropertySetROS2TopicPair(MODULE_NAME, "swing_planner_parameters");
+   public static final StoredPropertySetROS2TopicPair PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
+   public static final StoredPropertySetROS2TopicPair FOOTSTEP_PLANNING_PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME,
+                                                                                                                        "footstep_planning_parameters");
+   public static final StoredPropertySetROS2TopicPair SWING_PLANNER_PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "swing_planner_parameters");
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_FOR_UI = LOOK_AND_STEP_BEHAVIOR.withType(HeightMapMessage.class).withSuffix("height_map_for_ui");
 
    /*
