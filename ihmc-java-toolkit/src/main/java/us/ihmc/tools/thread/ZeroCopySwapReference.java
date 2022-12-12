@@ -10,6 +10,8 @@ import java.util.function.Supplier;
  * the data references can just be exchanged instead of copying anything.
  *
  * This class probably isn't bulletproof, but works under most conditions.
+ *
+ * Also evaluate IHMC Realtime's ConcurrentCopier for your use case.
  */
 public class ZeroCopySwapReference<T>
 {
