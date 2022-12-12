@@ -72,13 +72,9 @@ public class BytedecoOpenCVTools
       MatVector mats = new MatVector();
       opencv_core.split(source, mats);
 
-      LogTools.info("Previous Depth: {}", mats.size());
-
       MatVector finalMats = new MatVector();
       finalMats.push_back(mats.get(0));
       finalMats.push_back(mats.get(2));
-
-      LogTools.info("New Depth: {}", mats.size());
 
       Mat depth8UC2 = new Mat(source.rows(), source.cols(), CV_8UC2);
       opencv_core.merge(finalMats, depth8UC2);
@@ -349,8 +345,6 @@ public class BytedecoOpenCVTools
 
    public static Mat decompressImageJPGUsingYUV(byte[] dataArray)
    {
-      LogTools.info("Decompressing Image: {}", dataArray.length);
-
       BytePointer messageEncodedBytePointer = new BytePointer(dataArray.length);
       messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
       messageEncodedBytePointer.limit(dataArray.length);
