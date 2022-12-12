@@ -54,4 +54,37 @@ public final class ProMPUtil
       }
       System.out.println();
    }
+
+   public static ProMPInfoMapper.EigenMatrixXd concatenateEigenMatrix(ProMPInfoMapper.EigenMatrixXd matrixA, ProMPInfoMapper.EigenMatrixXd matrixB)
+   {
+      ProMPInfoMapper.EigenMatrixXd matrixC = new ProMPInfoMapper.EigenMatrixXd((int) Math.min(matrixA.rows(),matrixB.rows()),(int) (matrixA.cols()+matrixB.cols()));
+      for (int row = 0; row < (int) matrixC.rows(); row++)
+      {
+         for (int colA = 0; colA < (int) matrixA.cols(); colA++)
+         {
+            matrixC.apply(row, colA).put(matrixA.coeff(row, colA));
+         }
+         for (int colB = (int) matrixA.cols(); colB < (int) matrixA.cols() + matrixB.cols(); colB++)
+         {
+            matrixC.apply(row, colB).put(matrixB.coeff(row, colB-(int) matrixA.cols()));
+         }
+      }
+      return matrixC;
+   }
+
+   public static TrajectoryVector concatenateTrajectoryVector(TrajectoryVector vectorA, TrajectoryVector vectorB)
+   {
+      TrajectoryVector vectorC = new TrajectoryVector();
+      for (int row = 0; row < (int) vectorA.size(); row++)
+      {
+         Trajectory trajectoryRowA = vectorA.get(row);
+         Trajectory trajectoryRowB = vectorB.get(row);
+         ProMPInfoMapper.EigenMatrixXd rowA = trajectoryRowA.matrix();
+         ProMPInfoMapper.EigenMatrixXd rowB = trajectoryRowB.matrix();
+         ProMPInfoMapper.EigenMatrixXd rowC = concatenateEigenMatrix(rowA,rowB);
+         Trajectory trajectoryRowC = new Trajectory(rowC);
+         vectorC.put(trajectoryRowC);
+      }
+      return vectorC;
+   }
 }
