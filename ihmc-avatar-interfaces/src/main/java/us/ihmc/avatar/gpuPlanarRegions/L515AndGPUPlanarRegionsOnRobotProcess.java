@@ -136,7 +136,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
       gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ROS2StoredPropertySet ros2GPURegionParameters
+      ROS2StoredPropertySet<?> ros2GPURegionParameters
             = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS_TOPIC_PAIR, gpuPlanarRegionExtraction.getParameters());
       patchSizeChangedNotification
             = ros2GPURegionParameters.getCommandInput().registerPropertyChangedNotification(GPUPlanarRegionExtractionParameters.patchSize);
