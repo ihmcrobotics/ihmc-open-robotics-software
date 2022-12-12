@@ -69,6 +69,10 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
    public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
    {
+      // if we're passing in null, make an empty list
+      if (planarRegionsList == null)
+         planarRegionsList = new PlanarRegionsList();
+
       ArrayList<RDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
