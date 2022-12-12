@@ -164,8 +164,22 @@ public class GPUPlanarRegionExtraction
    }
 
    /**
-    * This is the part that needs to be done in the same thread as the sensor
-    * simulator, as it's using the same memory.
+    * A separate method that reads the source image from the memory location
+    * "sourceDepthByteBufferOfFloats" given in the create() method. If desired,
+    * extractPlanarRegions can then be called asyncronously, for performance.
+    *
+    * For example, for use with the sensor simulator,
+    * this is the part that needs to be done in the same thread as the sensor
+    * simulator, as it's using the same memory. This is part of making the
+    * planar region extraction UI more responsive by taking the planar region
+    * extraction algorithm off the main rendering thread. However, since we are
+    * using the sensor simulator, which gets rendered to on the render thread,
+    * we need to update from that memory on the render thread, so this method is
+    * meant to be called from there, separately from the extractPlanarRegions
+    * method.
+    *
+    * If it is not desired to run extractPlanarRegions in a separate thread,
+    * just call it right after this method.
     */
    public void readFromSourceImage()
    {
