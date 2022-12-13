@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.opencl._cl_kernel;
@@ -14,15 +15,22 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.VideoPacket;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.nadia.parameters.NadiaRobotModel;
+import us.ihmc.nadia.parameters.robotVersions.NadiaVersion;
+import us.ihmc.perception.*;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -52,6 +60,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
    private final AtomicReference<VideoPacket> colorPacketReference = new AtomicReference<>(null);
    private final AtomicReference<VideoPacket> depthPacketReference = new AtomicReference<>(null);
+
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
@@ -72,6 +81,9 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private int bytesPerSegment = 0;
    private String kilobytes = "";
 
+   private final FramePose3D cameraPose = new FramePose3D();
+   private final RigidBodyTransform steppingCameraTransform;
+   private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
    private IHMCROS2Callback<?> ros2Callback = null;
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer finalColoredDepthBuffer;
@@ -79,6 +91,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private _cl_kernel createPointCloudKernel;
    private String messageSizeString;
 
+   private final ROS2Helper ros2Helper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private OpenCLFloatBuffer parametersBuffer;
    private BytedecoImage color8UC4Image;
    private BytedecoImage depth32FC1Image;
@@ -92,14 +106,32 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
       this.depthTopic = depthTopic;
       this.colorTopic = colorTopic;
 
+      NadiaRobotModel robotModel = new NadiaRobotModel(NadiaVersion.V16_NEW_TORSO_FULL_ROBOT, RobotTarget.REAL_ROBOT);
+
+
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_point_cloud_node");
+      ros2Helper = new ROS2Helper(ros2Node);
+
+      steppingCameraTransform = robotModel.getSensorInformation().getSteppingCameraTransform();
+      frameUpdateSubscription = ros2Helper.subscribe(ROS2Tools.STEPPING_FRAME_UPDATE);
+
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
+
       setSubscribed(subscribed.get());
    }
 
    private void subscribe()
    {
       subscribed.set(true);
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, depthTopic, (packet) -> depthPacketReference.set(packet));
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, colorTopic, (packet) -> colorPacketReference.set(packet));
+
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, depthTopic, (packet) -> {
+         depthPacketReference.set(packet);
+         depthPacketReferenceCopy.getAndSet()
+      });
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, colorTopic, (packet) -> {
+         colorPacketReference.set(packet)
+      });
    }
 
    @Override
@@ -196,6 +228,16 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
          if (depthInitialized && colorInitialized)
          {
+            if (frameUpdateSubscription.getMessageNotification().poll())
+            {
+               MessageTools.toEuclid(frameUpdateSubscription.getMessageNotification().read(), steppingCameraTransform);
+            }
+            syncedRobot.update();
+            ReferenceFrame cameraFrame = syncedRobot.getReferenceFrames().getSteppingCameraFrame();
+            cameraPose.setToZero(cameraFrame);
+            cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
+            RigidBodyTransform transformToWorldFrame = cameraFrame.getTransformToWorldFrame();
+
             // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
             parametersBuffer.getBytedecoFloatBufferPointer().put(0, FOCAL_LENGTH_COLOR);
             parametersBuffer.getBytedecoFloatBufferPointer().put(1, CMOS_WIDTH_COLOR);
