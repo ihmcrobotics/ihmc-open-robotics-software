@@ -14,19 +14,43 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 
 import java.io.File;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
-import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class PerceptionDataLoader
 {
+   private ArrayList<PerceptionLogChannel> channels;
+
    private HDF5Manager hdf5Manager;
    private String filePath;
 
-   public PerceptionDataLoader(String filePath)
+   public PerceptionDataLoader()
    {
-      this.filePath = filePath;
-      hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+      channels = new ArrayList<>();
+   }
+
+   public void openLogFile(String filePath)
+   {
+      if (Files.exists(Paths.get(filePath)))
+      {
+         this.filePath = filePath;
+         hdf5Manager = new HDF5Manager(filePath, hdf5.H5F_ACC_RDONLY);
+         channels.clear();
+
+         ArrayList<String> topicNames = HDF5Tools.getTopicNames(hdf5Manager.getFile());
+         for (String topic : topicNames)
+         {
+            channels.add(new PerceptionLogChannel(topic, (int) hdf5Manager.getCount(topic), 0));
+         }
+      }
+      else
+      {
+         LogTools.warn("Log file does not exist: {}", filePath);
+      }
    }
 
    public void loadPointCloud(String namespace, int index, RecyclingArrayList<Point3D32> points, int rows, int cols)
@@ -101,6 +125,11 @@ public class PerceptionDataLoader
       return filePath;
    }
 
+   public ArrayList<PerceptionLogChannel> getChannels()
+   {
+      return channels;
+   }
+
    public HDF5Manager getHDF5Manager()
    {
       return hdf5Manager;
@@ -110,9 +139,10 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "experimental.hdf5";
+      String logFileName = "20221212_184940_PerceptionLog.hdf5";
 
-      PerceptionDataLoader loader = new PerceptionDataLoader(LOG_DIRECTORY + logFileName);
+      PerceptionDataLoader loader = new PerceptionDataLoader();
+      loader.openLogFile(LOG_DIRECTORY + logFileName);
 
       long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
 
@@ -145,7 +175,7 @@ public class PerceptionDataLoader
 
          imshow("/l515/color", colorImage);
          imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(300);
+         int code = waitKeyEx(30);
          if (code == 113)
          {
             System.exit(0);

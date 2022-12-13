@@ -3,8 +3,10 @@ package us.ihmc.rdx.ui;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.logging.PerceptionLogLoaderPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -15,16 +17,23 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Activator;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 public class RDXPerceptionVisualizerUI
 {
+   private final PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
+
    private RDXBaseUI baseUI;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
+
+   private PerceptionLogLoaderPanel perceptionLogLoaderPanel;
 
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
    private RDXROS2BigVideoVisualizer blackflyRightVisualizer;
    private RDXROS2VideoVisualizer videoVisualizer;
+
+   private final ArrayList<RDXOpenCVVideoVisualizer> imagePanels = new ArrayList<>();
 
    private Activator nativesLoadedActivator;
 
@@ -73,6 +82,9 @@ public class RDXPerceptionVisualizerUI
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
+            perceptionLogLoaderPanel = new PerceptionLogLoaderPanel(perceptionDataLoader);
+            baseUI.getImGuiPanelManager().addPanel(perceptionLogLoaderPanel);
+
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
@@ -95,6 +107,18 @@ public class RDXPerceptionVisualizerUI
          {
             if (nativesLoadedActivator.poll())
             {
+               if(perceptionLogLoaderPanel.isModified())
+               {
+                  imagePanels.clear();
+                  perceptionDataLoader.getChannels().forEach(channel ->
+                  {
+                        RDXOpenCVVideoVisualizer imagePanel = new RDXOpenCVVideoVisualizer("Perception Log: " + channel.getName(), channel.getName(), false);
+                        imagePanels.add(imagePanel);
+                        baseUI.getImGuiPanelManager().addPanel(imagePanel.getPanel());
+                  });
+                  perceptionLogLoaderPanel.setModified(false);
+               }
+
                globalVisualizersUI.update();
 
                baseUI.renderBeforeOnScreenUI();
