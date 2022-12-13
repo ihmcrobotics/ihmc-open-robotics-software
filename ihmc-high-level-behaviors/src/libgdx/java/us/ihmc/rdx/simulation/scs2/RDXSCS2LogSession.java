@@ -45,7 +45,7 @@ public class RDXSCS2LogSession extends RDXSCS2Session
 
    public void createPerceptionDataLoader(String perceptionLogFile)
    {
-      loader = new PerceptionDataLoader(perceptionLogFile);
+      loader = new PerceptionDataLoader();
    }
 
    public void create(RDXBaseUI baseUI)

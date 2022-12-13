@@ -6,9 +6,11 @@
     "Environment###java.lang.Class:Environment" : true,
     "Global Visualizers" : true,
     "/ihmc/blackflyright/video###us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer:/ihmc/blackflyright/video" : false,
-    "/ihmc/l515/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2BigDepthVideoVisualizer:/ihmc/l515/depth" : false,
+    "/ihmc/d435/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/d435/depth" : false,
+    "/ihmc/d435/video###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/d435/video" : false,
+    "/ihmc/ouster/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/ouster/depth" : false,
     "/ihmc/video###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/video" : false,
-    "Perception Logger" : true,
+    "Perception Logging and Loading" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }
