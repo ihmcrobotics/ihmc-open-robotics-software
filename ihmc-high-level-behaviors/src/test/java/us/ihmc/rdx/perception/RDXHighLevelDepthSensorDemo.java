@@ -105,7 +105,7 @@ public class RDXHighLevelDepthSensorDemo
                ImGui.text("Mouse x: " + mousePosX + " y: " + mousePosY);
             });
 
-            RDX3DPanel panel3D = new RDX3DPanel("3D View 2", 2, true);
+            RDX3DPanel panel3D = new RDX3DPanel("3D View 2", true);
             baseUI.add3DPanel(panel3D);
 
             frustumVisualizer = new RDXFrustumVisualizer();
