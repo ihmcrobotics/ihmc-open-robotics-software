@@ -11,13 +11,13 @@ import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 
 import java.util.ArrayList;
 
-public class RDXSimulatedTerrainObject
+public class RDXSCS2TerrainObject
 {
    private final TerrainObjectDefinition terrainObjectDefinition;
    private final ArrayList<ModelInstance> visualModelInstances = new ArrayList<>();
    private final ArrayList<ModelInstance> collisionModelInstances = new ArrayList<>();
 
-   public RDXSimulatedTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
+   public RDXSCS2TerrainObject(TerrainObjectDefinition terrainObjectDefinition)
    {
       this.terrainObjectDefinition = terrainObjectDefinition;
    }

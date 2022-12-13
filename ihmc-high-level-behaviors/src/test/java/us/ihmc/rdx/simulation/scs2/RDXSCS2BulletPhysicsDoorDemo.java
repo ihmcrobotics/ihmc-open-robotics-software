@@ -16,7 +16,7 @@ public class RDXSCS2BulletPhysicsDoorDemo
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources");
-   private final RDXSCS2BulletSimulationSession scs2SimulationSession = new RDXSCS2BulletSimulationSession();
+   private final RDXSCS2SimulationSession scs2SimulationSession = new RDXSCS2SimulationSession();
 
    public RDXSCS2BulletPhysicsDoorDemo()
    {

@@ -47,8 +47,8 @@ public class RDXSCS2Session
    private final ImBoolean showVirtualRenderables = new ImBoolean(true);
    private final ImBoolean showCollisionMeshes = new ImBoolean(false);
    protected final RDXYoManager yoManager = new RDXYoManager();
-   private final ArrayList<RDXSimulatedRobot> robots = new ArrayList<>();
-   private final ArrayList<RDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
+   private final ArrayList<RDXSCS2Robot> robots = new ArrayList<>();
+   private final ArrayList<RDXSCS2TerrainObject> terrainObjects = new ArrayList<>();
    private final SCS2YoImPlotManager plotManager = new SCS2YoImPlotManager();
    private boolean sessionStartedHandled = false;
    private final RDXRenderableAdapter renderables = new RDXRenderableAdapter(this::getRenderables);
@@ -80,7 +80,7 @@ public class RDXSCS2Session
       robots.clear();
       for (RobotDefinition robotDefinition : session.getRobotDefinitions())
       {
-         RDXSimulatedRobot robot = new RDXSimulatedRobot(robotDefinition);
+         RDXSCS2Robot robot = new RDXSCS2Robot(robotDefinition);
          robots.add(robot);
          robot.create(yoManager);
       }
@@ -88,7 +88,7 @@ public class RDXSCS2Session
       terrainObjects.clear();
       for (TerrainObjectDefinition terrainObjectDefinition : session.getTerrainObjectDefinitions())
       {
-         RDXSimulatedTerrainObject simulatedTerrainObject = new RDXSimulatedTerrainObject(terrainObjectDefinition);
+         RDXSCS2TerrainObject simulatedTerrainObject = new RDXSCS2TerrainObject(terrainObjectDefinition);
          terrainObjects.add(simulatedTerrainObject);
          simulatedTerrainObject.create();
       }
@@ -125,7 +125,7 @@ public class RDXSCS2Session
          plotManager.initializeLinkedVariables();
       }
 
-      for (RDXSimulatedRobot robot : robots)
+      for (RDXSCS2Robot robot : robots)
       {
          robot.update();
       }
@@ -135,7 +135,7 @@ public class RDXSCS2Session
    {
       if (sceneLevels.contains(RDXSceneLevel.GROUND_TRUTH))
       {
-         for (RDXSimulatedRobot robot : robots)
+         for (RDXSCS2Robot robot : robots)
          {
             ImBoolean showRobot = showRobotMap.get(robot.getRobotDefinition().getName());
             if (showRobot != null && showRobot.get()) // Sometimes it's not ready yet and can be null
@@ -145,7 +145,7 @@ public class RDXSCS2Session
          }
          if (showTerrain.get())
          {
-            for (RDXSimulatedTerrainObject terrainObject : terrainObjects)
+            for (RDXSCS2TerrainObject terrainObject : terrainObjects)
             {
                terrainObject.getRealRenderables(renderables, pool);
             }
@@ -155,11 +155,11 @@ public class RDXSCS2Session
       {
          if (showCollisionMeshes.get())
          {
-            for (RDXSimulatedRobot robot : robots)
+            for (RDXSCS2Robot robot : robots)
             {
                robot.getCollisionMeshRenderables(renderables, pool);
             }
-            for (RDXSimulatedTerrainObject terrainObject : terrainObjects)
+            for (RDXSCS2TerrainObject terrainObject : terrainObjects)
             {
                terrainObject.getCollisionRenderables(renderables, pool);
             }
@@ -176,7 +176,7 @@ public class RDXSCS2Session
    protected void renderImGuiWidgetsPartOne()
    {
       ImGui.pushItemWidth(110);
-      if (ImGuiTools.volatileInputInt("Bullet simulation dt (Hz)", dtHz))
+      if (ImGuiTools.volatileInputInt("DT (Hz)", dtHz))
       {
          changeDT();
       }
@@ -321,7 +321,7 @@ public class RDXSCS2Session
       showRobotPairs.clear();
    }
 
-   public ArrayList<RDXSimulatedRobot> getRobots()
+   public ArrayList<RDXSCS2Robot> getRobots()
    {
       return robots;
    }
