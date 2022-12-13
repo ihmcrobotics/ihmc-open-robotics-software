@@ -3,6 +3,7 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -13,6 +14,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -44,6 +46,8 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
+import us.ihmc.valkyrie.behaviors.ValkyrieLookAndStepParameters;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
@@ -106,7 +110,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.target = target;
       this.robotVersion = robotVersion;
 
-      controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
+      controllerDT = 0.004;
       estimatorDT = 0.002;
       simulateDT = estimatorDT / 3.0;
    }
@@ -527,6 +531,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return new ValkyrieLookAndStepParameters();
+   }
+
+   @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
@@ -705,5 +715,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return new ValkyrieDirectRobotInterface(ros2Node, this);
+   }
+
+   @Override
+   public Path getMultiContactScriptPath()
+   {
+      Path folderPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      return folderPath.resolve("valkyrie/src/main/resources/multiContact/scripts").toAbsolutePath().normalize();
    }
 }

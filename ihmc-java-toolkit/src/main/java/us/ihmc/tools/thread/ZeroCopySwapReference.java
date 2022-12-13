@@ -4,7 +4,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
+ * Manages two data instances shared by two threads. This often can be used to
+ * double performance by doing reading and writing at the same time, if both reading
+ * and writing need some time to access the data. Since there's two data instances,
+ * the data references can just be exchanged instead of copying anything.
+ *
  * This class probably isn't bulletproof, but works under most conditions.
+ *
+ * Also evaluate IHMC Realtime's ConcurrentCopier for your use case.
  */
 public class ZeroCopySwapReference<T>
 {

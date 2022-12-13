@@ -17,7 +17,9 @@ import org.bytedeco.javacpp.tools.InfoMapper;
             include = {"promp/trajectory.hpp",
                        "promp/trajectory_group.hpp",
                        "promp/promp.hpp",},
-            link = "promp"),
+            link = "promp",
+            preload = "jnipromp"
+      ),
       @Platform(
             value = "linux",
             includepath = "../include",
@@ -98,7 +100,7 @@ public class ProMPInfoMapper implements InfoMapper
 
       public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int rowId, int colId);
 
-      public void debugPrint(String name)
+      public void debugPrintMatrix(String name)
       {
          System.out.println(name);
 
@@ -123,6 +125,9 @@ public class ProMPInfoMapper implements InfoMapper
 
       private native void allocate(int length);
 
+      // Calls coeff(Index id) on the C++ side
+      public native double coeff(int id);
+
       // Calls data() on the C++ side
       public native DoublePointer data();
 
@@ -130,5 +135,15 @@ public class ProMPInfoMapper implements InfoMapper
       public native long size();
 
       public native @Name("operator ()") @ByRef EigenDoubleScalar apply(int id);
+
+      public void debugPrintVector(String name)
+      {
+         System.out.println(name);
+
+         for (int idx = 0; idx < size(); idx++)
+         {
+            System.out.println(coeff(idx) + " ");
+         }
+      }
    }
 }

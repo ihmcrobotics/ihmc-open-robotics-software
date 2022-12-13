@@ -214,6 +214,8 @@ public class InverseDynamicsQPSolver
 
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
+
+      CommonOps_DDRM.fill(solverInput_activeIndices, 1.0);
    }
 
    private void addRegularization()

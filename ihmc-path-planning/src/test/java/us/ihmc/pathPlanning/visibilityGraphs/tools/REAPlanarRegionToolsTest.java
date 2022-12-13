@@ -19,6 +19,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.REAPlanarRegionTools;
@@ -29,7 +30,7 @@ public class REAPlanarRegionToolsTest
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1.0e-12;
 
-   public static Point3D toWorld(Point2D point2D, Transform transformToWorld)
+   public static Point3D toWorld(Point2DReadOnly point2D, Transform transformToWorld)
    {
       Point3D inWorld = new Point3D(point2D);
       transformToWorld.transform(inWorld);

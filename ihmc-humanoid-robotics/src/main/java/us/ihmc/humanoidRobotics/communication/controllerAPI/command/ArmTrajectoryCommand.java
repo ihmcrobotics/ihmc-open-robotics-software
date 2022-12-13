@@ -12,6 +12,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    private long sequenceId;
    private RobotSide robotSide;
    private boolean forceExecution = false;
+   private RequestedMode requestedMode = null;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public ArmTrajectoryCommand()
@@ -36,6 +37,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       sequenceId = 0;
       robotSide = null;
       setForceExecution(false);
+      setRequestedMode(null);
       jointspaceTrajectory.clear();
    }
 
@@ -43,6 +45,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       this.robotSide = robotSide;
       setForceExecution(false);
+      setRequestedMode(null);
       jointspaceTrajectory.clear();
    }
 
@@ -51,6 +54,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       clear(RobotSide.fromByte(message.getRobotSide()));
       setForceExecution(message.getForceExecution());
+      setRequestedMode(RequestedMode.fromByte(message.getRequestedMode()));
       sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
@@ -60,6 +64,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       clear(other.getRobotSide());
       setForceExecution(other.getForceExecution());
+      setRequestedMode(other.getRequestedMode());
       sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.getJointspaceTrajectory());
    }
@@ -79,9 +84,19 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
       this.forceExecution = forceExecution;
    }
 
+   public void setRequestedMode(RequestedMode requestedMode)
+   {
+      this.requestedMode = requestedMode;
+   }
+
    public boolean getForceExecution()
    {
       return forceExecution;
+   }
+
+   public RequestedMode getRequestedMode()
+   {
+      return requestedMode;
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()
@@ -145,5 +160,25 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    public long getSequenceId()
    {
       return sequenceId;
+   }
+
+   public enum RequestedMode
+   {
+      TORQUE_CONTROL,
+      POSITION_CONTROL;
+
+      public static final RequestedMode[] values = values();
+
+      public byte toByte()
+      {
+         return (byte) ordinal();
+      }
+
+      public static RequestedMode fromByte(byte enumAsByte)
+      {
+         if (enumAsByte == -1)
+            return null;
+         return values[enumAsByte];
+      }
    }
 }

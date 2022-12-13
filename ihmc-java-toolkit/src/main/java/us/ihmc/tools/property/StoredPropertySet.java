@@ -86,6 +86,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private String saveFileNameJSON;
    private String currentVersionSuffix;
    private Class<?> classForLoading;
+   private Class<?> basePropertySetClass;
    private String directoryNameToAssumePresent;
    private String subsequentPathToResourceFolder;
    private final WorkspaceDirectory workspaceDirectory;
@@ -110,11 +111,22 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             String subsequentPathToResourceFolder,
                             String versionSuffix)
    {
+      this(keys, classForLoading, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+   }
+
+   public StoredPropertySet(StoredPropertyKeyList keys,
+                            Class<?> classForLoading,
+                            Class<?> basePropertySetClass,
+                            String directoryNameToAssumePresent,
+                            String subsequentPathToResourceFolder,
+                            String versionSuffix)
+   {
       this.keys = keys;
-      this.uncapitalizedClassName = StringUtils.uncapitalize(classForLoading.getSimpleName());
-      this.capitalizedClassName = classForLoading.getSimpleName();
+      this.uncapitalizedClassName = StringUtils.uncapitalize(basePropertySetClass.getSimpleName());
+      this.capitalizedClassName = basePropertySetClass.getSimpleName();
       this.classForLoading = classForLoading;
       title = classForLoading.getSimpleName();
+      this.basePropertySetClass = basePropertySetClass;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading);
@@ -133,7 +145,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    public void generateJavaFiles(String subsequentPathToJavaFolder)
    {
-      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(classForLoading,
+      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass,
                                                                                     directoryNameToAssumePresent,
                                                                                     subsequentPathToResourceFolder,
                                                                                     subsequentPathToJavaFolder);
@@ -158,19 +170,31 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public double get(DoubleStoredPropertyKey key)
    {
-      return (Double) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning Double.NaN.", key.getTitleCasedName());
+      return isNull ? Double.NaN : (Double) value;
    }
 
    @Override
    public int get(IntegerStoredPropertyKey key)
    {
-      return (Integer) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning -1.", key.getTitleCasedName());
+      return isNull ? -1 : (Integer) value;
    }
 
    @Override
    public boolean get(BooleanStoredPropertyKey key)
    {
-      return (Boolean) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning false.", key.getTitleCasedName());
+      return isNull ? false : (Boolean) value;
    }
 
    /**
@@ -179,7 +203,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public <T> T get(StoredPropertyKey<T> key)
    {
-      return (T) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning null.", key.getTitleCasedName());
+      return isNull ? null : (T) value;
    }
 
    @Override
@@ -317,7 +345,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       currentVersionSuffix = versionSuffix;
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
       workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
-      saveFileNameJSON = classForLoading.getSimpleName() + currentVersionSuffix + ".json";
+      saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
       workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
    }
 

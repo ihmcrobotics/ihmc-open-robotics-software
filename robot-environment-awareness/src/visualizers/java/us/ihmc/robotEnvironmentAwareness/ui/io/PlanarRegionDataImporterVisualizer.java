@@ -16,6 +16,7 @@ import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -72,7 +73,7 @@ public class PlanarRegionDataImporterVisualizer extends ApplicationNoModule
       RigidBodyTransform transform = new RigidBodyTransform();
       data.getTransformToWorld(transform);
 
-      List<Point2D> concaveHullVerticesLocal = data.getConcaveHull();
+      List<? extends Point2DReadOnly> concaveHullVerticesLocal = data.getConcaveHull();
       Color regionColor = OcTreeMeshBuilder.getRegionColor(regionId);
 
       List<Point3D> concaveHullVertices = concaveHullVerticesLocal.stream().map(Point3D::new).map(p ->

@@ -14,6 +14,7 @@ plugins {
 ihmc {
    loadProductProperties("../product.properties")
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    javaDirectory("slam-wrapper", "generated-java")
    configurePublications()
 }
@@ -36,7 +37,7 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
@@ -46,6 +47,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
+   api("us.ihmc:robot-environment-awareness:source")
+   apiBytedecoNatives("hdf5", "1.12.2-")
 }
 
 openpnpDependencies {
@@ -55,12 +58,16 @@ openpnpDependencies {
 val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:ihmc-commons:0.31.0")
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.21-")
    apiBytedecoNatives("opencv", "4.6.0-")
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
    apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 
@@ -72,6 +79,8 @@ javacvDependencies {
    apiBytedecoNatives("opencl", "3.0-")
    apiBytedecoNatives("librealsense2", "2.50.0-")
    apiBytedecoNatives("spinnaker", "2.4.0.143-")
+   apiBytedecoNatives("ffmpeg", "5.0-")
+   apiBytedecoNatives("hdf5", "1.12.2-")
    apiBytedecoNatives("ffmpeg", "5.1.2-")
 }
 

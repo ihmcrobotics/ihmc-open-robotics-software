@@ -544,7 +544,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                             double extraHeight)
    {
       double widthDisplacement = queryY - ankleY - Math.signum(queryY - ankleY) * 0.5 * hipWidth;
-      double height = EuclidCoreTools.norm(desiredDistance, queryX - ankleX, widthDisplacement);
+      double height = EuclidCoreTools.squareRoot(MathTools.square(desiredDistance) - MathTools.square(queryX - ankleX) - MathTools.square(widthDisplacement));
       return height + extraHeight;
    }
 

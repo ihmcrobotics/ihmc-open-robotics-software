@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.tools.behaviorTree;
 
-import us.ihmc.commons.Conversions;
+import us.ihmc.robotics.time.TimeTools;
+
+import java.time.Instant;
 
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
@@ -8,7 +10,7 @@ import us.ihmc.commons.Conversions;
 public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
 {
    private BehaviorTreeNodeStatus previousStatus = null;
-   private long lastTickMillis = -1;
+   private Instant lastTickInstant = null;
    private String name = getClass().getSimpleName();
    private Class<?> type = BehaviorTreeNode.class;
 
@@ -25,35 +27,22 @@ public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
    }
 
    @Override
-   public long getLastTickMillis()
+   public Instant getLastTickInstant()
    {
-      return lastTickMillis;
+      return lastTickInstant;
    }
 
    public double getTimeSinceLastTick()
    {
-      long lastTickMillis = getLastTickMillis();
-      if (lastTickMillis == -1)
-      {
-         return Double.MAX_VALUE;
-      }
+      if (hasBeenTicked())
+         return TimeTools.calculateDelay(lastTickInstant);
       else
-      {
-         return Conversions.millisecondsToSeconds(System.currentTimeMillis() - lastTickMillis);
-      }
+         return Double.NaN;
    }
 
    public boolean wasTickedRecently(double maxTimeSince)
    {
-      long lastTickMillis = getLastTickMillis();
-      if (lastTickMillis == -1)
-      {
-         return false;
-      }
-      else
-      {
-         return Conversions.millisecondsToSeconds(System.currentTimeMillis() - lastTickMillis) < maxTimeSince;
-      }
+      return hasBeenTicked() && TimeTools.calculateDelay(lastTickInstant) < maxTimeSince;
    }
 
    @Override
@@ -69,9 +58,9 @@ public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
    }
 
    @Override
-   public void setLastTickMillis(long lastTickMillis)
+   public void setLastTickInstant(Instant lastTickInstant)
    {
-      this.lastTickMillis = lastTickMillis;
+      this.lastTickInstant = lastTickInstant;
    }
 
    @Override
