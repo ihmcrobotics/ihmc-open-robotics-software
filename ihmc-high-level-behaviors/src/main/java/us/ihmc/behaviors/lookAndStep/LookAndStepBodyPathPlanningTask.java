@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -20,7 +18,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -79,7 +76,6 @@ public class LookAndStepBodyPathPlanningTask
    protected YoDouble bodyPathPlanningDuration;
 
    protected PlanarRegionsList mapRegions;
-   protected FusedSensorHeadPointCloudMessage ousterLidarScan;
    protected Pose3DReadOnly goal;
    protected ROS2SyncedRobotModel syncedRobot;
    protected boolean doPlanarRegionsVisibilityGraphsPlan;
@@ -96,13 +92,10 @@ public class LookAndStepBodyPathPlanningTask
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private final TypedInput<HeightMapData> heightMapInput = new TypedInput<>();
-      private final TypedInput<FusedSensorHeadPointCloudMessage> ousterLidarInput = new TypedInput<>();
       private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private final Timer heightMapExpirationTimer = new Timer();
-      private final Timer ousterLidarExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
-      private TimerSnapshotWithExpiration ousterLidarReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private BehaviorTaskSuppressor suppressor;
       private double neckPitch;
@@ -139,7 +132,6 @@ public class LookAndStepBodyPathPlanningTask
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
          mapRegionsInput.addCallback(data -> run());
-         ousterLidarInput.addCallback(data -> run());
          goalInput.addCallback(data -> run());
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
@@ -167,9 +159,6 @@ public class LookAndStepBodyPathPlanningTask
 //         suppressor.addCondition(() -> "No regions. "
 //                                       + (mapRegions == null ? null : (" isEmpty: " + mapRegions.isEmpty())),
 //                                 () -> !(mapRegions != null && !mapRegions.isEmpty()));
-         suppressor.addCondition(() -> "Ouster lidar expired. haveReceivedAny: " + ousterLidarReceptionTimerSnapshot.hasBeenSet()
-                                       + " timeSinceLastUpdate: " + ousterLidarReceptionTimerSnapshot.getTimePassedSinceReset(),
-                                 () -> lookAndStepParameters.getHeightMapBodyPathPlan() && ousterLidarReceptionTimerSnapshot.isExpired());
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
@@ -188,12 +177,6 @@ public class LookAndStepBodyPathPlanningTask
       {
          heightMapInput.set(HeightMapMessageTools.unpackMessage(heightMapMessage));
          heightMapExpirationTimer.reset();
-      }
-
-      public void acceptOusterLidar(FusedSensorHeadPointCloudMessage ousterLidarScan)
-      {
-         ousterLidarInput.set(ousterLidarScan);
-         ousterLidarExpirationTimer.reset();
       }
 
       public void acceptGoal(Pose3DReadOnly goal)
@@ -230,13 +213,11 @@ public class LookAndStepBodyPathPlanningTask
       {
          ros2LookAndStepParameters.update();
          mapRegions = mapRegionsInput.getLatest();
-         ousterLidarScan = ousterLidarInput.getLatest();
          goal = goalInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
          mapRegionsReceptionTimerSnapshot = mapRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
-         ousterLidarReceptionTimerSnapshot = ousterLidarExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
@@ -272,7 +253,6 @@ public class LookAndStepBodyPathPlanningTask
       }
       else if (doOusterHeightMapPlan)
       {
-//         ousterToWorld.set(ousterLidarScan.getSensorOrientation(), ousterLidarScan.getSensorPosition());
          ousterFrame.update();
 
          // TODO: Going to have to reimplement this
