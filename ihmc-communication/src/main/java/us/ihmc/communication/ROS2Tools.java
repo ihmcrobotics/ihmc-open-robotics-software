@@ -60,6 +60,7 @@ public class ROS2Tools
    public static final String BEHAVIOR_MODULE_NAME = "behavior";
    public static final String REA_MODULE_NAME = "rea";
    public static final String MAPPING_MODULE_NAME = "map";
+   public static final String PERCEPTION_MODULE_NAME = "perception";
    public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
    public static final String MAPSENSE_MODULE_NAME = "mapsense";
    public static final String HEIGHT_MAP_MODULE_NAME = "height_map";
@@ -103,6 +104,7 @@ public class ROS2Tools
    public static final ROS2Topic<?> BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
    public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
+   public static final ROS2Topic<?> PERCEPTION_MODULE = IHMC_ROOT.withModule(PERCEPTION_MODULE_NAME);
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
    public static final ROS2Topic<?> MAPSENSE_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> HEIGHT_MAP_MODULE = IHMC_ROOT.withModule(HEIGHT_MAP_MODULE_NAME);
@@ -169,6 +171,10 @@ public class ROS2Tools
    /** Output regions from Atlas Realsense SLAM module */
    public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    public static final ROS2Topic<PlanarRegionsListMessage> MAPSENSE_REGIONS = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   /** Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered for body collisions, and in world frame.
+    *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
+   public static final ROS2Topic<TimestampedPlanarRegionsListMessage> RAPID_REGIONS
+         = PERCEPTION_MODULE.withOutput().withTypeName(TimestampedPlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    public static final ROS2Topic<Float64> MAPSENSE_REGIONS_DELAY_OFFSET = MAPSENSE_MODULE.withType(Float64.class).withSuffix("delay_offset");
