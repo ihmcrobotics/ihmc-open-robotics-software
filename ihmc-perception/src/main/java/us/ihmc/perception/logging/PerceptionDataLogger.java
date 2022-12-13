@@ -288,8 +288,8 @@ public class PerceptionDataLogger
    public void storeDepthMap(String namespace, BigVideoPacket message)
    {
       Group group = hdf5Manager.getGroup(namespace);
-//      ThreadTools.startAThread(() ->
-//                               {
+      executorService.submit(() ->
+                               {
                                   synchronized (this)
                                   {
                                      LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
@@ -301,15 +301,15 @@ public class PerceptionDataLogger
                                      HDF5Tools.storeByteArray(group, depthMapCount, messageDepthDataArray, message.getData().size());
                                      LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
                                   }
-//                               }, "depth_map_logger_thread");
+                               });
    }
 
    public void storeVideoPacket(String namespace, VideoPacket packet)
    {
       long begin_store = System.nanoTime();
       Group group = hdf5Manager.getGroup(namespace);
-//      ThreadTools.startAThread(() ->
-//                               {
+      executorService.submit(() ->
+                               {
 
                                   byte[] heapArray = buffers.get(namespace);
                                   int imageCount = counts.get(namespace);
@@ -325,7 +325,7 @@ public class PerceptionDataLogger
                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
                                   LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
-//                               }, "video_packet_logger_thread -> " + namespace);
+                               });
       long end_store = System.nanoTime();
 
 
