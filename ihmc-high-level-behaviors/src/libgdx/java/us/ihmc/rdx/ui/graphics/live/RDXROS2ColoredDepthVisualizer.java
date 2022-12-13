@@ -99,6 +99,9 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private Mat depthImage;
    private Mat colorImage;
 
+   private boolean depthAvailable = false;
+   private boolean colorAvailable = false;
+
    public RDXROS2ColoredDepthVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> depthTopic, ROS2Topic<VideoPacket> colorTopic)
    {
       super(title + " (ROS 2)");
@@ -127,10 +130,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
       ros2Callback = new IHMCROS2Callback<>(ros2Node, depthTopic, (packet) -> {
          depthPacketReference.set(packet);
-         depthPacketReferenceCopy.getAndSet()
+         depthAvailable = true;
       });
       ros2Callback = new IHMCROS2Callback<>(ros2Node, colorTopic, (packet) -> {
-         colorPacketReference.set(packet)
+         colorPacketReference.set(packet);
+         colorAvailable = true;
       });
    }
 
@@ -285,6 +289,10 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
             // Request the PointCloudRenderer to render the point cloud from OpenCL-mapped buffers
             pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
+
+            depthAvailable = false;
+            colorAvailable = false;
+
          }
       }
    }
