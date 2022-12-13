@@ -36,12 +36,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements RenderableProvider
 {
+   private final static int TOTAL_NUMBER_OF_PARAMETERS = 24;
+
    private final static int FLOATS_PER_POINT = 8;
    private final static int BYTES_PER_POINT = FLOATS_PER_POINT * 4;
 
-   private final float l515ColorFocalLength = 0.00254f;
-   private final float l515ColorCMOSWidth = 0.0036894f;
-   private final float l515ColorCMOSHeight = 0.0020753f;
+   private final float FOCAL_LENGTH_COLOR = 0.00254f;
+   private final float CMOS_WIDTH_COLOR = 0.0036894f;
+   private final float CMOS_HEIGHT_COLOR = 0.0020753f;
 
    private final CameraPinholeBrown depthCameraInstrinsics = new CameraPinholeBrown();
    private final CameraPinholeBrown colorCameraInstrinsics = new CameraPinholeBrown();
@@ -54,8 +56,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean subscribed = new ImBoolean(true);
-   private final ROS2Topic<?> depthTopic;
-   private final ROS2Topic<?> colorTopic;
+   private final ROS2Topic<VideoPacket> depthTopic;
+   private final ROS2Topic<VideoPacket> colorTopic;
    private final ROS2Node ros2Node;
 
    private final byte[] heapArrayDepth = new byte[25000000];
@@ -63,6 +65,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
    private boolean depthInitialized = false;
    private boolean colorInitialized = false;
+   private boolean sinusoidalPatternEnabled = false;
 
    private float depthToMetersScalar = 2.500000118743628E-4f;
    private int totalNumberOfPoints = 0;
@@ -82,7 +85,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private Mat depthImage;
    private Mat colorImage;
 
-   public RDXROS2ColoredDepthVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> depthTopic, ROS2Topic<?> colorTopic)
+   public RDXROS2ColoredDepthVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> depthTopic, ROS2Topic<VideoPacket> colorTopic)
    {
       super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
@@ -95,8 +98,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private void subscribe()
    {
       subscribed.set(true);
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_DEPTH, (packet) -> depthPacketReference.set(packet));
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, ROS2Tools.L515_VIDEO, (packet) -> colorPacketReference.set(packet));
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, depthTopic, (packet) -> depthPacketReference.set(packet));
+      ros2Callback = new IHMCROS2Callback<>(ros2Node, colorTopic, (packet) -> colorPacketReference.set(packet));
    }
 
    @Override
@@ -106,10 +109,10 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
       openCLManager = new OpenCLManager();
       openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("RealsenseColoredPointCloudCreator");
+      openCLProgram = openCLManager.loadProgram("ColoredPointCloudCreator");
       createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
 
-      parametersBuffer = new OpenCLFloatBuffer(23);
+      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUMBER_OF_PARAMETERS);
       parametersBuffer.createOpenCLBufferObject(openCLManager);
    }
 
@@ -194,9 +197,9 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
          if (depthInitialized && colorInitialized)
          {
             // If both depth and color images are available, configure the OpenCL kernel and run it, to generate the point cloud float buffer.
-            parametersBuffer.getBytedecoFloatBufferPointer().put(0, l515ColorFocalLength);
-            parametersBuffer.getBytedecoFloatBufferPointer().put(1, l515ColorCMOSWidth);
-            parametersBuffer.getBytedecoFloatBufferPointer().put(2, l515ColorCMOSHeight);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(0, FOCAL_LENGTH_COLOR);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(1, CMOS_WIDTH_COLOR);
+            parametersBuffer.getBytedecoFloatBufferPointer().put(2, CMOS_HEIGHT_COLOR);
             parametersBuffer.getBytedecoFloatBufferPointer().put(3, transformToWorldFrame.getTranslation().getX32());
             parametersBuffer.getBytedecoFloatBufferPointer().put(4, transformToWorldFrame.getTranslation().getY32());
             parametersBuffer.getBytedecoFloatBufferPointer().put(5, transformToWorldFrame.getTranslation().getZ32());
@@ -217,6 +220,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             parametersBuffer.getBytedecoFloatBufferPointer().put(20, (float) depthImage.rows());
             parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) colorImage.cols());
             parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) colorImage.rows());
+            parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) (sinusoidalPatternEnabled ? 1.0f : 0.0f));
+            // Update TOTAL_NUMBER_OF_POINTS in the static constants if adding more parameters here.
 
             // Upload the buffers to the OpenCL device (GPU)
             depth32FC1Image.writeOpenCLImage(openCLManager);

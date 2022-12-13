@@ -42,9 +42,8 @@ double interpolate(double a, double b, double alpha)
 }
 
 // TODO: create (R,G,B) based on eyeDepth ( distance from me )
-int createRGB(double input)
+int createRGB(double input, bool sinusoidal)
 {
-    bool sinusoidal = false;
     if(sinusoidal)
     {
         // maximum depth value
@@ -159,6 +158,8 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    int colorImageWidth = parameters[21];
    int colorImageHeight = parameters[22];
 
+   bool sinusoidal = parameters[23] > 0.5; //TODO: Create a boolean OpenCL buffer for these binary parameters
+
    int x = get_global_id(0);
    int y = get_global_id(1);
 
@@ -173,7 +174,7 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
    float cmosToPixelsX = colorImageWidth / cmosWidth;
    float cmosToPixelsY = colorImageHeight / cmosHeight;
 
-   // Flip because positive yaw is to the left, but image cooridinates go to the right
+   // Flip because positive yaw is to the left, but image coordinates go to the right
    float yaw = -angle(1.0, 0.0, zUp3DX, zUp3DY);
    double distanceFromSensorCenterX = focalLength * tan(yaw);
    double distanceFromSensorLeftX = distanceFromSensorCenterX + halfCMOSWidth;
@@ -212,21 +213,21 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
         }
        else
        {
-         color = createRGB((double) worldFramePoint.z);
+         color = createRGB((double) worldFramePoint.z, sinusoidal);
 //          color = (255 << 24) | (255 << 16) | (255 << 8) | 255; // white is default
        }
 
     }
     else if(viewMode == DEPTH)
     {
-//              float4 rgb = createRGBFromDepth(eyeDepthInMeters);
+//              float4 rgb = createRGBFromDepth(eyeDepthInMeters, sinusoidal);
 //              color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
-          color = createRGB((double) eyeDepthInMeters);
+          color = createRGB((double) eyeDepthInMeters, sinusoidal);
 //              printf("%f, %f, %f\n", rgb.x,rgb.y,rgb.z);
     }
     else
     {
-//               float4 rgb = createRGBFromZDepth(zUp3DZ);
+//               float4 rgb = createRGBFromZDepth(zUp3DZ, sinusoidal);
 //               color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
 //               printf("r: %f, g: %f, b: %f\n", rgb.x,rgb.y,rgb.z);
          color = createRGB((double) worldFramePoint.z);
@@ -248,11 +249,6 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
     float g = gInt / 255.0;
     float b = bInt / 255.0;
     float a = aInt / 255.0;
-
-    // float r = 1.0;
-    // float g = 1.0;
-    // float b = 1.0;
-    // float a = 1.0;
 
     finalPointFloatBuffer[pointStartIndex + 3] = r;
     finalPointFloatBuffer[pointStartIndex + 4] = g;

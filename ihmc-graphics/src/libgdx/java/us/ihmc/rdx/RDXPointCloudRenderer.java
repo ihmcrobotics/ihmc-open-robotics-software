@@ -235,7 +235,6 @@ public class RDXPointCloudRenderer implements RenderableProvider
    public void updateMeshFastest(int numberOfPoints, int segmentToUpdate)
    {
       FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
-      LogTools.info("Number of Points: {}, Points Per Segment {}", numberOfPoints, pointsPerSegment);
       if (numberOfPoints < pointsPerSegment) // special use case here
       {
          if (numberOfPoints == 0) // prevents errors when no point are there
