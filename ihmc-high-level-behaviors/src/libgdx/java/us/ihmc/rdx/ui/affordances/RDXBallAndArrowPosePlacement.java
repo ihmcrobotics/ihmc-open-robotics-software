@@ -11,7 +11,6 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
-import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -36,7 +35,6 @@ import java.util.function.Consumer;
 public class RDXBallAndArrowPosePlacement implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private final ImFloat goalZOffset = new ImFloat(0.0f);
    private ModelInstance sphere;
    private ModelInstance arrow;
    private RDXUIActionMap placeGoalActionMap;
@@ -106,12 +104,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
          if (placingPosition)
          {
-            if (ImGui.getIO().getKeyCtrl())
-            {
-               goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
-            }
-
-            double z = pickPointInWorld.getZ() + goalZOffset.get();
+            double z = pickPointInWorld.getZ();
             sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), (float) z);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -214,10 +207,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
          {
             clear();
          }
-         ImGui.sameLine();
-         ImGui.pushItemWidth(50.0f);
-         ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
-         ImGui.popItemWidth();
       }
       return placementStarted;
    }
@@ -248,7 +237,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       placingPosition = true;
       if (sphere != null)
          sphere.transform.val[Matrix4.M03] = Float.NaN;
-      goalZOffset.set(0.0f);
    }
 
    public Pose3DReadOnly getGoalPose()
@@ -271,7 +259,6 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
       else
       {
          LibGDXTools.toLibGDX(pose.getPosition(), sphere.transform);
-//         goalZOffset.set((float) pose.getZ()); // This was useful before we had mouse scene collision
          LibGDXTools.toLibGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
