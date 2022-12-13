@@ -27,6 +27,10 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -36,12 +40,14 @@ import us.ihmc.rosControl.wholeRobot.JointImpedanceHandle;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieStandPrepSetpoints;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -54,21 +60,15 @@ import static us.ihmc.valkyrieRosControl.impedance.ValkyrieJointList.*;
 public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJavaBridge
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, ValkyrieRobotVersion.ARM_MASS_SIM);
+   private final ValkyrieJointMap jointMap = robotModel.getJointMap();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final TimestampProvider monotonicTimeProvider = RealtimeThread::getCurrentMonotonicClockTime;
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
    private final RobotConfigurationDataPublisher robotConfigurationDataPublisher;
 
-   /* For joints with impedance API */
    private final YoDouble impedanceMasterGain = new YoDouble("impedanceMasterGain", registry);
-   private final YoDouble impedanceStiffness = new YoDouble("impedanceStiffness", registry);
-   private final YoDouble impedanceDamping = new YoDouble("impedanceDamping", registry);
-
-   /* For joints without impedance API */
    private final YoDouble torqueMasterGain = new YoDouble("torqueMasterGain", registry);
-   private final YoDouble torqueStiffness = new YoDouble("torqueStiffness", registry);
-   private final YoDouble torqueDamping = new YoDouble("torqueDamping", registry);
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
@@ -104,13 +104,8 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       jointHome = new ValkyrieStandPrepSetpoints(robotModel.getJointMap());
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
 
-      impedanceMasterGain.set(0.1);
-      impedanceStiffness.set(200.0);
-      impedanceDamping.set(35.0);
-
+      impedanceMasterGain.set(0.15);
       torqueMasterGain.set(0.6);
-      torqueStiffness.set(55.0);
-      torqueDamping.set(6.0);
 
       ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
       ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName());
@@ -141,10 +136,46 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(25.0, robotModel.getControllerDT());
          AlphaFilteredYoVariable filteredVelocity = new AlphaFilteredYoVariable("qd_filt_" + controlledOneDoFJoints[i].getName(), registry, alphaVelocity);
          nameToFilteredJointVelocity.put(controlledOneDoFJoints[i].getName(), filteredVelocity);
+
+         if (ValkyrieJointList.impedanceJoints.contains(controlledJoints[i].getName()))
+         {
+            jointDesiredOutputList.getJointDesiredOutput(i).setMasterGain(impedanceMasterGain.getValue());
+         }
+         else
+         {
+            jointDesiredOutputList.getJointDesiredOutput(i).setMasterGain(torqueMasterGain.getValue());
+         }
       }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         setGains(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 250.0, 28.0);
+         setGains(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), 190.0, 25.0);
+         setGains(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 205.0, 28.0);
+         setGains(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), 250.0, 28.0);
+
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 190.0, 20.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 190.0, 20.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), 275.0, 25.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 220.0, 20.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 55.0, 6.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), 55.0, 6.0);
+      }
+
+      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 180.0, 18.0);
+      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 55.0, 6.0);
+      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 55.0, 6.0);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
       ros2Node.spin();
+   }
+
+   private void setGains(String jointName, double kp, double kd)
+   {
+      OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointName);
+      JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+      jointDesiredOutput.setStiffness(kp);
+      jointDesiredOutput.setDamping(kd);
    }
 
    @Override
@@ -241,17 +272,13 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          jointManagers[i].doControl(jointDesiredOutput);
 
          /* Master, kp, kd gains */
-         if (torqueJoints.contains(joint.getName()))
+         if (ValkyrieJointList.impedanceJoints.contains(joint.getName()))
          {
-            jointDesiredOutput.setMasterGain(torqueMasterGain.getValue());
-            jointDesiredOutput.setStiffness(torqueStiffness.getValue());
-            jointDesiredOutput.setDamping(torqueDamping.getValue());
+            jointDesiredOutputList.getJointDesiredOutput(i).setMasterGain(impedanceMasterGain.getValue());
          }
          else
          {
-            jointDesiredOutput.setMasterGain(impedanceMasterGain.getValue());
-            jointDesiredOutput.setStiffness(impedanceStiffness.getValue());
-            jointDesiredOutput.setDamping(impedanceDamping.getValue());
+            jointDesiredOutputList.getJointDesiredOutput(i).setMasterGain(torqueMasterGain.getValue());
          }
       }
    }

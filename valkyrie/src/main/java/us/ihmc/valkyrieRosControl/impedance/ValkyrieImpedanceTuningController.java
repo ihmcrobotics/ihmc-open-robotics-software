@@ -51,7 +51,7 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
-   private final WholeBodySetpointParameters jointHome;
+   private final ValkyrieStandPrepSetpoints jointHome;
    private final Map<String, AlphaFilteredYoVariable> nameToFilteredJointVelocity = new HashMap<>();
    private final ValkyrieImpedanceOutputWriter outputWriter;
 
@@ -80,6 +80,9 @@ public class ValkyrieImpedanceTuningController extends IHMCWholeRobotControlJava
       jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
       functionGenerators = new YoFunctionGeneratorNew[controlledJoints.length];
+
+      jointHome.setSetpoint("leftHipRoll", 0.2);
+      jointHome.setSetpoint("rightHipRoll", -0.2);
 
       masterTorqueGain.set(0.6);
       masterImpedanceGain.set(0.1);
