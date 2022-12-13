@@ -12,14 +12,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.RobotWalkRequester;
@@ -36,8 +31,6 @@ public class LookAndStepSteppingTask
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
-   protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   protected SwingPlannerParametersReadOnly swingPlannerParameters;
 
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable doneWaitingForSwingOutput;
@@ -56,9 +49,6 @@ public class LookAndStepSteppingTask
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
       private ResettableExceptionHandlingExecutorService executor;
-      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
-      private ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
-      private ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
 
@@ -68,12 +58,6 @@ public class LookAndStepSteppingTask
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          statusLogger = lookAndStep.statusLogger;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
-         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
-         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
-         ros2FootstepPlannerParameters = lookAndStep.ros2FootstepPlannerParameters;
-         footstepPlannerParameters = ros2FootstepPlannerParameters.getStoredPropertySet();
-         ros2SwingPlannerParameters = lookAndStep.ros2SwingPlannerParameters;
-         swingPlannerParameters = ros2SwingPlannerParameters.getStoredPropertySet();
          uiPublisher = lookAndStep.helper::publish;
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
          stepDuration = new YoDouble("stepDuration", lookAndStep.yoRegistry);
