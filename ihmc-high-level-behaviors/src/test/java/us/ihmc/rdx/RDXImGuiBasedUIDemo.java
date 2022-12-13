@@ -70,7 +70,7 @@ public class RDXImGuiBasedUIDemo
             RDX3DPanelToolbarButton hoverboardButton = baseUI.getPrimary3DPanel().addToolbarButton();
             hoverboardButton.loadAndSetIcon("icons/hoverboard.png");
 
-            RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", 2, true);
+            RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", true);
             baseUI.add3DPanel(second3DPanel);
 
             logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
