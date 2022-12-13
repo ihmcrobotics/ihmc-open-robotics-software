@@ -23,6 +23,7 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SensorDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieModelComparisonTest
 {
@@ -34,9 +35,32 @@ public class ValkyrieModelComparisonTest
    private static final double LIMIT_EPS = 1.0e-4;
 
    @Test
-   public void testSDFModelAgainstURDF()
+   public void testDefaultModel()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
+      testURDFAgainsSDF(ValkyrieRobotVersion.DEFAULT, "models/val_description/urdf/valkyrie_sim.urdf", "models/val_description/sdf/valkyrie_sim.sdf");
+   }
+   
+   @Test
+   public void testNoFingersModel()
+   {
+      testURDFAgainsSDF(ValkyrieRobotVersion.FINGERLESS, "models/val_description/urdf/valkyrie_sim_no_fingers.urdf", "models/val_description/sdf/valkyrie_sim_no_fingers.sdf");
+   }
+   
+   @Test
+   public void testArmMassSimModel()
+   {
+      testURDFAgainsSDF(ValkyrieRobotVersion.ARM_MASS_SIM, "models/val_description/urdf/valkyrie_sim_arm_mass_sim.urdf", "models/val_description/sdf/valkyrie_sim_arm_mass_sim.sdf");
+   }
+   
+   @Test
+   public void testNoArmsModel()
+   {
+      testURDFAgainsSDF(ValkyrieRobotVersion.ARMLESS, "models/val_description/urdf/valkyrie_sim_no_arms.urdf", "models/val_description/sdf/valkyrie_sim_no_arms.sdf");
+   }
+
+   private void testURDFAgainsSDF(ValkyrieRobotVersion version, String urdfPath, String sdfPath)
+   {
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
       ClassLoader classLoader = getClass().getClassLoader();
       List<String> resourceDirectories = Arrays.asList(robotModel.getResourceDirectories());
       String modelName = robotModel.getJointMap().getModelName();
@@ -44,7 +68,7 @@ public class ValkyrieModelComparisonTest
       RobotDefinition urdfRobotDefinition;
       try
       {
-         urdfRobotDefinition = RobotDefinitionLoader.loadURDFModel(classLoader.getResourceAsStream("models/val_description/urdf/valkyrie_sim.urdf"),
+         urdfRobotDefinition = RobotDefinitionLoader.loadURDFModel(classLoader.getResourceAsStream(urdfPath),
                                                                    resourceDirectories,
                                                                    classLoader,
                                                                    modelName,
@@ -57,7 +81,7 @@ public class ValkyrieModelComparisonTest
          e1.printStackTrace();
          throw e1;
       }
-      RobotDefinition sdfRobotDefinition = RobotDefinitionLoader.loadSDFModel(classLoader.getResourceAsStream("models/val_description/sdf/valkyrie_sim.sdf"),
+      RobotDefinition sdfRobotDefinition = RobotDefinitionLoader.loadSDFModel(classLoader.getResourceAsStream(sdfPath),
                                                                               resourceDirectories,
                                                                               classLoader,
                                                                               modelName,

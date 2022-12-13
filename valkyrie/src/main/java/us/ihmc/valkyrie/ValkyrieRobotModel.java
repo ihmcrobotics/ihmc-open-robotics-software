@@ -73,7 +73,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 {
    private static final boolean PRINT_MODEL = false;
 
-   private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/sdf/"};
+   private final String[] resourceDirectories = {"models/", "models/gazebo/", "models/val_description/", "models/val_description/urdf/"};
 
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
