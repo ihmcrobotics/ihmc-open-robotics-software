@@ -5,7 +5,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.behaviors.lookAndStep.LookAndStepHeightMapUpdater;
+import us.ihmc.behaviors.tools.perception.AlternateHeightMapUpdater;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -72,7 +72,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
    private final FramePose3D goalFramePose = new FramePose3D();
    private final ImBoolean updateHeightMap = new ImBoolean(true);
    private HeightMapMessage heightMapMessage;
-   private LookAndStepHeightMapUpdater heightMapUpdater;
+   private AlternateHeightMapUpdater heightMapUpdater;
 
    public RDXGPUHeightMapBodyPathPlanningDemo(RDXBaseUI baseUI, DRCRobotModel robotModel)
    {
@@ -144,7 +144,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
                   }
                   else
                   {
-                     heightMapUpdater = new LookAndStepHeightMapUpdater();
+                     heightMapUpdater = new AlternateHeightMapUpdater();
                   }
 
                   heightMapGraphic = new RDXHeightMapGraphic();
