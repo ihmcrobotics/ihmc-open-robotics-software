@@ -19,16 +19,12 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -64,7 +60,6 @@ public class LookAndStepBodyPathPlanningTask
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected Supplier<Boolean> operatorReviewEnabled;
-   protected LookAndStepHeightMapUpdater heightMapUpdater;
    protected FootstepPlanningModule footstepPlanningModule;
    protected final FramePose3D startFramePose = new FramePose3D();
    protected final FramePose3D goalFramePose = new FramePose3D();
@@ -79,11 +74,6 @@ public class LookAndStepBodyPathPlanningTask
    protected Pose3DReadOnly goal;
    protected ROS2SyncedRobotModel syncedRobot;
    protected boolean doPlanarRegionsVisibilityGraphsPlan;
-   protected boolean doOusterHeightMapPlan;
-   protected RigidBodyTransform ousterToWorld = new RigidBodyTransform();
-   protected ReferenceFrame ousterFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("lookandstepousterframe",
-                                                                                                          ReferenceFrame.getWorldFrame(),
-                                                                                                          ousterToWorld);
    protected RigidBodyTransform goalToWorld = new RigidBodyTransform();
    protected ReferenceFrame goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), goalToWorld);
 
@@ -119,7 +109,6 @@ public class LookAndStepBodyPathPlanningTask
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          output = lookAndStep::bodyPathPlanInput;
          ControllerStatusTracker controllerStatusTracker = lookAndStep.controllerStatusTracker;
-         heightMapUpdater = new LookAndStepHeightMapUpdater();
          footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
          bodyPathPlanningDuration = new YoDouble("bodyPathPlanningDuration", lookAndStep.yoRegistry);
 
@@ -222,7 +211,6 @@ public class LookAndStepBodyPathPlanningTask
          behaviorState = behaviorStateReference.get();
          neckTrajectoryTimerSnapshot = neckTrajectoryTimer.createSnapshot(1.0);
          doPlanarRegionsVisibilityGraphsPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan() && !lookAndStepParameters.getHeightMapBodyPathPlan();
-         doOusterHeightMapPlan = !lookAndStepParameters.getFlatGroundBodyPathPlan() && lookAndStepParameters.getHeightMapBodyPathPlan();
 
          // neckPitch = syncedRobot.getFramePoseReadOnly(frames -> frames.getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH)).getOrientation().getPitch();
 
@@ -250,30 +238,6 @@ public class LookAndStepBodyPathPlanningTask
       {
          uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions);
          result = performTaskWithVisibilityGraphPlanner();
-      }
-      else if (doOusterHeightMapPlan)
-      {
-         ousterFrame.update();
-
-         // TODO: Going to have to reimplement this
-         Point3D[] scanPoints = null;
-
-         FramePoint3D scanPoint = new FramePoint3D();
-         for (Point3D scanPointToModify : scanPoints)
-         {
-            scanPoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), scanPointToModify);
-            scanPoint.changeFrame(ousterFrame);
-            scanPointToModify.set(scanPoint);
-         }
-
-         // Center the height map between the start and goal
-         Point3D center = new Point3D();
-         center.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getPosition());
-         center.interpolate(goal.getPosition(), 0.5);
-
-         HeightMapMessage heightMapMessage = heightMapUpdater.update(scanPoints, ousterFrame, center);
-         helper.publish(HEIGHT_MAP_FOR_UI, heightMapMessage);
-         result = performTaskWithHeightMapPlanner(heightMapMessage);
       }
       else // flat ground body path
       {

@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.lookAndStep;
+package us.ihmc.behaviors.tools.perception;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
@@ -14,7 +14,13 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LookAndStepHeightMapUpdater
+/**
+ * This height map updater was created to satisfy the needs of
+ * look and step but was experimental and probably no longer works.
+ *
+ * @deprecated Needs work
+ */
+public class AlternateHeightMapUpdater
 {
    private final HeightMapParameters parameters;
    private final HeightMapManager heightMap;
@@ -22,7 +28,7 @@ public class LookAndStepHeightMapUpdater
    private final TFloatArrayList holeHeights = new TFloatArrayList();
    private final AtomicInteger totalUpdateCount = new AtomicInteger();
 
-   public LookAndStepHeightMapUpdater()
+   public AlternateHeightMapUpdater()
    {
       parameters = new HeightMapParameters();
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
