@@ -1,6 +1,7 @@
 package us.ihmc.rdx.imgui;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
@@ -141,6 +142,11 @@ public class ImGuiTools
       return ImGui.inputText(label, text, flags);
    }
 
+   public static void textColored(Color color, String text)
+   {
+      ImGui.textColored(color.r, color.g, color.b, color.a, text);
+   }
+
    public static void previousWidgetTooltip(String tooltipText)
    {
       if (ImGui.isItemHovered())
@@ -149,6 +155,7 @@ public class ImGuiTools
       }
    }
 
+   /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueLabel(String label)
    {
       return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
@@ -159,11 +166,13 @@ public class ImGuiTools
       return label + "###" + id + ":" + label;
    }
 
+   /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueLabel(Object thisObject, String label)
    {
       return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
+   /** @deprecated Use ImGuiUniqueLabelMap instead. */
    public static String uniqueIDOnly(Object thisObject, String label)
    {
       return "###" + thisObject.getClass().getName() + ":" + label;

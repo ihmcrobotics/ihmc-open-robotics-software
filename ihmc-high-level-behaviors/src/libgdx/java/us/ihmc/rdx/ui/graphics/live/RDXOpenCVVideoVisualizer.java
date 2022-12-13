@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
@@ -57,6 +58,14 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
          rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, rgba8888BytePointer);
          needNewTexture = true;
       }
+   }
+
+   public void setImage(Mat mat)
+   {
+      hasReceivedOne = true;
+      frequencyPlot.ping();
+      updateImageDimensions(mat.cols(), mat.rows());
+      opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
    }
 
    @Override

@@ -200,6 +200,7 @@ namespace promp {
          *	\return
          */
         void condition_goal(const Eigen::VectorXd& goal, const Eigen::MatrixXd& std);
+        void condition_goal(const Eigen::VectorXd& goal);
 
         /** \brief	set desired start/initial point for trajectory
          *	\param 	start 	desired value at start
@@ -207,6 +208,7 @@ namespace promp {
          *	\return
          */
         void condition_start(const Eigen::VectorXd& start, const Eigen::MatrixXd& std);
+        void condition_start(const Eigen::VectorXd& start);
 
         /**
          * @brief      Generates standard deviation vector with the standard deviation for every time step, with a certain number of time steps
@@ -244,6 +246,16 @@ namespace promp {
          *	\todo Use phase \f$ z_t\f$ instead of time step t.
          */
         void condition_via_point(int t, const Eigen::VectorXd& via_point, const Eigen::MatrixXd& std);
+        /**
+                 * @brief      Conditions all via points registered in 'viaPoints_'.
+                 * It updates  \a _mean_w and _cov_w  and clear _via_points vector
+                 */
+                /** \brief	set via point for trajectory with default std deviation, no noise assumption
+                 *	\param 	t 			time at which via point is to be added (between 0 and LAST TIME STEP)
+                 *	\param	via_point 	desired value at via point
+                 *	\return
+                 */
+        void condition_via_point(int t, const Eigen::VectorXd& via_point);
 
         Eigen::VectorXd get_upper_weights(double K);
 
@@ -354,7 +366,9 @@ namespace promp {
         //! ridge factor
         double _ridge_factor = 0.00000001;
         //!conditioning ridge factor
-        double _conditioning_ridge_factor = 0.01;
+        double _conditioning_ridge_factor = 0.0001;
+        //!default std deviation of observed via points, no noise assumption
+        Eigen::MatrixXd _default_std_via_point;
         //! number of samples used to rescale all the trajectories to same duration
         int _s;
         //! Mean of weights' distribution

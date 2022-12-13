@@ -135,7 +135,7 @@ public class WholeBodyInverseDynamicsSolver
       planeContactWrenchProcessor = toolbox.getPlaneContactWrenchProcessor();
       wrenchVisualizer = toolbox.getWrenchVisualizer();
 
-      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(controlDT, registry);
+      jointAccelerationIntegrationCalculator = new JointAccelerationIntegrationCalculator(toolbox.getRootBody(), controlDT, registry);
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
@@ -156,6 +156,7 @@ public class WholeBodyInverseDynamicsSolver
    public void reset()
    {
       optimizationControlModule.initialize();
+      jointAccelerationIntegrationCalculator.resetJointParameters();
 
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {

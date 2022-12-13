@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.tools.RDXIconTexture;
 
 import java.util.ArrayList;
 
@@ -40,7 +41,11 @@ public class RDX3DPanelToolbar
 
          for (RDX3DPanelToolbarButton button : buttons)
          {
-            if (ImGui.imageButton(button.getIcon().getTexture().getTextureObjectHandle(), iconSize, iconSize))
+            RDXIconTexture icon = button.getIcon();
+            if (icon == null)
+               continue;
+
+            if (ImGui.imageButton(icon.getTexture().getTextureObjectHandle(), iconSize, iconSize))
             {
                button.onPressed();
             }
