@@ -19,7 +19,7 @@ public class NativeMemoryTools
     */
    public static void copy(BytePointer from, BytePointer to)
    {
-      from.put(to);
+      to.put(from);
    }
 
    /**
