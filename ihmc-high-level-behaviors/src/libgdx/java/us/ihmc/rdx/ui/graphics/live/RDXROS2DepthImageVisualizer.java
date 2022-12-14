@@ -1,45 +1,67 @@
 package us.ihmc.rdx.ui.graphics.live;
 
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.Throttler;
 
 import java.nio.ByteBuffer;
 
 public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
 {
+   private final String titleBeforeAdditions;
+   private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<ImageMessage> topic;
-   private final RealtimeROS2Node realtimeROS2Node;
+   private RealtimeROS2Node realtimeROS2Node;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean subscribed = new ImBoolean(true);
    private final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
    private int depthWidth;
    private int depthHeight;
+   private int numberOfPixels;
    private ByteBuffer incomingCompressedImageBuffer;
    private BytePointer incomingCompressedImageBytePointer;
    private Mat inputCompressedDepthMat;
    private Mat decompressedDepthMat;
    private Mat normalizedScaledImage;
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
+   private String messageSizeString;
+   private final Throttler messageSizeStatusThrottler = new Throttler();
 
    public RDXROS2DepthImageVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
       super(title + " (ROS 2)", topic.getName(), false);
+      titleBeforeAdditions = title;
+      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(title));
+
+      setSubscribed(subscribed.get());
+   }
+
+   private void subscribe()
+   {
+      subscribed.set(true);
+      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), subscriber ->
       {
          synchronized (syncObject)
@@ -56,13 +78,15 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
             {
                depthWidth = imageMessage.getImageWidth();
                depthHeight = imageMessage.getImageHeight();
-               imageFormat = imageMessage.getFormat();
+               numberOfPixels = depthWidth * depthHeight;
+               imageFormat = imageMessage.getFormat(); // TODO: Use this when we introduce more formats
 
                if (incomingCompressedImageBuffer == null)
                {
-                  // TODO: The 2 is because 16 bit, two bytes, we should put this in ImageMessage
-                  // TODO: Possibly even ImageMessage should be split into ColorImageMessage and DepthImageMessage
-                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
+                  // TODO: Store bytes per pixel in ImageMessage
+                  // TODO: Split ImageMessage into ColorImageMessage and DepthImageMessage
+                  int bytesIfUncompressed = numberOfPixels * Short.BYTES;
+                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
                   incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
 
                   inputCompressedDepthMat = new Mat(1, 1, opencv_core.CV_8UC1);
@@ -78,24 +102,18 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
                   incomingCompressedImageBuffer.put(imageMessage.getData().get(i));
                }
                incomingCompressedImageBuffer.flip();
+
+               if (messageSizeStatusThrottler.run(1.0))
+               { // Only doing this at 1 Hz to improve readability and because String building and formatting is expensive to do every tick
+                  String kilobytes = FormattingTools.getFormattedDecimal1D((double) numberOfBytes / 1000.0);
+                  messageSizeString = String.format("Message size: ~%s KB", kilobytes);
+               }
             }
 
-            inputCompressedDepthMat.rows(depthHeight);
-            inputCompressedDepthMat.cols(depthWidth);
+            inputCompressedDepthMat.cols(numberOfBytes);
             inputCompressedDepthMat.data(incomingCompressedImageBytePointer);
 
-            inputCompressedDepthMat.copyTo(decompressedDepthMat);
-
-//            inputCompressedDepthMat.cols(numberOfBytes);
-//            inputCompressedDepthMat.data(incomingCompressedImageBytePointer);
-
-//            System.out.println(inputCompressedDepthMat.ptr(7, 39).getShort());
-//            System.out.println(inputCompressedDepthMat.ptr(7, 56).getShort());
-//            System.out.println(inputCompressedDepthMat.ptr(7, 324).getShort());
-//            System.out.println(inputCompressedDepthMat.ptr(7, 885).getShort());
-//            System.out.println(inputCompressedDepthMat.ptr(7, 1788).getShort());
-
-//            opencv_imgcodecs.imdecode(inputCompressedDepthMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthMat);
+            opencv_imgcodecs.imdecode(inputCompressedDepthMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthMat);
 
             BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedDepthMat, normalizedScaledImage, 0.0, 255.0);
 
@@ -112,13 +130,48 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
+      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
+      {
+         setSubscribed(subscribed.get());
+      }
+      ImGuiTools.previousWidgetTooltip("Subscribed");
+      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
+      if (messageSizeString != null)
+      {
+         ImGui.sameLine();
+         ImGui.text(messageSizeString);
+      }
       if (getHasReceivedOne())
       {
          getFrequencyPlot().renderImGuiWidgets();
          delayPlot.renderImGuiWidgets();
       }
+   }
+
+   public void setSubscribed(boolean subscribed)
+   {
+      if (subscribed && realtimeROS2Node == null)
+      {
+         subscribe();
+      }
+      else if (!subscribed && realtimeROS2Node != null)
+      {
+         unsubscribe();
+      }
+   }
+
+   private void unsubscribe()
+   {
+      subscribed.set(false);
+      realtimeROS2Node.destroy();
+      realtimeROS2Node = null;
+   }
+
+   public boolean isSubscribed()
+   {
+      return subscribed.get();
    }
 
    @Override

@@ -217,7 +217,6 @@ public class NettyOuster
          for (int i = 0; i < pixelsPerColumn; i++)
          {
             pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
-            LogTools.info("Shift {}: {}", i, pixelShiftNode.get(i).asInt());
          }
          pixelShiftBuffer.rewind();
 
