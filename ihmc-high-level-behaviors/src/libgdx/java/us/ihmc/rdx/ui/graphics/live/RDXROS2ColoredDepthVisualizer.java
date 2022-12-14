@@ -84,7 +84,8 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final FramePose3D cameraPose = new FramePose3D();
    private final RigidBodyTransform steppingCameraTransform;
    private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
-   private IHMCROS2Callback<?> ros2Callback = null;
+   private IHMCROS2Callback<?> ros2DepthCallback = null;
+   private IHMCROS2Callback<?> ros2ColorCallback = null;
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer finalColoredDepthBuffer;
    private _cl_program openCLProgram;
@@ -128,11 +129,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    {
       subscribed.set(true);
 
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, depthTopic, (packet) -> {
+      ros2DepthCallback = new IHMCROS2Callback<>(ros2Node, depthTopic, (packet) -> {
          depthPacketReference.set(packet);
          depthAvailable = true;
       });
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, colorTopic, (packet) -> {
+      ros2ColorCallback = new IHMCROS2Callback<>(ros2Node, colorTopic, (packet) -> {
          colorPacketReference.set(packet);
          colorAvailable = true;
       });
@@ -196,12 +197,15 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                depthInitialized = true;
             }
 
-            // Get the depth image from the packet
-            depthPacket.getData().toArray(heapArrayDepth, 0, depthPacket.getData().size());
-            BytedecoOpenCVTools.decompressDepthPNG(heapArrayDepth, depthImage);
+            if(depthAvailable)
+            {
+               // Get the depth image from the packet
+               depthPacket.getData().toArray(heapArrayDepth, 0, depthPacket.getData().size());
+               BytedecoOpenCVTools.decompressDepthPNG(heapArrayDepth, depthImage);
 
-            // Put the color image into OpenCL buffer
-            depthImage.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, depthToMetersScalar, 0.0);
+               // Put the color image into OpenCL buffer
+               depthImage.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, depthToMetersScalar, 0.0);
+            }
          }
 
          // Get the color image from the packet
@@ -222,15 +226,18 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
                colorInitialized = true;
             }
 
-            // Get the color image from the packet
-            colorPacket.getData().toArray(heapArrayColor, 0, colorPacket.getData().size());
-            colorImage = BytedecoOpenCVTools.decompressImageJPGUsingYUV(heapArrayColor);
+            if(colorAvailable)
+            {
+               // Get the color image from the packet
+               colorPacket.getData().toArray(heapArrayColor, 0, colorPacket.getData().size());
+               colorImage = BytedecoOpenCVTools.decompressImageJPGUsingYUV(heapArrayColor);
 
-            // Put the depth image into OpenCL buffer
-            opencv_imgproc.cvtColor(colorImage, color8UC4Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+               // Put the depth image into OpenCL buffer
+               opencv_imgproc.cvtColor(colorImage, color8UC4Image.getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+            }
          }
 
-         if (depthInitialized && colorInitialized)
+         if (depthInitialized && colorInitialized && depthAvailable && colorAvailable)
          {
             if (frameUpdateSubscription.getMessageNotification().poll())
             {
@@ -330,11 +337,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
    public void setSubscribed(boolean subscribed)
    {
-      if (subscribed && ros2Callback == null)
+      if (subscribed && ros2DepthCallback == null && ros2ColorCallback == null)
       {
          subscribe();
       }
-      else if (!subscribed && ros2Callback != null)
+      else if (!subscribed && ros2DepthCallback == null && ros2ColorCallback == null)
       {
          unsubscribe();
       }
@@ -343,8 +350,11 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private void unsubscribe()
    {
       subscribed.set(false);
-      ros2Callback.destroy();
-      ros2Callback = null;
+      ros2DepthCallback.destroy();
+      ros2ColorCallback.destroy();
+
+      ros2DepthCallback = null;
+      ros2ColorCallback = null;
    }
 
    public boolean isSubscribed()
