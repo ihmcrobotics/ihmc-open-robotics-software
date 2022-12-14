@@ -12,7 +12,6 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.FormattingTools;
@@ -22,6 +21,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
@@ -36,7 +36,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
@@ -126,8 +125,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerImage / 1000.0);
                messageSizeString = String.format("Message size: %s KB", kilobytes);
                pointCloudRenderer.create(totalNumberOfPoints);
-               decompressionInputBuffer = ByteBuffer.allocateDirect(depthWidth * depthHeight * 2);
-               decompressionInputBuffer.order(ByteOrder.nativeOrder());
+               decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
                decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
                decompressionOutputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);

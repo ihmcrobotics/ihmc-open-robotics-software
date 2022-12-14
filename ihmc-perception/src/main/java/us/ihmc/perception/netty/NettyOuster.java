@@ -12,6 +12,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
 
 import java.io.*;
 import java.net.Socket;
@@ -85,7 +86,7 @@ public class NettyOuster
    private int pixelsPerColumn;
    private int columnsPerFrame;
    public static final int MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM = 16;
-   private int[] pixelShift;
+   private ByteBuffer pixelShiftBuffer;
    private int measurementBlockSize;
    private int udpDatagramsPerFrame;
    private int lidarFrameSizeBytes;
@@ -212,11 +213,13 @@ public class NettyOuster
          lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
 
          JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
-         pixelShift = new int[pixelsPerColumn];
+         pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
          for (int i = 0; i < pixelsPerColumn; i++)
          {
-            pixelShift[i] = pixelShiftNode.get(i).asInt();
+            pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
+            LogTools.info("Shift {}: {}", i, pixelShiftNode.get(i).asInt());
          }
+         pixelShiftBuffer.rewind();
 
          // TODO: Store and print frequency
       }
@@ -277,6 +280,11 @@ public class NettyOuster
    public int getPixelsPerColumn()
    {
       return pixelsPerColumn;
+   }
+
+   public ByteBuffer getPixelShiftBuffer()
+   {
+      return pixelShiftBuffer;
    }
 
    public int getColumnsPerFrame()

@@ -11,7 +11,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.*;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -23,9 +23,6 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
@@ -52,6 +49,7 @@ public class RDXNettyOusterUI
    private BytedecoImage extractedDepthImage;
    private _cl_program pointCloudRenderingProgram;
    private _cl_kernel imageToPointCloudKernel;
+   private OpenCLIntBuffer pixelShiftOpenCLBuffer;
    private final OpenCLFloatParameters depthImageKernelParameters = new OpenCLFloatParameters();
    private final OpenCLFloatParameters imageToPointCloudParameters = new OpenCLFloatParameters();
    private OpenCLFloatBuffer pointCloudVertexBuffer;
@@ -146,6 +144,8 @@ public class RDXNettyOusterUI
                      extractDepthImageKernel = openCLManager.createKernel(depthImageExtractionProgram, "extractDepthImage");
                      lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
                      extractedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+                     pixelShiftOpenCLBuffer = new OpenCLIntBuffer(ouster.getPixelShiftBuffer());
+                     pixelShiftOpenCLBuffer.createOpenCLBufferObject(openCLManager);
 
                      pointCloudRenderingProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
                      imageToPointCloudKernel = openCLManager.createKernel(pointCloudRenderingProgram, "imageToPointCloud");
@@ -170,11 +170,13 @@ public class RDXNettyOusterUI
 
                   synchronized (this)
                   {
+                     pixelShiftOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
                      openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
 
                      openCLManager.setKernelArgument(extractDepthImageKernel, 0, depthImageKernelParameters.getOpenCLBufferObject());
-                     openCLManager.setKernelArgument(extractDepthImageKernel, 1, lidarFrameBufferObject);
-                     openCLManager.setKernelArgument(extractDepthImageKernel, 2, extractedDepthImage.getOpenCLImageObject());
+                     openCLManager.setKernelArgument(extractDepthImageKernel, 1, pixelShiftOpenCLBuffer.getOpenCLBufferObject());
+                     openCLManager.setKernelArgument(extractDepthImageKernel, 2, lidarFrameBufferObject);
+                     openCLManager.setKernelArgument(extractDepthImageKernel, 3, extractedDepthImage.getOpenCLImageObject());
                      openCLManager.execute2D(extractDepthImageKernel, depthWidth, depthHeight);
                      extractedDepthImage.readOpenCLImage(openCLManager);
                      openCLManager.finish();

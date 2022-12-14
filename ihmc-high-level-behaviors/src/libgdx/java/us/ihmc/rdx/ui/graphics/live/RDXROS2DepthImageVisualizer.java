@@ -3,12 +3,11 @@ package us.ihmc.rdx.ui.graphics.live;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
@@ -19,7 +18,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
 {
@@ -64,8 +62,7 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
                {
                   // TODO: The 2 is because 16 bit, two bytes, we should put this in ImageMessage
                   // TODO: Possibly even ImageMessage should be split into ColorImageMessage and DepthImageMessage
-                  incomingCompressedImageBuffer = ByteBuffer.allocateDirect(depthWidth * depthHeight * 2);
-                  incomingCompressedImageBuffer.order(ByteOrder.nativeOrder());
+                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
                   incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
 
                   inputCompressedDepthMat = new Mat(1, 1, opencv_core.CV_8UC1);

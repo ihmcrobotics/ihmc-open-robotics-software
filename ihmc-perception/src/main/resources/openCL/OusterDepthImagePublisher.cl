@@ -1,4 +1,5 @@
 kernel void extractDepthImage(global float* parameters,
+                              global int* pixelShifts,
                               global unsigned char* lidarFrameBuffer,
                               write_only image2d_t depthImage16UC1)
 {
@@ -11,10 +12,15 @@ kernel void extractDepthImage(global float* parameters,
    int channelDataBlockBytes = parameters[3];
    int columnsPerMeasurementBlock = parameters[4];
 
-   // For example, x is 0 - 2047; There's 16 columns per measurementBlock
-   int measurementBlockIndex = x / columnsPerMeasurementBlock;
+   int shiftedX = x;
+   shiftedX += pixelShifts[y];
 
-   int bytesToColumnDataBlockStart = measurementBlockIndex * measurementBlockSize
+   if (shiftedX < 0)
+      shiftedX = columnsPerFrame + shiftedX;
+   if (shiftedX > columnsPerFrame - 1)
+      shiftedX -= columnsPerFrame;
+
+   int bytesToColumnDataBlockStart = x * measurementBlockSize
                                      + headerBlockBytes
                                      + y * channelDataBlockBytes;
 
@@ -23,5 +29,5 @@ kernel void extractDepthImage(global float* parameters,
    unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
    unsigned int range = (range_MSB << 8) | range_LSB;
 
-   write_imageui(depthImage16UC1, (int2) (x, y), (uint4) (range, 0, 0, 0));
+   write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
 }
