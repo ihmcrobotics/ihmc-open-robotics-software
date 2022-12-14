@@ -359,7 +359,12 @@ public class OptimizedTrajectoryGenerator
     */
    public double getWaypointTime(int waypointIndex)
    {
-      return optimizer.getWaypointTime(indexMap.get(waypointIndex));
+      return waypointTimes.get(waypointIndex).getDoubleValue();
+   }
+
+   public double getWaypointPosition(int waypointIndex)
+   {
+      return this.waypointPositions.get(waypointIndex).get(0);
    }
 
    /**
@@ -377,6 +382,26 @@ public class OptimizedTrajectoryGenerator
    public boolean isDone()
    {
       return isDone.getBooleanValue();
+   }
+
+   public double getInitialPosition()
+   {
+      return initialPosition;
+   }
+
+   public double getInitialVelocity()
+   {
+      return initialVelocity;
+   }
+
+   public double getFinalPosition()
+   {
+      return finalPosition;
+   }
+
+   public double getFinalVelocity()
+   {
+      return finalVelocity;
    }
 
    public double getPosition()
