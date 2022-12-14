@@ -12,6 +12,7 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.FormattingTools;
@@ -155,20 +156,14 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
             decompressionInputBytePointer.position(0);
             decompressionInputBytePointer.limit(numberOfBytes);
 
-            decompressionInputMat.rows(depthHeight);
-            decompressionInputMat.cols(depthWidth);
+            decompressionInputMat.cols(numberOfBytes);
             decompressionInputMat.data(decompressionInputBytePointer);
 
-            decompressionInputMat.copyTo(decompressionOutputImage.getBytedecoOpenCVMat());
-
-//            decompressionInputMat.cols(numberOfBytes);
-//            decompressionInputMat.data(decompressionInputBytePointer);
-//
-//            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
-//            opencv_imgcodecs.imdecode(decompressionInputMat,
-//                                      opencv_imgcodecs.IMREAD_UNCHANGED,
-//                                      decompressionOutputImage.getBytedecoOpenCVMat());
-//            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+            opencv_imgcodecs.imdecode(decompressionInputMat,
+                                      opencv_imgcodecs.IMREAD_UNCHANGED,
+                                      decompressionOutputImage.getBytedecoOpenCVMat());
+            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
 
             // TODO: Create tuners for these
             double verticalFieldOfView = Math.PI / 2.0;
