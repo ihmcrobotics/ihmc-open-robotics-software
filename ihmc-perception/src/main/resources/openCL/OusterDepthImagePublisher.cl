@@ -27,7 +27,8 @@ kernel void extractDepthImage(global float* parameters,
    // Ouster data is little endian
    unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
    unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
-   unsigned int range = (range_MSB << 8) | range_LSB;
+   // OpenCV is little endian
+   unsigned short range = (range_LSB << 8) | range_MSB;
 
    write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
 }

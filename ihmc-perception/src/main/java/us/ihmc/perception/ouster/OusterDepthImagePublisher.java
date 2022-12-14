@@ -99,7 +99,7 @@ public class OusterDepthImagePublisher
             lidarFrameByteBufferPointerCopy = new BytePointer(lidarFrameByteBufferCopy);
             lidarFrameByteBufferPointer = new BytePointer(ouster.getLidarFrameByteBuffer());
             compressionInputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-            pngImageBuffer = ByteBuffer.allocateDirect(depthWidth * depthHeight * 2);
+            pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
          }
 
          // copy while the ouster thread is blocked
