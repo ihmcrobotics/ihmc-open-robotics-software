@@ -1,12 +1,12 @@
 {
   "title" : "GPU planar region extraction parameters",
   "Merge distance threshold" : {
-    "value": 0.008,
+    "value" : 0.00553,
     "lowerBound" : 0.0,
     "upperBound" : 0.1
   },
   "Merge angular threshold" : {
-    "value": 0.82,
+    "value" : 0.972851,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
@@ -22,17 +22,17 @@
     "upperBound" : 20
   },
   "Focal length X pixels" : {
-    "value": 0.0,
+    "value" : 736.4765625,
     "lowerBound" : -1000.0,
     "upperBound" : 1000.0
   },
   "Focal length Y pixels" : {
-    "value": 0.0,
+    "value" : 737.09375,
     "lowerBound" : -1000.0,
     "upperBound" : 1000.0
   },
-  "Principal offset X pixels" : 0.0,
-  "Principal offset Y pixels" : 0.0,
+  "Principal offset X pixels" : 538.984375,
+  "Principal offset Y pixels" : 391.03125,
   "Early gaussian blur" : true,
   "Use filtered image" : true,
   "Use SVD normals" : true,
@@ -47,12 +47,12 @@
     "upperBound" : 20
   },
   "Gaussian sigma" : {
-    "value": 6.0,
+    "value" : 6.0,
     "lowerBound" : 0.23,
     "upperBound" : 10.0
   },
   "Search depth limit" : {
-    "value" : 37000,
+    "value" : 45500,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
@@ -67,7 +67,7 @@
     "upperBound" : 1000
   },
   "Region growth factor" : {
-    "value": 0.0,
+    "value" : 0.0,
     "lowerBound" : 0.0,
     "upperBound" : 0.1
   }

@@ -49,6 +49,11 @@ public class PlanarRegionMappingManager
 
       filteredMap = new PlanarRegionFilteredMap();
 
+
+   }
+
+   public void loadPlanarRegionLogFiles()
+   {
       for (File file : logDirectory.listFiles())
       {
          if (file.getName().toUpperCase().endsWith(".PRLLOG"))

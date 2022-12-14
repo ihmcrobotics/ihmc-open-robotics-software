@@ -1,12 +1,16 @@
 package us.ihmc.rdx.ui.graphics.live;
 
 import org.bytedeco.opencv.opencv_core.Scalar;
+import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.BytedecoOpenCVTools;
@@ -17,11 +21,16 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.Throttler;
 
 public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
 {
+   private final String titleBeforeAdditions;
+   private final PubSubImplementation pubSubImplementation;
    private final ROS2Topic<BigVideoPacket> topic;
-   private final RealtimeROS2Node realtimeROS2Node;
+   private RealtimeROS2Node realtimeROS2Node = null;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean subscribed = new ImBoolean(true);
    private final BigVideoPacket videoPacket = new BigVideoPacket();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
@@ -30,12 +39,24 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private Mat inputDepthMat;
    private Mat normalizedScaledImage;
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
+   private String messageSizeString;
+   private final Throttler messageSizeStatusThrottler = new Throttler();
 
    public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
    {
       super(title + " (ROS 2)", topic.getName(), false);
+      titleBeforeAdditions = title;
+      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
-      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(title));
+
+      setSubscribed(subscribed.get());
+   }
+
+   private void subscribe()
+   {
+      subscribed.set(true);
+
+      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), subscriber ->
       {
          synchronized (syncObject)
@@ -49,6 +70,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
             synchronized (syncObject)
             {
                IDLSequence.Byte imageTByteArrayList = videoPacket.getData();
+               int numberOfBytes = imageTByteArrayList.size();
 
                if (messageDataHeapArray == null || messageDataHeapArray.length != imageTByteArrayList.size())
                {
@@ -67,6 +89,12 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
                }
 
                inputDepthMat.data(messageBytePointer);
+
+               if (messageSizeStatusThrottler.run(1.0))
+               { // Only doing this at 1 Hz to improve readability and because String building and formatting is expensive to do every tick
+                  String kilobytes = FormattingTools.getFormattedDecimal1D((double) numberOfBytes / 1000.0);
+                  messageSizeString = String.format("Message size: ~%s KB", kilobytes);
+               }
             }
 
             if (normalizedScaledImage == null)
@@ -92,13 +120,43 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
+      if (ImGui.checkbox(labels.getHidden(getTitle() + "Subscribed"), subscribed))
+      {
+         setSubscribed(subscribed.get());
+      }
+      ImGuiTools.previousWidgetTooltip("Subscribed");
+      ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
+      if (messageSizeString != null)
+      {
+         ImGui.sameLine();
+         ImGui.text(messageSizeString);
+      }
       if (getHasReceivedOne())
       {
          getFrequencyPlot().renderImGuiWidgets();
          delayPlot.renderImGuiWidgets();
       }
+   }
+
+   public void setSubscribed(boolean subscribed)
+   {
+      if (subscribed && realtimeROS2Node == null)
+      {
+         subscribe();
+      }
+      else if (!subscribed && realtimeROS2Node != null)
+      {
+         unsubscribe();
+      }
+   }
+
+   private void unsubscribe()
+   {
+      subscribed.set(false);
+      realtimeROS2Node.destroy();
+      realtimeROS2Node = null;
    }
 
    @Override

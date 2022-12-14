@@ -163,18 +163,41 @@ public class GPUPlanarRegionExtraction
       //      ROSOpenCVTools.backMatWithNettyBuffer(inputDepthImageMat, image.getData());
    }
 
-   public void extractPlanarRegions(ReferenceFrame cameraFrame, Runnable onPatchSizeChanged)
+   /**
+    * A separate method that reads the source image from the memory location
+    * "sourceDepthByteBufferOfFloats" given in the create() method. If desired,
+    * extractPlanarRegions can then be called asyncronously, for performance.
+    *
+    * For example, for use with the sensor simulator,
+    * this is the part that needs to be done in the same thread as the sensor
+    * simulator, as it's using the same memory. This is part of making the
+    * planar region extraction UI more responsive by taking the planar region
+    * extraction algorithm off the main rendering thread. However, since we are
+    * using the sensor simulator, which gets rendered to on the render thread,
+    * we need to update from that memory on the render thread, so this method is
+    * meant to be called from there, separately from the extractPlanarRegions
+    * method.
+    *
+    * If it is not desired to run extractPlanarRegions in a separate thread,
+    * just call it right after this method.
+    */
+   public void readFromSourceImage()
    {
-      calculateDerivativeParameters();
-
       // convert float to unint16
       // multiply by 1000 and cast to int
       double scaleFactor = 1000.0; // convert meters to millimeters
       double delta = 0.0; // no delta added
       int resultType = -1; // the output matrix will have the same type as the input
       inputFloatDepthImage.getBytedecoOpenCVMat().convertTo(inputScaledFloatDepthImage.getBytedecoOpenCVMat(), resultType, scaleFactor, delta);
-      scaleFactor = 1.0;
-      resultType = opencv_core.CV_16UC1;
+   }
+
+   public void extractPlanarRegions(Runnable onPatchSizeChanged)
+   {
+      calculateDerivativeParameters();
+
+      double scaleFactor = 1.0;
+      double delta = 0.0; // no delta added
+      int resultType = opencv_core.CV_16UC1;
       inputScaledFloatDepthImage.getBytedecoOpenCVMat().convertTo(inputU16DepthImage.getBytedecoOpenCVMat(), resultType, scaleFactor, delta);
 
       // Flip so the Y+ goes up instead of down.
@@ -534,28 +557,14 @@ public class GPUPlanarRegionExtraction
       .map(gpuPlanarRegion ->
       {
          List<PlanarRegion> planarRegions = new ArrayList<>();
+         FrameQuaternion orientation = new FrameQuaternion();
          try
          {
             // Going through LinearTransform3D first prevents NotARotationMatrix exceptions.
-            if (!MathTools.epsilonEquals(gpuPlanarRegion.getNormal().norm(), 1.0, 1e-4))
-               throw new RuntimeException("The planar region norm isn't valid");
-            FrameQuaternion orientation = new FrameQuaternion(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
-            try
-            {
-               orientation.changeFrame(ReferenceFrame.getWorldFrame());
-            }
-            catch (NotARotationMatrixException e)
-            {
-               if (!printedException)
-               {
-                  LogTools.info("Normal = " + gpuPlanarRegion.getNormal());
-                  LogTools.info("Orientation = " + orientation);
-
-                  printedException = true;
-
-                  throw e;
-               }
-            }
+            LinearTransform3D linearTransform3D = new LinearTransform3D(EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+            linearTransform3D.normalize();
+            orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
+            orientation.changeFrame(ReferenceFrame.getWorldFrame());
 
             // First compute the set of concave hulls for this region
             FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
@@ -614,6 +623,16 @@ public class GPUPlanarRegionExtraction
 
                hullCounter++;
                regionId = 31 * regionId + hullCounter;
+            }
+         }
+         catch (NotARotationMatrixException notARotationMatrixException)
+         {
+            if (!printedException)
+            {
+               printedException = true;
+               LogTools.info("Normal = " + gpuPlanarRegion.getNormal().toString(null));
+               LogTools.info("Orientation = " + orientation.toString(null));
+               LogTools.warn("Not a rotation matrix: {}", gpuPlanarRegion.getNormal());
             }
          }
          catch (RuntimeException e)

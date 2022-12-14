@@ -98,7 +98,7 @@ public class RDXARDemo
             baseUI.getPrimaryScene().addCoordinateFrame(0.3);
 
             // TODO: Make a new scene for this panel
-            arPanel = new RDX3DPanel("AR View", 2, false);
+            arPanel = new RDX3DPanel("AR View", false);
 
             baseUI.add3DPanel(arPanel);
             arPanel.getCamera3D().setInputEnabled(false);
