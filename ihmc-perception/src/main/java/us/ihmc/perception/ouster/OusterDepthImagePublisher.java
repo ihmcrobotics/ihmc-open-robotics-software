@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
-import us.ihmc.perception.memory.MemoryTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.pubsub.DomainFactory;
@@ -47,6 +47,7 @@ public class OusterDepthImagePublisher
    private _cl_program openCLProgram;
    private _cl_kernel extractDepthImageKernel;
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
+   private OpenCLIntBuffer pixelShiftOpenCLBuffer;
    private _cl_mem lidarFrameBufferObject;
    private BytedecoImage compressionInputImage;
    private ByteBuffer pngImageBuffer;
@@ -104,7 +105,7 @@ public class OusterDepthImagePublisher
          // copy while the ouster thread is blocked
          lidarFrameByteBufferPointer.position(0);
          lidarFrameByteBufferPointerCopy.position(0);
-         MemoryTools.memoryCopy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
+         NativeMemoryTools.copy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
 
          lidarFrameByteBufferCopy.put(ouster.getLidarFrameByteBuffer());
 
@@ -125,6 +126,8 @@ public class OusterDepthImagePublisher
 
          lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
          compressionInputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         pixelShiftOpenCLBuffer = new OpenCLIntBuffer(ouster.getPixelShiftBuffer());
+         pixelShiftOpenCLBuffer.createOpenCLBufferObject(openCLManager);
       }
 
       // Important not to store as a field, as update() needs to be called each frame
@@ -139,11 +142,13 @@ public class OusterDepthImagePublisher
       parametersBuffer.setParameter(NettyOuster.MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
+      pixelShiftOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
       openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
 
       openCLManager.setKernelArgument(extractDepthImageKernel, 0, parametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(extractDepthImageKernel, 1, lidarFrameBufferObject);
-      openCLManager.setKernelArgument(extractDepthImageKernel, 2, compressionInputImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(extractDepthImageKernel, 1, pixelShiftOpenCLBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(extractDepthImageKernel, 2, lidarFrameBufferObject);
+      openCLManager.setKernelArgument(extractDepthImageKernel, 3, compressionInputImage.getOpenCLImageObject());
       openCLManager.execute2D(extractDepthImageKernel, depthWidth, depthHeight);
       compressionInputImage.readOpenCLImage(openCLManager);
       openCLManager.finish();
