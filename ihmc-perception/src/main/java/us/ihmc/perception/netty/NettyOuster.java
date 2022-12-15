@@ -19,6 +19,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.util.function.Consumer;
 
 /**
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
@@ -93,6 +94,7 @@ public class NettyOuster
 
    private volatile boolean tryingTCP = false;
    private volatile boolean tcpInitialized = false;
+   private String sanitizededHostAddress;
 
    private final EventLoopGroup group;
    private final Bootstrap bootstrap;
@@ -100,6 +102,7 @@ public class NettyOuster
    private Instant aquisitionInstant;
    private ByteBuffer lidarFrameByteBuffer;
    private long nextExpectedMeasurementID = -1;
+   private String lidarMode;
 
    public NettyOuster()
    {
@@ -116,11 +119,11 @@ public class NettyOuster
             {
                tryingTCP = true;
                // Address looks like "/192.168.x.x" so we just discard the '/'
-               String modifiedAddress = packet.sender().getAddress().toString().substring(1);
+               sanitizededHostAddress = packet.sender().getAddress().toString().substring(1);
                // Do this on a thread so we don't hang up the UDP thread.
                ThreadTools.startAsDaemon(() ->
                {
-                  configureTCP(modifiedAddress);
+                  configureTCP();
                   tryingTCP = false;
                }, "TCPConfiguration");
             }
@@ -132,22 +135,12 @@ public class NettyOuster
                int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
                if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID)
                {
-//                  LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}", nextExpectedMeasurementID, measurementID);
+                  LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}", nextExpectedMeasurementID, measurementID);
                }
                nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
 
                lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
                content.getBytes(0, lidarFrameByteBuffer);
-
-//               content.resetReaderIndex();
-
-//               ByteBuffer slice = lidarFrameByteBuffer.slice(measurementID * measurementBlockSize, measurementBlockSize);
-
-//               if (lidarFrameByteBuffer.position() == 0)
-//                  ++numberOfTimesZero;
-
-//               content.readBytes(lidarFrameByteBuffer);
-//               content.readBytes(slice);
 
                boolean isLastBlockInFrame = measurementID == (columnsPerFrame - MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
                if (isLastBlockInFrame && onFrameReceived != null)
@@ -162,17 +155,75 @@ public class NettyOuster
       bootstrap.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(Conversions.megabytesToBytes(2)));
    }
 
-   private void configureTCP(String host)
+   private void configureTCP()
    {
-      LogTools.info("Attempting to query host " + host);
+      performQuery("get_lidar_data_format", jsonResponse ->
+      {
+         try
+         {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jsonResponse);
+
+            pixelsPerColumn = root.get("pixels_per_column").asInt();
+            columnsPerFrame = root.get("columns_per_frame").asInt();
+            measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
+            udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
+            lidarFrameSizeBytes = MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM * measurementBlockSize * udpDatagramsPerFrame;
+
+            LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}",
+                          pixelsPerColumn,
+                          columnsPerFrame,
+                          udpDatagramsPerFrame);
+            LogTools.info("Measurement block size (B): {}, Lidar frame size (B): {}", measurementBlockSize, lidarFrameSizeBytes);
+
+            lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
+
+            JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
+            pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
+            for (int i = 0; i < pixelsPerColumn; i++)
+            {
+               pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
+            }
+            pixelShiftBuffer.rewind();
+         }
+         catch (JsonProcessingException jsonProcessingException)
+         {
+            LogTools.error(jsonProcessingException.getMessage());
+         }
+      });
+
+      performQuery("get_config_param active", jsonResponse ->
+      {
+         try
+         {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(jsonResponse);
+
+            lidarMode = root.get("lidar_mode").asText();
+
+            LogTools.info("Lidar mode: {}", lidarMode);
+         }
+         catch (JsonProcessingException jsonProcessingException)
+         {
+            LogTools.error(jsonProcessingException.getMessage());
+         }
+      });
+
+      LogTools.info("Ouster is initialized.");
+      tcpInitialized = true;
+   }
+
+   private void performQuery(String command, Consumer<String> responseConsumer)
+   {
+      LogTools.info("Attempting to query host " + sanitizededHostAddress + " with command " + command);
 
       String jsonResponse = "";
       LogTools.info("Binding to TCP port " + TCP_PORT);
-      try (Socket socket = new Socket(host, TCP_PORT))
+      try (Socket socket = new Socket(sanitizededHostAddress, TCP_PORT))
       {
          OutputStream output = socket.getOutputStream();
          PrintWriter writer = new PrintWriter(output, true);
-         writer.println("get_lidar_data_format");
+         writer.println(command);
 
          InputStream input = socket.getInputStream();
          BufferedReader reader = new BufferedReader(new InputStreamReader(input));
@@ -193,42 +244,7 @@ public class NettyOuster
          LogTools.info("Unbound from TCP port " + TCP_PORT);
       }
 
-      try
-      {
-         ObjectMapper mapper = new ObjectMapper();
-         JsonNode root = mapper.readTree(jsonResponse);
-
-         pixelsPerColumn = root.get("pixels_per_column").asInt();
-         columnsPerFrame = root.get("columns_per_frame").asInt();
-         measurementBlockSize = HEADER_BLOCK_BYTES + (pixelsPerColumn * CHANNEL_DATA_BLOCK_BYTES) + MEASUREMENT_BLOCK_STATUS_BYTES;
-         udpDatagramsPerFrame = columnsPerFrame / MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM;
-         lidarFrameSizeBytes = MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM * measurementBlockSize * udpDatagramsPerFrame;
-
-         LogTools.info("Pixels Per Column: {}, Columns Per Frame: {}, UDP datagrams per frame: {}",
-                       pixelsPerColumn,
-                       columnsPerFrame,
-                       udpDatagramsPerFrame);
-         LogTools.info("Measurement block size (B): {}, Lidar frame size (B): {}", measurementBlockSize, lidarFrameSizeBytes);
-
-         lidarFrameByteBuffer = ByteBuffer.allocateDirect(lidarFrameSizeBytes);
-
-         JsonNode pixelShiftNode = root.get("pixel_shift_by_row");
-         pixelShiftBuffer = NativeMemoryTools.allocate(pixelsPerColumn * Integer.BYTES);
-         for (int i = 0; i < pixelsPerColumn; i++)
-         {
-            pixelShiftBuffer.putInt(pixelShiftNode.get(i).asInt());
-         }
-         pixelShiftBuffer.rewind();
-
-         // TODO: Store and print frequency
-      }
-      catch (JsonProcessingException jsonProcessingException)
-      {
-         LogTools.error(jsonProcessingException.getMessage());
-      }
-
-      LogTools.info("Ouster is initialized.");
-      tcpInitialized = true;
+      responseConsumer.accept(jsonResponse);
    }
 
    /**
