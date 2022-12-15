@@ -163,7 +163,7 @@ kernel void imageToPointCloud(global float* parameters,
    int depthImageHeight = parameters[15];
    float pointSize = parameters[16];
 
-   float discreteResolution = 0.003f;
+   float discreteResolution = 0.001f;
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
 
    int xFromCenter = -x - (depthImageWidth / 2); // flip
