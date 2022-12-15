@@ -51,7 +51,6 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    private final CameraPinholeBrown depthCameraInstrinsics = new CameraPinholeBrown();
    private final CameraPinholeBrown colorCameraInstrinsics = new CameraPinholeBrown();
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
 
    private final Object imageMessagesSyncObject = new Object();
    private final ImageMessage colorImageMessage = new ImageMessage();
@@ -305,18 +304,18 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
          parametersBuffer.getBytedecoFloatBufferPointer().put(0, FOCAL_LENGTH_COLOR);
          parametersBuffer.getBytedecoFloatBufferPointer().put(1, CMOS_WIDTH_COLOR);
          parametersBuffer.getBytedecoFloatBufferPointer().put(2, CMOS_HEIGHT_COLOR);
-         parametersBuffer.getBytedecoFloatBufferPointer().put(3, transformToWorldFrame.getTranslation().getX32());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(4, transformToWorldFrame.getTranslation().getY32());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(5, transformToWorldFrame.getTranslation().getZ32());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) transformToWorldFrame.getRotation().getM00());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) transformToWorldFrame.getRotation().getM01());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) transformToWorldFrame.getRotation().getM02());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) transformToWorldFrame.getRotation().getM10());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) transformToWorldFrame.getRotation().getM11());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) transformToWorldFrame.getRotation().getM12());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) transformToWorldFrame.getRotation().getM20());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) transformToWorldFrame.getRotation().getM21());
-         parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) transformToWorldFrame.getRotation().getM22());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(3, sensorTransformToWorld.getTranslation().getX32());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(4, sensorTransformToWorld.getTranslation().getY32());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(5, sensorTransformToWorld.getTranslation().getZ32());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(6, (float) sensorTransformToWorld.getRotation().getM00());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(7, (float) sensorTransformToWorld.getRotation().getM01());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(8, (float) sensorTransformToWorld.getRotation().getM02());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(9, (float) sensorTransformToWorld.getRotation().getM10());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(10, (float) sensorTransformToWorld.getRotation().getM11());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(11, (float) sensorTransformToWorld.getRotation().getM12());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(12, (float) sensorTransformToWorld.getRotation().getM20());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(13, (float) sensorTransformToWorld.getRotation().getM21());
+         parametersBuffer.getBytedecoFloatBufferPointer().put(14, (float) sensorTransformToWorld.getRotation().getM22());
          parametersBuffer.getBytedecoFloatBufferPointer().put(15, (float) depthCameraInstrinsics.getCx());
          parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) depthCameraInstrinsics.getCy());
          parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) depthCameraInstrinsics.getFx());
