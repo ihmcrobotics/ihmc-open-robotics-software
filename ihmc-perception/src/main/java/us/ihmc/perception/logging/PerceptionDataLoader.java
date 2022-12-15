@@ -11,12 +11,15 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
@@ -89,7 +92,7 @@ public class PerceptionDataLoader
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
 
-//      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
+      //      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
 
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
 
@@ -139,22 +142,29 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20221212_184940_PerceptionLog.hdf5";
+      String logFileName = "20221214_214533_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
 
+      ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+
       long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
+      long totalDepth = loader.getHDF5Manager().getCount("/l515/depth/");
+
+      long total = Math.min(totalColor, totalDepth);
 
       Mat colorImage = new Mat();
       Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
       LogTools.info("Total Images: {}", totalColor);
 
-      for (int i = 0; i < totalColor; i++)
+      for (int i = 0; i < total; i++)
       {
-         LogTools.info("Loading Index: {}/{}", i, totalColor);
+
+         LogTools.info("Loading Index: {}/{}", i, total);
          loader.loadImage("/l515/color/", i, colorImage);
 
+         //imshow("/l515/color", colorImage);
 
          long begin_load = System.nanoTime();
          loader.loadDepth("/l515/depth/", i, depthImage);
@@ -171,15 +181,16 @@ public class PerceptionDataLoader
          long end_decompress = System.nanoTime();
 
          LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
-         LogTools.info("Decompression Time: {} ms",(end_decompress - begin_decompress) / 1e6f);
+         LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
 
-         imshow("/l515/color", colorImage);
-         imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(30);
-         if (code == 113)
-         {
-            System.exit(0);
-         }
+         //imshow("/l515/depth", finalDisplayDepth);
+         //int code = waitKeyEx(30);
+         //if (code == 113)
+         //{
+         //   System.exit(0);
+         //}
       }
+
+
    }
 }

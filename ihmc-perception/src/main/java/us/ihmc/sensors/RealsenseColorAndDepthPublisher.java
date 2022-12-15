@@ -122,11 +122,12 @@ public class RealsenseColorAndDepthPublisher
 
          if (sensor.readFrameData())
          {
-            Instant now = Instant.now();
 
             sensor.updateDataBytePointers();
 
             long begin_acquire = System.nanoTime();
+
+            Instant now = Instant.now();
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
@@ -136,29 +137,27 @@ public class RealsenseColorAndDepthPublisher
             color8UC3Image = new Mat(this.colorHeight, this.colorWidth, opencv_core.CV_8UC3, colorFrameData);
             setColorExtrinsics(sensor);
 
-            long end_acquire = System.nanoTime();
-
-            long begin_depth = System.nanoTime();
+            long time_acquisition = System.nanoTime();
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);
-            BytedecoOpenCVTools.fillVideoPacket(compressedDepthPointer, heapByteArrayData, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth());
+            BytedecoOpenCVTools.fillVideoPacket(compressedDepthPointer, heapByteArrayData, depthVideoPacket, sensor.getDepthHeight(), sensor.getDepthWidth(), time_acquisition);
             ros2Helper.publish(this.depthTopic, depthVideoPacket);
 
             long end_depth = System.nanoTime();
 
             compressedColorPointer = new BytePointer();
             BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-            BytedecoOpenCVTools.fillVideoPacket(compressedColorPointer, heapByteArrayData, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth());
+            BytedecoOpenCVTools.fillVideoPacket(compressedColorPointer, heapByteArrayData, colorVideoPacket, sensor.getColorHeight(), sensor.getColorWidth(), time_acquisition);
             ros2Helper.publish(this.colorTopic, colorVideoPacket);
 
             long end_color = System.nanoTime();
 
-            LogTools.info("Acquisition Time: {} ms", (end_acquire - begin_acquire) / 1e6);
+            LogTools.info("Acquisition Time: {} ms", (time_acquisition - begin_acquire) / 1e6);
 
             LogTools.info(String.format("Depth Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
                           depthU16C1Image.rows() * depthU16C1Image.cols() * 2, compressedDepthPointer.capacity(),
-                          (float) (depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) compressedDepthPointer.capacity(), (end_depth - begin_depth) / 1e6));
+                          (float) (depthU16C1Image.rows() * depthU16C1Image.cols() * 2) / (float) compressedDepthPointer.capacity(), (end_depth - time_acquisition) / 1e6));
 
             LogTools.info(String.format("Color Raw: %d, Final:%d, Ratio: %.3f, Time: %.3f ms",
                           color8UC3Image.rows() * color8UC3Image.cols() * 3,

@@ -101,9 +101,11 @@ public class ZED2ColorStereoPublisher
          }
       }
 
+      long now = System.nanoTime();
+
       readImage(color8UC3ImageLeft);
       BytedecoOpenCVTools.compressRGBImageJPG(color8UC3ImageLeft, yuvImageLeft, compressedColorPointerLeft);
-      BytedecoOpenCVTools.fillVideoPacket(compressedColorPointerLeft, heapByteArrayData, colorVideoPacketLeft, 720, 2560);
+      BytedecoOpenCVTools.fillVideoPacket(compressedColorPointerLeft, heapByteArrayData, colorVideoPacketLeft, 720, 2560, now);
       ros2Helper.publish(ROS2Tools.ZED2_STEREO_COLOR, colorVideoPacketLeft);
    }
 
