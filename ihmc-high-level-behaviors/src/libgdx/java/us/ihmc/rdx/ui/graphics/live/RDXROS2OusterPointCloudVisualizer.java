@@ -15,7 +15,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -25,16 +24,15 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
+import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,14 +42,13 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
    private IHMCROS2Callback<ImageMessage> ros2Callback = null;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
-   private final ImGuiPlot skippedMessagesPlot = new ImGuiPlot("Skipped", 1000, 230, 20);
+   private final ImPlotFrequencyPlot frequencyPlot = new ImPlotFrequencyPlot("Hz", 30);
+   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean subscribed = new ImBoolean(true);
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private int totalNumberOfPoints;
-   private final ResettableExceptionHandlingExecutorService threadQueue;
    private final AtomicReference<ImageMessage> imageMessageReference = new AtomicReference<>(null);
    private OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -62,9 +59,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private BytedecoImage decompressionOutputImage;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
-   private String messageSizeString;
-   private long expectedNextSequenceNumber = -1;
-   private long skippedSequenceNumbers = 0;
+   private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
+   private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private int depthWidth;
    private int depthHeight;
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
@@ -74,7 +70,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
       super(title + " (ROS 2)");
       this.ros2Node = ros2Node;
       this.topic = topic;
-      threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
       setSubscribed(subscribed.get());
    }
@@ -90,7 +85,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
    private void queueRenderImageBasedPointCloud(ImageMessage message)
    {
-      frequencyPlot.recordEvent();
+      frequencyPlot.ping();
       // TODO: Possibly decompress on a thread here
       // TODO: threadQueue.clearQueueAndExecute(() ->
       imageMessageReference.set(message);
@@ -122,9 +117,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                depthWidth = imageMessage.getImageWidth();
                depthHeight = imageMessage.getImageHeight();
                totalNumberOfPoints = depthWidth * depthHeight;
-               int bytesPerImage = totalNumberOfPoints * 2;
-               String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerImage / 1000.0);
-               messageSizeString = String.format("Message size: %s KB", kilobytes);
                pointCloudRenderer.create(totalNumberOfPoints);
                decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
@@ -137,12 +129,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
             }
 
-            long sequenceNumber = imageMessage.getSequenceNumber();
-            if (expectedNextSequenceNumber > 0 && sequenceNumber != expectedNextSequenceNumber)
-            {
-               skippedSequenceNumbers++;
-            }
-            expectedNextSequenceNumber = sequenceNumber + 1;
+            sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
 
             int numberOfBytes = imageMessage.getData().size();
             decompressionInputBuffer.rewind();
@@ -152,6 +139,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                decompressionInputBuffer.put(imageMessage.getData().get(i));
             }
             decompressionInputBuffer.flip();
+
+            messageSizeReadout.update(numberOfBytes);
 
             decompressionInputBytePointer.position(0);
             decompressionInputBytePointer.limit(numberOfBytes);
@@ -199,6 +188,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
             pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
 
             pointCloudRenderer.updateMeshFastestAfterKernel();
+
+            delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTimeSecondsSinceEpoch(), imageMessage.getAcquisitionTimeAdditionalNanos()));
          }
       }
    }
@@ -214,17 +205,17 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
       ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      ImGui.sameLine();
-      ImGui.pushItemWidth(30.0f);
-      ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
-      ImGui.popItemWidth();
-      if (messageSizeString != null)
+      if (frequencyPlot.anyPingsYet())
       {
-         ImGui.sameLine();
-         ImGui.text(messageSizeString);
+         messageSizeReadout.renderImGuiWidgets();
       }
-      frequencyPlot.renderImGuiWidgets();
-      skippedMessagesPlot.render(skippedSequenceNumbers);
+      ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
+      if (frequencyPlot.anyPingsYet())
+      {
+         frequencyPlot.renderImGuiWidgets();
+         delayPlot.renderImGuiWidgets();
+         sequenceDiscontinuityPlot.renderImGuiWidgets();
+      }
    }
 
    @Override
