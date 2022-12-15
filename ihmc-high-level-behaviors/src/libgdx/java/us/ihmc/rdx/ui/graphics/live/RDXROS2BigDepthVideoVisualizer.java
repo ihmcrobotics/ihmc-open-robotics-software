@@ -106,7 +106,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
             synchronized (this) // synchronize with the update method
             {
                updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
-
                BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
             }
          });
