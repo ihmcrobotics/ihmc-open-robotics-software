@@ -1,3 +1,125 @@
+
+float4 transform(float x,
+                 float y,
+                 float z,
+                 float translationX,
+                 float translationY,
+                 float translationZ,
+                 float rotationMatrixM00,
+                 float rotationMatrixM01,
+                 float rotationMatrixM02,
+                 float rotationMatrixM10,
+                 float rotationMatrixM11,
+                 float rotationMatrixM12,
+                 float rotationMatrixM20,
+                 float rotationMatrixM21,
+                 float rotationMatrixM22)
+{
+   float4 ret = (float4) (rotationMatrixM00 * x + rotationMatrixM01 * y + rotationMatrixM02 * z,
+                          rotationMatrixM10 * x + rotationMatrixM11 * y + rotationMatrixM12 * z,
+                          rotationMatrixM20 * x + rotationMatrixM21 * y + rotationMatrixM22 * z,
+                          0.0f);
+   ret.x += translationX;
+   ret.y += translationY;
+   ret.z += translationZ;
+   return ret;
+}
+
+float angle(float x1, float y1, float x2, float y2)
+{
+   float cosTheta = x1 * x2 + y1 * y2;
+   float sinTheta = x1 * y2 - y1 * x2;
+   return atan2(sinTheta, cosTheta);
+}
+
+bool intervalContains(float value, float lowerEndpoint, float upperEndpoint)
+{
+   return value >= lowerEndpoint && value <= upperEndpoint;
+}
+
+double interpolate(double a, double b, double alpha)
+{
+  return (1.0 - alpha) * a + alpha * b;
+}
+
+// TODO: create (R,G,B) based on eyeDepth ( distance from me )
+int createRGB(double input, bool sinusoidal)
+{
+    if(sinusoidal)
+    {
+        // maximum depth value
+        float m = 3;
+        float PI = 3.141592;
+        float a= 5*input*PI/(3*m) + PI/2;
+        float r=sin(a) * 192 + 128;
+        float alpha = 255;
+
+        if(r<0) r=0;
+        else if(r>255) r =255;
+        //    r=max(0,min(255,r));
+        float g=sin(a - 2*PI/3) * 192 + 128;
+        if(g<0) g=0;
+        else if(g>255) g =255;
+        //    g=max(0,min(255,g));
+        float b=sin(a - 4*PI/3) * 192 + 128;
+        if(b<0) b=0;
+        else if(b>255) b =255;
+        //    b=max(0,min(255,b));
+        int color = ((int)round(r) << 24) | ((int)round(g) << 16) | ((int)round(b) << 8) | 255;
+        return color;
+    }
+    else
+    {
+        // using interpolation between keu color points >>
+        double r = 0,g = 0,b = 0;
+        double redR     = 255.0,  redG     = 0.0,      redB     = 0.0;
+        double magentaR = 255.0,  magentaG = 0.0,      magentaB = 255.0;
+        double orangeR  = 255.0,  orangeG  = 200.0,    orangeB  = 0.0;
+        double yellowR  = 255.0,  yellowG  = 255.0,    yellowB  = 0.0;
+        double blueR    = 0.0,    blueG    = 0.0,      blueB    = 255.0;
+        double greenR   = 0.0,    greenG   = 255.0,    greenB   = 0.0;
+
+        double gradientSize = 0.2;
+        double gradientLength = 1;
+        double alpha = fmod(input,gradientLength);
+
+        if(alpha<0) alpha = 1 + alpha;
+        if(alpha <= gradientSize * 1)
+        {
+            r = interpolate(magentaR,blueR,(alpha) / gradientSize);
+            g = interpolate(magentaG,blueG,(alpha) / gradientSize);
+            b = interpolate(magentaB,blueB,(alpha) / gradientSize);
+        }
+        else if(alpha <= gradientSize * 2)
+        {
+            r = interpolate(blueR,greenR,(alpha - gradientSize * 1) / gradientSize);
+            g = interpolate(blueG,greenG,(alpha - gradientSize * 1) / gradientSize);
+            b = interpolate(blueB,greenB,(alpha - gradientSize * 1) / gradientSize);
+        }
+        else if(alpha<=gradientSize * 3)
+        {
+            r = interpolate(greenR,yellowR,(alpha - gradientSize * 2) / gradientSize);
+            g = interpolate(greenG,yellowG,(alpha - gradientSize * 2) / gradientSize);
+            b = interpolate(greenB,yellowB,(alpha - gradientSize * 2) / gradientSize);
+        }
+        else if(alpha<=gradientSize * 4)
+        {
+            r = interpolate(yellowR,orangeR,(alpha - gradientSize * 3) / gradientSize);
+            g = interpolate(yellowG,orangeG,(alpha - gradientSize * 3) / gradientSize);
+            b = interpolate(yellowB,orangeB,(alpha - gradientSize * 3) / gradientSize);
+        }
+        else if(alpha<=gradientSize * 5)
+        {
+            r = interpolate(orangeR,redR,(alpha - gradientSize * 4) / gradientSize);
+            g = interpolate(orangeG,redG,(alpha - gradientSize * 4) / gradientSize);
+            b = interpolate(orangeB,redB,(alpha - gradientSize * 4) / gradientSize);
+        }
+        int color = ((int)round(r) << 24) | ((int)round(g) << 16) | ((int)round(b) << 8) | 255;
+        return color;
+    }
+}
+
+
 // TODO: float vs double in here? pick one, probably double for all the parameters
 kernel void createPointCloud(read_only image2d_t depthImageMeters,
                              read_only image2d_t colorRGBAImage,
@@ -92,24 +214,41 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
         }
        else
        {
+<<<<<<< HEAD
          color = calculateGradientColor((double) worldFramePoint.z, sinusoidal);
+=======
+         color = createRGB((double) worldFramePoint.z, sinusoidal);
+>>>>>>> Get the Realsense L515 image based point cloud working.
 //          color = (255 << 24) | (255 << 16) | (255 << 8) | 255; // white is default
        }
 
     }
     else if(viewMode == DEPTH)
     {
+<<<<<<< HEAD
 //              float4 rgb = calculateGradientColorFromDepth(eyeDepthInMeters);
 //              color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
           color = calculateGradientColor((double) eyeDepthInMeters, sinusoidal);
+=======
+//              float4 rgb = createRGBFromDepth(eyeDepthInMeters);
+//              color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
+          color = createRGB((double) eyeDepthInMeters, sinusoidal);
+>>>>>>> Get the Realsense L515 image based point cloud working.
 //              printf("%f, %f, %f\n", rgb.x,rgb.y,rgb.z);
     }
     else
     {
+<<<<<<< HEAD
 //               float4 rgb = calculateGradientColorFromZDepth(zUp3DZ);
 //               color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
 //               printf("r: %f, g: %f, b: %f\n", rgb.x,rgb.y,rgb.z);
          color = calculateGradientColor((double) worldFramePoint.z, sinusoidal);
+=======
+//               float4 rgb = createRGBFromZDepth(zUp3DZ);
+//               color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
+//               printf("r: %f, g: %f, b: %f\n", rgb.x,rgb.y,rgb.z);
+         color = createRGB((double) worldFramePoint.z, sinusoidal);
+>>>>>>> Get the Realsense L515 image based point cloud working.
     }
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
