@@ -58,6 +58,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -97,6 +99,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.getCdrSerializedSize(data.getIntrinsicParameters(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -121,6 +125,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getPosition(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
+      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.write(data.getIntrinsicParameters(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.ImageMessage data, us.ihmc.idl.CDR cdr)
@@ -140,6 +145,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getPosition(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
+      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.read(data.getIntrinsicParameters(), cdr);	
 
    }
 
@@ -157,6 +163,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
 
+      ser.write_type_a("intrinsic_parameters", new perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType(), data.getIntrinsicParameters());
+
    }
 
    @Override
@@ -172,6 +180,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       ser.read_type_a("position", new geometry_msgs.msg.dds.PointPubSubType(), data.getPosition());
 
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
+
+      ser.read_type_a("intrinsic_parameters", new perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType(), data.getIntrinsicParameters());
 
    }
 

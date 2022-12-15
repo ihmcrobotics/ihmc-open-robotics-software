@@ -48,6 +48,10 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             * Orientation of the focal point at sensor data aquisition
             */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
+   /**
+            * Intrinsic parameters for frustum camera models
+            */
+   public perception_msgs.msg.dds.IntrinsicParametersMessage intrinsic_parameters_;
 
    public ImageMessage()
    {
@@ -55,6 +59,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
       orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
+      intrinsic_parameters_ = new perception_msgs.msg.dds.IntrinsicParametersMessage();
    }
 
    public ImageMessage(ImageMessage other)
@@ -80,6 +85,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.position_, position_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.orientation_, orientation_);
+      perception_msgs.msg.dds.IntrinsicParametersMessagePubSubType.staticCopy(other.intrinsic_parameters_, intrinsic_parameters_);
    }
 
    /**
@@ -200,6 +206,15 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    }
 
 
+   /**
+            * Intrinsic parameters for frustum camera models
+            */
+   public perception_msgs.msg.dds.IntrinsicParametersMessage getIntrinsicParameters()
+   {
+      return intrinsic_parameters_;
+   }
+
+
    public static Supplier<ImageMessagePubSubType> getPubSubType()
    {
       return ImageMessagePubSubType::new;
@@ -233,6 +248,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!this.position_.epsilonEquals(other.position_, epsilon)) return false;
       if (!this.orientation_.epsilonEquals(other.orientation_, epsilon)) return false;
+      if (!this.intrinsic_parameters_.epsilonEquals(other.intrinsic_parameters_, epsilon)) return false;
 
       return true;
    }
@@ -261,6 +277,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!this.position_.equals(otherMyClass.position_)) return false;
       if (!this.orientation_.equals(otherMyClass.orientation_)) return false;
+      if (!this.intrinsic_parameters_.equals(otherMyClass.intrinsic_parameters_)) return false;
 
       return true;
    }
@@ -288,7 +305,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append("position=");
       builder.append(this.position_);      builder.append(", ");
       builder.append("orientation=");
-      builder.append(this.orientation_);
+      builder.append(this.orientation_);      builder.append(", ");
+      builder.append("intrinsic_parameters=");
+      builder.append(this.intrinsic_parameters_);
       builder.append("}");
       return builder.toString();
    }

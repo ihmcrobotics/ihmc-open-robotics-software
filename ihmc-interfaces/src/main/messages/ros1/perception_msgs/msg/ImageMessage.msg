@@ -28,4 +28,7 @@ geometry_msgs/Point position
 # Orientation of the focal point at sensor data aquisition
 geometry_msgs/Quaternion orientation
 
+# Intrinsic parameters for frustum camera models
+perception_msgs/IntrinsicParametersMessage intrinsic_parameters
+
 

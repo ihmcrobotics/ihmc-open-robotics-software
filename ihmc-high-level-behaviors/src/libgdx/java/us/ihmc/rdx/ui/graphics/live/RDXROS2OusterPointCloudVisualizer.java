@@ -15,7 +15,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -23,6 +23,9 @@ import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -30,18 +33,23 @@ import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements RenderableProvider
 {
-   private final ROS2Node ros2Node;
-   private final ROS2Topic<?> topic;
-   private IHMCROS2Callback<ImageMessage> ros2Callback = null;
+   private final String titleBeforeAdditions;
+   private final PubSubImplementation pubSubImplementation;
+   private final ROS2Topic<ImageMessage> topic;
+   private RealtimeROS2Node realtimeROS2Node;
+   private final ImageMessage imageMessage = new ImageMessage();
+   private final SampleInfo sampleInfo = new SampleInfo();
+   private final Object syncObject = new Object();
    private final ImPlotFrequencyPlot frequencyPlot = new ImPlotFrequencyPlot("Hz", 30);
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
@@ -65,10 +73,11 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private int depthHeight;
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
-   public RDXROS2OusterPointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<ImageMessage> topic)
+   public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
       super(title + " (ROS 2)");
-      this.ros2Node = ros2Node;
+      titleBeforeAdditions = title;
+      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
       setSubscribed(subscribed.get());
@@ -77,18 +86,21 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private void subscribe()
    {
       subscribed.set(true);
-      ros2Callback = new IHMCROS2Callback<>(ros2Node,
-                                            topic.withType(ImageMessage.class),
-                                            ROS2QosProfile.BEST_EFFORT(),
-                                            this::queueRenderImageBasedPointCloud);
+      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::queueRenderImageBasedPointCloud);
+      realtimeROS2Node.spin();
    }
 
-   private void queueRenderImageBasedPointCloud(ImageMessage message)
+   private void queueRenderImageBasedPointCloud(Subscriber<ImageMessage> subscriber)
    {
       frequencyPlot.ping();
-      // TODO: Possibly decompress on a thread here
-      // TODO: threadQueue.clearQueueAndExecute(() ->
-      imageMessageReference.set(message);
+
+      synchronized (syncObject)
+      {
+         imageMessage.getData().resetQuick();
+         subscriber.takeNextData(imageMessage, sampleInfo);
+         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTimeSecondsSinceEpoch(), imageMessage.getAcquisitionTimeAdditionalNanos()));
+      }
    }
 
    @Override
@@ -107,10 +119,12 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    {
       super.update();
 
-      if (subscribed.get() && isActive())
+      if (subscribed.get() && isActive() && frequencyPlot.anyPingsYet())
       {
-         ImageMessage imageMessage = imageMessageReference.getAndSet(null);
-         if (imageMessage != null)
+         int numberOfBytes;
+         long acquisitionTimeSecondsSinceEpoch;
+         long acquisitionTimeAdditionalNanos;
+         synchronized (syncObject)
          {
             if (decompressionInputBuffer == null)
             {
@@ -131,7 +145,10 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
             sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
 
-            int numberOfBytes = imageMessage.getData().size();
+            acquisitionTimeSecondsSinceEpoch = imageMessage.getAcquisitionTimeSecondsSinceEpoch();
+            acquisitionTimeAdditionalNanos = imageMessage.getAcquisitionTimeAdditionalNanos();
+
+            numberOfBytes = imageMessage.getData().size();
             decompressionInputBuffer.rewind();
             decompressionInputBuffer.limit(depthWidth * depthHeight * 2);
             for (int i = 0; i < numberOfBytes; i++)
@@ -139,58 +156,59 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                decompressionInputBuffer.put(imageMessage.getData().get(i));
             }
             decompressionInputBuffer.flip();
-
-            messageSizeReadout.update(numberOfBytes);
-
-            decompressionInputBytePointer.position(0);
-            decompressionInputBytePointer.limit(numberOfBytes);
-
-            decompressionInputMat.cols(numberOfBytes);
-            decompressionInputMat.data(decompressionInputBytePointer);
-
-            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
-            opencv_imgcodecs.imdecode(decompressionInputMat,
-                                      opencv_imgcodecs.IMREAD_UNCHANGED,
-                                      decompressionOutputImage.getBytedecoOpenCVMat());
-            decompressionOutputImage.getBackingDirectByteBuffer().rewind();
-
-            // TODO: Create tuners for these
-            double verticalFieldOfView = Math.PI / 2.0;
-            double horizontalFieldOfView = 2.0 * Math.PI;
-
-            parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
-            parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
-            parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
-            parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
-            parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
-            parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
-            parametersOpenCLFloatBuffer.setParameter(depthWidth);
-            parametersOpenCLFloatBuffer.setParameter(depthHeight);
-            parametersOpenCLFloatBuffer.setParameter(pointSize.get());
-
-            parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-            decompressionOutputImage.writeOpenCLImage(openCLManager);
-            pointCloudRenderer.updateMeshFastestBeforeKernel();
-            pointCloudVertexBuffer.syncWithBackingBuffer();
-
-            openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-            openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressionOutputImage.getOpenCLImageObject());
-            openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-            openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
-            pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-
-            pointCloudRenderer.updateMeshFastestAfterKernel();
-
-            delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTimeSecondsSinceEpoch(), imageMessage.getAcquisitionTimeAdditionalNanos()));
          }
+
+         messageSizeReadout.update(numberOfBytes);
+
+         decompressionInputBytePointer.position(0);
+         decompressionInputBytePointer.limit(numberOfBytes);
+
+         decompressionInputMat.cols(numberOfBytes);
+         decompressionInputMat.data(decompressionInputBytePointer);
+
+         decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+         opencv_imgcodecs.imdecode(decompressionInputMat,
+                                   opencv_imgcodecs.IMREAD_UNCHANGED,
+                                   decompressionOutputImage.getBytedecoOpenCVMat());
+         decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+
+         // TODO: Create tuners for these
+         double verticalFieldOfView = Math.PI / 2.0;
+         double horizontalFieldOfView = 2.0 * Math.PI;
+         sensorTransformToWorld.getTranslation().set(imageMessage.getPosition());
+         sensorTransformToWorld.getRotation().set(imageMessage.getOrientation());
+
+         parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
+         parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
+         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
+         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
+         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
+         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
+         parametersOpenCLFloatBuffer.setParameter(depthWidth);
+         parametersOpenCLFloatBuffer.setParameter(depthHeight);
+         parametersOpenCLFloatBuffer.setParameter(pointSize.get());
+
+         parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
+         decompressionOutputImage.writeOpenCLImage(openCLManager);
+         pointCloudRenderer.updateMeshFastestBeforeKernel();
+         pointCloudVertexBuffer.syncWithBackingBuffer();
+
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressionOutputImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
+         openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
+         pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+
+         pointCloudRenderer.updateMeshFastestAfterKernel();
+         delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
       }
    }
 
@@ -227,11 +245,11 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
    public void setSubscribed(boolean subscribed)
    {
-      if (subscribed && ros2Callback == null)
+      if (subscribed && realtimeROS2Node == null)
       {
          subscribe();
       }
-      else if (!subscribed && ros2Callback != null)
+      else if (!subscribed && realtimeROS2Node != null)
       {
          unsubscribe();
       }
@@ -240,8 +258,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private void unsubscribe()
    {
       subscribed.set(false);
-      ros2Callback.destroy();
-      ros2Callback = null;
+      realtimeROS2Node.destroy();
+      realtimeROS2Node = null;
    }
 
    public boolean isSubscribed()

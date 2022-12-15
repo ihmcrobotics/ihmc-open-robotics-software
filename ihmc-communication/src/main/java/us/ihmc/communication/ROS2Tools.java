@@ -125,8 +125,10 @@ public class ROS2Tools
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
    public static final ROS2Topic<VideoPacket> D435_DEPTH = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
+   public static final ROS2Topic<ImageMessage> L515_COLOR_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("color");
    public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION
          = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("debug_extraction");
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO
