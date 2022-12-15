@@ -2,10 +2,7 @@ package us.ihmc.perception.logging;
 
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -14,7 +11,6 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 
 import java.io.File;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import static org.bytedeco.opencv.global.opencv_highgui.*;
 
@@ -52,7 +48,7 @@ public class PerceptionDataLoader
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
 
-      mat.put(decompressImage(compressedByteArray));
+      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
 
       LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
       //      }, "perception_data_loader -> " + namespace);
@@ -70,30 +66,6 @@ public class PerceptionDataLoader
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
 
       LogTools.info("Completed Loading Image: {} {}", index, compressedByteArray.length);
-   }
-
-   private Mat decompressImage(byte[] dataArray)
-   {
-      LogTools.info("Decompressing Image: {}", dataArray.length);
-
-      BytePointer messageEncodedBytePointer = new BytePointer(dataArray.length);
-      messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
-      messageEncodedBytePointer.limit(dataArray.length);
-
-      Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
-      Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-
-      inputJPEGMat.cols(dataArray.length);
-      inputJPEGMat.data(messageEncodedBytePointer);
-
-      // imdecode takes the longest by far out of all this stuff
-      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
-
-      Mat outputMat = new Mat((int) (inputYUVI420Mat.rows() / 1.5f), inputYUVI420Mat.cols(), opencv_core.CV_8UC4);
-      opencv_imgproc.cvtColor(inputYUVI420Mat, outputMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
-      opencv_imgproc.cvtColor(outputMat, outputMat, opencv_imgproc.COLOR_RGBA2RGB);
-
-      return outputMat;
    }
 
    public String getFilePath()

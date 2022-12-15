@@ -3,6 +3,7 @@
 
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
+#include "perception_msgs/msg/./IntrinsicParametersMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -53,6 +54,10 @@ module perception_msgs
          * Orientation of the focal point at sensor data aquisition
          */
         geometry_msgs::msg::dds::Quaternion orientation;
+        /**
+         * Intrinsic parameters for frustum camera models
+         */
+        perception_msgs::msg::dds::IntrinsicParametersMessage intrinsic_parameters;
       };
     };
   };
