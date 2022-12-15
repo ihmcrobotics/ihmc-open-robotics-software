@@ -158,13 +158,13 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          setGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 190.0, 20.0);
          setGains(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), 275.0, 25.0);
          setGains(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 220.0, 20.0);
-         setGains(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 55.0, 6.0);
-         setGains(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), 55.0, 6.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), 55.0, 5.0);
+         setGains(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), 55.0, 5.0);
       }
 
-      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 180.0, 18.0);
-      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 55.0, 6.0);
-      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 55.0, 6.0);
+      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 300.0, 30.0);
+      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 75.0, 8.0);
+      setGains(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 75.0, 8.0);
 
       new DefaultParameterReader().readParametersInRegistry(registry);
       ros2Node.spin();
@@ -203,7 +203,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       }
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
-      yoVariableServer.setMainRegistry(registry, fullRobotModel.getRootBody(), graphicsListRegistry);
+      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       yoVariableServer.start();
 
       robotConfigurationDataPublisher.initialize();
