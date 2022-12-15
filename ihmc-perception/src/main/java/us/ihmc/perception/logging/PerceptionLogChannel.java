@@ -5,12 +5,23 @@ public class PerceptionLogChannel
    private String name;
    private int count;
    private int index;
+   boolean enabled = false;
 
    public PerceptionLogChannel(String name, int count, int index)
    {
       this.name = name;
       this.count = count;
       this.index = index;
+   }
+
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled = enabled;
    }
 
    public String getName()
@@ -38,9 +49,9 @@ public class PerceptionLogChannel
       index++;
    }
 
-   public void decrementIndex()
+   public void incrementCount()
    {
-      index--;
+      count++;
    }
 
    public void resetIndex()

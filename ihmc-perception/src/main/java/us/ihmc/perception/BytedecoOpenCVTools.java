@@ -337,9 +337,10 @@ public class BytedecoOpenCVTools
       }
    }
 
-   public static void fillVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width)
+   public static void fillVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
    {
       compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());
+      packet.setTimestamp(nanoTime);
       packet.getData().resetQuick();
       packet.getData().add(heapArray);
       packet.setImageHeight(height);

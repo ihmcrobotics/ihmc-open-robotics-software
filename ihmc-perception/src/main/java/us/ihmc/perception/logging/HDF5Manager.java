@@ -1,6 +1,7 @@
 package us.ihmc.perception.logging;
 
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.H5File;
 import us.ihmc.log.LogTools;
@@ -18,10 +19,11 @@ import java.util.Map;
 public class HDF5Manager
 {
 
-   public static int MAX_BUFFER_SIZE = 500;
+   public static int MAX_BUFFER_SIZE = 1000;
 
    private HashMap<String, Group> groups;
-   private HashMap<String, TFloatArrayList> buffers;
+   private HashMap<String, TFloatArrayList> floatBuffers;
+   private HashMap<String, TLongArrayList> longBuffers;
    private HashMap<String, Integer> counts;
    private H5File file;
 
@@ -35,7 +37,8 @@ public class HDF5Manager
    {
       file = new H5File(filePath, flag);
       groups = new HashMap<>();
-      buffers = new HashMap<>();
+      floatBuffers = new HashMap<>();
+      longBuffers = new HashMap<>();
    }
 
    /**
@@ -45,7 +48,7 @@ public class HDF5Manager
     */
    public void resetBuffer(String namespace)
    {
-      buffers.get(namespace).clear();
+      floatBuffers.get(namespace).clear();
    }
 
    /**
@@ -56,10 +59,10 @@ public class HDF5Manager
     */
    public int getBufferIndex(String namespace)
    {
-      if (buffers.containsKey(namespace))
+      if (floatBuffers.containsKey(namespace))
       {
-         LogTools.info("Get Index: {} {}", namespace, buffers.get(namespace).size());
-         return buffers.get(namespace).size();
+         LogTools.info("Get Index: {} {}", namespace, floatBuffers.get(namespace).size());
+         return floatBuffers.get(namespace).size();
       }
       else
       {
@@ -74,16 +77,36 @@ public class HDF5Manager
     * @param namespace The string namespace or topic name for which the buffer has been requested
     * @return Intermediate buffer for the requested namespace or topic name
     */
-   public TFloatArrayList getBuffer(String namespace)
+   public TFloatArrayList getFloatBuffer(String namespace)
    {
-      if (buffers.containsKey(namespace))
+      if (floatBuffers.containsKey(namespace))
       {
-         return buffers.get(namespace);
+         return floatBuffers.get(namespace);
       }
       else
       {
          TFloatArrayList list = new TFloatArrayList();
-         buffers.put(namespace, list);
+         floatBuffers.put(namespace, list);
+         return list;
+      }
+   }
+
+   /**
+    * Getter for Long Buffers belonging to the requested namespace
+    *
+    * @param namespace The string namespace or topic name for which the buffer has been requested
+    * @return Long intermediate buffer for the requested namespace or topic name
+    */
+   public TLongArrayList getLongBuffer(String namespace)
+   {
+      if (longBuffers.containsKey(namespace))
+      {
+         return longBuffers.get(namespace);
+      }
+      else
+      {
+         TLongArrayList list = new TLongArrayList();
+         longBuffers.put(namespace, list);
          return list;
       }
    }

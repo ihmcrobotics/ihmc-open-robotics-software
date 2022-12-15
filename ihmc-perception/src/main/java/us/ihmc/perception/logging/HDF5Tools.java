@@ -1,12 +1,10 @@
 package us.ihmc.perception.logging;
 
 import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.javacpp.*;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -177,6 +175,25 @@ public class HDF5Tools
    }
 
    /**
+    * Stores a 2D long array passed as TLongArrayList into an HDF5 dataset
+    *
+    * @param group The HDF5 group where the requested is stored
+    * @param index The index of the dataset within the requested group.
+    * @param data  The long data for the 2D matrix to be stored
+    * @param rows  Number of rows in the 2D matrix to be stored
+    * @param cols  Number of columns in the 2D matrix to be stored
+    */
+   public static void storeLongArray2D(Group group, long index, TLongArrayList data, int rows, int cols)
+   {
+      // Log the timestamps buffer as separate dataset with same index
+      long[] dimensions = {rows, cols};
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_LONG()), new DataSpace(2, dimensions));
+      long[] array = data.toArray();
+      dataset.write(new LongPointer(array), new DataType(PredType.NATIVE_LONG()));
+      dataset.close();
+   }
+
+   /**
     * Stores a 2D float array passed as TFloatArrayList into an HDF5 dataset
     *
     * @param group The HDF5 group where the requested is stored
@@ -187,8 +204,8 @@ public class HDF5Tools
     */
    public static void storeFloatArray2D(Group group, long index, TFloatArrayList data, int rows, int cols)
    {
+      // Log the data buffer as separate dataset with same index
       long[] dimensions = {rows, cols};
-
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
       float[] dataObject = data.toArray();
       dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
