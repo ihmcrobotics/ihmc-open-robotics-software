@@ -120,8 +120,6 @@ public class OusterDepthImagePublisher
          lidarFrameByteBufferPointerCopy.position(0);
          NativeMemoryTools.copy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
 
-         lidarFrameByteBufferCopy.put(ouster.getLidarFrameByteBuffer());
-
          extractCompressAndPublishThread.clearQueueAndExecute(this::extractCompressAndPublish);
       }
    }
