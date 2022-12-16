@@ -73,7 +73,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final ValkyrieStandPrepSetpoints jointHome;
-   private final Map<String, AlphaFilteredYoVariable> nameToFilteredJointVelocity = new HashMap<>();
+   private final ValkyrieImpedanceStateEstimator stateEstimator;
    private final ValkyrieImpedanceOutputWriter outputWriter;
 
    private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "valkyrie_whole_body_impedance_controller");
@@ -102,6 +102,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
       jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
       jointHome = new ValkyrieStandPrepSetpoints(robotModel.getJointMap());
+      stateEstimator = new ValkyrieImpedanceStateEstimator(controlledOneDoFJoints, nameToEffortHandleMap, robotModel.getControllerDT(), registry);
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
 
       impedanceMasterGain.set(0.15);
@@ -132,10 +133,6 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          jointManagers[i] = new JointspacePositionControllerState.OneDoFJointManager(controlledOneDoFJoints[i], yoTime, registry);
          nameToJointManagerMap.put(controlledOneDoFJoints[i].getName(), jointManagers[i]);
          hashCodeToJointIndexMap.put(controlledOneDoFJoints[i].hashCode(), i);
-
-         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(25.0, robotModel.getControllerDT());
-         AlphaFilteredYoVariable filteredVelocity = new AlphaFilteredYoVariable("qd_filt_" + controlledOneDoFJoints[i].getName(), registry, alphaVelocity);
-         nameToFilteredJointVelocity.put(controlledOneDoFJoints[i].getName(), filteredVelocity);
 
          if (ValkyrieJointList.impedanceJoints.contains(controlledJoints[i].getName()))
          {
@@ -215,7 +212,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       yoTime.set(Conversions.nanosecondsToSeconds(monotonicTimeProvider.getTimestamp()));
 
       /* Perform state estimation */
-      read();
+      stateEstimator.update();
 
       /* Process incoming trajectories */
       doControl();
@@ -225,21 +222,6 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
 
       yoVariableServer.update(monotonicTimeProvider.getTimestamp(), registry);
       robotConfigurationDataPublisher.write();
-   }
-
-   private void read()
-   {
-      for (int i = 0; i < allJoints.size(); i++)
-      {
-         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(allJoints.get(i));
-         AlphaFilteredYoVariable filteredVelocity = nameToFilteredJointVelocity.get(allJoints.get(i));
-         filteredVelocity.update(effortHandles[i].getVelocity());
-
-         joint.setQ(effortHandles[i].getPosition());
-         joint.setQd(filteredVelocity.getDoubleValue());
-      }
-
-      fullRobotModel.getRootBody().updateFramesRecursively();
    }
 
    private void doControl()
