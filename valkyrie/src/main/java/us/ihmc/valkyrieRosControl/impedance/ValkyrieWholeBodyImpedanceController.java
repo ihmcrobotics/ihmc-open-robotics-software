@@ -26,7 +26,6 @@ import us.ihmc.realtime.RealtimeThread;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -35,19 +34,23 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
-import us.ihmc.rosControl.wholeRobot.JointImpedanceHandle;
+import us.ihmc.rosControl.wholeRobot.*;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieStandPrepSetpoints;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
+import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReaderFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -55,7 +58,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.HashMap;
 import java.util.Map;
 
-import static us.ihmc.valkyrieRosControl.impedance.ValkyrieJointList.*;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
+import static us.ihmc.valkyrieRosControl.impedance.ValkyrieJointList.allJoints;
+import static us.ihmc.valkyrieRosControl.impedance.ValkyrieJointList.impedanceJoints;
 
 public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJavaBridge
 {
@@ -80,9 +86,11 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final EffortJointHandle[] effortHandles = new EffortJointHandle[allJoints.size()];
    private final JointImpedanceHandle[] impedanceHandles = new JointImpedanceHandle[impedanceJoints.size()];
 
-   private final Map<String, EffortJointHandle> nameToEffortHandleMap = new HashMap<>();
-   private final Map<String, JointImpedanceHandle> nameToImpedanceHandleMap = new HashMap<>();
-   private final Map<String, JointspacePositionControllerState.OneDoFJointManager> nameToJointManagerMap = new HashMap<>();
+   private final HashMap<String, EffortJointHandle> nameToEffortHandleMap = new HashMap<>();
+   private final HashMap<String, JointImpedanceHandle> nameToImpedanceHandleMap = new HashMap<>();
+   private final HashMap<String, PositionJointHandle> nameToPositionHandleMap = new HashMap<>();
+   private final HashMap<String, JointStateHandle> nameToJointStateHandleMap = new HashMap<>();
+   private final HashMap<String, JointspacePositionControllerState.OneDoFJointManager> nameToJointManagerMap = new HashMap<>();
 
    private final YoLowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList;
    private final JointspacePositionControllerState.OneDoFJointManager[] jointManagers;
@@ -90,6 +98,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final TIntIntHashMap hashCodeToJointIndexMap = new TIntIntHashMap(40, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
    private final CommandInputManager commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
    private final StatusMessageOutputManager statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
+   private final SettableTimestampProvider wallTimeProvider = new SettableTimestampProvider();
 
    private YoVariableServer yoVariableServer;
 
@@ -102,7 +111,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class);
       jointDesiredOutputList = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
       jointHome = new ValkyrieStandPrepSetpoints(robotModel.getJointMap());
-      stateEstimator = new ValkyrieImpedanceStateEstimator(controlledOneDoFJoints, nameToEffortHandleMap, robotModel.getControllerDT(), registry);
+      stateEstimator = new ValkyrieImpedanceStateEstimator(fullRobotModel.getRootJoint(), controlledOneDoFJoints);
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
 
       impedanceMasterGain.set(0.15);
@@ -190,6 +199,34 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          nameToImpedanceHandleMap.put(impedanceJoints.get(i), impedanceHandles[i]);
       }
 
+      String[] readIMUs = ValkyrieRosControlController.readIMUs;
+      HashMap<String, IMUHandle> imuHandles = new HashMap<>();
+      for (String imu : readIMUs)
+      {
+         imuHandles.put(imu, createIMUHandle(imu));
+      }
+
+      HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles = new HashMap<>();
+      for (int i = 0; i < readForceTorqueSensors.length; i++)
+      {
+         String forceTorqueSensor = readForceTorqueSensors[i];
+         String modelName = forceTorqueSensorModelNames[i];
+         forceTorqueSensorHandles.put(modelName, createForceTorqueSensorHandle(forceTorqueSensor));
+      }
+
+      StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
+      ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
+
+      ValkyrieJointMap jointMap = robotModel.getJointMap();
+      ValkyrieRosControlSensorReaderFactory sensorReaderFactory = new ValkyrieRosControlSensorReaderFactory(wallTimeProvider, monotonicTimeProvider,
+                                                                                                            stateEstimatorParameters, nameToEffortHandleMap,
+                                                                                                            nameToPositionHandleMap, nameToJointStateHandleMap,
+                                                                                                            imuHandles, forceTorqueSensorHandles,
+                                                                                                            jointMap, sensorInformation);
+      sensorReaderFactory.build(fullRobotModel.getRootJoint(), fullRobotModel.getIMUDefinitions(), fullRobotModel.getForceSensorDefinitions(), jointDesiredOutputList, registry);
+      ValkyrieRosControlSensorReader sensorReader = sensorReaderFactory.getSensorReader();
+      stateEstimator.init(sensorReader);
+
       LogModelProvider logModelProvider = robotModel.getLogModelProvider();
       DataServerSettings logSettings = robotModel.getLogSettings();
       double estimatorDT = robotModel.getEstimatorDT();
@@ -210,6 +247,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    protected void doControl(long rosTime, long duration)
    {
       yoTime.set(Conversions.nanosecondsToSeconds(monotonicTimeProvider.getTimestamp()));
+      wallTimeProvider.setTimestamp(rosTime);
 
       /* Perform state estimation */
       stateEstimator.update();
