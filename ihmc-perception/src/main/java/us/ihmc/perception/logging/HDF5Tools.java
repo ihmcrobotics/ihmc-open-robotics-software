@@ -213,6 +213,32 @@ public class HDF5Tools
    }
 
    /**
+    * Loads a 2D float array from an HDF5 dataset
+    *
+    * @param group The HDF5 group where the requested float array is stored
+    * @param index The index of the dataset within the requested group.
+    */
+   public static float[] loadFloatArray(Group group, long index)
+   {
+      DataSet dataset = group.openDataSet(String.valueOf(index));
+
+      int size = extractShape(dataset, 0);
+      int cols = extractShape(dataset, 1);
+
+      LogTools.info("Shape: {} {}", size, cols);
+
+      float[] floatArray = new float[size * cols];
+
+      FloatPointer floatPointer = new FloatPointer(floatArray);
+      dataset.read(floatPointer, new DataType(PredType.NATIVE_FLOAT()));
+      floatPointer.get(floatArray, 0, floatArray.length);
+
+      dataset.close();
+
+      return floatArray;
+   }
+
+   /**
     * Extracts a list of all topic names stored inside the HDF5 file recursively.
     *
     * @param file The HDF5 file to be explored.
