@@ -34,7 +34,7 @@ public class YoPositionJointHandleHolder
       this.controllerPositionDesired = new YoDouble(name + "ControllerPositionDesired", registry);
       this.positionDesired = new YoDouble(name + "PositionDesired", registry);
 
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
    }
 
    public void update()

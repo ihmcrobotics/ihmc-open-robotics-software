@@ -63,7 +63,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
    // Note: keep committed as DEFAULT, only change locally if needed
-   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.fromEnvironment();
+   public static final ValkyrieRobotVersion VERSION = ValkyrieRobotVersion.ARM_MASS_SIM; // ValkyrieRobotVersion.fromEnvironment();
 
    public static final boolean ENABLE_FINGER_JOINTS = VERSION.hasFingers();
    public static final boolean LOG_SECONDARY_HIGH_LEVEL_STATES = false;
@@ -535,5 +535,34 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       wallTimeProvider.setTimestamp(rosTime);
       robotController.read();
+   }
+
+   public static void main(String[] args)
+   {
+      HashSet<String> torqueControlledJointsSet = new HashSet<>(Arrays.asList(torqueControlledJoints));
+      HashSet<String> positionControlledJointsSet = new HashSet<>(Arrays.asList(positionControlledJoints));
+
+      for (String joint : allValkyrieJoints)
+      {
+         if (torqueControlledJointsSet.contains(joint) && positionControlledJointsSet.contains(joint))
+         {
+            throw new RuntimeException("Joint cannot be both position controlled and torque controlled via ROS Control! Joint name: " + joint);
+         }
+
+         if (torqueControlledJointsSet.contains(joint))
+         {
+            System.out.println("torque: " + joint);
+         }
+
+         if (positionControlledJointsSet.contains(joint))
+         {
+            System.out.println("position: " + joint);
+         }
+
+         if (!(torqueControlledJointsSet.contains(joint) || positionControlledJointsSet.contains(joint)))
+         {
+            System.out.println("joint state " + joint);
+         }
+      }
    }
 }

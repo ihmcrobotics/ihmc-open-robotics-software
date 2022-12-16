@@ -30,7 +30,7 @@ public class YoJointStateHandleHolder
       this.q = new YoDouble(name + "_q", registry);
       this.qd = new YoDouble(name + "_qd", registry);
 
-      parentRegistry.addChild(registry);
+//      parentRegistry.addChild(registry);
    }
 
    public void update()
