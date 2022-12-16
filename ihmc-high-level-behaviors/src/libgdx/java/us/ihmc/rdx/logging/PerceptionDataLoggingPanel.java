@@ -1,17 +1,20 @@
 package us.ihmc.rdx.logging;
 
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 
-public class PerceptionLoggingPanel extends ImGuiPanel
+public class PerceptionDataLoggingPanel extends ImGuiPanel
 {
    private PerceptionDataLogger logger;
 
@@ -29,31 +32,61 @@ public class PerceptionLoggingPanel extends ImGuiPanel
    private int numDatasetsInCurrentGroup = 0;
    private int numGroupsInCurrentGroup = 0;
 
-   public PerceptionLoggingPanel(PerceptionDataLogger logger)
+   private final HashMap<String, ImBoolean> channelFlags = new HashMap<>();
+
+   public PerceptionDataLoggingPanel(PerceptionDataLogger logger)
    {
       this("Perception Logger", logger);
    }
 
-   public PerceptionLoggingPanel(String panelName, PerceptionDataLogger logger)
+   public PerceptionDataLoggingPanel(String panelName, PerceptionDataLogger logger)
    {
       super(panelName);
       setRenderMethod(this::renderImGuiWidgets);
       this.logger = logger;
+
+      for(String channelName : logger.getChannels().keySet())
+      {
+         channelFlags.put(channelName, new ImBoolean(false));
+      }
    }
 
    public void renderImGuiWidgets()
    {
-      ImGuiTools.inputText(labels.get("Perception Log"), perceptionLogPath);
+      ImGui.text("Perception Logger");
+
+      for(PerceptionLogChannel channel : logger.getChannels().values())
+      {
+         ImGui.checkbox(channel.getName() + "\tTotal: " + channel.getCount(), channelFlags.get(channel.getName()));
+      }
+
       if (ImGui.button(labels.get("Start Logging")))
       {
          modified = true;
          loggerEnabled = true;
 
-         logger.startLogging(perceptionLogPath.get(), "Nadia");
+         for(String channelName : logger.getChannels().keySet())
+         {
+            if(channelFlags.get(channelName).get())
+            {
+               logger.setChannelEnabled(channelName, true);
+            }
+         }
 
-         //ArrayList<String> topicNames = new ArrayList<>();
-         //logger.getChannels().forEach(channel -> topicNames.add(channel.getName()));
-         //names = topicNames.toArray(new String[0]);
+         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+
+         String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
+         String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
+         String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
+
+         perceptionLogPath.set(logDirectory + logFileName);
+
+         logger.startLogging(perceptionLogPath.get(), "Nadia");
+      }
+
+      if(ImGui.button(labels.get("Stop Logging")))
+      {
+         logger.stopLogging();
       }
 
       //if (!logger.getChannels().isEmpty())

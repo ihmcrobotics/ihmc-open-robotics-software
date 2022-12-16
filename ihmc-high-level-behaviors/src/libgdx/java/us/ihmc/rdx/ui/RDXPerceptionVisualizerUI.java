@@ -4,10 +4,11 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.logging.PerceptionLogLoaderPanel;
+import us.ihmc.rdx.logging.PerceptionDataLoadingPanel;
+import us.ihmc.rdx.logging.PerceptionDataLoggingPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -27,7 +28,9 @@ public class RDXPerceptionVisualizerUI
    private RDXBaseUI baseUI;
    private RDXGlobalVisualizersPanel globalVisualizersUI;
 
-   private PerceptionLogLoaderPanel perceptionLogLoaderPanel;
+   private PerceptionDataLoadingPanel perceptionLogLoaderPanel;
+   private PerceptionDataLoggingPanel perceptionLoggingPanel;
+   private PerceptionDataLogger logger;
 
    private RDXEnvironmentBuilder environmentBuilder;
    private RDXBuildingConstructor buildingConstructor;
@@ -40,6 +43,8 @@ public class RDXPerceptionVisualizerUI
 
    public RDXPerceptionVisualizerUI()
    {
+      logger = new PerceptionDataLogger();
+
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
@@ -87,7 +92,10 @@ public class RDXPerceptionVisualizerUI
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             buildingConstructor = new RDXBuildingConstructor(baseUI.getPrimary3DPanel());
 
-            perceptionLogLoaderPanel = new PerceptionLogLoaderPanel(perceptionDataLoader);
+            perceptionLoggingPanel = new PerceptionDataLoggingPanel("Perception Logger", logger);
+            baseUI.getImGuiPanelManager().addPanel(perceptionLoggingPanel);
+
+            perceptionLogLoaderPanel = new PerceptionDataLoadingPanel(perceptionDataLoader);
             baseUI.getImGuiPanelManager().addPanel(perceptionLogLoaderPanel);
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);

@@ -10,10 +10,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.BigVideoPacket;
-import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
-import perception_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.*;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -44,11 +41,11 @@ public class PerceptionDataLogger
    *     Convert buffer sizes to final constant values
    *
    * */
-   private static final int BUFFER_SIZE = 25000000;
+   private static final int BUFFER_SIZE = 2500000;
 
    private final String ROBOT_CONFIGURATION_DATA_NAME = "/robot/root/position/";
-
    private final String ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME = "/robot/configuration/timestamps/";
+
    private final String ROOT_POSITION_NAME = "/robot/root/position/";
    private final String ROOT_ORIENTATION_NAME = "/robot/root/orientation/";
    private final String JOINT_ANGLES_NAME = "/robot/joint_angles/";
@@ -66,11 +63,6 @@ public class PerceptionDataLogger
    private final String L515_DEPTH_NAME = "/l515/depth/";
    private final String L515_COLOR_NAME = "/l515/color/";
 
-   private final byte[] messageDepthDataArray = new byte[BUFFER_SIZE];
-   private final Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private final Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
-   private final BytePointer messageEncodedBytePointer = new BytePointer(BUFFER_SIZE);
-
    private final HashMap<String, byte[]> byteBuffers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
 
@@ -86,13 +78,10 @@ public class PerceptionDataLogger
    private HDF5Manager hdf5Manager;
    private RealtimeROS2Node realtimeROS2Node;
 
-   private AtomicReference<Queue<PerceptionLogDataBlock>> dataBlockQueue = new AtomicReference<>(new LinkedList<>());
-
    private int pointCloudCount = 0;
    private int depthMapCount = 0;
 
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
-
 
    public PerceptionDataLogger()
    {
@@ -154,14 +143,14 @@ public class PerceptionDataLogger
       counts.put(D435_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
-      var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH);
+      var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
       l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
       byteBuffers.put(L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
       counts.put(L515_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
-      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
+      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_COLOR_IMAGE);
       l515ColorSubscription.addCallback(this::logColorL515);
       runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
       byteBuffers.put(L515_COLOR_NAME, new byte[BUFFER_SIZE]);
@@ -174,11 +163,6 @@ public class PerceptionDataLogger
       byteBuffers.put(ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
       counts.put(ZED2_COLOR_NAME, 0);
 
-      // Add callback for L515 Depth maps
-//      var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_VIDEO);
-//      l515ColorSubscription.addCallback(this::logColorL515);
-//      runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
-
       // Add callback for Ouster depth maps
       var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_DEPTH);
       ousterDepthSubscription.addCallback(this::logDepthOuster);
@@ -187,12 +171,6 @@ public class PerceptionDataLogger
       realtimeROS2Node.spin();
 
       runnablesToStopLogging.addLast(realtimeROS2Node::destroy);
-
-      //      "D435 Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420
-
-      //      new IHMCROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
-      //      bigVideoPacketROS2Callback = new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), this::logBigVideoPacket);
-      //      new ROS2Callback<>(ros2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.LEFT), this::logBigVideoPacket);
 
       executorService.scheduleAtFixedRate(this::collectStatistics, 0, 10, TimeUnit.MILLISECONDS);
    }
@@ -203,6 +181,14 @@ public class PerceptionDataLogger
       {
          runnablesToStopLogging.pollFirst().run();
       }
+
+      for(PerceptionLogChannel channel : channels.values())
+      {
+         channel.resetIndex();
+         channel.resetCount();
+      }
+
+      hdf5Manager.closeFile();
    }
 
    public void collectStatistics()
@@ -275,7 +261,7 @@ public class PerceptionDataLogger
       }
    }
 
-   public void logDepthL515(VideoPacket videoPacket)
+   public void logDepthL515(ImageMessage videoPacket)
    {
       LogTools.info("Logging L515 Depth: ", videoPacket.toString());
 
@@ -286,7 +272,7 @@ public class PerceptionDataLogger
       }
    }
 
-   public void logColorL515(VideoPacket videoPacket)
+   public void logColorL515(ImageMessage videoPacket)
    {
       LogTools.info("Logging L515 Color: ", videoPacket.toString());
 
@@ -311,54 +297,9 @@ public class PerceptionDataLogger
       //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
    }
 
-   public void convertBigVideoPacketToMat(BigVideoPacket packet, Mat mat)
-   {
-      IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-      imageEncodedTByteArrayList.toArray(messageDepthDataArray);
-      messageEncodedBytePointer.put(messageDepthDataArray, 0, imageEncodedTByteArrayList.size());
-      messageEncodedBytePointer.limit(imageEncodedTByteArrayList.size());
-
-      inputJPEGMat.cols(imageEncodedTByteArrayList.size());
-      inputJPEGMat.data(messageEncodedBytePointer);
-
-      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
-
-      //        updateImageDimensions(mat, inputYUVI420Mat.cols(), (int) (inputYUVI420Mat.rows() / 1.5f));
-      opencv_imgproc.cvtColor(inputYUVI420Mat, mat, opencv_imgproc.COLOR_YUV2RGBA_I420);
-   }
-
-   public void logBigVideoPacket(BigVideoPacket packet)
-   {
-      LogTools.info("BIG Video Received.");
-      //      Mat mat = new Mat(packet.getImageHeight(), packet.getImageHeight(), opencv_core.CV_8UC3);
-      //      convertBigVideoPacketToMat(packet, mat);
-      //      logImage(mat);
-   }
-
-
    /*
     *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
     */
-
-   public void storeBigVideoPacket(String namespace, BigVideoPacket message)
-   {
-      Group group = hdf5Manager.getGroup(namespace);
-      executorService.submit(() ->
-                               {
-                                  synchronized (this)
-                                  {
-                                     LogTools.info("{} Storing Buffer: {}", namespace, depthMapCount);
-                                     depthMapCount = (int) hdf5Manager.getCount(namespace);
-
-                                     IDLSequence.Byte imageEncodedTByteArrayList = message.getData();
-                                     imageEncodedTByteArrayList.toArray(messageDepthDataArray);
-
-                                     HDF5Tools.storeByteArray(group, depthMapCount, messageDepthDataArray, message.getData().size());
-                                     LogTools.info("{} Done Storing Buffer: {}", namespace, depthMapCount);
-                                  }
-                               });
-   }
-
    public void storeVideoPacket(String namespace, VideoPacket packet)
    {
       long begin_store = System.nanoTime();
@@ -382,8 +323,31 @@ public class PerceptionDataLogger
                                 LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
                              });
       long end_store = System.nanoTime();
+   }
 
+   public void storeVideoPacket(String namespace, ImageMessage packet)
+   {
+      long begin_store = System.nanoTime();
+      Group group = hdf5Manager.getGroup(namespace);
+      executorService.submit(() ->
+                             {
 
+                                byte[] heapArray = byteBuffers.get(namespace);
+                                int imageCount = counts.get(namespace);
+                                IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+
+                                LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+                                counts.put(namespace, imageCount + 1);
+
+                                //                                  LogTools.info("{} ByteArray: {}", namespace, Arrays.toString(heapArray));
+
+                                // Logging into HDF5
+                                imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+                                HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+
+                                LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                             });
+      long end_store = System.nanoTime();
    }
 
    public void storePointCloud(String namespace, LidarScanMessage message)
@@ -487,7 +451,12 @@ public class PerceptionDataLogger
       storeFloatArray(namespace, pointArray);
    }
 
-   private void setChannelEnabled(String name, boolean enabled)
+   public HashMap<String, PerceptionLogChannel> getChannels()
+   {
+      return channels;
+   }
+
+   public void setChannelEnabled(String name, boolean enabled)
    {
       channels.get(name).setEnabled(enabled);
    }
@@ -502,9 +471,9 @@ public class PerceptionDataLogger
 
       PerceptionDataLogger logger = new PerceptionDataLogger();
 
-      logger.setChannelEnabled(logger.ROBOT_CONFIGURATION_DATA_NAME, true);
-      //logger.setChannelEnabled(logger.L515_DEPTH_NAME, true);
-      //logger.setChannelEnabled(logger.L515_COLOR_NAME, true);
+      //logger.setChannelEnabled(logger.ROBOT_CONFIGURATION_DATA_NAME, true);
+      logger.setChannelEnabled(logger.L515_DEPTH_NAME, true);
+      logger.setChannelEnabled(logger.L515_COLOR_NAME, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
    }

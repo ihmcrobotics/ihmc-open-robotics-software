@@ -1,6 +1,5 @@
 package us.ihmc.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -126,7 +125,6 @@ public class RealsenseColorAndDepthPublisher
 
          if (sensor.readFrameData())
          {
-
             sensor.updateDataBytePointers();
 
             Instant now = Instant.now();
@@ -166,7 +164,7 @@ public class RealsenseColorAndDepthPublisher
             ros2Helper.publish(this.colorTopic, colorImageMessage);
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
-            //            display(depthU16C1Image, color8UC3Image);
+            //display(depthU16C1Image, color8UC3Image);
          }
       }
    }

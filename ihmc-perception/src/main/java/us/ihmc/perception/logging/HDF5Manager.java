@@ -192,6 +192,15 @@ public class HDF5Manager
       return group;
    }
 
+   public void closeFile()
+   {
+      for(Group group : groups.values())
+      {
+         group.close();
+      }
+      file.close();
+   }
+
    public H5File getFile()
    {
       return file;
