@@ -35,6 +35,7 @@ public class PerceptionDataLoader
 
    public void openLogFile(String filePath)
    {
+      LogTools.info("Loading Perception Log: {}", filePath);
       if (Files.exists(Paths.get(filePath)))
       {
          this.filePath = filePath;
