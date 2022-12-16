@@ -5,11 +5,6 @@ import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.*;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
@@ -28,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
@@ -60,6 +54,8 @@ public class PerceptionDataLogger
 
    private final String ZED2_COLOR_NAME = "/zed2/color/";
 
+   private final String L515_SENSOR_POSITION = "/l515/sensor/position/";
+   private final String L515_SENSOR_ORIENTATION = "/l515/sensor/orientation/";
    private final String L515_DEPTH_NAME = "/l515/depth/";
    private final String L515_COLOR_NAME = "/l515/color/";
 
@@ -146,6 +142,8 @@ public class PerceptionDataLogger
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
       l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
+      byteBuffers.put(D435_COLOR_NAME, new byte[BUFFER_SIZE]);
+      byteBuffers.put(D435_COLOR_NAME, new byte[BUFFER_SIZE]);      
       byteBuffers.put(L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
       counts.put(L515_DEPTH_NAME, 0);
 
@@ -235,7 +233,7 @@ public class PerceptionDataLogger
       if(channels.get(OUSTER_DEPTH_NAME).isEnabled())
       {
          channels.get(OUSTER_DEPTH_NAME).incrementCount();
-         storeVideoPacket(OUSTER_DEPTH_NAME, packet);
+         storeCompressedImage(OUSTER_DEPTH_NAME, packet);
       }
    }
 
@@ -246,7 +244,7 @@ public class PerceptionDataLogger
       if(channels.get(D435_COLOR_NAME).isEnabled())
       {
          channels.get(D435_COLOR_NAME).incrementCount();
-         storeVideoPacket(D435_COLOR_NAME, videoPacket);
+         storeCompressedImage(D435_COLOR_NAME, videoPacket);
       }
    }
 
@@ -257,18 +255,20 @@ public class PerceptionDataLogger
       if(channels.get(D435_DEPTH_NAME).isEnabled())
       {
          channels.get(D435_DEPTH_NAME).incrementCount();
-         storeVideoPacket(D435_DEPTH_NAME, videoPacket);
+         storeCompressedImage(D435_DEPTH_NAME, videoPacket);
       }
    }
 
-   public void logDepthL515(ImageMessage videoPacket)
+   public void logDepthL515(ImageMessage message)
    {
-      LogTools.info("Logging L515 Depth: ", videoPacket.toString());
+      LogTools.info("Logging L515 Depth: ", message.toString());
 
       if(channels.get(L515_DEPTH_NAME).isEnabled())
       {
          channels.get(L515_DEPTH_NAME).incrementCount();
-         storeVideoPacket(L515_DEPTH_NAME, videoPacket);
+         storeFloatArray(L515_SENSOR_POSITION, message.getPosition());
+         storeFloatArray(L515_SENSOR_ORIENTATION, message.getOrientation());
+         storeCompressedImage(L515_DEPTH_NAME, message);
       }
    }
 
@@ -279,7 +279,7 @@ public class PerceptionDataLogger
       if(channels.get(L515_COLOR_NAME).isEnabled())
       {
          channels.get(L515_COLOR_NAME).incrementCount();
-         storeVideoPacket(L515_COLOR_NAME, videoPacket);
+         storeCompressedImage(L515_COLOR_NAME, videoPacket);
       }
 
    }
@@ -291,7 +291,7 @@ public class PerceptionDataLogger
       if(channels.get(ZED2_COLOR_NAME).isEnabled())
       {
          channels.get(ZED2_COLOR_NAME).incrementCount();
-         storeVideoPacket(ZED2_COLOR_NAME, videoPacket);
+         storeCompressedImage(ZED2_COLOR_NAME, videoPacket);
       }
 
       //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
@@ -300,7 +300,7 @@ public class PerceptionDataLogger
    /*
     *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
     */
-   public void storeVideoPacket(String namespace, VideoPacket packet)
+   public void storeCompressedImage(String namespace, VideoPacket packet)
    {
       long begin_store = System.nanoTime();
       Group group = hdf5Manager.getGroup(namespace);
@@ -325,7 +325,7 @@ public class PerceptionDataLogger
       long end_store = System.nanoTime();
    }
 
-   public void storeVideoPacket(String namespace, ImageMessage packet)
+   public void storeCompressedImage(String namespace, ImageMessage packet)
    {
       long begin_store = System.nanoTime();
       Group group = hdf5Manager.getGroup(namespace);
@@ -391,7 +391,6 @@ public class PerceptionDataLogger
       buffer.addAll(array);
 
       int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-      //LogTools.info("Buffer Index: {} {}", bufferSize, HDF5Manager.MAX_BUFFER_SIZE - 1);
       if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
       {
          hdf5Manager.resetBuffer(namespace);
