@@ -133,7 +133,8 @@ public class RDXHeightMapGraphic implements RenderableProvider
          double x = HeightMapTools.indexToCoordinate(xIndex, gridCenterX, gridResolutionXY, centerIndex);
          double y = HeightMapTools.indexToCoordinate(yIndex, gridCenterY, gridResolutionXY, centerIndex);
          double height = heightsProvider.applyAsDouble(i);
-         double renderedHeight = height - groundHeight + 0.02;
+//         double renderedHeight = height - groundHeight + 0.02;
+         double renderedHeight = height + 0.02;
 
          Vector3DReadOnly normal = null;
          if (normalsProvider != null)

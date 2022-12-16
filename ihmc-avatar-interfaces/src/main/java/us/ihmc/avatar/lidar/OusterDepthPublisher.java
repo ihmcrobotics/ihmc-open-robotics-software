@@ -27,27 +27,27 @@ public class OusterDepthPublisher
       nettyOuster = new NettyOuster();
       nettyOuster.setOnFrameReceived(() ->
       {
-          nettyOuster.getDepthImageMeters().rewind();
-
-         BytePointer compressedDepthPointer = new BytePointer();
-
-         BytedecoOpenCVTools.compressImagePNG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer);
-
-         byte[] heapByteArrayData = new byte[compressedDepthPointer.asBuffer().remaining()];
-         compressedDepthPointer.asBuffer().get(heapByteArrayData);
-         videoPacket.getData().resetQuick();
-         videoPacket.getData().add(heapByteArrayData);
-
-         LogTools.info("Compressed Bytes: {}", heapByteArrayData.length);
-
-         videoPacket.setImageHeight(nettyOuster.getImageHeight());
-         videoPacket.setImageWidth(nettyOuster.getImageWidth());
-         videoPacket.setTimestamp(nettyOuster.getAquisitionInstant().getNano());
-         videoPacket.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
-//         videoPacket.setTimestamp(nettyOuster.getAquisitionInstant().getEpochSecond());
-
-          LogTools.info("Publishing Ouster Depth: {} {} {}", videoPacket.getTimestamp(), videoPacket.getImageHeight(), videoPacket.getImageWidth());
-         ros2Helper.publish(ROS2Tools.OUSTER_DEPTH, videoPacket);
+//          nettyOuster.getDepthImageMeters().rewind();
+//
+//         BytePointer compressedDepthPointer = new BytePointer();
+//
+//         BytedecoOpenCVTools.compressImagePNG(nettyOuster.getDepthImageMeters().getBytedecoOpenCVMat(), compressedDepthPointer);
+//
+//         byte[] heapByteArrayData = new byte[compressedDepthPointer.asBuffer().remaining()];
+//         compressedDepthPointer.asBuffer().get(heapByteArrayData);
+//         videoPacket.getData().resetQuick();
+//         videoPacket.getData().add(heapByteArrayData);
+//
+//         LogTools.info("Compressed Bytes: {}", heapByteArrayData.length);
+//
+//         videoPacket.setImageHeight(nettyOuster.getImageHeight());
+//         videoPacket.setImageWidth(nettyOuster.getImageWidth());
+//         videoPacket.setTimestamp(nettyOuster.getAquisitionInstant().getNano());
+//         videoPacket.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
+////         videoPacket.setTimestamp(nettyOuster.getAquisitionInstant().getEpochSecond());
+//
+//          LogTools.info("Publishing Ouster Depth: {} {} {}", videoPacket.getTimestamp(), videoPacket.getImageHeight(), videoPacket.getImageWidth());
+//         ros2Helper.publish(ROS2Tools.OUSTER_DEPTH, videoPacket);
       });
       nettyOuster.bind();
 

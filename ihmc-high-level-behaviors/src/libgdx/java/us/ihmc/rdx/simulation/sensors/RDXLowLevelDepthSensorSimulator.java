@@ -301,7 +301,7 @@ public class RDXLowLevelDepthSensorSimulator
       openCLManager.finish();
 
       if (depthPanel.getVideoPanel().getIsShowing().get())
-         depthPanel.drawFloatImage(metersDepthImage.getBytedecoOpenCVMat());
+         depthPanel.drawDepthImage(metersDepthImage.getBytedecoOpenCVMat());
    }
 
    public void renderTuningSliders()
