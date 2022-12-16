@@ -5,10 +5,10 @@ import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
-import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.nio.FloatBuffer;
@@ -69,7 +69,20 @@ public class PerceptionDataLoader
       return null;
    }
 
-   public void loadImage(String namespace, int index, Mat mat)
+   public void loadPoint3DList(String namespace, int index, ArrayList<Point3D> points)
+   {
+      Group group = hdf5Manager.getGroup(namespace);
+      float[] pointFloatArray = HDF5Tools.loadFloatArray(group, index);
+
+      for(int i = 0; i<pointFloatArray.length / 3; i++)
+      {
+         points.add(new Point3D(pointFloatArray[i], pointFloatArray[i*3+1], pointFloatArray[i*3+2]));
+
+         LogTools.info("Point: {} {} {}", pointFloatArray[i], pointFloatArray[i*3+1], pointFloatArray[i*3+2]);
+      }
+   }
+
+   public void loadCompressedImage(String namespace, int index, Mat mat)
    {
       //      ThreadTools.startAThread(()->{
       LogTools.info("Loading Image: {} {}", namespace, index);
@@ -83,7 +96,7 @@ public class PerceptionDataLoader
       //      }, "perception_data_loader -> " + namespace);
    }
 
-   public void loadDepth(String namespace, int index, Mat mat)
+   public void loadCompressedDepth(String namespace, int index, Mat mat)
    {
       LogTools.info("Loading Image: {} {}", namespace, index);
 
@@ -116,7 +129,7 @@ public class PerceptionDataLoader
    {
       String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20221215_234308_PerceptionLog.hdf5";
+      String logFileName = "20221216_141954_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
@@ -132,39 +145,41 @@ public class PerceptionDataLoader
       Mat depthImage = new Mat(720, 1280, opencv_core.CV_16UC1);
       LogTools.info("Total Images: {}", totalColor);
 
-      for (int i = 0; i < total; i++)
+      ArrayList<Point3D> points = new ArrayList<>();
+
+      for (int i = 0; i < 5; i++)
       {
+         points.clear();
+         loader.loadPoint3DList("/l515/sensor/position", i, points);
 
-         LogTools.info("Loading Index: {}/{}", i, total);
-         loader.loadImage("/l515/color/", i, colorImage);
-
-
-         long begin_load = System.nanoTime();
-         loader.loadDepth("/l515/depth/", i, depthImage);
-         long end_load = System.nanoTime();
-
-         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
-
-         long begin_decompress = System.nanoTime();
-         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
-         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
-
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
-         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
-         long end_decompress = System.nanoTime();
-
-         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
-         LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
-
-         imshow("/l515/color", colorImage);
-         imshow("/l515/depth", finalDisplayDepth);
-         int code = waitKeyEx(30);
-         if (code == 113)
-         {
-            System.exit(0);
-         }
+//         LogTools.info("Loading Index: {}/{}", i, total);
+//         loader.loadCompressedImage("/l515/color/", i, colorImage);
+//
+//
+//         long begin_load = System.nanoTime();
+//         loader.loadCompressedDepth("/l515/depth/", i, depthImage);
+//         long end_load = System.nanoTime();
+//
+//         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
+//
+//         long begin_decompress = System.nanoTime();
+//         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
+//         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
+//
+//         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
+//         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+//         long end_decompress = System.nanoTime();
+//
+//         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
+//         LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
+//
+//         imshow("/l515/color", colorImage);
+//         imshow("/l515/depth", finalDisplayDepth);
+//         int code = waitKeyEx(30);
+//         if (code == 113)
+//         {
+//            System.exit(0);
+//         }
       }
-
-
    }
 }

@@ -306,7 +306,6 @@ public class PerceptionDataLogger
       Group group = hdf5Manager.getGroup(namespace);
       executorService.submit(() ->
                              {
-
                                 byte[] heapArray = byteBuffers.get(namespace);
                                 int imageCount = counts.get(namespace);
                                 IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
@@ -314,9 +313,6 @@ public class PerceptionDataLogger
                                 LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
                                 counts.put(namespace, imageCount + 1);
 
-                                //                                  LogTools.info("{} ByteArray: {}", namespace, Arrays.toString(heapArray));
-
-                                // Logging into HDF5
                                 imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
                                 HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
@@ -339,9 +335,6 @@ public class PerceptionDataLogger
                                 LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
                                 counts.put(namespace, imageCount + 1);
 
-                                //                                  LogTools.info("{} ByteArray: {}", namespace, Arrays.toString(heapArray));
-
-                                // Logging into HDF5
                                 imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
                                 HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
@@ -386,6 +379,7 @@ public class PerceptionDataLogger
 
    public void storeFloatArray(String namespace, float[] array)
    {
+      LogTools.info("Store Float Array: {}", Arrays.toString(array));
       Group group = hdf5Manager.getGroup(namespace);
       TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
       buffer.addAll(array);
@@ -393,12 +387,14 @@ public class PerceptionDataLogger
       int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
       if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
       {
+         LogTools.info("Store Float Buffer: {}", Arrays.toString(buffer.toArray()));
          hdf5Manager.resetBuffer(namespace);
 
          executorService.submit(() ->
                                   {
                                      synchronized (this)
                                      {
+                                        LogTools.info("Store Float Array 2D: {}", Arrays.toString(buffer.toArray()));
                                         long count = hdf5Manager.getCount(namespace);
                                         HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                                      }
@@ -438,6 +434,7 @@ public class PerceptionDataLogger
 
    public void storeFloatArray(String namespace, Point3D point)
    {
+      LogTools.info("Store Float Array Point: {}", point);
       float[] pointArray = new float[3];
       point.get(pointArray);
       storeFloatArray(namespace, pointArray);
