@@ -8,10 +8,18 @@
     "/ihmc/blackflyright/video###us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer:/ihmc/blackflyright/video" : false,
     "/ihmc/d435/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/d435/depth" : false,
     "/ihmc/d435/video###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/d435/video" : false,
-    "/ihmc/ouster/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/ouster/depth" : false,
+    "/ihmc/ouster/image/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2DepthImageVisualizer:/ihmc/ouster/image/depth" : false,
     "/ihmc/video###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/video" : false,
-    "Perception Logging and Loading" : true,
+    "Perception Loader" : true,
+    "Perception Logger" : true,
     "VR Settings" : false,
-    "VR Thread Debugger" : false
+    "VR Thread Debugger" : false,
+    "l515/color###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/color" : false,
+    "l515/depth###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/depth" : false,
+    "robot/joint_angles###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/joint_angles" : false,
+    "robot/joint_torques###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/joint_torques" : false,
+    "robot/joint_velocities###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/joint_velocities" : false,
+    "robot/root/orientation###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/root/orientation" : false,
+    "robot/root/position###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/root/position" : false
   }
 }

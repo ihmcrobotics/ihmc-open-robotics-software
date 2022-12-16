@@ -113,9 +113,9 @@ public class PerceptionDataLoader
 
    public static void main(String[] args)
    {
-      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20221214_214533_PerceptionLog.hdf5";
+      String logFileName = "20221215_234308_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
@@ -137,7 +137,6 @@ public class PerceptionDataLoader
          LogTools.info("Loading Index: {}/{}", i, total);
          loader.loadImage("/l515/color/", i, colorImage);
 
-         //imshow("/l515/color", colorImage);
 
          long begin_load = System.nanoTime();
          loader.loadDepth("/l515/depth/", i, depthImage);
@@ -156,12 +155,13 @@ public class PerceptionDataLoader
          LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
          LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
 
-         //imshow("/l515/depth", finalDisplayDepth);
-         //int code = waitKeyEx(30);
-         //if (code == 113)
-         //{
-         //   System.exit(0);
-         //}
+         imshow("/l515/color", colorImage);
+         imshow("/l515/depth", finalDisplayDepth);
+         int code = waitKeyEx(30);
+         if (code == 113)
+         {
+            System.exit(0);
+         }
       }
 
 
