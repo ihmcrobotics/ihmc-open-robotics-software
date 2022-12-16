@@ -19,7 +19,7 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
    private RDXPointCloudRenderer pointCloudRenderer;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString perceptionLogPath = new ImString("/home/quantum/.ihmc/logs/perception/");
+   private final ImString perceptionLogPath = new ImString(System.getProperty("user.home") + "/.ihmc/logs/perception/");
 
    private final ImInt fileIndex = new ImInt(0);
    private final ImInt topicIndex = new ImInt(0);
