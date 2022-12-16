@@ -14,12 +14,8 @@
     "Perception Logger" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false,
-    "l515/color###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/color" : false,
     "l515/depth###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/depth" : false,
-    "robot/joint_angles###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/joint_angles" : false,
-    "robot/joint_torques###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/joint_torques" : false,
-    "robot/joint_velocities###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/joint_velocities" : false,
-    "robot/root/orientation###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/root/orientation" : false,
-    "robot/root/position###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:robot/root/position" : false
+    "l515/sensor/orientation###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/sensor/orientation" : false,
+    "l515/sensor/position###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/sensor/position" : false
   }
 }
