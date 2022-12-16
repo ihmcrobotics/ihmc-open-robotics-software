@@ -5,6 +5,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.PerceptionLogLoaderPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -40,7 +41,7 @@ public class RDXPerceptionVisualizerUI
    public RDXPerceptionVisualizerUI()
    {
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
       globalVisualizersUI = new RDXGlobalVisualizersPanel();
       baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
@@ -50,17 +51,21 @@ public class RDXPerceptionVisualizerUI
          @Override
          public void create()
          {
-
-            globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
-
-            globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("Ouster Depth", ros2Node, ROS2Tools.OUSTER_DEPTH, ROS2VideoFormat.JPEGYUVI420));
+            globalVisualizersUI.addVisualizer(new RDXROS2DepthImageVisualizer("Ouster Depth",
+                                                                              PubSubImplementation.FAST_RTPS,
+                                                                              ROS2Tools.OUSTER_DEPTH_IMAGE));
 
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Video", ros2Node, ROS2Tools.D435_VIDEO, ROS2VideoFormat.JPEGYUVI420));
             globalVisualizersUI.addVisualizer(new RDXROS2VideoVisualizer("D435 Depth", ros2Node, ROS2Tools.D435_DEPTH, ROS2VideoFormat.JPEGYUVI420));
 
             globalVisualizersUI.addVisualizer(new RDXROS2BigVideoVisualizer("IHMC Blackfly Right",
-                                                                            DomainFactory.PubSubImplementation.FAST_RTPS,
+                                                                            PubSubImplementation.FAST_RTPS,
                                                                             ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT)));
+
+            globalVisualizersUI.addVisualizer(new RDXROS2ColoredDepthVisualizer("L515 Colored Depth",
+                                                                                PubSubImplementation.FAST_RTPS,
+                                                                                ROS2Tools.L515_DEPTH_IMAGE,
+                                                                                ROS2Tools.L515_COLOR_IMAGE));
 
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Point Cloud",
                                                                               ros2Node,
@@ -72,9 +77,9 @@ public class RDXPerceptionVisualizerUI
                                                                               ros2Node,
                                                                               ROS2Tools.D435_COLORED_POINT_CLOUD));
 
-            globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
-                                                                              ros2Node,
-                                                                              ROS2Tools.OUSTER_POINT_CLOUD));
+            globalVisualizersUI.addVisualizer(new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
+                                                                                    PubSubImplementation.FAST_RTPS,
+                                                                                    ROS2Tools.OUSTER_DEPTH_IMAGE));
 
             videoVisualizer = new RDXROS2VideoVisualizer("Primary Video", ros2Node, ROS2Tools.VIDEO, ROS2VideoFormat.JPEGYUVI420);
             globalVisualizersUI.addVisualizer(videoVisualizer);

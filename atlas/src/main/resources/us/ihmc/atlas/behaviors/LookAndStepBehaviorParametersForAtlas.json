@@ -1,5 +1,5 @@
 {
-  "title" : "LookAndStepBehaviorParameters",
+  "title" : "Look and step behavior parameters for Atlas",
   "Use initial support regions" : true,
   "Assume flat ground" : false,
   "Detect flat ground" : false,
@@ -12,7 +12,8 @@
   "Support region scale factor" : 3.0,
   "Planar regions history size" : 1,
   "Max steps to send to controller" : 3,
-  "Flat ground body path plan" : true,
+  "Flat ground body path plan" : false,
+  "Height map body path plan" : true,
   "Swing planner type" : 2,
   "Minimum step translation" : 0.1,
   "Minimum step orientation" : 15.0,

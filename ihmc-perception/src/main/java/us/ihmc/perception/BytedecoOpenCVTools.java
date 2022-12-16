@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
+import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.log.LogTools;
@@ -88,6 +89,11 @@ public class BytedecoOpenCVTools
    }
 
    public static void convert8BitGrayTo8BitRGBA(Mat source, Mat destination)
+   {
+      convertGrayToRGBA(source, destination);
+   }
+
+   public static void convertGrayToRGBA(Mat source, Mat destination)
    {
       int destinationChannels = 0; // automatic mode
       opencv_imgproc.cvtColor(source, destination, opencv_imgproc.COLOR_GRAY2RGBA, destinationChannels);
@@ -346,5 +352,38 @@ public class BytedecoOpenCVTools
       packet.setImageHeight(height);
       packet.setImageWidth(width);
       packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
+   }
+
+   public static void fillImageMessage(BytePointer compressedBytes, ImageMessage imageMessage, int height, int width)
+   {
+      imageMessage.getData().resetQuick();
+      for (int i = 0; i < compressedBytes.limit(); i++)
+      {
+         imageMessage.getData().add(compressedBytes.get(i));
+      }
+      imageMessage.setImageHeight(height);
+      imageMessage.setImageWidth(width);
+   }
+
+   public static Mat decompressImageJPGUsingYUV(byte[] dataArray)
+   {
+      BytePointer messageEncodedBytePointer = new BytePointer(dataArray.length);
+      messageEncodedBytePointer.put(dataArray, 0, dataArray.length);
+      messageEncodedBytePointer.limit(dataArray.length);
+
+      Mat inputJPEGMat = new Mat(1, 1, opencv_core.CV_8UC1);
+      Mat inputYUVI420Mat = new Mat(1, 1, opencv_core.CV_8UC1);
+
+      inputJPEGMat.cols(dataArray.length);
+      inputJPEGMat.data(messageEncodedBytePointer);
+
+      // imdecode takes the longest by far out of all this stuff
+      opencv_imgcodecs.imdecode(inputJPEGMat, opencv_imgcodecs.IMREAD_UNCHANGED, inputYUVI420Mat);
+
+      Mat outputMat = new Mat((int) (inputYUVI420Mat.rows() / 1.5f), inputYUVI420Mat.cols(), opencv_core.CV_8UC4);
+      opencv_imgproc.cvtColor(inputYUVI420Mat, outputMat, opencv_imgproc.COLOR_YUV2RGBA_I420);
+      opencv_imgproc.cvtColor(outputMat, outputMat, opencv_imgproc.COLOR_RGBA2RGB);
+
+      return outputMat;
    }
 }

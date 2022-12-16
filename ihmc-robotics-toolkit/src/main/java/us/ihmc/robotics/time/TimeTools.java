@@ -22,6 +22,14 @@ public class TimeTools
    }
 
    /**
+    * @return Seconds since then.
+    */
+   public static double calculateDelay(Instant then)
+   {
+      return calculateDelay(then.getEpochSecond(), then.getNano());
+   }
+
+   /**
     * Nanoseconds since the epoch goes beyond what a long can hold. (?)
     * Or anyways, we do what Instant tells us to.
     */

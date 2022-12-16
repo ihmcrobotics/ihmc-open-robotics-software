@@ -6,6 +6,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.TimestampedPlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
@@ -15,14 +16,18 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -79,7 +84,9 @@ public class LookAndStepFootstepPlanningTask
    protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
+   protected YoDouble planarRegionDelay;
    protected YoDouble footstepPlanningDuration;
+   protected YoDouble moreInclusivePlanningDuration;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -87,6 +94,9 @@ public class LookAndStepFootstepPlanningTask
       private ResettableExceptionHandlingExecutorService executor;
       protected ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
+      private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
+      private ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
+      private ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> lidarREAPlanarRegionsInput = new TypedInput<>();
@@ -102,9 +112,12 @@ public class LookAndStepFootstepPlanningTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
-         lookAndStepParameters = lookAndStep.lookAndStepParameters;
-         footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
-         swingPlannerParameters = lookAndStep.swingPlannerParameters;
+         ros2LookAndStepParameters = lookAndStep.ros2LookAndStepParameters;
+         lookAndStepParameters = ros2LookAndStepParameters.getStoredPropertySet();
+         ros2FootstepPlannerParameters = lookAndStep.ros2FootstepPlannerParameters;
+         footstepPlannerParameters = ros2FootstepPlannerParameters.getStoredPropertySet();
+         ros2SwingPlannerParameters = lookAndStep.ros2SwingPlannerParameters;
+         swingPlannerParameters = ros2SwingPlannerParameters.getStoredPropertySet();
          uiPublisher = lookAndStep.helper::publish;
          footstepPlanningModule = lookAndStep.helper.getOrCreateFootstepPlanner();
          defaultFootPolygons = FootstepPlanningModuleLauncher.createFootPolygons(lookAndStep.helper.getRobotModel());
@@ -113,7 +126,9 @@ public class LookAndStepFootstepPlanningTask
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
+         planarRegionDelay = new YoDouble("planarRegionDelay", lookAndStep.yoRegistry);
          footstepPlanningDuration = new YoDouble("footstepPlanningDuration", lookAndStep.yoRegistry);
+         moreInclusivePlanningDuration = new YoDouble("moreInclusivePlanningDuration", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
@@ -176,9 +191,11 @@ public class LookAndStepFootstepPlanningTask
          stepsStartedWhilePlanning.add(footstepStatusMessage);
       }
 
-      public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
+      public void acceptPlanarRegions(TimestampedPlanarRegionsListMessage planarRegionsListMessage)
       {
-         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdatedSecondsSinceEpoch(),
+                                                        planarRegionsListMessage.getLastUpdatedAdditionalNanos()));
+         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage.getPlanarRegions()));
       }
 
       public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)
@@ -233,6 +250,9 @@ public class LookAndStepFootstepPlanningTask
 
       private void evaluateAndRun()
       {
+         ros2LookAndStepParameters.update();
+         ros2FootstepPlannerParameters.update();
+         ros2SwingPlannerParameters.update();
          lidarREAPlanarRegions = lidarREAPlanarRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          lidarREAPlanarRegionReceptionTimerSnapshot = lidarREAPlanarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
@@ -288,10 +308,12 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
    protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
+   protected final Stopwatch moreInclusivePlanningDurationStopwatch = new Stopwatch();
    private final Object logSessionSyncObject = new Object();
 
    protected void performTask()
    {
+      moreInclusivePlanningDurationStopwatch.reset();
       // clear the list so we can inspect on completion
       stepsStartedWhilePlanning.clear();
 
@@ -393,7 +415,8 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
-      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
+      // Make the timeout a little less so that we don't pause walking.
+      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration() - 0.008;
       boolean robotIsInMotion = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
       double plannerTimeout = robotIsInMotion ? plannerTimeoutWhenMoving : lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped();
       // TODO: Set start footholds!!
@@ -441,12 +464,14 @@ public class LookAndStepFootstepPlanningTask
             Stopwatch stopwatch = new Stopwatch().start();
             FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
             footstepPlannerLogger.logSessionWithExactFolderName(latestLogDirectory);
-            FootstepPlannerLogger.deleteOldLogs(50);
+            FootstepPlannerLogger.deleteOldLogs();
             LogTools.info("Logged footstep planner data in {} s. {} iterations",
                           FormattingTools.getFormattedDecimal3D(stopwatch.totalElapsed()),
                           iterations);
          }
       }, "FootstepPlanLogging");
+
+      moreInclusivePlanningDuration.set(moreInclusivePlanningDurationStopwatch.lap());
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?

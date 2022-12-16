@@ -224,7 +224,10 @@ public class RDXPointCloudRenderer implements RenderableProvider
 
    public void updateMeshFastest(int numberOfPoints)
    {
-      updateMeshFastest(numberOfPoints, currentSegmentIndex);
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+      floatBuffer.position(0);
+      floatBuffer.limit(numberOfPoints * floatsPerVertex);
+      renderable.meshPart.size = numberOfPoints;
    }
 
    public void updateMeshFastest(int numberOfPoints, int segmentToUpdate)
