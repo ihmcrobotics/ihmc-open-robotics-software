@@ -207,8 +207,8 @@ public class RealsenseColorAndDepthPublisher
 
    public static void main(String[] args)
    {
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
-//      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
+      //String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
       new RealsenseColorAndDepthPublisher(l515SerialNumber,
                                           1024,
                                           768,

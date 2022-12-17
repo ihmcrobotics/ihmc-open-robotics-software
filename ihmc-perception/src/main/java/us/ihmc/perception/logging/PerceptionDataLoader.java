@@ -3,6 +3,8 @@ package us.ihmc.perception.logging;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -15,6 +17,7 @@ import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -23,14 +26,14 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class PerceptionDataLoader
 {
-   private ArrayList<PerceptionLogChannel> channels;
+   private HashMap<String, PerceptionLogChannel> channels;
 
    private HDF5Manager hdf5Manager;
    private String filePath;
 
    public PerceptionDataLoader()
    {
-      channels = new ArrayList<>();
+      channels = new HashMap<>();
    }
 
    public void openLogFile(String filePath)
@@ -45,7 +48,7 @@ public class PerceptionDataLoader
          ArrayList<String> topicNames = HDF5Tools.getTopicNames(hdf5Manager.getFile());
          for (String topic : topicNames)
          {
-            channels.add(new PerceptionLogChannel(topic, (int) hdf5Manager.getCount(topic), 0));
+            channels.put(topic, new PerceptionLogChannel(topic, (int) hdf5Manager.getCount(topic), 0));
          }
       }
       else
@@ -84,7 +87,6 @@ public class PerceptionDataLoader
 
    public void loadCompressedImage(String namespace, int index, Mat mat)
    {
-      //      ThreadTools.startAThread(()->{
       LogTools.info("Loading Image: {} {}", namespace, index);
 
       Group group = hdf5Manager.getGroup(namespace);
@@ -93,7 +95,6 @@ public class PerceptionDataLoader
       mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
 
       LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
-      //      }, "perception_data_loader -> " + namespace);
    }
 
    public void loadCompressedDepth(String namespace, int index, Mat mat)
@@ -115,7 +116,7 @@ public class PerceptionDataLoader
       return filePath;
    }
 
-   public ArrayList<PerceptionLogChannel> getChannels()
+   public HashMap<String, PerceptionLogChannel> getChannels()
    {
       return channels;
    }
