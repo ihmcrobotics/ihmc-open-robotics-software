@@ -37,8 +37,6 @@ public class RDXPerceptionVisualizerUI
    private RDXROS2BigVideoVisualizer blackflyRightVisualizer;
    private RDXROS2VideoVisualizer videoVisualizer;
 
-   private final ArrayList<RDXOpenCVVideoVisualizer> imagePanels = new ArrayList<>();
-
    private Activator nativesLoadedActivator;
 
    public RDXPerceptionVisualizerUI()
@@ -96,6 +94,7 @@ public class RDXPerceptionVisualizerUI
             baseUI.getImGuiPanelManager().addPanel(perceptionLoggingPanel);
 
             perceptionLogLoaderPanel = new PerceptionDataLoadingPanel(perceptionDataLoader);
+            perceptionLogLoaderPanel.setBaseUI(baseUI);
             baseUI.getImGuiPanelManager().addPanel(perceptionLogLoaderPanel);
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
@@ -120,17 +119,6 @@ public class RDXPerceptionVisualizerUI
          {
             if (nativesLoadedActivator.poll())
             {
-               if(perceptionLogLoaderPanel.isModified())
-               {
-                  imagePanels.clear();
-                  perceptionDataLoader.getChannels().forEach(channel ->
-                  {
-                        RDXOpenCVVideoVisualizer imagePanel = new RDXOpenCVVideoVisualizer("Perception Log: " + channel.getName(), channel.getName(), false);
-                        imagePanels.add(imagePanel);
-                        baseUI.getImGuiPanelManager().addPanel(imagePanel.getPanel());
-                  });
-                  perceptionLogLoaderPanel.setModified(false);
-               }
 
                globalVisualizersUI.update();
 
