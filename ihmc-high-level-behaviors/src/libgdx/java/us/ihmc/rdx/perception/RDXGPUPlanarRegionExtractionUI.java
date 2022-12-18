@@ -483,6 +483,11 @@ public class RDXGPUPlanarRegionExtractionUI
       // TODO: Destroy the rest
    }
 
+   public GPUPlanarRegionExtraction getGpuPlanarRegionExtraction()
+   {
+      return gpuPlanarRegionExtraction;
+   }
+
    public ImGuiPanel getPanel()
    {
       return imguiPanel;

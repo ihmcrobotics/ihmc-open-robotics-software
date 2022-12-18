@@ -121,6 +121,7 @@ public class RealsenseColorAndDepthPublisher
 
             depthWidth = sensor.getDepthWidth();
             depthHeight = sensor.getDepthHeight();
+
          }
 
          if (sensor.readFrameData())
@@ -165,6 +166,22 @@ public class RealsenseColorAndDepthPublisher
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
             //display(depthU16C1Image, color8UC3Image);
+
+            //LogTools.info(String.format("Depth: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
+            //                            sensor.getDepthFocalLengthPixelsX(),
+            //                            sensor.getDepthFocalLengthPixelsY(),
+            //                            sensor.getDepthPrincipalOffsetXPixels(),
+            //                            sensor.getDepthPrincipalOffsetYPixels(),
+            //                            depthHeight,
+            //                            depthWidth));
+            //
+            //LogTools.info(String.format("Color: [fx:%.4f, fy:%.4f, cx:%.4f, cy:%.4f, h:%d, w:%d]",
+            //                            sensor.getColorFocalLengthPixelsX(),
+            //                            sensor.getColorFocalLengthPixelsY(),
+            //                            sensor.getColorPrincipalOffsetXPixels(),
+            //                            sensor.getColorPrincipalOffsetYPixels(),
+            //                            colorHeight,
+            //                            colorWidth));
          }
       }
    }
@@ -207,6 +224,11 @@ public class RealsenseColorAndDepthPublisher
 
    public static void main(String[] args)
    {
+      /*
+         Color: [fx:901.3026, fy:901.8400, cx:635.2337, cy:350.9427, h:720, w:1280]
+         Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
+      */
+
       //String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
       String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
       new RealsenseColorAndDepthPublisher(l515SerialNumber,
