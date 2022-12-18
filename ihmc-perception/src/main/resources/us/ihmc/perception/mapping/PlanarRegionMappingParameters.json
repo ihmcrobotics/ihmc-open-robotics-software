@@ -1,0 +1,7 @@
+{
+  "title" : "PlanarRegionMappingParameters",
+  "Update Alpha towards match" : 0.0,
+  "Angle threshold between normals" : 0,
+  "Orthogonal distance threshold" : 0.0,
+  "Max Inter Region Distance" : 0.0
+}

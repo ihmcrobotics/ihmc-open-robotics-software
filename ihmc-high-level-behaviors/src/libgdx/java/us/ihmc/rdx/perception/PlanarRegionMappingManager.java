@@ -8,7 +8,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.mapping.PlanarRegionMap;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
@@ -28,7 +27,7 @@ public class PlanarRegionMappingManager
    private final ROS2Helper ros2Helper;
 
    private PlanarRegionsListWithPose planarRegionsListWithPose;
-   private PlanarRegionMap filteredMap;
+   private PlanarRegionMap planarRegionMap;
    private PlanarRegionsListLogger logger;
 
    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
@@ -53,7 +52,12 @@ public class PlanarRegionMappingManager
          ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, this::planarRegionCallback);
       }
 
-      filteredMap = new PlanarRegionMap(smoothing);
+      planarRegionMap = new PlanarRegionMap(smoothing);
+
+      if(DATASET_MODE_ENABLED)
+      {
+         loadPlanarRegionLogFiles();
+      }
    }
 
    public void loadPlanarRegionLogFiles()
@@ -79,7 +83,7 @@ public class PlanarRegionMappingManager
    {
       if (enableLiveMode)
       {
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
+         planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
       }
    }
 
@@ -104,7 +108,7 @@ public class PlanarRegionMappingManager
       {
          LogTools.info("Callback: Fusing Regions in Live Mode!");
          planarRegionsListWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(planarRegionsListWithPoseMessage);
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
+         planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
       }
    }
 
@@ -114,26 +118,26 @@ public class PlanarRegionMappingManager
       {
          planarRegionsListWithPose = (PlanarRegionsListWithPose) planarRegionsListBuffer.get(planarRegionListIndex);
          LogTools.info("Transform: {}", planarRegionsListWithPose.getSensorToWorldFrameTransform());
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
+         planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
          planarRegionListIndex++;
       }
    }
 
    public PlanarRegionsList getMapRegions()
    {
-      return filteredMap.getMapRegions().copy();
+      return planarRegionMap.getMapRegions().copy();
    }
 
-   public PlanarRegionMap getFilteredMap()
+   public PlanarRegionMap getPlanarRegionMap()
    {
-      return filteredMap;
+      return planarRegionMap;
    }
 
    public void submitRegions(PlanarRegionsListWithPose regionsWithPose)
    {
       if (enableLiveMode)
       {
-         filteredMap.submitRegionsUsingIterativeReduction(regionsWithPose);
+         planarRegionMap.submitRegionsUsingIterativeReduction(regionsWithPose);
       }
    }
 

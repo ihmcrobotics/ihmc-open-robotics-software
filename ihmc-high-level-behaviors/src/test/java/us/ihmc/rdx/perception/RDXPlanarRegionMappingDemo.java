@@ -8,15 +8,15 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.ROS2Node;
 
-public class RDXPlanarRegionFilteredMapDemo
+public class RDXPlanarRegionMappingDemo
 {
    private PlanarRegionMappingManager mapHandler;
-   private PlanarRegionMappingUI planarRegionFilteredMapUI;
+   private PlanarRegionMappingUIPanel planarRegionMappingUI;
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
 
-   public RDXPlanarRegionFilteredMapDemo()
+   public RDXPlanarRegionMappingDemo()
    {
       mapHandler = new PlanarRegionMappingManager(ros2Node, true);
 
@@ -26,22 +26,22 @@ public class RDXPlanarRegionFilteredMapDemo
          public void create()
          {
             baseUI.create();
-            planarRegionFilteredMapUI = new PlanarRegionMappingUI("Filtered Map", mapHandler);
-            baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUI.getImGuiPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            planarRegionMappingUI = new PlanarRegionMappingUIPanel("Filtered Map", mapHandler);
+            baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionMappingUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
-            if (planarRegionFilteredMapUI.isCaptured())
+            if (planarRegionMappingUI.isCaptured())
             {
-               LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUI.isCaptured());
+               LogTools.info("Filtered Map Panel Captured: {}", planarRegionMappingUI.isCaptured());
                mapHandler.setCaptured(true);
-               planarRegionFilteredMapUI.setCaptured(false);
+               planarRegionMappingUI.setCaptured(false);
             }
 
-            planarRegionFilteredMapUI.renderPlanarRegions();
+            planarRegionMappingUI.renderPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -58,6 +58,6 @@ public class RDXPlanarRegionFilteredMapDemo
 
    public static void main(String[] args)
    {
-      new RDXPlanarRegionFilteredMapDemo();
+      new RDXPlanarRegionMappingDemo();
    }
 }

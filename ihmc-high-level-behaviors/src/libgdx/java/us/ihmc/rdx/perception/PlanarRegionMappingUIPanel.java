@@ -8,7 +8,7 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
-public class PlanarRegionMappingUI
+public class PlanarRegionMappingUIPanel
 {
    private boolean captured = false;
 
@@ -17,7 +17,7 @@ public class PlanarRegionMappingUI
    private PlanarRegionMappingManager mappingManager;
    private ImGuiPanel imGuiPanel;
 
-   public PlanarRegionMappingUI(String name, PlanarRegionMappingManager mappingManager)
+   public PlanarRegionMappingUIPanel(String name, PlanarRegionMappingManager mappingManager)
    {
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       this.mappingManager = mappingManager;
@@ -26,7 +26,7 @@ public class PlanarRegionMappingUI
       //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
       //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
 
-      mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions().getPlanarRegionsList());
+      mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
       mapPlanarRegionsGraphic.update();
    }
 
@@ -50,12 +50,12 @@ public class PlanarRegionMappingUI
 
    public void renderPlanarRegions()
    {
-      if (mappingManager.getFilteredMap().isModified() && mappingManager.getMapRegions().getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+      if (mappingManager.getPlanarRegionMap().isModified() && mappingManager.getMapRegions().getNumberOfPlanarRegions() > 0)
       {
          mapPlanarRegionsGraphic.clear();
-         mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions().getPlanarRegionsList());
+         mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
          mapPlanarRegionsGraphic.update();
-         mappingManager.getFilteredMap().setModified(false);
+         mappingManager.getPlanarRegionMap().setModified(false);
       }
    }
 
