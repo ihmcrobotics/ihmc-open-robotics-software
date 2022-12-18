@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
-import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
+import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.commons.Conversions;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -32,8 +32,8 @@ public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements Renderabl
    public static final String WINDOW_NAME = "Planar Region Logging";
 
    private final PlanarRegionsListLogger logger;
-   private PlanarRegionsListBuffer realtimeBuffer;
-   private PlanarRegionsListBuffer logBuffer;
+   private PlanarRegionsReplayBuffer realtimeBuffer;
+   private PlanarRegionsReplayBuffer logBuffer;
 
    private final RDXPlanarRegionsGraphic realtimeGraphic;
    private final RDXPlanarRegionsGraphic logGraphic;
@@ -59,7 +59,7 @@ public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements Renderabl
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
       logger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
-      realtimeBuffer = new PlanarRegionsListBuffer(REALTIME_BUFFER_LEN);
+      realtimeBuffer = new PlanarRegionsReplayBuffer(REALTIME_BUFFER_LEN);
 
       realtimeGraphic = new RDXPlanarRegionsGraphic();
       logGraphic = new RDXPlanarRegionsGraphic();
@@ -143,7 +143,7 @@ public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements Renderabl
       ImGui.sameLine();
       if (ImGui.button("Clear"))
       {
-         realtimeBuffer = new PlanarRegionsListBuffer(REALTIME_BUFFER_LEN);
+         realtimeBuffer = new PlanarRegionsReplayBuffer(REALTIME_BUFFER_LEN);
       }
       ImGui.sameLine();
       ImGui.checkbox("Enable", enableRealtime);
@@ -191,7 +191,7 @@ public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements Renderabl
 
       if (realtime || firstRun)
       {
-         PlanarRegionsList regions = realtimeBuffer.getNearTime(timeRealtime);
+         PlanarRegionsList regions = (PlanarRegionsList) realtimeBuffer.getNearTime(timeRealtime);
          if (regions != null)
          {
             realtimeGraphic.generateMeshesAsync(regions);
@@ -256,7 +256,7 @@ public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements Renderabl
 
          if (log || firstRun)
          {
-            PlanarRegionsList list = logBuffer.getNearTime(timeLog);
+            PlanarRegionsList list = (PlanarRegionsList) logBuffer.getNearTime(timeLog);
             if (list != null)
             {
                logGraphic.generateMeshesAsync(list);
@@ -289,7 +289,7 @@ public class RDXPlanarRegionLoggingPanel extends ImGuiPanel implements Renderabl
             {
                try
                {
-                  logBuffer = new PlanarRegionsListBuffer(file);
+                  logBuffer = new PlanarRegionsReplayBuffer(file, PlanarRegionsList.class);
                }
                catch (IOException ioException)
                {

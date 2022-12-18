@@ -1,14 +1,16 @@
 package us.ihmc.rdx.perception;
 
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
+import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
+import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.mapping.PlanarRegionFilteredMap;
+import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
 
 import java.io.File;
@@ -18,38 +20,40 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class PlanarRegionMappingManager
 {
+   private static final boolean ROS2_ENABLED = false;
+   private static final boolean DATASET_MODE_ENABLED = !ROS2_ENABLED;
+
    private final ROS2Node ros2Node;
+   ;
    private final ROS2Helper ros2Helper;
 
-   private PlanarRegionsList planarRegions;
-   private PlanarRegionFilteredMap filteredMap;
+   private PlanarRegionsListWithPose planarRegionsListWithPose;
+   private PlanarRegionMap filteredMap;
    private PlanarRegionsListLogger logger;
 
    private ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
 
-   private boolean enableCapture = false;
+   private boolean enableCapture = true;
    private boolean enableLiveMode = false;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
-   private PlanarRegionsListBuffer planarRegionsListBuffer = null;
+   private PlanarRegionsReplayBuffer planarRegionsListBuffer = null;
 
    private int planarRegionListIndex = 0;
 
-   public PlanarRegionMappingManager(ROS2Node ros2Node)
+   public PlanarRegionMappingManager(ROS2Node ros2Node, boolean smoothing)
    {
       //executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, 100, TimeUnit.MILLISECONDS);
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
 
-      if(ros2Node != null)
+      if (ros2Node != null)
       {
-         ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, this::planarRegionCallback);
+         ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, this::planarRegionCallback);
       }
 
-      filteredMap = new PlanarRegionFilteredMap();
-
-
+      filteredMap = new PlanarRegionMap(smoothing);
    }
 
    public void loadPlanarRegionLogFiles()
@@ -60,7 +64,7 @@ public class PlanarRegionMappingManager
          {
             try
             {
-               planarRegionsListBuffer = new PlanarRegionsListBuffer(file);
+               planarRegionsListBuffer = new PlanarRegionsReplayBuffer(file, PlanarRegionsListWithPose.class);
             }
             catch (IOException ex)
             {
@@ -75,11 +79,11 @@ public class PlanarRegionMappingManager
    {
       if (enableLiveMode)
       {
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
+         filteredMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
       }
    }
 
-   public void planarRegionCallback(PlanarRegionsListMessage planarRegionsListMessage)
+   public void planarRegionCallback(PlanarRegionsListWithPoseMessage planarRegionsListWithPoseMessage)
    {
       if (enableCapture)
       {
@@ -88,18 +92,19 @@ public class PlanarRegionMappingManager
             logger = new PlanarRegionsListLogger("planar-region-logger", 1);
             logger.start();
          }
-         planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+         planarRegionsListWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(planarRegionsListWithPoseMessage);
+         LogTools.info("Regions Captured: {}", planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions());
 
-         logger.update(System.currentTimeMillis(), planarRegions);
+         logger.update(System.currentTimeMillis(), planarRegionsListWithPose);
          enableCapture = false;
       }
 
       LogTools.debug("Received Planar Regions ROS2");
       if (enableLiveMode)
       {
-         LogTools.debug("Registering Regions");
-         planarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
+         LogTools.info("Callback: Fusing Regions in Live Mode!");
+         planarRegionsListWithPose = PlanarRegionMessageConverter.convertToPlanarRegionsListWithPose(planarRegionsListWithPoseMessage);
+         filteredMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
       }
    }
 
@@ -107,8 +112,9 @@ public class PlanarRegionMappingManager
    {
       if (planarRegionListIndex < planarRegionsListBuffer.getBufferLength())
       {
-         planarRegions = planarRegionsListBuffer.get(planarRegionListIndex);
-         filteredMap.submitRegionsUsingIterativeReduction(planarRegions);
+         planarRegionsListWithPose = (PlanarRegionsListWithPose) planarRegionsListBuffer.get(planarRegionListIndex);
+         LogTools.info("Transform: {}", planarRegionsListWithPose.getSensorToWorldFrameTransform());
+         filteredMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
          planarRegionListIndex++;
       }
    }
@@ -118,16 +124,16 @@ public class PlanarRegionMappingManager
       return filteredMap.getMapRegions().copy();
    }
 
-   public PlanarRegionFilteredMap getFilteredMap()
+   public PlanarRegionMap getFilteredMap()
    {
       return filteredMap;
    }
 
-   public void submitRegions(PlanarRegionsList regions)
+   public void submitRegions(PlanarRegionsListWithPose regionsWithPose)
    {
       if (enableLiveMode)
       {
-         filteredMap.submitRegionsUsingIterativeReduction(regions);
+         filteredMap.submitRegionsUsingIterativeReduction(regionsWithPose);
       }
    }
 

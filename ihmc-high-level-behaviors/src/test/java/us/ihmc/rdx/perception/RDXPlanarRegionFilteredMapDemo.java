@@ -11,14 +11,14 @@ import us.ihmc.ros2.ROS2Node;
 public class RDXPlanarRegionFilteredMapDemo
 {
    private PlanarRegionMappingManager mapHandler;
-   private PlanarRegionFilteredMapUIPanel planarRegionFilteredMapUIPanel;
+   private PlanarRegionMappingUI planarRegionFilteredMapUI;
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
 
    public RDXPlanarRegionFilteredMapDemo()
    {
-      mapHandler = new PlanarRegionMappingManager(ros2Node);
+      mapHandler = new PlanarRegionMappingManager(ros2Node, true);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -26,22 +26,22 @@ public class RDXPlanarRegionFilteredMapDemo
          public void create()
          {
             baseUI.create();
-            planarRegionFilteredMapUIPanel = new PlanarRegionFilteredMapUIPanel("Filtered Map", mapHandler);
-            baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUIPanel.getImGuiPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUIPanel::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            planarRegionFilteredMapUI = new PlanarRegionMappingUI("Filtered Map", mapHandler);
+            baseUI.getImGuiPanelManager().addPanel(planarRegionFilteredMapUI.getImGuiPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(planarRegionFilteredMapUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
-            if (planarRegionFilteredMapUIPanel.isCaptured())
+            if (planarRegionFilteredMapUI.isCaptured())
             {
-               LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUIPanel.isCaptured());
+               LogTools.info("Filtered Map Panel Captured: {}", planarRegionFilteredMapUI.isCaptured());
                mapHandler.setCaptured(true);
-               planarRegionFilteredMapUIPanel.setCaptured(false);
+               planarRegionFilteredMapUI.setCaptured(false);
             }
 
-            planarRegionFilteredMapUIPanel.renderPlanarRegions();
+            planarRegionFilteredMapUI.renderPlanarRegions();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

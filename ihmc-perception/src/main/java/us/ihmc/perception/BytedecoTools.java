@@ -100,7 +100,7 @@ public class BytedecoTools
    public static void loadNatives()
    {
       loadOpenCL();
-      loadOpenCV();
+//      loadOpenCV();
    }
 
    public static void loadOpenCL()
