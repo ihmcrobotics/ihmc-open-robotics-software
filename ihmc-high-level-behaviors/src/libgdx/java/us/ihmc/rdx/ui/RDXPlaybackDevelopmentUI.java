@@ -3,7 +3,7 @@ package us.ihmc.rdx.ui;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.type.ImInt;
-import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
+import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -22,7 +22,7 @@ public class RDXPlaybackDevelopmentUI
 
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
-   private PlanarRegionsListBuffer prlBuffer = null;
+   private PlanarRegionsReplayBuffer prlBuffer = null;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
@@ -66,7 +66,7 @@ public class RDXPlaybackDevelopmentUI
                   if (ImGui.selectable(f.getName())) {
                      try
                      {
-                        prlBuffer = new PlanarRegionsListBuffer(f);
+                        prlBuffer = new PlanarRegionsReplayBuffer(f, PlanarRegionsList.class);
                      } catch (IOException ex) {
                         LogTools.error(ex.getStackTrace());
                      }
@@ -81,7 +81,7 @@ public class RDXPlaybackDevelopmentUI
 
             if (prlBuffer != null)
             {
-               PlanarRegionsList list = prlBuffer.getNearTime(t.get() + prlBuffer.getStartTime());
+               PlanarRegionsList list = (PlanarRegionsList) prlBuffer.getNearTime(t.get() + prlBuffer.getStartTime());
                if (list != null)
                   planarRegionsGraphic.generateMeshesAsync(list);
                planarRegionsGraphic.update();

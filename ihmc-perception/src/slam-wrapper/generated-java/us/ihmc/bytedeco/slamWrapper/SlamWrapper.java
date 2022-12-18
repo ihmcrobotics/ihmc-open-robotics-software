@@ -32,15 +32,20 @@ public static class FactorGraphExternal extends Pointer {
         return new FactorGraphExternal((Pointer)this).offsetAddress(i);
     }
 
-        // Expects packed Pose3
+        // Expects packed Pose3 as XYZYPR
         public native void addPriorPoseFactor(int index, FloatPointer pose);
         public native void addPriorPoseFactor(int index, FloatBuffer pose);
         public native void addPriorPoseFactor(int index, float[] pose);
 
-        // Expects packed Pose3
+        // Expects packed Pose3 as XYZYPR
         public native void addOdometryFactor(FloatPointer odometry, int poseId);
         public native void addOdometryFactor(FloatBuffer odometry, int poseId);
         public native void addOdometryFactor(float[] odometry, int poseId);
+
+        // Expects 4x4 homogenous transform matrix as 16-float array
+        public native void addOdometryFactorExtended(FloatPointer odometry, int poseId);
+        public native void addOdometryFactorExtended(FloatBuffer odometry, int poseId);
+        public native void addOdometryFactorExtended(float[] odometry, int poseId);
 
         // Expects packed Vector4
         public native void addOrientedPlaneFactor(FloatPointer lmMean, int lmId, int poseIndex);
@@ -57,6 +62,11 @@ public static class FactorGraphExternal extends Pointer {
         public native void setPoseInitialValue(int index, FloatPointer value);
         public native void setPoseInitialValue(int index, FloatBuffer value);
         public native void setPoseInitialValue(int index, float[] value);
+
+        // Expects 4x4 homogenous transform as 16-float array
+        public native void setPoseInitialValueExtended(int index, FloatPointer value);
+        public native void setPoseInitialValueExtended(int index, FloatBuffer value);
+        public native void setPoseInitialValueExtended(int index, float[] value);
 
         // Expects packed OrientedPlane3
         public native void setOrientedPlaneInitialValue(int landmarkId, FloatPointer value);

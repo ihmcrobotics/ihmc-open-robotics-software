@@ -14,8 +14,21 @@ void FactorGraphExternal::addOdometryFactor(float *odometry, int poseId)
     factorGraphHandler.addOdometryFactor(odometryValue, poseId);
 }
 
+void FactorGraphExternal::addOdometryFactorExtended(float *odometry, int poseId)
+{
+    using namespace gtsam;
+    Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(odometry);
+
+    Pose3 odometryValue(M.cast<double>());
+    factorGraphHandler.addOdometryFactor(odometryValue, poseId);
+}
+
+
 void FactorGraphExternal::addOrientedPlaneFactor(float *lmMean, int lmId, int poseIndex)
 {
+    using namespace gtsam;
+    Vector4 planeValue(lmMean[0], lmMean[1], lmMean[2], lmMean[3]);
+    factorGraphHandler.addOrientedPlaneFactor(planeValue, lmId, poseIndex);
 }
 
 void FactorGraphExternal::optimize()
@@ -40,8 +53,23 @@ void FactorGraphExternal::setPoseInitialValue(int index, float *value)
     factorGraphHandler.setPoseInitialValue(index, initialValue);
 }
 
+void FactorGraphExternal::setPoseInitialValueExtended(int index, float *value)
+{
+    printf("setPoseInitialValueExtended(%d)\n", index);
+    using namespace gtsam;
+    Eigen::Matrix4f M = Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor> >(value);
+
+    // std::cout << "Set Pose Initial Extended: " << std::endl << M << std::endl;
+
+    Pose3 initialValue(M.cast<double>());
+    factorGraphHandler.setPoseInitialValue(index, initialValue);
+}
+
 void FactorGraphExternal::setOrientedPlaneInitialValue(int landmarkId, float *value)
 {
+    using namespace gtsam;
+    OrientedPlane3 initialValue(value[0], value[1], value[2], value[3]);
+    factorGraphHandler.setOrientedPlaneInitialValue(landmarkId, initialValue);
 }
 
 void FactorGraphExternal::createOdometryNoiseModel(float *odomVariance)

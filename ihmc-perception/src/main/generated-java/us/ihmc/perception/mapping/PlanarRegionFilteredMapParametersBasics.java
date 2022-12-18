@@ -10,21 +10,21 @@ public interface PlanarRegionFilteredMapParametersBasics extends PlanarRegionFil
 {
    default void setUpdateAlphaTowardsMatch(double updateAlphaTowardsMatch)
    {
-      set(PlanarRegionFilteredMapParameters.updateAlphaTowardsMatch, updateAlphaTowardsMatch);
+      set(PlanarRegionMappingParameters.updateAlphaTowardsMatch, updateAlphaTowardsMatch);
    }
 
    default void setAngleThresholdBetweenNormals(int angleThresholdBetweenNormals)
    {
-      set(PlanarRegionFilteredMapParameters.angleThresholdBetweenNormals, angleThresholdBetweenNormals);
+      set(PlanarRegionMappingParameters.angleThresholdBetweenNormals, angleThresholdBetweenNormals);
    }
 
    default void setOrthogonalDistanceThreshold(double orthogonalDistanceThreshold)
    {
-      set(PlanarRegionFilteredMapParameters.orthogonalDistanceThreshold, orthogonalDistanceThreshold);
+      set(PlanarRegionMappingParameters.orthogonalDistanceThreshold, orthogonalDistanceThreshold);
    }
 
    default void setMaxInterRegionDistance(double maxInterRegionDistance)
    {
-      set(PlanarRegionFilteredMapParameters.maxInterRegionDistance, maxInterRegionDistance);
+      set(PlanarRegionMappingParameters.maxInterRegionDistance, maxInterRegionDistance);
    }
 }

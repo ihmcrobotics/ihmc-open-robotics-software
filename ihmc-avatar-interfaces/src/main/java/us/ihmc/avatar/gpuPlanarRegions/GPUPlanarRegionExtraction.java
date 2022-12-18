@@ -16,7 +16,6 @@ import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -35,6 +34,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -96,6 +96,8 @@ public class GPUPlanarRegionExtraction
    private final Stack<GPUPlanarRegionExtractionDepthFirstSearchQuery> depthFirstSearchStack = new Stack<>();
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+   private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
+   private final RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
 
@@ -647,6 +649,10 @@ public class GPUPlanarRegionExtraction
       {
          planarRegionsList.addPlanarRegions(planarRegions);
       }
+      sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
+
+      planarRegionsListWithPose.setPlanarRegionsList(planarRegionsList);
+      planarRegionsListWithPose.setSensorToWorldFrameTransform(sensorToWorldFrameTransform);
    }
 
    private void calculateDerivativeParameters()
@@ -705,6 +711,11 @@ public class GPUPlanarRegionExtraction
    public PlanarRegionsList getPlanarRegionsList()
    {
       return planarRegionsList;
+   }
+
+   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
+   {
+      return planarRegionsListWithPose;
    }
 
    public int getPatchImageWidth()

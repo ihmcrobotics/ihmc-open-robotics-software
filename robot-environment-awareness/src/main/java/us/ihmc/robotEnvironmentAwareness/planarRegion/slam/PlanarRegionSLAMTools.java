@@ -1,9 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion.slam;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.esotericsoftware.kryo.util.IntMap;
@@ -605,6 +602,33 @@ public class PlanarRegionSLAMTools
       return newDataCollisions;
    }
 
+   public static HashMap<Integer, Integer> findPlanarRegionMatches(PlanarRegionsList map, PlanarRegionsList newData, float boundingBoxHeight, float normalThreshold)
+   {
+      HashMap<Integer, Integer> matches = new HashMap<>();
+
+      List<PlanarRegion> newRegions = newData.getPlanarRegionsAsList();
+      List<PlanarRegion> mapRegions = map.getPlanarRegionsAsList();
+
+      for (int i = 0; i<mapRegions.size(); i++)
+      {
+         PlanarRegion mapRegion = mapRegions.get(i);
+         for (int j = 0; j<newRegions.size(); j++)
+         {
+            PlanarRegion newRegion = newRegions.get(j);
+
+            if (boxesIn3DIntersect(mapRegion, newRegion, boundingBoxHeight))
+            {
+               double dot = newRegion.getNormal().dot(mapRegion.getNormal());
+               if (dot > normalThreshold)
+               {
+                  matches.put(i, j);
+               }
+            }
+         }
+      }
+      return matches;
+   }
+
    public static boolean boxesIn3DIntersect(PlanarRegion a, PlanarRegion b, double boxHeight)
    {
       Box3D boxA = PlanarRegionTools.getLocalBoundingBox3DInWorld(a, boxHeight);
@@ -727,5 +751,29 @@ public class PlanarRegionSLAMTools
       //                            distanceThreshold) + ": [{}]", wasMatched);
 
       return wasMatched;
+   }
+
+   public static void printMatches(String tag, PlanarRegionsList map, PlanarRegionsList regions, HashMap<Integer, TIntArrayList> matches)
+   {
+      LogTools.info("------------------------------------------------ Printing Matches ({}) ---------------------------------------------", tag);
+      LogTools.info("Map Region Count: {}", map.getNumberOfPlanarRegions());
+      LogTools.info("Incoming Regionr Count: {}", regions.getNumberOfPlanarRegions());
+
+      for(Integer key : matches.keySet())
+      {
+         int[] values = matches.get(key).toArray();
+         LogTools.info("Match: ({}) -> {}", key, Arrays.toString(values));
+      }
+      LogTools.info("------------------------------------------------ Printing Matches End ---------------------------------------------");
+   }
+
+   public static void printRegionIDs(String tag, PlanarRegionsList regions)
+   {
+      int[] ids = new int[regions.getNumberOfPlanarRegions()];
+      for(int i = 0; i < regions.getNumberOfPlanarRegions(); i++)
+      {
+         ids[i] = regions.getPlanarRegion(i).getRegionId();
+      }
+      LogTools.info("[{}] Region IDs: {}", tag, Arrays.toString(ids));
    }
 }

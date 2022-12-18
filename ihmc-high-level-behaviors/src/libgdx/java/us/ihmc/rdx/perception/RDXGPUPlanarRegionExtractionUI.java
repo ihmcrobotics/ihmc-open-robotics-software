@@ -35,6 +35,7 @@ import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.thread.ZeroCopySwapReference;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -490,6 +491,11 @@ public class RDXGPUPlanarRegionExtractionUI
    public PlanarRegionsList getPlanarRegionsList()
    {
       return gpuPlanarRegionExtraction.getPlanarRegionsList();
+   }
+
+   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
+   {
+      return gpuPlanarRegionExtraction.getPlanarRegionsListWithPose();
    }
 
    public ImBoolean getEnabled()
