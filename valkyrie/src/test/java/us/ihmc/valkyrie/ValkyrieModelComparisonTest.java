@@ -357,6 +357,8 @@ public class ValkyrieModelComparisonTest
 
          List<SensorDefinition> sdfSensors = sdfJoint.getSensorDefinitions();
          List<SensorDefinition> urdfSensors = urdfJoint.getSensorDefinitions();
+         // This should be addressed with SCS2 0.11.2
+         sdfSensors.forEach(sensor -> sensor.setName(sensor.getName().replace("___default__", "")));
          sdfSensors.forEach(sensor -> sensor.setName(sensor.getName().replace("__default__", "")));
          Collections.sort(sdfSensors, (s1, s2) -> s1.getName().compareTo(s2.getName()));
          Collections.sort(urdfSensors, (s1, s2) -> s1.getName().compareTo(s2.getName()));
