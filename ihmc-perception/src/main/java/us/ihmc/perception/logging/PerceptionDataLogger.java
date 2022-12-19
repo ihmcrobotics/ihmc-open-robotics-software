@@ -30,14 +30,12 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 public class PerceptionDataLogger
 {
    /* TODO:
-   *     Remove or fix commented parts of the code.
-   *     Improve multi-threading
-   *     Convert buffer sizes to final constant values
-   *
-   * */
+    *     Remove or fix commented parts of the code.
+    *     Improve multi-threading
+    *     Convert buffer sizes to final constant values
+    *
+    * */
    private static final int BUFFER_SIZE = 2500000;
-
-
 
    private final HashMap<String, byte[]> byteBuffers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
@@ -67,7 +65,8 @@ public class PerceptionDataLogger
       channels.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_DEPTH_NAME, 0, 0));
       channels.put(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, 0, 0));
       channels.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, 0));
-      channels.put(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME,
+                   new PerceptionLogChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
 
       communicationMode = CommunicationMode.INTERPROCESS;
    }
@@ -127,14 +126,14 @@ public class PerceptionDataLogger
       byteBuffers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
       counts.put(PerceptionLoggerConstants.D435_DEPTH_NAME, 0);
 
-      // Add callback for L515 Depth maps
+      // Add callback for L515 Depth Maps
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
       l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
       byteBuffers.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
       counts.put(PerceptionLoggerConstants.L515_DEPTH_NAME, 0);
 
-      // Add callback for L515 Depth maps
+      // Add callback for L515 Color Images
       var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_COLOR_IMAGE);
       l515ColorSubscription.addCallback(this::logColorL515);
       runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
@@ -167,7 +166,7 @@ public class PerceptionDataLogger
          runnablesToStopLogging.pollFirst().run();
       }
 
-      for(PerceptionLogChannel channel : channels.values())
+      for (PerceptionLogChannel channel : channels.values())
       {
          channel.resetIndex();
          channel.resetCount();
@@ -190,7 +189,7 @@ public class PerceptionDataLogger
    {
       LogTools.info("Robot Configuration Data Received: {}", data.getMonotonicTime());
 
-      if(channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
          storeLongArray(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, data.getMonotonicTime());
          storeFloatArray(PerceptionLoggerConstants.ROOT_POSITION_NAME, data.getRootPosition());
@@ -206,7 +205,7 @@ public class PerceptionDataLogger
       LogTools.info("OUSTER POINT CLOUD Received.");
 
       ousterCloudPacket.set(message);
-      if(channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).incrementCount();
          storePointCloud(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, ousterCloudPacket);
@@ -217,7 +216,7 @@ public class PerceptionDataLogger
    {
       LogTools.info("Depth Map Received: {}", packet.data_);
 
-      if(channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, packet);
@@ -228,7 +227,7 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging D435 Color: ", videoPacket.toString());
 
-      if(channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.D435_COLOR_NAME, videoPacket);
@@ -239,7 +238,7 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging D435 Depth: ", videoPacket.toString());
 
-      if(channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.D435_DEPTH_NAME, videoPacket);
@@ -250,7 +249,7 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging L515 Depth: ", message.toString());
 
-      if(channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).incrementCount();
          storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_POSITION, message.getPosition());
@@ -263,19 +262,18 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging L515 Color: ", videoPacket.toString());
 
-      if(channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, videoPacket);
       }
-
    }
 
    public void logColorZED2(VideoPacket videoPacket)
    {
       LogTools.info("Logging L515 Color: ", videoPacket.toString());
 
-      if(channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, videoPacket);
@@ -289,10 +287,10 @@ public class PerceptionDataLogger
     */
    public void storeCompressedImage(String namespace, VideoPacket packet)
    {
-      long begin_store = System.nanoTime();
-      Group group = hdf5Manager.getGroup(namespace);
       executorService.submit(() ->
                              {
+                                Group group = hdf5Manager.getGroup(namespace);
+
                                 byte[] heapArray = byteBuffers.get(namespace);
                                 int imageCount = counts.get(namespace);
                                 IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
@@ -305,7 +303,6 @@ public class PerceptionDataLogger
 
                                 LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
                              });
-      long end_store = System.nanoTime();
    }
 
    public void storeCompressedImage(String namespace, ImageMessage packet)
@@ -335,17 +332,17 @@ public class PerceptionDataLogger
       Group group = hdf5Manager.getGroup(namespace);
 
       executorService.submit(() ->
-                               {
-                                  synchronized (this)
-                                  {
-                                     LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
-                                     pointCloudCount = (int) hdf5Manager.getCount(namespace);
-                                     HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
-                                     LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
+                             {
+                                synchronized (this)
+                                {
+                                   LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
+                                   pointCloudCount = (int) hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
+                                   LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
 
-                                     //                                         pointCloudCount++;
-                                  }
-                               });
+                                   //                                         pointCloudCount++;
+                                }
+                             });
    }
 
    public void storePointCloud(String namespace, FusedSensorHeadPointCloudMessage message)
@@ -353,40 +350,33 @@ public class PerceptionDataLogger
       Group group = hdf5Manager.getGroup(namespace);
 
       executorService.submit(() ->
-                               {
-                                  synchronized (this)
-                                  {
-                                     LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
-                                     pointCloudCount = (int) hdf5Manager.getCount(namespace);
-                                     HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
-                                     LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
-                                  }
-                               });
+                             {
+                                synchronized (this)
+                                {
+                                   LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
+                                   pointCloudCount = (int) hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
+                                   LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
+                                }
+                             });
    }
 
    public void storeFloatArray(String namespace, float[] array)
    {
-      LogTools.info("Store Float Array: {}", Arrays.toString(array));
-      Group group = hdf5Manager.getGroup(namespace);
-      TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
-      buffer.addAll(array);
+      executorService.submit(() ->
+                             {
+                                Group group = hdf5Manager.getGroup(namespace);
+                                TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
+                                buffer.addAll(array);
 
-      int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-      if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
-      {
-         LogTools.info("Store Float Buffer: {}", Arrays.toString(buffer.toArray()));
-         hdf5Manager.resetBuffer(namespace);
-
-         executorService.submit(() ->
-                                  {
-                                     synchronized (this)
-                                     {
-                                        LogTools.info("Store Float Array 2D: {}", Arrays.toString(buffer.toArray()));
-                                        long count = hdf5Manager.getCount(namespace);
-                                        HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                     }
-                                  });
-      }
+                                int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
+                                if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
+                                {
+                                   long count = hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+                                   hdf5Manager.resetBuffer(namespace);
+                                }
+                             });
    }
 
    public void storeLongArray(String namespace, long[] array)
@@ -421,7 +411,6 @@ public class PerceptionDataLogger
 
    public void storeFloatArray(String namespace, Point3D point)
    {
-      LogTools.info("Store Float Array Point: {}", point);
       float[] pointArray = new float[3];
       point.get(pointArray);
       storeFloatArray(namespace, pointArray);
@@ -448,7 +437,8 @@ public class PerceptionDataLogger
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
-      String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      String defaultLogDirectory =
+            System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
       String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
 
@@ -456,7 +446,7 @@ public class PerceptionDataLogger
 
       //logger.setChannelEnabled(logger.PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, true);
       logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
-      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
+      //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
    }
