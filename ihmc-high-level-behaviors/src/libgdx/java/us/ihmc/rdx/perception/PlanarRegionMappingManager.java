@@ -50,7 +50,7 @@ public class PlanarRegionMappingManager
    private PerceptionDataLoader perceptionDataLoader;
 
    private final String defaultLogDirectory =
-         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
+         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good" + File.separator;
    private static final File regionLogDirectory = new File(
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
    private final String perceptionLogDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
@@ -145,9 +145,13 @@ public class PlanarRegionMappingManager
 
       if (source == DataSource.PERCEPTION_LOG)
       {
-         LogTools.info("Loading Perception Log");
+         LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
+
          planarRegionsListWithPose = getRegionsFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
-         planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
+         if(planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         {
+            planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
+         }
          perceptionLogIndex++;
       }
    }
@@ -160,7 +164,7 @@ public class PlanarRegionMappingManager
 
       PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
       gpuPlanarRegionExtractionUI.extractPlanarRegions();
-      planarRegionsListWithPose.setPlanarRegionsList(gpuPlanarRegionExtractionUI.getPlanarRegionsList());
+      planarRegionsListWithPose.setPlanarRegionsList(gpuPlanarRegionExtractionUI.getPlanarRegionsList().copy());
       return planarRegionsListWithPose;
    }
 
