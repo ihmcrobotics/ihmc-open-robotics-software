@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sharedControl;
 
+import org.junit.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -15,8 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 public class ProMPAssistantTest
 {
@@ -27,11 +27,11 @@ public class ProMPAssistantTest
       // Check ProMPAssistant.json if you want to change parameters (e.g, task to learn, body parts to consider in the motion)
       ProMPAssistant proMPAssistant = new ProMPAssistant();
       Set<String> tasks = proMPAssistant.getTaskNames();
-      assertTrue(tasks.size()>0);
+      assertTrue(tasks.size() > 0);
       String task = tasks.iterator().next();
       ProMPManager myManager = proMPAssistant.getProMPManager(task);
-      assertTrue(myManager!=null);
-      assertTrue(proMPAssistant.getProMPManager(task)!=null);
+      assertTrue(myManager != null);
+      assertTrue(proMPAssistant.getProMPManager(task) != null);
       // use a csv file with the trajectories of the hands of the robot for testing
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc");
       String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
@@ -54,13 +54,27 @@ public class ProMPAssistantTest
       TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, directoryAbsolutePath, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
       LogTools.info("Processing trajectory ...");
+      boolean observedGoal = false;
+      FramePose3D observedGoalPose = new FramePose3D();
       while (!trajectoryPlayer.hasDoneReplay())
       {
-         for (String bodyPart : bodyParts){
+         for (String bodyPart : bodyParts)
+         {
             FramePose3D framePose = new FramePose3D();
             framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
             // Read file with stored trajectories: read set point per timestep until file is over
             Double[] dataPoint = trajectoryPlayer.play(true);
+            if (!observedGoal)
+            {
+               // get final set point
+               ArrayList<Double[]> dataTrajectory = trajectoryPlayer.getData();
+               Double[] dataGoal = dataTrajectory.get(dataTrajectory.size() - 1);
+               // we consider only the right hand
+               observedGoalPose.getOrientation().set(dataGoal[7], dataGoal[8], dataGoal[9], dataGoal[10]);
+               observedGoalPose.getPosition().set(dataGoal[11], dataGoal[12], dataGoal[13]);
+               observedGoal = true;
+            }
+
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
             framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
             framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
@@ -74,7 +88,7 @@ public class ProMPAssistantTest
             {
                assertTrue(!proMPAssistant.readyToPack());
                //do not change the frame, just observe it in order to generate a prediction later
-               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, null, "PushDoor");
+               proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, observedGoalPose, "PushDoor");
             }
             //record frame and store it in csv file
             Double[] bodyPartTrajectories = new Double[] {framePose.getOrientation().getX(),
@@ -91,13 +105,13 @@ public class ProMPAssistantTest
       trajectoryRecorder.concatenateData();
       ArrayList<Double[]> dataConcatenated = trajectoryRecorder.getData();
       assertTrue(dataConcatenated.size() > 0); // check data is not empty
+      // save recorded file name
+      String recordFile = trajectoryRecorder.getRecordFileName();
       //save recording in csv file
       trajectoryRecorder.saveRecording();
 
       LogTools.info("Test completed successfully!");
       LogTools.info("You can visualize the ProMPs plots by running the file {}/1Dplots_ProMPAssistantTest.py", directoryAbsolutePath);
-      LogTools.info("You can use file {}/{} as a replay file in Kinematics Streaming Mode",
-                    directoryAbsolutePath,
-                    trajectoryRecorder.getRecordFileName());
+      LogTools.info("You can use file {}/{} as a replay file in Kinematics Streaming Mode", directoryAbsolutePath, recordFile);
    }
 }
