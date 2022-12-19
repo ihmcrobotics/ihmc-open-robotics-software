@@ -359,4 +359,61 @@ public class PerceptionDataLoggingTest
       assertEquals(0, diff, 1e-5);
    }
 
+   @Test
+   @Disabled
+   public void testCompressedDepthMapLoggingPNG()
+   {
+
+      hdf5ManagerWriter = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_TRUNC());
+
+      Mat depth = new Mat(128, 128, opencv_core.CV_16UC1);
+      depth.put(new Scalar(12345));
+
+      BytePointer compressedDepthPointer = new BytePointer();
+      BytedecoOpenCVTools.compressImagePNG(depth, compressedDepthPointer);
+
+      byte[] dataArray = new byte[compressedDepthPointer.asBuffer().remaining()];
+      compressedDepthPointer.asBuffer().get(dataArray, 0, dataArray.length);
+
+      //      LogTools.info("Raw Size: {}, Compressed Size: {}", depth.rows() * depth.cols() * 4, dataArray.length);
+
+      Group writeGroup = hdf5ManagerWriter.getGroup("/test/bytes/");
+
+      //      LogTools.info("PNG Stored: [{}] -> {}", dataArray.length, Arrays.toString(dataArray));
+
+      HDF5Tools.storeByteArray(writeGroup, 0, dataArray, dataArray.length);
+
+      writeGroup.close();
+      hdf5ManagerWriter.getFile().close();
+
+      hdf5ManagerReader = new HDF5Manager("hdf5_test.hdf5", hdf5.H5F_ACC_RDONLY());
+      Group readGroup = hdf5ManagerReader.openGroup("/test/bytes/");
+
+      byte[] pngCompressedBytes = HDF5Tools.loadByteArray(readGroup, 0);
+
+      //      LogTools.info("PNG Loaded: [{}] -> {}", pngCompressedBytes.length, Arrays.toString(pngCompressedBytes));
+
+
+      Mat finalDepth16UC1 = new Mat(128, 128, opencv_core.CV_16UC1);
+      BytedecoOpenCVTools.decompressDepthPNG(pngCompressedBytes, finalDepth16UC1);
+
+      ShortBufferIndexer indexer = new ShortBufferIndexer(finalDepth16UC1.getShortBuffer());
+      ShortBufferIndexer indexerActual = new ShortBufferIndexer(depth.getShortBuffer());
+
+      short diff = 0;
+      for(int i = 0; i<128; i++)
+      {
+         for(int j = 0; j<128; j++)
+         {
+            diff += Math.abs(indexer.get(i*128 + j) - indexerActual.get(i*128 + j));
+
+            //LogTools.info("Depth ({} {}): {}", i, j, indexer.get(i*128 + j));
+            //LogTools.info("Actual ({} {}): {}", i, j, indexerActual.get(i*128 + j));
+
+         }
+      }
+
+      assertEquals(0.0, diff, 1e-5);
+   }
+
 }

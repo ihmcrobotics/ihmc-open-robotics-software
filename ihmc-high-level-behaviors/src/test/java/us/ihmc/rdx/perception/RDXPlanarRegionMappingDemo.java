@@ -49,6 +49,9 @@ public class RDXPlanarRegionMappingDemo
             planarRegionExtractionUI.getRender3DBoundaries().set(false);
             planarRegionExtractionUI.getRender3DGrownBoundaries().set(false);
 
+            planarRegionExtractionUI.getEnabled().set(true);
+
+
             mappingManager = new PlanarRegionMappingManager(planarRegionExtractionUI, depth32FC1Image, true);
 
             baseUI.getImGuiPanelManager().addPanel(planarRegionExtractionUI.getPanel());
@@ -57,6 +60,8 @@ public class RDXPlanarRegionMappingDemo
             planarRegionMappingUI = new PlanarRegionMappingUIPanel("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionMappingUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+
+            baseUI.getPerspectiveManager().reloadPerspective();
          }
 
          @Override
