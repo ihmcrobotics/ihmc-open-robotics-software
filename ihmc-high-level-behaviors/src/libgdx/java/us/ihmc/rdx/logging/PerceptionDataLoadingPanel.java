@@ -103,10 +103,10 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
          ImGui.text("Number of topics: " + loader.getChannels().size());
 
          ImGui.combo("Topic Names", topicIndex, topicNamesArray);
-         currentTopic = loader.getChannels().get(topicIndex.get()).getName();
-         ImGui.text("Total Files: " + loader.getChannels().get(topicIndex.get()).getCount());
-
-         ImGui.sliderInt("Object Index", objectIndex.getData(), 0, 10);
+//         currentTopic = loader.getChannels().get(topicNamesArray[topicIndex.get()]).getName();
+//         ImGui.text("Total Files: " + loader.getChannels().get(topicNamesArray[topicIndex.get()]).getCount());
+//
+//         ImGui.sliderInt("Object Index", objectIndex.getData(), 0, 10);
 
          HashMap<String, PerceptionLogChannel> channels = loader.getChannels();
          for (PerceptionLogChannel channel : channels.values())
@@ -115,19 +115,19 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
          }
       }
 
-      if (modified)
-      {
-         imagePanels.clear();
-         loader.getChannels().keySet().forEach(channelName ->
-                                      {
-                                         RDXOpenCVVideoVisualizer imagePanel = new RDXOpenCVVideoVisualizer("Perception Log: " + channelName,
-                                                                                                            channelName,
-                                                                                                            false);
-                                         imagePanels.put(channelName, imagePanel);
-                                         baseUI.getImGuiPanelManager().addPanel(imagePanel.getPanel());
-                                      });
-         modified = false;
-      }
+//      if (modified)
+//      {
+//         imagePanels.clear();
+//         loader.getChannels().keySet().forEach(channelName ->
+//                                      {
+//                                         RDXOpenCVVideoVisualizer imagePanel = new RDXOpenCVVideoVisualizer("Perception Log: " + channelName,
+//                                                                                                            channelName,
+//                                                                                                            false);
+//                                         imagePanels.put(channelName, imagePanel);
+//                                         baseUI.getImGuiPanelManager().addPanel(imagePanel.getPanel());
+//                                      });
+//         modified = false;
+//      }
 
       if(playEnabled)
       {
