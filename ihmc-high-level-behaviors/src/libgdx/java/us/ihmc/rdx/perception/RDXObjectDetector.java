@@ -1,20 +1,17 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.ArUcoObject;
+import us.ihmc.perception.ArUcoObjectInfo;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualBox;
-import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualDoorFrame;
-import us.ihmc.rdx.simulation.environment.object.objects.door.RDXArUcoVirtualDoorPanel;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 
 import java.util.ArrayList;
@@ -23,38 +20,32 @@ public class RDXObjectDetector
 {
    private final ImGuiPanel panel = new ImGuiPanel("Object Detector", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean enabled = new ImBoolean(true);
-   private final ImBoolean showGraphics = new ImBoolean(true);
-   private RDXArUcoVirtualDoorPanel pullDoorPanel;
-   private RDXArUcoVirtualDoorFrame pullDoorFrame;
-   private RDXArUcoVirtualBox box;
-   private boolean isPullDoorDetected = false;
-   private boolean isPullDoorDetectedOnce = false;
-   private boolean isFrameLockedIn = false;
-   private boolean isBoxDetected = false;
-   private final FramePose3D cameraPose = new FramePose3D();
+   private final ImBoolean enabled = new ImBoolean(false);
+   private final ArUcoObjectInfo arucoInfo = new ArUcoObjectInfo();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
    private RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator;
+   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
+//   private final ArrayList<ArUcoObject> objecstWithArUco = new ArrayList<>();
+   private ArUcoObject objectWithArUco;
+   private int objectId;
+   private String objectName = "";
 
    public void create(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator)
    {
       this.objectDetectionBlackflySimulator = objectDetectionBlackflySimulator;
-
-      pullDoorPanel = new RDXArUcoVirtualDoorPanel(0);
-      pullDoorFrame = new RDXArUcoVirtualDoorFrame(0);
-      box = new RDXArUcoVirtualBox(2);
 
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
       arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage(),
                                   objectDetectionBlackflySimulator.getDepthCameraIntrinsics(),
                                   objectDetectionBlackflySimulator.getSensorFrame());
       arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
-      ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-      markersToTrack.add(pullDoorPanel.getArUcoMarker());
-      markersToTrack.add(box.getArUcoMarker());
-      arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
 
+      for (int id : arucoInfo.getMarkersId()){
+         markersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
+      }
+
+      arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
       panel.addChild(arUcoMarkerDetectionUI.getMainPanel());
    }
 
@@ -63,42 +54,29 @@ public class RDXObjectDetector
       if (enabled.get())
       {
          arUcoMarkerDetection.update();
-         isPullDoorDetected = arUcoMarkerDetection.isDetected(pullDoorPanel.getArUcoMarker());
-         isBoxDetected = arUcoMarkerDetection.isDetected(box.getArUcoMarker());
-         if (isPullDoorDetected)
+         for (OpenCVArUcoMarker marker : markersToTrack)
          {
-            isPullDoorDetectedOnce = true;
-
-            FramePose3DBasics panelMarkerPose = arUcoMarkerDetection.getPose(pullDoorPanel.getArUcoMarker());
-            panelMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
-            panelMarkerPose.get(pullDoorPanel.getMarkerToWorld());
-
-            // Hack, once we see the door panel up close, lock in the frame pose, because after a while or the panel moves
-            // we won't know where it is anymore
-            if (!isFrameLockedIn)
+            if (arUcoMarkerDetection.isDetected(marker)) // check if a marker between those that we have in the config file is detected
             {
-               FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(pullDoorFrame.getArUcoMarker());
-               markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-               markerPose.get(pullDoorFrame.getMarkerToWorld());
-
-               cameraPose.setToZero(objectDetectionBlackflySimulator.getSensorFrame());
-               cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-               double distanceToMarker = markerPose.getPosition().distance(cameraPose.getPosition());
-               if (distanceToMarker < 0.9)
-               {
-                  isFrameLockedIn = true;
-               }
+               objectId = marker.getId();
+               objectName = arucoInfo.getObjectName(objectId);
+               //TODO - EXTENSION TO SIMULTANEOUS DETECTION MULTIPLE OBJECTS
+               // if multiple objects detected,
+               // use VR eye tracking to see what we are focusing on (closer object to where the eye is focusing)
+               // highlight selected object and user confirms with button A, rejects button B
+//               objecstWithArUco.add(new ArUcoObject(marker.getId(),arucoInfo)); // get object with attached marker
+               objectWithArUco = new ArUcoObject(objectId,arucoInfo);
+               LogTools.info("Detected marker1: {}", objectName);
+               FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(marker); // get marker pose in camera frame
+               LogTools.info("Pose1: {}", markerPose);
+               markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform in world frame
+               markerPose.get(objectWithArUco.getMarkerToWorld());
+               objectWithArUco.update(); // update frame of the object
+               objectWithArUco.packToObjectPose(markerPose); // marker pose gets transformed to object pose
+               break;
             }
          }
-         if (isBoxDetected)
-         {
-            FramePose3DBasics boxMarkerPose = arUcoMarkerDetection.getPose(box.getArUcoMarker());
-            boxMarkerPose.changeFrame(ReferenceFrame.getWorldFrame());
-            boxMarkerPose.get(box.getMarkerToWorld());
-         }
-         pullDoorPanel.update();
-         pullDoorFrame.update();
-         box.update();
+
          arUcoMarkerDetectionUI.update();
       }
    }
@@ -106,41 +84,21 @@ public class RDXObjectDetector
    public void renderImGuiWidgets()
    {
       ImGui.checkbox(labels.get("Enabled"), enabled);
-      ImGui.checkbox(labels.get("Show graphics"), showGraphics);
    }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public String getObjectName()
    {
-      if (showGraphics.get())
-      {
-         if (isPullDoorDetected)
-         {
-            pullDoorPanel.getRenderables(renderables, pool);
-         }
-         if (isPullDoorDetectedOnce)
-         {
-            pullDoorFrame.getRenderables(renderables, pool);
-         }
-         if (isBoxDetected)
-         {
-            box.getRenderables(renderables, pool);
-         }
-      }
+      return objectName;
    }
 
-   public ReferenceFrame getPullDoorPanelFrame()
+   public FramePose3DReadOnly getObjectPose()
    {
-      return pullDoorPanel.getVirtualFrame();
+      return objectWithArUco.getObjectPose();
    }
 
-   public ReferenceFrame getPullDoorFrameFrame()
+   public ReferenceFrame getObjectFrame()
    {
-      return pullDoorFrame.getVirtualFrame();
-   }
-
-   public ReferenceFrame getBoxFrame()
-   {
-      return box.getVirtualFrame();
+      return objectWithArUco.getObjectFrame();
    }
 
    public RDXOpenCVArUcoMarkerDetectionUI getArUcoMarkerDetectionUI()

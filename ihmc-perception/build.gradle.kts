@@ -49,6 +49,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
    apiBytedecoNatives("hdf5", "1.12.2-")
+   api("com.googlecode.json-simple:json-simple:1.1.1")
+
 }
 
 openpnpDependencies {

@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Once the task is detected (by recognizing the protagonist object of that task and/or by observing the current motion of the user),
  * the teleoperated referenceFrame gradually shifts from the reference specified by the user to the predicted assistance of the ProMPs.
  */
-public class ProMPAssistant implements TeleoperationAssistant
+public class ProMPAssistant
 {
    private final HashMap<String, ProMPManager> proMPManagers = new HashMap<>(); //proMPManagers stores a proMPManager for each task
    private String currentTask = ""; // detected task
@@ -37,7 +37,7 @@ public class ProMPAssistant implements TeleoperationAssistant
    private String bodyPartGoal = "";
    private final HashMap<String, String> taskBodyPartRecognitionMap = new HashMap<>();
    private final HashMap<String, String> taskBodyPartGoalMap = new HashMap<>();
-   private FramePose3D taskGoalPose = null; // detected goal
+   private Pose3DReadOnly taskGoalPose;
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedTrajectoryMap = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedTrajectoryMap = new HashMap<>();
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); // to track the last used sample of a generated trajectory
@@ -164,47 +164,35 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
    }
 
-   @Override
-   public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, Pose3DReadOnly objectPose, String objectName)
    {
-      if (objectDetected())
+      if (taskDetected(objectName))
       {
-         if (!bodyPartGoal.isEmpty()) // there is a goal a body part can reach in this task
+         // store observed pose
+         Pose3D lastObservedPose = new Pose3D();
+         lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
+         lastObservedPose.getOrientation()
+                         .set(observedPose.getOrientation().getX(),
+                              observedPose.getOrientation().getY(),
+                              observedPose.getOrientation().getZ(),
+                              observedPose.getOrientation().getS());
+         bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
+         if (!bodyPartGoal.isEmpty() && objectPose!= null) // there is an observable goal a body part can reach in this task
          {
-            if (objectPoseEstimated())
+            taskGoalPose = objectPose;
+            // update the proMP prediction according to observations and observed goal and generate mean trajectory
+            if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
             {
-               // store observed pose
-               Pose3D lastObservedPose = new Pose3D();
-               lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
-               lastObservedPose.getOrientation()
-                               .set(observedPose.getOrientation().getX(),
-                                    observedPose.getOrientation().getY(),
-                                    observedPose.getOrientation().getZ(),
-                                    observedPose.getOrientation().getS());
-               bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
-               // update the proMP prediction according to observations and observed goal and generate mean trajectory
-               if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
-               {
-                  updateTaskWithObjectInfo();
-                  generateTaskTrajectories();
-                  doneInitialProcessingTask = true;
-                  LogTools.info("Generating prediction ...");
-               }
+               updateTaskWithObjectInfo();
+               generateTaskTrajectories();
+               doneInitialProcessingTask = true;
+               LogTools.info("Generating prediction ...");
             }
          }
          else // there is no specific goal location to reach with a body part in this task
          {
-            // store observed pose
-            Pose3D lastObservedPose = new Pose3D();
-            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
-            lastObservedPose.getOrientation()
-                            .set(observedPose.getOrientation().getX(),
-                                 observedPose.getOrientation().getY(),
-                                 observedPose.getOrientation().getZ(),
-                                 observedPose.getOrientation().getS());
-            bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
             // update the proMP prediction according to observations and generate mean trajectory
-            if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) //if observed a sufficient number of poses
+            if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
             {
                updateTask();
                generateTaskTrajectories();
@@ -215,13 +203,14 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
    }
 
-   private boolean objectDetected()
+   private boolean taskDetected(String objectName)
    {
       if (currentTask.isEmpty())
       {
-         // TODO A.1. recognize task with object detection algorithm (or Aruco Markers to begin with)
-         // TODO A.2. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
-         currentTask = "PushDoor";
+         // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
+         // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task?
+         //  Learn task for both hands and called them ...L and ...R, just check initial velocity of hands to determine which one is being used
+         currentTask = objectName;
          // get the body part used for recognition for this task
          bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
          // get the body part that has to reach a goal for this task
@@ -233,13 +222,6 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
       else
          return true;
-   }
-
-   private boolean objectPoseEstimated()
-   {
-      // TODO A.2. identify object pose (with Aruco Markers to begin with)
-      // taskGoalPose = ;
-      return (taskGoalPose!=null);
    }
 
    private void updateTaskWithObjectInfo()
@@ -261,7 +243,6 @@ public class ProMPAssistant implements TeleoperationAssistant
 
    private void updateTask()
    {
-      // TODO B.1. what if someone is lefthanded, or simply wants to use the left hand for that task, should we learn the task for both hands?
       proMPManagers.get(currentTask).updateTaskSpeed(bodyPartObservedTrajectoryMap.get(bodyPartRecognition), bodyPartRecognition);
       // update all proMP trajectories based on initial observations (stored observed poses)
       for (String robotPart : bodyPartObservedTrajectoryMap.keySet())
@@ -299,13 +280,11 @@ public class ProMPAssistant implements TeleoperationAssistant
       }
    }
 
-   @Override
    public boolean readyToPack()
    {
       return doneInitialProcessingTask;
    }
 
-   @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
       List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
@@ -352,7 +331,7 @@ public class ProMPAssistant implements TeleoperationAssistant
       // reset manager of current task (reset reference of proMP object of current task to initial proMP before any conditioning)
       proMPManagers.get(currentTask).resetTask();
       currentTask = "";
-      taskGoalPose.setToZero(taskGoalPose.getReferenceFrame().getWorldFrame());
+      taskGoalPose = null;
       bodyPartObservedTrajectoryMap.clear();
       bodyPartGeneratedTrajectoryMap.clear();
       bodyPartTrajectorySampleCounter.clear();

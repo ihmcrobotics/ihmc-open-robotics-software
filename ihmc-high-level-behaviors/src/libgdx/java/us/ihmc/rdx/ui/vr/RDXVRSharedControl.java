@@ -4,22 +4,26 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
+import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.perception.RDXObjectDetector;
 
-public class RDXVRSharedControl
+public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private ImBoolean enabledReplay;
    private ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
+   private final RDXObjectDetector objectDetector;
 
-   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay, RDXObjectDetector objectDetector)
    {
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
+      this.objectDetector = objectDetector;
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -31,16 +35,21 @@ public class RDXVRSharedControl
       }
    }
 
+   @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      proMPAssistant.processFrameInformation(observedPose, bodyPart);
+      String objectName = objectDetector.getObjectName();
+      FramePose3DReadOnly objectPose = objectDetector.getObjectPose();
+      proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
    }
 
+   @Override
    public boolean readyToPack()
    {
       return proMPAssistant.readyToPack();
    }
 
+   @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
       proMPAssistant.framePoseToPack(framePose, bodyPart); // use promp assistance for shared control

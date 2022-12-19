@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sharedControl;
 
+import org.junit.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -15,10 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
-public class ProMPAssistantTest
+public class ProMPAssistantObjectDetectionTest
 {
    @Test
    public void testProMPTrajectoryGeneration() throws IOException
