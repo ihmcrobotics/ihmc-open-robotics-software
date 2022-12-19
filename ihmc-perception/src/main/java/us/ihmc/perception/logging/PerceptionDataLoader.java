@@ -137,8 +137,8 @@ public class PerceptionDataLoader
 
       ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-      long totalColor = loader.getHDF5Manager().getCount("/l515/color/");
-      long totalDepth = loader.getHDF5Manager().getCount("/l515/depth/");
+      long totalColor = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.L515_COLOR_NAME);
+      long totalDepth = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.L515_DEPTH_NAME);
 
       long total = Math.min(totalColor, totalDepth);
 
@@ -151,14 +151,14 @@ public class PerceptionDataLoader
       for (int i = 0; i < 5; i++)
       {
          points.clear();
-         loader.loadPoint3DList("/l515/sensor/position", i, points);
+         loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, i, points);
 
 //         LogTools.info("Loading Index: {}/{}", i, total);
-//         loader.loadCompressedImage("/l515/color/", i, colorImage);
+//         loader.loadCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, i, colorImage);
 //
 //
 //         long begin_load = System.nanoTime();
-//         loader.loadCompressedDepth("/l515/depth/", i, depthImage);
+//         loader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, i, depthImage);
 //         long end_load = System.nanoTime();
 //
 //         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
