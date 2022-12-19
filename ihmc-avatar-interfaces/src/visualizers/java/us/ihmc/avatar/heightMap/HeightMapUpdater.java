@@ -19,7 +19,9 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -75,7 +77,7 @@ public class HeightMapUpdater
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
 
-   private final ConcurrentLinkedQueue<Pair<PointCloud2, FramePose3D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Pair<PointCloudData, FramePose3D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
    private final ExecutorService heightMapUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean();
 
@@ -124,7 +126,7 @@ public class HeightMapUpdater
 
       while (updatesWithoutDataCounter < maxIdleTimeMillis / sleepTimeMillis)
       {
-         Pair<PointCloud2, FramePose3D> data = pointCloudQueue.poll();
+         Pair<PointCloudData, FramePose3D> data = pointCloudQueue.poll();
          if (data == null)
          {
             updatesWithoutDataCounter++;
@@ -144,32 +146,25 @@ public class HeightMapUpdater
       updateThreadIsRunning.set(false);
    }
 
-   private void update(Pair<PointCloud2, FramePose3D> pointCloudData)
+   private void update(Pair<PointCloudData, FramePose3D> pointCloudData)
+   {
+      update(pointCloudData.getKey().getPointCloud(), pointCloudData.getRight());
+   }
+
+   private void update(Point3D[] pointCloud, FramePose3DReadOnly ousterPose)
    {
       if (printFrequency)
       {
          updateFrequency();
       }
 
-      PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
-      ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
+      ousterFrame.setPoseAndUpdate(ousterPose);
 
-      if (USE_OUSTER_FRAME)
+      RigidBodyTransformReadOnly ousterTransform = USE_OUSTER_FRAME ? ousterPose : APPROX_OUSTER_TRANSFORM;
+      // Transform ouster data
+      for (int i = 0; i < pointCloud.length; i++)
       {
-         // Transform ouster data
-         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
-         {
-            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
-            point.changeFrame(ReferenceFrame.getWorldFrame());
-            pointCloud.getPointCloud()[i].set(point);
-         }
-      }
-      else
-      {
-         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
-         {
-            pointCloud.getPointCloud()[i].applyTransform(APPROX_OUSTER_TRANSFORM);
-         }
+         pointCloud[i].applyTransform(ousterTransform);
       }
 
       if (clearRequested.getAndSet(false))
@@ -180,13 +175,13 @@ public class HeightMapUpdater
       }
 
       // Update height map
-      heightMap.update(pointCloud.getPointCloud());
+      heightMap.update(pointCloud);
       totalUpdateCount.incrementAndGet();
 
       if (--publishFrequencyCounter <= 0)
       {
          /* estimate ground height */
-         double estimatedGroundHeight = estimateGroundHeight(pointCloud.getPointCloud());
+         double estimatedGroundHeight = estimateGroundHeight(pointCloud);
 
          /* filter near and below ground height and outliers that seem too high */
          performFiltering(estimatedGroundHeight);

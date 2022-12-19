@@ -16,6 +16,7 @@ import sensor_msgs.PointCloud2;
 import tf2_msgs.TFMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -100,7 +101,8 @@ public abstract class HeightMapUI extends ApplicationNoModule
                ousterPose.getOrientation().set(ros1Orientation.getX(), ros1Orientation.getY(), ros1Orientation.getZ(), ros1Orientation.getW());
             }
 
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Pair.of(pointCloud, ousterPose));
+            PointCloudData pointCloudData = new PointCloudData(pointCloud, 1000000, false);
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Pair.of(pointCloudData, ousterPose));
          }
       });
 
