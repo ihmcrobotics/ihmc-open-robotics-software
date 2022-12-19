@@ -7,16 +7,12 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
-import org.opencv.core.Mat;
-import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -69,7 +65,7 @@ public class PointCloudVisualizer extends AnimationTimer
       }
    }
 
-   public void processPointCloud(Pair<PointCloud2, FramePose3D> pointCloudData)
+   public void processPointCloud(Pair<PointCloudData, FramePose3D> pointCloudData)
    {
       if (isProcessing.getAndSet(true))
       {
@@ -81,25 +77,28 @@ public class PointCloudVisualizer extends AnimationTimer
 
    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
 
-   private void processPointCloudInternal(Pair<PointCloud2, FramePose3D> pointCloudData)
+   private void processPointCloudInternal(Pair<PointCloudData, FramePose3D> pointCloudData)
+   {
+      processPointCloudInternal(pointCloudData.getKey().getPointCloud(), pointCloudData.getRight());
+   }
+
+   private void processPointCloudInternal(Point3D[] pointCloud, FramePose3DReadOnly ousterPose)
    {
       /* Compute mesh */
       meshBuilder.clear();
 
-      PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
-
       if (USE_OUSTER_FRAME)
       {
-         ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
+         ousterFrame.setPoseAndUpdate(ousterPose);
 
          for (int i = 0; i < 64; i++)
          {
             int v = 10;
             for (int j = 0; j < 2048; j++)
             {
-               FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[2048 * i + j]);
+               FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud[2048 * i + j]);
                point.changeFrame(ReferenceFrame.getWorldFrame());
-               pointCloud.getPointCloud()[i].set(point);
+               pointCloud[i].set(point);
 
                double alpha = i / 65.0;
                meshBuilder.addCube(POINT_SIZE, point, Color.RED.interpolate(Color.BLUE, alpha));
@@ -126,9 +125,9 @@ public class PointCloudVisualizer extends AnimationTimer
       }
       else
       {
-         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         for (int i = 0; i < pointCloud.length; i++)
          {
-            pointCloud.getPointCloud()[i].applyTransform(APPROX_OUSTER_TRANSFORM);
+            pointCloud[i].applyTransform(APPROX_OUSTER_TRANSFORM);
          }
       }
 

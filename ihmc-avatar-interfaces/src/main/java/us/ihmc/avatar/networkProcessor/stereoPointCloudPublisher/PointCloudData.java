@@ -1,17 +1,27 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Decompressor;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
@@ -85,6 +95,71 @@ public class PointCloudData
                currentSize--;
             }
          }
+
+         numberOfPoints = maxSize;
+      }
+   }
+
+   public PointCloudData(FusedSensorHeadPointCloudMessage sensorData, int maxSize, boolean hasColors)
+   {
+      double discreteResolution = DiscretizedColoredPointCloud.DISCRETE_RESOLUTION;
+      timestamp = Conversions.secondsToNanoseconds(sensorData.aquisition_seconds_since_epoch_) + sensorData.aquisition_additional_nanos_;
+      int intsPerPoint = DiscretizedColoredPointCloud.DISCRETE_INTS_PER_POINT;
+      int bytesPerPoint = DiscretizedColoredPointCloud.DISCRETE_BYTES_PER_POINT;
+      int bytesPerSegment = sensorData.getPointsPerSegment() * DiscretizedColoredPointCloud.DISCRETE_BYTES_PER_POINT;
+
+      int numberOfBytes = sensorData.getScan().size();
+      ByteBuffer compressedScanData = ByteBuffer.allocate(bytesPerSegment);
+      compressedScanData.order(ByteOrder.nativeOrder());
+      compressedScanData.rewind();
+      compressedScanData.limit(numberOfBytes);
+      for (int i = 0; i < numberOfBytes; i++)
+         compressedScanData.put(sensorData.getScan().get(i));
+      compressedScanData.flip();
+
+      ByteBuffer decompressedData = ByteBuffer.allocate(bytesPerSegment);
+      decompressedData.order(ByteOrder.nativeOrder());
+
+      LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
+      decompressedData.rewind();
+      lz4Decompressor.decompress(compressedScanData, decompressedData);
+      decompressedData.rewind();
+
+      pointCloud = new Point3D[sensorData.getPointsPerSegment()];
+      if (hasColors)
+         colors = new int[sensorData.getPointsPerSegment()];
+      else
+         colors = null;
+
+      for (int i = 0; i < sensorData.getPointsPerSegment(); i++)
+      {
+         int x = decompressedData.getInt();
+         int y = decompressedData.getInt();
+         int z = decompressedData.getInt();
+         int color = decompressedData.getInt();
+         pointCloud[i] = new Point3D(x * discreteResolution, y * discreteResolution, z * discreteResolution);
+
+         if (colors != null)
+            colors[i] = color;
+      }
+
+      if (sensorData.getPointsPerSegment() <= maxSize)
+      {
+         numberOfPoints = pointCloud.length;
+      }
+      else
+      {
+         Random random = new Random();
+         int currentSize = pointCloud.length;
+
+            while (currentSize > maxSize)
+            {
+               int nextToRemove = random.nextInt(currentSize);
+               pointCloud[nextToRemove] = pointCloud[currentSize - 1];
+               pointCloud[currentSize - 1] = null;
+
+               currentSize--;
+            }
 
          numberOfPoints = maxSize;
       }
