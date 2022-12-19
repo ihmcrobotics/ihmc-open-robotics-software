@@ -12,7 +12,6 @@
       "bodyPartForRecognition": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "bodyParts":[
-        { "name":"leftHand", "geometry":"Pose" },
         { "name":"rightHand", "geometry":"Pose" }
       ]
     }

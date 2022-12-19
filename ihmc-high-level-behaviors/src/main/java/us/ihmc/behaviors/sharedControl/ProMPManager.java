@@ -186,7 +186,7 @@ public class ProMPManager
       // infer what training demo is the closest to the observed trajectory
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectory);
       // infer the new speed for the demo trajectory based on observed (portion of) trajectory
-      double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      double inferredSpeed = demoTrajectory.get(demo).infer_speed(observedTrajectory, 1.0/speedFactor, speedFactor, numberOfInferredSpeeds);
       // find equivalent timesteps
       int inferredTimesteps = (int) (demoTrajectory.get(demo).timesteps() / inferredSpeed);
       if (logEnabled)
@@ -203,7 +203,8 @@ public class ProMPManager
       }
    }
 
-   /** Update the speed of the ProMPs of the task based on observation of a body part trajectory and goal (e.g., RightHand or LeftHand) */
+   /** Update the speed of the ProMPs of the task based on observation of a body part trajectory and goal (e.g., RightHand or LeftHand)
+    * more accurate but much slower */
    public void updateTaskSpeed(List<Pose3DReadOnly> observedFrameTrajectory, Pose3DReadOnly observedGoal, String bodyPart)
    {
       EigenMatrixXd observedTrajectory = toEigenMatrix(observedFrameTrajectory, bodyPart);
@@ -214,7 +215,7 @@ public class ProMPManager
       updateTrajectoryGoal(copyProMPCurrentTask, bodyPart, observedGoal);
       Trajectory meanTrajectoryProMPCurrentTask = new Trajectory(copyProMPCurrentTask.generate_trajectory(), 1.0);
       // infer the new speed for the mean trajectory based on observed (portion of) trajectory
-      double inferredSpeed = meanTrajectoryProMPCurrentTask.infer_speed(observedTrajectory, 0.25, 4.0, 30);
+      double inferredSpeed = meanTrajectoryProMPCurrentTask.infer_speed(observedTrajectory, 1.0/speedFactor, speedFactor, numberOfInferredSpeeds);
       // find equivalent timesteps
       int inferredTimesteps = (int) (meanTrajectoryProMPCurrentTask.timesteps() / inferredSpeed);
       if (logEnabled)
@@ -327,7 +328,8 @@ public class ProMPManager
       myProMP.condition_goal(viaPoint);
       if (logEnabled)
       {
-         logger.saveUpdatedTrajectories(bodyPart, myProMP, "ConditionedGoal");
+         LogTools.info("Logging goal conditioning ...");
+         logger.saveUpdatedTrajectories(bodyPart, myProMP, "Conditioned");
       }
    }
 
