@@ -4,14 +4,14 @@
       "markerId": 0,
       "markerSize": 0.2032,
       "objectName": "PushDoor",
-      "translationToMarker": [-0.05, -0.125, -0.28],
+      "translationToMarker": [-0.05, -0.088, -0.2414],
       "yawPitchRollToMarker": [0.0, 0.0, 0.0]
     },
     {
       "markerId": 1,
       "markerSize": 0.2032,
       "objectName": "PullDoor",
-      "translationToMarker": [-0.05, 0.125, -0.28],
+      "translationToMarker": [-0.05, 0.088, -0.2414],
       "yawPitchRollToMarker": [0.0, 0.0, 0.0]
     }
   ]
