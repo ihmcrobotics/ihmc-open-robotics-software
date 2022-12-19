@@ -5,5 +5,9 @@
   "Max Z" : [0.6, "Max z relative to robot mid foot z. Points above this threshold are ignored."],
   "Nominal standard deviation" : [0.017992, "When calibrated on flat ground, this is the average standard deviation observed for a grid cell."],
   "Max points per cell" : 20,
-  "Mahalanobis scale" : [3.0, "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value."]
+  "Mahalanobis scale" : [3.0, "If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset. where s is getNominalStandardDeviation() and m is this value."],
+  "Hole proximity threshold" : [3, "Number of cells in a direction to search for data to fill in holes."],
+  "Estimate ground height" : true,
+  "Fill holes" :  true,
+  "Remove outlier cells" : true
 }

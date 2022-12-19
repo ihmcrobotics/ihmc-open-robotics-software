@@ -23,7 +23,7 @@ public class HeadlessHeightMapUpdater
    private final ROS2Node ros2Node;
 
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
-   private final AbstractHeightMapUpdater heightMapUpdater;
+   private final HeightMapUpdater heightMapUpdater;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                     ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
@@ -34,7 +34,8 @@ public class HeadlessHeightMapUpdater
 
       IHMCROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
 
-      heightMapUpdater = new AbstractHeightMapUpdater(heightMapPublisher::publish);
+      heightMapUpdater = new HeightMapUpdater();
+      heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
       ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, ROS2Tools.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
       {
