@@ -42,7 +42,7 @@ public class AlternateHeightMapUpdater
    public HeightMapMessage update(Point3D[] scanPoints, ReferenceFrame ousterFrame, Point3D center)
    {
       heightMap.setMaxHeight(center.getZ() + 2.0); // Set max to basically just over the robot's head.
-      heightMap.getGridCenterXY().set(center.getX(), center.getY());
+      heightMap.translateToNewGridCenter(center.getX(), center.getY());
 
       PointCloudData pointCloud = new PointCloudData(System.nanoTime(), scanPoints, null);
 
