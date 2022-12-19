@@ -57,4 +57,27 @@ public interface HeightMapParametersReadOnly extends StoredPropertySetReadOnly
    {
       return get(mahalanobisScale);
    }
+
+   /**
+    * Number of cells in a direction to search for data to fill in holes.
+    */
+   default int getHoleProximityThreshold()
+   {
+      return get(holeProximityThreshold);
+   }
+
+   default boolean getEstimateGroundHeight()
+   {
+      return get(estimateGroundHeight);
+   }
+
+   default boolean getFillHoles()
+   {
+      return get(fillHoles);
+   }
+
+   default boolean getRemoveOutlierCells()
+   {
+      return get(removeOutlierCells);
+   }
 }

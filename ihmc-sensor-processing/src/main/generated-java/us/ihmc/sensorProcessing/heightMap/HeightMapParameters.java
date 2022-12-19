@@ -46,15 +46,36 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     * is getNominalStandardDeviation() and m is this value.
     */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
+   /**
+    * Number of cells in a direction to search for data to fill in holes.
+    */
+   public static final IntegerStoredPropertyKey holeProximityThreshold = keys.addIntegerKey("Hole proximity threshold");
+   public static final BooleanStoredPropertyKey estimateGroundHeight = keys.addBooleanKey("Estimate ground height");
+   public static final BooleanStoredPropertyKey fillHoles = keys.addBooleanKey("Fill holes");
+   public static final BooleanStoredPropertyKey removeOutlierCells = keys.addBooleanKey("Remove outlier cells");
 
+   /**
+    * Loads this property set.
+    */
    public HeightMapParameters()
    {
       this("");
    }
 
+   /**
+    * Loads an alternate version of this property set in the same folder.
+    */
    public HeightMapParameters(String versionSpecifier)
    {
-      super(keys, HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+      this(HeightMapParameters.class, DIRECTORY_NAME_TO_ASSUME_PRESENT, SUBSEQUENT_PATH_TO_RESOURCE_FOLDER, versionSpecifier);
+   }
+
+   /**
+    * Loads an alternate version of this property set in other folders.
+    */
+   public HeightMapParameters(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String versionSuffix)
+   {
+      super(keys, classForLoading, HeightMapParameters.class, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
       load();
    }
 

@@ -1,27 +1,29 @@
 package us.ihmc.sensorProcessing.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 public class HeightMapManager
 {
-   private static final boolean updateWithStreams = false;
    private static final boolean debug = false;
 
    /*  From HeightMapMessage.msg  */
    public static final int maxCellCount = 30000;
 
    private double maxHeight = 0.4;
-   private final double gridResolutionXY;
-   private final int centerIndex;
-   private final int cellsPerAxis;
-   private final HeightMapCell[] heightMapCells;
-   private final TIntArrayList occupiedCells = new TIntArrayList();
+   private double gridSizeXY;
+   private double gridResolutionXY;
+   private int centerIndex;
+   private int cellsPerAxis;
+   private HeightMapCell[] heightMapCells;
+   private TIntArrayList occupiedCells = new TIntArrayList();
 
    private final HeightMapParametersReadOnly parameters;
    private final Point2D gridCenterXY = new Point2D();
@@ -30,6 +32,7 @@ public class HeightMapManager
    {
       this.parameters = parameters;
       this.gridResolutionXY = gridResolutionXY;
+      this.gridSizeXY = gridSizeXY;
       this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
       this.cellsPerAxis = 2 * centerIndex + 1;
 
@@ -39,12 +42,96 @@ public class HeightMapManager
    }
 
    /**
+    * Updates the grid size of the underlying height map. If this grid size is different from the current, it will
+    * clear the current height map and build a new one.
+    */
+   public void updateGridSizeXY(double gridSizeXY)
+   {
+      if (MathTools.epsilonEquals(gridSizeXY, this.gridSizeXY, 1e-5))
+         return;
+
+      this.gridSizeXY = gridSizeXY;
+      this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
+      this.cellsPerAxis = 2 * centerIndex + 1;
+
+      heightMapCells = new HeightMapCell[cellsPerAxis * cellsPerAxis];
+      occupiedCells.reset();
+   }
+
+   /**
+    * Updates the grid resolution of the underlying height map. If this grid resolution is different from the current, it will
+    * clear the current height map and build a new one.
+    */
+   public void updateGridResolutionXY(double gridResolutionXY)
+   {
+      if (MathTools.epsilonEquals(gridResolutionXY, this.gridResolutionXY, 1e-5))
+         return;
+
+      this.gridResolutionXY = gridResolutionXY;
+      this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
+      this.cellsPerAxis = 2 * centerIndex + 1;
+
+      heightMapCells = new HeightMapCell[cellsPerAxis * cellsPerAxis];
+      occupiedCells.reset();
+   }
+
+   /**
     * Clears height map data and moves grid center to the given value.
     */
-   public void setGridCenter(double xCenter, double yCenter)
+   public void resetAtGridCenter(double xCenter, double yCenter)
    {
       gridCenterXY.set(xCenter, yCenter);
       clear();
+   }
+
+   /**
+    * Translates the existing height map to a new center location. It keeps all the cells that are still in range and translates them to new locations.
+    */
+   public void translateToNewGridCenter(Point2DReadOnly gridCenter)
+   {
+      translateToNewGridCenter(gridCenter.getX(), gridCenter.getY());
+   }
+
+   /**
+    * Translates the existing height map to a new center location. It keeps all the cells that are still in range and translates them to new locations.
+    */
+   public void translateToNewGridCenter(double xCenter, double yCenter)
+   {
+      if ((Math.abs(xCenter - this.gridCenterXY.getX()) < gridResolutionXY / 2.0) && (Math.abs(yCenter - this.gridCenterXY.getY()) < gridResolutionXY / 2.0))
+         return;
+
+      HeightMapCell[] oldCellArray = heightMapCells;
+      TIntArrayList oldOccupiedCells = occupiedCells;
+      heightMapCells = new HeightMapCell[cellsPerAxis * cellsPerAxis];
+      occupiedCells = new TIntArrayList();
+
+      for (int i = 0; i < oldOccupiedCells.size(); i++)
+      {
+         int oldKey = oldOccupiedCells.get(i);
+         if (oldCellArray[oldKey] == null)
+            continue;
+
+         double xCoordinate = HeightMapTools.keyToXCoordinate(oldKey, gridCenterXY.getX(), gridResolutionXY, centerIndex);
+         double yCoordinate = HeightMapTools.keyToXCoordinate(oldKey, gridCenterXY.getY(), gridResolutionXY, centerIndex);
+
+         int xIndex = HeightMapTools.coordinateToIndex(xCoordinate, xCenter, gridResolutionXY, centerIndex);
+         if (xIndex < 0 || xIndex >= cellsPerAxis)
+         {
+            continue;
+         }
+
+         int yIndex = HeightMapTools.coordinateToIndex(yCoordinate, yCenter, gridResolutionXY, centerIndex);
+         if (yIndex < 0 || yIndex >= cellsPerAxis)
+         {
+            continue;
+         }
+
+         int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+         heightMapCells[key] = oldCellArray[oldKey];
+         occupiedCells.add(key);
+      }
+
+      gridCenterXY.set(xCenter, yCenter);
    }
 
    /**
@@ -88,95 +175,62 @@ public class HeightMapManager
 
 //      Point3D[] pointCloud = pointList.toArray(new Point3D[0]);
 
-      if (updateWithStreams)
+      for (int i = 0; i < pointCloud.length; i++)
       {
-         Stream<Point3D> filteredPoints = Arrays.stream(pointCloud).parallel().filter(point -> point.getZ() < maxHeight);
-         filteredPoints.parallel().forEach(point ->
-                                           {
-                                              int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
-                                              if (xIndex < 0 || xIndex >= cellsPerAxis)
-                                                 return;
-
-                                              int yIndex = HeightMapTools.coordinateToIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, centerIndex);
-                                              if (yIndex < 0 || yIndex >= cellsPerAxis)
-                                                 return;
-
-                                              int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-                                              boolean noCellPresent = heightMapCells[key] == null;
-
-                                              if (noCellPresent && occupiedCells.size() >= maxCellCount)
-                                              {
-                                                 return;
-                                              }
-
-                                              if (noCellPresent)
-                                              {
-                                                 heightMapCells[key] = new HeightMapCell(parameters);
-                                                 occupiedCells.add(key);
-                                              }
-
-                                              heightMapCells[key].addPoint(point.getZ());
-                                           });
-      }
-      else
-      {
-         for (int i = 0; i < pointCloud.length; i++)
+         if (pointCloud[i] != null)
          {
-            if (pointCloud[i] != null)
+            Point3DReadOnly point = pointCloud[i];
+
+            // cinders
+            //            if (point.getZ() > 0.4)
+            //               continue;
+
+            // stairs side
+            //            if (point.getX() < 0.5 && point.getZ() > 0.3)
+            //               continue;
+            //            if (point.getY() > 1.0 && point.getZ() > 0.3)
+            //               continue;
+
+            // stairs
+            //            if (point.getX() < 0.6 && point.getZ() > -0.2)
+            //               continue;
+
+            // narrow passage
+            //            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
+            //               continue;
+
+            // stepping stones
+            //            if (point.getZ() > 0.4)
+            //               continue;
+
+            if (point.getZ() > maxHeight)
             {
-               Point3D point = new Point3D(pointCloud[i]);
-
-               // cinders
-               //            if (point.getZ() > 0.4)
-               //               continue;
-
-               // stairs side
-               //            if (point.getX() < 0.5 && point.getZ() > 0.3)
-               //               continue;
-               //            if (point.getY() > 1.0 && point.getZ() > 0.3)
-               //               continue;
-
-               // stairs
-               //            if (point.getX() < 0.6 && point.getZ() > -0.2)
-               //               continue;
-
-               // narrow passage
-               //            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
-               //               continue;
-
-               // stepping stones
-               //            if (point.getZ() > 0.4)
-               //               continue;
-
-               if (point.getZ() > maxHeight)
-               {
-                  continue;
-               }
-
-               int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
-               if (xIndex < 0 || xIndex >= cellsPerAxis)
-                  continue;
-
-               int yIndex = HeightMapTools.coordinateToIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, centerIndex);
-               if (yIndex < 0 || yIndex >= cellsPerAxis)
-                  continue;
-
-               int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-               boolean noCellPresent = heightMapCells[key] == null;
-
-               if (noCellPresent && occupiedCells.size() >= maxCellCount)
-               {
-                  continue;
-               }
-
-               if (noCellPresent)
-               {
-                  heightMapCells[key] = new HeightMapCell(parameters);
-                  occupiedCells.add(key);
-               }
-
-               heightMapCells[key].addPoint(point.getZ());
+               continue;
             }
+
+            int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
+            if (xIndex < 0 || xIndex >= cellsPerAxis)
+               continue;
+
+            int yIndex = HeightMapTools.coordinateToIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, centerIndex);
+            if (yIndex < 0 || yIndex >= cellsPerAxis)
+               continue;
+
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            boolean noCellPresent = heightMapCells[key] == null;
+
+            if (noCellPresent && occupiedCells.size() >= maxCellCount)
+            {
+               continue;
+            }
+
+            if (noCellPresent)
+            {
+               heightMapCells[key] = new HeightMapCell(parameters);
+               occupiedCells.add(key);
+            }
+
+            heightMapCells[key].addPoint(point.getZ());
          }
       }
 
@@ -299,7 +353,7 @@ public class HeightMapManager
       return cellsPerAxis;
    }
 
-   public Point2D getGridCenterXY()
+   public Point2DReadOnly getGridCenterXY()
    {
       return gridCenterXY;
    }

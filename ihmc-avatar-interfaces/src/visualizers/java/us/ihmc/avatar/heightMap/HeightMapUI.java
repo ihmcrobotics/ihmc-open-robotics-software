@@ -61,7 +61,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       HeightMapParameters parameters = new HeightMapParameters();
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
-      new HeightMapUpdater(messager, ros2Node, stage);
+      new HeightMapUpdaterForUI(messager, ros2Node, stage);
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
