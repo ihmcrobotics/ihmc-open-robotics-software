@@ -43,42 +43,36 @@ public class ArUcoObjectInfo
          // getting objects with marker
          JSONArray objectsArray = (JSONArray) jsonObject.get("objectsWithMarker");
          //iterating objects with marker
-         Iterator objectsIterator = objectsArray.iterator();
-         while (objectsIterator.hasNext())
+         for (Object objectElement : objectsArray)
          {
-            Iterator<Map.Entry> objectPropertiesIterator = ((Map) objectsIterator.next()).entrySet().iterator();
-            while (objectPropertiesIterator.hasNext())
+            for (Map.Entry objectPropertyMap : (Iterable<Map.Entry>) ((Map) objectElement).entrySet())
             {
-               Map.Entry objectPropertyMap = objectPropertiesIterator.next();
                switch (objectPropertyMap.getKey().toString())
                {
-                  case "markerId":
-                     markerIds.add((int) ((long) objectPropertyMap.getValue()));
-                     break;
-                  case "markerSize":
-                     markerSizes.add((double) objectPropertyMap.getValue());
-                     break;
-                  case "objectName":
-                     objectNames.add((String) objectPropertyMap.getValue());
-                     break;
-                  case "translationToMarker":
+                  case "markerId" -> markerIds.add((int) ((long) objectPropertyMap.getValue()));
+                  case "markerSize" -> markerSizes.add((double) objectPropertyMap.getValue());
+                  case "objectName" -> objectNames.add((String) objectPropertyMap.getValue());
+                  case "translationToMarker" ->
+                  {
                      JSONArray translationArray = (JSONArray) objectPropertyMap.getValue();
                      Iterator translationIterator = translationArray.iterator();
                      List<Double> translation = new ArrayList<>(3);
                      while (translationIterator.hasNext())
                         translation.add((Double) translationIterator.next());
                      objectTranslations.add(translation);
-                     break;
-                  case "yawPitchRollToMarker":
+                  }
+                  case "yawPitchRollToMarker" ->
+                  {
                      JSONArray rotationArray = (JSONArray) objectPropertyMap.getValue();
                      Iterator rotationIterator = rotationArray.iterator();
                      List<Double> rotation = new ArrayList<>(3);
                      while (rotationIterator.hasNext())
                         rotation.add((Double) rotationIterator.next());
                      objectRotations.add(rotation);
-                     break;
-                  default:
-                     break;
+                  }
+                  default ->
+                  {
+                  }
                }
             }
          }
@@ -87,11 +81,7 @@ public class ArUcoObjectInfo
       {
          ex.printStackTrace();
       }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      catch (ParseException e)
+      catch (IOException | ParseException e)
       {
          throw new RuntimeException(e);
       }
