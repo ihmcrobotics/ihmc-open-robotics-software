@@ -33,6 +33,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -42,6 +43,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataFilterParameters;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -524,6 +526,8 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(y))
                {
                   ros2PointsToPublish.add().set(x, y, z);
+                  if (MathTools.epsilonEquals(x, 0.0, 1e-8) && MathTools.epsilonEquals(y, 0.0, 1e-8) && MathTools.epsilonEquals(z, 0.0, 1e-8))
+                     throw new RuntimeException("Bad zero");
                   if (ros2ColorsToPublish != null)
                      ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
                }

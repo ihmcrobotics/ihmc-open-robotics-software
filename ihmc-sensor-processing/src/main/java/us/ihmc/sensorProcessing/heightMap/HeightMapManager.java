@@ -6,9 +6,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class HeightMapManager
 {
+   private static final boolean updateWithStreams = false;
    private static final boolean debug = false;
 
    /*  From HeightMapMessage.msg  */
@@ -86,62 +88,95 @@ public class HeightMapManager
 
 //      Point3D[] pointCloud = pointList.toArray(new Point3D[0]);
 
-      for (int i = 0; i < pointCloud.length; i++)
+      if (updateWithStreams)
       {
-         if (pointCloud[i] != null)
+         Stream<Point3D> filteredPoints = Arrays.stream(pointCloud).parallel().filter(point -> point.getZ() < maxHeight);
+         filteredPoints.parallel().forEach(point ->
+                                           {
+                                              int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
+                                              if (xIndex < 0 || xIndex >= cellsPerAxis)
+                                                 return;
+
+                                              int yIndex = HeightMapTools.coordinateToIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, centerIndex);
+                                              if (yIndex < 0 || yIndex >= cellsPerAxis)
+                                                 return;
+
+                                              int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+                                              boolean noCellPresent = heightMapCells[key] == null;
+
+                                              if (noCellPresent && occupiedCells.size() >= maxCellCount)
+                                              {
+                                                 return;
+                                              }
+
+                                              if (noCellPresent)
+                                              {
+                                                 heightMapCells[key] = new HeightMapCell(parameters);
+                                                 occupiedCells.add(key);
+                                              }
+
+                                              heightMapCells[key].addPoint(point.getZ());
+                                           });
+      }
+      else
+      {
+         for (int i = 0; i < pointCloud.length; i++)
          {
-            Point3D point = new Point3D(pointCloud[i]);
-
-            // cinders
-            //            if (point.getZ() > 0.4)
-            //               continue;
-
-            // stairs side
-            //            if (point.getX() < 0.5 && point.getZ() > 0.3)
-            //               continue;
-            //            if (point.getY() > 1.0 && point.getZ() > 0.3)
-            //               continue;
-
-            // stairs
-            //            if (point.getX() < 0.6 && point.getZ() > -0.2)
-            //               continue;
-
-            // narrow passage
-            //            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
-            //               continue;
-
-            // stepping stones
-            //            if (point.getZ() > 0.4)
-            //               continue;
-
-            if (point.getZ() > maxHeight)
+            if (pointCloud[i] != null)
             {
-               continue;
+               Point3D point = new Point3D(pointCloud[i]);
+
+               // cinders
+               //            if (point.getZ() > 0.4)
+               //               continue;
+
+               // stairs side
+               //            if (point.getX() < 0.5 && point.getZ() > 0.3)
+               //               continue;
+               //            if (point.getY() > 1.0 && point.getZ() > 0.3)
+               //               continue;
+
+               // stairs
+               //            if (point.getX() < 0.6 && point.getZ() > -0.2)
+               //               continue;
+
+               // narrow passage
+               //            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
+               //               continue;
+
+               // stepping stones
+               //            if (point.getZ() > 0.4)
+               //               continue;
+
+               if (point.getZ() > maxHeight)
+               {
+                  continue;
+               }
+
+               int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
+               if (xIndex < 0 || xIndex >= cellsPerAxis)
+                  continue;
+
+               int yIndex = HeightMapTools.coordinateToIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, centerIndex);
+               if (yIndex < 0 || yIndex >= cellsPerAxis)
+                  continue;
+
+               int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+               boolean noCellPresent = heightMapCells[key] == null;
+
+               if (noCellPresent && occupiedCells.size() >= maxCellCount)
+               {
+                  continue;
+               }
+
+               if (noCellPresent)
+               {
+                  heightMapCells[key] = new HeightMapCell(parameters);
+                  occupiedCells.add(key);
+               }
+
+               heightMapCells[key].addPoint(point.getZ());
             }
-
-            int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
-            if (xIndex < 0 || xIndex >= cellsPerAxis)
-               continue;
-
-            int yIndex = HeightMapTools.coordinateToIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, centerIndex);
-            if (yIndex < 0 || yIndex >= cellsPerAxis)
-               continue;
-
-            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            boolean noCellPresent = heightMapCells[key] == null;
-
-            if (noCellPresent && occupiedCells.size() >= maxCellCount)
-            {
-               continue;
-            }
-
-            if (noCellPresent)
-            {
-               heightMapCells[key] = new HeightMapCell(parameters);
-               occupiedCells.add(key);
-            }
-
-            heightMapCells[key].addPoint(point.getZ());
          }
       }
 
