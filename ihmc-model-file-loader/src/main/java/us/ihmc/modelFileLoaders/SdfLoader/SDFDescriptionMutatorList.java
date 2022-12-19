@@ -36,12 +36,6 @@ public class SDFDescriptionMutatorList implements SDFDescriptionMutator
    }
 
    @Override
-   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-      mutators.forEach(mutator -> mutator.mutateContactSensorForModel(model, contactSensor));
-   }
-
-   @Override
    public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
    {
       mutators.forEach(mutator -> mutator.mutateForceSensorForModel(model, forceSensor));
