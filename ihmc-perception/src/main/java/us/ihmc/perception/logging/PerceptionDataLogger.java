@@ -37,27 +37,7 @@ public class PerceptionDataLogger
    * */
    private static final int BUFFER_SIZE = 2500000;
 
-   private final String ROBOT_CONFIGURATION_DATA_NAME = "/robot/root/position/";
-   private final String ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME = "/robot/configuration/timestamps/";
 
-   private final String ROOT_POSITION_NAME = "/robot/root/position/";
-   private final String ROOT_ORIENTATION_NAME = "/robot/root/orientation/";
-   private final String JOINT_ANGLES_NAME = "/robot/joint_angles/";
-   private final String JOINT_VELOCITIES_NAME = "/robot/joint_velocities/";
-   private final String JOINT_TORQUES_NAME = "/robot/joint_torques/";
-
-   private final String OUSTER_CLOUD_NAME = "/os_cloud_node/points/";
-   private final String OUSTER_DEPTH_NAME = "/ouster/depth/";
-
-   private final String D435_DEPTH_NAME = "/d435/depth/";
-   private final String D435_COLOR_NAME = "/d435/color/";
-
-   private final String ZED2_COLOR_NAME = "/zed2/color/";
-
-   private final String L515_SENSOR_POSITION = "/l515/sensor/position/";
-   private final String L515_SENSOR_ORIENTATION = "/l515/sensor/orientation/";
-   private final String L515_DEPTH_NAME = "/l515/depth/";
-   private final String L515_COLOR_NAME = "/l515/color/";
 
    private final HashMap<String, byte[]> byteBuffers = new HashMap<>();
    private final HashMap<String, Integer> counts = new HashMap<>();
@@ -81,18 +61,18 @@ public class PerceptionDataLogger
 
    public PerceptionDataLogger()
    {
-      channels.put(D435_COLOR_NAME, new PerceptionLogChannel(D435_COLOR_NAME, 0, 0));
-      channels.put(D435_DEPTH_NAME, new PerceptionLogChannel(D435_DEPTH_NAME, 0, 0));
-      channels.put(L515_COLOR_NAME, new PerceptionLogChannel(L515_COLOR_NAME, 0, 0));
-      channels.put(L515_DEPTH_NAME, new PerceptionLogChannel(L515_DEPTH_NAME, 0, 0));
-      channels.put(OUSTER_CLOUD_NAME, new PerceptionLogChannel(OUSTER_CLOUD_NAME, 0, 0));
-      channels.put(OUSTER_DEPTH_NAME, new PerceptionLogChannel(OUSTER_DEPTH_NAME, 0, 0));
-      channels.put(ROBOT_CONFIGURATION_DATA_NAME, new PerceptionLogChannel(ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.D435_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_COLOR_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.D435_DEPTH_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.L515_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_COLOR_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.L515_DEPTH_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, 0));
+      channels.put(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
 
       communicationMode = CommunicationMode.INTERPROCESS;
    }
 
-   public void startLogging(String logFileName, String simpleRobotName)
+   public void openLogFile(String logFileName)
    {
       File f = new File(logFileName);
       if (!f.exists() && !f.isDirectory())
@@ -107,7 +87,16 @@ public class PerceptionDataLogger
          LogTools.info("Opening Existing HDF5 File: " + logFileName);
          hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_RDWR);
       }
+   }
 
+   public void closeLogFile()
+   {
+      hdf5Manager.closeFile();
+   }
+
+   public void startLogging(String logFileName, String simpleRobotName)
+   {
+      openLogFile(logFileName);
 
       // Use both regular and real-time ROS2 nodes to assign callbacks to different message types
       ros2Node = ROS2Tools.createROS2Node(communicationMode.getPubSubImplementation(), "perception_logger_node");
@@ -128,38 +117,36 @@ public class PerceptionDataLogger
       var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_VIDEO);
       d435VideoSubscription.addCallback(this::logColorD435);
       runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
-      byteBuffers.put(D435_COLOR_NAME, new byte[BUFFER_SIZE]);
-      counts.put(D435_COLOR_NAME, 0);
+      byteBuffers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[BUFFER_SIZE]);
+      counts.put(PerceptionLoggerConstants.D435_COLOR_NAME, 0);
 
       // Add callback for D435 Depth images
       var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH);
       d435DepthSubscription.addCallback(this::logDepthD435);
       runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
-      byteBuffers.put(D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
-      counts.put(D435_DEPTH_NAME, 0);
+      byteBuffers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
+      counts.put(PerceptionLoggerConstants.D435_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
       var l515DepthSubscription = ros2Helper.subscribe(ROS2Tools.L515_DEPTH_IMAGE);
       l515DepthSubscription.addCallback(this::logDepthL515);
       runnablesToStopLogging.addLast(l515DepthSubscription::destroy);
-      byteBuffers.put(D435_COLOR_NAME, new byte[BUFFER_SIZE]);
-      byteBuffers.put(D435_COLOR_NAME, new byte[BUFFER_SIZE]);      
-      byteBuffers.put(L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
-      counts.put(L515_DEPTH_NAME, 0);
+      byteBuffers.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
+      counts.put(PerceptionLoggerConstants.L515_DEPTH_NAME, 0);
 
       // Add callback for L515 Depth maps
       var l515ColorSubscription = ros2Helper.subscribe(ROS2Tools.L515_COLOR_IMAGE);
       l515ColorSubscription.addCallback(this::logColorL515);
       runnablesToStopLogging.addLast(l515ColorSubscription::destroy);
-      byteBuffers.put(L515_COLOR_NAME, new byte[BUFFER_SIZE]);
-      counts.put(L515_COLOR_NAME, 0);
+      byteBuffers.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[BUFFER_SIZE]);
+      counts.put(PerceptionLoggerConstants.L515_COLOR_NAME, 0);
 
       // Add callback for D435 Color images
       var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
       zed2StereoSubscription.addCallback(this::logColorZED2);
       runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
-      byteBuffers.put(ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
-      counts.put(ZED2_COLOR_NAME, 0);
+      byteBuffers.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
+      counts.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0);
 
       // Add callback for Ouster depth maps
       var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_DEPTH);
@@ -203,14 +190,14 @@ public class PerceptionDataLogger
    {
       LogTools.info("Robot Configuration Data Received: {}", data.getMonotonicTime());
 
-      if(channels.get(ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
-         storeLongArray(ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, data.getMonotonicTime());
-         storeFloatArray(ROOT_POSITION_NAME, data.getRootPosition());
-         storeFloatArray(ROOT_ORIENTATION_NAME, data.getRootOrientation());
-         storeFloatArray(JOINT_ANGLES_NAME, data.getJointAngles().toArray());
-         storeFloatArray(JOINT_VELOCITIES_NAME, data.getJointVelocities().toArray());
-         storeFloatArray(JOINT_TORQUES_NAME, data.getJointTorques().toArray());
+         storeLongArray(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_MONOTONIC_TIME, data.getMonotonicTime());
+         storeFloatArray(PerceptionLoggerConstants.ROOT_POSITION_NAME, data.getRootPosition());
+         storeFloatArray(PerceptionLoggerConstants.ROOT_ORIENTATION_NAME, data.getRootOrientation());
+         storeFloatArray(PerceptionLoggerConstants.JOINT_ANGLES_NAME, data.getJointAngles().toArray());
+         storeFloatArray(PerceptionLoggerConstants.JOINT_VELOCITIES_NAME, data.getJointVelocities().toArray());
+         storeFloatArray(PerceptionLoggerConstants.JOINT_TORQUES_NAME, data.getJointTorques().toArray());
       }
    }
 
@@ -219,10 +206,10 @@ public class PerceptionDataLogger
       LogTools.info("OUSTER POINT CLOUD Received.");
 
       ousterCloudPacket.set(message);
-      if(channels.get(OUSTER_CLOUD_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).isEnabled())
       {
-         channels.get(OUSTER_CLOUD_NAME).incrementCount();
-         storePointCloud(OUSTER_CLOUD_NAME, ousterCloudPacket);
+         channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).incrementCount();
+         storePointCloud(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, ousterCloudPacket);
       }
    }
 
@@ -230,10 +217,10 @@ public class PerceptionDataLogger
    {
       LogTools.info("Depth Map Received: {}", packet.data_);
 
-      if(channels.get(OUSTER_DEPTH_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
-         channels.get(OUSTER_DEPTH_NAME).incrementCount();
-         storeCompressedImage(OUSTER_DEPTH_NAME, packet);
+         channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, packet);
       }
    }
 
@@ -241,10 +228,10 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging D435 Color: ", videoPacket.toString());
 
-      if(channels.get(D435_COLOR_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
       {
-         channels.get(D435_COLOR_NAME).incrementCount();
-         storeCompressedImage(D435_COLOR_NAME, videoPacket);
+         channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.D435_COLOR_NAME, videoPacket);
       }
    }
 
@@ -252,10 +239,10 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging D435 Depth: ", videoPacket.toString());
 
-      if(channels.get(D435_DEPTH_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
       {
-         channels.get(D435_DEPTH_NAME).incrementCount();
-         storeCompressedImage(D435_DEPTH_NAME, videoPacket);
+         channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.D435_DEPTH_NAME, videoPacket);
       }
    }
 
@@ -263,12 +250,12 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging L515 Depth: ", message.toString());
 
-      if(channels.get(L515_DEPTH_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
-         channels.get(L515_DEPTH_NAME).incrementCount();
-         storeFloatArray(L515_SENSOR_POSITION, message.getPosition());
-         storeFloatArray(L515_SENSOR_ORIENTATION, message.getOrientation());
-         storeCompressedImage(L515_DEPTH_NAME, message);
+         channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).incrementCount();
+         storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_POSITION, message.getPosition());
+         storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, message.getOrientation());
+         storeCompressedImage(PerceptionLoggerConstants.L515_DEPTH_NAME, message);
       }
    }
 
@@ -276,10 +263,10 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging L515 Color: ", videoPacket.toString());
 
-      if(channels.get(L515_COLOR_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
-         channels.get(L515_COLOR_NAME).incrementCount();
-         storeCompressedImage(L515_COLOR_NAME, videoPacket);
+         channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, videoPacket);
       }
 
    }
@@ -288,10 +275,10 @@ public class PerceptionDataLogger
    {
       LogTools.info("Logging L515 Color: ", videoPacket.toString());
 
-      if(channels.get(ZED2_COLOR_NAME).isEnabled())
+      if(channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
-         channels.get(ZED2_COLOR_NAME).incrementCount();
-         storeCompressedImage(ZED2_COLOR_NAME, videoPacket);
+         channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, videoPacket);
       }
 
       //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
@@ -467,9 +454,9 @@ public class PerceptionDataLogger
 
       PerceptionDataLogger logger = new PerceptionDataLogger();
 
-      //logger.setChannelEnabled(logger.ROBOT_CONFIGURATION_DATA_NAME, true);
-      logger.setChannelEnabled(logger.L515_DEPTH_NAME, true);
-      logger.setChannelEnabled(logger.L515_COLOR_NAME, true);
+      //logger.setChannelEnabled(logger.PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, true);
+      logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
+      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
    }
