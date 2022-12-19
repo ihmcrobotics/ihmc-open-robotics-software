@@ -13,6 +13,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyJointspaceTrajectoryCommand;
@@ -81,6 +82,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final ValkyrieStandPrepSetpoints jointHome;
    private final ValkyrieImpedanceStateEstimator stateEstimator;
    private final ValkyrieImpedanceOutputWriter outputWriter;
+   private final ImpedanceGravityCompensationCalculator gravityCompensationCalculator;
 
    private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "valkyrie_whole_body_impedance_controller");
    private final EffortJointHandle[] effortHandles = new EffortJointHandle[allJoints.size()];
@@ -113,6 +115,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       jointHome = new ValkyrieStandPrepSetpoints(robotModel.getJointMap());
       stateEstimator = new ValkyrieImpedanceStateEstimator(fullRobotModel.getRootJoint(), controlledOneDoFJoints);
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
+      gravityCompensationCalculator = new ImpedanceGravityCompensationCalculator(controlledOneDoFJoints, fullRobotModel.getTotalMass(), registry);
 
       impedanceMasterGain.set(0.15);
       torqueMasterGain.set(0.6);
@@ -246,6 +249,9 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    @Override
    protected void doControl(long rosTime, long duration)
    {
+      torqueMasterGain.set(EuclidCoreTools.clamp(torqueMasterGain.getValue(), 0.0, 1.0));
+      impedanceMasterGain.set(EuclidCoreTools.clamp(impedanceMasterGain.getValue(), 0.0, 1.0));
+
       yoTime.set(Conversions.nanosecondsToSeconds(monotonicTimeProvider.getTimestamp()));
       wallTimeProvider.setTimestamp(rosTime);
 
@@ -301,5 +307,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
             jointDesiredOutputList.getJointDesiredOutput(i).setMasterGain(torqueMasterGain.getValue());
          }
       }
+
+      gravityCompensationCalculator.compute(jointDesiredOutputList);
    }
 }
