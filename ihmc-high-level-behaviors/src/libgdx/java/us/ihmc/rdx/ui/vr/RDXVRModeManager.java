@@ -61,9 +61,9 @@ public class RDXVRModeManager
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
    }
 
-   public void addObjectDetection(RDXObjectDetector objectDetector)
+   public void addSharedControl(RDXObjectDetector objectDetector)
    {
-      kinematicsStreamingMode.addObjectDetection(objectDetector);
+      kinematicsStreamingMode.addSharedControl(objectDetector);
    }
 
    public void processVRInput(RDXVRContext vrContext)

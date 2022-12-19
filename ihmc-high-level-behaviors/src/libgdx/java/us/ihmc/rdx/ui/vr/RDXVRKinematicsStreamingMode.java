@@ -74,8 +74,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled, 2);
-   private RDXObjectDetector objectDetector;
-   private final RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled(),objectDetector);
+   private RDXVRSharedControl sharedControlAssistant;
 
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
@@ -145,9 +144,9 @@ public class RDXVRKinematicsStreamingMode
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
    }
 
-   public void addObjectDetection(RDXObjectDetector objectDetector)
+   public void addSharedControl(RDXObjectDetector objectDetector)
    {
-      this.objectDetector = objectDetector;
+      sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled(),objectDetector);
    }
 
    public void processVRInput(RDXVRContext vrContext)
