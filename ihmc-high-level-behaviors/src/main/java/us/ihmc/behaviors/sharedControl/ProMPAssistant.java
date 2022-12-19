@@ -71,25 +71,17 @@ public class ProMPAssistant
          // getting tasks
          JSONArray tasksArray = (JSONArray) jsonObject.get("tasks");
          // iterating tasks
-         Iterator taskIterator = tasksArray.iterator();
-         while (taskIterator.hasNext())
+         for (Object taskObject : tasksArray)
          {
-            Iterator<Map.Entry> taskPropertiesIterator = ((Map) taskIterator.next()).entrySet().iterator();
-            while (taskPropertiesIterator.hasNext())
+            for (Map.Entry taskPropertyMap : (Iterable<Map.Entry>) ((Map) taskObject).entrySet())
             {
-               Map.Entry taskPropertyMap = taskPropertiesIterator.next();
                switch (taskPropertyMap.getKey().toString())
                {
-                  case "name":
-                     taskNames.add((String) taskPropertyMap.getValue());
-                     break;
-                  case "bodyPartForRecognition":
-                     bodyPartsRecognition.add((String) taskPropertyMap.getValue());
-                     break;
-                  case "bodyPartWithObservableGoal":
-                     bodyPartsGoal.add((String) taskPropertyMap.getValue());
-                     break;
-                  case "bodyParts":
+                  case "name" -> taskNames.add((String) taskPropertyMap.getValue());
+                  case "bodyPartForRecognition" -> bodyPartsRecognition.add((String) taskPropertyMap.getValue());
+                  case "bodyPartWithObservableGoal" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
+                  case "bodyParts" ->
+                  {
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
                      HashMap<String, String> bodyPartsGeometry = new HashMap<>();
                      //parse body parts
@@ -102,23 +94,21 @@ public class ProMPAssistant
                                                             {
                                                                switch (bodyPartProperty.toString())
                                                                {
-                                                                  case "name":
-                                                                     name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
-                                                                     break;
-                                                                  case "geometry":
-                                                                     geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
-                                                                     break;
-                                                                  default:
-                                                                     break;
+                                                                  case "name" -> name.add(String.valueOf((jsonBodyPartObject.get(bodyPartProperty))));
+                                                                  case "geometry" -> geometry.add(String.valueOf(jsonBodyPartObject.get(bodyPartProperty)));
+                                                                  default ->
+                                                                  {
+                                                                  }
                                                                }
                                                             });
                         for (int i = 0; i < name.size(); i++)
                            bodyPartsGeometry.put(name.get(i), geometry.get(i));
                      }
                      bodyPartsGeometries.add(bodyPartsGeometry);
-                     break;
-                  default:
-                     break;
+                  }
+                  default ->
+                  {
+                  }
                }
             }
          }
@@ -128,11 +118,11 @@ public class ProMPAssistant
          for (int i = 0; i < taskNames.size(); i++)
          {
             LogTools.info("Learning ProMPs for task: {}", taskNames.get(i));
-            for (int j = 0; j < bodyPartsGeometries.size(); j++)
+            for (HashMap<String, String> bodyPartsGeometry : bodyPartsGeometries)
             {
-               for (String key : bodyPartsGeometries.get(j).keySet())
+               for (String key : bodyPartsGeometry.keySet())
                {
-                  LogTools.info("     {} {}", key, bodyPartsGeometries.get(j).get(key));
+                  LogTools.info("     {} {}", key, bodyPartsGeometry.get(key));
                }
             }
             proMPManagers.put(taskNames.get(i),
@@ -154,11 +144,7 @@ public class ProMPAssistant
       {
          ex.printStackTrace();
       }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      catch (ParseException e)
+      catch (IOException | ParseException e)
       {
          throw new RuntimeException(e);
       }
@@ -205,7 +191,7 @@ public class ProMPAssistant
          bodyPartRecognition = taskBodyPartRecognitionMap.get(currentTask);
          // get the body part that has to reach a goal for this task
          bodyPartGoal = taskBodyPartGoalMap.get(currentTask);
-         ;
+
          // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
          for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
             bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
