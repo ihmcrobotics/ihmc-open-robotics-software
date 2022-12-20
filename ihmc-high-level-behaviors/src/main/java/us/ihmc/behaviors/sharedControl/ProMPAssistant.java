@@ -152,11 +152,14 @@ public class ProMPAssistant
 
    public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, Pose3DReadOnly objectPose, String objectName)
    {
+      LogTools.info("out processing");
       if (taskDetected(objectName))
       {
+         LogTools.info("PROCESSING");
          if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
          { // if bodyPart is used in current task
-            taskGoalPose = objectPose;
+            if (!bodyPartGoal.isEmpty() && objectPose!=null) // if there is an observable goal this body part can reach
+               taskGoalPose = objectPose;
             // store observed pose
             Pose3D lastObservedPose = new Pose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
@@ -195,10 +198,8 @@ public class ProMPAssistant
          // initialize bodyPartObservedFrameTrajectory that will contain for each body part a list of observed FramePoses
          for (String bodyPart : (proMPManagers.get(currentTask).getBodyPartsGeometry()).keySet())
             bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
-         return !(currentTask.isEmpty());
       }
-      else
-         return true;
+      return !currentTask.isEmpty();
    }
 
    private void updateTask()
@@ -230,7 +231,7 @@ public class ProMPAssistant
             }
          }
       }
-      if (!bodyPartGoal.isEmpty() && taskGoalPose != null)
+      if (taskGoalPose != null) // if there is an observable goal this body part can reach
       {
          // update only proMP trajectory of the body part relevant for goal of the task, based on observed goal
          proMPManagers.get(currentTask).updateTaskTrajectoryGoal(bodyPartGoal, taskGoalPose);
@@ -300,8 +301,11 @@ public class ProMPAssistant
    public void reset()
    {
       // reset manager of current task (reset reference of proMP object of current task to initial proMP before any conditioning)
-      proMPManagers.get(currentTask).resetTask();
-      currentTask = "";
+      if (!currentTask.isEmpty())
+      {
+         proMPManagers.get(currentTask).resetTask();
+         currentTask = "";
+      }
       taskGoalPose = null;
       bodyPartObservedTrajectoryMap.clear();
       bodyPartGeneratedTrajectoryMap.clear();
