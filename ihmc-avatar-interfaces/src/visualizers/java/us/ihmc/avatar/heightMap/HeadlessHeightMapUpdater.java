@@ -1,6 +1,7 @@
 package us.ihmc.avatar.heightMap;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
@@ -8,6 +9,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -44,9 +46,9 @@ public class HeadlessHeightMapUpdater
          {
             LidarScanMessage data = subscriber.readNextData();
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
-
+            Point2D gridCenter = new Point2D(data.getLidarPosition().getX(), data.getLidarPosition().getY());
             PointCloudData pointCloudData = new PointCloudData(data);
-            heightMapUpdater.addPointCloudToQueue(Pair.of(pointCloudData, new FramePose3D()));
+            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(), gridCenter));
          }
       });
 
