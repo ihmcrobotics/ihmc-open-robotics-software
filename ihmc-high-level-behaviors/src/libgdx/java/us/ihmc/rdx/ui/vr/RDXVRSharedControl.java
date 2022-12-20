@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXObjectDetector;
 
@@ -38,8 +39,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      String objectName = objectDetector.getObjectName();
-      FramePose3DReadOnly objectPose = objectDetector.getObjectPose();
+      String objectName = "";
+      FramePose3DReadOnly objectPose = null;
+      if (objectDetector!=null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
+      {
+         objectName = objectDetector.getObjectName();
+         objectPose = objectDetector.getObjectPose();
+         LogTools.info("Pose: {}", objectPose);
+      }
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
    }
 
@@ -73,10 +80,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          this.enabled.set(enabled);
          if (!enabled) // if deactivated
          {
+            if(proMPAssistant.readyToPack()) // if the shared control had started to pack frame poses
+               enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
             // reset promp assistance
             proMPAssistant.reset();
             proMPAssistant.setCurrentTaskDone(false);
-            enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
          }
       }
       if (enabled)

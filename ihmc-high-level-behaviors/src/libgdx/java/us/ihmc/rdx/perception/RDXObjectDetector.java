@@ -21,6 +21,7 @@ public class RDXObjectDetector
    private final ImGuiPanel panel = new ImGuiPanel("Object Detector", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
+   private boolean objectDetected = false;
    private final ArUcoObjectInfo arucoInfo = new ArUcoObjectInfo();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
@@ -28,7 +29,6 @@ public class RDXObjectDetector
    private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
 //   private final ArrayList<ArUcoObject> objecstWithArUco = new ArrayList<>();
    private ArUcoObject objectWithArUco;
-   private int objectId;
    private String objectName = "";
 
    public void create(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator)
@@ -58,7 +58,8 @@ public class RDXObjectDetector
          {
             if (arUcoMarkerDetection.isDetected(marker)) // check if a marker between those that we have in the config file is detected
             {
-               objectId = marker.getId();
+               objectDetected = true;
+               int objectId = marker.getId();
                objectName = arucoInfo.getObjectName(objectId);
                //TODO - EXTENSION TO SIMULTANEOUS DETECTION MULTIPLE OBJECTS
                // if multiple objects detected,
@@ -66,15 +67,15 @@ public class RDXObjectDetector
                // highlight selected object and user confirms with button A, rejects button B
 //               objecstWithArUco.add(new ArUcoObject(marker.getId(),arucoInfo)); // get object with attached marker
                objectWithArUco = new ArUcoObject(objectId,arucoInfo);
-               LogTools.info("Detected marker1: {}", objectName);
                FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(marker); // get marker pose in camera frame
-               LogTools.info("Pose1: {}", markerPose);
                markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform in world frame
                markerPose.get(objectWithArUco.getMarkerToWorld());
                objectWithArUco.update(); // update frame of the object
                objectWithArUco.packToObjectPose(markerPose); // marker pose gets transformed to object pose
                break;
             }
+            else
+               objectDetected = false;
          }
 
          arUcoMarkerDetectionUI.update();
@@ -109,5 +110,15 @@ public class RDXObjectDetector
    public ImGuiPanel getPanel()
    {
       return panel;
+   }
+
+   public boolean isEnabled()
+   {
+      return enabled.get();
+   }
+
+   public boolean hasDetectedObject()
+   {
+      return objectDetected;
    }
 }

@@ -1,6 +1,6 @@
 {
   "testNumberUseOnlyForTesting": 2,
-  "logging" : true,
+  "logging" : false,
   "numberBasisFunctions": 20,
   "numberObservations": 50,
   "conditionOnlyLastObservation": true,
@@ -10,7 +10,7 @@
     {
       "name":"PushDoor",
       "bodyPartForRecognition": "rightHand",
-      "bodyPartWithObservableGoal": "rightHand",
+      "bodyPartWithObservableGoal": "",
       "bodyParts":[
         { "name":"rightHand", "geometry":"Pose" }
       ]
