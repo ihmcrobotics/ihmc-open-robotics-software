@@ -31,6 +31,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
+import rcl_interfaces.msg.dds.Log;
 import sensor_msgs.Image;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
@@ -79,6 +80,8 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.function.LongSupplier;
+
+import static us.ihmc.rdx.simulation.sensors.RDXLowLevelDepthSensorSimulator.FLOATS_PER_POINT;
 
 public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
 {
@@ -517,20 +520,22 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          if (pointCloudMessageType.equals(LidarScanMessage.class) || pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
          {
             ros2PointsToPublish.clear();
+            int ignoredPointCounter = 0;
+
             for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
-                            && (Float.BYTES * 8 * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
+                            && (FLOATS_PER_POINT * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
             {
-               float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
-               float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
-               float z = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 2);
+               float x = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i);
+               float y = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 1);
+               float z = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 2);
                if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(y))
                {
                   ros2PointsToPublish.add().set(x, y, z);
-                  if (MathTools.epsilonEquals(x, 0.0, 1e-8) && MathTools.epsilonEquals(y, 0.0, 1e-8) && MathTools.epsilonEquals(z, 0.0, 1e-8))
-                     throw new RuntimeException("Bad zero");
                   if (ros2ColorsToPublish != null)
                      ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
                }
+               else
+                  ignoredPointCounter++;
             }
 
             if (!ros2PointsToPublish.isEmpty())
@@ -627,14 +632,12 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       {
          ros1PointsToPublish.clear();
          for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
-                         && (Float.BYTES * 8 * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
+                         && (FLOATS_PER_POINT * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
          {
-            float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
-            float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
-            float z = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 2);
+            float x = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i);
+            float y = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 1);
+            float z = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 2);
             ros1PointsToPublish.add().set(x, y, z);
-            if (ros2ColorsToPublish != null)
-               ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
          }
 
          if (!ros1PointsToPublish.isEmpty())

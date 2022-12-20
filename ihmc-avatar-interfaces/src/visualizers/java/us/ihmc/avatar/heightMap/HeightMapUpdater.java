@@ -1,6 +1,7 @@
 package us.ihmc.avatar.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
@@ -15,6 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -58,6 +61,7 @@ public class HeightMapUpdater
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final List<Consumer<HeightMapMessage>> heightMapConsumers = new ArrayList<>();
+   private Consumer<Point2DReadOnly> gridCenterConsumer;
    private final AtomicReference<HeightMapMessage> latestMessage = new AtomicReference<>();
 
    private final AtomicBoolean enableUpdates = new AtomicBoolean();
@@ -69,7 +73,7 @@ public class HeightMapUpdater
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
 
-   private final ConcurrentLinkedQueue<Pair<PointCloudData, FramePose3D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Triple<PointCloudData, FramePose3D, Point2D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
 
    private int publishFrequencyCounter = 0;
    private final AtomicInteger publishFrequency = new AtomicInteger();
@@ -92,6 +96,12 @@ public class HeightMapUpdater
 
       messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, this::setPublishFrequency);
       messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> this.exportOnThread());
+
+      gridCenterConsumer = (point) ->
+      {
+         messager.submitMessage(HeightMapMessagerAPI.GridCenterX, point.getX());
+         messager.submitMessage(HeightMapMessagerAPI.GridCenterY, point.getY());
+      };
    }
 
    public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapConsumer)
@@ -139,7 +149,7 @@ public class HeightMapUpdater
       ThreadTools.startAThread(this::export, "Height map exporter");
    }
 
-   public void addPointCloudToQueue(Pair<PointCloudData, FramePose3D> pointCloudData)
+   public void addPointCloudToQueue(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
    {
       this.pointCloudQueue.add(pointCloudData);
    }
@@ -152,7 +162,7 @@ public class HeightMapUpdater
 
       while (updatesWithoutDataCounter < maxIdleTimeMillis / sleepTimeMillis)
       {
-         Pair<PointCloudData, FramePose3D> data = pointCloudQueue.poll();
+         Triple<PointCloudData, FramePose3D, Point2D> data = pointCloudQueue.poll();
          if (data == null)
          {
             updatesWithoutDataCounter++;
@@ -162,7 +172,7 @@ public class HeightMapUpdater
             updatesWithoutDataCounter = 0;
             long startTime = System.nanoTime();
             update(data);
-            LogTools.info("Update time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + ", points = " + data.getKey().getNumberOfPoints());
+            LogTools.info("Update time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + ", points = " + data.getLeft().getNumberOfPoints());
          }
 
          if (pointCloudQueue.isEmpty())
@@ -174,21 +184,21 @@ public class HeightMapUpdater
       return true;
    }
 
-   private void update(Pair<PointCloudData, FramePose3D> pointCloudData)
+   private void update(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
    {
-      update(pointCloudData.getKey().getPointCloud(), pointCloudData.getRight());
+      update(pointCloudData.getLeft().getPointCloud(), pointCloudData.getMiddle(), pointCloudData.getRight());
    }
 
-   private void update(Point3D[] pointCloud, FramePose3DReadOnly ousterPose)
+   private void update(Point3D[] pointCloud, FramePose3DReadOnly pointCloudFramePose, Point2DReadOnly gridCenter)
    {
       if (printFrequency)
       {
          updateFrequency();
       }
 
-      ousterFrame.setPoseAndUpdate(ousterPose);
+      ousterFrame.setPoseAndUpdate(pointCloudFramePose);
 
-      RigidBodyTransformReadOnly ousterTransform = USE_OUSTER_FRAME ? ousterPose : APPROX_OUSTER_TRANSFORM;
+      RigidBodyTransformReadOnly ousterTransform = USE_OUSTER_FRAME ? pointCloudFramePose : APPROX_OUSTER_TRANSFORM;
       boolean isNonZeroTransform = ousterTransform.hasTranslation() && ousterTransform.hasRotation();
 
       // Transform ouster data
@@ -204,13 +214,17 @@ public class HeightMapUpdater
       {
          heightMap.resetAtGridCenter(gridCenterX.get(), gridCenterY.get());
       }
-
+      else
+      {
+         heightMap.translateToNewGridCenter(gridCenter.getX(), gridCenter.getY());
+         if (gridCenterConsumer != null)
+            gridCenterConsumer.accept(gridCenter);
+      }
 
       // Update height map
       heightMap.setMaxHeight(maxHeight.get());
       heightMap.updateGridSizeXY(parameters.getGridSizeXY());
       heightMap.updateGridResolutionXY(parameters.getGridResolutionXY());
-      heightMap.translateToNewGridCenter(gridCenterX.get(), gridCenterY.get());
       heightMap.update(pointCloud);
       totalUpdateCount.incrementAndGet();
 

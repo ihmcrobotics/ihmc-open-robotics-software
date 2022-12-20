@@ -206,6 +206,11 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
          if (latestLidarScanMessage != null)
          {
             int numberOfScanPoints = latestLidarScanMessage.getNumberOfPoints();
+            if (totalNumberOfPoints != latestLidarScanMessage.getNumberOfPoints())
+            {
+               totalNumberOfPoints = latestLidarScanMessage.getNumberOfPoints();
+               pointCloudRenderer.create(totalNumberOfPoints);
+            }
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
                float size = pointSize.get();
