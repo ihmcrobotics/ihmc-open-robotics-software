@@ -36,7 +36,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       {
          executorService.clearQueueAndExecute(() ->
                                               {
-                                                 heightMapGraphic.generateMeshes(heightMapMessage);
+                                                 heightMapGraphic.generateMeshesAsync(heightMapMessage);
                                               });
       }
    }
