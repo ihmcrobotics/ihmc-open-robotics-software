@@ -46,6 +46,8 @@ public class ProMPAssistant
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
    private boolean conditionOnlyLastObservation = true;
+   private List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
+   private boolean isMoving = false;
 
    public ProMPAssistant()
    {
@@ -152,15 +154,10 @@ public class ProMPAssistant
 
    public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, Pose3DReadOnly objectPose, String objectName)
    {
-      LogTools.info("out processing");
       if (taskDetected(objectName))
       {
-         LogTools.info("PROCESSING");
-         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
-         { // if bodyPart is used in current task
-            if (!bodyPartGoal.isEmpty() && objectPose!=null) // if there is an observable goal this body part can reach
-               taskGoalPose = objectPose;
-            // store observed pose
+         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
+         {
             Pose3D lastObservedPose = new Pose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
             lastObservedPose.getOrientation()
@@ -168,15 +165,22 @@ public class ProMPAssistant
                                  observedPose.getOrientation().getY(),
                                  observedPose.getOrientation().getZ(),
                                  observedPose.getOrientation().getS());
-            bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
-
-            // update the proMP prediction according to observations and generate mean trajectory
-            if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
+            if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (pressed the button)
             {
-               updateTask();
-               generateTaskTrajectories();
-               doneInitialProcessingTask = true;
-               LogTools.info("Generating prediction ...");
+               // store observed pose
+               bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
+               // update the proMP prediction according to observations and generate mean trajectory
+               if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
+               {
+                  if (!bodyPartGoal.isEmpty() && objectPose != null) // if there is an observable goal this body part can reach
+                  {
+                     taskGoalPose = objectPose;
+                  }
+                  updateTask();
+                  generateTaskTrajectories();
+                  doneInitialProcessingTask = true;
+                  LogTools.info("Generating prediction ...");
+               }
             }
          }
       }
@@ -184,6 +188,7 @@ public class ProMPAssistant
 
    private boolean taskDetected(String objectName)
    {
+      objectName = "PushDoor";
       if (currentTask.isEmpty() && !objectName.isEmpty())
       {
          // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
@@ -200,6 +205,22 @@ public class ProMPAssistant
             bodyPartObservedTrajectoryMap.put(bodyPart, new ArrayList<>());
       }
       return !currentTask.isEmpty();
+   }
+
+   private boolean userIsMoving(Pose3D lastObservedPose, String bodyPart)
+   {
+      if (bodyPart.equals(bodyPartRecognition) && !isMoving)
+      {
+         observationRecognitionPart.add(lastObservedPose);
+         if (observationRecognitionPart.size()>1)
+         {
+            double distance = (observationRecognitionPart.get(observationRecognitionPart.size() - 1)).getTranslation()
+                                                                                                     .distance(observationRecognitionPart.get(0).getTranslation());
+            isMoving = distance>0.04;
+            LogTools.info("IsMoving {}, distance {}", isMoving, distance);
+         }
+      }
+      return isMoving;
    }
 
    private void updateTask()
@@ -312,6 +333,7 @@ public class ProMPAssistant
       bodyPartTrajectorySampleCounter.clear();
       doneInitialProcessingTask = false;
       isLastViaPoint.set(false);
+      isMoving = false;
    }
 
    public int getTestNumber()

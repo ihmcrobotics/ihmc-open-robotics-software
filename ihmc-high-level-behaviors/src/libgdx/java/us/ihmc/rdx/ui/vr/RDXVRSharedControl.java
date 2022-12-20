@@ -19,6 +19,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private final RDXObjectDetector objectDetector;
+   private String objectName = "";
+   private FramePose3DReadOnly objectPose;
 
    public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay, RDXObjectDetector objectDetector)
    {
@@ -39,14 +41,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      String objectName = "";
-      FramePose3DReadOnly objectPose = null;
-      if (objectDetector!=null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
-      {
-         objectName = objectDetector.getObjectName();
-         objectPose = objectDetector.getObjectPose();
-         LogTools.info("Pose: {}", objectPose);
-      }
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
    }
 
@@ -85,10 +79,19 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             // reset promp assistance
             proMPAssistant.reset();
             proMPAssistant.setCurrentTaskDone(false);
+            objectName = "";
+            objectPose = null;
          }
       }
       if (enabled)
       {
+         // store detected object name and pose
+         if (objectDetector!=null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
+         {
+            objectName = objectDetector.getObjectName();
+            objectPose = objectDetector.getObjectPose();
+            LogTools.info("Detected object {} pose: {}", objectName, objectPose);
+         }
          if (enabledReplay.get())
             this.enabled.set(false); // check no concurrency with replay
       }
