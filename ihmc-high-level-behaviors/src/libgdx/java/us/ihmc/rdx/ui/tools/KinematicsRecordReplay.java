@@ -4,12 +4,17 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KinematicsRecordReplay
 {
@@ -21,11 +26,16 @@ public class KinematicsRecordReplay
    private final ImBoolean enablerReplay = new ImBoolean(false);
    private boolean isReplaying = false;
    private final ImBoolean enabledKinematicsStreaming;
+   private boolean isUserMoving = false;
+   private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
+   private int partId = 0; // identifier of current frame, used to now what body part among numberParts we are currently handling
 
    public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberParts)
    {
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
       trajectoryRecorder.setNumberParts(numberParts);
+      for (int n = 0; n < numberParts; n++)
+         framesToRecordHistory.add(new ArrayList<>());
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -52,23 +62,54 @@ public class KinematicsRecordReplay
    {
       if (isRecording)
       {
-         framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-         // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
-         // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-         Double[] dataTrajectories = new Double[] {framePose.getOrientation().getX(),
-                                                   framePose.getOrientation().getY(),
-                                                   framePose.getOrientation().getZ(),
-                                                   framePose.getOrientation().getS(),
-                                                   framePose.getPosition().getX(),
-                                                   framePose.getPosition().getY(),
-                                                   framePose.getPosition().getZ()};
-         trajectoryRecorder.record(dataTrajectories);
+         if (isMoving(framePose)) //check from frames if the user is moving
+         { // we want to start the recording as soon as the user start moving, recordings with different initial pauses can lead to bad behaviors when used for learning
+            framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+            // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
+            // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
+            Double[] dataTrajectories = new Double[] {framePose.getOrientation().getX(),
+                                                      framePose.getOrientation().getY(),
+                                                      framePose.getOrientation().getZ(),
+                                                      framePose.getOrientation().getS(),
+                                                      framePose.getPosition().getX(),
+                                                      framePose.getPosition().getY(),
+                                                      framePose.getPosition().getZ()};
+            trajectoryRecorder.record(dataTrajectories);
+         }
       }
       else if (!(trajectoryRecorder.hasSavedRecording()))
       {
          trajectoryRecorder.concatenateData();
          trajectoryRecorder.saveRecording();
+         isUserMoving = false;
       }
+   }
+
+   private boolean isMoving(FramePose3DReadOnly framePose)
+   {
+      if (!isUserMoving)
+      {
+         Pose3D lastFramePose = new Pose3D();
+         lastFramePose.getPosition().set(framePose.getPosition().getX(), framePose.getPosition().getY(), framePose.getPosition().getZ());
+         lastFramePose.getOrientation()
+                         .set(framePose.getOrientation().getX(),
+                              framePose.getOrientation().getY(),
+                              framePose.getOrientation().getZ(),
+                              framePose.getOrientation().getS());
+         framesToRecordHistory.get(partId).add(lastFramePose);
+         if (framesToRecordHistory.get(partId).size() > 1)
+         {
+            double distance = (framesToRecordHistory.get(partId).get(framesToRecordHistory.get(partId).size() - 1)).getTranslation()
+                                                                                                                   .distance(framesToRecordHistory.get(partId)
+                                                                                                                                                  .get(0)
+                                                                                                                                                  .getTranslation());
+            isUserMoving = distance > 0.04;
+         }
+         partId++;
+         if (partId >= framesToRecordHistory.size())
+            partId = 0;
+      }
+      return isUserMoving;
    }
 
    public void framePoseToPack(FixedFramePose3DBasics framePose)
