@@ -1,11 +1,13 @@
 package us.ihmc.rdx.perception;
 
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -98,6 +100,11 @@ public class PlanarRegionMappingManager
          launchMapper();
          controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
          ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, latestIncomingRegions::set);
+
+         ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message -> {
+            setEnableLiveMode(false);
+            resetMap();
+         });
       }
    }
 
@@ -132,14 +139,6 @@ public class PlanarRegionMappingManager
             }
             break;
          }
-      }
-   }
-
-   private void scheduledUpdate()
-   {
-      if (enableLiveMode)
-      {
-         planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
       }
    }
 
