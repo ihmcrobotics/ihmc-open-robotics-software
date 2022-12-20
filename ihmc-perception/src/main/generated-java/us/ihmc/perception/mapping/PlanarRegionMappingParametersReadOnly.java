@@ -15,7 +15,7 @@ public interface PlanarRegionMappingParametersReadOnly extends StoredPropertySet
       return get(updateAlphaTowardsMatch);
    }
 
-   default int getAngleThresholdBetweenNormals()
+   default double getAngleThresholdBetweenNormals()
    {
       return get(angleThresholdBetweenNormals);
    }
