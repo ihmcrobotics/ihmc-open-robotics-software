@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -16,6 +17,8 @@ public class PlanarRegionMappingUIPanel
    private final RDXPlanarRegionsGraphic mapPlanarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private PlanarRegionMappingManager mappingManager;
    private ImGuiPanel imGuiPanel;
+   private final ImBoolean liveModeEnabled = new ImBoolean();
+   private final ImBoolean renderEnabled = new ImBoolean();
 
    public PlanarRegionMappingUIPanel(String name, PlanarRegionMappingManager mappingManager)
    {
@@ -26,7 +29,8 @@ public class PlanarRegionMappingUIPanel
       //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
       //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
 
-      mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
+
+      mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
       mapPlanarRegionsGraphic.update();
    }
 
@@ -42,26 +46,36 @@ public class PlanarRegionMappingUIPanel
          mappingManager.nextButtonCallback();
       }
 
-      if (ImGui.button("Enable Live Mode"))
+      if (ImGui.checkbox("Enable Live Mode", liveModeEnabled))
       {
-         mappingManager.setEnableLiveMode(true);
+         mappingManager.setEnableLiveMode(liveModeEnabled.get());
+      }
+      ImGui.checkbox("Render live mode", renderEnabled);
+
+      if (ImGui.button("Reset map"))
+      {
+         mappingManager.resetMap();
+      }
+      if (ImGui.button("Hard reset map"))
+      {
+         mappingManager.hardResetTheMap();
       }
    }
 
    public void renderPlanarRegions()
    {
-      if (mappingManager.getPlanarRegionMap().isModified() && mappingManager.getMapRegions().getNumberOfPlanarRegions() > 0)
+      if (mappingManager.pollIsModified() && mappingManager.hasPlanarRegionsToRender())
       {
          mapPlanarRegionsGraphic.clear();
-         mapPlanarRegionsGraphic.generateMeshes(mappingManager.getMapRegions());
+         mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
          mapPlanarRegionsGraphic.update();
-         mappingManager.getPlanarRegionMap().setModified(false);
       }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      mapPlanarRegionsGraphic.getRenderables(renderables, pool);
+      if (renderEnabled.get())
+         mapPlanarRegionsGraphic.getRenderables(renderables, pool);
    }
 
    public void setCaptured(boolean captured)

@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -555,6 +556,8 @@ public class GPUPlanarRegionExtraction
    private boolean printedException = false;
    public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
+      AtomicBoolean listCaughtException = new AtomicBoolean(false);
+
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
       .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
       .map(gpuPlanarRegion ->
@@ -568,6 +571,9 @@ public class GPUPlanarRegionExtraction
             linearTransform3D.normalize();
             orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
+
+            if (!MathTools.epsilonEquals(gpuPlanarRegion.getNormal().norm(), 1.0, 1e-4))
+               throw new RuntimeException("The planar region norm isn't valid");
 
             // First compute the set of concave hulls for this region
             FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
@@ -646,9 +652,12 @@ public class GPUPlanarRegionExtraction
       })
       .collect(Collectors.toList());
       planarRegionsList.clear();
-      for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
+      if (!listCaughtException.get())
       {
-         planarRegionsList.addPlanarRegions(planarRegions);
+         for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
+         {
+            planarRegionsList.addPlanarRegions(planarRegions);
+         }
       }
       sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
 

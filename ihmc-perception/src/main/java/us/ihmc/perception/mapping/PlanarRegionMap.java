@@ -75,6 +75,12 @@ public class PlanarRegionMap
       finalMap = new PlanarRegionsList();
    }
 
+   public void reset()
+   {
+      initialized = false;
+      finalMap.clear();
+   }
+
    public void submitRegionsUsingIterativeReduction(PlanarRegionsListWithPose regionsWithPose)
    {
       PlanarRegionsList regions = regionsWithPose.getPlanarRegionsList();
