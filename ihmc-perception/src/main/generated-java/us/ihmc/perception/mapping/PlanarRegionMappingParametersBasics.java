@@ -13,7 +13,7 @@ public interface PlanarRegionMappingParametersBasics extends PlanarRegionMapping
       set(PlanarRegionMappingParameters.updateAlphaTowardsMatch, updateAlphaTowardsMatch);
    }
 
-   default void setAngleThresholdBetweenNormals(int angleThresholdBetweenNormals)
+   default void setAngleThresholdBetweenNormals(double angleThresholdBetweenNormals)
    {
       set(PlanarRegionMappingParameters.angleThresholdBetweenNormals, angleThresholdBetweenNormals);
    }

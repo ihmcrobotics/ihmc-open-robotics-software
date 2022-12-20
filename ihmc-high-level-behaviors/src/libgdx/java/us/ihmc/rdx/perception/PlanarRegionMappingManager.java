@@ -16,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.mapping.PlanarRegionMap;
+import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
@@ -42,7 +43,6 @@ public class PlanarRegionMappingManager
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
    private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
-
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                         getClass(),
@@ -79,7 +79,8 @@ public class PlanarRegionMappingManager
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
    private final String defaultLogDirectory =
-         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good" + File.separator;
+         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good"
+         + File.separator;
 
    private final String perceptionLogDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
    private final String logFileName = "20221216_141954_PerceptionLog.hdf5";
@@ -89,7 +90,7 @@ public class PlanarRegionMappingManager
       source = DataSource.ROS2_CALLBACK;
       planarRegionMap = new PlanarRegionMap(smoothing);
 
-      if(ros2Node != null)
+      if (ros2Node != null)
       {
          this.ros2Node = ros2Node;
          this.ros2Helper = new ROS2Helper(ros2Node);
@@ -110,7 +111,6 @@ public class PlanarRegionMappingManager
 
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(perceptionLogDirectory + logFileName);
-
    }
 
    public PlanarRegionMappingManager(boolean smoothing)
@@ -202,7 +202,7 @@ public class PlanarRegionMappingManager
          LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
          planarRegionsListWithPose = getRegionsFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
-         if(planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
          {
             planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
          }
@@ -274,6 +274,11 @@ public class PlanarRegionMappingManager
    {
       updateMapFuture.cancel(true);
       resetMap();
+   }
+
+   public PlanarRegionMappingParameters getParameters()
+   {
+      return planarRegionMap.getParameters();
    }
 
    public void setEnableLiveMode(boolean enableLiveMode)

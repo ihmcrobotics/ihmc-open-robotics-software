@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -26,10 +27,9 @@ public class PlanarRegionMappingUIPanel
       imGuiPanel = new ImGuiPanel(name, this::renderImGuiWidgets);
       this.mappingManager = mappingManager;
 
-      // TODO: Connect this to UI. JIRA Ticket HS-330 (https://jira.ihmc.us/browse/HS-330)
-      //mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getFilteredMap().getParameters().getTitle());
-      //mappingParametersTuner.create(mappingManager.getFilteredMap().getParameters());
-
+      mappingParametersTuner = new ImGuiStoredPropertySetTuner(mappingManager.getParameters().getTitle());
+      mappingParametersTuner.create(mappingManager.getParameters());
+      imGuiPanel.addChild(mappingParametersTuner);
 
       mapPlanarRegionsGraphic.generateMeshes(mappingManager.pollMapRegions());
       mapPlanarRegionsGraphic.update();
@@ -61,6 +61,8 @@ public class PlanarRegionMappingUIPanel
       {
          mappingManager.hardResetTheMap();
       }
+
+      ImGui.checkbox("Show Parameter Tuners", mappingParametersTuner.getIsShowing());
    }
 
    public void renderPlanarRegions()
