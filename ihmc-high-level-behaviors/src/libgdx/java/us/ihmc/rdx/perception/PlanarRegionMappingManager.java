@@ -75,8 +75,6 @@ public class PlanarRegionMappingManager
 
    private PerceptionDataLoader perceptionDataLoader;
 
-   private RDXGPUPlanarRegionExtractionUI planarRegionExtractionUI;
-
    private final String defaultLogDirectory =
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good" + File.separator;
    private static final File regionLogDirectory = new File(
@@ -100,32 +98,13 @@ public class PlanarRegionMappingManager
       }
    }
 
-   public PlanarRegionMappingManager(String perceptionLogFilePath, boolean smoothing)
+   public PlanarRegionMappingManager(RDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtractionUI, BytedecoImage depth32FC1Image, boolean smoothing)
    {
       source = DataSource.PERCEPTION_LOG;
       planarRegionMap = new PlanarRegionMap(smoothing);
 
-      depth32FC1Image = new BytedecoImage(1024, 768, opencv_core.CV_32FC1);
-
-      /* L515 Parameters
-            Color: [fx:901.3026, fy:901.8400, cx:635.2337, cy:350.9427, h:720, w:1280]
-            Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
-       */
-      planarRegionExtractionUI = new RDXGPUPlanarRegionExtractionUI();
-      planarRegionExtractionUI.create(1024,
-                                      768,
-                                      depth32FC1Image.getBackingDirectByteBuffer(),
-                                      730.7891,
-                                      731.0859,
-                                      528.6094,
-                                      408.1602,
-                                      ReferenceFrame.getWorldFrame());
-
-      planarRegionExtractionUI.getRender3DPlanarRegions().set(false);
-      planarRegionExtractionUI.getRender3DBoundaries().set(false);
-      planarRegionExtractionUI.getRender3DGrownBoundaries().set(false);
-
-      planarRegionExtractionUI.getEnabled().set(true);
+      this.gpuPlanarRegionExtractionUI = gpuPlanarRegionExtractionUI;
+      this.depth32FC1Image = depth32FC1Image;
 
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(perceptionLogDirectory + logFileName);
@@ -298,10 +277,5 @@ public class PlanarRegionMappingManager
    public void setEnableLiveMode(boolean enableLiveMode)
    {
       this.enableLiveMode = enableLiveMode;
-   }
-
-   public RDXGPUPlanarRegionExtractionUI getGpuPlanarRegionExtractionUI()
-   {
-      return gpuPlanarRegionExtractionUI;
    }
 }
