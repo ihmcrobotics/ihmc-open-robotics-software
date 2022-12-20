@@ -75,10 +75,12 @@ public class PlanarRegionMappingManager
 
    private PerceptionDataLoader perceptionDataLoader;
 
-   private final String defaultLogDirectory =
-         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good" + File.separator;
    private static final File regionLogDirectory = new File(
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
+
+   private final String defaultLogDirectory =
+         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good" + File.separator;
+
    private final String perceptionLogDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
    private final String logFileName = "20221216_141954_PerceptionLog.hdf5";
 
