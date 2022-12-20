@@ -43,6 +43,9 @@ import java.util.Random;
  */
 public class RDXLowLevelDepthSensorSimulator
 {
+   // Each point contains {X, Y, Z, R, G, B, A, Size}
+   public static final int FLOATS_PER_POINT = 8;
+
    private final String depthWindowName;
    private final String colorWindowName;
 
@@ -159,7 +162,7 @@ public class RDXLowLevelDepthSensorSimulator
       metersDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       rgba8888ColorImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
       if (pointCloudRenderingBufferToPack != null)
-         pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
+         pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * FLOATS_PER_POINT, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
       parametersBuffer = new OpenCLFloatBuffer(29);

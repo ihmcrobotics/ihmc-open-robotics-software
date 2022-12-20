@@ -97,6 +97,11 @@ public class HeightMapManager
     */
    public void translateToNewGridCenter(double xCenter, double yCenter)
    {
+//      int xIndexShift = HeightMapTools.coordinateToIndex(xCenter - this.gridCenterXY.getX(), 0.0, gridResolutionXY, centerIndex);
+//      int yIndexShift = HeightMapTools.coordinateToIndex(yCenter - this.gridCenterXY.getY(), 0.0, gridResolutionXY, centerIndex);
+//      if (xIndexShift == 0 && yIndexShift == 0)
+//         return;
+
       if ((Math.abs(xCenter - this.gridCenterXY.getX()) < gridResolutionXY / 2.0) && (Math.abs(yCenter - this.gridCenterXY.getY()) < gridResolutionXY / 2.0))
          return;
 
@@ -111,16 +116,21 @@ public class HeightMapManager
          if (oldCellArray[oldKey] == null)
             continue;
 
+         int oldXIndex = HeightMapTools.keyToXIndex(oldKey, centerIndex);
+         int oldYIndex = HeightMapTools.keyToYIndex(oldKey, centerIndex);
+
          double xCoordinate = HeightMapTools.keyToXCoordinate(oldKey, gridCenterXY.getX(), gridResolutionXY, centerIndex);
-         double yCoordinate = HeightMapTools.keyToXCoordinate(oldKey, gridCenterXY.getY(), gridResolutionXY, centerIndex);
+         double yCoordinate = HeightMapTools.keyToYCoordinate(oldKey, gridCenterXY.getY(), gridResolutionXY, centerIndex);
 
          int xIndex = HeightMapTools.coordinateToIndex(xCoordinate, xCenter, gridResolutionXY, centerIndex);
+//         int xIndex = oldXIndex + xIndexShift;
          if (xIndex < 0 || xIndex >= cellsPerAxis)
          {
             continue;
          }
 
          int yIndex = HeightMapTools.coordinateToIndex(yCoordinate, yCenter, gridResolutionXY, centerIndex);
+//         int yIndex = oldYIndex + yIndexShift;
          if (yIndex < 0 || yIndex >= cellsPerAxis)
          {
             continue;
@@ -236,6 +246,19 @@ public class HeightMapManager
 
       if (debug)
          LogTools.info(occupiedCells.size() + " cells");
+   }
+
+   public double getHeightAt(double x, double y)
+   {
+      int xIndex = HeightMapTools.coordinateToIndex(x, gridCenterXY.getX(), gridResolutionXY, centerIndex);
+      if (xIndex < 0 || xIndex >= cellsPerAxis)
+         return Double.NaN;
+
+      int yIndex = HeightMapTools.coordinateToIndex(x, gridCenterXY.getY(), gridResolutionXY, centerIndex);
+      if (yIndex < 0 || yIndex >= cellsPerAxis)
+         return Double.NaN;
+
+      return getHeightAt(xIndex, yIndex);
    }
 
    public double getHeightAt(int indexX, int indexY)

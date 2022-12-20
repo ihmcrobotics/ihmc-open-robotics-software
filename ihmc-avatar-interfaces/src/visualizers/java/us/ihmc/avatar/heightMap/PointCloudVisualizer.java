@@ -7,6 +7,7 @@ import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -65,7 +66,7 @@ public class PointCloudVisualizer extends AnimationTimer
       }
    }
 
-   public void processPointCloud(Pair<PointCloudData, FramePose3D> pointCloudData)
+   public void processPointCloud(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
    {
       if (isProcessing.getAndSet(true))
       {
@@ -77,9 +78,9 @@ public class PointCloudVisualizer extends AnimationTimer
 
    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
 
-   private void processPointCloudInternal(Pair<PointCloudData, FramePose3D> pointCloudData)
+   private void processPointCloudInternal(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
    {
-      processPointCloudInternal(pointCloudData.getKey().getPointCloud(), pointCloudData.getRight());
+      processPointCloudInternal(pointCloudData.getLeft().getPointCloud(), pointCloudData.getMiddle());
    }
 
    private void processPointCloudInternal(Point3D[] pointCloud, FramePose3DReadOnly ousterPose)

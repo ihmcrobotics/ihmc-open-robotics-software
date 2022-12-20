@@ -12,6 +12,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import sensor_msgs.PointCloud2;
 import tf2_msgs.TFMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,6 +22,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -85,6 +87,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
          public void onNewMessage(PointCloud2 pointCloud)
          {
             FramePose3D ousterPose = new FramePose3D();
+            Point2D gridCenter = new Point2D();
             if (useROS2)
             {
                syncedRobot.update();
@@ -100,9 +103,10 @@ public abstract class HeightMapUI extends ApplicationNoModule
                ousterPose.getPosition().set(ros1Translation.getX(), ros1Translation.getY(), ros1Translation.getZ());
                ousterPose.getOrientation().set(ros1Orientation.getX(), ros1Orientation.getY(), ros1Orientation.getZ(), ros1Orientation.getW());
             }
+            gridCenter.set(ousterPose.getPosition());
 
             PointCloudData pointCloudData = new PointCloudData(pointCloud, 1000000, false);
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Pair.of(pointCloudData, ousterPose));
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, ousterPose, gridCenter));
          }
       });
 
