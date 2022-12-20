@@ -40,11 +40,10 @@ public class PlanarRegionMap
    private final RigidBodyTransform worldToPreviousSensorFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform odoometry = new RigidBodyTransform();
 
-   private static final double updateAlphaTowardsMatch = 0.05;
-
-   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
-   private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
-   private static final float maxDistanceBetweenRegionsForMatch = 0.0f;
+   //   private static final double updateAlphaTowardsMatch = 0.05;
+   //   private static final double angleThresholdBetweenNormalsForMatch = Math.toRadians(15);
+   //   private static final float outOfPlaneDistanceFromOneRegionToAnother = 0.05f;
+   //   private static final float maxDistanceBetweenRegionsForMatch = 0.0f;
 
    private boolean initialized = false;
    private boolean modified = false;
@@ -107,7 +106,7 @@ public class PlanarRegionMap
       if (!initialized)
       {
          finalMap.addPlanarRegionsList(regions);
-         if(merger == MergingMode.SMOOTHING)
+         if (merger == MergingMode.SMOOTHING)
          {
             initializeFactorGraphForSmoothing(finalMap);
          }
@@ -123,15 +122,15 @@ public class PlanarRegionMap
          // merge all the new regions in
          finalMap = crossReduceRegionsIteratively(finalMap,
                                                   regions,
-                                                  (float) updateAlphaTowardsMatch,
-                                                  (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-                                                  outOfPlaneDistanceFromOneRegionToAnother,
-                                                  maxDistanceBetweenRegionsForMatch);
+                                                  (float) parameters.getUpdateAlphaTowardsMatch(),
+                                                  (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
+                                                  (float) parameters.getOrthogonalDistanceThreshold(),
+                                                  (float) parameters.getMaxInterRegionDistance());
 
          processUniqueRegions(finalMap);
          PlanarRegionSLAMTools.printMatches("Cross", finalMap, regions, planarRegionMatches);
 
-         if(merger == MergingMode.SMOOTHING)
+         if (merger == MergingMode.SMOOTHING)
          {
             applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
          }
@@ -161,10 +160,10 @@ public class PlanarRegionMap
       if (!initialized)
       {
          regions.getPlanarRegionsAsList().forEach(region ->
-         {
-            region.setRegionId(uniqueIDtracker++);
-            mapRegionIDSet.add(region.getRegionId());
-         });
+                                                  {
+                                                     region.setRegionId(uniqueIDtracker++);
+                                                     mapRegionIDSet.add(region.getRegionId());
+                                                  });
          finalMap.addPlanarRegionsList(regions);
 
          initialized = true;
@@ -181,20 +180,20 @@ public class PlanarRegionMap
          addIncomingRegionsToGraph(finalMap,
                                    regions,
                                    planarRegionGraph,
-                                   (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-                                   outOfPlaneDistanceFromOneRegionToAnother,
-                                   maxDistanceBetweenRegionsForMatch);
+                                   (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
+                                   (float) parameters.getOrthogonalDistanceThreshold(),
+                                   (float) parameters.getMaxInterRegionDistance());
 
          // merge all the new regions in
-         planarRegionGraph.collapseGraphByMerging(updateAlphaTowardsMatch);
+         planarRegionGraph.collapseGraphByMerging(parameters.getUpdateAlphaTowardsMatch());
 
          // go back through the existing regions and add them to the graph to check for overlap
          checkMapRegionsForOverlap(planarRegionGraph,
-                                   (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-                                   outOfPlaneDistanceFromOneRegionToAnother,
-                                   maxDistanceBetweenRegionsForMatch);
+                                   (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
+                                   (float) parameters.getOrthogonalDistanceThreshold(),
+                                   (float) parameters.getMaxInterRegionDistance());
 
-         planarRegionGraph.collapseGraphByMerging(updateAlphaTowardsMatch);
+         planarRegionGraph.collapseGraphByMerging(parameters.getUpdateAlphaTowardsMatch());
 
          finalMap = planarRegionGraph.getAsPlanarRegionsList();
 
@@ -390,10 +389,10 @@ public class PlanarRegionMap
    {
       map.addPlanarRegionsList(regions);
       map = selfReduceRegionsIteratively(map,
-                                         (float) updateAlphaTowardsMatch,
-                                         (float) Math.cos(angleThresholdBetweenNormalsForMatch),
-                                         outOfPlaneDistanceFromOneRegionToAnother,
-                                         maxDistanceBetweenRegionsForMatch,
+                                         (float) parameters.getUpdateAlphaTowardsMatch(),
+                                         (float) Math.cos(parameters.getAngleThresholdBetweenNormals()),
+                                         (float) parameters.getOrthogonalDistanceThreshold(),
+                                         (float) parameters.getMaxInterRegionDistance(),
                                          planarRegionMatches);
       return map;
    }
@@ -431,7 +430,7 @@ public class PlanarRegionMap
          {
             int landmarkId = Math.abs(generatePostMergeId(parentId, childId));
 
-            if(childId >= 0)
+            if (childId >= 0)
                continue;
 
             LogTools.info("ParentID: {}, Finding Child Region with ID: {}", parentId, childId);
@@ -475,8 +474,8 @@ public class PlanarRegionMap
 
    public void initializeFactorGraphForSmoothing(PlanarRegionsList map)
    {
-      factorGraph.addPriorPoseFactor(0, new float[] {0,0,0,0,0,0});
-      factorGraph.setPoseInitialValue(0, new float[] {0,0,0,0,0,0});
+      factorGraph.addPriorPoseFactor(0, new float[] {0, 0, 0, 0, 0, 0});
+      factorGraph.setPoseInitialValue(0, new float[] {0, 0, 0, 0, 0, 0});
 
       for (PlanarRegion region : map.getPlanarRegionsAsList())
       {
