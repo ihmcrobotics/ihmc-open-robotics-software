@@ -52,7 +52,7 @@ public class RDXPlanarRegionMappingDemo
 
             planarRegionExtractionUI.getEnabled().set(true);
 
-            mappingManager = new PlanarRegionMappingManager(planarRegionExtractionUI, depth32FC1Image, true);
+            mappingManager = new PlanarRegionMappingManager(true);
 
             baseUI.getImGuiPanelManager().addPanel(planarRegionExtractionUI.getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionExtractionUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);

@@ -85,8 +85,6 @@ public class PlanarRegionsReplayBuffer<T>
 
          Object list;
 
-         LogTools.info("Type: {} {} {}", type, PlanarRegionsListWithPose.class, type == PlanarRegionsListWithPose.class);
-
          if(type == PlanarRegionsListWithPose.class)
             list = PlanarRegionFileTools.importPlanarRegionsWithPoseData(temp);
          else

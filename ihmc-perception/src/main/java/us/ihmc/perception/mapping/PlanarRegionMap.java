@@ -70,6 +70,10 @@ public class PlanarRegionMap
          BytedecoTools.loadGTSAMNatives();
          factorGraph = new SlamWrapper.FactorGraphExternal();
       }
+      else
+      {
+         this.merger = MergingMode.FILTERING;
+      }
 
       parameters = new PlanarRegionMappingParameters();
       finalMap = new PlanarRegionsList();
@@ -103,7 +107,10 @@ public class PlanarRegionMap
       if (!initialized)
       {
          finalMap.addPlanarRegionsList(regions);
-         initializeFactorGraphForSmoothing(finalMap);
+         if(merger == MergingMode.SMOOTHING)
+         {
+            initializeFactorGraphForSmoothing(finalMap);
+         }
          initialized = true;
       }
       else
@@ -124,9 +131,10 @@ public class PlanarRegionMap
          processUniqueRegions(finalMap);
          PlanarRegionSLAMTools.printMatches("Cross", finalMap, regions, planarRegionMatches);
 
-         applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
-
-
+         if(merger == MergingMode.SMOOTHING)
+         {
+            applyFactorGraphBasedSmoothing(finalMap, regions, regionsWithPose.getSensorToWorldFrameTransform(), planarRegionMatches, sensorPoseIndex);
+         }
 
          LogTools.info("After Cross: {}", finalMap.getNumberOfPlanarRegions());
       }
