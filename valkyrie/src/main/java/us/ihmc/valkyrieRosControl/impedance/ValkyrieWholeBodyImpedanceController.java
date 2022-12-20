@@ -175,7 +175,6 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       setGains(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 75.0, 8.0);
       setGains(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 75.0, 8.0);
 
-      new DefaultParameterReader().readParametersInRegistry(registry);
       ros2Node.spin();
    }
 
@@ -238,6 +237,8 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       {
          jointManagers[i].holdPosition(jointHome.getSetpoint(controlledOneDoFJoints[i].getName()));
       }
+
+      new DefaultParameterReader().readParametersInRegistry(registry);
 
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
