@@ -6,6 +6,7 @@ import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSol
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -43,7 +44,10 @@ public class MultiContactForceOptimizer
       }
    }
 
-   public void solve(MultiContactSupportRegionSolverInput input, double comX, double comY)
+   /**
+    * Returns whether an optimal solution was found
+    */
+   public boolean solve(MultiContactSupportRegionSolverInput input, double comX, double comY)
    {
       clear();
 
@@ -112,11 +116,21 @@ public class MultiContactForceOptimizer
       qpSolver.setLinearInequalityConstraints(Ain, bin);
 
       qpSolver.solve(rho);
+      boolean success = MatrixTools.containsNaN(rho);
 
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
-         contactPoints.get(i).setResolvedForce(rho.getData());
+         if (success)
+         {
+            contactPoints.get(i).setResolvedForce(rho.getData());
+         }
+         else
+         {
+            contactPoints.get(i).clear();
+         }
       }
+
+      return success;
    }
 
    public Tuple3DReadOnly getResolvedForce(int i)
