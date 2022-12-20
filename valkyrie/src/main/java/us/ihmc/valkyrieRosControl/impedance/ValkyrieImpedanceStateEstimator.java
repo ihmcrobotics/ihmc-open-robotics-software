@@ -6,6 +6,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
@@ -17,7 +18,8 @@ public class ValkyrieImpedanceStateEstimator
 {
    private final FloatingJointBasics rootJoint;
    private final RigidBodyBasics rootBody;
-   private final SensorDataContext sensorDataContext = new SensorDataContext();
+   private final OneDoFJointBasics[] controlledOneDoFJoints;
+   private SensorOutputMapReadOnly processedSensorOutputMap;
 
    private ValkyrieRosControlSensorReader sensorReader;
    private List<? extends IMUSensorReadOnly> imuOutputs;
@@ -31,13 +33,14 @@ public class ValkyrieImpedanceStateEstimator
    public ValkyrieImpedanceStateEstimator(FloatingJointBasics rootJoint, OneDoFJointBasics[] controlledOneDoFJoints)
    {
       this.rootJoint = rootJoint;
+      this.controlledOneDoFJoints = controlledOneDoFJoints;
       this.rootBody = MultiBodySystemTools.getRootBody(controlledOneDoFJoints[0].getSuccessor());
    }
 
    public void init(ValkyrieRosControlSensorReader sensorReader)
    {
       this.sensorReader = sensorReader;
-      SensorOutputMapReadOnly processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
+      processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       imuOutputs = processedSensorOutputMap.getIMUOutputs();
       sensorReader.initialize();
    }
@@ -46,6 +49,14 @@ public class ValkyrieImpedanceStateEstimator
    {
       /* First pass computes joint angles */
       sensorReader.readSensors();
+
+      for (int i = 0; i < controlledOneDoFJoints.length; i++)
+      {
+         OneDoFJointStateReadOnly processedJointOutput = processedSensorOutputMap.getOneDoFJointOutput(controlledOneDoFJoints[i]);
+         controlledOneDoFJoints[i].setQ(processedJointOutput.getPosition());
+         controlledOneDoFJoints[i].setQd(processedJointOutput.getVelocity());
+      }
+
       rootBody.updateFramesRecursively();
 
       /* Second pass computes root joint */
