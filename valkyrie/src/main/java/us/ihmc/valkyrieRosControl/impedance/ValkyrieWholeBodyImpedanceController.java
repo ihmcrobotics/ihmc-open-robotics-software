@@ -57,7 +57,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
 import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
@@ -81,8 +80,9 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final ValkyrieStandPrepSetpoints jointHome;
    private final ValkyrieImpedanceStateEstimator stateEstimator;
+
    private final ValkyrieImpedanceOutputWriter outputWriter;
-   private final ImpedanceGravityCompensationCalculator gravityCompensationCalculator;
+//   private final ImpedanceGravityCompensationCalculator gravityCompensationCalculator;
 
    private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "valkyrie_whole_body_impedance_controller");
    private final EffortJointHandle[] effortHandles = new EffortJointHandle[allJoints.size()];
@@ -115,7 +115,7 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       jointHome = new ValkyrieStandPrepSetpoints(robotModel.getJointMap());
       stateEstimator = new ValkyrieImpedanceStateEstimator(fullRobotModel.getRootJoint(), controlledOneDoFJoints);
       outputWriter = new ValkyrieImpedanceOutputWriter(fullRobotModel, jointDesiredOutputList, nameToEffortHandleMap, nameToImpedanceHandleMap);
-      gravityCompensationCalculator = new ImpedanceGravityCompensationCalculator(controlledOneDoFJoints, fullRobotModel.getTotalMass(), registry);
+//      gravityCompensationCalculator = new ImpedanceGravityCompensationCalculator(controlledOneDoFJoints, fullRobotModel.getTotalMass(), registry);
 
       impedanceMasterGain.set(0.15);
       torqueMasterGain.set(0.6);
@@ -239,7 +239,6 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
       }
 
       new DefaultParameterReader().readParametersInRegistry(registry);
-
       yoVariableServer = new YoVariableServer(getClass(), logModelProvider, logSettings, estimatorDT);
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), graphicsListRegistry);
       yoVariableServer.start();
@@ -252,9 +251,9 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
    {
       torqueMasterGain.set(EuclidCoreTools.clamp(torqueMasterGain.getValue(), 0.0, 1.0));
       impedanceMasterGain.set(EuclidCoreTools.clamp(impedanceMasterGain.getValue(), 0.0, 1.0));
+      wallTimeProvider.setTimestamp(rosTime);
 
       yoTime.set(Conversions.nanosecondsToSeconds(monotonicTimeProvider.getTimestamp()));
-      wallTimeProvider.setTimestamp(rosTime);
 
       /* Perform state estimation */
       stateEstimator.update();
@@ -309,6 +308,6 @@ public class ValkyrieWholeBodyImpedanceController extends IHMCWholeRobotControlJ
          }
       }
 
-      gravityCompensationCalculator.compute(jointDesiredOutputList);
+//      gravityCompensationCalculator.compute(jointDesiredOutputList);
    }
 }
