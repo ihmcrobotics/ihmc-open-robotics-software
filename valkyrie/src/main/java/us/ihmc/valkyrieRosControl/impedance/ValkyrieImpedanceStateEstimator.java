@@ -39,13 +39,13 @@ public class ValkyrieImpedanceStateEstimator
       this.sensorReader = sensorReader;
       SensorOutputMapReadOnly processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       imuOutputs = processedSensorOutputMap.getIMUOutputs();
+      sensorReader.initialize();
    }
 
    public void update()
    {
       /* First pass computes joint angles */
-      long timestamp = sensorReader.read(sensorDataContext);
-      sensorReader.compute(timestamp, sensorDataContext);
+      sensorReader.readSensors();
       rootBody.updateFramesRecursively();
 
       /* Second pass computes root joint */
