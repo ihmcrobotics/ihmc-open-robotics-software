@@ -74,6 +74,7 @@ public class KinematicsRecordReplay
          if (isMoving(framePose)) //check from framePose if the user is moving
          { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+            LogTools.info("Framepose world: {}", framePose);
             // transform to object reference frame if using object detection
             if (objectFrame != null)
                framePose.changeFrame(objectFrame);
@@ -87,6 +88,7 @@ public class KinematicsRecordReplay
                                                       framePose.getPosition().getX(),
                                                       framePose.getPosition().getY(),
                                                       framePose.getPosition().getZ()};
+            LogTools.info("Framepose object: {}", framePose);
             trajectoryRecorder.record(dataTrajectories);
          }
       }
