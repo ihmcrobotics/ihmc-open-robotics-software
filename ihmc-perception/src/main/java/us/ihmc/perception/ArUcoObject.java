@@ -1,8 +1,8 @@
 package us.ihmc.perception;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
@@ -14,7 +14,7 @@ public class ArUcoObject
    private final RigidBodyTransform transformToHandle = new RigidBodyTransform();
    // object frame might be different than marker location, for example the door handle is not exactly where the marker is on the door
    private ReferenceFrame objectFrame;
-   private FramePose3DBasics objectPose;
+   private FramePose3D objectPose = new FramePose3D();
 
    public ArUcoObject(int id, ArUcoObjectInfo arucoInfo)
    {
@@ -28,9 +28,9 @@ public class ArUcoObject
       objectFrame.update();
    }
 
-   public void packToObjectPose(FramePose3DBasics markerPose)
+   public void computeObjectPose(FramePose3DBasics markerPose)
    {
-      objectPose = markerPose;
+      objectPose.set(markerPose);
       objectPose.appendTranslation(transformToHandle.getTranslation());
       objectPose.appendRotation(transformToHandle.getRotation());
    }
@@ -45,7 +45,7 @@ public class ArUcoObject
       return objectFrame;
    }
 
-   public FramePose3DReadOnly getObjectPose()
+   public FramePose3D getObjectPose()
    {
       return objectPose;
    }
