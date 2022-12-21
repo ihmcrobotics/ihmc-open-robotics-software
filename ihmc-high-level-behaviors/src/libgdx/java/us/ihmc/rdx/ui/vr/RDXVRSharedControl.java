@@ -18,15 +18,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
-   private final RDXObjectDetector objectDetector;
+   private RDXObjectDetector objectDetector;
    private String objectName = "";
    private FramePose3DReadOnly objectPose;
 
-   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay, RDXObjectDetector objectDetector)
+   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
-      this.objectDetector = objectDetector;
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -100,5 +99,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isActive()
    {
       return this.enabled.get();
+   }
+
+   public void setObjectDetector(RDXObjectDetector objectDetector)
+   {
+      this.objectDetector = objectDetector;
    }
 }
