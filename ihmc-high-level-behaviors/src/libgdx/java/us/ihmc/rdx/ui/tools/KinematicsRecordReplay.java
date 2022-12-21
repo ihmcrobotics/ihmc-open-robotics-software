@@ -67,28 +67,29 @@ public class KinematicsRecordReplay
       }
    }
 
-   public void framePoseToRecord(FramePose3D framePose)
+   public void framePoseToRecord(FramePose3DReadOnly framePose)
    {
       if (isRecording)
       {
          if (isMoving(framePose)) //check from framePose if the user is moving
          { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            LogTools.info("Framepose world: {}", framePose);
+            FramePose3D frameToRecord = new FramePose3D(framePose);
+            LogTools.info("Framepose world: {}", frameToRecord);
             // transform to object reference frame if using object detection
             if (objectFrame != null)
-               framePose.changeFrame(objectFrame);
+               frameToRecord.changeFrame(objectFrame);
 
             // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-            Double[] dataTrajectories = new Double[] {framePose.getOrientation().getX(),
-                                                      framePose.getOrientation().getY(),
-                                                      framePose.getOrientation().getZ(),
-                                                      framePose.getOrientation().getS(),
-                                                      framePose.getPosition().getX(),
-                                                      framePose.getPosition().getY(),
-                                                      framePose.getPosition().getZ()};
-            LogTools.info("Framepose object: {}", framePose);
+            Double[] dataTrajectories = new Double[] {frameToRecord.getOrientation().getX(),
+                                                      frameToRecord.getOrientation().getY(),
+                                                      frameToRecord.getOrientation().getZ(),
+                                                      frameToRecord.getOrientation().getS(),
+                                                      frameToRecord.getPosition().getX(),
+                                                      frameToRecord.getPosition().getY(),
+                                                      frameToRecord.getPosition().getZ()};
+            LogTools.info("Framepose object: {}", frameToRecord);
             trajectoryRecorder.record(dataTrajectories);
          }
       }
