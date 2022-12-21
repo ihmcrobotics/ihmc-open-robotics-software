@@ -72,6 +72,7 @@ public class RDXObjectDetector
                markerPose.get(objectWithArUco.getMarkerToWorld());
                objectWithArUco.update(); // update frame of the object
                objectWithArUco.packToObjectPose(markerPose); // marker pose gets transformed to object pose
+               LogTools.info("Detected object {} pose: {}", getObjectName(), getObjectPose());
                break;
             }
             else

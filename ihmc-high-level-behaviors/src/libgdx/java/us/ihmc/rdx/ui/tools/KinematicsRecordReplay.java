@@ -6,11 +6,13 @@ import imgui.type.ImString;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.perception.RDXObjectDetector;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -29,6 +31,8 @@ public class KinematicsRecordReplay
    private boolean isUserMoving = false;
    private final List<List<Pose3DReadOnly>> framesToRecordHistory = new ArrayList<>();
    private int partId = 0; // identifier of current frame, used to now what body part among numberParts we are currently handling
+   private RDXObjectDetector objectDetector;
+   private ReferenceFrame objectFrame;
 
    public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberParts)
    {
@@ -44,6 +48,11 @@ public class KinematicsRecordReplay
       if (enabledKinematicsStreaming.get() && enablerRecording.get() && triggerButton.bChanged() && !triggerButton.bState())
       {
          isRecording = !isRecording;
+         // store object reference frame if using object detection
+         if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
+         {
+            objectFrame = objectDetector.getObjectFrame();
+         }
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
             trajectoryRecorder.setPath(recordPath.get()); //recorder is reset when changing path
@@ -54,17 +63,21 @@ public class KinematicsRecordReplay
          isReplaying = !isReplaying;
          // check if replay file has been set to a different one from previous replay. In case update file path.
          if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
-            trajectoryRecorder.setPath(replayPath.get()); //replayer is reset when changing path
+            trajectoryRecorder.setPath(replayPath.get()); // replayer is reset when changing path
       }
    }
 
-   public void framePoseToRecord(FramePose3DReadOnly framePose)
+   public void framePoseToRecord(FramePose3D framePose)
    {
       if (isRecording)
       {
-         if (isMoving(framePose)) //check from frames if the user is moving
-         { // we want to start the recording as soon as the user start moving, recordings with different initial pauses can lead to bad behaviors when used for learning
+         if (isMoving(framePose)) //check from framePose if the user is moving
+         { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+            // transform to object reference frame if using object detection
+            if (objectFrame != null)
+               framePose.changeFrame(objectFrame);
+
             // Store trajectories in file: store a setpoint per timestep until trigger button is pressed again
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
             Double[] dataTrajectories = new Double[] {framePose.getOrientation().getX(),
@@ -92,11 +105,12 @@ public class KinematicsRecordReplay
          Pose3D lastFramePose = new Pose3D();
          lastFramePose.getPosition().set(framePose.getPosition().getX(), framePose.getPosition().getY(), framePose.getPosition().getZ());
          lastFramePose.getOrientation()
-                         .set(framePose.getOrientation().getX(),
-                              framePose.getOrientation().getY(),
-                              framePose.getOrientation().getZ(),
-                              framePose.getOrientation().getS());
+                      .set(framePose.getOrientation().getX(),
+                           framePose.getOrientation().getY(),
+                           framePose.getOrientation().getZ(),
+                           framePose.getOrientation().getS());
          framesToRecordHistory.get(partId).add(lastFramePose);
+         // check if last value of frame pose translated by 4cm with respect to first value of frame pose
          if (framesToRecordHistory.get(partId).size() > 1)
          {
             double distance = (framesToRecordHistory.get(partId).get(framesToRecordHistory.get(partId).size() - 1)).getTranslation()
@@ -115,7 +129,7 @@ public class KinematicsRecordReplay
    public void framePoseToPack(FixedFramePose3DBasics framePose)
    {
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
-      // Read file with stored trajectories: read setpoint per timestep until file is over
+      // Read file with stored trajectories: read set point per timestep until file is over
       Double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
       // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
       framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
@@ -152,7 +166,7 @@ public class KinematicsRecordReplay
       if (enablerRecording != this.enablerRecording.get())
          this.enablerRecording.set(enablerRecording);
       if (enablerRecording)
-         this.enablerReplay.set(false); //check no concurrency replay and record
+         this.enablerReplay.set(false); // check no concurrency replay and record
    }
 
    public void setReplay(boolean enablerReplay)
@@ -162,7 +176,7 @@ public class KinematicsRecordReplay
       if (enablerReplay)
       {
          if (enablerRecording.get() || enabledKinematicsStreaming.get())
-            this.enablerReplay.set(false); //check no concurrency replay and record/streaming
+            this.enablerReplay.set(false); // check no concurrency replay and record/streaming
       }
    }
 
@@ -184,5 +198,10 @@ public class KinematicsRecordReplay
    public boolean isReplaying()
    {
       return isReplaying;
+   }
+
+   public void setObjectDetector(RDXObjectDetector objectDetector)
+   {
+      this.objectDetector = objectDetector;
    }
 }
