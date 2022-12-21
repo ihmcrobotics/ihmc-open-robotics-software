@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -71,7 +72,7 @@ public class RDXObjectDetector
                markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform in world frame
                markerPose.get(objectWithArUco.getMarkerToWorld());
                objectWithArUco.update(); // update frame of the object
-               objectWithArUco.packToObjectPose(markerPose); // marker pose gets transformed to object pose
+               objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
                break;
             }
             else
@@ -92,7 +93,7 @@ public class RDXObjectDetector
       return objectName;
    }
 
-   public FramePose3DReadOnly getObjectPose()
+   public FramePose3D getObjectPose()
    {
       return objectWithArUco.getObjectPose();
    }

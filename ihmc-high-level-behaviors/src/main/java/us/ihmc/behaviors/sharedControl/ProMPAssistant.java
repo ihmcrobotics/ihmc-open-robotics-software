@@ -9,6 +9,10 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
@@ -37,7 +41,8 @@ public class ProMPAssistant
    private String bodyPartGoal = "";
    private final HashMap<String, String> taskBodyPartRecognitionMap = new HashMap<>();
    private final HashMap<String, String> taskBodyPartGoalMap = new HashMap<>();
-   private Pose3DReadOnly taskGoalPose;
+   private final HashMap<String, RigidBodyTransform> taskTransformGoalMap = new HashMap<>();
+   private FramePose3D taskGoalPose;
    private final HashMap<String, List<Pose3DReadOnly>> bodyPartObservedTrajectoryMap = new HashMap<>();
    private final HashMap<String, List<FramePose3D>> bodyPartGeneratedTrajectoryMap = new HashMap<>();
    private final HashMap<String, Integer> bodyPartTrajectorySampleCounter = new HashMap<>(); // to track the last used sample of a generated trajectory
@@ -46,7 +51,7 @@ public class ProMPAssistant
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
    private boolean conditionOnlyLastObservation = true;
-   private List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
+   private final List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
    private boolean isMoving = false;
 
    public ProMPAssistant()
@@ -55,6 +60,8 @@ public class ProMPAssistant
       List<String> bodyPartsRecognition = new ArrayList<>();
       List<String> bodyPartsGoal = new ArrayList<>();
       List<HashMap<String, String>> bodyPartsGeometries = new ArrayList<>();
+      List<Point3D> goalToEETranslations = new ArrayList<>();
+      List<Quaternion> goalToEERotations = new ArrayList<>();
       boolean logEnabled = false;
       // read parameters regarding the properties of available learned tasks from json file
       try
@@ -82,7 +89,24 @@ public class ProMPAssistant
                   case "name" -> taskNames.add((String) taskPropertyMap.getValue());
                   case "bodyPartForRecognition" -> bodyPartsRecognition.add((String) taskPropertyMap.getValue());
                   case "bodyPartWithObservableGoal" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
-                  case "translationGoalToEE" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
+                  case "translationGoalToEE" ->
+                  {
+                     JSONArray translationArray = (JSONArray) taskPropertyMap.getValue();
+                     Iterator translationIterator = translationArray.iterator();
+                     List<Double> translation = new ArrayList<>(3);
+                     while (translationIterator.hasNext())
+                        translation.add((Double) translationIterator.next());
+                     goalToEETranslations.add(new Point3D(translation.get(0), translation.get(1), translation.get(2)));
+                  }
+                  case "rotationGoalToEE" ->
+                  {
+                     JSONArray rotationArray = (JSONArray) taskPropertyMap.getValue();
+                     Iterator rotationIterator = rotationArray.iterator();
+                     List<Double> rotation = new ArrayList<>(4);
+                     while (rotationIterator.hasNext())
+                        rotation.add((Double) rotationIterator.next());
+                     goalToEERotations.add(new Quaternion(rotation.get(0), rotation.get(1), rotation.get(2), rotation.get(3)));
+                  }
                   case "bodyParts" ->
                   {
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
@@ -138,6 +162,7 @@ public class ProMPAssistant
                                                numberOfInferredSpeeds));
             taskBodyPartRecognitionMap.put(taskNames.get(i), bodyPartsRecognition.get(i));
             taskBodyPartGoalMap.put(taskNames.get(i), bodyPartsGoal.get(i));
+            taskTransformGoalMap.put(taskNames.get(i),new RigidBodyTransform(goalToEERotations.get(i), goalToEETranslations.get(i)));
          }
          for (ProMPManager proMPManager : proMPManagers.values())
             proMPManager.learnTaskFromDemos();
@@ -153,7 +178,7 @@ public class ProMPAssistant
       }
    }
 
-   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, Pose3DReadOnly objectPose, String objectName)
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, FramePose3D objectPose, String objectName)
    {
       if (taskDetected(objectName))
       {
@@ -176,7 +201,9 @@ public class ProMPAssistant
                   if (!bodyPartGoal.isEmpty() && objectPose != null) // if there is an observable goal this body part can reach
                   {
                      taskGoalPose = objectPose;
+                     taskGoalPose.applyTransform(taskTransformGoalMap.get(currentTask));
                   }
+                  LogTools.info("GOAL world: {}", taskGoalPose);
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;

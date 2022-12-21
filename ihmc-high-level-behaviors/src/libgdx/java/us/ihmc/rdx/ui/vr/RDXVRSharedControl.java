@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,7 +21,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private RDXObjectDetector objectDetector;
    private String objectName = "";
-   private FramePose3DReadOnly objectPose;
+   private FramePose3D objectPose;
 
    public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
