@@ -82,6 +82,7 @@ public class ProMPAssistant
                   case "name" -> taskNames.add((String) taskPropertyMap.getValue());
                   case "bodyPartForRecognition" -> bodyPartsRecognition.add((String) taskPropertyMap.getValue());
                   case "bodyPartWithObservableGoal" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
+                  case "translationGoalToEE" -> bodyPartsGoal.add((String) taskPropertyMap.getValue());
                   case "bodyParts" ->
                   {
                      JSONArray bodyPartsArray = (JSONArray) taskPropertyMap.getValue();
@@ -188,7 +189,6 @@ public class ProMPAssistant
 
    private boolean taskDetected(String objectName)
    {
-      objectName = "PushDoor";
       if (currentTask.isEmpty() && !objectName.isEmpty())
       {
          // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task

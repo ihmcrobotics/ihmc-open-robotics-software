@@ -10,7 +10,9 @@
     {
       "name":"PushDoor",
       "bodyPartForRecognition": "rightHand",
-      "bodyPartWithObservableGoal": "",
+      "bodyPartWithObservableGoal": "rightHand",
+      "translationGoalToEE": [0.2569618668462455,-0.010945852157134962,0.6245353719557298],
+      "rotationGoalToEE": [-0.11454938738054958,-0.7183499308507522,0.6668305249906048,-0.16182974274902306],
       "bodyParts":[
         { "name":"rightHand", "geometry":"Pose" }
       ]
