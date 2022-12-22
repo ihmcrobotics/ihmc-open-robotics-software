@@ -1,9 +1,9 @@
-package us.ihmc.perception;
+package us.ihmc.perception.objectDetection;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.ArUcoObjectInfo;
 
-import java.util.List;
 import static org.junit.Assert.assertTrue;
 
 public class ArUcoObjectInfoTest
