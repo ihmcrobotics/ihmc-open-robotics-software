@@ -129,7 +129,7 @@ public class PerceptionDataLoader
       String defaultLogDirectory =
             System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20221222_141507_Ouster.hdf5";
+      String logFileName = "20221222_152459_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
@@ -137,7 +137,7 @@ public class PerceptionDataLoader
       ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
       //      long totalColor = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.L515_COLOR_NAME);
-//      long totalDepth = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
+      long totalDepth = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
 
       //      long total = Math.min(totalColor, totalDepth);
 
@@ -147,7 +147,7 @@ public class PerceptionDataLoader
 
       ArrayList<Point3D> points = new ArrayList<>();
 
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < totalDepth; i++)
       {
          //         points.clear();
          //         loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, i, points);
@@ -174,7 +174,7 @@ public class PerceptionDataLoader
 
          //         imshow("/l515/color", colorImage);
          imshow(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, finalDisplayDepth);
-         int code = waitKeyEx(30);
+         int code = waitKeyEx(100);
          if (code == 113)
          {
             System.exit(0);
