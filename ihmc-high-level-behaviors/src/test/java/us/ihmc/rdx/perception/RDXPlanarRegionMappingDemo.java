@@ -11,10 +11,15 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.ROS2Node;
 
+import java.io.File;
+
 public class RDXPlanarRegionMappingDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "filtered_map_node");
+
+   private static final File regionLogDirectory = new File(
+         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
    private RDXGPUPlanarRegionExtractionUI planarRegionExtractionUI;
    private PlanarRegionMappingUIPanel planarRegionMappingUI;
@@ -52,7 +57,7 @@ public class RDXPlanarRegionMappingDemo
 
             planarRegionExtractionUI.getEnabled().set(true);
 
-            mappingManager = new PlanarRegionMappingManager(true);
+            mappingManager = new PlanarRegionMappingManager(regionLogDirectory, true);
 
             baseUI.getImGuiPanelManager().addPanel(planarRegionExtractionUI.getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(planarRegionExtractionUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
