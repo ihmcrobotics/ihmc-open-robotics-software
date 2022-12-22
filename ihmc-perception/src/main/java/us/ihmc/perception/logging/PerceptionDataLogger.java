@@ -42,7 +42,6 @@ public class PerceptionDataLogger
 
    private final CommunicationMode communicationMode;
    private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
-   private final FusedSensorHeadPointCloudMessage ousterCloudPacket = new FusedSensorHeadPointCloudMessage();
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                         getClass(),
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
@@ -102,11 +101,6 @@ public class PerceptionDataLogger
       ros2Helper = new ROS2Helper(ros2Node);
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
 
-      // Add callback for Ouster scans
-      var ousterSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_POINT_CLOUD);
-      ousterSubscription.addCallback(this::logLidarScanMessage);
-      runnablesToStopLogging.addLast(ousterSubscription::destroy);
-
       // Add callback for Robot Configuration Data
       var robotConfigurationDataSubscription = ros2Helper.subscribe(ROS2Tools.getRobotConfigurationDataTopic(simpleRobotName));
       robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
@@ -148,7 +142,7 @@ public class PerceptionDataLogger
       counts.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0);
 
       // Add callback for Ouster depth maps
-      var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_DEPTH);
+      var ousterDepthSubscription = ros2Helper.subscribe(ROS2Tools.OUSTER_DEPTH_IMAGE);
       ousterDepthSubscription.addCallback(this::logDepthOuster);
       runnablesToStopLogging.addLast(ousterDepthSubscription::destroy);
 
@@ -200,26 +194,16 @@ public class PerceptionDataLogger
       }
    }
 
-   public void logLidarScanMessage(FusedSensorHeadPointCloudMessage message)
+   public void logDepthOuster(ImageMessage message)
    {
-      LogTools.info("OUSTER POINT CLOUD Received.");
-
-      ousterCloudPacket.set(message);
-      if (channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).isEnabled())
-      {
-         channels.get(PerceptionLoggerConstants.OUSTER_CLOUD_NAME).incrementCount();
-         storePointCloud(PerceptionLoggerConstants.OUSTER_CLOUD_NAME, ousterCloudPacket);
-      }
-   }
-
-   public void logDepthOuster(VideoPacket packet)
-   {
-      LogTools.info("Depth Map Received: {}", packet.data_);
+      LogTools.info("Depth Map Received: {}", message.data_);
 
       if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, packet);
+         storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, message.getPosition());
+         storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, message.getOrientation());
+         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, message);
       }
    }
 
