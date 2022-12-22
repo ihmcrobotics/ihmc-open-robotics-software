@@ -78,6 +78,9 @@ public class PerceptionDataLogger
       channels.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new AtomicReference<>(null));
 
+      channels.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0, 0));
+      references.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
+
       channels.put(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME,
                    new PerceptionLogChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
 
