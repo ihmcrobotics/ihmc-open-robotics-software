@@ -247,9 +247,9 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, message);
          storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, message.getPosition());
          storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, message.getOrientation());
-         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, message);
       }
    }
 
@@ -337,10 +337,12 @@ public class PerceptionDataLogger
 
    public void storeCompressedImage(String namespace, ImageMessage packet)
    {
+      LogTools.info("Storing Compressed Image: {}", namespace);
+
       long begin_store = System.nanoTime();
-      Group group = hdf5Manager.getGroup(namespace);
       executorService.submit(() ->
                              {
+                                Group group = hdf5Manager.getGroup(namespace);
 
                                 byte[] heapArray = byteBuffers.get(namespace);
                                 int imageCount = counts.get(namespace);
@@ -359,12 +361,12 @@ public class PerceptionDataLogger
 
    public void storePointCloud(String namespace, LidarScanMessage message)
    {
-      Group group = hdf5Manager.getGroup(namespace);
 
       executorService.submit(() ->
                              {
                                 synchronized (this)
                                 {
+                                   Group group = hdf5Manager.getGroup(namespace);
                                    LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
                                    pointCloudCount = (int) hdf5Manager.getCount(namespace);
                                    HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
