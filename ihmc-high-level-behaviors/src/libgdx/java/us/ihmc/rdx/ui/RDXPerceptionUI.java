@@ -19,9 +19,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Activator;
 
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 
-public class RDXPerceptionVisualizerUI
+public class RDXPerceptionUI
 {
    private final PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
 
@@ -39,7 +38,7 @@ public class RDXPerceptionVisualizerUI
 
    private Activator nativesLoadedActivator;
 
-   public RDXPerceptionVisualizerUI()
+   public RDXPerceptionUI()
    {
       logger = new PerceptionDataLogger();
 
@@ -144,7 +143,7 @@ public class RDXPerceptionVisualizerUI
 
    public static void main(String[] args) throws URISyntaxException
    {
-      new RDXPerceptionVisualizerUI();
+      new RDXPerceptionUI();
    }
 }
 

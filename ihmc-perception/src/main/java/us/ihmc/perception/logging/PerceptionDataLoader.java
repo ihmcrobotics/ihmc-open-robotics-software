@@ -129,7 +129,7 @@ public class PerceptionDataLoader
       String defaultLogDirectory =
             System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20221222_152459_PerceptionLog.hdf5";
+      String logFileName = "20221222_141507_Ouster.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
