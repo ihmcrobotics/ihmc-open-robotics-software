@@ -200,9 +200,11 @@ public class ProMPAssistant
                {
                   if (!bodyPartGoal.isEmpty() && objectPose != null) // if there is an observable goal this body part can reach
                   {
-                     taskGoalPose = objectPose;
-                     taskGoalPose.applyTransform(taskTransformGoalMap.get(currentTask));
+                     taskGoalPose = new FramePose3D(objectPose);
+                     taskGoalPose.appendRotation(taskTransformGoalMap.get(currentTask).getRotation());
+                     taskGoalPose.appendTranslation(taskTransformGoalMap.get(currentTask).getTranslation());
                   }
+                  LogTools.info("handle world: {}", objectPose);
                   LogTools.info("GOAL world: {}", taskGoalPose);
                   updateTask();
                   generateTaskTrajectories();
