@@ -70,6 +70,10 @@ public class RDXPerceptionVisualizerUI
                                                                                 ROS2Tools.L515_DEPTH_IMAGE,
                                                                                 ROS2Tools.L515_COLOR_IMAGE));
 
+            globalVisualizersUI.addVisualizer(new RDXROS2OusterPointCloudVisualizer("Ouster Point Cloud",
+                                                                                    PubSubImplementation.FAST_RTPS,
+                                                                                    ROS2Tools.OUSTER_DEPTH_IMAGE));
+
             globalVisualizersUI.addVisualizer(new RDXROS2PointCloudVisualizer("L515 Point Cloud",
                                                                               ros2Node,
                                                                               ROS2Tools.IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class)));
