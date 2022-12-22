@@ -659,9 +659,11 @@ public class GPUPlanarRegionExtraction
             planarRegionsList.addPlanarRegions(planarRegions);
          }
       }
-      sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
+      //sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
 
-      planarRegionsListWithPose.setPlanarRegionsList(planarRegionsList);
+      LogTools.info("Planar Regions Found: {}", planarRegionsList.getNumberOfPlanarRegions());
+
+      planarRegionsListWithPose.setPlanarRegionsList(planarRegionsList.copy());
       planarRegionsListWithPose.setSensorToWorldFrameTransform(sensorToWorldFrameTransform);
    }
 

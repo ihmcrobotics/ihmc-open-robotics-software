@@ -35,7 +35,7 @@ public class PlanarRegionMappingManager
 {
    private enum DataSource
    {
-      ROS2_CALLBACK, PLANAR_REGIONS_LOG, PERCEPTION_LOG
+      ROS2_CALLBACK, PLANAR_REGIONS_LOG, PERCEPTION_LOG, SUBMIT_API
    }
 
    private final DataSource source;
@@ -77,15 +77,19 @@ public class PlanarRegionMappingManager
 
    private PerceptionDataLoader perceptionDataLoader;
 
-   private static final File regionLogDirectory = new File(
-         System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
-
    private final String defaultLogDirectory =
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator + "Good"
          + File.separator;
 
    private final String perceptionLogDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
    private final String logFileName = "20221216_141954_PerceptionLog.hdf5";
+
+   public PlanarRegionMappingManager(boolean smoothing)
+   {
+      source = DataSource.SUBMIT_API;
+      planarRegionMap = new PlanarRegionMap(smoothing);
+
+   }
 
    public PlanarRegionMappingManager(String simpleRobotName, ROS2Node ros2Node, boolean smoothing)
    {
@@ -120,12 +124,12 @@ public class PlanarRegionMappingManager
       perceptionDataLoader.openLogFile(perceptionLogDirectory + logFileName);
    }
 
-   public PlanarRegionMappingManager(boolean smoothing)
+   public PlanarRegionMappingManager(File planarRegionLogDirectory, boolean smoothing)
    {
       source = DataSource.PLANAR_REGIONS_LOG;
       planarRegionMap = new PlanarRegionMap(smoothing);
 
-      for (File file : regionLogDirectory.listFiles())
+      for (File file : planarRegionLogDirectory.listFiles())
       {
          if (file.getName().toUpperCase().endsWith(".PRLLOG"))
          {
