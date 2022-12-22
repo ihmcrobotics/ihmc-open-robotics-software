@@ -105,14 +105,12 @@ public class ArUcoObjectInfo
    public Point3D getObjectTranslation(int id)
    {
       int realIndex = markerIds.indexOf(id);
-      Point3D translation = new Point3D(objectTranslations.get(realIndex).get(0), objectTranslations.get(realIndex).get(1), objectTranslations.get(realIndex).get(2));
-      return translation;
+      return new Point3D(objectTranslations.get(realIndex).get(0), objectTranslations.get(realIndex).get(1), objectTranslations.get(realIndex).get(2));
    }
 
    public YawPitchRoll getObjectYawPitchRoll(int id)
    {
       int realIndex = markerIds.indexOf(id);
-      YawPitchRoll rotation = new YawPitchRoll(objectRotations.get(realIndex).get(0), objectRotations.get(realIndex).get(1), objectRotations.get(realIndex).get(2));
-      return rotation;
+      return new YawPitchRoll(objectRotations.get(realIndex).get(0), objectRotations.get(realIndex).get(1), objectRotations.get(realIndex).get(2));
    }
 }

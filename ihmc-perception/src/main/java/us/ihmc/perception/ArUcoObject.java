@@ -31,8 +31,8 @@ public class ArUcoObject
    public void computeObjectPose(FramePose3DBasics markerPose)
    {
       objectPose.set(markerPose);
-      objectPose.appendTranslation(transformToHandle.getTranslation());
       objectPose.appendRotation(transformToHandle.getRotation());
+      objectPose.appendTranslation(transformToHandle.getTranslation());
    }
 
    public RigidBodyTransform getMarkerToWorld()
