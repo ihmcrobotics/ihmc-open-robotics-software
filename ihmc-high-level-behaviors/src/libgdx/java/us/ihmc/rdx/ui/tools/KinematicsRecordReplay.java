@@ -75,7 +75,6 @@ public class KinematicsRecordReplay
          { // we want to start the recording as soon as the user starts moving, recordings with different initial pauses can lead to bad behaviors when used for learning
             framePose.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             FramePose3D frameToRecord = new FramePose3D(framePose);
-            LogTools.info("Framepose world: {}", frameToRecord);
             // transform to object reference frame if using object detection
             if (objectFrame != null)
                frameToRecord.changeFrame(objectFrame);
@@ -89,7 +88,6 @@ public class KinematicsRecordReplay
                                                       frameToRecord.getPosition().getX(),
                                                       frameToRecord.getPosition().getY(),
                                                       frameToRecord.getPosition().getZ()};
-            LogTools.info("Framepose object: {}", frameToRecord);
             trajectoryRecorder.record(dataTrajectories);
          }
       }
@@ -122,11 +120,21 @@ public class KinematicsRecordReplay
                                                                                                                                                   .getTranslation());
             isUserMoving = distance > 0.04;
          }
+         if (!isUserMoving) // if still not moving analyze next frame at next call
+         {
+            partId++;
+            if (partId >= framesToRecordHistory.size())
+               partId = 0;
+         }
+      }
+      if (isUserMoving && partId > 0)  // we want to record the frames of all parts at each time step, if the user starts moving only after we parsed the frame of a previous part
+      { // this clause will activate the recording at the next step, preventing start recording while skipping the frame of a part, which would make the trajectory recorder crash
          partId++;
          if (partId >= framesToRecordHistory.size())
             partId = 0;
+         return false;
       }
-      return isUserMoving;
+      return isUserMoving && partId == 0;
    }
 
    public void framePoseToPack(FixedFramePose3DBasics framePose)
