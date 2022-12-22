@@ -11,15 +11,15 @@ public class ArUcoObject
    private RigidBodyTransform markerToWorld = new RigidBodyTransform();
    private final ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                      markerToWorld);
-   private final RigidBodyTransform transformToHandle = new RigidBodyTransform();
+   private final RigidBodyTransform transformToObject = new RigidBodyTransform();
    // object frame might be different than marker location, for example the door handle is not exactly where the marker is on the door
    private ReferenceFrame objectFrame;
    private FramePose3D objectPose = new FramePose3D();
 
    public ArUcoObject(int id, ArUcoObjectInfo arucoInfo)
    {
-      transformToHandle.set(arucoInfo.getObjectYawPitchRoll(id), arucoInfo.getObjectTranslation(id));
-      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, transformToHandle);
+      transformToObject.set(arucoInfo.getObjectYawPitchRoll(id), arucoInfo.getObjectTranslation(id));
+      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, transformToObject);
    }
 
    public void update()
@@ -31,13 +31,18 @@ public class ArUcoObject
    public void computeObjectPose(FramePose3DBasics markerPose)
    {
       objectPose.set(markerPose);
-      objectPose.appendRotation(transformToHandle.getRotation());
-      objectPose.appendTranslation(transformToHandle.getTranslation());
+      objectPose.appendRotation(transformToObject.getRotation());
+      objectPose.appendTranslation(transformToObject.getTranslation());
    }
 
    public RigidBodyTransform getMarkerToWorld()
    {
       return markerToWorld;
+   }
+
+   public ReferenceFrame getMarkerFrame()
+   {
+      return markerFrame;
    }
 
    public ReferenceFrame getObjectFrame()

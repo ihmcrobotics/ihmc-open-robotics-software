@@ -5,8 +5,6 @@ import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.ArUcoObject;
 import us.ihmc.perception.ArUcoObjectInfo;
 import us.ihmc.perception.OpenCVArUcoMarker;
@@ -70,7 +68,7 @@ public class RDXObjectDetector
                objectWithArUco = new ArUcoObject(objectId,arucoInfo);
                FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(marker); // get marker pose in camera frame
                markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform in world frame
-               markerPose.get(objectWithArUco.getMarkerToWorld());
+               markerPose.get(objectWithArUco.getMarkerToWorld()); // pack transform marker to world from marker pose
                objectWithArUco.update(); // update frame of the object
                objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
                break;
