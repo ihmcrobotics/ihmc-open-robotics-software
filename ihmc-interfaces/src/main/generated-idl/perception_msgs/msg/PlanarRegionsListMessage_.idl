@@ -4,6 +4,7 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Quaternion_.idl"
 #include "geometry_msgs/msg/./Vector3_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -25,14 +26,9 @@ module perception_msgs
          */
         unsigned long sequence_id;
         /**
-         * Approximate last update time seconds since epoch
-         * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
+         * Approximate last update time
          */
-        long long last_updated_seconds_since_epoch;
-        /**
-         * Approximate last update time additional nanoseconds
-         */
-        long long last_updated_additional_nanos;
+        ihmc_common_msgs::msg::dds::InstantMessage last_updated;
         /**
          * ID number referring to each planar region, it should be unique.
          */

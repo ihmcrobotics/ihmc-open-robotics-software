@@ -23,6 +23,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -304,8 +305,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             }
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-            planarRegionsListMessage.setLastUpdatedSecondsSinceEpoch(now.getEpochSecond());
-            planarRegionsListMessage.setLastUpdatedAdditionalNanos(now.getNano());
+            MessageTools.toMessage(now, planarRegionsListMessage.getLastUpdated());
             ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
