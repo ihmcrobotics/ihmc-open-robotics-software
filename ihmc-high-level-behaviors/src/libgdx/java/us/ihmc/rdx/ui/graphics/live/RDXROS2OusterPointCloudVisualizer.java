@@ -180,18 +180,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
          parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
          parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
-         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
-         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
-         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
-         parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
+         parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld);
          parametersOpenCLFloatBuffer.setParameter(depthWidth);
          parametersOpenCLFloatBuffer.setParameter(depthHeight);
          parametersOpenCLFloatBuffer.setParameter(pointSize.get());
