@@ -150,18 +150,7 @@ public class RDXNettyOusterUI
 
                   imageToPointCloudParameters.setParameter(horizontalFieldOfView.get());
                   imageToPointCloudParameters.setParameter(verticalFieldOfView.get());
-                  imageToPointCloudParameters.setParameter(transformToWorldFrame.getTranslation().getX32());
-                  imageToPointCloudParameters.setParameter(transformToWorldFrame.getTranslation().getY32());
-                  imageToPointCloudParameters.setParameter(transformToWorldFrame.getTranslation().getZ32());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM00());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM01());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM02());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM10());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM11());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM12());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM20());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM21());
-                  imageToPointCloudParameters.setParameter((float) transformToWorldFrame.getRotation().getM22());
+                  imageToPointCloudParameters.setParameter(transformToWorldFrame);
                   imageToPointCloudParameters.setParameter(depthWidth);
                   imageToPointCloudParameters.setParameter(depthHeight);
                   imageToPointCloudParameters.setParameter(0.01f);

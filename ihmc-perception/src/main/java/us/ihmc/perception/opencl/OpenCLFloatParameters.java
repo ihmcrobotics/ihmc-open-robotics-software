@@ -2,6 +2,7 @@ package us.ihmc.perception.opencl;
 
 import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.opencl._cl_mem;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 
@@ -30,6 +31,25 @@ public class OpenCLFloatParameters
       }
 
       ++parameterIndex;
+   }
+
+   /**
+    * Sets 12 float parameters for a RigidBodyTransform.
+    */
+   public void setParameter(RigidBodyTransform rigidBodyTransform)
+   {
+      setParameter(rigidBodyTransform.getTranslation().getX32());
+      setParameter(rigidBodyTransform.getTranslation().getY32());
+      setParameter(rigidBodyTransform.getTranslation().getZ32());
+      setParameter((float) rigidBodyTransform.getRotation().getM00());
+      setParameter((float) rigidBodyTransform.getRotation().getM01());
+      setParameter((float) rigidBodyTransform.getRotation().getM02());
+      setParameter((float) rigidBodyTransform.getRotation().getM10());
+      setParameter((float) rigidBodyTransform.getRotation().getM11());
+      setParameter((float) rigidBodyTransform.getRotation().getM12());
+      setParameter((float) rigidBodyTransform.getRotation().getM20());
+      setParameter((float) rigidBodyTransform.getRotation().getM21());
+      setParameter((float) rigidBodyTransform.getRotation().getM22());
    }
 
    public void writeOpenCLBufferObject(OpenCLManager openCLManager)
