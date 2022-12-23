@@ -19,14 +19,9 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
             */
    public long sequence_id_;
    /**
-            * Approximate last update time seconds since epoch
-            * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
+            * Approximate last update time
             */
-   public long last_updated_seconds_since_epoch_;
-   /**
-            * Approximate last update time additional nanoseconds
-            */
-   public long last_updated_additional_nanos_;
+   public ihmc_common_msgs.msg.dds.InstantMessage last_updated_;
    /**
             * ID number referring to each planar region, it should be unique.
             */
@@ -62,6 +57,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
    public PlanarRegionsListMessage()
    {
+      last_updated_ = new ihmc_common_msgs.msg.dds.InstantMessage();
       region_id_ = new us.ihmc.idl.IDLSequence.Integer (3000, "type_2");
 
       region_origin_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (3000, new geometry_msgs.msg.dds.PointPubSubType());
@@ -87,10 +83,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
    {
       sequence_id_ = other.sequence_id_;
 
-      last_updated_seconds_since_epoch_ = other.last_updated_seconds_since_epoch_;
-
-      last_updated_additional_nanos_ = other.last_updated_additional_nanos_;
-
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.last_updated_, last_updated_);
       region_id_.set(other.region_id_);
       region_origin_.set(other.region_origin_);
       region_orientation_.set(other.region_orientation_);
@@ -116,36 +109,13 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       return sequence_id_;
    }
 
-   /**
-            * Approximate last update time seconds since epoch
-            * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
-            */
-   public void setLastUpdatedSecondsSinceEpoch(long last_updated_seconds_since_epoch)
-   {
-      last_updated_seconds_since_epoch_ = last_updated_seconds_since_epoch;
-   }
-   /**
-            * Approximate last update time seconds since epoch
-            * Nanoseconds since the epoch goes beyond what a long can hold so we use two values.
-            */
-   public long getLastUpdatedSecondsSinceEpoch()
-   {
-      return last_updated_seconds_since_epoch_;
-   }
 
    /**
-            * Approximate last update time additional nanoseconds
+            * Approximate last update time
             */
-   public void setLastUpdatedAdditionalNanos(long last_updated_additional_nanos)
+   public ihmc_common_msgs.msg.dds.InstantMessage getLastUpdated()
    {
-      last_updated_additional_nanos_ = last_updated_additional_nanos;
-   }
-   /**
-            * Approximate last update time additional nanoseconds
-            */
-   public long getLastUpdatedAdditionalNanos()
-   {
-      return last_updated_additional_nanos_;
+      return last_updated_;
    }
 
 
@@ -240,10 +210,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.last_updated_seconds_since_epoch_, other.last_updated_seconds_since_epoch_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.last_updated_additional_nanos_, other.last_updated_additional_nanos_, epsilon)) return false;
-
+      if (!this.last_updated_.epsilonEquals(other.last_updated_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.region_id_, other.region_id_, epsilon)) return false;
 
       if (this.region_origin_.size() != other.region_origin_.size()) { return false; }
@@ -295,10 +262,7 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
-      if(this.last_updated_seconds_since_epoch_ != otherMyClass.last_updated_seconds_since_epoch_) return false;
-
-      if(this.last_updated_additional_nanos_ != otherMyClass.last_updated_additional_nanos_) return false;
-
+      if (!this.last_updated_.equals(otherMyClass.last_updated_)) return false;
       if (!this.region_id_.equals(otherMyClass.region_id_)) return false;
       if (!this.region_origin_.equals(otherMyClass.region_origin_)) return false;
       if (!this.region_orientation_.equals(otherMyClass.region_orientation_)) return false;
@@ -319,10 +283,8 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
       builder.append("PlanarRegionsListMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
-      builder.append("last_updated_seconds_since_epoch=");
-      builder.append(this.last_updated_seconds_since_epoch_);      builder.append(", ");
-      builder.append("last_updated_additional_nanos=");
-      builder.append(this.last_updated_additional_nanos_);      builder.append(", ");
+      builder.append("last_updated=");
+      builder.append(this.last_updated_);      builder.append(", ");
       builder.append("region_id=");
       builder.append(this.region_id_);      builder.append(", ");
       builder.append("region_origin=");

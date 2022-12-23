@@ -35,6 +35,7 @@ import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1253,5 +1254,21 @@ public class MessageTools
    {
       ellipsoidToSet.getPose().set(ellipsoidMessage.getPose());
       ellipsoidToSet.getRadii().set(ellipsoidMessage.getRadii());
+   }
+
+   public static void toMessage(Instant instant, InstantMessage instantMessage)
+   {
+      instantMessage.setSecondsSinceEpoch(instant.getEpochSecond());
+      instantMessage.setAdditionalNanos(instant.getNano());
+   }
+
+   /**
+    * Instant is immutable so there is no allocation free option.
+    * If allocation free is needed, just pass around the two longs separately.
+    * If needed, we could make a MutableInstant class.
+    */
+   public static Instant toInstant(InstantMessage instantMessage)
+   {
+      return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
    }
 }
