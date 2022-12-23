@@ -2,11 +2,6 @@ package us.ihmc.perception.ouster;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_mem;
-import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -18,7 +13,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
-import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -38,23 +32,15 @@ public class OusterDepthImagePublisher
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCRealtimeROS2Publisher<ImageMessage> ros2DepthImagePublisher;
-   private Supplier<ReferenceFrame> sensorFrameUpdater;
+   private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
-   private NettyOuster ouster;
+   private final NettyOuster ouster;
    private int depthWidth;
    private int depthHeight;
    private int numberOfPointsPerFullScan;
-   private ByteBuffer lidarFrameByteBufferCopy;
-   private BytePointer lidarFrameByteBufferPointerCopy;
-   private BytePointer lidarFrameByteBufferPointer;
+   private OusterDepthExtractionKernel depthExtractionKernel;
    private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-   private _cl_kernel extractDepthImageKernel;
-   private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
-   private OpenCLIntBuffer pixelShiftOpenCLBuffer;
-   private _cl_mem lidarFrameBufferObject;
-   private BytedecoImage compressionInputImage;
    private IntPointer compressionParameters;
    private ByteBuffer pngImageBuffer;
    private BytePointer pngImageBytePointer;
@@ -99,27 +85,21 @@ public class OusterDepthImagePublisher
             openCLManager.create();
          }
 
-         if (lidarFrameByteBufferCopy == null)
+         if (depthExtractionKernel == null)
          {
             LogTools.info("Ouster has been initialized.");
             depthWidth = ouster.getImageWidth();
             depthHeight = ouster.getImageHeight();
             numberOfPointsPerFullScan = depthWidth * depthHeight;
             LogTools.info("Ouster width: {} height: {} # points: {}", depthWidth, depthHeight, numberOfPointsPerFullScan);
-            lidarFrameByteBufferCopy = ByteBuffer.allocateDirect(ouster.getLidarFrameByteBuffer().limit());
-            lidarFrameByteBufferPointerCopy = new BytePointer(lidarFrameByteBufferCopy);
-            lidarFrameByteBufferPointer = new BytePointer(ouster.getLidarFrameByteBuffer());
+            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
-            compressionInputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
             pngImageBytePointer = new BytePointer(pngImageBuffer);
          }
 
          // copy while the ouster thread is blocked
-         lidarFrameByteBufferPointer.position(0);
-         lidarFrameByteBufferPointerCopy.position(0);
-         NativeMemoryTools.copy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
-
+         depthExtractionKernel.copyLidarFrameBuffer();
          extractCompressAndPublishThread.clearQueueAndExecute(this::extractCompressAndPublish);
       }
    }
@@ -130,41 +110,13 @@ public class OusterDepthImagePublisher
     */
    private synchronized void extractCompressAndPublish()
    {
-      if (openCLProgram == null)
-      {
-         openCLProgram = openCLManager.loadProgram(getClass().getSimpleName());
-         extractDepthImageKernel = openCLManager.createKernel(openCLProgram, "extractDepthImage");
-
-         lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
-         compressionInputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-         pixelShiftOpenCLBuffer = new OpenCLIntBuffer(ouster.getPixelShiftBuffer());
-         pixelShiftOpenCLBuffer.createOpenCLBufferObject(openCLManager);
-      }
-
       // Important not to store as a field, as update() needs to be called each frame
       ReferenceFrame cameraFrame = sensorFrameUpdater.get();
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      parametersBuffer.setParameter(ouster.getColumnsPerFrame());
-      parametersBuffer.setParameter(ouster.getMeasurementBlockSize());
-      parametersBuffer.setParameter(NettyOuster.HEADER_BLOCK_BYTES);
-      parametersBuffer.setParameter(NettyOuster.CHANNEL_DATA_BLOCK_BYTES);
-      parametersBuffer.setParameter(NettyOuster.MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM);
-      parametersBuffer.writeOpenCLBufferObject(openCLManager);
-
-      pixelShiftOpenCLBuffer.writeOpenCLBufferObject(openCLManager);
-      openCLManager.enqueueWriteBuffer(lidarFrameBufferObject, lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
-
-      openCLManager.setKernelArgument(extractDepthImageKernel, 0, parametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(extractDepthImageKernel, 1, pixelShiftOpenCLBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(extractDepthImageKernel, 2, lidarFrameBufferObject);
-      openCLManager.setKernelArgument(extractDepthImageKernel, 3, compressionInputImage.getOpenCLImageObject());
-      openCLManager.execute2D(extractDepthImageKernel, depthWidth, depthHeight);
-      compressionInputImage.readOpenCLImage(openCLManager);
-      openCLManager.finish();
-
-      opencv_imgcodecs.imencode(".png", compressionInputImage.getBytedecoOpenCVMat(), pngImageBytePointer, compressionParameters);
+      depthExtractionKernel.runKernel();
+      opencv_imgcodecs.imencode(".png", depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(), pngImageBytePointer, compressionParameters);
 
       outputImageMessage.getPosition().set(cameraPose.getPosition());
       outputImageMessage.getOrientation().set(cameraPose.getOrientation());
