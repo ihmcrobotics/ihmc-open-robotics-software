@@ -1,8 +1,3 @@
-double interpolate(double a, double b, double alpha)
-{
-  return (1.0 - alpha) * a + alpha * b;
-}
-
 int createRGB(double input)
 {
    // using interpolation between keu color points >>
