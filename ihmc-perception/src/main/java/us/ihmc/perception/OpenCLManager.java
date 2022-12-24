@@ -109,9 +109,20 @@ public class OpenCLManager
 
    public _cl_program loadProgram(String programName)
    {
+      String sourceAsString = "";
+
+      String[] includedHeaders = {"EuclidCommon.cl"};
+
+      for (String includedHeader : includedHeaders)
+      {
+         Path headerFilePath = Paths.get("openCL", includedHeader);
+         LogTools.info("Loading OpenCL program: {}", includedHeader);
+         sourceAsString += OpenCLTools.readFile(headerFilePath) + "\n";
+      }
+
       Path programPath = Paths.get("openCL", programName + ".cl");
       LogTools.info("Loading OpenCL program: {}", programPath);
-      String sourceAsString = OpenCLTools.readFile(programPath);
+      sourceAsString += OpenCLTools.readFile(programPath);
 
       // Support loading from CRLF (Windows) checkouts
       sourceAsString = sourceAsString.replaceAll("\\r\\n", "\n");

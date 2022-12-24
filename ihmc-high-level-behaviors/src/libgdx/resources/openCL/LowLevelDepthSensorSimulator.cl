@@ -1,34 +1,3 @@
-float4 transform(float x,
-                 float y,
-                 float z,
-                 float translationX,
-                 float translationY,
-                 float translationZ,
-                 float rotationMatrixM00,
-                 float rotationMatrixM01,
-                 float rotationMatrixM02,
-                 float rotationMatrixM10,
-                 float rotationMatrixM11,
-                 float rotationMatrixM12,
-                 float rotationMatrixM20,
-                 float rotationMatrixM21,
-                 float rotationMatrixM22)
-{
-   float4 ret = (float4) (rotationMatrixM00 * x + rotationMatrixM01 * y + rotationMatrixM02 * z,
-                          rotationMatrixM10 * x + rotationMatrixM11 * y + rotationMatrixM12 * z,
-                          rotationMatrixM20 * x + rotationMatrixM21 * y + rotationMatrixM22 * z,
-                          0.0f);
-   ret.x += translationX;
-   ret.y += translationY;
-   ret.z += translationZ;
-   return ret;
-}
-
-double interpolate(double a, double b, double alpha)
-{
-   return (1.0 - alpha) * a + alpha * b;
-}
-
 float4 createRGB(double input)
 {
    // Using interpolation between keu color points
