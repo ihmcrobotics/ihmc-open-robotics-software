@@ -3,12 +3,8 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import imgui.ImGui;
 import imgui.type.ImFloat;
-import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_program;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.*;
-import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -21,6 +17,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableFrameModel;
 import us.ihmc.rdx.ui.gizmo.CylinderRayIntersection;
 import us.ihmc.perception.netty.NettyOuster;
+import us.ihmc.rdx.ui.graphics.RDXOusterDepthImageToPointCloudKernel;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -35,12 +32,9 @@ public class RDXNettyOusterUI
    private final FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int numberOfDepthPoints;
-   private OusterDepthExtractionKernel depthExtractionKernel;
    private OpenCLManager openCLManager;
-   private _cl_program pointCloudRenderingProgram;
-   private _cl_kernel imageToPointCloudKernel;
-   private final OpenCLFloatParameters imageToPointCloudParameters = new OpenCLFloatParameters();
-   private OpenCLFloatBuffer pointCloudVertexBuffer;
+   private OusterDepthExtractionKernel depthExtractionKernel;
+   private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
    private final ImFloat verticalFieldOfView = new ImFloat((float) Math.toRadians(90.0));
    private final ImFloat horizontalFieldOfView = new ImFloat((float) Math.toRadians(360.0));
@@ -122,17 +116,13 @@ public class RDXNettyOusterUI
 
                      depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
 
-                     pointCloudRenderingProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
-                     imageToPointCloudKernel = openCLManager.createKernel(pointCloudRenderingProgram, "imageToPointCloud");
-
                      pointCloudRenderer = new RDXPointCloudRenderer();
                      pointCloudRenderer.create(numberOfDepthPoints);
                      baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.MODEL);
 
-                     pointCloudVertexBuffer = new OpenCLFloatBuffer(numberOfDepthPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX,
-                                                                    pointCloudRenderer.getVertexBuffer());
-                     pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
-
+                     depthImageToPointCloudKernel = new RDXOusterDepthImageToPointCloudKernel(pointCloudRenderer,
+                                                                                              openCLManager,
+                                                                                              depthExtractionKernel.getExtractedDepthImage());
                      isReady = true;
                   }
 
@@ -146,27 +136,9 @@ public class RDXNettyOusterUI
 
                   imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());
 
-                  RigidBodyTransform transformToWorldFrame = ousterInteractable.getReferenceFrame().getTransformToWorldFrame();
-
-                  imageToPointCloudParameters.setParameter(horizontalFieldOfView.get());
-                  imageToPointCloudParameters.setParameter(verticalFieldOfView.get());
-                  imageToPointCloudParameters.setParameter(transformToWorldFrame);
-                  imageToPointCloudParameters.setParameter(depthWidth);
-                  imageToPointCloudParameters.setParameter(depthHeight);
-                  imageToPointCloudParameters.setParameter(0.01f);
-                  imageToPointCloudParameters.writeOpenCLBufferObject(openCLManager);
-
-                  depthExtractionKernel.getExtractedDepthImage().writeOpenCLImage(openCLManager);
-                  pointCloudRenderer.updateMeshFastestBeforeKernel();
-                  pointCloudVertexBuffer.syncWithBackingBuffer();
-
-                  openCLManager.setKernelArgument(imageToPointCloudKernel, 0, imageToPointCloudParameters.getOpenCLBufferObject());
-                  openCLManager.setKernelArgument(imageToPointCloudKernel, 1, depthExtractionKernel.getExtractedDepthImage().getOpenCLImageObject());
-                  openCLManager.setKernelArgument(imageToPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-                  openCLManager.execute2D(imageToPointCloudKernel, depthWidth, depthHeight);
-                  pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-
-                  pointCloudRenderer.updateMeshFastestAfterKernel();
+                  depthImageToPointCloudKernel.updateSensorTransform(ousterInteractable.getReferenceFrame());
+                  float pointSize = 0.01f;
+                  depthImageToPointCloudKernel.runKernel(horizontalFieldOfView.get(), verticalFieldOfView.get(), pointSize);
                }
             }
 
