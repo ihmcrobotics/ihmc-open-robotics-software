@@ -41,7 +41,7 @@ public class RDXOusterDepthImageToPointCloudKernel
       this.pointCloudRenderer = pointCloudRenderer;
       this.openCLManager = openCLManager;
 
-      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
+      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer", "PerceptionCommon.cl");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
 
       int totalNumberOfPoints = depthImage.getImageWidth() * depthImage.getImageHeight();

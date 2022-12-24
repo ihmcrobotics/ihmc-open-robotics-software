@@ -1,52 +1,3 @@
-float4 createRGB(double input)
-{
-   // Using interpolation between keu color points
-   double r = 0, g = 0, b = 0;
-   double redR = 1.0, redG = 0.0, redB = 0.0;
-   double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
-   double orangeR = 1.0, orangeG = 200.0 / 255.0, orangeB = 0.0;
-   double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
-   double blueR = 0.0, blueG = 0.0, blueB = 1.0;
-   double greenR = 0.0, greenG = 1.0, greenB = 0.0;
-   double gradientSize = 0.2;
-   double gradientLength = 1;
-   double alpha = fmod(input, gradientLength);
-   if (alpha < 0)
-      alpha = 1 + alpha;
-   if (alpha <= gradientSize * 1)
-   {
-      r = interpolate(magentaR, blueR, (alpha) / gradientSize);
-      g = interpolate(magentaG, blueG, (alpha) / gradientSize);
-      b = interpolate(magentaB, blueB, (alpha) / gradientSize);
-   }
-   else if (alpha <= gradientSize * 2)
-   {
-      r = interpolate(blueR, greenR, (alpha - gradientSize * 1) / gradientSize);
-      g = interpolate(blueG, greenG, (alpha - gradientSize * 1) / gradientSize);
-      b = interpolate(blueB, greenB, (alpha - gradientSize * 1) / gradientSize);
-   }
-   else if (alpha <= gradientSize * 3)
-   {
-      r = interpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
-      g = interpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
-      b = interpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
-   }
-   else if (alpha <= gradientSize * 4)
-   {
-      r = interpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
-      g = interpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
-      b = interpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
-   }
-   else if (alpha <= gradientSize * 5)
-   {
-      r = interpolate(orangeR, redR, (alpha - gradientSize * 4) / gradientSize);
-      g = interpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
-      b = interpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
-   }
-
-   return (float4) (r, g, b, 1.0);
-}
-
 kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoordinateDepthImage,
                                          read_only image2d_t noiseImage,
                                          read_only image2d_t rgba8888ColorImage,
@@ -179,7 +130,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          }
          else if (colorBasedOnWorldZ)
          {
-            float4 rgba8888Color = createRGB(worldFramePoint.z);
+            float4 rgba8888Color = createGradientFloat4(worldFramePoint.z);
             pointColorR = (rgba8888Color.x);
             pointColorG = (rgba8888Color.y);
             pointColorB = (rgba8888Color.z);
