@@ -64,6 +64,7 @@ public class OusterDepthImagePublisher
       realtimeROS2Node.spin();
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
+      // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
       ouster.setOnFrameReceived(this::onFrameReceived);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
@@ -99,7 +100,7 @@ public class OusterDepthImagePublisher
             pngImageBytePointer = new BytePointer(pngImageBuffer);
          }
 
-         // copy while the ouster thread is blocked
+         // Fast memcopy while the ouster thread is blocked
          depthExtractionKernel.copyLidarFrameBuffer();
          extractCompressAndPublishThread.clearQueueAndExecute(this::extractCompressAndPublish);
       }
@@ -117,11 +118,13 @@ public class OusterDepthImagePublisher
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       depthExtractionKernel.runKernel();
+      // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png", depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(), pngImageBytePointer, compressionParameters);
 
       outputImageMessage.getPosition().set(cameraPose.getPosition());
       outputImageMessage.getOrientation().set(cameraPose.getOrientation());
       MessageTools.toMessage(ouster.getAquisitionInstant(), outputImageMessage.getAcquisitionTime());
+      // Sadly, Pub Sub makes us go through a TByteArrayList. If we rewrite our DDS layer, we should allow a memcpy to native DDS buffer.
       outputImageMessage.getData().resetQuick();
       for (int i = 0; i < pngImageBytePointer.limit(); i++)
       {
