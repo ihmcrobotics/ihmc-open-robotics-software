@@ -44,7 +44,7 @@ public class OusterDepthExtractionKernel
       lidarFrameByteBufferPointer = new BytePointer(nettyOuster.getLidarFrameByteBuffer());
 
       extractedDepthImage = new BytedecoImage(nettyOuster.getImageWidth(), nettyOuster.getImageHeight(), opencv_core.CV_16UC1);
-      depthImageExtractionProgram = openCLManager.loadProgram("OusterDepthImagePublisher");
+      depthImageExtractionProgram = openCLManager.loadProgram("OusterDepthImageExtraction");
       extractDepthImageKernel = openCLManager.createKernel(depthImageExtractionProgram, "extractDepthImage");
       lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
       extractedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
