@@ -118,7 +118,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
                depthHeight = imageMessage.getImageHeight();
                totalNumberOfPoints = depthWidth * depthHeight;
                pointCloudRenderer.create(totalNumberOfPoints);
-               decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
+               decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * Short.BYTES);
                decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
                decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
 
@@ -133,7 +133,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
             numberOfBytes = imageMessage.getData().size();
             decompressionInputBuffer.rewind();
-            decompressionInputBuffer.limit(depthWidth * depthHeight * 2);
+            decompressionInputBuffer.limit(depthWidth * depthHeight * Short.BYTES);
             for (int i = 0; i < numberOfBytes; i++)
             {
                decompressionInputBuffer.put(imageMessage.getData().get(i));
