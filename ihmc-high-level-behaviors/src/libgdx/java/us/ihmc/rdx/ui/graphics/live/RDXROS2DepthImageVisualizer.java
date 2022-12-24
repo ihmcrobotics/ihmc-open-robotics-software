@@ -71,7 +71,8 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
       {
          imageMessage.getData().resetQuick();
          subscriber.takeNextData(imageMessage, sampleInfo);
-         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTimeSecondsSinceEpoch(), imageMessage.getAcquisitionTimeAdditionalNanos()));
+         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                                     imageMessage.getAcquisitionTime().getAdditionalNanos()));
       }
       doReceiveMessageOnThread(() ->
       {
