@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
-public class OusterDepthImagePublisher
+public class OusterDepthImageNode
 {
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -48,7 +48,7 @@ public class OusterDepthImagePublisher
    private long sequenceNumber = 0;
    private final ImageMessage outputImageMessage = new ImageMessage();
 
-   public OusterDepthImagePublisher(Supplier<ReferenceFrame> sensorFrameUpdater)
+   public OusterDepthImageNode(Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.sensorFrameUpdater = sensorFrameUpdater;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
@@ -56,7 +56,7 @@ public class OusterDepthImagePublisher
       ouster = new NettyOuster();
       ouster.bind();
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_publisher");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
       ROS2Topic<ImageMessage> topic = ROS2Tools.OUSTER_DEPTH_IMAGE;
       LogTools.info("Publishing ROS 2 depth images: {}", topic);
       ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT());
@@ -139,6 +139,6 @@ public class OusterDepthImagePublisher
 
    public static void main(String[] args)
    {
-      new OusterDepthImagePublisher(ReferenceFrame::getWorldFrame);
+      new OusterDepthImageNode(ReferenceFrame::getWorldFrame);
    }
 }
