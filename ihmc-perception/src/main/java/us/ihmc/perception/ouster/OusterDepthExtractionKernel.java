@@ -9,6 +9,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 
@@ -55,7 +56,7 @@ public class OusterDepthExtractionKernel
    {
       lidarFrameByteBufferPointer.position(0);
       lidarFrameByteBufferPointerCopy.position(0);
-      lidarFrameByteBufferPointerCopy.put(lidarFrameByteBufferPointer);
+      NativeMemoryTools.copy(lidarFrameByteBufferPointer, lidarFrameByteBufferPointerCopy);
    }
 
    public void runKernel()
