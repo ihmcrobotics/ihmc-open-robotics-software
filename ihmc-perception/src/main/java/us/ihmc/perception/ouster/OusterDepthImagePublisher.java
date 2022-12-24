@@ -7,6 +7,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -120,8 +121,7 @@ public class OusterDepthImagePublisher
 
       outputImageMessage.getPosition().set(cameraPose.getPosition());
       outputImageMessage.getOrientation().set(cameraPose.getOrientation());
-      outputImageMessage.setAcquisitionTimeSecondsSinceEpoch(ouster.getAquisitionInstant().getEpochSecond());
-      outputImageMessage.setAcquisitionTimeAdditionalNanos(ouster.getAquisitionInstant().getNano());
+      MessageTools.toMessage(ouster.getAquisitionInstant(), outputImageMessage.getAcquisitionTime());
       outputImageMessage.getData().resetQuick();
       for (int i = 0; i < pngImageBytePointer.limit(); i++)
       {

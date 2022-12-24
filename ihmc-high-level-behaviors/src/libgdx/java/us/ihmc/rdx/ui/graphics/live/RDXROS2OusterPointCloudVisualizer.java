@@ -86,7 +86,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
       {
          imageMessage.getData().resetQuick();
          subscriber.takeNextData(imageMessage, sampleInfo);
-         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTimeSecondsSinceEpoch(), imageMessage.getAcquisitionTimeAdditionalNanos()));
+         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                                     imageMessage.getAcquisitionTime().getAdditionalNanos()));
       }
    }
 
@@ -127,8 +128,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
             sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
 
-            acquisitionTimeSecondsSinceEpoch = imageMessage.getAcquisitionTimeSecondsSinceEpoch();
-            acquisitionTimeAdditionalNanos = imageMessage.getAcquisitionTimeAdditionalNanos();
+            acquisitionTimeSecondsSinceEpoch = imageMessage.getAcquisitionTime().getSecondsSinceEpoch();
+            acquisitionTimeAdditionalNanos = imageMessage.getAcquisitionTime().getAdditionalNanos();
 
             numberOfBytes = imageMessage.getData().size();
             decompressionInputBuffer.rewind();
