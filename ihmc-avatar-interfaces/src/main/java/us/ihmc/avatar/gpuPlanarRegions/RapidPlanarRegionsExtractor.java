@@ -20,33 +20,30 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
-import java.nio.ByteBuffer;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Stack;
-import java.util.function.Consumer;
 
 import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
 
 public class RapidPlanarRegionsExtractor
 {
-   private enum FeatureGridType
-   {
-      PATCH_NORMAL_X, PATCH_NORMAL_Y, PATCH_NORMAL_Z, PATCH_CENTER_X, PATCH_CENTER_Y, PATCH_CENTER_Z
-   }
+   private BytedecoImage inputU16DepthImage;
 
-   private final FeatureGridType[] featureGridTypes = {FeatureGridType.PATCH_NORMAL_X,
-                                                       FeatureGridType.PATCH_NORMAL_Y,
-                                                       FeatureGridType.PATCH_NORMAL_Z,
-                                                       FeatureGridType.PATCH_CENTER_X,
-                                                       FeatureGridType.PATCH_CENTER_Y,
-                                                       FeatureGridType.PATCH_CENTER_Z};
+   private enum SensorModel
+   {
+      SPHERICAL, PERSPECTIVE
+   }
 
    private final GPUPlanarRegionExtractionParameters parameters;
 
-   private BytedecoImage inputU16DepthImage;
+   private SensorModel sensorModel;
 
-   HashMap<FeatureGridType, BytedecoImage> gridImages = new HashMap<>();
+   private BytedecoImage nxImage;
+   private BytedecoImage nyImage;
+   private BytedecoImage nzImage;
+   private BytedecoImage cxImage;
+   private BytedecoImage cyImage;
+   private BytedecoImage czImage;
    private BytedecoImage patchGraph;
 
    private BMatrixRMaj regionVisitedMatrix;
@@ -54,7 +51,7 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
 
-   private boolean patchSizeChanged = false;
+   private boolean patchSizeChanged = true;
 
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
@@ -73,21 +70,19 @@ public class RapidPlanarRegionsExtractor
    private int patchWidth;
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
-   private final Stack<GPUPlanarRegionExtractionDepthFirstSearchQuery> depthFirstSearchStack = new Stack<>();
 
+   private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
    private final Comparator<GPURegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
 
-   private final OpenCLManager openCLManager = new OpenCLManager();
+   private OpenCLManager openCLManager;
    private OpenCLFloatBuffer parametersBuffer;
    private _cl_program planarRegionExtractionProgram;
-   private _cl_kernel filterKernel;
    private _cl_kernel packKernel;
    private _cl_kernel mergeKernel;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-   private final RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
 
@@ -102,8 +97,11 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
+   public void create(OpenCLManager openCLManager, BytedecoImage depthImage, int imageWidth, int imageHeight, double fx, double fy, double cx, double cy)
    {
+      this.sensorModel = SensorModel.PERSPECTIVE;
+      this.openCLManager = openCLManager;
+      this.inputU16DepthImage = depthImage;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
@@ -114,17 +112,17 @@ public class RapidPlanarRegionsExtractor
 
       parametersBuffer = new OpenCLFloatBuffer(16);
       calculateDerivativeParameters();
-      inputU16DepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
 
-      for (FeatureGridType type : featureGridTypes)
-      {
-         gridImages.put(type, new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1));
-      }
+      nxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nzImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      czImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
 
       patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
 
-      openCLManager.create();
-      planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
+      planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
 
@@ -134,12 +132,52 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
+   public void create(OpenCLManager openCLManager, BytedecoImage depthImage, int imageWidth, int imageHeight)
+   {
+      this.sensorModel = SensorModel.SPHERICAL;
+      this.openCLManager = openCLManager;
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
+      this.inputU16DepthImage = depthImage;
+
+      parametersBuffer = new OpenCLFloatBuffer(16);
+      calculateDerivativeParameters();
+
+      nxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nzImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      czImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
+
+      openCLManager.create();
+      planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
+      packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
+      mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
+
+      regionVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
+      boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
+      boundaryMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
+      regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
+   }
+
+   public void update()
+   {
+      LogTools.info("++++++++++++++ [START] Calling Update ++++++++++++++++");
+      extractPatchGraphUsingOpenCL();
+      findRegions();
+      findBoundariesAndHoles();
+      growRegionBoundaries();
+      LogTools.info(" --------------------- [DONE] Calling Update -------------------------- ");
+   }
+
    /**
     * Extracts features and generates patch graph from the input depth image on the GPU.
-    *
     */
-   public void extractPatchGraphOnGPU()
+   public void extractPatchGraphUsingOpenCL()
    {
+      LogTools.info("++++++++++++++ [START] Generating Patch Graph ++++++++++++++++");
       calculateDerivativeParameters();
 
       // Flip so the Y+ goes up instead of down.
@@ -167,10 +205,12 @@ public class RapidPlanarRegionsExtractor
          patchSizeChanged = false;
          LogTools.info("Resizing patch image to {}x{}", patchImageWidth, patchImageHeight);
 
-         for (FeatureGridType type : featureGridTypes)
-         {
-            gridImages.get(type).resize(patchImageWidth, patchImageHeight, openCLManager, null);
-         }
+         nxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nzImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         cxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
          patchGraph.resize(patchImageWidth, patchImageHeight, openCLManager, null);
 
          regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
@@ -183,10 +223,12 @@ public class RapidPlanarRegionsExtractor
          firstRun = false;
          inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-         for (FeatureGridType type : featureGridTypes)
-         {
-            gridImages.get(type).createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         }
+         nxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         nyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         nzImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         cxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         cyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         czImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          patchGraph.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
       }
@@ -198,44 +240,45 @@ public class RapidPlanarRegionsExtractor
 
       _cl_mem inputImage = inputU16DepthImage.getOpenCLImageObject();
 
-      int argIndex = 0;
-      openCLManager.setKernelArgument(packKernel, argIndex++, inputImage);
-      for (FeatureGridType type : featureGridTypes)
-      {
-         openCLManager.setKernelArgument(packKernel, argIndex++, gridImages.get(type).getOpenCLImageObject());
-      }
-      openCLManager.setKernelArgument(packKernel, argIndex++, parametersBuffer.getOpenCLBufferObject());
-
-      argIndex = 0;
-      for (FeatureGridType type : featureGridTypes)
-      {
-         openCLManager.setKernelArgument(mergeKernel, argIndex++, gridImages.get(type).getOpenCLImageObject());
-      }
-      openCLManager.setKernelArgument(mergeKernel, argIndex++, patchGraph.getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, argIndex++, parametersBuffer.getOpenCLBufferObject());
-
+      openCLManager.setKernelArgument(packKernel, 0, inputImage);
+      openCLManager.setKernelArgument(packKernel, 1, nxImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 2, nyImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 3, nzImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 4, cxImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 5, cyImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 6, czImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 7, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(packKernel, patchImageHeight, patchImageWidth);
+
+      openCLManager.setKernelArgument(mergeKernel, 0, nxImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 1, nyImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 2, nzImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 3, cxImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 4, cyImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 5, czImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 6, patchGraph.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(mergeKernel, patchImageHeight, patchImageWidth);
 
-      for (FeatureGridType type : featureGridTypes)
-      {
-         openCLManager.enqueueReadImage(gridImages.get(type).getOpenCLImageObject(),
-                                        patchImageWidth,
-                                        patchImageHeight,
-                                        gridImages.get(type).getBytedecoByteBufferPointer());
-      }
+      openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nxImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(nyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nyImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(nzImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nzImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(cxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cxImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(patchGraph.getOpenCLImageObject(), patchImageWidth, patchImageHeight, patchGraph.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
+
+      LogTools.info(" --------------------- [DONE] Generating Patch Graph -------------------------- ");
    }
 
    /**
-    *
-    *
-    * @param forDrawingDebugPanel Consumer for drawing the debug panel.
+    * Finds the connected regions in the patch graph using Depth First Search. It uses a heap-allocated stack object instead of process recursion stack.
     */
-   public void findRegions(Consumer<GPUPlanarRegionIsland> forDrawingDebugPanel)
+   public void findRegions()
    {
+      LogTools.info("++++++++++++++ [START] Finding Regions ++++++++++++++++");
       int planarRegionIslandIndex = 0;
       regionMaxSearchDepth = 0;
       gpuPlanarRegions.clear();
@@ -243,6 +286,7 @@ public class RapidPlanarRegionsExtractor
       boundaryMatrix.zero();
       regionMatrix.zero();
       maxSVDSolveTime = 0.0;
+
       for (int row = 0; row < patchImageHeight; row++)
       {
          for (int column = 0; column < patchImageWidth; column++)
@@ -253,12 +297,11 @@ public class RapidPlanarRegionsExtractor
                numberOfRegionPatches = 0; // also number of patches traversed
                GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
-               // We use a stack object instead of using the JVM's stack because it's very tall and would require special
-               // settings and breaks profiling. It would crash YourKit.
-               depthFirstSearchStack.push(new GPUPlanarRegionExtractionDepthFirstSearchQuery(row, column, planarRegionIslandIndex, planarRegion, 1));
+
+               depthFirstSearchStack.push(new PatchGraphRecursionBlock(row, column, planarRegionIslandIndex, planarRegion, 1));
                while (!depthFirstSearchStack.empty())
                {
-                  depthFirstSearchStack.pop().performQuery();
+                  depthFirstSearchStack.pop().expandBlock();
                }
                if (numberOfRegionPatches >= parameters.getRegionMinPatches())
                {
@@ -269,8 +312,6 @@ public class RapidPlanarRegionsExtractor
 
                   tempIsland.planarRegion = planarRegion;
                   tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
-                  if (forDrawingDebugPanel != null)
-                     forDrawingDebugPanel.accept(tempIsland);
                }
                else
                {
@@ -281,129 +322,96 @@ public class RapidPlanarRegionsExtractor
             }
          }
       }
+      LogTools.info("Total GPUPlanarRegions Found: {}", gpuPlanarRegions.size());
+      LogTools.info(" --------------------- [DONE] Generating Patch Graph -------------------------- ");
    }
 
-   public class GPUPlanarRegionExtractionDepthFirstSearchQuery
+   public void findBoundariesAndHoles()
    {
-      private final int row;
-      private final int column;
-      private final int planarRegionIslandIndex;
-      private final GPUPlanarRegion planarRegion;
-      private final int searchDepth;
-
-      public GPUPlanarRegionExtractionDepthFirstSearchQuery(int row, int column, int planarRegionIslandIndex, GPUPlanarRegion planarRegion, int searchDepth)
-      {
-         this.row = row;
-         this.column = column;
-         this.planarRegionIslandIndex = planarRegionIslandIndex;
-         this.planarRegion = planarRegion;
-         this.searchDepth = searchDepth;
-      }
-
-      public void performQuery()
-      {
-         if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
-            return;
-
-         if (searchDepth > regionMaxSearchDepth)
-            regionMaxSearchDepth = searchDepth;
-
-         ++numberOfRegionPatches;
-         regionVisitedMatrix.set(row, column, true);
-         regionMatrix.set(row, column, planarRegionIslandIndex);
-         // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-         float ny = -gridImages.get(FeatureGridType.PATCH_NORMAL_X).getFloat(column, row);
-         float nz = gridImages.get(FeatureGridType.PATCH_NORMAL_Y).getFloat(column, row);
-         float nx = gridImages.get(FeatureGridType.PATCH_NORMAL_Z).getFloat(column, row);
-         float cy = -gridImages.get(FeatureGridType.PATCH_CENTER_X).getFloat(column, row);
-         float cz = gridImages.get(FeatureGridType.PATCH_CENTER_Y).getFloat(column, row);
-         float cx = gridImages.get(FeatureGridType.PATCH_CENTER_Z).getFloat(column, row);
-         planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
-
-         int count = 0;
-         for (int i = 0; i < 8; i++)
-         {
-            if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
-            {
-               int boundaryConnectionsEncodedAsOnes = patchGraph.getByteAsInteger((column + adjacentX[i]), (row + adjacentY[i]));
-               if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
-               {
-                  ++count;
-                  depthFirstSearchStack.push(new GPUPlanarRegionExtractionDepthFirstSearchQuery(row + adjacentY[i],
-                                                                                                column + adjacentX[i],
-                                                                                                planarRegionIslandIndex,
-                                                                                                planarRegion,
-                                                                                                searchDepth + 1));
-               }
-            }
-         }
-         if (count != 8)
-         {
-            boundaryMatrix.set(row, column, true);
-            planarRegion.getBorderIndices().add().set(column, row);
-         }
-      }
-   }
-
-   public void findBoundariesAndHoles(Consumer<GPURegionRing> forDrawingDebugPanel)
-   {
+      LogTools.info("++++++++++++++ [START] Finding Boundaries and Holes ++++++++++++++++");
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
       gpuPlanarRegions.parallelStream().forEach(planarRegion ->
-                                                {
-                                                   int leafPatchIndex = 0;
-                                                   int regionRingIndex = 0;
-                                                   planarRegion.getRegionsRingsBySize().clear();
-                                                   for (Point2D leafPatch : planarRegion.getBorderIndices())
-                                                   {
-                                                      GPURegionRing regionRing = planarRegion.getRegionRings().add();
-                                                      regionRing.reset();
-                                                      regionRing.setIndex(regionRingIndex);
-                                                      int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
-                                                                                                             (int) leafPatch.getX(),
-                                                                                                             planarRegion.getId(),
-                                                                                                             regionRing,
-                                                                                                             leafPatchIndex,
-                                                                                                             1);
-                                                      if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
-                                                      {
-                                                         if (forDrawingDebugPanel != null)
-                                                            forDrawingDebugPanel.accept(regionRing);
-                                                         ++regionRingIndex;
-                                                         regionRing.updateConvexPolygon();
-                                                         planarRegion.getRegionsRingsBySize().add(regionRing);
-                                                      }
-                                                      else
-                                                      {
-                                                         planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
-                                                      }
-                                                      ++leafPatchIndex;
-                                                   }
+      {
+         int leafPatchIndex = 0;
+         int regionRingIndex = 0;
+         planarRegion.getRegionsRingsBySize().clear();
+         for (Point2D leafPatch : planarRegion.getBorderIndices())
+         {
+            GPURegionRing regionRing = planarRegion.getRegionRings().add();
+            regionRing.reset();
+            regionRing.setIndex(regionRingIndex);
+            int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
+                                                                   (int) leafPatch.getX(),
+                                                                   planarRegion.getId(),
+                                                                   regionRing,
+                                                                   leafPatchIndex,
+                                                                   1);
+            if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
+            {
+               ++regionRingIndex;
+               regionRing.updateConvexPolygon();
+               planarRegion.getRegionsRingsBySize().add(regionRing);
+            }
+            else
+            {
+               planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
+            }
+            ++leafPatchIndex;
+         }
 
-                                                   // remove holes
-                                                   for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
-                                                   {
-                                                      planarRegion.getHoleRingsToRemove().clear();
-                                                      for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
-                                                      {
-                                                         if (otherRegionRing != regionRing)
-                                                         {
-                                                            // We probably only need to check one
-                                                            Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
-                                                            if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
-                                                            {
-                                                               planarRegion.getHoleRingsToRemove().add(otherRegionRing);
-                                                            }
-                                                         }
-                                                      }
-                                                      for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
-                                                      {
-                                                         planarRegion.getRegionRings().remove(regionRingToRemove);
-                                                      }
-                                                   }
+         // remove holes
+         for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
+         {
+            planarRegion.getHoleRingsToRemove().clear();
+            for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
+            {
+               if (otherRegionRing != regionRing)
+               {
+                  // We probably only need to check one
+                  Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
+                  if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
+                  {
+                     planarRegion.getHoleRingsToRemove().add(otherRegionRing);
+                  }
+               }
+            }
+            for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
+            {
+               planarRegion.getRegionRings().remove(regionRingToRemove);
+            }
+         }
 
-                                                   planarRegion.getRegionRings().sort(boundaryLengthComparator);
-                                                });
+         planarRegion.getRegionRings().sort(boundaryLengthComparator);
+      });
+      LogTools.info(" --------------------- [DONE] Finding Boundaries and Holes -------------------------- ");
+   }
+
+   public void growRegionBoundaries()
+   {
+      LogTools.info("++++++++++++++ [START] Growing Region Boundaries ++++++++++++++++");
+      gpuPlanarRegions.forEach(planarRegion ->
+                               {
+                                  if (!planarRegion.getRegionRings().isEmpty())
+                                  {
+                                     GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+                                     for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+                                     {
+                                        // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+                                        float vertexX = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+                                        float vertexY = -cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+                                        float vertexZ = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+
+                                        Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
+                                        boundaryVertex.set(vertexX, vertexY, vertexZ);
+                                        boundaryVertex.sub(planarRegion.getCenter());
+                                        boundaryVertex.normalize();
+                                        boundaryVertex.scale(parameters.getRegionGrowthFactor());
+                                        boundaryVertex.add(vertexX, vertexY, vertexZ);
+                                     }
+                                  }
+                               });
+      LogTools.info(" --------------------- [DONE] Growing Region Boundaries -------------------------- ");
    }
 
    private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
@@ -433,40 +441,6 @@ public class RapidPlanarRegionsExtractor
          }
       }
       return numberOfBoundaryPatches;
-   }
-
-   public void growRegionBoundaries()
-   {
-      gpuPlanarRegions.forEach(planarRegion ->
-                               {
-                                  if (!planarRegion.getRegionRings().isEmpty())
-                                  {
-                                     GPURegionRing firstRing = planarRegion.getRegionRings().get(0);
-                                     for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
-                                     {
-                                        // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-                                        float vertexX = gridImages.get(FeatureGridType.PATCH_CENTER_Z)
-                                                                  .getBytedecoOpenCVMat()
-                                                                  .ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX())
-                                                                  .getFloat();
-                                        float vertexY = -gridImages.get(FeatureGridType.PATCH_CENTER_X)
-                                                                   .getBytedecoOpenCVMat()
-                                                                   .ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX())
-                                                                   .getFloat();
-                                        float vertexZ = gridImages.get(FeatureGridType.PATCH_CENTER_Y)
-                                                                  .getBytedecoOpenCVMat()
-                                                                  .ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX())
-                                                                  .getFloat();
-
-                                        Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
-                                        boundaryVertex.set(vertexX, vertexY, vertexZ);
-                                        boundaryVertex.sub(planarRegion.getCenter());
-                                        boundaryVertex.normalize();
-                                        boundaryVertex.scale(parameters.getRegionGrowthFactor());
-                                        boundaryVertex.add(vertexX, vertexY, vertexZ);
-                                     }
-                                  }
-                               });
    }
 
    private void calculateDerivativeParameters()
@@ -527,11 +501,6 @@ public class RapidPlanarRegionsExtractor
       return planarRegionsList;
    }
 
-   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
-   {
-      return planarRegionsListWithPose;
-   }
-
    public int getPatchImageWidth()
    {
       return patchImageWidth;
@@ -542,44 +511,9 @@ public class RapidPlanarRegionsExtractor
       return patchImageHeight;
    }
 
-   public OpenCLManager getOpenCLManager()
-   {
-      return openCLManager;
-   }
-
    public int getNumberOfBoundaryPatchesInWholeImage()
    {
       return numberOfBoundaryPatchesInWholeImage;
-   }
-
-   public BytedecoImage getNxImage()
-   {
-      return gridImages.get(FeatureGridType.PATCH_NORMAL_X);
-   }
-
-   public BytedecoImage getNyImage()
-   {
-      return gridImages.get(FeatureGridType.PATCH_NORMAL_Y);
-   }
-
-   public BytedecoImage getNzImage()
-   {
-      return gridImages.get(FeatureGridType.PATCH_NORMAL_Z);
-   }
-
-   public BytedecoImage getCxImage()
-   {
-      return gridImages.get(FeatureGridType.PATCH_CENTER_X);
-   }
-
-   public BytedecoImage getCyImage()
-   {
-      return gridImages.get(FeatureGridType.PATCH_CENTER_Y);
-   }
-
-   public BytedecoImage getCzImage()
-   {
-      return gridImages.get(FeatureGridType.PATCH_CENTER_Z);
    }
 
    public RecyclingArrayList<GPUPlanarRegion> getGPUPlanarRegions()
@@ -625,6 +559,68 @@ public class RapidPlanarRegionsExtractor
    public double getMaxSVDSolveTime()
    {
       return maxSVDSolveTime;
+   }
+
+   public class PatchGraphRecursionBlock
+   {
+      private final int row;
+      private final int column;
+      private final int planarRegionIslandIndex;
+      private final GPUPlanarRegion planarRegion;
+      private final int searchDepth;
+
+      public PatchGraphRecursionBlock(int row, int column, int planarRegionIslandIndex, GPUPlanarRegion planarRegion, int searchDepth)
+      {
+         this.row = row;
+         this.column = column;
+         this.planarRegionIslandIndex = planarRegionIslandIndex;
+         this.planarRegion = planarRegion;
+         this.searchDepth = searchDepth;
+      }
+
+      public void expandBlock()
+      {
+         if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
+            return;
+
+         if (searchDepth > regionMaxSearchDepth)
+            regionMaxSearchDepth = searchDepth;
+
+         ++numberOfRegionPatches;
+         regionVisitedMatrix.set(row, column, true);
+         regionMatrix.set(row, column, planarRegionIslandIndex);
+         // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+         float ny = -nxImage.getFloat(column, row);
+         float nz = nyImage.getFloat(column, row);
+         float nx = nzImage.getFloat(column, row);
+         float cy = -cxImage.getFloat(column, row);
+         float cz = cyImage.getFloat(column, row);
+         float cx = czImage.getFloat(column, row);
+         planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
+
+         int count = 0;
+         for (int i = 0; i < 8; i++)
+         {
+            if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
+            {
+               int boundaryConnectionsEncodedAsOnes = patchGraph.getByteAsInteger((column + adjacentX[i]), (row + adjacentY[i]));
+               if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
+               {
+                  ++count;
+                  depthFirstSearchStack.push(new PatchGraphRecursionBlock(row + adjacentY[i],
+                                                                          column + adjacentX[i],
+                                                                          planarRegionIslandIndex,
+                                                                          planarRegion,
+                                                                          searchDepth + 1));
+               }
+            }
+         }
+         if (count != 8)
+         {
+            boundaryMatrix.set(row, column, true);
+            planarRegion.getBorderIndices().add().set(column, row);
+         }
+      }
    }
 }
 

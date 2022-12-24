@@ -4,7 +4,6 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,46 +17,41 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.Activator;
-
-import java.nio.ByteBuffer;
 
 public class RDXRapidRegionsExtractionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
+   private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
+   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
+
+   private final GPUPlanarRegionExtractionParameters gpuPlanarRegionExtractionParameters = new GPUPlanarRegionExtractionParameters();
+   private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(gpuPlanarRegionExtractionParameters);
    private Activator nativesLoadedActivator;
-   private RDXEnvironmentBuilder environmentBuilder;
-   private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
-   private GPUPlanarRegionExtractionParameters gpuPlanarRegionExtractionParameters;
+   private BytedecoImage bytedecoDepthImage;
+   private OpenCLFloatBuffer pointCloudVertexBuffer;
+   private OpenCLManager openCLManager;
+   private _cl_program openCLProgram;
+   private _cl_kernel unpackPointCloudKernel;
+   private PerceptionDataLoader perceptionDataLoader;
 
    private int depthWidth;
    private int depthHeight;
    private int totalNumberOfPoints;
-
-   private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
-   private ByteBuffer decompressionInputBuffer;
-
-   private BytedecoImage bytedecoDepthImage;
-   private OpenCLFloatBuffer pointCloudVertexBuffer;
-   private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
-   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
-
-   private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
-   private _cl_kernel unpackPointCloudKernel;
-
-   private Mat depthImage = new Mat(128, 2058, opencv_core.CV_16UC1);
-
-   private PerceptionDataLoader perceptionDataLoader;
+   private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
    public RDXRapidRegionsExtractionDemo()
    {
-      perceptionDataLoader = new PerceptionDataLoader();
-      perceptionDataLoader.openLogFile("/home/bmishra/.ihmc/logs/perception/20221222_141507_Ouster.hdf5");
+      depthHeight = 128;
+      depthWidth = 2048;
 
-      perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, depthImage);
+      perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader.openLogFile("/home/quantum/.ihmc/logs/perception/20221222_141507_Ouster.hdf5");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -65,15 +59,19 @@ public class RDXRapidRegionsExtractionDemo
          public void create()
          {
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
-
-            submitToPointCloudRenderer(depthImage);
-
             baseUI.create();
 
-            environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
-            environmentBuilder.create();
-            baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DemoPullDoor.json");
+            planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+
+            openCLManager = new OpenCLManager();
+            openCLManager.create();
+
+            bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
+
+
+            //submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
+            submitToPlanarRegionExtractor(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
          }
 
          @Override
@@ -83,23 +81,12 @@ public class RDXRapidRegionsExtractionDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  //                  rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(gpuPlanarRegionExtractionParameters);
-                  //                  rapidPlanarRegionsExtractor.create(depthWidth,
-                  //                                                     depthHeight, ,
-                  //                                                     cameraIntrinsics.getFx(),
-                  //                                                     cameraIntrinsics.getFy(),
-                  //                                                     cameraIntrinsics.getCx(),
-                  //                                                     cameraIntrinsics.getCy(),
-                  //                                                     l515PoseGizmo.getGizmoFrame()); rapidPlanarRegionsExtractor.getEnabled().set(true);
-                  //                  baseUI.getImGuiPanelManager().addPanel(rapidPlanarRegionsExtractor.getPanel());
-                  //                  baseUI.getPrimaryScene().addRenderableProvider(rapidPlanarRegionsExtractor::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+
+                  baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
-
-               pointCloudRenderer.updateMeshFastest(totalNumberOfPoints);
-
-               //               rapidPlanarRegionsExtractor.extractPlanarRegions();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -110,23 +97,23 @@ public class RDXRapidRegionsExtractionDemo
          public void dispose()
          {
             baseUI.dispose();
-            environmentBuilder.destroy();
          }
       });
    }
 
-   public void submitToPointCloudRenderer(Mat depthImage)
+   public void submitToPointCloudRenderer(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
    {
-      depthWidth = depthImage.cols();
-      depthHeight = depthImage.rows();
+      depthWidth = width;
+      depthHeight = height;
+
+      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
+      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
+
+      bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+
 
       totalNumberOfPoints = depthWidth * depthHeight;
       pointCloudRenderer.create(totalNumberOfPoints);
-
-      bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-      bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-
-      bytedecoDepthImage.resize(depthWidth, depthHeight, openCLManager, depthImage.asByteBuffer());
 
       pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
       pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
@@ -155,14 +142,32 @@ public class RDXRapidRegionsExtractionDemo
       parametersOpenCLFloatBuffer.setParameter(0.01f);
 
       parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-      bytedecoDepthImage.writeOpenCLImage(openCLManager);
+      bytedecoImage.writeOpenCLImage(openCLManager);
+      pointCloudRenderer.updateMeshFastestBeforeKernel();
       pointCloudVertexBuffer.syncWithBackingBuffer();
 
       openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, bytedecoDepthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, bytedecoImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
+
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+      pointCloudRenderer.updateMeshFastestAfterKernel();
+   }
+
+   public void submitToPlanarRegionExtractor(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
+   {
+      rapidPlanarRegionsExtractor.create(openCLManager, bytedecoImage, width, height);
+      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+
+      // Get the planar regions from the planar region extractor
+      rapidPlanarRegionsExtractor.update();
+      PlanarRegionsList planarRegions = rapidPlanarRegionsExtractor.getPlanarRegionsList();
+
+      // Submit the planar regions to the planar region renderer
+      planarRegionsGraphic.generateMeshes(planarRegions);
+      planarRegionsGraphic.update();
+
    }
 
    public static void main(String[] args)
