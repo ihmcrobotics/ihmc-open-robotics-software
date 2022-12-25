@@ -254,7 +254,7 @@ public class HeightMapManager
       if (xIndex < 0 || xIndex >= cellsPerAxis)
          return Double.NaN;
 
-      int yIndex = HeightMapTools.coordinateToIndex(x, gridCenterXY.getY(), gridResolutionXY, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(y, gridCenterXY.getY(), gridResolutionXY, centerIndex);
       if (yIndex < 0 || yIndex >= cellsPerAxis)
          return Double.NaN;
 

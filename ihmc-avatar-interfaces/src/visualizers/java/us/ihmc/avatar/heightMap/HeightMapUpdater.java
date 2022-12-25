@@ -6,13 +6,11 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -22,7 +20,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -38,11 +35,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.StreamSupport;
 
 public class HeightMapUpdater
 {
    private static final boolean printFrequency = false;
    private static final boolean printQueueSize = false;
+
+   private static final int minNumberOfNeighbors = 2;
+   private static final int minNumberOfNeighborsToResetHeight = 3;
+   private static final double epsilonHeightReset = 0.04;
 
    static final boolean USE_OUSTER_FRAME = true;
    static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
@@ -58,7 +60,6 @@ public class HeightMapUpdater
 
    private final HeightMapParameters parameters;
 
-   private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final List<Consumer<HeightMapMessage>> heightMapConsumers = new ArrayList<>();
    private Consumer<Point2DReadOnly> gridCenterConsumer;
@@ -196,8 +197,6 @@ public class HeightMapUpdater
          updateFrequency();
       }
 
-      ousterFrame.setPoseAndUpdate(pointCloudFramePose);
-
       RigidBodyTransformReadOnly ousterTransform = USE_OUSTER_FRAME ? pointCloudFramePose : APPROX_OUSTER_TRANSFORM;
       boolean isNonZeroTransform = ousterTransform.hasTranslation() && ousterTransform.hasRotation();
 
@@ -320,69 +319,9 @@ public class HeightMapUpdater
       }
 
       /* Remove cells with no neighbors and reset height of cells which are higher than all neighbors */
-      if (parameters.getRemoveOutlierCells())
+      for (int cellNumber = heightMap.getNumberOfCells() - 1; cellNumber >= 0; cellNumber--)
       {
-         int minNumberOfNeighbors = 2;
-         int minNumberOfNeighborsToResetHeight = 3;
-         double epsilonHeightReset = 0.04;
-
-         outerLoop:
-         for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
-         {
-            int xIndex = heightMap.getXIndex(i);
-            int yIndex = heightMap.getYIndex(i);
-
-            if (xIndex == 0 || yIndex == 0 || xIndex == heightMap.getCellsPerAxis() - 1 || yIndex == heightMap.getCellsPerAxis() - 1)
-            {
-               continue;
-            }
-
-            boolean muchHigherThanAllNeighbors = true;
-            double heightThreshold = heightMap.getHeightAt(i) - epsilonHeightReset;
-            int numberOfNeighbors = 0;
-            for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
-            {
-               int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
-               int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
-               if (heightMap.cellHasData(xNeighbor, yNeighbor))
-               {
-                  numberOfNeighbors++;
-                  muchHigherThanAllNeighbors = muchHigherThanAllNeighbors && heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
-               }
-
-               if (numberOfNeighbors >= minNumberOfNeighbors && !muchHigherThanAllNeighbors)
-               {
-                  heightMap.setHasSufficientNeighbors(i, true);
-                  continue outerLoop;
-               }
-            }
-
-            if (numberOfNeighbors < minNumberOfNeighbors)
-            {
-               heightMap.setHasSufficientNeighbors(i, false);
-            }
-            else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && muchHigherThanAllNeighbors)
-            {
-               double resetHeight = 0.0;
-               for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
-               {
-                  int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
-                  int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
-                  if (heightMap.cellHasData(xNeighbor, yNeighbor))
-                  {
-                     resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
-                  }
-               }
-               heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors);
-            }
-         }
-      }
-      else
-      {
-         for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
-         {
-            heightMap.setHasSufficientNeighbors(i, true);
-         }
+         updateIfCellIsOutlier(cellNumber);
       }
 
       if (parameters.getFillHoles())
@@ -402,25 +341,91 @@ public class HeightMapUpdater
             {
                for (int yIndex = holeProximityThreshold; yIndex < heightMap.getCellsPerAxis() - holeProximityThreshold; yIndex++)
                {
-                  if (heightMap.cellHasData(xIndex, yIndex))
-                     continue;
-
-                  double heightSearch;
-
-                  if (!Double.isNaN(heightSearch = hasDataInDirection(xIndex, yIndex, true, holeProximityThreshold)))
+                  float height = getHeightOfHole(xIndex, yIndex);
+                  if (!Float.isNaN(height))
                   {
                      holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
-                     holeHeights.add((float) heightSearch);
-                  }
-                  else if (!Double.isNaN(heightSearch = hasDataInDirection(xIndex, yIndex, false, holeProximityThreshold)))
-                  {
-                     holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
-                     holeHeights.add((float) heightSearch);
+                     holeHeights.add(height);
                   }
                }
             }
          }
       }
+   }
+
+   private void updateIfCellIsOutlier(int cellNumber)
+   {
+      if (!parameters.getRemoveOutlierCells())
+      {
+         heightMap.setHasSufficientNeighbors(cellNumber, true);
+         return;
+      }
+
+      int xIndex = heightMap.getXIndex(cellNumber);
+      int yIndex = heightMap.getYIndex(cellNumber);
+
+      if (xIndex == 0 || yIndex == 0 || xIndex == heightMap.getCellsPerAxis() - 1 || yIndex == heightMap.getCellsPerAxis() - 1)
+      {
+         return;
+      }
+
+      boolean muchHigherThanAllNeighbors = true;
+      double heightThreshold = heightMap.getHeightAt(cellNumber) - epsilonHeightReset;
+      int numberOfNeighbors = 0;
+      for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
+      {
+         int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
+         int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
+         if (heightMap.cellHasData(xNeighbor, yNeighbor))
+         {
+            numberOfNeighbors++;
+            muchHigherThanAllNeighbors &= heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
+         }
+
+         if (numberOfNeighbors >= minNumberOfNeighbors && !muchHigherThanAllNeighbors)
+         {
+            heightMap.setHasSufficientNeighbors(cellNumber, true);
+            return;
+         }
+      }
+
+      if (numberOfNeighbors < minNumberOfNeighbors)
+      {
+         heightMap.setHasSufficientNeighbors(cellNumber, false);
+      }
+      else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && muchHigherThanAllNeighbors)
+      {
+         double resetHeight = 0.0;
+         for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
+         {
+            int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
+            int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
+            if (heightMap.cellHasData(xNeighbor, yNeighbor))
+            {
+               resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
+            }
+         }
+         heightMap.resetAtHeight(cellNumber, resetHeight / numberOfNeighbors);
+      }
+   }
+
+   private float getHeightOfHole(int xIndex, int yIndex)
+   {
+      if (heightMap.cellHasData(xIndex, yIndex))
+         return Float.NaN;
+
+      float heightSearch;
+
+      if (!Float.isNaN(heightSearch = (float) hasDataInDirection(xIndex, yIndex, true, parameters.getHoleProximityThreshold())))
+      {
+         return heightSearch;
+      }
+      else if (!Float.isNaN(heightSearch = (float) hasDataInDirection(xIndex, yIndex, false, parameters.getHoleProximityThreshold())))
+      {
+         return heightSearch;
+      }
+
+      return Float.NaN;
    }
 
    /**
