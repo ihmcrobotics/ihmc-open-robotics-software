@@ -1,5 +1,6 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
+import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
@@ -8,9 +9,9 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -20,6 +21,7 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
+import java.nio.FloatBuffer;
 import java.util.Comparator;
 import java.util.Stack;
 
@@ -71,6 +73,7 @@ public class RapidPlanarRegionsExtractor
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
 
+   private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
    private final Comparator<GPURegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
@@ -80,6 +83,10 @@ public class RapidPlanarRegionsExtractor
    private _cl_program planarRegionExtractionProgram;
    private _cl_kernel packKernel;
    private _cl_kernel mergeKernel;
+
+   // TODO: Remove
+   private _cl_kernel sphericalBackProjectionKernel;
+   private OpenCLFloatBuffer cloudBuffer;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
@@ -113,6 +120,8 @@ public class RapidPlanarRegionsExtractor
       parametersBuffer = new OpenCLFloatBuffer(16);
       calculateDerivativeParameters();
 
+      debugger.create(imageHeight, imageWidth);
+
       nxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       nyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       nzImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
@@ -125,6 +134,10 @@ public class RapidPlanarRegionsExtractor
       planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
+
+      // TODO: Remove
+      cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
+      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
 
       regionVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
       boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
@@ -143,6 +156,8 @@ public class RapidPlanarRegionsExtractor
       parametersBuffer = new OpenCLFloatBuffer(16);
       calculateDerivativeParameters();
 
+      debugger.create(imageWidth, imageHeight);
+
       nxImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       nyImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       nzImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
@@ -156,6 +171,10 @@ public class RapidPlanarRegionsExtractor
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
 
+      // TODO: Remove
+      cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
+      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
+
       regionVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
       boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
       boundaryMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
@@ -166,10 +185,17 @@ public class RapidPlanarRegionsExtractor
    {
       LogTools.info("++++++++++++++ [START] Calling Update ++++++++++++++++");
       extractPatchGraphUsingOpenCL();
+
+      debugger.constructCentroidPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
+      //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage);
+      //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
+
       findRegions();
       findBoundariesAndHoles();
       growRegionBoundaries();
       LogTools.info(" --------------------- [DONE] Calling Update -------------------------- ");
+
+      //debugger.showDebugImage();
    }
 
    /**
@@ -220,6 +246,7 @@ public class RapidPlanarRegionsExtractor
       }
       if (firstRun)
       {
+         LogTools.info("First Run.");
          firstRun = false;
          inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
@@ -231,6 +258,7 @@ public class RapidPlanarRegionsExtractor
          czImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          patchGraph.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
+         cloudBuffer.createOpenCLBufferObject(openCLManager);
       }
       else
       {
@@ -268,7 +296,16 @@ public class RapidPlanarRegionsExtractor
       openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(patchGraph.getOpenCLImageObject(), patchImageWidth, patchImageHeight, patchGraph.getBytedecoByteBufferPointer());
 
+      // TODO: Remove
+      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
+      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
+      cloudBuffer.readOpenCLBufferObject(openCLManager);
+
       openCLManager.finish();
+
+      LogTools.info("Image: {} {}", imageHeight, imageWidth);
 
       LogTools.info(" --------------------- [DONE] Generating Patch Graph -------------------------- ");
    }
@@ -312,6 +349,8 @@ public class RapidPlanarRegionsExtractor
 
                   tempIsland.planarRegion = planarRegion;
                   tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
+
+                  debugger.drawRegionInternalPatches(tempIsland, patchHeight, patchWidth);
                }
                else
                {
@@ -332,58 +371,60 @@ public class RapidPlanarRegionsExtractor
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
       gpuPlanarRegions.parallelStream().forEach(planarRegion ->
-      {
-         int leafPatchIndex = 0;
-         int regionRingIndex = 0;
-         planarRegion.getRegionsRingsBySize().clear();
-         for (Point2D leafPatch : planarRegion.getBorderIndices())
-         {
-            GPURegionRing regionRing = planarRegion.getRegionRings().add();
-            regionRing.reset();
-            regionRing.setIndex(regionRingIndex);
-            int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
-                                                                   (int) leafPatch.getX(),
-                                                                   planarRegion.getId(),
-                                                                   regionRing,
-                                                                   leafPatchIndex,
-                                                                   1);
-            if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
-            {
-               ++regionRingIndex;
-               regionRing.updateConvexPolygon();
-               planarRegion.getRegionsRingsBySize().add(regionRing);
-            }
-            else
-            {
-               planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
-            }
-            ++leafPatchIndex;
-         }
+                                                {
+                                                   int leafPatchIndex = 0;
+                                                   int regionRingIndex = 0;
+                                                   planarRegion.getRegionsRingsBySize().clear();
+                                                   for (Point2D leafPatch : planarRegion.getBorderIndices())
+                                                   {
+                                                      GPURegionRing regionRing = planarRegion.getRegionRings().add();
+                                                      regionRing.reset();
+                                                      regionRing.setIndex(regionRingIndex);
+                                                      int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
+                                                                                                             (int) leafPatch.getX(),
+                                                                                                             planarRegion.getId(),
+                                                                                                             regionRing,
+                                                                                                             leafPatchIndex,
+                                                                                                             1);
+                                                      if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
+                                                      {
+                                                         debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
 
-         // remove holes
-         for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
-         {
-            planarRegion.getHoleRingsToRemove().clear();
-            for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
-            {
-               if (otherRegionRing != regionRing)
-               {
-                  // We probably only need to check one
-                  Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
-                  if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
-                  {
-                     planarRegion.getHoleRingsToRemove().add(otherRegionRing);
-                  }
-               }
-            }
-            for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
-            {
-               planarRegion.getRegionRings().remove(regionRingToRemove);
-            }
-         }
+                                                         ++regionRingIndex;
+                                                         regionRing.updateConvexPolygon();
+                                                         planarRegion.getRegionsRingsBySize().add(regionRing);
+                                                      }
+                                                      else
+                                                      {
+                                                         planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
+                                                      }
+                                                      ++leafPatchIndex;
+                                                   }
 
-         planarRegion.getRegionRings().sort(boundaryLengthComparator);
-      });
+                                                   // remove holes
+                                                   for (GPURegionRing regionRing : planarRegion.getRegionsRingsBySize())
+                                                   {
+                                                      planarRegion.getHoleRingsToRemove().clear();
+                                                      for (GPURegionRing otherRegionRing : planarRegion.getRegionRings())
+                                                      {
+                                                         if (otherRegionRing != regionRing)
+                                                         {
+                                                            // We probably only need to check one
+                                                            Vector2D boundaryIndex = otherRegionRing.getBoundaryIndices().get(0);
+                                                            if (regionRing.getConvexPolygon().isPointInside(boundaryIndex.getX(), boundaryIndex.getY()))
+                                                            {
+                                                               planarRegion.getHoleRingsToRemove().add(otherRegionRing);
+                                                            }
+                                                         }
+                                                      }
+                                                      for (GPURegionRing regionRingToRemove : planarRegion.getHoleRingsToRemove())
+                                                      {
+                                                         planarRegion.getRegionRings().remove(regionRingToRemove);
+                                                      }
+                                                   }
+
+                                                   planarRegion.getRegionRings().sort(boundaryLengthComparator);
+                                                });
       LogTools.info(" --------------------- [DONE] Finding Boundaries and Holes -------------------------- ");
    }
 
@@ -489,6 +530,11 @@ public class RapidPlanarRegionsExtractor
    {
       openCLManager.destroy();
       // TODO: Destroy the rest
+   }
+
+   public RapidRegionsDebutOutputGenerator getDebugger()
+   {
+      return debugger;
    }
 
    public void setPatchSizeChanged(boolean patchSizeChanged)

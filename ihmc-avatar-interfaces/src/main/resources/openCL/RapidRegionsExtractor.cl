@@ -17,17 +17,26 @@
 
 float4 back_project_spherical(int2 pos, float depth, global float* params)
 {
-    float x = -pos.x - (params[INPUT_WIDTH] / 2);
-    float y = -pos.y - (params[INPUT_HEIGHT] / 2);
 
-    float theta = 2 * M_PI * ( x / params[INPUT_WIDTH]);
-    float phi = M_PI * ( y / params[INPUT_HEIGHT]);
+   float verticalFieldOfView = M_PI / 2;
+   float horizontalFieldOfView = 2 * M_PI;
 
-    float r = depth * cos(phi);
+   int x = pos.x;
+   int y = pos.y;
 
-    float px = r * cos(theta);
-    float py = r * sin(theta);
-    float pz = depth * sin(phi);
+   int xFromCenter = -x - (params[INPUT_WIDTH] / 2); // flip
+   int yFromCenter = y - (params[INPUT_HEIGHT] / 2);
+
+   float yaw = xFromCenter / (float) params[INPUT_WIDTH] * horizontalFieldOfView;
+   float pitch = yFromCenter / (float) params[INPUT_HEIGHT] * verticalFieldOfView;
+
+    float r = depth * cos(pitch);
+
+    float px = r * cos(yaw);
+    float py = r * sin(yaw);
+    float pz = depth * sin(pitch);
+
+    //printf("Projection: [%d,%d,%.2lf,%.2lf] (PC:%d,YC:%d,X:%.2lf,Y:%.2lf,Z:%.2lf,R:%.2lf,D:%.2lf)\n", pitchOffset, yawOffset, yaw, pitch, pitchCount, yawCount, px, py, pz, r, depth);
 
     float4 X = (float4) (px, py, pz, 0);
     return X;
@@ -82,7 +91,7 @@ float3 estimate_perspective_normal(read_only image2d_t in, int x, int y, global 
          }
       }
    }
-   return (1 / (float) (count)) * normal.xyz;
+   return normalize((1 / (float) (count)) * normal.xyz);
 }
 
 float3 estimate_spherical_normal(read_only image2d_t in, int x, int y, global float* params)
@@ -126,10 +135,10 @@ float3 estimate_spherical_normal(read_only image2d_t in, int x, int y, global fl
          }
       }
    }
-   return (1 / (float) (count)) * normal.xyz;
+   return normalize((1 / (float) (count)) * normal.xyz);
 }
 
-float3 estimate_perspective_centroid(read_only image2d_t in, int x, int y, global float* params)
+float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, global float* params)
 {
    float Z = 0;
    int count = 0;
@@ -157,7 +166,7 @@ float3 estimate_perspective_centroid(read_only image2d_t in, int x, int y, globa
    return (1/(float)(count)) * centroid;
 }
 
-float3 estimate_spherical_centroid(read_only image2d_t in, int x, int y, global float* params)
+float3 estimate_spherical_centroid(read_only image2d_t in, int y, int x, global float* params)
 {
    float radius = 0;
    int count = 0;
@@ -168,7 +177,6 @@ float3 estimate_spherical_centroid(read_only image2d_t in, int x, int y, global 
        {
            for(int j = 0; j<(int)params[PATCH_WIDTH]; j++)
            {
-               count++;
                int gx = x*(int)params[PATCH_HEIGHT] + i;
                int gy = y*(int)params[PATCH_WIDTH] + j;
                int2 pos = (int2)(gx,gy);
@@ -177,8 +185,8 @@ float3 estimate_spherical_centroid(read_only image2d_t in, int x, int y, global 
                {
                    float4 P = back_project_spherical(pos, radius, params);
                    centroid += P.xyz;
+                   count++;
                }
-
            }
        }
    }
@@ -378,7 +386,9 @@ void kernel packKernel(  read_only image2d_t in,
    int y = get_global_id(0);
    int x = get_global_id(1);
 
-    if(x==0 && y==0) printf("PackKernel:(%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+    if(x==0 && y==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+                            (int)params[INPUT_HEIGHT],
+                            (int)params[INPUT_WIDTH],
                             (int)params[SUB_H],
                             (int)params[SUB_W],
                             (int)params[PATCH_HEIGHT],
@@ -394,7 +404,8 @@ void kernel packKernel(  read_only image2d_t in,
 
 //        if(x==24 && y==50) printf("PackKernel Normal:(%.4lf, %.4lf, %.4lf)\n", normal.x, normal.y, normal.z);
 //        if(x==26 && y==7) printf("PackKernel Centroid:(%.4lf, %.4lf, %.4lf)\n", centroid.x, centroid.y, centroid.z);
-//        printf("PackKernel Centroid:(%.4lf, %.4lf, %.4lf)\n", centroid.x, centroid.y, centroid.z);
+
+       //printf("PackKernel\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
 
        write_imagef(out0, (int2)(x,y), (float4)(normal.x,0,0,0));
        write_imagef(out1, (int2)(x,y), (float4)(normal.y,0,0,0));
@@ -488,3 +499,43 @@ void kernel segmentKernel(read_only image2d_t color, write_only image2d_t filter
       fillDeadPixels(color, x, y, filteredImage, params);
    }
 }
+
+/*
+ * Spherical Back-Projection Kernel for Rotating LIDARs.
+ * */
+void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
+{
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+
+    if(x == 0 && y == 0)
+    {
+        printf("Spherical Projection Kernel: %d, %d\n", (int)params[INPUT_HEIGHT], (int)params[INPUT_WIDTH]);
+    }
+
+    //if(y >= 0 && y < (int)params[INPUT_HEIGHT] && x >= 0 && x < (int)params[INPUT_WIDTH])
+    {
+       int2 pos = (int2)(x,y);
+
+       float scaleToMeters = 0.001f;
+       float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
+
+        if(radius > 0.1f)
+        {
+            float4 point = back_project_spherical(pos, radius, params);
+
+            int index = ((y * params[INPUT_WIDTH]) + x) * 3;
+
+            cloud[index] = point.x;
+            cloud[index + 1] = point.y;
+            cloud[index + 2] = point.z;
+
+            //cloud[index] = x * 0.01f;
+            //cloud[index + 1] = y * 0.01f;
+            //cloud[index + 2] = radius;
+
+            //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, y,x, radius, cloud[index], cloud[index+1], cloud[index+2]);
+        }
+    }
+}
+
