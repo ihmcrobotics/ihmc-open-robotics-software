@@ -18,6 +18,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -137,6 +138,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       desiredRobot = new RDXDesiredRobot(robotModel, syncedRobot);
 
+
       ROS2ControllerHelper slidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, slidersROS2ControllerHelper, teleoperationParameters);
       // TODO this should update the GDX desired Robot
@@ -150,6 +152,9 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
       footstepPlanning = new RDXFootstepPlanning(robotModel, syncedRobot);
+      ros2Helper.subscribeViaCallback(ROS2Tools.RAPID_REGIONS, regions -> footstepPlanning.setPlanarRegions(regions.getPlanarRegions()));
+      ros2Helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, footstepPlanning::setHeightMapData);
+
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -171,7 +176,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
-      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), false, footstepPlanning::plan);
+//      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), false, footstepPlanning::planAsync);
       teleoperationParametersTuner.create(teleoperationParameters);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
@@ -293,17 +298,15 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
-         footstepPlanning.getMidFeetGoalPose().set(ballAndArrowMidFeetPosePlacement.getGoalPose());
-         footstepPlanning.setGoalFootPosesFromMidFeetPose();
-         footstepPlanning.setStanceSideToClosestToGoal();
+         footstepPlanning.setMidFeetGoalPose(ballAndArrowMidFeetPosePlacement.getGoalPose());
          // TODO: Call planAsync
-         footstepPlanning.plan();
+         footstepPlanning.planAsync();
+      }
 
-         // TODO: make footsteps from footstepPlan interactable (modifiable)
-         if (footstepPlanning.isReadyToWalk()) // failed
-         {
-            interactableFootstepPlan.updateFromPlan(footstepPlanning.getOutput().getFootstepPlan());
-         }
+      // TODO: make footsteps from footstepPlan interactable (modifiable)
+      if (footstepPlanning.pollHasNewPlanAvailable()) // failed
+      {
+         interactableFootstepPlan.updateFromPlan(footstepPlanning.pollOutput().getFootstepPlan());
       }
 
       if (interactablesEnabled.get())

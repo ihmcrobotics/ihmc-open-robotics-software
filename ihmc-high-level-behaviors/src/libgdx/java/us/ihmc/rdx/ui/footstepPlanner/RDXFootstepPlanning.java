@@ -1,7 +1,10 @@
 package us.ihmc.rdx.ui.footstepPlanner;
 
+import com.kitfox.svg.A;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -9,6 +12,8 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -25,6 +30,8 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXFootstepPlanning
 {
@@ -33,12 +40,17 @@ public class RDXFootstepPlanning
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final FootstepPlannerRequest request;
-   private final FootstepPlannerOutput output;
-   private final FramePose3D midFeetGoalPose = new FramePose3D();
    private final ResettableExceptionHandlingExecutorService executor;
    private boolean isReadyToWalk = false;
    private final Throttler throttler = new Throttler();
    private final Notification plannedNotification = new Notification();
+
+   private final AtomicReference<Pose3DReadOnly> goalPoseReference = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> planarRegionsReference = new AtomicReference<>();
+   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
+
+   private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
 
    public RDXFootstepPlanning(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
@@ -46,28 +58,26 @@ public class RDXFootstepPlanning
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       footstepPlannerParameters = footstepPlanner.getFootstepPlannerParameters();
       request = new FootstepPlannerRequest();
-      output = footstepPlanner.getOutput();
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
       executor = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    }
 
-   public void setGoalFootPosesFromMidFeetPose()
+   public void planAsync()
    {
-      request.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), midFeetGoalPose);
+      executor.clearQueueAndExecute(this::plan);
    }
 
-   public void updateMidFeetGoalPose()
+   private void setGoalFootPosesFromMidFeetPose(Pose3DReadOnly goalPose)
    {
-      midFeetGoalPose.set(request.getGoalFootPoses().get(RobotSide.LEFT));
-      midFeetGoalPose.interpolate(request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
+      request.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
    }
 
-   public void setStanceSideToClosestToGoal()
+   private void setStanceSideToClosestToGoal(Pose3DReadOnly goalPose)
    {
       RobotSide stanceSide;
-      if (request.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(midFeetGoalPose.getPosition())
-          <= request.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(midFeetGoalPose.getPosition()))
+      if (request.getStartFootPoses().get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
+          <= request.getStartFootPoses().get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
       {
          stanceSide = RobotSide.LEFT;
       }
@@ -76,33 +86,43 @@ public class RDXFootstepPlanning
          stanceSide = RobotSide.RIGHT;
       }
 
-      request.setPlanBodyPath(false);
       request.setRequestedInitialStanceSide(stanceSide);
    }
-
-   private void planAsync()
+   
+   private void plan()
    {
-      executor.clearQueueAndExecute(this::plan);
-   }
+      if (footstepPlanner.isPlanning())
+         footstepPlanner.halt();
 
-   /**
-    * TODO: Make this private and get async working
-    */
-   public void plan()
-   {
+      PlanarRegionsListMessage planarRegionsListMessage = planarRegionsReference.get();
+      HeightMapMessage heightMapMessage = heightMapDataReference.get();
+      Pose3DReadOnly goalPose = goalPoseReference.getAndSet(null);
+      if (goalPose == null)
+         return;
+
+      setGoalFootPosesFromMidFeetPose(goalPose);
+      setStanceSideToClosestToGoal(goalPose);
+
       request.getStartFootPoses().forEach((side, pose3D) ->
       {
          FramePose3DReadOnly soleFramePose = syncedRobot.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side));
          soleFramePose.get(pose3D);
       });
 
+      if (heightMapMessage != null)
+         request.setHeightMapMessage(heightMapMessage);
+      if (planarRegionsListMessage != null)
+         request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+
       request.setPlanBodyPath(false);
       // TODO: Set start footholds!!
       //      request.setPlanarRegionsList(...);
-      request.setAssumeFlatGround(true); // FIXME Assuming flat ground
+//      request.setAssumeFlatGround(true); // FIXME Assuming flat ground
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
       //      request.setSwingPlannerType(swingPlannerType);
       //      request.setSnapGoalSteps(true);
+
+      FootstepPlannerOutput output = footstepPlanner.getOutput();
 
       LogTools.info("Stance side: {}", request.getRequestedInitialStanceSide().name());
       LogTools.info("Planning footsteps...");
@@ -127,10 +147,22 @@ public class RDXFootstepPlanning
             rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
          }
          LogTools.info("Footstep planning failure...");
+
+         outputReference.set(null);
+      }
+      else
+      {
+         outputReference.set(output);
       }
 
       isReadyToWalk = !plannerFailed;
       plannedNotification.set();
+      hasNewPlanAvailable.set(isReadyToWalk);
+   }
+
+   public boolean pollHasNewPlanAvailable()
+   {
+      return hasNewPlanAvailable.getAndSet(false);
    }
 
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
@@ -138,14 +170,24 @@ public class RDXFootstepPlanning
       return footstepPlannerParameters;
    }
 
-   public FootstepPlannerOutput getOutput()
+   public FootstepPlannerOutput pollOutput()
    {
-      return output;
+      return outputReference.getAndSet(null);
    }
 
-   public FramePose3D getMidFeetGoalPose()
+   public void setMidFeetGoalPose(Pose3DReadOnly midFeetGoalPose)
    {
-      return midFeetGoalPose;
+      this.goalPoseReference.set(midFeetGoalPose);
+   }
+
+   public void setPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      this.planarRegionsReference.set(planarRegionsListMessage);
+   }
+
+   public void setHeightMapData(HeightMapMessage heightMapMessage)
+   {
+      this.heightMapDataReference.set(heightMapMessage);
    }
 
    public boolean isReadyToWalk()
