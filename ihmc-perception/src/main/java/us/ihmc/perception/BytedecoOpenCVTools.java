@@ -321,12 +321,7 @@ public class BytedecoOpenCVTools
       BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
 
-      imshow("/l515/depth", finalDisplayDepth);
-      int code = waitKeyEx(30);
-      if (code == 113)
-      {
-         System.exit(0);
-      }
+      display("/l515/depth", finalDisplayDepth, 30);
    }
 
    public static void displayVideoPacketColor(VideoPacket videoPacket)
@@ -334,9 +329,13 @@ public class BytedecoOpenCVTools
       Mat colorImage = new Mat(videoPacket.getImageHeight(), videoPacket.getImageWidth(), opencv_core.CV_8UC3);
       byte[] compressedByteArray = videoPacket.getData().toArray();
       BytedecoOpenCVTools.decompressJPG(compressedByteArray, colorImage);
+      display("Color Image", colorImage, 1);
+   }
 
-      imshow("Color Image", colorImage);
-      int code = waitKeyEx(1);
+   public static void display(String tag, Mat image, int delay)
+   {
+      imshow(tag, image);
+      int code = waitKeyEx(delay);
       if (code == 113)
       {
          System.exit(0);

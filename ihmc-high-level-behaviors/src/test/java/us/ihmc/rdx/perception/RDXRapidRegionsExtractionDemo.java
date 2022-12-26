@@ -101,6 +101,7 @@ public class RDXRapidRegionsExtractionDemo
       });
    }
 
+   /* A one-time method to convert depth map to renderable pointcloud. */
    public void submitToPointCloudRenderer(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
    {
       depthWidth = width;
@@ -110,7 +111,6 @@ public class RDXRapidRegionsExtractionDemo
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
 
       bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-
 
       totalNumberOfPoints = depthWidth * depthHeight;
       pointCloudRenderer.create(totalNumberOfPoints);
@@ -155,7 +155,8 @@ public class RDXRapidRegionsExtractionDemo
       pointCloudRenderer.updateMeshFastestAfterKernel();
    }
 
-   public void submitToPlanarRegionExtractor(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
+   /* A one-time method to generate planar regions from depth map. */
+   private void submitToPlanarRegionExtractor(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
    {
       rapidPlanarRegionsExtractor.create(openCLManager, bytedecoImage, width, height);
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
@@ -163,6 +164,13 @@ public class RDXRapidRegionsExtractionDemo
       // Get the planar regions from the planar region extractor
       rapidPlanarRegionsExtractor.update();
       PlanarRegionsList planarRegions = rapidPlanarRegionsExtractor.getPlanarRegionsList();
+
+      pointCloudRenderer.create(200000);
+      pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints());
+      if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
+      {
+         pointCloudRenderer.updateMesh();
+      }
 
       // Submit the planar regions to the planar region renderer
       planarRegionsGraphic.generateMeshes(planarRegions);
