@@ -49,13 +49,32 @@ public class HeightMapUpdaterForUI
          }
       });
 
-      heightMapUpdater.setupForMessager(messager);
+      attachMessagerToUpdater();
 
       IHMCROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       heightMapUpdater.attachHeightMapConsumer(heightMap -> messager.submitMessage(HeightMapMessagerAPI.HeightMapData, heightMap));
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
       messager.registerTopicListener(HeightMapMessagerAPI.Import, i -> importHeightMap());
+   }
+
+   private void attachMessagerToUpdater()
+   {
+      messager.registerTopicListener(HeightMapMessagerAPI.EnableUpdates, heightMapUpdater::setEnableUpdates);
+      messager.registerTopicListener(HeightMapMessagerAPI.Clear, c -> heightMapUpdater.requestClear());
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, heightMapUpdater::setGridCenterX);
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, heightMapUpdater::setGridCenterY);
+      messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapUpdater::setMaxHeight);
+      messager.registerTopicListener(HeightMapMessagerAPI.parameters, heightMapUpdater::setParameters);
+
+      messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, heightMapUpdater::setPublishFrequency);
+      messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> heightMapUpdater.exportOnThread());
+
+      heightMapUpdater.setGridCenterConsumer((point) ->
+                                             {
+                                                messager.submitMessage(HeightMapMessagerAPI.GridCenterX, point.getX());
+                                                messager.submitMessage(HeightMapMessagerAPI.GridCenterY, point.getY());
+                                             });
    }
 
    private final AtomicBoolean importing = new AtomicBoolean();

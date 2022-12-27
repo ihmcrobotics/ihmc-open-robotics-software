@@ -23,6 +23,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.tools.property.StoredPropertySet;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -86,23 +87,9 @@ public class HeightMapUpdater
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
    }
 
-   public void setupForMessager(Messager messager)
+   public StoredPropertySet getHeightMapParameters()
    {
-      messager.registerTopicListener(HeightMapMessagerAPI.EnableUpdates, this::setEnableUpdates);
-      messager.registerTopicListener(HeightMapMessagerAPI.Clear, c -> this.requestClear());
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, this::setGridCenterX);
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, this::setGridCenterY);
-      messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, this::setMaxHeight);
-      messager.registerTopicListener(HeightMapMessagerAPI.parameters, parameters::set);
-
-      messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, this::setPublishFrequency);
-      messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> this.exportOnThread());
-
-      gridCenterConsumer = (point) ->
-      {
-         messager.submitMessage(HeightMapMessagerAPI.GridCenterX, point.getX());
-         messager.submitMessage(HeightMapMessagerAPI.GridCenterY, point.getY());
-      };
+      return parameters;
    }
 
    public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapConsumer)
@@ -143,6 +130,16 @@ public class HeightMapUpdater
    public void setPublishFrequency(int publishFrequency)
    {
       this.publishFrequency.set(publishFrequency);
+   }
+
+   public void setParameters(HeightMapParameters parameters)
+   {
+      this.parameters.set(parameters);
+   }
+
+   public void setGridCenterConsumer(Consumer<Point2DReadOnly> gridCenterConsumer)
+   {
+      this.gridCenterConsumer = gridCenterConsumer;
    }
 
    public void exportOnThread()
