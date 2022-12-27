@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
+import us.ihmc.avatar.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -18,7 +19,7 @@ public class RDXRemoteHeightMapUI
    {
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
       // FIXME fix the comms
-      remotePropertySets.registerRemotePropertySet(gpuRegionParameters, GPUPlanarRegionExtractionComms.PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(gpuRegionParameters, HeightMapAPI.PARAMETERS);
    }
 
    public void update()
