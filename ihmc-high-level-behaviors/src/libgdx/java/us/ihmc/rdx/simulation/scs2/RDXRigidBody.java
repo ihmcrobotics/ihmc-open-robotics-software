@@ -39,9 +39,9 @@ public class RDXRigidBody implements RigidBodyBasics
    public void updateGraphics()
    {
       if (visualGraphicsNode != null)
-         visualGraphicsNode.updatePose();
+         visualGraphicsNode.update();
       if (collisionGraphicsNode != null)
-         collisionGraphicsNode.updatePose();
+         collisionGraphicsNode.update();
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {

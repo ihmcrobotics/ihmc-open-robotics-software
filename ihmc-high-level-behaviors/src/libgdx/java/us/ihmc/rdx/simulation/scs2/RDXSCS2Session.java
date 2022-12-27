@@ -21,7 +21,15 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.session.SessionMode;
+import us.ihmc.scs2.session.log.LogSession;
+import us.ihmc.scs2.session.remote.RemoteSession;
 import us.ihmc.scs2.sharedMemory.CropBufferRequest;
+import us.ihmc.scs2.simulation.SimulationDataSession;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
 import us.ihmc.tools.UnitConversions;
 
 import java.util.ArrayList;
@@ -31,6 +39,7 @@ import java.util.Set;
 public class RDXSCS2Session
 {
    protected Session session;
+   private String sessionInfo = "";
    private final ImBoolean runAtRealtimeRate = new ImBoolean(true);
    private final ImDouble playbackRealtimeRate = new ImDouble(1.0);
    private final ImGuiPanel controlPanel = new ImGuiPanel("SCS 2 Session", this::renderImGuiWidgets);
@@ -73,6 +82,53 @@ public class RDXSCS2Session
       sessionStartedHandled = false;
 
       this.session = session;
+
+      if (session instanceof SimulationSession)
+      {
+         sessionInfo += "Simulation session";
+      }
+      else if (session instanceof SimulationDataSession)
+      {
+         sessionInfo += "Simulation data session";
+      }
+      else if (session instanceof LogSession)
+      {
+         sessionInfo += "Log session";
+      }
+      else if (session instanceof RemoteSession)
+      {
+         sessionInfo += "Remote session";
+      }
+      else
+      {
+         sessionInfo += session.getClass().getSimpleName();
+      }
+      sessionInfo += ": " + session.getSessionName();
+      if (session instanceof SimulationSession simulationSession)
+      {
+         sessionInfo += "\nPhysics engine: ";
+         if (simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine)
+         {
+            sessionInfo += "Bullet";
+         }
+         else if (simulationSession.getPhysicsEngine() instanceof ContactPointBasedPhysicsEngine)
+         {
+            sessionInfo += "Contact point";
+         }
+         else if (simulationSession.getPhysicsEngine() instanceof DoNothingPhysicsEngine)
+         {
+            sessionInfo += "Do nothing";
+         }
+         else if (simulationSession.getPhysicsEngine() instanceof ImpulseBasedPhysicsEngine)
+         {
+            sessionInfo += "Impulse based";
+         }
+         else
+         {
+            sessionInfo += simulationSession.getPhysicsEngine().getClass().getSimpleName();
+         }
+      }
+
       dtHz.set((int) UnitConversions.secondsToHertz(session.getSessionDTSeconds()));
 
       yoManager.startSession(session); // TODO: Add to controls?
@@ -86,11 +142,18 @@ public class RDXSCS2Session
       }
 
       terrainObjects.clear();
+      int terrainObjectIndex = 0;
       for (TerrainObjectDefinition terrainObjectDefinition : session.getTerrainObjectDefinitions())
       {
          RDXSCS2TerrainObject simulatedTerrainObject = new RDXSCS2TerrainObject(terrainObjectDefinition);
+         if (session instanceof SimulationSession simulationSession
+          && simulationSession.getPhysicsEngine() instanceof BulletPhysicsEngine bulletPhysicsEngine)
+         { // Support moving terrain objects when using Bullet physics
+            simulatedTerrainObject.setBulletTerrainObject(bulletPhysicsEngine.getTerrainObjects().get(terrainObjectIndex));
+         }
          terrainObjects.add(simulatedTerrainObject);
          simulatedTerrainObject.create();
+         ++terrainObjectIndex;
       }
 
       bufferRecordTickPeriod.set(session.getBufferRecordTickPeriod());
@@ -128,6 +191,10 @@ public class RDXSCS2Session
       for (RDXSCS2Robot robot : robots)
       {
          robot.update();
+      }
+      for (RDXSCS2TerrainObject terrainObject : terrainObjects)
+      {
+         terrainObject.update();
       }
    }
 
@@ -175,6 +242,7 @@ public class RDXSCS2Session
 
    protected void renderImGuiWidgetsPartOne()
    {
+      ImGui.text(sessionInfo);
       ImGui.pushItemWidth(110);
       if (ImGuiTools.volatileInputInt("DT (Hz)", dtHz))
       {
