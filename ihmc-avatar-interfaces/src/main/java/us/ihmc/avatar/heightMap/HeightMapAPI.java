@@ -11,6 +11,5 @@ public class HeightMapAPI
    private static final String MODULE_NAME = "cpu_height_map";
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
    public static final StoredPropertySetROS2TopicPair PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "parameters");
-   public static final ROS2Topic<StoredPropertySetMessage> PARAMETERS_COMMAND = PARAMETERS.getCommandTopic();
-   public static final ROS2Topic<StoredPropertySetMessage> PARAMETERS_STATUS = PARAMETERS.getStatusTopic();
+   public static final StoredPropertySetROS2TopicPair FILTER_PARAMETERS = new StoredPropertySetROS2TopicPair(MODULE_NAME, "filter_parameters");
 }

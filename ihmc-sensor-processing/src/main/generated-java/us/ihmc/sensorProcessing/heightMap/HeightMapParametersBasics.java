@@ -55,27 +55,4 @@ public interface HeightMapParametersBasics extends HeightMapParametersReadOnly, 
    {
       set(HeightMapParameters.mahalanobisScale, mahalanobisScale);
    }
-
-   /**
-    * Number of cells in a direction to search for data to fill in holes.
-    */
-   default void setHoleProximityThreshold(int holeProximityThreshold)
-   {
-      set(HeightMapParameters.holeProximityThreshold, holeProximityThreshold);
-   }
-
-   default void setEstimateGroundHeight(boolean estimateGroundHeight)
-   {
-      set(HeightMapParameters.estimateGroundHeight, estimateGroundHeight);
-   }
-
-   default void setFillHoles(boolean fillHoles)
-   {
-      set(HeightMapParameters.fillHoles, fillHoles);
-   }
-
-   default void setRemoveOutlierCells(boolean removeOutlierCells)
-   {
-      set(HeightMapParameters.removeOutlierCells, removeOutlierCells);
-   }
 }
