@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -75,7 +76,7 @@ public class HeightMapUpdater
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
 
-   private final ConcurrentLinkedQueue<Triple<PointCloudData, FramePose3D, Point2D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Triple<PointCloudData, FramePose3D, Point3D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
 
    private int publishFrequencyCounter = 0;
    private final AtomicInteger publishFrequency = new AtomicInteger();
@@ -147,7 +148,7 @@ public class HeightMapUpdater
       ThreadTools.startAThread(this::export, "Height map exporter");
    }
 
-   public void addPointCloudToQueue(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
+   public void addPointCloudToQueue(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
    {
       this.pointCloudQueue.add(pointCloudData);
    }
@@ -160,7 +161,7 @@ public class HeightMapUpdater
 
       while (updatesWithoutDataCounter < maxIdleTimeMillis / sleepTimeMillis)
       {
-         Triple<PointCloudData, FramePose3D, Point2D> data = pointCloudQueue.poll();
+         Triple<PointCloudData, FramePose3D, Point3D> data = pointCloudQueue.poll();
          if (data == null)
          {
             updatesWithoutDataCounter++;
@@ -168,9 +169,7 @@ public class HeightMapUpdater
          else
          {
             updatesWithoutDataCounter = 0;
-            long startTime = System.nanoTime();
             update(data);
-            LogTools.info("Update time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) + ", points = " + data.getLeft().getNumberOfPoints());
          }
 
          if (pointCloudQueue.isEmpty())
@@ -182,12 +181,37 @@ public class HeightMapUpdater
       return true;
    }
 
-   private void update(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
+   public void runFullUpdate(long maxUpdatePeriod)
+   {
+      long estimatedUpdatePeriod = 0;
+      long cumulativeUpdateDuration = 0;
+      int totalUpdates = 0;
+      long startMillis = System.currentTimeMillis();
+
+      while (cumulativeUpdateDuration + estimatedUpdatePeriod < maxUpdatePeriod && !pointCloudQueue.isEmpty())
+      {
+         Triple<PointCloudData, FramePose3D, Point3D> data = pointCloudQueue.poll();
+         if (data == null)
+         {
+            break;
+         }
+         else
+         {
+            update(data);
+         }
+
+         cumulativeUpdateDuration = System.currentTimeMillis() - startMillis;
+         totalUpdates++;
+         estimatedUpdatePeriod = cumulativeUpdateDuration / totalUpdates;
+      }
+   }
+
+   private void update(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
    {
       update(pointCloudData.getLeft().getPointCloud(), pointCloudData.getMiddle(), pointCloudData.getRight());
    }
 
-   private void update(Point3D[] pointCloud, FramePose3DReadOnly pointCloudFramePose, Point2DReadOnly gridCenter)
+   private void update(Point3D[] pointCloud, FramePose3DReadOnly pointCloudFramePose, Point3DReadOnly gridCenter)
    {
       if (printFrequency)
       {
@@ -214,11 +238,11 @@ public class HeightMapUpdater
       {
          heightMap.translateToNewGridCenter(gridCenter.getX(), gridCenter.getY());
          if (gridCenterConsumer != null)
-            gridCenterConsumer.accept(gridCenter);
+            gridCenterConsumer.accept(new Point2D(gridCenter));
       }
 
       // Update height map
-      heightMap.setMaxHeight(maxHeight.get());
+      heightMap.setMaxHeight(gridCenter.getZ() + parameters.getMaxZ());
       heightMap.updateGridSizeXY(parameters.getGridSizeXY());
       heightMap.updateGridResolutionXY(parameters.getGridResolutionXY());
       heightMap.update(pointCloud);
