@@ -66,7 +66,7 @@ public class PointCloudVisualizer extends AnimationTimer
       }
    }
 
-   public void processPointCloud(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
+   public void processPointCloud(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
    {
       if (isProcessing.getAndSet(true))
       {
@@ -78,7 +78,7 @@ public class PointCloudVisualizer extends AnimationTimer
 
    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
 
-   private void processPointCloudInternal(Triple<PointCloudData, FramePose3D, Point2D> pointCloudData)
+   private void processPointCloudInternal(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
    {
       processPointCloudInternal(pointCloudData.getLeft().getPointCloud(), pointCloudData.getMiddle());
    }

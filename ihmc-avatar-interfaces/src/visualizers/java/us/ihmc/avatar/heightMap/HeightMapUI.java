@@ -23,6 +23,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -87,12 +88,15 @@ public abstract class HeightMapUI extends ApplicationNoModule
          public void onNewMessage(PointCloud2 pointCloud)
          {
             FramePose3D ousterPose = new FramePose3D();
-            Point2D gridCenter = new Point2D();
+            Point3D gridCenter = new Point3D();
+            double groundHeight = 0.0;
             if (useROS2)
             {
                syncedRobot.update();
                ousterPose.setToZero(syncedRobot.getReferenceFrames().getOusterLidarFrame());
                ousterPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+               groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
             }
             else if (ros1OusterTransform.get() != null)
             {
@@ -102,8 +106,11 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
                ousterPose.getPosition().set(ros1Translation.getX(), ros1Translation.getY(), ros1Translation.getZ());
                ousterPose.getOrientation().set(ros1Orientation.getX(), ros1Orientation.getY(), ros1Orientation.getZ(), ros1Orientation.getW());
+
+               groundHeight = ros1Translation.getZ() - 2.0;
             }
             gridCenter.set(ousterPose.getPosition());
+            gridCenter.setZ(groundHeight);
 
             PointCloudData pointCloudData = new PointCloudData(pointCloud, 1000000, false);
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, ousterPose, gridCenter));
