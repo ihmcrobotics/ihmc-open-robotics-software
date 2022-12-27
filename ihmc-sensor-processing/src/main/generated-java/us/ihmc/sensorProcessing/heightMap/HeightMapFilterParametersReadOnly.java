@@ -21,11 +21,20 @@ public interface HeightMapFilterParametersReadOnly extends StoredPropertySetRead
 
    /**
     * The number of occupied neighbor cells to allow determining if a cell is an
-    * outlier
+    * outlier.
     */
-   default int getMinNeighborsToToDetermineOutliers()
+   default int getMinNeighborsToDetermineOutliers()
    {
-      return get(minNeighborsToToDetermineOutliers);
+      return get(minNeighborsToDetermineOutliers);
+   }
+
+   /**
+    * Min neighboring cells at the same height to determine that a cell is not an
+    * outlier.
+    */
+   default int getMinNeighborsAtSameHeightForValid()
+   {
+      return get(minNeighborsAtSameHeightForValid);
    }
 
    /**
