@@ -29,7 +29,7 @@ public class HeightMapCell
       clear();
    }
 
-   public synchronized void addPoint(double height)
+   public void addPoint(double height)
    {
       if (QUICK_UPDATE)
       {
