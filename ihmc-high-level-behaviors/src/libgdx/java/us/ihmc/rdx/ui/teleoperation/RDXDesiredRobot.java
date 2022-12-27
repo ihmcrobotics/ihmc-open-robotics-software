@@ -68,7 +68,8 @@ public class RDXDesiredRobot extends RDXMultiBodyGraphic
       MaterialDefinition material = new MaterialDefinition(ghostColor);
       SCS2DefinitionMissingTools.forEachRigidBodyDefinitionIncludingFourBars(robotDefinition.getRootBodyDefinition(),
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
-      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), true);
+      double scaleFactor = 1.1; // make the ghost robot a little larger, so it shows up more cleanly
+      loadRobotModelAndGraphics(robotDefinition, desiredFullRobotModel.getElevator(), scaleFactor);
    }
 
    @Override

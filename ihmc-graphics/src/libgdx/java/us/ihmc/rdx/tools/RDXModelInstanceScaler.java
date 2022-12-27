@@ -50,12 +50,12 @@ public class RDXModelInstanceScaler
    private final ModifiableReferenceFrame centroidFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final Stopwatch stopwatch = new Stopwatch();
 
-   public RDXModelInstanceScaler(String modelFileName, double startingScaleFactor)
+   public RDXModelInstanceScaler(String modelFileName)
    {
-      this(RDXModelLoader.loadModelData(modelFileName), startingScaleFactor);
+      this(RDXModelLoader.loadModelData(modelFileName));
    }
 
-   public RDXModelInstanceScaler(ModelData modelData, double startingScaleFactor)
+   public RDXModelInstanceScaler(ModelData modelData)
    {
       this.modelData = modelData;
 
@@ -106,11 +106,15 @@ public class RDXModelInstanceScaler
 
       wholeModelCentroid.scale(1.0 / totalNumberOfVertices);
       centroidFrame.update(transformToParent -> transformToParent.getTranslation().set(wholeModelCentroid));
-
-      scale(startingScaleFactor);
    }
 
    public void scale(double scaleFactor)
+   {
+      Model model = scaleForModel(scaleFactor);
+      modelInstance = new ModelInstance(model);
+   }
+
+   public Model scaleForModel(double scaleFactor)
    {
       stopwatch.start();
       float scaleFactorFloat = (float) scaleFactor;
@@ -135,10 +139,11 @@ public class RDXModelInstanceScaler
       }
 
       Model model = new Model(modelData);
-      modelInstance = new ModelInstance(model);
 
       if (stopwatch.totalElapsed() > 0.1)
-         LogTools.warn("Took {} s to scale, whcih is a little long.", stopwatch.lapElapsed());
+         LogTools.warn("Took {} s to scale, which is a little long.", stopwatch.lapElapsed());
+
+      return model;
    }
 
    public Point3D32 getWholeModelCentroid()
