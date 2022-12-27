@@ -4,10 +4,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
+import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.pubsub.DomainFactory;
@@ -26,6 +29,8 @@ public class HeadlessHeightMapUpdater
 
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
+
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                     ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
@@ -52,6 +57,8 @@ public class HeadlessHeightMapUpdater
          }
       });
 
+      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(new ROS2Helper(ros2Node));
+      ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());
 
       int initialPublishFrequency = 5;
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);
@@ -64,6 +71,8 @@ public class HeadlessHeightMapUpdater
 
    public void update()
    {
+      ros2PropertySetGroup.update();
+
       if (heightMapUpdater.updatesAreEnabled())
       {
          if (!updateThreadIsRunning.getAndSet(true))
