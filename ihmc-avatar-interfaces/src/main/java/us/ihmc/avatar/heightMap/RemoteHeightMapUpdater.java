@@ -66,6 +66,7 @@ public class RemoteHeightMapUpdater
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(new ROS2Helper(ros2Node));
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.FILTER_PARAMETERS, heightMapUpdater.getHeightMapFilterParameters());
 
       int initialPublishFrequency = 5;
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);

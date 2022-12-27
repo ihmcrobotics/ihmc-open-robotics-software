@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class HeightMapMessagerAPI
@@ -27,6 +28,7 @@ public class HeightMapMessagerAPI
    public static final MessagerAPIFactory.Topic<Triple<PointCloudData, FramePose3D, Point3D>> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");
+   public static final MessagerAPIFactory.Topic<HeightMapFilterParameters> filterParameters = topic("FilterParameters");
    public static final MessagerAPIFactory.Topic<Double> GridCenterX = topic("GridCenterX");
    public static final MessagerAPIFactory.Topic<Double> GridCenterY = topic("GridCenterY");
    public static final MessagerAPIFactory.Topic<Integer> PublishFrequency = topic("PublishRate");

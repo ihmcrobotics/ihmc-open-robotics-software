@@ -46,13 +46,6 @@ public class HeightMapParameters extends StoredPropertySet implements HeightMapP
     * is getNominalStandardDeviation() and m is this value.
     */
    public static final DoubleStoredPropertyKey mahalanobisScale = keys.addDoubleKey("Mahalanobis scale");
-   /**
-    * Number of cells in a direction to search for data to fill in holes.
-    */
-   public static final IntegerStoredPropertyKey holeProximityThreshold = keys.addIntegerKey("Hole proximity threshold");
-   public static final BooleanStoredPropertyKey estimateGroundHeight = keys.addBooleanKey("Estimate ground height");
-   public static final BooleanStoredPropertyKey fillHoles = keys.addBooleanKey("Fill holes");
-   public static final BooleanStoredPropertyKey removeOutlierCells = keys.addBooleanKey("Remove outlier cells");
 
    /**
     * Loads this property set.
