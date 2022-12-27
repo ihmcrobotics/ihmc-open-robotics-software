@@ -43,6 +43,7 @@ public class StoredPropertySetROS2Input
 
    private void acceptMessage(StoredPropertySetMessage message)
    {
+      LogTools.info("Got new properties ");
       receptionNotification.set(message);
       ++numberOfMessagesReceived;
       receptionTimer.reset();

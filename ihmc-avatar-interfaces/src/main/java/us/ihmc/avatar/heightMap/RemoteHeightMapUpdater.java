@@ -1,10 +1,10 @@
 package us.ihmc.avatar.heightMap;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -12,7 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -23,21 +23,24 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class HeadlessHeightMapUpdater
+public class RemoteHeightMapUpdater
 {
    private final ROS2Node ros2Node;
 
+   private static final long updateDTMillis = 100;
+
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
+   private ROS2SyncedRobotModel syncedRobot;
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                     ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-
-   public HeadlessHeightMapUpdater()
+   public RemoteHeightMapUpdater(DRCRobotModel robotModel)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       IHMCROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
 
@@ -49,9 +52,13 @@ public class HeadlessHeightMapUpdater
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
          {
+            syncedRobot.update();
+
+            double groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
+
             LidarScanMessage data = subscriber.readNextData();
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
-            Point2D gridCenter = new Point2D(data.getLidarPosition().getX(), data.getLidarPosition().getY());
+            Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
             PointCloudData pointCloudData = new PointCloudData(data);
             heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(), gridCenter));
          }
@@ -66,7 +73,7 @@ public class HeadlessHeightMapUpdater
       heightMapUpdater.setGridCenterX(2.0);
       heightMapUpdater.setGridCenterY(0.0);
 
-      executorService.scheduleAtFixedRate(this::update, 0, 100, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
    public void update()
@@ -77,7 +84,7 @@ public class HeadlessHeightMapUpdater
       {
          if (!updateThreadIsRunning.getAndSet(true))
          {
-            heightMapUpdater.runUpdateThread();
+            heightMapUpdater.runFullUpdate(updateDTMillis);
             updateThreadIsRunning.set(false);
          }
       }
@@ -87,10 +94,5 @@ public class HeadlessHeightMapUpdater
    {
       ros2Node.destroy();
       executorService.shutdown();
-   }
-
-   public static void main(String[] args)
-   {
-      new HeadlessHeightMapUpdater();
    }
 }

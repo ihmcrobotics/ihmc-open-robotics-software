@@ -24,7 +24,7 @@ public class HeightMapMessagerAPI
    public static final MessagerAPIFactory.Topic<Double> yPosition = topic("yPosition");
    public static final MessagerAPIFactory.Topic<Double> zPosition = topic("zPosition");
 
-   public static final MessagerAPIFactory.Topic<Triple<PointCloudData, FramePose3D, Point2D>> PointCloudData = topic("PointCloudData");
+   public static final MessagerAPIFactory.Topic<Triple<PointCloudData, FramePose3D, Point3D>> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");
    public static final MessagerAPIFactory.Topic<Double> GridCenterX = topic("GridCenterX");
