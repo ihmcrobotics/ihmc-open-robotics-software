@@ -44,9 +44,7 @@ public class HeightMapUpdater
 {
    private static final boolean printFrequency = false;
    private static final boolean printQueueSize = false;
-
-   private static final int minNumberOfNeighbors = 2;
-   private static final int minNumberOfNeighborsToResetHeight = 3;
+   private static final int maxQueueLength = 5;
 
    static final boolean USE_OUSTER_FRAME = true;
    static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
@@ -410,18 +408,18 @@ public class HeightMapUpdater
             muchHigherThanAllNeighbors &= heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
          }
 
-         if (numberOfNeighbors >= minNumberOfNeighbors && !muchHigherThanAllNeighbors)
+         if (numberOfNeighbors >= filterParameters.getMinNeighborsAtSameHeightForValid() && !muchHigherThanAllNeighbors)
          {
             heightMap.setHasSufficientNeighbors(cellNumber, true);
             return;
          }
       }
 
-      if (numberOfNeighbors < minNumberOfNeighbors)
+      if (numberOfNeighbors < filterParameters.getMinNeighborsAtSameHeightForValid())
       {
          heightMap.setHasSufficientNeighbors(cellNumber, false);
       }
-      else if (numberOfNeighbors >= filterParameters.getMinNeighborsToToDetermineOutliers() && muchHigherThanAllNeighbors)
+      else if (numberOfNeighbors >= filterParameters.getMinNeighborsToDetermineOutliers() && muchHigherThanAllNeighbors)
       {
          double resetHeight = 0.0;
          for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)

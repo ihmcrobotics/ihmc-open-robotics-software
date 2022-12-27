@@ -19,11 +19,20 @@ public interface HeightMapFilterParametersBasics extends HeightMapFilterParamete
 
    /**
     * The number of occupied neighbor cells to allow determining if a cell is an
-    * outlier
+    * outlier.
     */
-   default void setMinNeighborsToToDetermineOutliers(int minNeighborsToToDetermineOutliers)
+   default void setMinNeighborsToDetermineOutliers(int minNeighborsToDetermineOutliers)
    {
-      set(HeightMapFilterParameters.minNeighborsToToDetermineOutliers, minNeighborsToToDetermineOutliers);
+      set(HeightMapFilterParameters.minNeighborsToDetermineOutliers, minNeighborsToDetermineOutliers);
+   }
+
+   /**
+    * Min neighboring cells at the same height to determine that a cell is not an
+    * outlier.
+    */
+   default void setMinNeighborsAtSameHeightForValid(int minNeighborsAtSameHeightForValid)
+   {
+      set(HeightMapFilterParameters.minNeighborsAtSameHeightForValid, minNeighborsAtSameHeightForValid);
    }
 
    /**
