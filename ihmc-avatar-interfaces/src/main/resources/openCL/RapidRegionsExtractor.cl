@@ -18,17 +18,17 @@
 float4 back_project_spherical(int2 pos, float depth, global float* params)
 {
 
-   float verticalFieldOfView = M_PI / 2;
-   float horizontalFieldOfView = 2 * M_PI;
+   float totalPitch = M_PI / 2;
+   float totalYaw = 2 * M_PI;
 
    int x = pos.x;
    int y = pos.y;
 
-   int xFromCenter = -x - (params[INPUT_WIDTH] / 2); // flip
+   int xFromCenter = -x - (params[INPUT_WIDTH] / 2);
    int yFromCenter = y - (params[INPUT_HEIGHT] / 2);
 
-   float yaw = xFromCenter / (float) params[INPUT_WIDTH] * horizontalFieldOfView;
-   float pitch = yFromCenter / (float) params[INPUT_HEIGHT] * verticalFieldOfView;
+   float yaw = xFromCenter / (float) params[INPUT_WIDTH] * totalYaw;
+   float pitch = yFromCenter / (float) params[INPUT_HEIGHT] * totalPitch;
 
     float r = depth * cos(pitch);
 
@@ -36,7 +36,7 @@ float4 back_project_spherical(int2 pos, float depth, global float* params)
     float py = r * sin(yaw);
     float pz = depth * sin(pitch);
 
-    //printf("Projection: [%d,%d,%.2lf,%.2lf] (PC:%d,YC:%d,X:%.2lf,Y:%.2lf,Z:%.2lf,R:%.2lf,D:%.2lf)\n", pitchOffset, yawOffset, yaw, pitch, pitchCount, yawCount, px, py, pz, r, depth);
+    //printf("Projection: [%d,%d] (X:%.2lf,Y:%.2lf,Z:%.2lf,R:%.2lf,D:%.2lf)\n", x, y, px, py, pz, r, depth);
 
     float4 X = (float4) (px, py, pz, 0);
     return X;
@@ -529,10 +529,6 @@ void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* 
             cloud[index] = point.x;
             cloud[index + 1] = point.y;
             cloud[index + 2] = point.z;
-
-            //cloud[index] = x * 0.01f;
-            //cloud[index + 1] = y * 0.01f;
-            //cloud[index + 2] = radius;
 
             //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, y,x, radius, cloud[index], cloud[index+1], cloud[index+2]);
         }
