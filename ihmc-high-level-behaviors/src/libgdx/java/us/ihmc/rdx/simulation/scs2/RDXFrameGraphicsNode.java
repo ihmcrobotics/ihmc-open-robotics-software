@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
@@ -28,9 +29,9 @@ public class RDXFrameGraphicsNode
          coordinateFrame = RDXModelBuilder.createCoordinateFrameInstance(0.15);
    }
 
-   public void addModelPart(RDXVisualModelInstance model, String name, float x, float y, float z)
+   public void addModelPart(RDXVisualModelInstance model)
    {
-      parts.add(new RDXFrameNodePart(referenceFrame, model, name, x, y, z));
+      parts.add(new RDXFrameNodePart(referenceFrame, model));
    }
 
    public void addModelPart(RDXVisualModelInstance model, String name)
@@ -38,7 +39,12 @@ public class RDXFrameGraphicsNode
       parts.add(new RDXFrameNodePart(referenceFrame, model, name));
    }
 
-   public void updatePose()
+   public void addModelPart(RDXVisualModelInstance model, String name, Vector3D scale)
+   {
+      parts.add(new RDXFrameNodePart(referenceFrame, model, name, scale));
+   }
+
+   public void update()
    {
       for (RDXFrameNodePart part : parts)
       {

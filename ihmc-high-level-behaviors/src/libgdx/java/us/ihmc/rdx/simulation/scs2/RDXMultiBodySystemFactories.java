@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -127,9 +128,7 @@ public class RDXMultiBodySystemFactories
                                              RigidBodyDefinition rigidBodyDefinition,
                                              Executor graphicLoader,
                                              ClassLoader resourceClassLoader,
-                                             float x,
-                                             float y,
-                                             float z)
+                                             Vector3D scale)
    {
       RDXRigidBody RDXRigidBody = new RDXRigidBody(rigidBody);
       List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
@@ -137,11 +136,11 @@ public class RDXMultiBodySystemFactories
 
       if (graphicLoader != null)
       {
-         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader, x, y, z));
+         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader, scale));
       }
       else
       {
-         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader, x, y, z);
+         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, RDXRigidBody, resourceClassLoader, scale);
       }
 
       return RDXRigidBody;
@@ -172,9 +171,7 @@ public class RDXMultiBodySystemFactories
                                             List<CollisionShapeDefinition> collisionShapeDefinitions,
                                             RDXRigidBody RDXRigidBody,
                                             ClassLoader resourceClassLoader,
-                                            float x,
-                                            float y,
-                                            float z)
+                                            Vector3D scale)
    {
       ReferenceFrame graphicFrame = RDXRigidBody.isRootBody() ? RDXRigidBody.getBodyFixedFrame() : RDXRigidBody.getParentJoint().getFrameAfterJoint();
       List<RDXVisualModelInstance> visualModels = RDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
@@ -185,14 +182,14 @@ public class RDXMultiBodySystemFactories
          int i = 0;
          for (RDXVisualModelInstance visualModel : visualModels)
          {
-            visualGraphicsNode.addModelPart(visualModel, RDXRigidBody.getName() + "Visual" + i, x, y, z);
+            visualGraphicsNode.addModelPart(visualModel, RDXRigidBody.getName() + "Visual" + i, scale);
          }
          RDXRigidBody.setVisualGraphics(visualGraphicsNode);
          RDXFrameGraphicsNode collisionGraphicsNode = new RDXFrameGraphicsNode(graphicFrame);
          i = 0;
          for (RDXVisualModelInstance collisionModel : collisionModels)
          {
-            collisionGraphicsNode.addModelPart(collisionModel, RDXRigidBody.getName() + "Collision" + i, x, y, z);
+            collisionGraphicsNode.addModelPart(collisionModel, RDXRigidBody.getName() + "Collision" + i, scale);
          }
          RDXRigidBody.setCollisionGraphics(collisionGraphicsNode);
       }

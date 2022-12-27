@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -34,14 +35,14 @@ public class RDXMultiBodyGraphic extends RDXVisualizer implements RenderableProv
       loadRobotModelAndGraphics(robotDefinition, originalRootBody, false);
    }
 
-   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody, boolean scale)
+   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody, boolean scaleALittleBigger)
    {
       if (multiBody != null)
          multiBody.destroy();
 
       ThreadTools.startAsDaemon(() ->
       {
-         multiBody = loadRigidBody(originalRootBody, robotDefinition, scale);
+         multiBody = loadRigidBody(originalRootBody, robotDefinition, scaleALittleBigger);
          robotLoadedActivator.activate();
       }, getClass().getSimpleName() + "Loading");
    }
@@ -51,26 +52,16 @@ public class RDXMultiBodyGraphic extends RDXVisualizer implements RenderableProv
       return loadRigidBody(rigidBody, robotDefinition, false);
    }
 
-   private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, boolean scale)
+   private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, boolean scaleALittleBigger)
    {
       RDXRigidBody RDXRigidBody;
       Executor executorToRunLaterOnThreadWithGraphicsContext = Gdx.app::postRunnable;
-      if (scale)
-      {
-         RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                   executorToRunLaterOnThreadWithGraphicsContext,
-                                                                   robotDefinition.getResourceClassLoader(),
-                                                                   1.1f, 1.1f, 1.1f);
-      }
-
-      else
-      {
-         RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
-                                                                   robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
-                                                                   executorToRunLaterOnThreadWithGraphicsContext,
-                                                                   robotDefinition.getResourceClassLoader());
-      }
+      Vector3D scaleVector = scaleALittleBigger ? new Vector3D(1.1, 1.1, 1.1) : new Vector3D(1.0, 1.0, 1.0);
+      RDXRigidBody = RDXMultiBodySystemFactories.toGDXRigidBody(rigidBody,
+                                                                robotDefinition.getRigidBodyDefinition(rigidBody.getName()),
+                                                                executorToRunLaterOnThreadWithGraphicsContext,
+                                                                robotDefinition.getResourceClassLoader(),
+                                                                scaleVector);
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {
@@ -83,12 +74,12 @@ public class RDXMultiBodyGraphic extends RDXVisualizer implements RenderableProv
                                                                                              fourBarJointDefinition.getBodyDA(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              robotDefinition.getResourceClassLoader(),
-                                                                                             1.1f, 1.1f, 1.1f));
+                                                                                             scaleVector));
             fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toGDXRigidBody(fourBarJoint.getBodyBC(),
                                                                                              fourBarJointDefinition.getBodyBC(),
                                                                                              executorToRunLaterOnThreadWithGraphicsContext,
                                                                                              robotDefinition.getResourceClassLoader(),
-                                                                                             0.0f, 0.0f, 0.0f));
+                                                                                             scaleVector));
          }
 
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition));

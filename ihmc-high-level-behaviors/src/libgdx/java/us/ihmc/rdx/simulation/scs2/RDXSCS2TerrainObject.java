@@ -1,21 +1,21 @@
 package us.ihmc.rdx.simulation.scs2;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXVisualModelInstance;
+import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
-
-import java.util.ArrayList;
+import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletTerrainObject;
 
 public class RDXSCS2TerrainObject
 {
    private final TerrainObjectDefinition terrainObjectDefinition;
-   private final ArrayList<ModelInstance> visualModelInstances = new ArrayList<>();
-   private final ArrayList<ModelInstance> collisionModelInstances = new ArrayList<>();
+   private RDXFrameGraphicsNode visualFrameGraphicsNode;
+   private RDXFrameGraphicsNode collisionFrameGraphicsNode;
+   private final ModifiableReferenceFrame centerOfMassFrame = new ModifiableReferenceFrame(ReferenceFrame.getWorldFrame());
+   private BulletTerrainObject bulletTerrainObject;
 
    public RDXSCS2TerrainObject(TerrainObjectDefinition terrainObjectDefinition)
    {
@@ -24,34 +24,45 @@ public class RDXSCS2TerrainObject
 
    public void create()
    {
-      Gdx.app.postRunnable(() ->
+      visualFrameGraphicsNode = new RDXFrameGraphicsNode(centerOfMassFrame.getReferenceFrame());
+      collisionFrameGraphicsNode = new RDXFrameGraphicsNode(centerOfMassFrame.getReferenceFrame());
+
+      for (RDXVisualModelInstance terrainModelInstance : RDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
       {
-         for (RDXVisualModelInstance terrainModelInstance : RDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
-         {
-            visualModelInstances.add(terrainModelInstance);
-            LibGDXTools.toLibGDX(terrainModelInstance.getLocalTransform(), terrainModelInstance.transform);
-         }
-         for (RDXVisualModelInstance terrainCollisionModelInstance : RDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
-         {
-            collisionModelInstances.add(terrainCollisionModelInstance);
-            LibGDXTools.toLibGDX(terrainCollisionModelInstance.getLocalTransform(), terrainCollisionModelInstance.transform);
-         }
+         visualFrameGraphicsNode.addModelPart(terrainModelInstance);
+      }
+      for (RDXVisualModelInstance terrainCollisionModelInstance : RDXVisualTools.collectCollisionNodes(terrainObjectDefinition.getCollisionShapeDefinitions()))
+      {
+         collisionFrameGraphicsNode.addModelPart(terrainCollisionModelInstance);
+      }
+   }
+
+   public void update()
+   {
+      centerOfMassFrame.update(transformToParent ->
+      {
+         transformToParent.set(bulletTerrainObject.getTransformToWorld());
       });
+
+      visualFrameGraphicsNode.update();
+      collisionFrameGraphicsNode.update();
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (ModelInstance modelInstance : visualModelInstances)
-      {
-         modelInstance.getRenderables(renderables, pool);
-      }
+      visualFrameGraphicsNode.getRenderables(renderables, pool);
    }
 
    public void getCollisionRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (ModelInstance modelInstance : collisionModelInstances)
-      {
-         modelInstance.getRenderables(renderables, pool);
-      }
+      collisionFrameGraphicsNode.getRenderables(renderables, pool);
+   }
+
+   /**
+    * Support moving terrain objects when using Bullet physics
+    */
+   public void setBulletTerrainObject(BulletTerrainObject bulletTerrainObject)
+   {
+      this.bulletTerrainObject = bulletTerrainObject;
    }
 }
