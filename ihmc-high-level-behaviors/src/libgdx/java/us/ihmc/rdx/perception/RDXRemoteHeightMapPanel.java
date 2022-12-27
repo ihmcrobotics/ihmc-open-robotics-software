@@ -1,6 +1,5 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionComms;
 import us.ihmc.avatar.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -9,7 +8,7 @@ import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
-public class RDXRemoteHeightMapUI
+public class RDXRemoteHeightMapPanel
 {
    private final HeightMapParameters heightMapParameters = new HeightMapParameters();
    private final HeightMapFilterParameters heightMapFilterParameters = new HeightMapFilterParameters();
@@ -17,10 +16,9 @@ public class RDXRemoteHeightMapUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
 
-   public RDXRemoteHeightMapUI(ROS2Helper ros2Helper)
+   public RDXRemoteHeightMapPanel(ROS2Helper ros2Helper)
    {
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
-      // FIXME fix the comms
       remotePropertySets.registerRemotePropertySet(heightMapParameters, HeightMapAPI.PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapFilterParameters, HeightMapAPI.FILTER_PARAMETERS);
    }
