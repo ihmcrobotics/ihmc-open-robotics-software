@@ -3,15 +3,22 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXObjectDetector;
+import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
@@ -22,11 +29,27 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private RDXObjectDetector objectDetector;
    private String objectName = "";
    private FramePose3D objectPose;
+   private FullHumanoidRobotModel ghostRobotModel;
+   private RDXMultiBodyGraphic ghostRobotGraphic;
+   private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
 
-   public RDXVRSharedControl(ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
+   public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
       this.enabledIKStreaming = enabledIKStreaming;
       this.enabledReplay = enabledReplay;
+
+      // create ghost robot for assistance preview
+      RobotDefinition ghostRobotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("#9370DB").derive(0.0, 1.0, 1.0, 0.5));
+      RobotDefinition.forEachRigidBodyDefinition(ghostRobotDefinition.getRootBodyDefinition(),
+                                                 body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
+
+      ghostRobotModel = robotModel.createFullRobotModel();
+      ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostRobotModel);
+      ghostRobotGraphic = new RDXMultiBodyGraphic(robotModel.getSimpleRobotName() + " (Assistance Preview Ghost)");
+      ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostRobotModel.getElevator());
+      ghostRobotGraphic.setActive(true);
+      ghostRobotGraphic.create();
    }
 
    public void processInput(InputDigitalActionData triggerButton)
@@ -36,6 +59,17 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       {
          setEnabled(!enabled.get());
       }
+   }
+
+   public void updatePreviewModel(KinematicsToolboxOutputStatus latestStatus)
+   {
+      ghostRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
+      ghostRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
+      for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+      {
+         ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+      }
+      ghostRobotModel.getElevator().updateFramesRecursively();
    }
 
    @Override
@@ -65,6 +99,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       {
          setEnabled(enabled.get());
       }
+      ghostRobotGraphic.renderImGuiWidgets();
+   }
+
+   public void destroy()
+   {
+      ghostRobotGraphic.destroy();
    }
 
    private void setEnabled(boolean enabled)
@@ -95,6 +135,16 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          if (enabledReplay.get())
             this.enabled.set(false); // check no concurrency with replay
       }
+   }
+
+   public RDXMultiBodyGraphic getPreviewGraphic()
+   {
+      return ghostRobotGraphic;
+   }
+
+   public FullHumanoidRobotModel getPreviewModel()
+   {
+      return ghostRobotModel;
    }
 
    public boolean isActive()

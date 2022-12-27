@@ -76,11 +76,11 @@ public class ArUcoObjectPoseTest
 
       FramePose3D goalPose = new FramePose3D(objectPose);
       RigidBodyTransform transformObjectToGoal = new RigidBodyTransform(); // new RigidBodyTransform(recordedGoalPose); // cannot create transform from pose like this probably
-      recordedGoalPose.get(transformObjectToGoal); // pack transform object to goal from goal pose in object frame
+      recordedGoalPose.get(transformObjectToGoal); // pack transformObjectToGoal, from goalPose in object frame
 //      transformObjectToGoal.invert();
 //      goalPose.appendRotation(transformObjectToGoal.getRotation());
 //      goalPose.appendTranslation(transformObjectToGoal.getTranslation());
-      goalPose.applyInverseTransform(transformObjectToGoal);
+      goalPose.applyTransform(transformObjectToGoal);
       recordedGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
       LogTools.info("Goal: {}", goalPose);
       assertEquals((float) goalPose.getTranslation().getX(), (float) recordedGoalPose.getX());

@@ -74,7 +74,7 @@ public class RDXVRKinematicsStreamingMode
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled, 2);
-   private RDXVRSharedControl sharedControlAssistant = new RDXVRSharedControl(streamToController, kinematicsRecorder.isReplayingEnabled());
+   private RDXVRSharedControl sharedControlAssistant;
 
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
@@ -142,6 +142,8 @@ public class RDXVRKinematicsStreamingMode
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
 
       wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
+
+      sharedControlAssistant = new RDXVRSharedControl(robotModel, streamToController, kinematicsRecorder.isReplayingEnabled());
    }
 
    public void addObjectDetection(RDXObjectDetector objectDetector)
@@ -301,9 +303,13 @@ public class RDXVRKinematicsStreamingMode
                ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
+            if(sharedControlAssistant.isActive())
+               sharedControlAssistant.updatePreviewModel(latestStatus);
          }
       }
       ghostRobotGraphic.update();
+      if(sharedControlAssistant.isActive())
+         sharedControlAssistant.getPreviewGraphic().update();
    }
 
    public void renderImGuiWidgets()
@@ -393,7 +399,11 @@ public class RDXVRKinematicsStreamingMode
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (status.hasReceivedFirstMessage())
+      {
          ghostRobotGraphic.getRenderables(renderables, pool);
+         if(sharedControlAssistant.isActive())
+            sharedControlAssistant.getPreviewGraphic().getRenderables(renderables, pool);
+      }
       if (showReferenceFrameGraphics.get())
       {
 //         headsetFrameGraphic.getRenderables(renderables, pool);
@@ -408,6 +418,7 @@ public class RDXVRKinematicsStreamingMode
    public void destroy()
    {
       ghostRobotGraphic.destroy();
+      sharedControlAssistant.destroy();
       headsetFrameGraphic.dispose();
       for (RobotSide side : RobotSide.values)
       {
