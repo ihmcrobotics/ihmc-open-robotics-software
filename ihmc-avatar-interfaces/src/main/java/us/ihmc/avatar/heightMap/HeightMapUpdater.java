@@ -21,6 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -46,7 +47,6 @@ public class HeightMapUpdater
 
    private static final int minNumberOfNeighbors = 2;
    private static final int minNumberOfNeighborsToResetHeight = 3;
-   private static final double epsilonHeightReset = 0.04;
 
    static final boolean USE_OUSTER_FRAME = true;
    static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
@@ -61,6 +61,7 @@ public class HeightMapUpdater
    }
 
    private final HeightMapParameters parameters;
+   private final HeightMapFilterParameters filterParameters;
 
    private final HeightMapManager heightMap;
    private final List<Consumer<HeightMapMessage>> heightMapConsumers = new ArrayList<>();
@@ -85,12 +86,18 @@ public class HeightMapUpdater
    public HeightMapUpdater()
    {
       parameters = new HeightMapParameters();
+      filterParameters = new HeightMapFilterParameters();
       heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
    }
 
    public StoredPropertySet getHeightMapParameters()
    {
       return parameters;
+   }
+
+   public StoredPropertySet getHeightMapFilterParameters()
+   {
+      return filterParameters;
    }
 
    public void attachHeightMapConsumer(Consumer<HeightMapMessage> heightMapConsumer)
@@ -252,7 +259,7 @@ public class HeightMapUpdater
       {
          /* estimate ground height */
          double estimatedGroundHeight = Double.NaN;
-         if (parameters.getEstimateGroundHeight())
+         if (filterParameters.getEstimateGroundHeight())
             estimatedGroundHeight = estimateGroundHeight(pointCloud);
 
          /* filter near and below ground height and outliers that seem too high */
@@ -320,7 +327,7 @@ public class HeightMapUpdater
 
    private void performFiltering(double estimatedGroundHeight)
    {
-      if (parameters.getEstimateGroundHeight())
+      if (filterParameters.getEstimateGroundHeight())
       {
          /* Remove cells near ground height */
          double groundEpsilonToFilter = 0.03;
@@ -345,12 +352,12 @@ public class HeightMapUpdater
          updateIfCellIsOutlier(cellNumber);
       }
 
-      if (parameters.getFillHoles())
+      if (filterParameters.getFillHoles())
       {
          /* Once the map has had a chance to initialize, fill in any holes. This is a very ad-hoc way to fill them in,
           *  holes are detected as cells without data that does have data within both sides along either the x or y axis.
           */
-         int holeProximityThreshold = parameters.getHoleProximityThreshold();
+         int holeProximityThreshold = filterParameters.getHoleProximityThreshold();
 
          if (totalUpdateCount.get() > 50)
          {
@@ -376,7 +383,7 @@ public class HeightMapUpdater
 
    private void updateIfCellIsOutlier(int cellNumber)
    {
-      if (!parameters.getRemoveOutlierCells())
+      if (!filterParameters.getRemoveOutlierCells())
       {
          heightMap.setHasSufficientNeighbors(cellNumber, true);
          return;
@@ -391,7 +398,7 @@ public class HeightMapUpdater
       }
 
       boolean muchHigherThanAllNeighbors = true;
-      double heightThreshold = heightMap.getHeightAt(cellNumber) - epsilonHeightReset;
+      double heightThreshold = heightMap.getHeightAt(cellNumber) - filterParameters.getOutlierCellHeightResetEpsilon();
       int numberOfNeighbors = 0;
       for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
       {
@@ -414,7 +421,7 @@ public class HeightMapUpdater
       {
          heightMap.setHasSufficientNeighbors(cellNumber, false);
       }
-      else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && muchHigherThanAllNeighbors)
+      else if (numberOfNeighbors >= filterParameters.getMinNeighborsToToDetermineOutliers() && muchHigherThanAllNeighbors)
       {
          double resetHeight = 0.0;
          for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
@@ -437,11 +444,11 @@ public class HeightMapUpdater
 
       float heightSearch;
 
-      if (!Float.isNaN(heightSearch = (float) hasDataInDirection(xIndex, yIndex, true, parameters.getHoleProximityThreshold())))
+      if (!Float.isNaN(heightSearch = (float) hasDataInDirection(xIndex, yIndex, true, filterParameters.getHoleProximityThreshold())))
       {
          return heightSearch;
       }
-      else if (!Float.isNaN(heightSearch = (float) hasDataInDirection(xIndex, yIndex, false, parameters.getHoleProximityThreshold())))
+      else if (!Float.isNaN(heightSearch = (float) hasDataInDirection(xIndex, yIndex, false, filterParameters.getHoleProximityThreshold())))
       {
          return heightSearch;
       }

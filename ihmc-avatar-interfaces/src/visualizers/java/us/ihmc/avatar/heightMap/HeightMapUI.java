@@ -31,6 +31,7 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
@@ -62,6 +63,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
    public void start(Stage stage) throws Exception
    {
       HeightMapParameters parameters = new HeightMapParameters();
+      HeightMapFilterParameters filterParameters = new HeightMapFilterParameters();
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
       new HeightMapUpdaterForUI(messager, ros2Node, stage);
@@ -170,6 +172,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       }
 
       heightMapParametersUIController.setParameters(parameters);
+      heightMapParametersUIController.setFilterParameters(filterParameters);
       heightMapParametersUIController.attachMessager(messager);
       heightMapParametersUIController.bindControls();
 
