@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -17,6 +19,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImBoolean inPaintHeight = new ImBoolean(false);
+   private final ImBoolean renderGroundPlane = new ImBoolean(false);
+   private final ImBoolean renderGroundCells = new ImBoolean(false);
 
    public RDXHeightMapVisualizer(String title)
    {
@@ -34,6 +39,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
       {
          executorService.clearQueueAndExecute(() ->
                                               {
+                                                 gridMapGraphic.setInPaintHeight(inPaintHeight.get());
+                                                 gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
+                                                 gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
                                                  gridMapGraphic.generateMeshesAsync(heightMapMessage);
                                               });
       }
@@ -53,6 +61,11 @@ public class RDXHeightMapVisualizer extends RDXVisualizer implements RenderableP
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgets();
+
+      ImGui.checkbox("In Paint Height", inPaintHeight);
+      ImGui.checkbox("Render Ground Plane", renderGroundPlane);
+      ImGui.checkbox("Render Ground Cells", renderGroundCells);
+
       if (!isActive())
       {
          executorService.interruptAndReset();
