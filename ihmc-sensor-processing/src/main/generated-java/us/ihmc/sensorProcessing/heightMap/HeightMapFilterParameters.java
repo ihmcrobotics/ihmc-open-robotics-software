@@ -29,9 +29,14 @@ public class HeightMapFilterParameters extends StoredPropertySet implements Heig
    public static final DoubleStoredPropertyKey outlierCellHeightResetEpsilon = keys.addDoubleKey("Outlier cell height reset epsilon");
    /**
     * The number of occupied neighbor cells to allow determining if a cell is an
-    * outlier
+    * outlier.
     */
-   public static final IntegerStoredPropertyKey minNeighborsToToDetermineOutliers = keys.addIntegerKey("Min neighbors to to determine outliers");
+   public static final IntegerStoredPropertyKey minNeighborsToDetermineOutliers = keys.addIntegerKey("Min neighbors to determine outliers");
+   /**
+    * Min neighboring cells at the same height to determine that a cell is not an
+    * outlier.
+    */
+   public static final IntegerStoredPropertyKey minNeighborsAtSameHeightForValid = keys.addIntegerKey("Min neighbors at same height for valid");
    /**
     * Number of cells in a direction to search for data to fill in holes.
     */
