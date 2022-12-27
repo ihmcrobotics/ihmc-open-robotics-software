@@ -136,21 +136,6 @@ public class RDXRigidBody implements RigidBodyBasics
       }
    }
 
-   public void destroy()
-   {
-      for (RDXRigidBody rigidBody : subtreeIterable())
-      {
-         if (rigidBody.getVisualGraphicsNode() != null)
-         {
-            rigidBody.getVisualGraphicsNode().dispose();
-         }
-         if (rigidBody.getCollisionGraphicsNode() != null)
-         {
-            rigidBody.getCollisionGraphicsNode().dispose();
-         }
-      }
-   }
-
    @Override
    public SpatialInertiaBasics getInertia()
    {
@@ -214,14 +199,6 @@ public class RDXRigidBody implements RigidBodyBasics
    public Stream<? extends RDXRigidBody> subtreeStream()
    {
       return SubtreeStreams.from(RDXRigidBody.class, this);
-   }
-
-   public void scale(float x, float y, float z)
-   {
-      if (visualGraphicsNode != null)
-         visualGraphicsNode.scale(x, y, z);
-      if (collisionGraphicsNode != null)
-         collisionGraphicsNode.scale(x, y, z);
    }
 
    public TreeSet<String> getRigidBodiesToHide()
