@@ -33,6 +33,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private FullHumanoidRobotModel ghostRobotModel;
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
+   private boolean wasPreviewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -77,16 +78,19 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
+      if (proMPAssistant.readyToPack())
+      {
+         if (isPreviewActive() && !previewValidated)
+         {
+            enabledIKStreaming.set(false);
+            wasPreviewSetToActive = ghostRobotGraphic.isActive();
+         }
+      }
    }
 
    @Override
    public boolean readyToPack()
    {
-      if (proMPAssistant.readyToPack())
-      {
-         if (isPreviewActive() && !previewValidated)
-            enabledIKStreaming.set(false);
-      }
       return proMPAssistant.readyToPack();
    }
 
@@ -96,7 +100,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       if (isPreviewActive() && !previewValidated)
       {
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
+         {
             previewValidated = true;
+            ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
+         }
       }
       else
       {
@@ -136,6 +143,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             objectName = "";
             objectPose = null;
             previewValidated = false;
+            ghostRobotGraphic.setActive(wasPreviewSetToActive); // set activate preview graphic back to what it was
          }
       }
       if (enabled)
