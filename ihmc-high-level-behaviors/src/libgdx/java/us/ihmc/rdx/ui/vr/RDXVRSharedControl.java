@@ -29,6 +29,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private RDXObjectDetector objectDetector;
    private String objectName = "";
    private FramePose3D objectPose;
+   private boolean previewValidated = false;
    private FullHumanoidRobotModel ghostRobotModel;
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
@@ -81,15 +82,28 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public boolean readyToPack()
    {
+      if (proMPAssistant.readyToPack())
+      {
+         if (isPreviewActive() && !previewValidated)
+            enabledIKStreaming.set(false);
+      }
       return proMPAssistant.readyToPack();
    }
 
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      proMPAssistant.framePoseToPack(framePose, bodyPart); // use promp assistance for shared control
-      if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
-         setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+      if (isPreviewActive() && !previewValidated)
+      {
+         if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
+            previewValidated = true;
+      }
+      else
+      {
+         proMPAssistant.framePoseToPack(framePose, bodyPart); // use promp assistance for shared control
+         if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
+            setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
+      }
    }
 
    public void renderWidgets(ImGuiUniqueLabelMap labels)
@@ -121,6 +135,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setCurrentTaskDone(false);
             objectName = "";
             objectPose = null;
+            previewValidated = false;
          }
       }
       if (enabled)
@@ -150,6 +165,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public boolean isActive()
    {
       return this.enabled.get();
+   }
+
+   public boolean isPreviewActive()
+   {
+      return ghostRobotGraphic.isActive();
    }
 
    public void setObjectDetector(RDXObjectDetector objectDetector)

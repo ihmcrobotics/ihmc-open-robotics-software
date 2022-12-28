@@ -148,7 +148,9 @@ public class RDXVRKinematicsStreamingMode
 
    public void addObjectDetection(RDXObjectDetector objectDetector)
    {
+      // the object information can be used to improve the precision of the assistance
       sharedControlAssistant.setObjectDetector(objectDetector);
+      // the object information can be used to record the motion in the object frame
       kinematicsRecorder.setObjectDetector(objectDetector);
    }
 
@@ -303,12 +305,12 @@ public class RDXVRKinematicsStreamingMode
                ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
-            if(sharedControlAssistant.isActive())
+            if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
                sharedControlAssistant.updatePreviewModel(latestStatus);
          }
       }
       ghostRobotGraphic.update();
-      if(sharedControlAssistant.isActive())
+      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
          sharedControlAssistant.getPreviewGraphic().update();
    }
 
@@ -401,7 +403,7 @@ public class RDXVRKinematicsStreamingMode
       if (status.hasReceivedFirstMessage())
       {
          ghostRobotGraphic.getRenderables(renderables, pool);
-         if(sharedControlAssistant.isActive())
+         if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
             sharedControlAssistant.getPreviewGraphic().getRenderables(renderables, pool);
       }
       if (showReferenceFrameGraphics.get())
