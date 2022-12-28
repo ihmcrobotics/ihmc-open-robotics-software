@@ -52,7 +52,7 @@ public class ProMPAssistant
    private boolean conditionOnlyLastObservation = true;
    private final List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
    private boolean isMoving = false;
-   private boolean isPreview = true;
+   private boolean isPreviewEnabled = true;
 
    public ProMPAssistant()
    {
@@ -295,16 +295,22 @@ public class ProMPAssistant
       for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart));
-         if(isPreview)
-         {
-            bodyPartTrajectorySampleCounter.put(bodyPart, 0);
-         }
+         if(isPreviewEnabled)
+            setStartTrajectories(0);
          else
          {
             // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-            bodyPartTrajectorySampleCounter.put(bodyPart, numberObservations);
+            setStartTrajectories(numberObservations);
          }
       }
+   }
+
+   public void setStartTrajectories(int sample)
+   {
+      doneCurrentTask = false;
+      // for each body part generate the mean trajectory of the learned promp
+      for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
+         bodyPartTrajectorySampleCounter.put(bodyPart, sample);
    }
 
    public boolean readyToPack()
@@ -378,10 +384,10 @@ public class ProMPAssistant
       return testNumber;
    }
 
-   public void setPreview(boolean isPreview)
+   public void setPreviewEnabled(boolean enabled)
    {
-      if(this.isPreview != isPreview)
-         this.isPreview = isPreview;
+      if(this.isPreviewEnabled != enabled)
+         this.isPreviewEnabled = enabled;
    }
 
    public void setCurrentTaskDone(boolean doneCurrentTask)
