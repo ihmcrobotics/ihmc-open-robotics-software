@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.rdx.tools.RDXModelInstanceScaler;
 import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -25,6 +27,7 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class RDXVisualTools
@@ -182,5 +185,21 @@ public class RDXVisualTools
          return defaultValue;
       else
          return LibGDXTools.toLibGDX(colorDefinition.getRed(), colorDefinition.getGreen(), colorDefinition.getBlue(), colorDefinition.getAlpha());
+   }
+
+   // TODO: Figure out how to make this general to all things that extend RigidBody
+   public static void collectRDXRigidBodiesIncludingPossibleFourBars(RDXRigidBody rigidBody, Consumer<RDXRigidBody> rigidBodyConsumer)
+   {
+      rigidBodyConsumer.accept(rigidBody);
+      for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
+      {
+         if (childrenJoint instanceof CrossFourBarJoint fourBarJoint)
+         {
+            RDXRigidBody bodyDA = (RDXRigidBody) fourBarJoint.getJointA().getSuccessor();
+            rigidBodyConsumer.accept(bodyDA);
+            RDXRigidBody bodyBC = (RDXRigidBody) fourBarJoint.getJointB().getSuccessor();
+            rigidBodyConsumer.accept(bodyBC);
+         }
+      }
    }
 }
