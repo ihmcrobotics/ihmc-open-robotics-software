@@ -9,7 +9,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -53,6 +52,7 @@ public class ProMPAssistant
    private boolean conditionOnlyLastObservation = true;
    private final List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
    private boolean isMoving = false;
+   private boolean isPreview = true;
 
    public ProMPAssistant()
    {
@@ -162,7 +162,7 @@ public class ProMPAssistant
                                                numberOfInferredSpeeds));
             taskBodyPartRecognitionMap.put(taskNames.get(i), bodyPartsRecognition.get(i));
             taskBodyPartGoalMap.put(taskNames.get(i), bodyPartsGoal.get(i));
-            taskTransformGoalMap.put(taskNames.get(i),new RigidBodyTransform(goalToEERotations.get(i), goalToEETranslations.get(i)));
+            taskTransformGoalMap.put(taskNames.get(i), new RigidBodyTransform(goalToEERotations.get(i), goalToEETranslations.get(i)));
          }
          for (ProMPManager proMPManager : proMPManagers.values())
             proMPManager.learnTaskFromDemos();
@@ -241,11 +241,12 @@ public class ProMPAssistant
       if (bodyPart.equals(bodyPartRecognition) && !isMoving)
       {
          observationRecognitionPart.add(lastObservedPose);
-         if (observationRecognitionPart.size()>1)
+         if (observationRecognitionPart.size() > 1)
          {
             double distance = (observationRecognitionPart.get(observationRecognitionPart.size() - 1)).getTranslation()
-                                                                                                     .distance(observationRecognitionPart.get(0).getTranslation());
-            isMoving = distance>0.04;
+                                                                                                     .distance(observationRecognitionPart.get(0)
+                                                                                                                                         .getTranslation());
+            isMoving = distance > 0.04;
             LogTools.info("IsMoving {}, distance {}", isMoving, distance);
          }
       }
@@ -294,8 +295,15 @@ public class ProMPAssistant
       for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart));
-         // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-         bodyPartTrajectorySampleCounter.put(bodyPart, numberObservations);
+         if(isPreview)
+         {
+            bodyPartTrajectorySampleCounter.put(bodyPart, 0);
+         }
+         else
+         {
+            // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
+            bodyPartTrajectorySampleCounter.put(bodyPart, numberObservations);
+         }
       }
    }
 
@@ -368,6 +376,12 @@ public class ProMPAssistant
    public int getTestNumber()
    {
       return testNumber;
+   }
+
+   public void setPreview(boolean isPreview)
+   {
+      if(this.isPreview != isPreview)
+         this.isPreview = isPreview;
    }
 
    public void setCurrentTaskDone(boolean doneCurrentTask)

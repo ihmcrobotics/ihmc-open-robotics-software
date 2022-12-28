@@ -77,15 +77,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
+      if (isPreviewActive())
+         proMPAssistant.setPreview(true);
+      else
+         proMPAssistant.setPreview(false);
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
-      if (proMPAssistant.readyToPack())
-      {
-         if (isPreviewActive() && !previewValidated)
-         {
-            enabledIKStreaming.set(false);
-            wasPreviewSetToActive = ghostRobotGraphic.isActive();
-         }
-      }
    }
 
    @Override
@@ -97,7 +93,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void framePoseToPack(FramePose3D framePose, String bodyPart)
    {
-      if (isPreviewActive() && !previewValidated)
+      proMPAssistant.framePoseToPack(framePose, bodyPart);
+
+      if (isPreviewActive() && !previewValidated)  // preview active but not validated yet
       {
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
@@ -105,9 +103,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
          }
       }
-      else
+      else if(!wasPreviewSetToActive) // if user did not use the preview
       {
-         proMPAssistant.framePoseToPack(framePose, bodyPart); // use promp assistance for shared control
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
             setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
       }
@@ -133,9 +130,28 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       if (enabled != this.enabled.get())
       {
          this.enabled.set(enabled);
-         if (!enabled) // if deactivated
+         if (enabled)
          {
-            if(proMPAssistant.readyToPack()) // if the shared control had started to pack frame poses
+            // store detected object name and pose
+            if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
+            {
+               objectName = objectDetector.getObjectName();
+               objectPose = objectDetector.getObjectPose();
+               LogTools.info("Detected object {} pose: {}", objectName, objectPose);
+            }
+
+            if (enabledReplay.get())
+               this.enabled.set(false); // check no concurrency with replay
+
+            if (!enabledIKStreaming.get() && !isPreviewActive()) // no streaming and no preview
+               this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
+            else if (isPreviewActive())
+               enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
+            wasPreviewSetToActive = isPreviewActive();
+         }
+         else // deactivated
+         {
+            if (proMPAssistant.readyToPack()) // if the shared control had started to pack frame poses
                enabledIKStreaming.set(false); // stop the ik streaming so that you can reposition according to the robot state to avoid jumps in poses
             // reset promp assistance
             proMPAssistant.reset();
@@ -145,18 +161,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             previewValidated = false;
             ghostRobotGraphic.setActive(wasPreviewSetToActive); // set activate preview graphic back to what it was
          }
-      }
-      if (enabled)
-      {
-         // store detected object name and pose
-         if (objectDetector!=null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
-         {
-            objectName = objectDetector.getObjectName();
-            objectPose = objectDetector.getObjectPose();
-            LogTools.info("Detected object {} pose: {}", objectName, objectPose);
-         }
-         if (enabledReplay.get())
-            this.enabled.set(false); // check no concurrency with replay
       }
    }
 
