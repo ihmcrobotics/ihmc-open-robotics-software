@@ -78,12 +78,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
       if (previewSetToActive)
-      {
-         proMPAssistant.setPreviewEnabled(true);
          ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
-      }
-      else
-         proMPAssistant.setPreviewEnabled(false);
+
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
    }
 
@@ -107,9 +103,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             previewValidated = true;
+            proMPAssistant.setStartTrajectories(0);
          }
       }
-      else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated, trigger assistance
+      else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated
       {
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
             setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
@@ -149,7 +146,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
-            if (!enabledIKStreaming.get() && !isPreviewActive()) // no streaming and no preview
+            if (!enabledIKStreaming.get() && !isPreviewActive())
                this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
             else if (isPreviewActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
@@ -165,7 +162,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             objectName = "";
             objectPose = null;
             previewValidated = false;
-            ghostRobotGraphic.setActive(previewSetToActive); // set activate preview graphic back to what it was
+            ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
          }
       }
    }

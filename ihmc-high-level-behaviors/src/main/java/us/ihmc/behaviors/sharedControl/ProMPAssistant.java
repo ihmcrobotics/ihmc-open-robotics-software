@@ -52,7 +52,6 @@ public class ProMPAssistant
    private boolean conditionOnlyLastObservation = true;
    private final List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
    private boolean isMoving = false;
-   private boolean isPreviewEnabled = true;
 
    public ProMPAssistant()
    {
@@ -295,13 +294,8 @@ public class ProMPAssistant
       for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
          bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart));
-         if(isPreviewEnabled)
-            setStartTrajectories(0);
-         else
-         {
-            // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
-            setStartTrajectories(numberObservations);
-         }
+         // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
+         setStartTrajectories(numberObservations);
       }
    }
 
@@ -382,12 +376,6 @@ public class ProMPAssistant
    public int getTestNumber()
    {
       return testNumber;
-   }
-
-   public void setPreviewEnabled(boolean enabled)
-   {
-      if(this.isPreviewEnabled != enabled)
-         this.isPreviewEnabled = enabled;
    }
 
    public void setCurrentTaskDone(boolean doneCurrentTask)
