@@ -33,7 +33,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private FullHumanoidRobotModel ghostRobotModel;
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
-   private boolean wasPreviewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
+   private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -77,10 +77,13 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (isPreviewActive())
-         proMPAssistant.setPreview(true);
+      if (previewSetToActive)
+      {
+         proMPAssistant.setPreviewEnabled(true);
+         ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
+      }
       else
-         proMPAssistant.setPreview(false);
+         proMPAssistant.setPreviewEnabled(false);
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
    }
 
@@ -95,15 +98,18 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    {
       proMPAssistant.framePoseToPack(framePose, bodyPart);
 
-      if (isPreviewActive() && !previewValidated)  // preview active but not validated yet
+      if (previewSetToActive && !previewValidated)  // preview active but not validated yet
       {
+         ghostRobotGraphic.setActive(true); // show ghost robot of preview
+         if (proMPAssistant.isCurrentTaskDone()) // if motion is over and not validated yet, replay it
+            proMPAssistant.setStartTrajectories(0);
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
-            previewValidated = true;
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
+            previewValidated = true;
          }
       }
-      else if(!wasPreviewSetToActive) // if user did not use the preview
+      else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated, trigger assistance
       {
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
             setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
@@ -147,7 +153,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
                this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
             else if (isPreviewActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
-            wasPreviewSetToActive = isPreviewActive();
+            previewSetToActive = isPreviewActive();
          }
          else // deactivated
          {
@@ -159,7 +165,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             objectName = "";
             objectPose = null;
             previewValidated = false;
-            ghostRobotGraphic.setActive(wasPreviewSetToActive); // set activate preview graphic back to what it was
+            ghostRobotGraphic.setActive(previewSetToActive); // set activate preview graphic back to what it was
          }
       }
    }
