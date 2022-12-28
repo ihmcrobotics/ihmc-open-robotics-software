@@ -94,37 +94,37 @@ float3 estimate_perspective_normal(read_only image2d_t in, int x, int y, global 
    return normalize((1 / (float) (count)) * normal.xyz);
 }
 
-float3 estimate_spherical_normal(read_only image2d_t in, int x, int y, global float* params)
+float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float residual = 0;
    float radius = 0;
    int m = 1;
    int count = 0;
    float4 normal = (float4)(0,0,0,0);
-   if (y >= 0 && y < (int) params[SUB_H] && x >= 0 && x < (int) params[SUB_W])
+   //if (rIndex >= 0 && rIndex < (int) params[SUB_H] && cIndex >= 0 && cIndex < (int) params[SUB_W])
    {
       for (int i = 0; i < (int) params[PATCH_HEIGHT] - m; i++)
       {
          for( int j = 0; j < (int) params[PATCH_WIDTH] - m; j++)
          {
             count++;
-            int gx = x * (int) params[PATCH_HEIGHT] + i;
-            int gy = y * (int) params[PATCH_WIDTH] + j;
-            int2 pos = (int2) (gx, gy);
+            int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
+            int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
+            int2 pos = (int2) (grIndex, gcIndex);
 
-            pos = (int2) (gx, gy);
+            pos = (int2) (gcIndex, grIndex);
             radius = ((float) read_imageui(in, pos).x) / (float) 1000;
             float4 va = back_project_spherical(pos, radius, params);
 
-            pos = (int2) (gx + m, gy);
+            pos = (int2) (gcIndex + m, grIndex);
             radius = ((float) read_imageui(in, pos).x) / (float) 1000;
             float4 vb = back_project_spherical(pos, radius, params);
 
-            pos = (int2) (gx + m, gy + m);
+            pos = (int2) (gcIndex + m, grIndex + m);
             radius = ((float) read_imageui(in, pos).x) / (float) 1000;
             float4 vc = back_project_spherical(pos, radius, params);
 
-            pos = (int2) (gx, gy + m);
+            pos = (int2) (gcIndex, grIndex + m);
             radius = ((float) read_imageui(in, pos).x) / (float) 1000;
             float4 vd = back_project_spherical(pos, radius, params);
 
@@ -166,26 +166,27 @@ float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, globa
    return (1/(float)(count)) * centroid;
 }
 
-float3 estimate_spherical_centroid(read_only image2d_t in, int y, int x, global float* params)
+float3 estimate_spherical_centroid(read_only image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float radius = 0;
    int count = 0;
    float3 centroid = (float3)(0,0,0);
-   if(y >= 0 && y < (int)params[SUB_H] && x >= 0 && x < (int)params[SUB_W])
+   //if(rIndex >= 0 && rIndex < (int)params[SUB_H] && cIndex >= 0 && cIndex < (int)params[SUB_W])
    {
        for(int i = 0; i<(int)params[PATCH_HEIGHT]; i++)
        {
            for(int j = 0; j<(int)params[PATCH_WIDTH]; j++)
            {
-               int gx = x*(int)params[PATCH_HEIGHT] + i;
-               int gy = y*(int)params[PATCH_WIDTH] + j;
-               int2 pos = (int2)(gx,gy);
+                count++;
+               int grIndex = rIndex * (int)params[PATCH_HEIGHT] + i;
+               int gcIndex = cIndex * (int)params[PATCH_WIDTH] + j;
+               int2 pos = (int2)(gcIndex,grIndex);
                radius = ((float)read_imageui(in, pos).x)/(float)1000;
                if(radius > 0.1f)
                {
                    float4 P = back_project_spherical(pos, radius, params);
                    centroid += P.xyz;
-                   count++;
+
                }
            }
        }
@@ -383,10 +384,10 @@ void kernel packKernel(  read_only image2d_t in,
 
  )
 {
-   int y = get_global_id(0);
-   int x = get_global_id(1);
+   int cIndex = get_global_id(0);
+   int rIndex = get_global_id(1);
 
-    if(x==0 && y==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+    if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
                             (int)params[INPUT_HEIGHT],
                             (int)params[INPUT_WIDTH],
                             (int)params[SUB_H],
@@ -397,22 +398,30 @@ void kernel packKernel(  read_only image2d_t in,
                             params[MERGE_ANGULAR_THRESHOLD],
                             params[MERGE_DISTANCE_THRESHOLD]);
 
-   if(y >= 0 && y < (int)params[SUB_H] && x >= 0 && x < (int)params[SUB_W])
+   //if(cIndex >= 0 && cIndex < (int)params[SUB_H] && rIndex >= 0 && rIndex < (int)params[SUB_W])
    {
-       float3 normal = estimate_spherical_normal(in, x, y, params);
-       float3 centroid = estimate_spherical_centroid(in, x, y, params);
+       float3 normal = estimate_spherical_normal(in, rIndex, cIndex, params);
+       float3 centroid = estimate_spherical_centroid(in, rIndex, cIndex, params);
 
 //        if(x==24 && y==50) printf("PackKernel Normal:(%.4lf, %.4lf, %.4lf)\n", normal.x, normal.y, normal.z);
 //        if(x==26 && y==7) printf("PackKernel Centroid:(%.4lf, %.4lf, %.4lf)\n", centroid.x, centroid.y, centroid.z);
 
-       //printf("PackKernel\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
 
-       write_imagef(out0, (int2)(x,y), (float4)(normal.x,0,0,0));
-       write_imagef(out1, (int2)(x,y), (float4)(normal.y,0,0,0));
-       write_imagef(out2, (int2)(x,y), (float4)(normal.z,0,0,0));
-       write_imagef(out3, (int2)(x,y), (float4)(centroid.x,0,0,0));
-       write_imagef(out4, (int2)(x,y), (float4)(centroid.y,0,0,0));
-       write_imagef(out5, (int2)(x,y), (float4)(centroid.z,0,0,0));
+      write_imagef(out0, (int2)(cIndex,rIndex), (float4)(normal.x,0,0,0));
+      write_imagef(out1, (int2)(cIndex,rIndex), (float4)(normal.y,0,0,0));
+      write_imagef(out2, (int2)(cIndex,rIndex), (float4)(normal.z,0,0,0));
+      write_imagef(out3, (int2)(cIndex,rIndex), (float4)(centroid.x,0,0,0));
+      write_imagef(out4, (int2)(cIndex,rIndex), (float4)(centroid.y,0,0,0));
+      write_imagef(out5, (int2)(cIndex,rIndex), (float4)(centroid.z,0,0,0));
+
+      //write_imagef(out0, (int2)(cIndex,rIndex), (float4)(0,0,0,0));
+      //write_imagef(out1, (int2)(cIndex,rIndex), (float4)(1,0,0,0));
+      //write_imagef(out2, (int2)(cIndex,rIndex), (float4)(2,0,0,0));
+      //write_imagef(out3, (int2)(cIndex,rIndex), (float4)(0,0,0,0));
+      //write_imagef(out4, (int2)(cIndex,rIndex), (float4)(1,0,0,0));
+      //write_imagef(out5, (int2)(cIndex,rIndex), (float4)(2,0,0,0));
+
+       //printf("PackKernel[%d,%d]\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", rIndex, cIndex, centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
    }
 }
 
@@ -427,24 +436,24 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
                           // write_only image2d_t debug
 )
 {
-     int y = get_global_id(0);
-     int x = get_global_id(1);
+     int cIndex = get_global_id(0);
+     int rIndex = get_global_id(1);
 
-     int m = 2;
+     int m = 1;
 
-     if(x==0 && y==0) printf("MergeKernel:(%d,%d)\n", (int)params[SUB_H], (int)params[SUB_W]);
+     if(rIndex==0 && cIndex==0) printf("MergeKernel:(%d,%d)\n", (int)params[SUB_H], (int)params[SUB_W]);
 
-    //printf("MergeKernel: subHeight: %d, subWidth: %d, x: %d, y: %d \n", (int) params[SUB_H], (int) params[SUB_W], x, y);
+    //printf("MergeKernel: subHeight: %d, subWidth: %d, rIndex: %d, cIndex: %d \n", (int) params[SUB_H], (int) params[SUB_W], rIndex, cIndex);
 
-     if(y >= m && y < (int)params[SUB_H]-m && x >= m && x < (int)params[SUB_W]-m)
+     if(rIndex >= m && rIndex < (int)params[SUB_H]-m && cIndex >= m && cIndex < (int)params[SUB_W]-m)
      {
 
-        float n1_a = read_imagef(out0, (int2)(x,y)).x;
-        float n2_a = read_imagef(out1, (int2)(x,y)).x;
-        float n3_a = read_imagef(out2, (int2)(x,y)).x;
-        float g1_a = read_imagef(out3, (int2)(x,y)).x;
-        float g2_a = read_imagef(out4, (int2)(x,y)).x;
-        float g3_a = read_imagef(out5, (int2)(x,y)).x;
+        float n1_a = read_imagef(out0, (int2)(cIndex,rIndex)).x;
+        float n2_a = read_imagef(out1, (int2)(cIndex,rIndex)).x;
+        float n3_a = read_imagef(out2, (int2)(cIndex,rIndex)).x;
+        float g1_a = read_imagef(out3, (int2)(cIndex,rIndex)).x;
+        float g2_a = read_imagef(out4, (int2)(cIndex,rIndex)).x;
+        float g3_a = read_imagef(out5, (int2)(cIndex,rIndex)).x;
 
 //        if (n1_a + n2_a + n3_a + g1_a + g2_a + g3_a > 0 || n1_a + n2_a + n3_a + g1_a + g2_a + g3_a < 0)
 //            printf("MergeKernel: n1_a: %f, n2_a: %f, n3_a: %f, g1_a: %f, g2_a: %f, g3_a: %f \n", n1_a, n2_a, n3_a, g1_a, g2_a, g3_a);
@@ -462,26 +471,27 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
                 // printf("MergeKernel:(%d,%d)\n", i, j);
                 if (!(j==0 && i==0))
                 {
-                     float n1_b = read_imagef(out0, (int2)(x+i,y+j)).x;
-                     float n2_b = read_imagef(out1, (int2)(x+i,y+j)).x;
-                     float n3_b = read_imagef(out2, (int2)(x+i,y+j)).x;
-                     float g1_b = read_imagef(out3, (int2)(x+i,y+j)).x;
-                     float g2_b = read_imagef(out4, (int2)(x+i,y+j)).x;
-                     float g3_b = read_imagef(out5, (int2)(x+i,y+j)).x;
+                     float n1_b = read_imagef(out0, (int2)(cIndex+j,rIndex+i)).x;
+                     float n2_b = read_imagef(out1, (int2)(cIndex+j,rIndex+i)).x;
+                     float n3_b = read_imagef(out2, (int2)(cIndex+j,rIndex+i)).x;
+                     float g1_b = read_imagef(out3, (int2)(cIndex+j,rIndex+i)).x;
+                     float g2_b = read_imagef(out4, (int2)(cIndex+j,rIndex+i)).x;
+                     float g3_b = read_imagef(out5, (int2)(cIndex+j,rIndex+i)).x;
 
                      float3 g_b = (float3)(g1_b,g2_b,g3_b);
                      float3 n_b = (float3)(n1_b,n2_b,n3_b);
 
                      if(isConnected(g_a, normalize(n_a), g_b, normalize(n_b), params))
                      {
-                         // printf("Connected: (%d,%d)\n",x+i, y+j);
+                         //printf("Connected: (%d,%d)\n",rIndex+i, cIndex+j);
                          boundaryConnectionsEncodedAsOnes = (1 << count) | boundaryConnectionsEncodedAsOnes;
                      }
                      count++;
                 }
             }
         }
-        write_imageui(out6, (int2)(x,y), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
+        printf("Connected: (%d,%d,%d)\n",rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+        write_imageui(out6, (int2)(cIndex,rIndex), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
     }
 }
 
@@ -505,17 +515,17 @@ void kernel segmentKernel(read_only image2d_t color, write_only image2d_t filter
  * */
 void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
 {
-    int x = get_global_id(0);
-    int y = get_global_id(1);
+    int cIndex = get_global_id(0);
+    int rIndex = get_global_id(1);
 
-    if(x == 0 && y == 0)
+    if(cIndex == 0 && rIndex == 0)
     {
         printf("Spherical Projection Kernel: %d, %d\n", (int)params[INPUT_HEIGHT], (int)params[INPUT_WIDTH]);
     }
 
-    //if(y >= 0 && y < (int)params[INPUT_HEIGHT] && x >= 0 && x < (int)params[INPUT_WIDTH])
+    //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
     {
-       int2 pos = (int2)(x,y);
+       int2 pos = (int2)(cIndex,rIndex);
 
        float scaleToMeters = 0.001f;
        float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
@@ -524,13 +534,13 @@ void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* 
         {
             float4 point = back_project_spherical(pos, radius, params);
 
-            int index = ((y * params[INPUT_WIDTH]) + x) * 3;
+            int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
 
             cloud[index] = point.x;
             cloud[index + 1] = point.y;
             cloud[index + 2] = point.z;
 
-            //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, y,x, radius, cloud[index], cloud[index+1], cloud[index+2]);
+            //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
         }
     }
 }

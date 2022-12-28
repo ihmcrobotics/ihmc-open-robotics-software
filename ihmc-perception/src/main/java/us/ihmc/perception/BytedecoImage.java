@@ -221,9 +221,19 @@ public class BytedecoImage
       return imageHeight;
    }
 
-   public float getFloat(int x, int y)
+   public float getFloat(int row, int col)
    {
-      return pointerForAccessSpeed.getFloat(((long) y * imageWidth + x) * Float.BYTES);
+      return pointerForAccessSpeed.getFloat(((long) col * imageWidth + row) * Float.BYTES);
+   }
+
+   public float getFloatDirect(int row, int col)
+   {
+      return backingDirectByteBuffer.asFloatBuffer().get(row * imageWidth + col);
+   }
+
+   public int getCharDirect(int row, int col)
+   {
+      return backingDirectByteBuffer.get(row * imageWidth + col);
    }
 
    public int getByteAsInteger(int x, int y)
