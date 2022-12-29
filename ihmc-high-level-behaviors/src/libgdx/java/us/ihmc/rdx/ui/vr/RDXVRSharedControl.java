@@ -215,7 +215,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void setStatusBeforeAssistance(KinematicsToolboxOutputStatus status)
    {
-      statusBeforeAssistance = status;
+      statusBeforeAssistance = new KinematicsToolboxOutputStatus(status);
    }
 
    public KinematicsToolboxOutputStatus getStatusBeforeAssistance()
