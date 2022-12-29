@@ -34,6 +34,9 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
+   private KinematicsToolboxOutputStatus statusBeforeAssistance;
+   private boolean assistanceJustStarted = false;
+   private boolean restartedMotion = false;
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -77,10 +80,13 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      if (previewSetToActive)
-         ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
-
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
+
+      if (previewSetToActive)
+      {
+         ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
+         assistanceJustStarted = false;
+      }
    }
 
    @Override
@@ -98,16 +104,23 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       {
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if motion is over and not validated yet, replay it
+         {
             proMPAssistant.setStartTrajectories(0);
+            restartedMotion = true;
+         }
+         else
+            restartedMotion = false;
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             previewValidated = true;
             proMPAssistant.setStartTrajectories(0);
+            restartedMotion = true;
          }
       }
       else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated
       {
+         restartedMotion = false;
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
             setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
       }
@@ -135,6 +148,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          this.enabled.set(enabled);
          if (enabled)
          {
+            assistanceJustStarted = true;
+
             // store detected object name and pose
             if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
             {
@@ -161,6 +176,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setCurrentTaskDone(false);
             objectName = "";
             objectPose = null;
+            assistanceJustStarted = false;
             previewValidated = false;
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
          }
@@ -190,5 +206,25 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public void setObjectDetector(RDXObjectDetector objectDetector)
    {
       this.objectDetector = objectDetector;
+   }
+
+   public void setStatusBeforeAssistance(KinematicsToolboxOutputStatus status)
+   {
+      statusBeforeAssistance = status;
+   }
+
+   public KinematicsToolboxOutputStatus getStatusBeforeAssistance()
+   {
+      return statusBeforeAssistance;
+   }
+
+   public boolean hasAssistanceJustStarted()
+   {
+      return assistanceJustStarted;
+   }
+
+   public boolean hasMotionRestarted()
+   {
+      return restartedMotion;
    }
 }
