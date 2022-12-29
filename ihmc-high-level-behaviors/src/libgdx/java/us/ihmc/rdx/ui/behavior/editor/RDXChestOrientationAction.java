@@ -1,13 +1,9 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -16,19 +12,22 @@ import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
-public class RDXChestOrientationAction implements RDXBehaviorAction
+public class RDXChestOrientationAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ROS2ControllerHelper ros2ControllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
-   private final ImBoolean selected = new ImBoolean();
    private final ImDouble yaw = new ImDouble();
    private final ImDouble pitch = new ImDouble();
    private final ImDouble roll = new ImDouble();
    private final ImDouble trajectoryTime = new ImDouble(4.0);
+
+   public RDXChestOrientationAction()
+   {
+      super("Chest Orientation");
+   }
 
    public void create(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
@@ -37,25 +36,7 @@ public class RDXChestOrientationAction implements RDXBehaviorAction
    }
 
    @Override
-   public void update()
-   {
-
-   }
-
-   @Override
-   public void calculate3DViewPick(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(80.0f);
       ImGui.inputDouble(labels.get("Yaw"), yaw);
@@ -65,11 +46,6 @@ public class RDXChestOrientationAction implements RDXBehaviorAction
       ImGui.inputDouble(labels.get("Roll"), roll);
       ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
       ImGui.popItemWidth();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
    }
 
    @Override
@@ -108,23 +84,5 @@ public class RDXChestOrientationAction implements RDXBehaviorAction
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
       ros2ControllerHelper.publishToController(message);
-   }
-
-   @Override
-   public void destroy()
-   {
-
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
-   }
-
-   @Override
-   public String getNameForDisplay()
-   {
-      return "Chest Orientation";
    }
 }

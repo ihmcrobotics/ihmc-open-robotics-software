@@ -16,8 +16,8 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.rdx.RDXFocusBasedCamera;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -42,14 +42,14 @@ public class RDXBehaviorActionSequenceEditor
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
    private String pascalCasedName;
    private RDX3DPanel panel3D;
-   private RDXFocusBasedCamera camera3D;
    private DRCRobotModel robotModel;
-   private int playbackNextIndex = 0;
+   private int excecutionNextIndex = 0;
    private FootstepPlanningModule footstepPlanner;
    private ROS2SyncedRobotModel syncedRobot;
    private List<ReferenceFrame> referenceFrameLibrary;
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
+   private boolean loading = false;
 
    public RDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
    {
@@ -77,7 +77,6 @@ public class RDXBehaviorActionSequenceEditor
                       ROS2SyncedRobotModel syncedRobot,
                       List<ReferenceFrame> referenceFrameLibrary)
    {
-      this.camera3D = panel3D.getCamera3D();
       this.panel3D = panel3D;
       this.robotModel = robotModel;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
@@ -94,7 +93,8 @@ public class RDXBehaviorActionSequenceEditor
    public void loadActionsFromFile()
    {
       actionSequence.clear();
-      playbackNextIndex = 0;
+      excecutionNextIndex = 0;
+      loading = true;
       LogTools.info("Loading from {}", workspaceFile.getClasspathResource().toString());
       JSONFileTools.load(workspaceFile.getClasspathResourceAsStream(), jsonNode ->
       {
@@ -144,7 +144,8 @@ public class RDXBehaviorActionSequenceEditor
             }
          }
       });
-      playbackNextIndex = 0;
+      loading = false;
+      excecutionNextIndex = 0;
    }
 
    public void saveToFile()
@@ -207,53 +208,86 @@ public class RDXBehaviorActionSequenceEditor
          {
             loadActionsFromFile();
          }
-
          ImGui.endMenu();
       }
-
+//      if (ImGui.beginMenu(labels.get("View")))
+//      {
+//         ImGui.endMenu();
+//      }
       ImGui.endMenuBar();
+
+      if (ImGui.button(labels.get("Expand all")))
+      {
+         for (RDXBehaviorAction action : actionSequence)
+         {
+            action.getExpanded().set(true);
+         }
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Collapse all")))
+      {
+         for (RDXBehaviorAction action : actionSequence)
+         {
+            action.getExpanded().set(false);
+         }
+      }
+      ImGui.sameLine();
 
       if (ImGui.button(labels.get("<")))
       {
-         if (playbackNextIndex > 0)
-            playbackNextIndex--;
+         if (excecutionNextIndex > 0)
+            excecutionNextIndex--;
       }
+      ImGuiTools.previousWidgetTooltip("Go to previous action");
       ImGui.sameLine();
-      ImGui.text("Index: " + String.format("%03d", playbackNextIndex));
+      ImGui.text("Index: " + String.format("%03d", excecutionNextIndex));
       ImGui.sameLine();
       if (ImGui.button(labels.get(">")))
       {
-         if (playbackNextIndex < actionSequence.size())
-            playbackNextIndex++;
+         if (excecutionNextIndex < actionSequence.size())
+            excecutionNextIndex++;
       }
+      ImGuiTools.previousWidgetTooltip("Go to next action");
       ImGui.sameLine();
-      boolean endOfSequence = playbackNextIndex >= actionSequence.size();
+      boolean endOfSequence = excecutionNextIndex >= actionSequence.size();
       if (!endOfSequence)
       {
          if (ImGui.button(labels.get("Execute")))
          {
-            RDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+            RDXBehaviorAction action = actionSequence.get(excecutionNextIndex);
             action.performAction();
-            playbackNextIndex++;
+            excecutionNextIndex++;
          }
       }
       ImGui.sameLine();
-      endOfSequence = playbackNextIndex >= actionSequence.size();
+      endOfSequence = excecutionNextIndex >= actionSequence.size();
       if (endOfSequence)
          ImGui.text("No actions left.");
       else
-         ImGui.text(actionSequence.get(playbackNextIndex).getNameForDisplay());
+         ImGui.text(actionSequence.get(excecutionNextIndex).getNameForDisplay());
 
       ImGui.separator();
 
+      // This, paired with the endChild call after, allows this area to scroll separately
+      // from the rest, so the top controls are still available while editing later parts
+      // of the sequence.
       ImGui.beginChild(labels.get("childRegion"));
-
 
       reorderRequest.setLeft(-1);
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
-         ImGui.checkbox(labels.get("", "Selected", i), action.getSelected());
+         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), excecutionNextIndex == i))
+         {
+            excecutionNextIndex = i;
+         }
+         ImGuiTools.previousWidgetTooltip("Next for excecution");
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("", "selected", i), action.getSelected());
+         ImGuiTools.previousWidgetTooltip("Selected");
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("", "expanded", i), action.getExpanded());
+         ImGuiTools.previousWidgetTooltip("Expanded");
          ImGui.sameLine();
          ImGui.text(i + ": " + action.getNameForDisplay());
          ImGui.sameLine();
@@ -264,6 +298,7 @@ public class RDXBehaviorActionSequenceEditor
                reorderRequest.setLeft(i);
                reorderRequest.setRight(0);
             }
+            ImGuiTools.previousWidgetTooltip("Swap with previous action (in ordering)");
             ImGui.sameLine();
          }
          if (i < actionSequence.size() - 1)
@@ -273,14 +308,16 @@ public class RDXBehaviorActionSequenceEditor
                reorderRequest.setLeft(i);
                reorderRequest.setRight(1);
             }
+            ImGuiTools.previousWidgetTooltip("Swap with next action (in ordering)");
             ImGui.sameLine();
          }
          if (ImGui.button(labels.get("X", i)))
          {
             RDXBehaviorAction removedAction = actionSequence.remove(i);
-            playbackNextIndex = actionSequence.size();
+            excecutionNextIndex = actionSequence.size();
 //            removedAction.destroy();
          }
+
          action.renderImGuiWidgets();
       }
 
@@ -306,7 +343,7 @@ public class RDXBehaviorActionSequenceEditor
             RDXHandPoseAction handPoseAction = addHandPoseAction();
             // Set the new action to where the last one was for faster authoring
             RDXHandPoseAction previousAction = null;
-            for (int i = 0; i < playbackNextIndex - 1; i++)
+            for (int i = 0; i < excecutionNextIndex - 1; i++)
             {
                if (actionSequence.get(i) instanceof RDXHandPoseAction
                && ((RDXHandPoseAction) actionSequence.get(i)).getSide() == side)
@@ -425,7 +462,7 @@ public class RDXBehaviorActionSequenceEditor
 
       // Set the new action to where the last one was for faster authoring
       RDXFootstepAction previousAction = null;
-      for (int i = 0; i < playbackNextIndex; i++)
+      for (int i = 0; i < excecutionNextIndex; i++)
       {
          if (actionSequence.get(i) instanceof RDXFootstepAction)
          {
@@ -440,12 +477,13 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
-      actionSequence.add(playbackNextIndex, action);
+      actionSequence.add(excecutionNextIndex, action);
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         actionSequence.get(i).getSelected().set(i == playbackNextIndex);
+         // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
+         actionSequence.get(i).getSelected().set(!loading && i == excecutionNextIndex);
       }
-      playbackNextIndex++;
+      excecutionNextIndex++;
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

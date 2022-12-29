@@ -1,29 +1,28 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
-public class RDXPelvisHeightAction implements RDXBehaviorAction
+public class RDXPelvisHeightAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ROS2ControllerHelper ros2ControllerHelper;
-   private final ImBoolean selected = new ImBoolean();
    private final ImDouble heightInWorld = new ImDouble();
    private final ImDouble trajectoryTime = new ImDouble(4.0);
+
+   public RDXPelvisHeightAction()
+   {
+      super("Pelvis Height");
+   }
 
    public void create(ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -31,35 +30,12 @@ public class RDXPelvisHeightAction implements RDXBehaviorAction
    }
 
    @Override
-   public void update()
-   {
-
-   }
-
-   @Override
-   public void calculate3DViewPick(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(80.0f);
       ImGui.inputDouble(labels.get("Height in world"), heightInWorld);
       ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
       ImGui.popItemWidth();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
    }
 
    @Override
@@ -91,23 +67,5 @@ public class RDXPelvisHeightAction implements RDXBehaviorAction
       message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
 
       ros2ControllerHelper.publishToController(message);
-   }
-
-   @Override
-   public void destroy()
-   {
-
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
-   }
-
-   @Override
-   public String getNameForDisplay()
-   {
-      return "Pelvis Height";
    }
 }

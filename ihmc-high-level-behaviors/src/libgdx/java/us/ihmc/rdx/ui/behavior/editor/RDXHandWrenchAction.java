@@ -1,30 +1,24 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXHandWrenchAction implements RDXBehaviorAction
+public class RDXHandWrenchAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide side;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private final ImBoolean selected = new ImBoolean();
    private final ImDouble trajectoryTime = new ImDouble(1000.0);
    private final ImDouble force = new ImDouble(20.0);
 
@@ -39,36 +33,12 @@ public class RDXHandWrenchAction implements RDXBehaviorAction
    }
 
    @Override
-   public void update()
-   {
-
-   }
-
-   @Override
-   public void calculate3DViewPick(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(80.0f);
       ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
       ImGui.inputDouble(labels.get("Force"), force);
       ImGui.popItemWidth();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-
    }
 
    @Override
@@ -85,12 +55,6 @@ public class RDXHandWrenchAction implements RDXBehaviorAction
       setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
       force.set(jsonNode.get("force").asDouble());
-   }
-
-   @Override
-   public void destroy()
-   {
-
    }
 
    @Override
@@ -121,12 +85,6 @@ public class RDXHandWrenchAction implements RDXBehaviorAction
       handWrenchTrajectoryMessage.getWrenchTrajectory().getControlFramePose().setY(side == RobotSide.RIGHT ? -handCenterOffset : handCenterOffset);
 
       ros2ControllerHelper.publishToController(handWrenchTrajectoryMessage);
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
    }
 
    public RobotSide getSide()

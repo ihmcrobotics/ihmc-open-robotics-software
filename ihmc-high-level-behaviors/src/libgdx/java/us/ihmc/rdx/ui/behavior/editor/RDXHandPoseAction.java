@@ -9,7 +9,6 @@ import ihmc_common_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -32,7 +31,7 @@ import us.ihmc.tools.io.JSONTools;
 
 import java.util.List;
 
-public class RDXHandPoseAction implements RDXBehaviorAction
+public class RDXHandPoseAction extends RDXBehaviorAction
 {
    private RDXInteractableHighlightModel highlightModel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -48,7 +47,6 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private final ImBoolean selected = new ImBoolean();
    private final ImDouble trajectoryTime = new ImDouble(4.0);
 
    public void create(RDX3DPanel panel3D,
@@ -108,7 +106,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (getSelected().get())
       {
          poseGizmo.calculate3DViewPick(input);
       }
@@ -117,14 +115,14 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (getSelected().get())
       {
          poseGizmo.process3DViewInput(input);
       }
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       if (referenceFrameLibraryCombo.combo())
       {
@@ -144,7 +142,7 @@ public class RDXHandPoseAction implements RDXBehaviorAction
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       highlightModel.getRenderables(renderables, pool);
-      if (selected.get())
+      if (getSelected().get())
          poseGizmo.getRenderables(renderables, pool);
    }
 
@@ -226,12 +224,6 @@ public class RDXHandPoseAction implements RDXBehaviorAction
       trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);
       trajectoryPoint.getAngularVelocity().set(EuclidCoreTools.zeroVector3D);
       ros2ControllerHelper.publishToController(handTrajectoryMessage);
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
    }
 
    public RobotSide getSide()

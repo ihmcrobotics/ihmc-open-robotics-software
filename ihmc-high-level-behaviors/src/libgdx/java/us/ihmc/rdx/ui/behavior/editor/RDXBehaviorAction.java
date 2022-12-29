@@ -8,27 +8,87 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.type.ImBoolean;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 
-public interface RDXBehaviorAction
+public class RDXBehaviorAction
 {
-   public void update();
+   private String nameForDisplay = "";
+   private final ImBoolean selected = new ImBoolean();
+   private final ImBoolean expanded = new ImBoolean(true);
 
-   public void calculate3DViewPick(ImGui3DViewInput input);
+   public RDXBehaviorAction()
+   {
 
-   public void process3DViewInput(ImGui3DViewInput input);
+   }
 
-   public void renderImGuiWidgets();
+   public RDXBehaviorAction(String nameForDisplay)
+   {
+      this.nameForDisplay = nameForDisplay;
+   }
 
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool);
+   public void update()
+   {
 
-   public void saveToFile(ObjectNode jsonNode);
+   }
 
-   public void loadFromFile(JsonNode jsonNode);
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
 
-   public void performAction();
+   }
 
-   public void destroy();
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
 
-   public ImBoolean getSelected();
+   }
 
-   public String getNameForDisplay();
+   public final void renderImGuiWidgets()
+   {
+      if (expanded.get())
+      {
+         renderImGuiSettingWidgets();
+      }
+   }
+
+   public void renderImGuiSettingWidgets()
+   {
+
+   }
+
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+
+   }
+
+   public void saveToFile(ObjectNode jsonNode)
+   {
+
+   }
+
+   public void loadFromFile(JsonNode jsonNode)
+   {
+
+   }
+
+   public void performAction()
+   {
+
+   }
+
+   public void destroy()
+   {
+
+   }
+
+   public ImBoolean getSelected()
+   {
+      return selected;
+   }
+
+   public ImBoolean getExpanded()
+   {
+      return expanded;
+   }
+
+   public String getNameForDisplay()
+   {
+      return nameForDisplay;
+   }
 }

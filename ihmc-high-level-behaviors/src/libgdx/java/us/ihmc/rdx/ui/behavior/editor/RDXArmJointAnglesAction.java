@@ -1,33 +1,29 @@
 package us.ihmc.rdx.ui.behavior.editor;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.tools.ImGuiRobotSideCombo;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXArmJointAnglesAction implements RDXBehaviorAction
+public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean selected = new ImBoolean();
-   private ImGuiRobotSideCombo side = new ImGuiRobotSideCombo();
+   private final ImGuiRobotSideCombo side = new ImGuiRobotSideCombo();
    private ROS2ControllerHelper ros2ControllerHelper;
-   private int numberOfJoints = 7;
-   private ImDouble[] jointAngles = new ImDouble[numberOfJoints];
+   private final int numberOfJoints = 7;
+   private final ImDouble[] jointAngles = new ImDouble[numberOfJoints];
    private final ImDouble trajectoryTime = new ImDouble(4.0);
 
    public RDXArmJointAnglesAction()
    {
+      super("Arm Joint Angles");
+
       for (int i = 0; i < numberOfJoints; i++)
       {
          jointAngles[i] = new ImDouble();
@@ -40,25 +36,7 @@ public class RDXArmJointAnglesAction implements RDXBehaviorAction
    }
 
    @Override
-   public void update()
-   {
-
-   }
-
-   @Override
-   public void calculate3DViewPick(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
-
-   }
-
-   @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(100.0f);
       side.combo(labels.get("Side"));
@@ -70,12 +48,6 @@ public class RDXArmJointAnglesAction implements RDXBehaviorAction
          ImGui.inputDouble(labels.get("j" + i), jointAngles[i]);
       }
       ImGui.popItemWidth();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-
    }
 
    @Override
@@ -110,23 +82,5 @@ public class RDXArmJointAnglesAction implements RDXBehaviorAction
       }
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side.getSide(), trajectoryTime.get(), jointAngleArray);
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
-   }
-
-   @Override
-   public void destroy()
-   {
-
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
-   }
-
-   @Override
-   public String getNameForDisplay()
-   {
-      return "Arm Joint Angles";
    }
 }
