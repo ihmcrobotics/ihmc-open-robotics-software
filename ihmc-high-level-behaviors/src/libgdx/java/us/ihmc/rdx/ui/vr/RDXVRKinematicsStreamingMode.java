@@ -308,7 +308,7 @@ public class RDXVRKinematicsStreamingMode
             {
                // the joint angle solutions take into account previous solutions, so when jumping in position from end to beginning of motion they have to be forced
                if (sharedControlAssistant.hasAssistanceJustStarted()) // store the initial message with initial posture
-                  sharedControlAssistant.setStatusBeforeAssistance(new KinematicsToolboxOutputStatus(latestStatus));
+                  sharedControlAssistant.setStatusBeforeAssistance(latestStatus);
                // if motion has restarted use the joint angles from the initial message for the ghost robots
                if(sharedControlAssistant.hasMotionRestarted())
                {
