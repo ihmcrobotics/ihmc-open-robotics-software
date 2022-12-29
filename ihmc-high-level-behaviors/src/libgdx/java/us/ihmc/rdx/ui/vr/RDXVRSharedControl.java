@@ -36,7 +36,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private KinematicsToolboxOutputStatus statusBeforeAssistance;
    private boolean assistanceJustStarted = false;
-   private boolean restartedMotion = false;
+   private boolean restartingMotion = false;
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -87,7 +87,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
 
-      restartedMotion = false;
+      restartingMotion = false;
    }
 
    @Override
@@ -115,15 +115,15 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if motion is over and not validated yet, replay it
          {
-            restartedMotion = true;
+            restartingMotion = true;
          }
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             previewValidated = true;
-            restartedMotion = true;
+            restartingMotion = true;
          }
-         if (restartedMotion)
+         if (restartingMotion)
          {
             proMPAssistant.setStartTrajectories(0);
          }
@@ -240,6 +240,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public boolean hasMotionRestarted()
    {
-      return restartedMotion;
+      return restartingMotion;
    }
 }

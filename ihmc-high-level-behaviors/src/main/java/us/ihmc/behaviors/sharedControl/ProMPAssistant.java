@@ -11,7 +11,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 
@@ -317,15 +319,22 @@ public class ProMPAssistant
       if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart))
       { // if bodyPart is used in current task
          List<FramePose3D> generatedFramePoseTrajectory = bodyPartGeneratedTrajectoryMap.get(bodyPart);
+         List<Pose3DReadOnly> observedFramePoseTrajectory = bodyPartObservedTrajectoryMap.get(bodyPart);
          int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
          if (sampleCounter < generatedFramePoseTrajectory.size())
          {
-            // take a sample (frame) from the trajectory
-            FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
-            FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
-            FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
-            framePose.getPosition().set(generatedFramePosition);
-            framePose.getOrientation().set(generatedFrameOrientation);
+            if (sampleCounter < numberObservations) // replay the observed motion, do not want the unconditioned ProMP mean for the first part
+            {
+               Pose3D observedFramePose = (Pose3D) observedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
+               framePose.getPosition().set(observedFramePose.getPosition());
+               framePose.getOrientation().set(observedFramePose.getOrientation());
+            }
+            else
+            {
+               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
+               framePose.getPosition().set(generatedFramePose.getPosition());
+               framePose.getOrientation().set(generatedFramePose.getOrientation());
+            }
 
             // take the next sample from the trajectory next time
             bodyPartTrajectorySampleCounter.replace(bodyPart, bodyPartTrajectorySampleCounter.get(bodyPart) + 1);
@@ -345,10 +354,8 @@ public class ProMPAssistant
             {
                // take previous sample (frame) to avoid jump when exiting assistance mode
                FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart) - 1);
-               FixedFrameQuaternionBasics generatedFrameOrientation = generatedFramePose.getOrientation();
-               FixedFramePoint3DBasics generatedFramePosition = generatedFramePose.getPosition();
-               framePose.getPosition().set(generatedFramePosition);
-               framePose.getOrientation().set(generatedFrameOrientation);
+               framePose.getPosition().set(generatedFramePose.getPosition());
+               framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
             // exit assistance mode
             doneCurrentTask = true;
