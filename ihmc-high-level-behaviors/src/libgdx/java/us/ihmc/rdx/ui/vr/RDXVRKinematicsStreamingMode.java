@@ -76,7 +76,6 @@ public class RDXVRKinematicsStreamingMode
    private final KinematicsRecordReplay kinematicsRecorder = new KinematicsRecordReplay(enabled, 2);
    private RDXVRSharedControl sharedControlAssistant;
 
-
    private final HandConfiguration[] handConfigurations = {HandConfiguration.OPEN, HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH};
    private int leftIndex = -1;
    private int rightIndex = -1;
@@ -306,7 +305,22 @@ public class RDXVRKinematicsStreamingMode
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
             if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
-               sharedControlAssistant.updatePreviewModel(latestStatus);
+            {
+               // the joint angle solutions take into account previous solutions, so when jumping in position from end to beginning of motion they have to be forced
+               if (sharedControlAssistant.hasAssistanceJustStarted()) // store the initial message with initial posture
+                  sharedControlAssistant.setStatusBeforeAssistance(new KinematicsToolboxOutputStatus(latestStatus));
+               // if motion has restarted use the initial message
+               if(sharedControlAssistant.hasMotionRestarted())
+               {
+                  for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+                  {
+                     ghostOneDoFJointsExcludingHands[i].setQ(sharedControlAssistant.getStatusBeforeAssistance().getDesiredJointAngles().get(i));
+                  }
+                  sharedControlAssistant.updatePreviewModel(sharedControlAssistant.getStatusBeforeAssistance());
+               }
+               else
+                  sharedControlAssistant.updatePreviewModel(latestStatus);
+            }
          }
       }
       ghostRobotGraphic.update();
