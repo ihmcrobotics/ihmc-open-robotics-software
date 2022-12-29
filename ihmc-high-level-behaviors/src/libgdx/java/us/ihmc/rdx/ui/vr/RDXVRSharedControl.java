@@ -66,13 +66,13 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
    }
 
-   public void updatePreviewModel(KinematicsToolboxOutputStatus latestStatus)
+   public void updatePreviewModel(KinematicsToolboxOutputStatus status)
    {
-      ghostRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
-      ghostRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
+      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
+      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
       for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
       {
-         ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+         ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
    }
