@@ -82,11 +82,14 @@ public class RapidRegionsDebutOutputGenerator
       }
    }
 
-   public void constructCentroidPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage, int rows, int cols)
+   public void constructCentroidPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage)
    {
       FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
+
+      int rows = cxImage.getImageHeight();
+      int cols = cxImage.getImageWidth();
 
       for (int y = 0; y < rows; y++)
       {
@@ -95,10 +98,6 @@ public class RapidRegionsDebutOutputGenerator
             float cx = cxBuffer.get(y * cols + x);
             float cy = cyBuffer.get(y * cols + x);
             float cz = czBuffer.get(y * cols + x);
-
-            float cv_cx = cxImage.getFloatDirect(y, x);
-            float cv_cy = cyImage.getFloatDirect(y, x);
-            float cv_cz = czImage.getFloatDirect(y, x);
 
             //LogTools.info(String.format("Centroid: %.2f,%.2f,%.2f,%.2f,%.2f,%.2f", cx, cy, cz, cv_cx, cv_cy, cv_cz));
             if (!(cx == 0.0f && cy == 0.0f && cz == 0.0f))
@@ -116,16 +115,28 @@ public class RapidRegionsDebutOutputGenerator
                                             BytedecoImage nyImage,
                                             BytedecoImage nzImage)
    {
-      for (int y = 0; y < cxImage.getImageHeight(); y++)
+      FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
+      FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
+      FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();
+
+      FloatBuffer nxBuffer = nxImage.getBackingDirectByteBuffer().asFloatBuffer();
+      FloatBuffer nyBuffer = nyImage.getBackingDirectByteBuffer().asFloatBuffer();
+      FloatBuffer nzBuffer = nzImage.getBackingDirectByteBuffer().asFloatBuffer();
+
+      int rows = cxImage.getImageHeight();
+      int cols = cxImage.getImageWidth();
+
+      for (int y = 0; y < rows; y++)
       {
-         for (int x = 0; x < cxImage.getImageWidth(); x++)
+         for (int x = 0; x < cols; x++)
          {
-            float cx = cxImage.getFloat(y, x);
-            float cy = cyImage.getFloat(y, x);
-            float cz = czImage.getFloat(y, x);
-            float nx = nxImage.getFloat(y, x);
-            float ny = nyImage.getFloat(y, x);
-            float nz = nzImage.getFloat(y, x);
+            float cx = cxBuffer.get(y * cols + x);
+            float cy = cyBuffer.get(y * cols + x);
+            float cz = czBuffer.get(y * cols + x);
+
+            float nx = cxBuffer.get(y * cols + x);
+            float ny = cyBuffer.get(y * cols + x);
+            float nz = czBuffer.get(y * cols + x);
 
             if (!(cx == 0.0f && cy == 0.0f && cz == 0.0f))
             {
@@ -133,6 +144,24 @@ public class RapidRegionsDebutOutputGenerator
                debugNormals.add().set(nx, ny, nz);
             }
          }
+      }
+   }
+
+   public void printPatchGraph(BytedecoImage patchGraph)
+   {
+      for(int i = 0; i<patchGraph.getImageHeight(); i++)
+      {
+         for(int j = 0; j<patchGraph.getImageWidth(); j++)
+         {
+            int value = patchGraph.getCharDirect(i, j);
+            if(value == 255)
+               System.out.print("o");
+            else if(value > 0)
+               System.out.print("+");
+            else
+               System.out.print(".");
+         }
+         System.out.println();
       }
    }
 
@@ -148,8 +177,7 @@ public class RapidRegionsDebutOutputGenerator
 
    private void drawNode(int patchRow, int patchCol, int patchHeight, int patchWidth, Scalar color)
    {
-      LogTools.info("Drawing node at {}, {}", patchRow, patchCol);
-      opencv_imgproc.circle(debugImage, new Point(patchCol * patchWidth, patchRow * patchHeight), 2, color, -1, 8, 0);
+      opencv_imgproc.circle(debugImage, new Point(patchRow * patchHeight, patchCol * patchWidth), 2, color, -1, -1, 0);
    }
 
    private Scalar getColor(int id)

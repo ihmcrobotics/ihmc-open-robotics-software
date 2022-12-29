@@ -18,6 +18,7 @@ public class PlanarRegionsListWithPose
    public PlanarRegionsListWithPose()
    {
       this.sensorToWorldFrameTransform = new RigidBodyTransform();
+      this.planarRegionsList = new PlanarRegionsList();
    }
 
    public PlanarRegionsList getPlanarRegionsList()

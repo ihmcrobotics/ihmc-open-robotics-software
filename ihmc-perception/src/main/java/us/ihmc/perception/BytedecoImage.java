@@ -233,7 +233,7 @@ public class BytedecoImage
 
    public int getCharDirect(int row, int col)
    {
-      return backingDirectByteBuffer.get(row * imageWidth + col);
+      return Byte.toUnsignedInt(backingDirectByteBuffer.get(row * imageWidth + col));
    }
 
    public int getByteAsInteger(int x, int y)

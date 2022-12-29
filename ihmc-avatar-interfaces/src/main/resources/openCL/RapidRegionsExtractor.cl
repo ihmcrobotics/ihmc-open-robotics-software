@@ -110,7 +110,7 @@ float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex,
             count++;
             int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
             int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
-            int2 pos = (int2) (grIndex, gcIndex);
+            int2 pos = (int2) (gcIndex, grIndex);
 
             pos = (int2) (gcIndex, grIndex);
             radius = ((float) read_imageui(in, pos).x) / (float) 1000;
@@ -387,25 +387,21 @@ void kernel packKernel(  read_only image2d_t in,
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
 
-    if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
-                            (int)params[INPUT_HEIGHT],
-                            (int)params[INPUT_WIDTH],
-                            (int)params[SUB_H],
-                            (int)params[SUB_W],
-                            (int)params[PATCH_HEIGHT],
-                            (int)params[PATCH_WIDTH],
-                            (int)params[FILTER_DISPARITY_THRESHOLD],
-                            params[MERGE_ANGULAR_THRESHOLD],
-                            params[MERGE_DISTANCE_THRESHOLD]);
+    //if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+    //                        (int)params[INPUT_HEIGHT],
+    //                        (int)params[INPUT_WIDTH],
+    //                        (int)params[SUB_H],
+    //                        (int)params[SUB_W],
+    //                        (int)params[PATCH_HEIGHT],
+    //                        (int)params[PATCH_WIDTH],
+    //                        (int)params[FILTER_DISPARITY_THRESHOLD],
+    //                        params[MERGE_ANGULAR_THRESHOLD],
+    //                        params[MERGE_DISTANCE_THRESHOLD]);
 
    //if(cIndex >= 0 && cIndex < (int)params[SUB_H] && rIndex >= 0 && rIndex < (int)params[SUB_W])
    {
        float3 normal = estimate_spherical_normal(in, rIndex, cIndex, params);
        float3 centroid = estimate_spherical_centroid(in, rIndex, cIndex, params);
-
-//        if(x==24 && y==50) printf("PackKernel Normal:(%.4lf, %.4lf, %.4lf)\n", normal.x, normal.y, normal.z);
-//        if(x==26 && y==7) printf("PackKernel Centroid:(%.4lf, %.4lf, %.4lf)\n", centroid.x, centroid.y, centroid.z);
-
 
       write_imagef(out0, (int2)(cIndex,rIndex), (float4)(normal.x,0,0,0));
       write_imagef(out1, (int2)(cIndex,rIndex), (float4)(normal.y,0,0,0));
@@ -414,14 +410,7 @@ void kernel packKernel(  read_only image2d_t in,
       write_imagef(out4, (int2)(cIndex,rIndex), (float4)(centroid.y,0,0,0));
       write_imagef(out5, (int2)(cIndex,rIndex), (float4)(centroid.z,0,0,0));
 
-      //write_imagef(out0, (int2)(cIndex,rIndex), (float4)(0,0,0,0));
-      //write_imagef(out1, (int2)(cIndex,rIndex), (float4)(1,0,0,0));
-      //write_imagef(out2, (int2)(cIndex,rIndex), (float4)(2,0,0,0));
-      //write_imagef(out3, (int2)(cIndex,rIndex), (float4)(0,0,0,0));
-      //write_imagef(out4, (int2)(cIndex,rIndex), (float4)(1,0,0,0));
-      //write_imagef(out5, (int2)(cIndex,rIndex), (float4)(2,0,0,0));
-
-       //printf("PackKernel[%d,%d]\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", rIndex, cIndex, centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
+      //printf("PackKernel[%d,%d]\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", rIndex, cIndex, centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
    }
 }
 
@@ -490,7 +479,7 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
                 }
             }
         }
-        printf("Connected: (%d,%d,%d)\n",rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+        //printf("Connected: (%d,%d,%d)\n",rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
         write_imageui(out6, (int2)(cIndex,rIndex), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
     }
 }

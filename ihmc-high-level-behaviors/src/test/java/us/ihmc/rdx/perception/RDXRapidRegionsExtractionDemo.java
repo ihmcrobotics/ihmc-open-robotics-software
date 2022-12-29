@@ -1,12 +1,27 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.model.MeshPart;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
+import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
@@ -17,11 +32,16 @@ import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.tools.thread.Activator;
+
+import java.util.ArrayList;
 
 public class RDXRapidRegionsExtractionDemo
 {
@@ -32,6 +52,8 @@ public class RDXRapidRegionsExtractionDemo
 
    private final GPUPlanarRegionExtractionParameters gpuPlanarRegionExtractionParameters = new GPUPlanarRegionExtractionParameters();
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(gpuPlanarRegionExtractionParameters);
+   private final RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
+
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
@@ -68,7 +90,6 @@ public class RDXRapidRegionsExtractionDemo
 
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
-
 
             //submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
             submitToPlanarRegionExtractor(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
@@ -162,20 +183,59 @@ public class RDXRapidRegionsExtractionDemo
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
       // Get the planar regions from the planar region extractor
+      PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
       rapidPlanarRegionsExtractor.update();
-      PlanarRegionsList planarRegions = rapidPlanarRegionsExtractor.getPlanarRegionsList();
+      rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegionsExtractor.getGPUPlanarRegions(),
+                                                                 ReferenceFrame.getWorldFrame(),
+                                                                 regionsWithPose);
 
-      pointCloudRenderer.create(200000);
-      pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints());
-      if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
-      {
-         pointCloudRenderer.updateMesh();
-      }
+      PlanarRegionsList planarRegions = regionsWithPose.getPlanarRegionsList();
+      LogTools.info("Total Planar Regions in List: {}", planarRegions.getNumberOfPlanarRegions());
+
+      //pointCloudRenderer.create(200000);
+      //pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints());
+      //if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
+      //{
+      //   pointCloudRenderer.updateMesh();
+      //}
 
       // Submit the planar regions to the planar region renderer
       planarRegionsGraphic.generateMeshes(planarRegions);
       planarRegionsGraphic.update();
+   }
 
+   private RDXModelInstance constructSurfelMesh()
+   {
+      RecyclingArrayList<Point3D32> debugPoints = rapidPlanarRegionsExtractor.getDebugger().getDebugPoints();
+
+      ModelBuilder modelBuilder = new ModelBuilder();
+      modelBuilder.begin();
+
+      RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+
+      ArrayList<Point3DReadOnly> points = new ArrayList<>();
+      for (int i = 0; i < debugPoints.size(); i++)
+      {
+         points.clear();
+
+         points.add(debugPoints.get(i));
+
+         Point3D32 point = debugPoints.get(i);
+         meshBuilder.addPolygon(points, new Color(0.5f, 0.6f, 0.0f, 1.0f)); // dark red
+      }
+
+      Mesh mesh = meshBuilder.generateMesh();
+      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL20.GL_TRIANGLES);
+      Material material = new Material();
+      Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+      material.set(TextureAttribute.createDiffuse(paletteTexture));
+      material.set(ColorAttribute.createDiffuse(com.badlogic.gdx.graphics.Color.WHITE));
+      modelBuilder.part(meshPart, material);
+
+      Model model = modelBuilder.end();
+
+      RDXModelInstance modelInstance = new RDXModelInstance(model);
+      return modelInstance;
    }
 
    public static void main(String[] args)

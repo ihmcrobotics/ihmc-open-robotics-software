@@ -1,6 +1,5 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
@@ -11,7 +10,6 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -21,7 +19,6 @@ import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
-import java.nio.FloatBuffer;
 import java.util.Comparator;
 import java.util.Stack;
 
@@ -195,7 +192,8 @@ public class RapidPlanarRegionsExtractor
       growRegionBoundaries();
       LogTools.info(" --------------------- [DONE] Calling Update -------------------------- ");
 
-      debugger.showDebugImage();
+      //debugger.printPatchGraph(patchGraph);
+      //debugger.showDebugImage();
    }
 
    /**
@@ -339,7 +337,8 @@ public class RapidPlanarRegionsExtractor
             //int boundaryConnectionsEncodedAsOnes = Byte.toUnsignedInt(patchGraph.getBytedecoOpenCVMat().ptr(row, column).get());
             int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect(row, column);
 
-            //LogTools.info("DFS({}, {}) -> {}", row, column, boundaryConnectionsEncodedAsOnes);
+            //LogTools.info("------------------------ Start Depth First Search ---------------------------");
+            //LogTools.info("------------------------ DFS({}, {}) -> {} ---------------------------", row, column, boundaryConnectionsEncodedAsOnes);
 
             if (!regionVisitedMatrix.get(row, column) && checkConnection(boundaryConnectionsEncodedAsOnes)) // all ones; fully connected
             {
@@ -357,17 +356,19 @@ public class RapidPlanarRegionsExtractor
                }
 
                // Create final rapid region if the connected island has enough patches
-               if (numberOfRegionPatches >= parameters.getRegionMinPatches())
+               //LogTools.info("Min Patch Count: {} | Number of Patches: {} | Island: {}", 20, numberOfRegionPatches, planarRegionIslandIndex);
+               if (numberOfRegionPatches >= 20)
                {
-                  ++planarRegionIslandIndex;
+                  //LogTools.info("Region Found: {}", planarRegionIslandIndex);
+                  planarRegionIslandIndex++;
                   planarRegion.update(parameters.getUseSVDNormals(), parameters.getSVDReductionFactor());
                   if (planarRegion.getSVDDuration() > maxSVDSolveTime)
                      maxSVDSolveTime = planarRegion.getSVDDuration();
 
-                  tempIsland.planarRegion = planarRegion;
-                  tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
+                  //tempIsland.planarRegion = planarRegion;
+                  //tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
 
-                  debugger.drawRegionInternalPatches(tempIsland, patchHeight, patchWidth);
+                  //debugger.drawRegionInternalPatches(tempIsland, patchHeight, patchWidth);
                }
                else
                {
@@ -403,9 +404,9 @@ public class RapidPlanarRegionsExtractor
                                                                                                              regionRing,
                                                                                                              leafPatchIndex,
                                                                                                              1);
-                                                      if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
+                                                      if (numberOfBoundaryPatches >= 5)
                                                       {
-                                                         debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
+                                                         //debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
 
                                                          ++regionRingIndex;
                                                          regionRing.updateConvexPolygon();
@@ -550,7 +551,7 @@ public class RapidPlanarRegionsExtractor
 
    public boolean checkConnection(int nodeConnection)
    {
-      return nodeConnection > 120;
+      return nodeConnection == 255;
    }
 
    public void destroy()
@@ -653,6 +654,8 @@ public class RapidPlanarRegionsExtractor
 
       public void expandBlock()
       {
+         //LogTools.info("DFS [Depth:{}, Row:{}, Column:{}]", searchDepth, row, column);
+
          if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
             return;
 
@@ -678,7 +681,7 @@ public class RapidPlanarRegionsExtractor
          {
             if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
             {
-               int boundaryConnectionsEncodedAsOnes = patchGraph.getByteAsInteger((column + adjacentX[i]), (row + adjacentY[i]));
+               int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect((row + adjacentY[i]), (column + adjacentX[i]));
                if (checkConnection(boundaryConnectionsEncodedAsOnes)) // all ones; fully connected
                {
                   ++count;
@@ -694,7 +697,7 @@ public class RapidPlanarRegionsExtractor
          {
             boundaryMatrix.set(row, column, true);
             planarRegion.getBorderIndices().add().set(column, row);
-            debugger.drawBoundaryNode(planarRegionIslandIndex, column, row, patchHeight, patchWidth);
+            //debugger.drawBoundaryNode(planarRegionIslandIndex, column, row, patchHeight, patchWidth);
          }
       }
    }
