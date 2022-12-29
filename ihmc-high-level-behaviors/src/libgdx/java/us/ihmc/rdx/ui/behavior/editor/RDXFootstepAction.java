@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -28,7 +27,7 @@ import us.ihmc.tools.io.JSONTools;
 import java.util.List;
 import java.util.UUID;
 
-public class RDXFootstepAction implements RDXBehaviorAction
+public class RDXFootstepAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXInteractableHighlightModel highlightModel;
@@ -40,7 +39,6 @@ public class RDXFootstepAction implements RDXBehaviorAction
    private ROS2ControllerHelper ros2ControllerHelper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform ankleToSoleFrameTransform = new RigidBodyTransform();
-   private final ImBoolean selected = new ImBoolean();
    private boolean wasInitializedToPreviousStep;
 
    public void create(RDX3DPanel panel3D,
@@ -89,7 +87,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (getSelected().get())
       {
          poseGizmo.calculate3DViewPick(input);
       }
@@ -98,14 +96,14 @@ public class RDXFootstepAction implements RDXBehaviorAction
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (getSelected().get())
       {
          poseGizmo.process3DViewInput(input);
       }
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       if (referenceFrameLibraryCombo.combo())
       {
@@ -121,7 +119,7 @@ public class RDXFootstepAction implements RDXBehaviorAction
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       highlightModel.getRenderables(renderables, pool);
-      if (selected.get())
+      if (getSelected().get())
          poseGizmo.getRenderables(renderables, pool);
    }
 
@@ -183,12 +181,6 @@ public class RDXFootstepAction implements RDXBehaviorAction
    public void destroy()
    {
       highlightModel.dispose();
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
    }
 
    @Override

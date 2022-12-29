@@ -41,7 +41,7 @@ import us.ihmc.tools.io.JSONTools;
 import java.util.List;
 import java.util.UUID;
 
-public class RDXWalkAction implements RDXBehaviorAction
+public class RDXWalkAction extends RDXBehaviorAction
 {
    private RDXFootstepPlanGraphic footstepPlanGraphic;
    private ROS2SyncedRobotModel syncedRobot;
@@ -53,7 +53,6 @@ public class RDXWalkAction implements RDXBehaviorAction
    private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean selected = new ImBoolean();
    private FootstepDataListMessage footstepDataListMessage;
    private final SideDependentList<ImBoolean> editGoalFootPoses = new SideDependentList<>();
    private final SideDependentList<RDXPose3DGizmo> editGoalFootGizmos = new SideDependentList<>();
@@ -100,7 +99,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    @Override
    public void update()
    {
-      if (!selected.get())
+      if (!getSelected().get())
          editGoalFootPoses.forEach(imBoolean -> imBoolean.set(false));
 
       footstepPlannerGoalGizmo.updateTransforms();
@@ -119,7 +118,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (getSelected().get())
       {
          boolean goalFootEditingEnabled = false;
          for (RobotSide side : RobotSide.values)
@@ -138,7 +137,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (selected.get())
+      if (getSelected().get())
       {
          boolean goalFootEditingEnabled = false;
          for (RobotSide side : RobotSide.values)
@@ -155,7 +154,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void renderImGuiSettingWidgets()
    {
       if (referenceFrameLibraryCombo.combo())
       {
@@ -186,7 +185,7 @@ public class RDXWalkAction implements RDXBehaviorAction
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       footstepPlanGraphic.getRenderables(renderables, pool);
-      if (selected.get())
+      if (getSelected().get())
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
          for (RobotSide side : RobotSide.values)
@@ -318,12 +317,6 @@ public class RDXWalkAction implements RDXBehaviorAction
       {
          ros2ControllerHelper.publishToController(footstepDataListMessage);
       }
-   }
-
-   @Override
-   public ImBoolean getSelected()
-   {
-      return selected;
    }
 
    @Override
