@@ -115,15 +115,17 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if motion is over and not validated yet, replay it
          {
-            proMPAssistant.setStartTrajectories(0);
             restartedMotion = true;
          }
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             previewValidated = true;
-            proMPAssistant.setStartTrajectories(0);
             restartedMotion = true;
+         }
+         if (restartedMotion)
+         {
+            proMPAssistant.setStartTrajectories(0);
          }
       }
       else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated
