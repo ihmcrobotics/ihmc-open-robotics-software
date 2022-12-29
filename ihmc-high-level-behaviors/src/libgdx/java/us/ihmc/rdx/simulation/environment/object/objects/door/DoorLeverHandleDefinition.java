@@ -43,6 +43,7 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       modelVisualDefinitionOtherSide.getOriginPose().getTranslation().setX(0.0508);
       addVisualDefinition(modelVisualDefinitionOtherSide);
 
+      // This code enables the full mesh collisions, but they aren't super useful, and they're slow
 ////      Point3D collisionShapeOffset = new Point3D(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
 //      CollisionShapeDefinition collisionShapeDefinition = new CollisionShapeDefinition();
 //      ModelFileGeometryDefinition collisionShapeGeometryDefinition
@@ -58,5 +59,11 @@ public class DoorLeverHandleDefinition extends RigidBodyDefinition
       cylinderCollisionShapeDefinition.setGeometryDefinition(cylinderDefinition);
       cylinderCollisionShapeDefinition.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)), new Point3D(-0.045, -length / 2.0, 0.0));
       addCollisionShapeDefinition(cylinderCollisionShapeDefinition);
+
+      CollisionShapeDefinition cylinderCollisionShapeDefinition2 = new CollisionShapeDefinition();
+      cylinderCollisionShapeDefinition2.setGeometryDefinition(cylinderDefinition);
+      cylinderCollisionShapeDefinition2.getOriginPose().set(new YawPitchRoll(0.0, 0.0, -Math.toRadians(90.0)),
+                                                            new Point3D(DoorDefinition.DOOR_PANEL_THICKNESS + 0.045, -length / 2.0, 0.0));
+      addCollisionShapeDefinition(cylinderCollisionShapeDefinition2);
    }
 }
