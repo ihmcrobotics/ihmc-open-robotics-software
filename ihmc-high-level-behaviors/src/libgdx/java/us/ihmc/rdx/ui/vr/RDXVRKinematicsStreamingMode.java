@@ -231,6 +231,7 @@ public class RDXVRKinematicsStreamingMode
                   kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
                else if (sharedControlAssistant.isActive())
                {
+                  LogTools.info("processing packing frames");
                   if(sharedControlAssistant.readyToPack())
                      sharedControlAssistant.framePoseToPack(tempFramePose, side.getCamelCaseName() + "Hand");
                   else
@@ -306,6 +307,7 @@ public class RDXVRKinematicsStreamingMode
             ghostFullRobotModel.getElevator().updateFramesRecursively();
             if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
             {
+               LogTools.info("Inside sharedcontrol preview active");
                // the joint angle solutions take into account previous solutions, so when jumping in position from end to beginning of motion they have to be forced
                if (sharedControlAssistant.hasAssistanceJustStarted()) // store the initial message with initial posture
                {
