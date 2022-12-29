@@ -200,6 +200,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public boolean isPreviewActive()
    {
+      return previewSetToActive;
+   }
+
+   public boolean isPreviewGraphicActive()
+   {
       return ghostRobotGraphic.isActive();
    }
 

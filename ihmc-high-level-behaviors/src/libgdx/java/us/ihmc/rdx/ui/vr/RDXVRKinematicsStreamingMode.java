@@ -304,12 +304,12 @@ public class RDXVRKinematicsStreamingMode
                ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
-            if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
+            if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
             {
                // the joint angle solutions take into account previous solutions, so when jumping in position from end to beginning of motion they have to be forced
                if (sharedControlAssistant.hasAssistanceJustStarted()) // store the initial message with initial posture
                   sharedControlAssistant.setStatusBeforeAssistance(new KinematicsToolboxOutputStatus(latestStatus));
-               // if motion has restarted use the initial message
+               // if motion has restarted use the joint angles from the initial message for the ghost robots
                if(sharedControlAssistant.hasMotionRestarted())
                {
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
@@ -318,13 +318,13 @@ public class RDXVRKinematicsStreamingMode
                   }
                   sharedControlAssistant.updatePreviewModel(sharedControlAssistant.getStatusBeforeAssistance());
                }
-               else
+               else  // if motion has not restarted update model with latestStatus
                   sharedControlAssistant.updatePreviewModel(latestStatus);
             }
          }
       }
       ghostRobotGraphic.update();
-      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
+      if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewGraphicActive()) // if graphic active update also graphic
          sharedControlAssistant.getPreviewGraphic().update();
    }
 
