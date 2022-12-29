@@ -29,13 +29,19 @@ public class RapidPlanarRegionsCustomizer
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters;
    private final PolygonizerParameters polygonizerParameters;
 
+   public RapidPlanarRegionsCustomizer()
+   {
+      concaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForGPURegions");
+      polygonizerParameters = new PolygonizerParameters("ForGPURegions");
+   }
+
    public RapidPlanarRegionsCustomizer(ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters)
    {
       this.concaveHullFactoryParameters = concaveHullFactoryParameters;
       this.polygonizerParameters = polygonizerParameters;
    }
 
-   public List<PlanarRegion> createPlanarRegion(GPUPlanarRegion rapidPlanarRegion, ReferenceFrame cameraFrame)
+   public List<PlanarRegion> convertToPlanarRegion(GPUPlanarRegion rapidPlanarRegion, ReferenceFrame cameraFrame)
    {
       List<PlanarRegion> planarRegions = new ArrayList<>();
       FrameQuaternion orientation = new FrameQuaternion();
@@ -50,66 +56,18 @@ public class RapidPlanarRegionsCustomizer
          if (!MathTools.epsilonEquals(rapidPlanarRegion.getNormal().norm(), 1.0, 1e-4))
             throw new RuntimeException("The planar region norm isn't valid");
 
-         // First compute the set of concave hulls for this region
          FramePoint3D origin = new FramePoint3D(cameraFrame, rapidPlanarRegion.getCenter());
          origin.changeFrame(ReferenceFrame.getWorldFrame());
 
-         List<Point2D> pointCloudInPlane = rapidPlanarRegion.getBoundaryVertices()
-                                                            .stream()
-                                                            .map(boundaryVertex ->
-                                                                 {
-                                                                    FramePoint3D framePoint3D = new FramePoint3D(cameraFrame,
-                                                                                                                 boundaryVertex);
-                                                                    framePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
-                                                                    return PolygonizerTools.toPointInPlane(framePoint3D,
-                                                                                                           origin,
-                                                                                                           orientation);
-                                                                 })
-                                                            .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
-                                                            .collect(Collectors.toList());
          List<LineSegment2D> intersections = new ArrayList<>();
-         //                     = intersections.stream()
-         //                  .map(intersection -> PolygonizerTools.toLineSegmentInPlane(lineSegmentInWorld, origin, orientation))
-         //                  .collect(Collectors.toList());
+         List<Point2D> pointCloudInPlane = getPointCloudInPlane(rapidPlanarRegion, cameraFrame, origin, orientation);
          ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane,
                                                                                                             intersections,
                                                                                                             concaveHullFactoryParameters);
 
-         // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
-         double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
-         double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
-         double lengthThreshold = polygonizerParameters.getLengthThreshold();
+         applyConcaveHullFilters(concaveHullCollection);
+         createPlanarRegion(rapidPlanarRegion.getId(), origin, orientation, concaveHullCollection, planarRegions);
 
-         ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-         ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
-         if (polygonizerParameters.getCutNarrowPassage())
-            concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
-
-         int hullCounter = 0;
-         int regionId = rapidPlanarRegion.getId();
-
-         for (ConcaveHull concaveHull : concaveHullCollection)
-         {
-            if (concaveHull.isEmpty())
-               continue;
-
-            // Decompose the concave hulls into convex polygons
-            double depthThreshold = polygonizerParameters.getDepthThreshold();
-            List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
-            ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
-
-            // Pack the data in PlanarRegion
-            FramePose3D regionPose = new FramePose3D();
-            regionPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), origin, orientation);
-            RigidBodyTransform tempTransform = new RigidBodyTransform();
-            regionPose.get(tempTransform);
-            PlanarRegion planarRegion = new PlanarRegion(tempTransform, concaveHull.getConcaveHullVertices(), decomposedPolygons);
-            planarRegion.setRegionId(regionId);
-            planarRegions.add(planarRegion);
-
-            hullCounter++;
-            regionId = 31 * regionId + hullCounter;
-         }
       }
       catch (NotARotationMatrixException notARotationMatrixException)
       {
@@ -124,6 +82,36 @@ public class RapidPlanarRegionsCustomizer
       return planarRegions;
    }
 
+   private List<Point2D> getPointCloudInPlane(GPUPlanarRegion rapidRegion, ReferenceFrame cameraFrame, FramePoint3D origin, FrameQuaternion orientation)
+   {
+      return rapidRegion.getBoundaryVertices()
+                              .stream()
+                              .map(boundaryVertex ->
+                                   {
+                                      FramePoint3D framePoint3D = new FramePoint3D(cameraFrame,
+                                                                                   boundaryVertex);
+                                      framePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
+                                      return PolygonizerTools.toPointInPlane(framePoint3D,
+                                                                             origin,
+                                                                             orientation);
+                                   })
+                              .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
+                              .collect(Collectors.toList());
+   }
+
+   public void applyConcaveHullFilters(ConcaveHullCollection concaveHulls)
+   {
+      // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
+      double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
+      double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
+      double lengthThreshold = polygonizerParameters.getLengthThreshold();
+
+      ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHulls);
+      ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHulls);
+      if (polygonizerParameters.getCutNarrowPassage())
+         concaveHulls = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHulls);
+   }
+
    public void createCustomPlanarRegionsList(List<GPUPlanarRegion> gpuPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
    {
       RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
@@ -132,8 +120,8 @@ public class RapidPlanarRegionsCustomizer
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
                                                                       .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size()
                                                                                                  >= polygonizerParameters.getMinNumberOfNodes())
-                                                                      .map(gpuPlanarRegion -> createPlanarRegion(gpuPlanarRegion, cameraFrame))
-                                                                      .collect(Collectors.toList());
+                                                                      .map(gpuPlanarRegion -> convertToPlanarRegion(gpuPlanarRegion, cameraFrame))
+                                                                      .toList();
       regionsToPack.getPlanarRegionsList().clear();
       if (!listCaughtException.get())
       {
@@ -143,9 +131,35 @@ public class RapidPlanarRegionsCustomizer
          }
       }
       sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
-
-      LogTools.info("Planar Regions Found: {}", regionsToPack.getPlanarRegionsList().getNumberOfPlanarRegions());
-
       regionsToPack.setSensorToWorldFrameTransform(sensorToWorldFrameTransform);
+   }
+
+   public void createPlanarRegion(int regionId, FramePoint3D origin, FrameQuaternion orientation, ConcaveHullCollection concaveHullCollection,
+                                  List<PlanarRegion> planarRegions)
+   {
+      int hullCounter = 0;
+
+      for (ConcaveHull concaveHull : concaveHullCollection)
+      {
+         if (concaveHull.isEmpty())
+            continue;
+
+         // Decompose the concave hulls into convex polygons
+         double depthThreshold = polygonizerParameters.getDepthThreshold();
+         List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
+         ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
+
+         // Pack the data in PlanarRegion
+         FramePose3D regionPose = new FramePose3D();
+         regionPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), origin, orientation);
+         RigidBodyTransform tempTransform = new RigidBodyTransform();
+         regionPose.get(tempTransform);
+         PlanarRegion planarRegion = new PlanarRegion(tempTransform, concaveHull.getConcaveHullVertices(), decomposedPolygons);
+         planarRegion.setRegionId(regionId);
+         planarRegions.add(planarRegion);
+
+         hullCounter++;
+         regionId = 31 * regionId + hullCounter;
+      }
    }
 }
