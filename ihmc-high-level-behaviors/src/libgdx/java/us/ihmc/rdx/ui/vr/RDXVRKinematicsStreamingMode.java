@@ -323,7 +323,7 @@ public class RDXVRKinematicsStreamingMode
 //                  {
 //                     ghostOneDoFJointsExcludingHands[i].setQ(sharedControlAssistant.getStatusBeforeAssistance().getDesiredJointAngles().get(i));
 //                  }
-                  sharedControlAssistant.updatePreviewModel(sharedControlAssistant.getStatusBeforeAssistance());
+                  sharedControlAssistant.resetPreviewModel();
                }
                else  // if motion has not restarted update model with latestStatus
                   sharedControlAssistant.updatePreviewModel(latestStatus);

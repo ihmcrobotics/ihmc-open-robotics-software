@@ -77,16 +77,26 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       ghostRobotModel.getElevator().updateFramesRecursively();
    }
 
+   public void resetPreviewModel()
+   {
+      ghostRobotModel.getRootJoint().setJointPosition(statusBeforeAssistance.getDesiredRootPosition());
+      ghostRobotModel.getRootJoint().setJointOrientation(statusBeforeAssistance.getDesiredRootOrientation());
+      for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+      {
+         ghostOneDoFJointsExcludingHands[i].setQ(statusBeforeAssistance.getDesiredJointAngles().get(i));
+      }
+      ghostRobotModel.getElevator().updateFramesRecursively();
+
+      restartedMotion = false;
+   }
+
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
 
       if (previewSetToActive)
-      {
          ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
-         assistanceJustStarted = false;
-      }
    }
 
    @Override
@@ -108,8 +118,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setStartTrajectories(0);
             restartedMotion = true;
          }
-         else
-            restartedMotion = false;
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
@@ -120,7 +128,6 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       }
       else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated
       {
-         restartedMotion = false;
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
             setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
       }
@@ -216,6 +223,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    public void setStatusBeforeAssistance(KinematicsToolboxOutputStatus status)
    {
       statusBeforeAssistance = new KinematicsToolboxOutputStatus(status);
+      assistanceJustStarted = false;
    }
 
    public KinematicsToolboxOutputStatus getStatusBeforeAssistance()
