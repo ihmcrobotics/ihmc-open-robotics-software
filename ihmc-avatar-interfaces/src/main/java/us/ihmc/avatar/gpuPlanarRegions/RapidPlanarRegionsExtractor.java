@@ -467,9 +467,13 @@ public class RapidPlanarRegionsExtractor
                                         //float vertexY = -cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
                                         //float vertexZ = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
 
-                                        float vertexX = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        float vertexZ = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        //float vertexX = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        //float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        //float vertexZ = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+
+                                        float vertexX = cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        float vertexY = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        float vertexZ = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
                                         Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                                         boundaryVertex.set(vertexX, vertexY, vertexZ);
@@ -590,12 +594,20 @@ public class RapidPlanarRegionsExtractor
          regionVisitedMatrix.set(row, column, true);
          regionMatrix.set(row, column, planarRegionIslandIndex);
          // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-         float ny = -nxImage.getFloatDirect(row, column);
-         float nz = nyImage.getFloatDirect(row, column);
-         float nx = nzImage.getFloatDirect(row, column);
-         float cy = -cxImage.getFloatDirect(row, column);
-         float cz = cyImage.getFloatDirect(row, column);
-         float cx = czImage.getFloatDirect(row, column);
+         //float ny = -nxImage.getFloatDirect(row, column);
+         //float nz = nyImage.getFloatDirect(row, column);
+         //float nx = nzImage.getFloatDirect(row, column);
+         //float cy = -cxImage.getFloatDirect(row, column);
+         //float cz = cyImage.getFloatDirect(row, column);
+         //float cx = czImage.getFloatDirect(row, column);
+
+         float ny = nyImage.getFloatDirect(row, column);
+         float nz = nzImage.getFloatDirect(row, column);
+         float nx = nxImage.getFloatDirect(row, column);
+         float cy = cyImage.getFloatDirect(row, column);
+         float cz = czImage.getFloatDirect(row, column);
+         float cx = cxImage.getFloatDirect(row, column);
+
          planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
          debugger.drawInternalNode(planarRegionIslandIndex, column, row, patchHeight, patchWidth);

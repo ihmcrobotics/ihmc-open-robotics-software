@@ -98,14 +98,19 @@ float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex,
 {
    float residual = 0;
    float radius = 0;
-   int m = 1;
+   int m = 2;
    int count = 0;
    float4 normal = (float4)(0,0,0,0);
-   //if (rIndex >= 0 && rIndex < (int) params[SUB_H] && cIndex >= 0 && cIndex < (int) params[SUB_W])
+
+   if   (
+            rIndex >= m && cIndex >= m
+            && (rIndex * ((int) params[PATCH_HEIGHT]) + 2*m) < ((int) params[INPUT_HEIGHT])
+            && (cIndex * ((int) params[PATCH_WIDTH]) + 2*m) < ((int) params[INPUT_WIDTH])
+        )
    {
-      for (int i = 0; i < (int) params[PATCH_HEIGHT] - m; i++)
+      for (int i = 0; i < (int) m; i++)
       {
-         for( int j = 0; j < (int) params[PATCH_WIDTH] - m; j++)
+         for( int j = 0; j < (int) m; j++)
          {
             count++;
             int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
