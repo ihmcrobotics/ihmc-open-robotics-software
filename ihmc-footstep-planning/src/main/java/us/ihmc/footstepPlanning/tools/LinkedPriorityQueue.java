@@ -15,6 +15,11 @@ public class LinkedPriorityQueue<E>
    @SuppressWarnings("serial") // Conditionally serializable
    private final Comparator<? super E> comparator;
 
+   public LinkedPriorityQueue(Comparator<? super E> comparator)
+   {
+      this.comparator = comparator;
+   }
+
    /**
     * Inserts the specified element into this priority queue.
     *
@@ -64,6 +69,11 @@ public class LinkedPriorityQueue<E>
       return last.item;
    }
 
+   public int size()
+   {
+      return size;
+   }
+
    /**
     * Inserts item x at position k, maintaining heap invariant by
     * promoting x up the tree until it is greater than or equal to
@@ -91,19 +101,32 @@ public class LinkedPriorityQueue<E>
       last = node;
    }
 
-   private static <T> void siftUpUsingComparator(T elementToAdd, Node<T> tailToStart, Comparator<? super T> comparator)
+   private void siftUpUsingComparator(E elementToAdd, Node<E> tailToStart, Comparator<? super E> comparator)
    {
-
-      Node<T> candidate = tailToStart;
+      Node<E> candidate = tailToStart;
+      Node<E> next = tailToStart.next;
 
       while (true)
       {
          if (comparator.compare(elementToAdd, candidate.item) >= 0)
             break;
+         next = candidate;
          candidate = candidate.prev;
+         if (candidate == null)
+            break;
       }
 
-      insertAfter(candidate, elementToAdd);
+      if (candidate == null)
+      {
+         insertBefore(next, elementToAdd);
+         first = next.prev;
+      }
+      else
+      {
+         insertAfter(candidate, elementToAdd);
+         if (last == candidate)
+            last = candidate.next;
+      }
    }
 
    private static <E> void insertAfter(Node<E> node, E elementToInsert)
@@ -122,8 +145,8 @@ public class LinkedPriorityQueue<E>
 
    private static class Node<E> {
       E item;
-      Node<E> next;
-      Node<E> prev;
+      public Node<E> next;
+      public Node<E> prev;
 
       Node(Node<E> prev, E element, Node<E> next) {
          this.item = element;
