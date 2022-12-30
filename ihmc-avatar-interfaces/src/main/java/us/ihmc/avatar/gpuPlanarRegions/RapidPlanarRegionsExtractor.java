@@ -8,6 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,7 +34,12 @@ public class RapidPlanarRegionsExtractor
       SPHERICAL, PERSPECTIVE
    }
 
-   private final GPUPlanarRegionExtractionParameters parameters;
+   private final GPUPlanarRegionExtractionParameters parameters = new GPUPlanarRegionExtractionParameters();
+
+   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
+   private final Stopwatch gpuDurationStopwatch = new Stopwatch();
+   private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
+   private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
 
    private SensorModel sensorModel;
 
@@ -49,6 +55,7 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryVisitedMatrix;
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
+
 
    private boolean patchSizeChanged = true;
 
@@ -70,10 +77,13 @@ public class RapidPlanarRegionsExtractor
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
 
+   private final GPUPlanarRegionExtractionParameters gpuPlanarRegionExtractionParameters = new GPUPlanarRegionExtractionParameters();
+
    private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
    private final Comparator<GPURegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
+
 
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer parametersBuffer;
@@ -89,11 +99,6 @@ public class RapidPlanarRegionsExtractor
    private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
-
-   public RapidPlanarRegionsExtractor(GPUPlanarRegionExtractionParameters parameters)
-   {
-      this.parameters = parameters;
-   }
 
    /**
     * Creates buffers and kernels for the OpenCL program.
@@ -554,87 +559,6 @@ public class RapidPlanarRegionsExtractor
       return nodeConnection == 255;
    }
 
-   public void destroy()
-   {
-      openCLManager.destroy();
-      // TODO: Destroy the rest
-   }
-
-   public RapidRegionsDebutOutputGenerator getDebugger()
-   {
-      return debugger;
-   }
-
-   public void setPatchSizeChanged(boolean patchSizeChanged)
-   {
-      this.patchSizeChanged = patchSizeChanged;
-   }
-
-   public PlanarRegionsList getPlanarRegionsList()
-   {
-      return planarRegionsList;
-   }
-
-   public int getPatchImageWidth()
-   {
-      return patchImageWidth;
-   }
-
-   public int getPatchImageHeight()
-   {
-      return patchImageHeight;
-   }
-
-   public int getNumberOfBoundaryPatchesInWholeImage()
-   {
-      return numberOfBoundaryPatchesInWholeImage;
-   }
-
-   public RecyclingArrayList<GPUPlanarRegion> getGPUPlanarRegions()
-   {
-      return gpuPlanarRegions;
-   }
-
-   public int getPatchWidth()
-   {
-      return patchWidth;
-   }
-
-   public int getPatchHeight()
-   {
-      return patchHeight;
-   }
-
-   public int getImageWidth()
-   {
-      return imageWidth;
-   }
-
-   public int getImageHeight()
-   {
-      return imageHeight;
-   }
-
-   public GPUPlanarRegionExtractionParameters getParameters()
-   {
-      return parameters;
-   }
-
-   public int getRegionMaxSearchDepth()
-   {
-      return regionMaxSearchDepth;
-   }
-
-   public int getBoundaryMaxSearchDepth()
-   {
-      return boundaryMaxSearchDepth;
-   }
-
-   public double getMaxSVDSolveTime()
-   {
-      return maxSVDSolveTime;
-   }
-
    public class PatchGraphRecursionBlock
    {
       private final int row;
@@ -700,6 +624,142 @@ public class RapidPlanarRegionsExtractor
             //debugger.drawBoundaryNode(planarRegionIslandIndex, column, row, patchHeight, patchWidth);
          }
       }
+   }
+
+   public void destroy()
+   {
+      openCLManager.destroy();
+      // TODO: Destroy the rest
+   }
+
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
+   }
+
+   public RapidRegionsDebutOutputGenerator getDebugger()
+   {
+      return debugger;
+   }
+
+   public void setPatchSizeChanged(boolean patchSizeChanged)
+   {
+      this.patchSizeChanged = patchSizeChanged;
+   }
+
+   public int getPatchImageWidth()
+   {
+      return patchImageWidth;
+   }
+
+   public int getPatchImageHeight()
+   {
+      return patchImageHeight;
+   }
+
+   public int getNumberOfBoundaryPatchesInWholeImage()
+   {
+      return numberOfBoundaryPatchesInWholeImage;
+   }
+
+   public RecyclingArrayList<GPUPlanarRegion> getGPUPlanarRegions()
+   {
+      return gpuPlanarRegions;
+   }
+
+   public int getPatchWidth()
+   {
+      return patchWidth;
+   }
+
+   public int getPatchHeight()
+   {
+      return patchHeight;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
+   }
+
+   public GPUPlanarRegionExtractionParameters getParameters()
+   {
+      return parameters;
+   }
+
+   public int getRegionMaxSearchDepth()
+   {
+      return regionMaxSearchDepth;
+   }
+
+   public int getBoundaryMaxSearchDepth()
+   {
+      return boundaryMaxSearchDepth;
+   }
+
+   public double getMaxSVDSolveTime()
+   {
+      return maxSVDSolveTime;
+   }
+
+   public BytedecoImage getNxImage()
+   {
+      return nxImage;
+   }
+
+   public BytedecoImage getNyImage()
+   {
+      return nyImage;
+   }
+
+   public BytedecoImage getNzImage()
+   {
+      return nzImage;
+   }
+
+   public BytedecoImage getCxImage()
+   {
+      return cxImage;
+   }
+
+   public BytedecoImage getCyImage()
+   {
+      return cyImage;
+   }
+
+   public BytedecoImage getCzImage()
+   {
+      return czImage;
+   }
+
+   public BytedecoImage getPatchGraph()
+   {
+      return patchGraph;
+   }
+
+   public Stopwatch getWholeAlgorithmDurationStopwatch()
+   {
+      return wholeAlgorithmDurationStopwatch;
+   }
+
+   public Stopwatch getGpuDurationStopwatch()
+   {
+      return gpuDurationStopwatch;
+   }
+
+   public Stopwatch getDepthFirstSearchDurationStopwatch()
+   {
+      return depthFirstSearchDurationStopwatch;
+   }
+
+   public Stopwatch getPlanarRegionsSegmentationDurationStopwatch()
+   {
+      return planarRegionsSegmentationDurationStopwatch;
    }
 }
 

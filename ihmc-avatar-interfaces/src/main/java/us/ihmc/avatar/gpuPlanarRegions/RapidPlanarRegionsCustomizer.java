@@ -162,4 +162,14 @@ public class RapidPlanarRegionsCustomizer
          regionId = 31 * regionId + hullCounter;
       }
    }
+
+   public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
+   {
+      return concaveHullFactoryParameters;
+   }
+
+   public PolygonizerParameters getPolygonizerParameters()
+   {
+      return polygonizerParameters;
+   }
 }
