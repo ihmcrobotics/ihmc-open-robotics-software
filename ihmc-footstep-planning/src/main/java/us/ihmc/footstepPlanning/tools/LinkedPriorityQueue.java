@@ -20,6 +20,13 @@ public class LinkedPriorityQueue<E>
       this.comparator = comparator;
    }
 
+   public void clear()
+   {
+      size = 0;
+      first = null;
+      last = null;
+   }
+
    /**
     * Inserts the specified element into this priority queue.
     *
@@ -43,7 +50,10 @@ public class LinkedPriorityQueue<E>
    {
       E ret = first.item;
       first = first.next;
-      first.prev = null;
+      if (first == null)
+         last = null;
+      else
+         first.prev = null;
       size--;
 
       return ret;
