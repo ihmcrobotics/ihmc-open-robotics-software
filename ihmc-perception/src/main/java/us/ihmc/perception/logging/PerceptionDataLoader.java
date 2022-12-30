@@ -124,6 +124,11 @@ public class PerceptionDataLoader
       return hdf5Manager;
    }
 
+   public void destroy()
+   {
+      hdf5Manager.closeFile();
+   }
+
    public static void main(String[] args)
    {
       String defaultLogDirectory =
@@ -143,7 +148,7 @@ public class PerceptionDataLoader
 
       Mat colorImage = new Mat();
       Mat depthImage = new Mat(128, 2048, opencv_core.CV_16UC1);
-//      LogTools.info("Total Images: {}", totalDepth);
+      //      LogTools.info("Total Images: {}", totalDepth);
 
       ArrayList<Point3D> points = new ArrayList<>();
 

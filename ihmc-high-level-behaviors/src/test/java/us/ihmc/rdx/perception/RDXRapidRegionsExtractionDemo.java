@@ -39,8 +39,14 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class RDXRapidRegionsExtractionDemo
 {
@@ -62,6 +68,7 @@ public class RDXRapidRegionsExtractionDemo
    private _cl_kernel unpackPointCloudKernel;
    private PerceptionDataLoader perceptionDataLoader;
 
+   private int frameIndex = 0;
    private int depthWidth;
    private int depthHeight;
    private int totalNumberOfPoints;
@@ -98,8 +105,8 @@ public class RDXRapidRegionsExtractionDemo
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
 
-            //submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
-            updateRapidRegionsExtractor();
+            submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
+
          }
 
          @Override
@@ -114,9 +121,18 @@ public class RDXRapidRegionsExtractionDemo
                   baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getPerspectiveManager().reloadPerspective();
+
+               }
+
+               //frameIndex = (frameIndex + 1) % 8;
+               frameIndex++;
+               if(frameIndex % 50 == 0)
+               {
+                  updateRapidRegionsExtractor(0);
                }
 
                rapidRegionsUIPanel.render();
+
 
             }
 
@@ -127,6 +143,7 @@ public class RDXRapidRegionsExtractionDemo
          @Override
          public void dispose()
          {
+            perceptionDataLoader.destroy();
             baseUI.dispose();
          }
       });
@@ -186,8 +203,10 @@ public class RDXRapidRegionsExtractionDemo
       pointCloudRenderer.updateMeshFastestAfterKernel();
    }
 
-   private void updateRapidRegionsExtractor()
+   private void updateRapidRegionsExtractor(int frameIndex)
    {
+      perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex, bytedecoDepthImage.getBytedecoOpenCVMat());
+
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
       rapidPlanarRegionsExtractor.update();
