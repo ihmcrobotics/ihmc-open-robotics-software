@@ -2,7 +2,16 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
-    "Environment###java.lang.Class:Environment" : false,
+    "GPU Planar Region Extraction" : true,
+    "Blurred Depth" : false,
+    "Filtered Depth" : false,
+    "Gx Image" : false,
+    "Gy Image" : false,
+    "Gz Image" : false,
+    "Nx Image" : false,
+    "Ny Image" : false,
+    "Nz Image" : false,
+    "Planar Region Extraction Image" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }

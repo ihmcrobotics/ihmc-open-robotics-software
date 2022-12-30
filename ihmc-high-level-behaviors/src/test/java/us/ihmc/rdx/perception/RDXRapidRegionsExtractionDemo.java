@@ -14,7 +14,6 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -46,12 +45,13 @@ import java.util.ArrayList;
 public class RDXRapidRegionsExtractionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
-   private final GPUPlanarRegionExtractionParameters gpuPlanarRegionExtractionParameters = new GPUPlanarRegionExtractionParameters();
-   private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor(gpuPlanarRegionExtractionParameters);
+   private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
 
    private Activator nativesLoadedActivator;
@@ -83,6 +83,7 @@ public class RDXRapidRegionsExtractionDemo
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
+
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
             openCLManager = new OpenCLManager();
@@ -91,8 +92,14 @@ public class RDXRapidRegionsExtractionDemo
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
 
+            rapidPlanarRegionsExtractor.create(openCLManager, bytedecoDepthImage, depthWidth, depthHeight);
+            planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+
+            rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
+            baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
+
             //submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
-            submitToPlanarRegionExtractor(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
+            updateRapidRegionsExtractor();
          }
 
          @Override
@@ -108,6 +115,9 @@ public class RDXRapidRegionsExtractionDemo
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
+
+               rapidRegionsUIPanel.render();
+
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -176,12 +186,8 @@ public class RDXRapidRegionsExtractionDemo
       pointCloudRenderer.updateMeshFastestAfterKernel();
    }
 
-   /* A one-time method to generate planar regions from depth map. */
-   private void submitToPlanarRegionExtractor(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
+   private void updateRapidRegionsExtractor()
    {
-      rapidPlanarRegionsExtractor.create(openCLManager, bytedecoImage, width, height);
-      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
-
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
       rapidPlanarRegionsExtractor.update();
@@ -204,6 +210,7 @@ public class RDXRapidRegionsExtractionDemo
       planarRegionsGraphic.update();
    }
 
+   // TODO: Complete this for visualizing the patch centroids and normals
    private RDXModelInstance constructSurfelMesh()
    {
       RecyclingArrayList<Point3D32> debugPoints = rapidPlanarRegionsExtractor.getDebugger().getDebugPoints();
