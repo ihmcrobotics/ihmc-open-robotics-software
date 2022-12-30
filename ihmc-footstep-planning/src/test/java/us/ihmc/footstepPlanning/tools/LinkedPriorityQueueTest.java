@@ -26,5 +26,21 @@ public class LinkedPriorityQueueTest
          assertEquals(size, queue.size());
       }
 
+      queue.clear();
+
+      for (double x = 1; x <= 1.0; x += 1.0)
+      {
+         queue.add(x);
+      }
+
+      size = 10;
+      assertEquals(size, queue.size());
+
+      for(double expected = 1.0; expected <= 10.0; expected += 1.0)
+      {
+         assertEquals(size--, queue.size());
+         assertEquals(expected, queue.pollFirst(), 1e-5);
+         assertEquals(size, queue.size());
+      }
    }
 }
