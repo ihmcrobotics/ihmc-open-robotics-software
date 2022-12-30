@@ -37,6 +37,7 @@ public class RDXBehaviorActionSequenceEditor
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private ImGuiPanel panel;
    private final ImBoolean enabled = new ImBoolean(false);
+   private final ImBoolean automaticExecution = new ImBoolean(false);
    private String name;
    private final WorkspaceFile workspaceFile;
    private final LinkedList<RDXBehaviorAction> actionSequence = new LinkedList<>();
@@ -216,21 +217,23 @@ public class RDXBehaviorActionSequenceEditor
 //      }
       ImGui.endMenuBar();
 
-      if (ImGui.button(labels.get("Expand all")))
+      if (ImGui.button(labels.get("[+]")))
       {
          for (RDXBehaviorAction action : actionSequence)
          {
             action.getExpanded().set(true);
          }
       }
+      ImGuiTools.previousWidgetTooltip("Expand all action settings");
       ImGui.sameLine();
-      if (ImGui.button(labels.get("Collapse all")))
+      if (ImGui.button(labels.get("[-]")))
       {
          for (RDXBehaviorAction action : actionSequence)
          {
             action.getExpanded().set(false);
          }
       }
+      ImGuiTools.previousWidgetTooltip("Collapse all action settings");
       ImGui.sameLine();
 
       if (ImGui.button(labels.get("<")))
@@ -248,21 +251,33 @@ public class RDXBehaviorActionSequenceEditor
             excecutionNextIndex++;
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
-      ImGui.sameLine();
+
       boolean endOfSequence = excecutionNextIndex >= actionSequence.size();
       if (!endOfSequence)
       {
-         if (ImGui.button(labels.get("Execute")))
+         ImGui.sameLine();
+         ImGui.text("Execute");
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("Autonomously"), automaticExecution);
+         ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
+         if (!automaticExecution.get())
          {
-            RDXBehaviorAction action = actionSequence.get(excecutionNextIndex);
-            action.performAction();
-            excecutionNextIndex++;
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Manually")))
+            {
+               RDXBehaviorAction action = actionSequence.get(excecutionNextIndex);
+               action.performAction();
+               excecutionNextIndex++;
+            }
+            ImGuiTools.previousWidgetTooltip("Executes the next action.");
          }
       }
+
+      ImGui.text("Current action:");
       ImGui.sameLine();
       endOfSequence = excecutionNextIndex >= actionSequence.size();
       if (endOfSequence)
-         ImGui.text("No actions left.");
+         ImGui.text("End of sequence.");
       else
          ImGui.text(actionSequence.get(excecutionNextIndex).getNameForDisplay());
 
