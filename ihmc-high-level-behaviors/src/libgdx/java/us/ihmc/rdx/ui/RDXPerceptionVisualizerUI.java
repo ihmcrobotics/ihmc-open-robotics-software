@@ -75,7 +75,7 @@ public class RDXPerceptionVisualizerUI
             baseUI.getImGuiPanelManager().addPanel(buildingConstructor.getPanelName(), buildingConstructor::renderImGuiWidgets);
 
             baseUI.create();
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
+            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
 
             environmentBuilder.create();
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
