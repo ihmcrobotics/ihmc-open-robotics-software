@@ -299,7 +299,7 @@ public class FootstepPlannerLogger
          return false;
       }
 
-      // Log footstep planner iteration data
+      // Log body path planner iteration data
       try
       {
          File plannerDataFile = new File(sessionDirectory + astarBodyPathPlanFileName);
@@ -345,7 +345,7 @@ public class FootstepPlannerLogger
       }
       catch (Exception e)
       {
-         LogTools.error("Error logging footstep planner data");
+         LogTools.error("Error logging body path planner data");
          fileWriter = null;
          outputStream = null;
          printStream = null;
