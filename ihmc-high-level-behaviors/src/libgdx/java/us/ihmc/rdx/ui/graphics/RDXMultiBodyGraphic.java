@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
@@ -17,6 +18,7 @@ import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
 
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 public class RDXMultiBodyGraphic extends RDXVisualizer
@@ -27,6 +29,7 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    public RDXMultiBodyGraphic(String title)
    {
       super(title);
+      setSceneLevels(RDXSceneLevel.GROUND_TRUTH, RDXSceneLevel.MODEL);
    }
 
    public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics originalRootBody)
@@ -104,17 +107,17 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll() && sceneLevelCheck(sceneLevels))
       {
          multiBody.getVisualRenderables(renderables, pool);
       }
    }
 
-   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVisualReferenceFrameRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive() && robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll() && sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
          multiBody.getVisualReferenceFrameRenderables(renderables, pool);
       }

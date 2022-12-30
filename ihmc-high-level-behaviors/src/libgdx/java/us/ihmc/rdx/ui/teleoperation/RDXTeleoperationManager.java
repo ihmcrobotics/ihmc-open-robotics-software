@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.type.ImBoolean;
@@ -23,7 +21,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetDoubleWidget;
@@ -50,7 +47,7 @@ import us.ihmc.tools.gui.YoAppearanceTools;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Set;
 
 /**
  *  Possibly extract simple controller controls to a smaller panel class, like remote safety controls or something.
@@ -136,6 +133,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
 
       desiredRobot = new RDXDesiredRobot(robotModel, syncedRobot);
+      desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
 
       ROS2ControllerHelper slidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, slidersROS2ControllerHelper, teleoperationParameters);
@@ -278,7 +276,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       handManager.create(baseUI, communicationHelper);
 
-      baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
 
    public void update()
@@ -640,32 +638,35 @@ public class RDXTeleoperationManager extends ImGuiPanel
       return jointAnglesString.toString();
    }
 
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      desiredRobot.getRenderables(renderables, pool);
-
-      if (showGraphics.get())
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
       {
-         footstepsSentToControllerGraphic.getRenderables(renderables, pool);
-         ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
-         manualFootstepPlacement.getRenderables(renderables, pool);
-         interactableFootstepPlan.getRenderables(renderables, pool);
-      }
+         desiredRobot.getRenderables(renderables, pool, sceneLevels);
 
-      if (interactablesEnabled.get())
-      {
-         if (interactablesAvailable)
+         if (showGraphics.get())
          {
-            if (showSelfCollisionMeshes.get())
-               selfCollisionModel.getRenderables(renderables, pool);
-            if (showEnvironmentCollisionMeshes.get())
-               environmentCollisionModel.getRenderables(renderables, pool);
-
-            for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
-               robotPartInteractable.getVirtualRenderables(renderables, pool);
+            footstepsSentToControllerGraphic.getRenderables(renderables, pool);
+            ballAndArrowMidFeetPosePlacement.getRenderables(renderables, pool);
+            manualFootstepPlacement.getRenderables(renderables, pool);
+            interactableFootstepPlan.getRenderables(renderables, pool);
          }
 
-         walkPathControlRing.getVirtualRenderables(renderables, pool);
+         if (interactablesEnabled.get())
+         {
+            if (interactablesAvailable)
+            {
+               if (showSelfCollisionMeshes.get())
+                  selfCollisionModel.getRenderables(renderables, pool);
+               if (showEnvironmentCollisionMeshes.get())
+                  environmentCollisionModel.getRenderables(renderables, pool);
+
+               for (RDXInteractableRobotLink robotPartInteractable : allInteractableRobotLinks)
+                  robotPartInteractable.getVirtualRenderables(renderables, pool);
+            }
+
+            walkPathControlRing.getVirtualRenderables(renderables, pool);
+         }
       }
    }
 

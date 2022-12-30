@@ -48,7 +48,7 @@ public class BulletKinematicRobotLink
 
    public void addCollidableShape(GeometryDefinition geometryDefinition)
    {
-      terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
+//      terrainObjectDefinition.addVisualDefinition(new VisualDefinition(originPose, geometryDefinition, materialDefinition));
       terrainObjectDefinition.addCollisionShapeDefinition(new CollisionShapeDefinition(originPose, geometryDefinition));
    }
 
