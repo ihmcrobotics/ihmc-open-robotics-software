@@ -39,14 +39,8 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.tools.thread.Activator;
-import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 public class RDXRapidRegionsExtractionDemo
 {
@@ -74,6 +68,8 @@ public class RDXRapidRegionsExtractionDemo
    private int totalNumberOfPoints;
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
+   private OpenCLFloatBuffer cloudBuffer;
+
    public RDXRapidRegionsExtractionDemo()
    {
       depthHeight = 128;
@@ -90,7 +86,6 @@ public class RDXRapidRegionsExtractionDemo
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
-
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
             openCLManager = new OpenCLManager();
@@ -99,14 +94,15 @@ public class RDXRapidRegionsExtractionDemo
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
 
+            pointCloudRenderer.create(depthHeight * depthWidth);
+
             rapidPlanarRegionsExtractor.create(openCLManager, bytedecoDepthImage, depthWidth, depthHeight);
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
 
-            submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
-
+            //submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
          }
 
          @Override
@@ -121,19 +117,16 @@ public class RDXRapidRegionsExtractionDemo
                   baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getPerspectiveManager().reloadPerspective();
-
                }
 
                //frameIndex = (frameIndex + 1) % 8;
                frameIndex++;
-               if(frameIndex % 50 == 0)
+               if (frameIndex % 50 == 0)
                {
                   updateRapidRegionsExtractor(0);
                }
 
                rapidRegionsUIPanel.render();
-
-
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -215,14 +208,13 @@ public class RDXRapidRegionsExtractionDemo
                                                                  regionsWithPose);
 
       PlanarRegionsList planarRegions = regionsWithPose.getPlanarRegionsList();
-      LogTools.info("Total Planar Regions in List: {}", planarRegions.getNumberOfPlanarRegions());
 
-      //pointCloudRenderer.create(200000);
-      //pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints());
-      //if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
-      //{
-      //   pointCloudRenderer.updateMesh();
-      //}
+
+      pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints(), Color.GRAY);
+      if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
+      {
+         pointCloudRenderer.updateMesh();
+      }
 
       // Submit the planar regions to the planar region renderer
       planarRegionsGraphic.generateMeshes(planarRegions);

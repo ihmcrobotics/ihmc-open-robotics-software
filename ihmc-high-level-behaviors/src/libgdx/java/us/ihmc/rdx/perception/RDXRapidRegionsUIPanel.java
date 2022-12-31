@@ -5,40 +5,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.gpuPlanarRegions.*;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapParameters;
-import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
-import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
-import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
-import us.ihmc.robotics.perception.ProjectionTools;
-import us.ihmc.tools.thread.ZeroCopySwapReference;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.nio.ByteBuffer;
 
 public class RDXRapidRegionsUIPanel
 {
@@ -63,7 +36,7 @@ public class RDXRapidRegionsUIPanel
    private ImGuiPlot svdDurationPlot;
    private ImGuiPlot gpuDurationPlot;
    private ImGuiPlot depthFirstSearchDurationPlot;
-   private ImGuiPlot planarRegionsSegmentationDurationPlot;
+   private ImGuiPlot planarRegionCustomizationDurationPlot;
 
    private ImGuiPanel imguiPanel;
    private RDXImagePanel blurredDepthPanel;
@@ -127,7 +100,7 @@ public class RDXRapidRegionsUIPanel
       wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
       gpuDurationPlot = new ImGuiPlot(labels.get("GPU processing duration"), 1000, 300, 50);
       depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
-      planarRegionsSegmentationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
+      planarRegionCustomizationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    }
@@ -160,7 +133,7 @@ public class RDXRapidRegionsUIPanel
       wholeAlgorithmDurationPlot.render(rapidPlanarRegionsExtractor.getWholeAlgorithmDurationStopwatch().totalElapsed());
       gpuDurationPlot.render(rapidPlanarRegionsExtractor.getGpuDurationStopwatch().totalElapsed());
       depthFirstSearchDurationPlot.render(rapidPlanarRegionsExtractor.getDepthFirstSearchDurationStopwatch().totalElapsed());
-      planarRegionsSegmentationDurationPlot.render(rapidPlanarRegionsExtractor.getPlanarRegionsSegmentationDurationStopwatch().totalElapsed());
+      planarRegionCustomizationDurationPlot.render(rapidPlanarRegionsCustomizer.getStopWatch().totalElapsed());
 
       numberOfPlanarRegionsPlot.render((float) rapidPlanarRegionsExtractor.getGPUPlanarRegions().size());
       regionMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getRegionMaxSearchDepth());

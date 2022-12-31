@@ -435,7 +435,7 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
 
      int m = 1;
 
-     if(rIndex==0 && cIndex==0) printf("MergeKernel:(%d,%d)\n", (int)params[SUB_H], (int)params[SUB_W]);
+     // if(rIndex==0 && cIndex==0) printf("MergeKernel:(%d,%d)\n", (int)params[SUB_H], (int)params[SUB_W]);
 
     //printf("MergeKernel: subHeight: %d, subWidth: %d, rIndex: %d, cIndex: %d \n", (int) params[SUB_H], (int) params[SUB_W], rIndex, cIndex);
 
@@ -512,10 +512,7 @@ void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* 
     int cIndex = get_global_id(0);
     int rIndex = get_global_id(1);
 
-    if(cIndex == 0 && rIndex == 0)
-    {
-        printf("Spherical Projection Kernel: %d, %d\n", (int)params[INPUT_HEIGHT], (int)params[INPUT_WIDTH]);
-    }
+    //if(cIndex == 0 && rIndex == 0) printf("Spherical Projection Kernel: %d, %d\n", (int)params[INPUT_HEIGHT], (int)params[INPUT_WIDTH]);
 
     //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
     {

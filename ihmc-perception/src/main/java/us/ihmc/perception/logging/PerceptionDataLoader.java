@@ -92,7 +92,6 @@ public class PerceptionDataLoader
 
       mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
 
-      LogTools.info("Completed Loading Image: {} {} {}", index, compressedByteArray.length);
    }
 
    public void loadCompressedDepth(String namespace, int index, Mat mat)
@@ -106,7 +105,6 @@ public class PerceptionDataLoader
 
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
 
-      LogTools.info("Completed Loading Image: {} {}", index, compressedByteArray.length);
    }
 
    public String getFilePath()
