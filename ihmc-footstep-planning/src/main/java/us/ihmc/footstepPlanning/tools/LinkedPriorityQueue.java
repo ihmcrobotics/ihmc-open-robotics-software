@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.tools;
 
+import us.ihmc.log.LogTools;
+
 import java.util.*;
 
 public class LinkedPriorityQueue<E>
@@ -84,6 +86,11 @@ public class LinkedPriorityQueue<E>
       return size;
    }
 
+   public boolean isEmpty()
+   {
+      return size < 1;
+   }
+
    /**
     * Inserts item x at position k, maintaining heap invariant by
     * promoting x up the tree until it is greater than or equal to
@@ -144,13 +151,21 @@ public class LinkedPriorityQueue<E>
       Node<E> nextToStore = null;
       if (node != null)
          nextToStore = node.next;
-      node.next = new Node<>(node, elementToInsert, nextToStore);
+      Node<E> nodeToInsert = new Node<>(node, elementToInsert, nextToStore);
+
+      if (node != null)
+         node.next = nodeToInsert;
+      if (nextToStore != null)
+         nextToStore.prev = nodeToInsert;
    }
 
    private static <E> void insertBefore(Node<E> node, E elementToInsert)
    {
       Node<E> prevToStore = node.prev;
-      node.prev = new Node<>(prevToStore, elementToInsert, node);
+      Node<E> nodeToInsert = new Node<>(prevToStore, elementToInsert, node);
+      if (prevToStore != null)
+         prevToStore.next = nodeToInsert;
+      node.prev = nodeToInsert;
    }
 
    private static class Node<E> {
