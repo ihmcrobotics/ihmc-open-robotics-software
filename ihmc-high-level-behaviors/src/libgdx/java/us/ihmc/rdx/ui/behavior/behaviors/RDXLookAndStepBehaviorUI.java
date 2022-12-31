@@ -254,7 +254,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanningDurationPlot.renderImGuiWidgets();
 //      ImGui.text("Footstep planning regions recieved:");
 //      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
-      stopForImpassibilities.accessImBoolean(stopForImpassibilities ->
+      stopForImpassibilities.renderImGuiWidget(stopForImpassibilities ->
       {
          if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
          {
