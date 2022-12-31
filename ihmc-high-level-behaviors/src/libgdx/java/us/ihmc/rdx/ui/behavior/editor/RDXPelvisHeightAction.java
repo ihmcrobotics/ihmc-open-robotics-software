@@ -15,17 +15,14 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 public class RDXPelvisHeightAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final ImDouble heightInWorld = new ImDouble();
    private final ImDouble trajectoryTime = new ImDouble(4.0);
 
-   public RDXPelvisHeightAction()
+   public RDXPelvisHeightAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       super("Pelvis Height");
-   }
 
-   public void create(ROS2ControllerHelper ros2ControllerHelper)
-   {
       this.ros2ControllerHelper = ros2ControllerHelper;
    }
 

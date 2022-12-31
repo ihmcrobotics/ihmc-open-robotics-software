@@ -33,20 +33,20 @@ public class RDXFootstepAction extends RDXBehaviorAction
    private RDXInteractableHighlightModel highlightModel;
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();
    private RobotSide side;
-   private DRCRobotModel robotModel;
-   private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
-   private ROS2SyncedRobotModel syncedRobot;
-   private ROS2ControllerHelper ros2ControllerHelper;
+   private final DRCRobotModel robotModel;
+   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform ankleToSoleFrameTransform = new RigidBodyTransform();
-   private boolean wasInitializedToPreviousStep;
+   private final boolean wasInitializedToPreviousStep;
 
-   public void create(RDX3DPanel panel3D,
-                      DRCRobotModel robotModel,
-                      ROS2SyncedRobotModel syncedRobot,
-                      ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary,
-                      RDXFootstepAction possiblyNullPreviousFootstepAction)
+   public RDXFootstepAction(RDX3DPanel panel3D,
+                            DRCRobotModel robotModel,
+                            ROS2SyncedRobotModel syncedRobot,
+                            ROS2ControllerHelper ros2ControllerHelper,
+                            List<ReferenceFrame> referenceFrameLibrary,
+                            RDXFootstepAction possiblyNullPreviousFootstepAction)
    {
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;

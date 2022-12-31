@@ -18,11 +18,11 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide side;
-   private ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final ImDouble trajectoryTime = new ImDouble(1000.0);
    private final ImDouble force = new ImDouble(20.0);
 
-   public void create(ROS2ControllerHelper ros2ControllerHelper)
+   public RDXHandWrenchAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
    }

@@ -17,20 +17,17 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 public class RDXChestOrientationAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ROS2ControllerHelper ros2ControllerHelper;
-   private ROS2SyncedRobotModel syncedRobot;
+   private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ImDouble yaw = new ImDouble();
    private final ImDouble pitch = new ImDouble();
    private final ImDouble roll = new ImDouble();
    private final ImDouble trajectoryTime = new ImDouble(4.0);
 
-   public RDXChestOrientationAction()
+   public RDXChestOrientationAction(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
       super("Chest Orientation");
-   }
 
-   public void create(ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
-   {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
    }

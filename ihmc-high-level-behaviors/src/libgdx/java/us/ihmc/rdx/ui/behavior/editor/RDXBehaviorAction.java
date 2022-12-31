@@ -72,6 +72,11 @@ public class RDXBehaviorAction
 
    }
 
+   public boolean isExecuting()
+   {
+      return false;
+   }
+
    public void destroy()
    {
 

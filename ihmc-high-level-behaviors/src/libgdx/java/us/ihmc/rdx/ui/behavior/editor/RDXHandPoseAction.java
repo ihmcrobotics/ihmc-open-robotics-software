@@ -40,21 +40,21 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handControlTransformToHandFrames = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handGraphicTransformToHandFrames = new SideDependentList<>();
-   private ModifiableReferenceFrame handFrame;
-   private ModifiableReferenceFrame graphicFrame;
-   private RobotSide side;
-   private DRCRobotModel robotModel;
-   private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
-   private ROS2SyncedRobotModel syncedRobot;
-   private ROS2ControllerHelper ros2ControllerHelper;
+   private final ModifiableReferenceFrame handFrame;
+   private final ModifiableReferenceFrame graphicFrame;
+   private final DRCRobotModel robotModel;
+   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final ImDouble trajectoryTime = new ImDouble(4.0);
+   private RobotSide side;
 
-   public void create(RDX3DPanel panel3D,
-                      DRCRobotModel robotModel,
-                      ROS2SyncedRobotModel syncedRobot,
-                      FullHumanoidRobotModel fullRobotModel,
-                      ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary)
+   public RDXHandPoseAction(RDX3DPanel panel3D,
+                            DRCRobotModel robotModel,
+                            ROS2SyncedRobotModel syncedRobot,
+                            FullHumanoidRobotModel fullRobotModel,
+                            ROS2ControllerHelper ros2ControllerHelper,
+                            List<ReferenceFrame> referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.robotModel = robotModel;
