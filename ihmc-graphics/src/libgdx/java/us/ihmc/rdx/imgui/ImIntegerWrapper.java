@@ -1,6 +1,8 @@
 package us.ihmc.rdx.imgui;
 
+import imgui.ImGui;
 import imgui.type.ImInt;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
@@ -12,6 +14,8 @@ import java.util.function.*;
  */
 public class ImIntegerWrapper
 {
+   private static final String[] PASCAL_CASED_SIDE_NAMES = new String[] {"Left", "Right"};
+
    private final ImInt imInt = new ImInt();
    private final IntSupplier wrappedValueGetter;
    private final IntConsumer wrappedValueSetter;
@@ -24,6 +28,16 @@ public class ImIntegerWrapper
    public ImIntegerWrapper(StoredPropertySetBasics storedPropertySet, IntegerStoredPropertyKey key, Consumer<ImInt> widgetRenderer)
    {
       this(() -> storedPropertySet.get(key), integerValue -> storedPropertySet.set(key, integerValue), widgetRenderer);
+   }
+
+   /**
+    * Convenience method for wrapping a RobotSide.
+    */
+   public ImIntegerWrapper(Supplier<RobotSide> robotSideGetter, Consumer<RobotSide> robotSideSetter, String label)
+   {
+      this(() -> robotSideGetter.get().ordinal(),
+           ordinal -> robotSideSetter.accept(RobotSide.values[ordinal]),
+           imInt -> ImGui.combo(label, imInt, PASCAL_CASED_SIDE_NAMES));
    }
 
    /**
