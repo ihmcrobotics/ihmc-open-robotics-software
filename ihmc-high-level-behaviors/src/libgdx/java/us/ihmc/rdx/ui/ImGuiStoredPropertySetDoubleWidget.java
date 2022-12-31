@@ -22,7 +22,6 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
    private String unitString;
    private final Runnable onParametersUpdatedCallback;
    private final ImDoubleWrapper imDoubleWrapper;
-   private final Consumer<ImDouble> accessImDouble;
    private double step;
    private double stepFast;
    private DoubleStoredPropertyKey key;
@@ -41,9 +40,8 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       this.min = min;
       this.max = max;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.get(key.getTitleCasedName());
-      accessImDouble = this::renderSliderWithMinMax;
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, this::renderSliderWithMinMax);
    }
 
    public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
@@ -56,15 +54,15 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       this.key = key;
       this.format = format;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.getHidden(key.getTitleCasedName());
       fancyPrefixLabel = key.getTitleCasedName() + ":";
 
+      Consumer<ImDouble> widgetRenderer;
       if (key.hasLowerBound() && key.hasUpperBound())
       {
          this.min = key.getLowerBound();
          this.max = key.getUpperBound();
-         accessImDouble = this::renderSliderWithMinMaxAndFormatFancy;
+         widgetRenderer = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
@@ -72,8 +70,10 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
          this.stepFast = stepFast;
          min = Double.NaN;
          max = Double.NaN;
-         accessImDouble = this::renderInputWithStepAndStepFastFancy;
+         widgetRenderer = this::renderInputWithStepAndStepFastFancy;
       }
+
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, widgetRenderer);
    }
 
    public ImGuiStoredPropertySetDoubleWidget(StoredPropertySetBasics storedPropertySet,
@@ -88,15 +88,15 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
       this.format = format;
       this.unitString = unitString;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
-      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key);
       label = labels.get(unitString, key.getTitleCasedName());
       fancyPrefixLabel = key.getTitleCasedName() + ":";
 
+      Consumer<ImDouble> widgetRenderer;
       if (key.hasLowerBound() && key.hasUpperBound())
       {
          this.min = key.getLowerBound();
          this.max = key.getUpperBound();
-         accessImDouble = this::renderSliderWithMinMaxAndFormatFancy;
+         widgetRenderer = this::renderSliderWithMinMaxAndFormatFancy;
       }
       else
       {
@@ -104,14 +104,16 @@ public class ImGuiStoredPropertySetDoubleWidget implements ImGuiStoredPropertySe
          this.stepFast = stepFast;
          min = Double.NaN;
          max = Double.NaN;
-         accessImDouble = this::renderInputWithStepAndStepFastFancy;
+         widgetRenderer = this::renderInputWithStepAndStepFastFancy;
       }
+
+      imDoubleWrapper = new ImDoubleWrapper(storedPropertySet, key, widgetRenderer);
    }
 
    @Override
    public void render()
    {
-      imDoubleWrapper.accessImDouble(accessImDouble);
+      imDoubleWrapper.renderImGuiWidget();
    }
 
    @Override
