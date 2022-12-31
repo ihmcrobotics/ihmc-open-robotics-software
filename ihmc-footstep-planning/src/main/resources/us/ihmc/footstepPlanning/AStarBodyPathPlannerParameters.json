@@ -1,0 +1,10 @@
+{
+  "title" : "AStarBodyPathPlannerParameters",
+  "Roll cost weight" : 1.5,
+  "Incline cost weight" : 0.0,
+  "Incline cost deadband" : 0.05,
+  "Max incline" : 0.96,
+  "Check for collisions" : true,
+  "Compute surface normal cost" : true,
+  "Perform smoothing" : false
+}
