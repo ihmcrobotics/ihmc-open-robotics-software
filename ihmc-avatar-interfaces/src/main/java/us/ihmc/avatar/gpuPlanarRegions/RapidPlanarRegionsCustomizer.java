@@ -1,6 +1,7 @@
 package us.ihmc.avatar.gpuPlanarRegions;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -19,6 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,6 +30,7 @@ public class RapidPlanarRegionsCustomizer
 {
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters;
    private final PolygonizerParameters polygonizerParameters;
+   private final Stopwatch stopWatch = new Stopwatch();
 
    public RapidPlanarRegionsCustomizer()
    {
@@ -114,6 +117,7 @@ public class RapidPlanarRegionsCustomizer
 
    public void createCustomPlanarRegionsList(List<GPUPlanarRegion> gpuPlanarRegions, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsToPack)
    {
+      stopWatch.start();
       RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
       AtomicBoolean listCaughtException = new AtomicBoolean(false);
 
@@ -132,6 +136,7 @@ public class RapidPlanarRegionsCustomizer
       }
       sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
       regionsToPack.setSensorToWorldFrameTransform(sensorToWorldFrameTransform);
+      stopWatch.suspend();
    }
 
    public void createPlanarRegion(int regionId, FramePoint3D origin, FrameQuaternion orientation, ConcaveHullCollection concaveHullCollection,
@@ -171,5 +176,10 @@ public class RapidPlanarRegionsCustomizer
    public PolygonizerParameters getPolygonizerParameters()
    {
       return polygonizerParameters;
+   }
+
+   public Stopwatch getStopWatch()
+   {
+      return stopWatch;
    }
 }

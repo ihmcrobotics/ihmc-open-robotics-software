@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 
@@ -62,8 +61,9 @@ public class RapidRegionsDebutOutputGenerator
       }
    }
 
-   public void constructCentroidPointCloud(FloatBuffer buffer, int numberOfPoints)
+   public void constructPointCloud(FloatBuffer buffer, int numberOfPoints)
    {
+      debugPoints.clear();
       for (int i = 0; i < numberOfPoints; i++)
       {
          float cx = buffer.get(i * 3);
@@ -82,7 +82,7 @@ public class RapidRegionsDebutOutputGenerator
       }
    }
 
-   public void constructCentroidPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage)
+   public void constructPointCloud(BytedecoImage cxImage, BytedecoImage cyImage, BytedecoImage czImage)
    {
       FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();

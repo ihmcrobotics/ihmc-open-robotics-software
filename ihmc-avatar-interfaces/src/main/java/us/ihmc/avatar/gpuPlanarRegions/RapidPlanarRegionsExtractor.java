@@ -39,7 +39,6 @@ public class RapidPlanarRegionsExtractor
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
    private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
-   private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
 
    private SensorModel sensorModel;
 
@@ -185,17 +184,23 @@ public class RapidPlanarRegionsExtractor
 
    public void update()
    {
-      LogTools.info("++++++++++++++ [START] Calling Update ++++++++++++++++");
-      extractPatchGraphUsingOpenCL();
+      wholeAlgorithmDurationStopwatch.start();
 
-      //debugger.constructCentroidPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
+      gpuDurationStopwatch.start();
+      extractPatchGraphUsingOpenCL();
+      gpuDurationStopwatch.suspend();
+
+      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
       //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
       //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
+      depthFirstSearchDurationStopwatch.start();
       findRegions();
       findBoundariesAndHoles();
       growRegionBoundaries();
-      LogTools.info(" --------------------- [DONE] Calling Update -------------------------- ");
+      depthFirstSearchDurationStopwatch.suspend();
+
+      wholeAlgorithmDurationStopwatch.suspend();
 
       //debugger.printPatchGraph(patchGraph);
       //debugger.showDebugImage();
@@ -206,7 +211,6 @@ public class RapidPlanarRegionsExtractor
     */
    public void extractPatchGraphUsingOpenCL()
    {
-      LogTools.info("++++++++++++++ [START] Generating Patch Graph ++++++++++++++++");
       calculateDerivativeParameters();
 
       // Flip so the Y+ goes up instead of down.
@@ -291,14 +295,6 @@ public class RapidPlanarRegionsExtractor
       openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(mergeKernel, patchImageWidth, patchImageHeight);
 
-      //openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nxImage.getBytedecoByteBufferPointer());
-      //openCLManager.enqueueReadImage(nyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nyImage.getBytedecoByteBufferPointer());
-      //openCLManager.enqueueReadImage(nzImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nzImage.getBytedecoByteBufferPointer());
-      //openCLManager.enqueueReadImage(cxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cxImage.getBytedecoByteBufferPointer());
-      //openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
-      //openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
-      //openCLManager.enqueueReadImage(patchGraph.getOpenCLImageObject(), patchImageWidth, patchImageHeight, patchGraph.getBytedecoByteBufferPointer());
-
       nxImage.readOpenCLImage(openCLManager);
       nyImage.readOpenCLImage(openCLManager);
       nzImage.readOpenCLImage(openCLManager);
@@ -308,17 +304,13 @@ public class RapidPlanarRegionsExtractor
       patchGraph.readOpenCLImage(openCLManager);
 
       // TODO: Remove
-      //openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
-      //openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
-      //openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
-      //openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
-      //cloudBuffer.readOpenCLBufferObject(openCLManager);
+      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
+      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
+      cloudBuffer.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
-
-      LogTools.info("Image: {} {}", imageHeight, imageWidth);
-
-      LogTools.info(" --------------------- [DONE] Generating Patch Graph -------------------------- ");
    }
 
    /**
@@ -326,7 +318,6 @@ public class RapidPlanarRegionsExtractor
     */
    public void findRegions()
    {
-      LogTools.info("++++++++++++++ [START] Finding Regions ++++++++++++++++");
       int planarRegionIslandIndex = 0;
       regionMaxSearchDepth = 0;
       gpuPlanarRegions.clear();
@@ -339,11 +330,7 @@ public class RapidPlanarRegionsExtractor
       {
          for (int column = 0; column < patchImageWidth; column++)
          {
-            //int boundaryConnectionsEncodedAsOnes = Byte.toUnsignedInt(patchGraph.getBytedecoOpenCVMat().ptr(row, column).get());
             int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect(row, column);
-
-            //LogTools.info("------------------------ Start Depth First Search ---------------------------");
-            //LogTools.info("------------------------ DFS({}, {}) -> {} ---------------------------", row, column, boundaryConnectionsEncodedAsOnes);
 
             if (!regionVisitedMatrix.get(row, column) && checkConnection(boundaryConnectionsEncodedAsOnes)) // all ones; fully connected
             {
@@ -369,11 +356,6 @@ public class RapidPlanarRegionsExtractor
                   planarRegion.update(parameters.getUseSVDNormals(), parameters.getSVDReductionFactor());
                   if (planarRegion.getSVDDuration() > maxSVDSolveTime)
                      maxSVDSolveTime = planarRegion.getSVDDuration();
-
-                  //tempIsland.planarRegion = planarRegion;
-                  //tempIsland.planarRegionIslandIndex = planarRegionIslandIndex;
-
-                  //debugger.drawRegionInternalPatches(tempIsland, patchHeight, patchWidth);
                }
                else
                {
@@ -385,12 +367,10 @@ public class RapidPlanarRegionsExtractor
          }
       }
       LogTools.info("Total GPUPlanarRegions Found: {}", gpuPlanarRegions.size());
-      LogTools.info(" --------------------- [DONE] Generating Patch Graph -------------------------- ");
    }
 
    public void findBoundariesAndHoles()
    {
-      LogTools.info("++++++++++++++ [START] Finding Boundaries and Holes ++++++++++++++++");
       boundaryVisitedMatrix.zero();
       boundaryMaxSearchDepth = 0;
       gpuPlanarRegions.parallelStream().forEach(planarRegion ->
@@ -448,12 +428,10 @@ public class RapidPlanarRegionsExtractor
 
                                                    planarRegion.getRegionRings().sort(boundaryLengthComparator);
                                                 });
-      LogTools.info(" --------------------- [DONE] Finding Boundaries and Holes -------------------------- ");
    }
 
    public void growRegionBoundaries()
    {
-      LogTools.info("++++++++++++++ [START] Growing Region Boundaries ++++++++++++++++");
       gpuPlanarRegions.forEach(planarRegion ->
                                {
                                   if (!planarRegion.getRegionRings().isEmpty())
@@ -462,10 +440,6 @@ public class RapidPlanarRegionsExtractor
                                      for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
                                      {
                                         // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-
-                                        //float vertexX = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
-                                        //float vertexY = -cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
-                                        //float vertexZ = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
 
                                         //float vertexX = czImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
                                         //float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
@@ -484,7 +458,6 @@ public class RapidPlanarRegionsExtractor
                                      }
                                   }
                                });
-      LogTools.info(" --------------------- [DONE] Growing Region Boundaries -------------------------- ");
    }
 
    private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
@@ -769,9 +742,5 @@ public class RapidPlanarRegionsExtractor
       return depthFirstSearchDurationStopwatch;
    }
 
-   public Stopwatch getPlanarRegionsSegmentationDurationStopwatch()
-   {
-      return planarRegionsSegmentationDurationStopwatch;
-   }
 }
 
