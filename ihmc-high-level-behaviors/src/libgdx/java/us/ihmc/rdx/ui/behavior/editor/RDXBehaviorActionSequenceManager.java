@@ -23,7 +23,7 @@ import java.util.TreeSet;
 
 public class RDXBehaviorActionSequenceManager
 {
-   private ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
+   private final ImGuiPanel managerPanel = new ImGuiPanel("Behavior Sequence Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private WorkspaceDirectory behaviorSequenceStorageDirectory;
    private RDX3DPanel panel3D;
@@ -52,30 +52,25 @@ public class RDXBehaviorActionSequenceManager
 
    public void update()
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
-         editor.update();
-      }
+      for (var editor : editors)
+         if (editor.getPanel().getIsShowing().get())
+            editor.update();
    }
 
    private void renderImGuiWidgets()
    {
       boolean reindexClicked = ImGui.button(labels.get("Reindex sequence files"));
       if (reindexClicked)
-      {
          reindexSequences();
-      }
 
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          ImGui.checkbox(labels.get(editor.getName()), editor.getPanel().getIsShowing());
-      }
 
       ImGuiTools.inputText(labels.getHidden("newSequenceName"), newSequenceName);
       ImGui.sameLine();
       if (ImGui.button("Create new sequence"))
       {
-         RDXBehaviorActionSequenceEditor editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
+         var editor = new RDXBehaviorActionSequenceEditor(newSequenceName.get(), behaviorSequenceStorageDirectory);
          editor.saveToFile();
          addEditor(editor);
       }
@@ -86,12 +81,12 @@ public class RDXBehaviorActionSequenceManager
       for (WorkspaceFile queryContainedFile : behaviorSequenceStorageDirectory.queryContainedFiles())
       {
          boolean alreadyLoaded = false;
-         for (RDXBehaviorActionSequenceEditor editor : editors)
+         for (var editor : editors)
             alreadyLoaded |= editor.getWorkspaceFile().getFileName().equals(queryContainedFile.getFileName());
 
          if (!alreadyLoaded)
          {
-            RDXBehaviorActionSequenceEditor editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
+            var editor = new RDXBehaviorActionSequenceEditor(queryContainedFile);
             addEditor(editor);
             editor.loadActionsFromFile();
          }
@@ -107,26 +102,20 @@ public class RDXBehaviorActionSequenceManager
 
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          editor.calculate3DViewPick(input);
-      }
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          editor.process3DViewInput(input);
-      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXBehaviorActionSequenceEditor editor : editors)
-      {
+      for (var editor : editors)
          editor.getRenderables(renderables, pool);
-      }
    }
 
    public ImGuiPanel getManagerPanel()

@@ -43,15 +43,15 @@ import java.util.UUID;
 
 public class RDXWalkAction extends RDXBehaviorAction
 {
-   private RDXFootstepPlanGraphic footstepPlanGraphic;
-   private ROS2SyncedRobotModel syncedRobot;
-   private ROS2ControllerHelper ros2ControllerHelper;
-   private ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
+   private final RDXFootstepPlanGraphic footstepPlanGraphic;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ROS2ControllerHelper ros2ControllerHelper;
+   private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
-   private FootstepPlanningModule footstepPlanner;
+   private final FootstepPlanningModule footstepPlanner;
    private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
-   private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private FootstepDataListMessage footstepDataListMessage;
    private final SideDependentList<ImBoolean> editGoalFootPoses = new SideDependentList<>();
@@ -59,12 +59,12 @@ public class RDXWalkAction extends RDXBehaviorAction
    private final ImDouble swingDuration = new ImDouble(1.2);
    private final ImDouble transferDuration = new ImDouble(0.8);
 
-   public void create(RDX3DPanel panel3D,
-                      DRCRobotModel robotModel,
-                      FootstepPlanningModule footstepPlanner,
-                      ROS2SyncedRobotModel syncedRobot,
-                      ROS2ControllerHelper ros2ControllerHelper,
-                      List<ReferenceFrame> referenceFrameLibrary)
+   public RDXWalkAction(RDX3DPanel panel3D,
+                        DRCRobotModel robotModel,
+                        FootstepPlanningModule footstepPlanner,
+                        ROS2SyncedRobotModel syncedRobot,
+                        ROS2ControllerHelper ros2ControllerHelper,
+                        List<ReferenceFrame> referenceFrameLibrary)
    {
       this.footstepPlanner = footstepPlanner;
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -282,7 +282,7 @@ public class RDXWalkAction extends RDXBehaviorAction
 
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
       footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(), "FootstepPlanLogDeletion");
+      ThreadTools.startAThread(FootstepPlannerLogger::deleteOldLogs, "FootstepPlanLogDeletion");
 
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {

@@ -16,25 +16,22 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class RDXHandConfigurationAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private ImGuiRobotSideCombo side = new ImGuiRobotSideCombo();
-   private ROS2ControllerHelper ros2ControllerHelper;
+   private final ImGuiRobotSideCombo side = new ImGuiRobotSideCombo();
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final ImInt handConfigurationIndex = new ImInt(6);
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
 
-   public RDXHandConfigurationAction()
+   public RDXHandConfigurationAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       super("Hand Configuration");
+
+      this.ros2ControllerHelper = ros2ControllerHelper;
 
       HandConfiguration[] values = HandConfiguration.values;
       for (int i = 0; i < values.length; i++)
       {
          handConfigurationNames[i] = values[i].name();
       }
-   }
-
-   public void create(ROS2ControllerHelper ros2ControllerHelper)
-   {
-      this.ros2ControllerHelper = ros2ControllerHelper;
    }
 
    @Override

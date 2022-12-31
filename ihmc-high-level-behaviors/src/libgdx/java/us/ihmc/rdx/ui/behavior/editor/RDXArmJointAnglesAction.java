@@ -15,24 +15,21 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiRobotSideCombo side = new ImGuiRobotSideCombo();
-   private ROS2ControllerHelper ros2ControllerHelper;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final int numberOfJoints = 7;
    private final ImDouble[] jointAngles = new ImDouble[numberOfJoints];
    private final ImDouble trajectoryTime = new ImDouble(4.0);
 
-   public RDXArmJointAnglesAction()
+   public RDXArmJointAnglesAction(ROS2ControllerHelper ros2ControllerHelper)
    {
       super("Arm Joint Angles");
+
+      this.ros2ControllerHelper = ros2ControllerHelper;
 
       for (int i = 0; i < numberOfJoints; i++)
       {
          jointAngles[i] = new ImDouble();
       }
-   }
-
-   public void create(ROS2ControllerHelper ros2ControllerHelper)
-   {
-      this.ros2ControllerHelper = ros2ControllerHelper;
    }
 
    @Override
