@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
+import java.util.Iterator;
+import java.util.function.Consumer;
+
 public class JSONTools
 {
    public static void toJSON(ObjectNode jsonNode, RigidBodyTransform rigidBodyTransform)
@@ -36,5 +39,17 @@ public class JSONTools
                                                          jsonNode.get("m20").asDouble(),
                                                          jsonNode.get("m21").asDouble(),
                                                          jsonNode.get("m22").asDouble());
+   }
+
+   /**
+    * Jackson requires us to create and manipulate an Iterator, so let's provide a tool
+    * to at least show how to do that.
+    */
+   public static void forEachArrayElement(JsonNode parentNode, String arrayName, Consumer<JsonNode> nodeConsumer)
+   {
+      for (Iterator<JsonNode> actionNodeIterator = parentNode.withArray(arrayName).elements(); actionNodeIterator.hasNext(); )
+      {
+         nodeConsumer.accept(actionNodeIterator.next());
+      }
    }
 }

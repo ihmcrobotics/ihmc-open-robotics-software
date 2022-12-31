@@ -16,6 +16,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.io.InputStream;
@@ -100,23 +101,20 @@ public class SCS2YoImPlotManager
          plotPanels.clear();
          JSONFileTools.load(inputStream, node ->
          {
-            for (Iterator<JsonNode> panelNodeIterator = node.withArray("panels").elements(); panelNodeIterator.hasNext(); )
+            JSONTools.forEachArrayElement(node, "panels", panelNode ->
             {
-               JsonNode panelNode = panelNodeIterator.next();
                String panelName = panelNode.get("name").asText();
                ImPlotModifiableYoPlotPanel plotPanel = addPlotPanel(panelName);
-               for (Iterator<JsonNode> plotsNodeInterator = panelNode.withArray("plots").elements(); plotsNodeInterator.hasNext(); )
+               JSONTools.forEachArrayElement(panelNode, "plots", plotNode ->
                {
-                  JsonNode plotNode = plotsNodeInterator.next();
                   ImPlotModifiableYoPlot imPlotModifiableYoPlot = plotPanel.addPlot();
-                  for (Iterator<JsonNode> variablesNodeInterator = plotNode.withArray("variables").elements(); variablesNodeInterator.hasNext(); )
+                  JSONTools.forEachArrayElement(plotNode, "variables", variableNode ->
                   {
-                     JsonNode variableNode = variablesNodeInterator.next();
                      // We are using getRootRegistry which is the session's working copy; i.e. not linked
                      imPlotModifiableYoPlot.addVariable(yoManager.getRootRegistry().findVariable(variableNode.get("variableName").asText()), false);
-                  }
-               }
-            }
+                  });
+               });
+            });
          });
       }
       else
