@@ -13,13 +13,11 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.BodyPathPlanningResult;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
+import us.ihmc.footstepPlanning.tools.LinkedPriorityQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -43,16 +41,12 @@ import java.util.function.Consumer;
 public class AStarBodyPathPlanner
 {
    private static final boolean debug = false;
-   private static final boolean checkForCollisions = true;
-   private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useRANSACTraversibility = true;
-   private static final double rollCostWeight = 3.5;
-   private static final double inclineCostWeight = 0.0;
-   private static final double inclineCostDeadband = Math.toRadians(3.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final FootstepPlannerParametersReadOnly parameters;
+   private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private final AStarBodyPathEdgeData edgeData;
    private HeightMapData heightMapData;
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
@@ -116,19 +110,29 @@ public class AStarBodyPathPlanner
    static final double boxSizeY = 1.2;
    static final double boxSizeX = 0.35;
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons)
+   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+                               AStarBodyPathPlannerParametersReadOnly plannerParameters,
+                               SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this(parameters, footPolygons, new Stopwatch());
+      this(parameters, plannerParameters, footPolygons, new Stopwatch());
    }
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons, Stopwatch stopwatch)
+   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+                               AStarBodyPathPlannerParametersReadOnly plannerParameters,
+                               SideDependentList<ConvexPolygon2D> footPolygons,
+                               Stopwatch stopwatch)
    {
-      this(parameters, footPolygons, new ArrayList<>(), stopwatch);
+      this(parameters, plannerParameters, footPolygons, new ArrayList<>(), stopwatch);
    }
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons, List<Consumer<FootstepPlannerOutput>> statusCallbacks, Stopwatch stopwatch)
+   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+                               AStarBodyPathPlannerParametersReadOnly plannerParameters,
+                               SideDependentList<ConvexPolygon2D> footPolygons,
+                               List<Consumer<FootstepPlannerOutput>> statusCallbacks,
+                               Stopwatch stopwatch)
    {
       this.parameters = parameters;
+      this.plannerParameters = plannerParameters;
       this.statusCallbacks = statusCallbacks;
       this.stopwatch = stopwatch;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
@@ -260,7 +264,7 @@ public class AStarBodyPathPlanner
       leastCostNode = startNode;
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
 
-      if (computeSurfaceNormalCost)
+      if (plannerParameters.getComputeSurfaceNormalCost())
       {
          double patchWidth = 0.3;
          surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
@@ -330,14 +334,14 @@ public class AStarBodyPathPlanner
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
-            if (Math.abs(incline.getValue()) > maxIncline)
+            if (Math.abs(incline.getValue()) > plannerParameters.getMaxIncline())
             {
                rejectionReason.set(RejectionReason.TOO_STEEP);
                graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
                continue;
             }
 
-            if (checkForCollisions)
+            if (plannerParameters.getCheckForCollisions())
             {
                this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, neighborIndex, snapHeight.getDoubleValue(), groundClearance));
                if (containsCollision.getValue())
@@ -379,7 +383,7 @@ public class AStarBodyPathPlanner
                }
             }
 
-            if (computeSurfaceNormalCost)
+            if (plannerParameters.getComputeSurfaceNormalCost())
             {
                double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
                Pose2D bodyPose = new Pose2D();
@@ -398,7 +402,7 @@ public class AStarBodyPathPlanner
             else
             {
                double inclineDelta = Math.abs(incline.getValue() - nominalIncline.getValue());
-               inclineCost.set(inclineCostWeight * Math.max(0.0, inclineDelta - inclineCostDeadband));
+               inclineCost.set(plannerParameters.getInclineCostWeight() * Math.max(0.0, inclineDelta - plannerParameters.getInclineCostDeadband()));
                this.edgeCost.add(inclineCost);
             }
 
@@ -469,7 +473,7 @@ public class AStarBodyPathPlanner
          double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
          double rollDeadband = Math.toRadians(1.5);
          double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - rollDeadband);
-         rollCost.set(rollCostWeight * inclineScale * rollAngleDeadbanded);
+         rollCost.set(plannerParameters.getRollCostWeight() * inclineScale * rollAngleDeadbanded);
          edgeCost.add(rollCost);
       }
    }
@@ -481,7 +485,7 @@ public class AStarBodyPathPlanner
          LogTools.info("Reporting status");
       }
 
-      boolean performSmoothing = result == BodyPathPlanningResult.FOUND_SOLUTION;
+      boolean performSmoothing = plannerParameters.getPerformSmoothing() && result == BodyPathPlanningResult.FOUND_SOLUTION;
 
       outputToPack.setBodyPathPlanningResult(result);
       outputToPack.getBodyPath().clear();
@@ -568,6 +572,7 @@ public class AStarBodyPathPlanner
    {
       while (!stack.isEmpty())
       {
+//         BodyPathLatticePoint nextNode = stack.pollFirst();
          BodyPathLatticePoint nextNode = stack.poll();
          if (!expandedNodeSet.contains(nextNode))
          {

@@ -110,10 +110,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.visibilityGraphParameters = visibilityGraphParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
+      AStarBodyPathPlannerParameters plannerParameters = new AStarBodyPathPlannerParameters();
+
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
-      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, footPolygons, stopwatch);
+      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, plannerParameters, footPolygons, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
