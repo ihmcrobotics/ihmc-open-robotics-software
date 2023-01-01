@@ -205,7 +205,7 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* param
     float dist = length(vec);
     float sim = fabs(dot(an, bn));
     float perpDist = fabs(dot(ag-bg, bn)) + fabs(dot(bg-ag, an));
-    if (perpDist < params[MERGE_DISTANCE_THRESHOLD] * dist * 40 && sim > params[MERGE_ANGULAR_THRESHOLD])
+    if (perpDist < params[MERGE_DISTANCE_THRESHOLD] && (dist < 0.8f) && sim > params[MERGE_ANGULAR_THRESHOLD])
     {
         return true;
     }
@@ -427,7 +427,6 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
                           read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5, /* float3 maps for centroids */
                           write_only image2d_t out6, /* uint8 map for patch metadata*/
                           global float* params /* All parameters */
-                          // write_only image2d_t debug
 )
 {
      int cIndex = get_global_id(0);
@@ -435,22 +434,14 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
 
      int m = 1;
 
-     // if(rIndex==0 && cIndex==0) printf("MergeKernel:(%d,%d)\n", (int)params[SUB_H], (int)params[SUB_W]);
-
-    //printf("MergeKernel: subHeight: %d, subWidth: %d, rIndex: %d, cIndex: %d \n", (int) params[SUB_H], (int) params[SUB_W], rIndex, cIndex);
-
      if(rIndex >= m && rIndex < (int)params[SUB_H]-m && cIndex >= m && cIndex < (int)params[SUB_W]-m)
      {
-
         float n1_a = read_imagef(out0, (int2)(cIndex,rIndex)).x;
         float n2_a = read_imagef(out1, (int2)(cIndex,rIndex)).x;
         float n3_a = read_imagef(out2, (int2)(cIndex,rIndex)).x;
         float g1_a = read_imagef(out3, (int2)(cIndex,rIndex)).x;
         float g2_a = read_imagef(out4, (int2)(cIndex,rIndex)).x;
         float g3_a = read_imagef(out5, (int2)(cIndex,rIndex)).x;
-
-//        if (n1_a + n2_a + n3_a + g1_a + g2_a + g3_a > 0 || n1_a + n2_a + n3_a + g1_a + g2_a + g3_a < 0)
-//            printf("MergeKernel: n1_a: %f, n2_a: %f, n3_a: %f, g1_a: %f, g2_a: %f, g3_a: %f \n", n1_a, n2_a, n3_a, g1_a, g2_a, g3_a);
 
         float3 g_a = (float3)(g1_a,g2_a,g3_a);
         float3 n_a = (float3)(n1_a,n2_a,n3_a);
@@ -462,7 +453,6 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
         {
             for(int j = -m; j<m+1; j+=m)
             {
-                // printf("MergeKernel:(%d,%d)\n", i, j);
                 if (!(j==0 && i==0))
                 {
                      float n1_b = read_imagef(out0, (int2)(cIndex+j,rIndex+i)).x;
@@ -477,14 +467,12 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
 
                      if(isConnected(g_a, normalize(n_a), g_b, normalize(n_b), params))
                      {
-                         //printf("Connected: (%d,%d)\n",rIndex+i, cIndex+j);
                          boundaryConnectionsEncodedAsOnes = (1 << count) | boundaryConnectionsEncodedAsOnes;
                      }
                      count++;
                 }
             }
         }
-        //printf("Connected: (%d,%d,%d)\n",rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
         write_imageui(out6, (int2)(cIndex,rIndex), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
     }
 }

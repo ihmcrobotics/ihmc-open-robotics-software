@@ -62,13 +62,11 @@ public class RDXRapidRegionsExtractionDemo
    private _cl_kernel unpackPointCloudKernel;
    private PerceptionDataLoader perceptionDataLoader;
 
-   private int frameIndex = 0;
+   private int frameIndex = -1;
    private int depthWidth;
    private int depthHeight;
    private int totalNumberOfPoints;
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
-
-   private OpenCLFloatBuffer cloudBuffer;
 
    public RDXRapidRegionsExtractionDemo()
    {
@@ -123,7 +121,7 @@ public class RDXRapidRegionsExtractionDemo
                frameIndex++;
                if (frameIndex % 50 == 0)
                {
-                  updateRapidRegionsExtractor(0);
+                  updateRapidRegionsExtractor();
                }
 
                rapidRegionsUIPanel.render();
@@ -196,9 +194,14 @@ public class RDXRapidRegionsExtractionDemo
       pointCloudRenderer.updateMeshFastestAfterKernel();
    }
 
-   private void updateRapidRegionsExtractor(int frameIndex)
+   private void updateRapidRegionsExtractor()
    {
-      perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex, bytedecoDepthImage.getBytedecoOpenCVMat());
+      int uiFrameIndex = rapidRegionsUIPanel.getFrameIndex();
+      if(uiFrameIndex != frameIndex)
+      {
+         frameIndex = uiFrameIndex;
+         perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, uiFrameIndex, bytedecoDepthImage.getBytedecoOpenCVMat());
+      }
 
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();

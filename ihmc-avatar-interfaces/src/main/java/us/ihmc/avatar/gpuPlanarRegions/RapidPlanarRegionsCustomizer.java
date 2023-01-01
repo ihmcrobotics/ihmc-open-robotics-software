@@ -68,7 +68,7 @@ public class RapidPlanarRegionsCustomizer
                                                                                                             intersections,
                                                                                                             concaveHullFactoryParameters);
 
-         applyConcaveHullFilters(concaveHullCollection);
+         //applyConcaveHullFilters(concaveHullCollection);
          createPlanarRegion(rapidPlanarRegion.getId(), origin, orientation, concaveHullCollection, planarRegions);
 
       }
