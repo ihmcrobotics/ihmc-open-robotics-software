@@ -60,7 +60,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private ROS2NodeInterface ros2Node;
    private boolean manageROS2Node = false;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
-   private final AStarBodyPathPlannerParameters aStarBodyPathPlannerParameters;
+   private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final VisibilityGraphPathPlanner visibilityGraphPlanner;
@@ -102,7 +102,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
-                                 AStarBodyPathPlannerParameters aStarBodyPathPlannerParameters,
+                                 AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
@@ -482,7 +482,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return footstepPlannerParameters;
    }
 
-   public AStarBodyPathPlannerParameters getAStarBodyPathPlannerParameters()
+   public AStarBodyPathPlannerParametersBasics getAStarBodyPathPlannerParameters()
    {
       return aStarBodyPathPlannerParameters;
    }

@@ -32,10 +32,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -298,6 +295,7 @@ public class SwingOverPlanarRegionsTest
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
                                                                          new DefaultVisibilityGraphParameters(),
+                                                                         new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,
                                                                          walkingControllerParameters,
