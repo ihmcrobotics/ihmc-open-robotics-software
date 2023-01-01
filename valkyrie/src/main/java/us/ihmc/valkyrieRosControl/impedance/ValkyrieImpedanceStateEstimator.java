@@ -2,16 +2,17 @@ package us.ihmc.valkyrieRosControl.impedance;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ValkyrieImpedanceStateEstimator
@@ -24,11 +25,11 @@ public class ValkyrieImpedanceStateEstimator
    private ValkyrieRosControlSensorReader sensorReader;
    private List<? extends IMUSensorReadOnly> imuOutputs;
 
-   private final RigidBodyTransform rootToIMU0 = new RigidBodyTransform();
-
-   private final RotationMatrix imu0ToWorldRotation = new RotationMatrix();
-   private final RotationMatrix rootToIMU0Rotation = new RotationMatrix();
-   private final RotationMatrix rootToWorld = new RotationMatrix();
+   private final RotationMatrix rootToWorldFused = new RotationMatrix();
+   private final List<RotationMatrix> rootToWorlds = new ArrayList<>();
+   private final List<RigidBodyTransform> rootToIMUs = new ArrayList<>();
+   private final List<RotationMatrix> imuToWorldRotations = new ArrayList<>();
+   private final List<RotationMatrix> rootToIMURotations = new ArrayList<>();
 
    public ValkyrieImpedanceStateEstimator(FloatingJointBasics rootJoint, OneDoFJointBasics[] controlledOneDoFJoints)
    {
@@ -43,6 +44,19 @@ public class ValkyrieImpedanceStateEstimator
       processedSensorOutputMap = sensorReader.getProcessedSensorOutputMap();
       imuOutputs = processedSensorOutputMap.getIMUOutputs();
       sensorReader.initialize();
+
+      if (imuOutputs.size() != 2)
+      {
+         throw new RuntimeException("Expecting 2 IMU's, but there are " + imuOutputs.size());
+      }
+
+      for (int i = 0; i < imuOutputs.size(); i++)
+      {
+         rootToIMUs.add(new RigidBodyTransform());
+         imuToWorldRotations.add(new RotationMatrix());
+         rootToIMURotations.add(new RotationMatrix());
+         rootToWorlds.add(new RotationMatrix());
+      }
    }
 
    public void update()
@@ -60,15 +74,34 @@ public class ValkyrieImpedanceStateEstimator
       rootBody.updateFramesRecursively();
 
       /* Second pass computes root joint */
-      IMUSensorReadOnly imuOutput0 = imuOutputs.get(0);
-      rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(rootToIMU0, imuOutput0.getMeasurementFrame());
-      rootToIMU0Rotation.set(rootToIMU0.getRotation());
+      computeRootToIMU(0);
+      computeRootToIMU(1);
 
-      imu0ToWorldRotation.set(imuOutput0.getOrientationMeasurement());
+      rootToWorldFused.interpolate(rootToWorlds.get(0), rootToWorlds.get(1), 0.5);
 
-      rootToWorld.set(rootToIMU0Rotation);
-      rootToWorld.preMultiply(imu0ToWorldRotation);
-      rootJoint.getJointPose().getOrientation().set(rootToWorld);
+      double pitch = rootToWorldFused.getPitch();
+      double roll = rootToWorldFused.getRoll();
+      rootToWorldFused.setYawPitchRoll(0.0, pitch, roll);
+
+      rootJoint.getJointPose().getOrientation().set(rootToWorldFused);
       rootBody.updateFramesRecursively();
+
+      /* Third pass computes vertical offset */
+   }
+
+   private void computeRootToIMU(int index)
+   {
+      IMUSensorReadOnly imuOutput = imuOutputs.get(index);
+      RigidBodyTransform rootToIMU = rootToIMUs.get(index);
+      RotationMatrix imuToWorldRotation = imuToWorldRotations.get(index);
+      RotationMatrix rootToIMURotation = rootToIMURotations.get(index);
+      RotationMatrix rootToWorld = rootToWorlds.get(index);
+
+      rootJoint.getFrameAfterJoint().getTransformToDesiredFrame(rootToIMU, imuOutput.getMeasurementFrame());
+      rootToIMURotation.set(rootToIMU.getRotation());
+      imuToWorldRotation.set(imuOutput.getOrientationMeasurement());
+
+      rootToWorld.set(rootToIMURotation);
+      rootToWorld.preMultiply(imuToWorldRotation);
    }
 }
