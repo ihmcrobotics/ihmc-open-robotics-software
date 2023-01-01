@@ -60,6 +60,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private ROS2NodeInterface ros2Node;
    private boolean manageROS2Node = false;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final AStarBodyPathPlannerParameters aStarBodyPathPlannerParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final VisibilityGraphPathPlanner visibilityGraphPlanner;
@@ -91,6 +92,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       this(name,
            new DefaultVisibilityGraphParameters(),
+           new AStarBodyPathPlannerParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
            null,
@@ -100,6 +102,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
+                                 AStarBodyPathPlannerParameters aStarBodyPathPlannerParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
@@ -108,14 +111,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;
+      this.aStarBodyPathPlannerParameters = aStarBodyPathPlannerParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
-
-      AStarBodyPathPlannerParameters plannerParameters = new AStarBodyPathPlannerParameters();
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
-      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, plannerParameters, footPolygons, stopwatch);
+      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -478,6 +480,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
+   }
+
+   public AStarBodyPathPlannerParameters getAStarBodyPathPlannerParameters()
+   {
+      return aStarBodyPathPlannerParameters;
    }
 
    public VisibilityGraphsParametersBasics getVisibilityGraphParameters()

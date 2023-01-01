@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
@@ -154,7 +155,8 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
 
                   FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
                   SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
-                  bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, footPolygons, bodyPathPlannerStopwatch);
+                  bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, new AStarBodyPathPlannerParameters(),
+                                                             footPolygons, bodyPathPlannerStopwatch);
 
                   bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
                   baseUI.getPrimaryScene().addRenderableProvider(bodyPathPlanGraphic, RDXSceneLevel.VIRTUAL);
