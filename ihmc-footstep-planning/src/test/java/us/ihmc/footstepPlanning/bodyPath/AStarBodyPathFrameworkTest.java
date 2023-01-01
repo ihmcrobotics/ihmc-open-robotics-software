@@ -369,6 +369,7 @@ public class AStarBodyPathFrameworkTest
       request.setHeightMapMessage(heightMapMessage);
       request.setPlanarRegionsList(planarRegionsList);
       request.setPlanBodyPath(true);
+      request.setPlanFootsteps(false);
       request.setAssumeFlatGround(false);
 
       for(RobotSide robotSide : RobotSide.values())
@@ -578,8 +579,18 @@ public class AStarBodyPathFrameworkTest
 //
 //      }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
-      test.tearDown();
+//      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
+//      test.tearDown();
 
+      Predicate<DataSet> dataSetFilter = dataSet ->
+      {
+         if(!dataSet.hasPlannerInput())
+            return false;
+
+         return dataSet.getPlannerInput().getVisGraphIsTestable();
+      };
+      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
+      test.runAssertionsOnAllDatasets(dataSets, test::runAssertionsWithoutOcclusion);
+      test.tearDown();
    }
 }

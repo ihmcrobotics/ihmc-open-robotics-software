@@ -269,8 +269,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
-
-         stopwatch.lap();
       }
       else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
       {
@@ -306,11 +304,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
 
-      if (request.getPerformAStarSearch())
+      if (request.getPlanFootsteps() && request.getPerformAStarSearch())
       {
          aStarFootstepPlanner.handleRequest(request, output);
       }
-      else
+      else if (request.getPlanFootsteps())
       {
          RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
          FramePose3D initialStancePose = new FramePose3D(request.getStartFootPoses().get(initialStanceSide));
