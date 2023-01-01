@@ -391,8 +391,6 @@ public class AStarBodyPathPlanner
                bodyPose.set(neighbor.getX(), neighbor.getY(), yaw);
                bodyPose.interpolate(new Pose2D(node.getX(), node.getY(), yaw), 0.5);
                computeRollCost(node, neighbor, bodyPose);
-
-               computeRollCost(node, neighbor, bodyPose);
             }
 
             if (incline.getValue() < nominalIncline.getValue())
