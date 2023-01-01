@@ -29,6 +29,9 @@ public class BodyPathRANSACTraversibilityCalculator
    static final double minNormalToPenalize = Math.toRadians(45.0);
    static final double maxNormalToPenalize = Math.toRadians(70.0);
 
+   private static final double alphaStance = 4.0;
+   private static final double alphaStep = 2.0;
+
    private BodyPathLatticePoint startNode;
    private final ToDoubleFunction<BodyPathLatticePoint> gridHeightMap;
    private final HeightMapRANSACNormalCalculator surfaceNormalCalculator;
@@ -37,6 +40,7 @@ public class BodyPathRANSACTraversibilityCalculator
 
    private final SideDependentList<YoDouble> stanceScore;
    private final SideDependentList<YoDouble> stepScores;
+   private final YoDouble stanceTraversibility;
    private final SideDependentList<YoInteger> traversibileCells;
 
    private final TIntArrayList zeroDegCollisionOffsetsX = new TIntArrayList();
@@ -56,6 +60,7 @@ public class BodyPathRANSACTraversibilityCalculator
       this.stanceScore = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StanceScore", registry));
       this.stepScores = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StepScore", registry));
       this.traversibileCells = new SideDependentList<>(side -> new YoInteger(side.getCamelCaseNameForStartOfExpression() + "TraversibleCells", registry));
+      this.stanceTraversibility = new YoDouble("stanceTraversibility", registry);
       this.surfaceNormalCalculator = surfaceNormalCalculator;
    }
 
@@ -92,9 +97,6 @@ public class BodyPathRANSACTraversibilityCalculator
       stanceScore.get(RobotSide.LEFT).set(leftTraversibility);
       stanceScore.get(RobotSide.RIGHT).set(rightTraversibility);
 
-      double alphaStance = 4.0;
-      double alphaStep = 2.0;
-
       double previousLeftTraversibility = 1.0;
       double previousRightTraversibility = 1.0;
       if (!startNode.equals(parentNode))
@@ -103,20 +105,28 @@ public class BodyPathRANSACTraversibilityCalculator
          previousRightTraversibility = compute(RobotSide.RIGHT, parentNode, yawIndex, nodeHeight, parentHeight, false);
       }
 
-      double stanceTraversibility = Math.max(leftTraversibility, rightTraversibility);
+      stanceTraversibility.set(Math.max(leftTraversibility, rightTraversibility));
       double leftStepScore = Math.sqrt(leftTraversibility * previousRightTraversibility);
       double rightStepScore = Math.sqrt(rightTraversibility * previousLeftTraversibility);
 
       stepScores.get(RobotSide.LEFT).set(leftStepScore);
       stepScores.get(RobotSide.RIGHT).set(rightStepScore);
-      double stepTraversibility = Math.max(leftStepScore, rightStepScore);
 
-      return alphaStance * (1.0 - stanceTraversibility) + alphaStep * (1.0 - stepTraversibility);
+      return getTraversability();
    }
 
    boolean isTraversible()
    {
       return stanceScore.get(RobotSide.LEFT).getValue() >= minPercent || stanceScore.get(RobotSide.RIGHT).getValue() >= minPercent;
+   }
+
+   double getTraversability()
+   {
+      double leftStepScore = stepScores.get(RobotSide.LEFT).getDoubleValue();
+      double rightStepScore = stepScores.get(RobotSide.RIGHT).getDoubleValue();
+      double stepTraversibility = Math.max(leftStepScore, rightStepScore);
+
+      return alphaStance * (1.0 - stanceTraversibility.getValue()) + alphaStep * (1.0 - stepTraversibility);
    }
 
    private double compute(RobotSide side, BodyPathLatticePoint node, int yawIndex, double oppositeHeight, double nominalHeight, boolean updateYoVariables)
