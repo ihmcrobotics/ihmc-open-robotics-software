@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -69,6 +70,7 @@ public class SwingOverPlanarRegionsLogViewer
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
                                                                          new DefaultVisibilityGraphParameters(),
+                                                                         new AStarBodyPathPlannerParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          parameters,
                                                                          walkingControllerParameters,
