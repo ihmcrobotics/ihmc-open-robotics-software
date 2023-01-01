@@ -23,6 +23,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -103,6 +105,8 @@ public class FootstepPlannerUI
    @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
+   private AStarBodyPathParametersUIController aStarBodyPathParametersUIController;
+   @FXML
    private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
    @FXML
    private SwingPlannerParametersUIController swingPlannerParametersUIController;
@@ -121,6 +125,7 @@ public class FootstepPlannerUI
       this(primaryStage,
            messager,
            new DefaultVisibilityGraphParameters(),
+           new AStarBodyPathPlannerParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
            null,
@@ -132,6 +137,7 @@ public class FootstepPlannerUI
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
                             FootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
@@ -143,6 +149,7 @@ public class FootstepPlannerUI
       this(primaryStage,
            messager,
            visibilityGraphsParameters,
+           aStarBodyPathParameters,
            plannerParameters,
            swingPlannerParameters,
            fullHumanoidRobotModelFactory,
@@ -158,6 +165,7 @@ public class FootstepPlannerUI
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
                             FootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
@@ -188,6 +196,7 @@ public class FootstepPlannerUI
       }
 
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
+      aStarBodyPathParametersUIController.setAStarBodyPathParameters(aStarBodyPathParameters);
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       swingPlannerParametersUIController.setParameters(swingPlannerParameters);
 
@@ -196,6 +205,7 @@ public class FootstepPlannerUI
       footstepPlannerTestDashboardController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
+      aStarBodyPathParametersUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       bodyPathLogVisualizerController.attachMessager(messager);
       swingPlannerParametersUIController.attachMessager(messager);
@@ -216,6 +226,7 @@ public class FootstepPlannerUI
       footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
+      aStarBodyPathParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
       swingPlannerParametersUIController.bindControls();
       visibilityGraphsUIController.bindControls();
@@ -454,6 +465,7 @@ public class FootstepPlannerUI
       bodyPathLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
+      aStarBodyPathParametersUIController.onPrimaryStageLoaded();
       swingPlannerParametersUIController.onPrimaryStageLoaded();
    }
 
@@ -503,6 +515,7 @@ public class FootstepPlannerUI
    public static FootstepPlannerUI createUI(Stage primaryStage,
                                             JavaFXMessager messager,
                                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                                            AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
                                             FootstepPlannerParametersBasics plannerParameters,
                                             SwingPlannerParametersBasics swingPlannerParameters,
                                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
@@ -523,6 +536,7 @@ public class FootstepPlannerUI
       return new FootstepPlannerUI(primaryStage,
                                    messager,
                                    visibilityGraphsParameters,
+                                   aStarBodyPathParameters,
                                    plannerParameters,
                                    swingPlannerParameters,
                                    fullHumanoidRobotModelFactory,
