@@ -29,8 +29,7 @@ public class RDXRapidRegionsUIPanel
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
-   private final ImBoolean render3DBoundaries = new ImBoolean(true);
-   private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
+   private final ImBoolean renderPointCloud = new ImBoolean(true);
 
    private ImGuiPlot wholeAlgorithmDurationPlot;
    private ImGuiPlot numberOfPlanarRegionsPlot;
@@ -57,8 +56,6 @@ public class RDXRapidRegionsUIPanel
    private int patchImageHeight = 0;
    private int imageWidth = 0;
    private int imageHeight = 0;
-
-   private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
    public void create(RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor,
                       RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer)
@@ -112,7 +109,6 @@ public class RDXRapidRegionsUIPanel
       depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
       planarRegionCustomizationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
 
-      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    }
 
    public void render()
@@ -125,12 +121,6 @@ public class RDXRapidRegionsUIPanel
       gzImagePanel.displayFloat(rapidPlanarRegionsExtractor.getCzImage().getBytedecoOpenCVMat());
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
-
-      if (!render3DPlanarRegions.get())
-         return;
-
-      planarRegionsGraphic.generateMeshes(rapidPlanarRegionsExtractor.getPlanarRegionsList());
-      planarRegionsGraphic.update();
    }
 
    public void renderImGuiWidgets()
@@ -158,8 +148,7 @@ public class RDXRapidRegionsUIPanel
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
-      ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
-      ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
+      ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
 
       if(ImGui.button("Load Next"))
       {
@@ -170,12 +159,6 @@ public class RDXRapidRegionsUIPanel
       {
          frameIndex = Math.max(0, frameIndex - 1);
       }
-   }
-
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (render3DPlanarRegions.get())
-         planarRegionsGraphic.getRenderables(renderables, pool);
    }
 
    public void destroy()
@@ -198,4 +181,15 @@ public class RDXRapidRegionsUIPanel
    {
       return frameIndex;
    }
+
+   public boolean getPointCloudRenderEnabled()
+   {
+      return renderPointCloud.get();
+   }
+
+   public boolean get3DPlanarRegionsRenderEnabled()
+   {
+      return render3DPlanarRegions.get();
+   }
+
 }

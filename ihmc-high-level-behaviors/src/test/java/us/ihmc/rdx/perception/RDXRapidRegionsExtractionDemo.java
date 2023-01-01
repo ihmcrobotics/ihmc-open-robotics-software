@@ -6,10 +6,14 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
@@ -42,7 +46,7 @@ import us.ihmc.tools.thread.Activator;
 
 import java.util.ArrayList;
 
-public class RDXRapidRegionsExtractionDemo
+public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -111,8 +115,9 @@ public class RDXRapidRegionsExtractionDemo
                if (nativesLoadedActivator.isNewlyActivated())
                {
 
-                  baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
-                  baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic, RDXSceneLevel.VIRTUAL);
+                  //baseUI.getPrimaryScene().addRenderableProvider(pointCloudRenderer, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
+                  //baseUI.getPrimaryScene().addRenderableProvider(planarRegionsGraphic, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                }
@@ -212,11 +217,13 @@ public class RDXRapidRegionsExtractionDemo
 
       PlanarRegionsList planarRegions = regionsWithPose.getPlanarRegionsList();
 
-
-      pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints(), Color.GRAY);
-      if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
+      if(rapidRegionsUIPanel.getPointCloudRenderEnabled())
       {
-         pointCloudRenderer.updateMesh();
+         pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints(), Color.GRAY);
+         if (!rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().isEmpty())
+         {
+            pointCloudRenderer.updateMesh();
+         }
       }
 
       // Submit the planar regions to the planar region renderer
@@ -262,5 +269,15 @@ public class RDXRapidRegionsExtractionDemo
    public static void main(String[] args)
    {
       new RDXRapidRegionsExtractionDemo();
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if(rapidRegionsUIPanel.getPointCloudRenderEnabled())
+         pointCloudRenderer.getRenderables(renderables, pool);
+
+      if(rapidRegionsUIPanel.get3DPlanarRegionsRenderEnabled())
+         planarRegionsGraphic.getRenderables(renderables, pool);
    }
 }
