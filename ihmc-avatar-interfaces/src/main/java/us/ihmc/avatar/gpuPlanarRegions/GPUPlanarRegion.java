@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -122,6 +123,12 @@ public class GPUPlanarRegion
       }
 
       normal.set(useCentroidSVD ? normalSVD : normalAverage);
+
+      if(normal.dot(centroidAverage) > 0.0)
+      {
+         normal.negate();
+      }
+      //LogTools.info("Normal: " + normal);
    }
 
    public Point3D32 getCenter()

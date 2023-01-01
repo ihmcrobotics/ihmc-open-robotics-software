@@ -555,8 +555,6 @@ public class RapidPlanarRegionsExtractor
 
       public void expandBlock()
       {
-         //LogTools.info("DFS [Depth:{}, Row:{}, Column:{}]", searchDepth, row, column);
-
          if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
             return;
 
@@ -613,6 +611,14 @@ public class RapidPlanarRegionsExtractor
 
    public void destroy()
    {
+      nxImage.destroy(openCLManager);
+      nyImage.destroy(openCLManager);
+      nzImage.destroy(openCLManager);
+      cxImage.destroy(openCLManager);
+      cyImage.destroy(openCLManager);
+      czImage.destroy(openCLManager);
+      patchGraph.destroy(openCLManager);
+      inputU16DepthImage.destroy(openCLManager);
       openCLManager.destroy();
       // TODO: Destroy the rest
    }

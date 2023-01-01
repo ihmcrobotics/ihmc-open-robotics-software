@@ -5,10 +5,15 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
 
 public class RDXImagePanel
 {
@@ -24,6 +29,7 @@ public class RDXImagePanel
       int imageHeight = image.rows();
 
       this.image = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC4, image.data());
+      normalizedScaledImage = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC1);
       createPixMap(imageWidth, imageHeight);
 
       boolean flipY = false;
@@ -56,12 +62,25 @@ public class RDXImagePanel
    /**
     * @param singleChannelImage Can be float, unsigned integer, etc
     */
-   public void displayRaw(Mat singleChannelImage)
+   public void displayFloat(Mat singleChannelImage)
    {
       if (videoPanel.getIsShowing().get())
       {
          BytedecoOpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage, 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, image);
+         display();
+      }
+   }
+
+   public void displayByte(Mat rgbImage)
+   {
+      if (videoPanel.getIsShowing().get())
+      {
+
+         imshow("Image", rgbImage);
+         waitKey(1);
+
+         image.put(rgbImage);
          display();
       }
    }

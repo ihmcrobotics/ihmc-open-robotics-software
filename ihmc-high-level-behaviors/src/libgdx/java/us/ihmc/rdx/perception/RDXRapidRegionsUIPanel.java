@@ -19,7 +19,10 @@ public class RDXRapidRegionsUIPanel
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
    private RapidRegionsDebutOutputGenerator rapidRegionsDebutOutputGenerator;
 
+
    private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
+   private ImGuiStoredPropertySetTuner polygonizerParametersTuner;
+   private ImGuiStoredPropertySetTuner concaveHullParametersTuner;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
@@ -49,6 +52,7 @@ public class RDXRapidRegionsUIPanel
    private RDXImagePanel gzImagePanel;
    private RDXImagePanel debugExtractionPanel;
 
+   private int frameIndex = 0;
    private int patchImageWidth = 0;
    private int patchImageHeight = 0;
    private int imageWidth = 0;
@@ -70,6 +74,12 @@ public class RDXRapidRegionsUIPanel
 
       gpuRegionParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsExtractor.getParameters().getTitle());
       gpuRegionParametersTuner.create(rapidPlanarRegionsExtractor.getParameters());
+
+      polygonizerParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getPolygonizerParameters().getTitle());
+      polygonizerParametersTuner.create(rapidPlanarRegionsCustomizer.getPolygonizerParameters());
+
+      concaveHullParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters().getTitle());
+      concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters());
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredDepthPanel = new RDXImagePanel("Blurred Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);
@@ -107,13 +117,14 @@ public class RDXRapidRegionsUIPanel
 
    public void render()
    {
-      nxImagePanel.displayRaw(rapidPlanarRegionsExtractor.getNxImage().getBytedecoOpenCVMat());
-      nyImagePanel.displayRaw(rapidPlanarRegionsExtractor.getNyImage().getBytedecoOpenCVMat());
-      nzImagePanel.displayRaw(rapidPlanarRegionsExtractor.getNzImage().getBytedecoOpenCVMat());
-      gxImagePanel.displayRaw(rapidPlanarRegionsExtractor.getCxImage().getBytedecoOpenCVMat());
-      gyImagePanel.displayRaw(rapidPlanarRegionsExtractor.getCyImage().getBytedecoOpenCVMat());
-      gzImagePanel.displayRaw(rapidPlanarRegionsExtractor.getCzImage().getBytedecoOpenCVMat());
-      debugExtractionPanel.display();
+      nxImagePanel.displayFloat(rapidPlanarRegionsExtractor.getNxImage().getBytedecoOpenCVMat());
+      nyImagePanel.displayFloat(rapidPlanarRegionsExtractor.getNyImage().getBytedecoOpenCVMat());
+      nzImagePanel.displayFloat(rapidPlanarRegionsExtractor.getNzImage().getBytedecoOpenCVMat());
+      gxImagePanel.displayFloat(rapidPlanarRegionsExtractor.getCxImage().getBytedecoOpenCVMat());
+      gyImagePanel.displayFloat(rapidPlanarRegionsExtractor.getCyImage().getBytedecoOpenCVMat());
+      gzImagePanel.displayFloat(rapidPlanarRegionsExtractor.getCzImage().getBytedecoOpenCVMat());
+
+      debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
 
       if (!render3DPlanarRegions.get())
          return;
@@ -140,6 +151,8 @@ public class RDXRapidRegionsUIPanel
       boundaryMaxSearchDepthPlot.render((float) rapidPlanarRegionsExtractor.getBoundaryMaxSearchDepth());
 
       boolean anyParameterChanged = gpuRegionParametersTuner.renderImGuiWidgets();
+      anyParameterChanged |= polygonizerParametersTuner.renderImGuiWidgets();
+      anyParameterChanged |= concaveHullParametersTuner.renderImGuiWidgets();
 
       svdDurationPlot.render((float) rapidPlanarRegionsExtractor.getMaxSVDSolveTime());
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
@@ -147,6 +160,16 @@ public class RDXRapidRegionsUIPanel
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
+
+      if(ImGui.button("Load Next"))
+      {
+         frameIndex++;
+      }
+      ImGui.sameLine();
+      if(ImGui.button("Load Previous"))
+      {
+         frameIndex = Math.max(0, frameIndex - 1);
+      }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -169,5 +192,10 @@ public class RDXRapidRegionsUIPanel
    public ImBoolean getEnabled()
    {
       return enabled;
+   }
+
+   public int getFrameIndex()
+   {
+      return frameIndex;
    }
 }
