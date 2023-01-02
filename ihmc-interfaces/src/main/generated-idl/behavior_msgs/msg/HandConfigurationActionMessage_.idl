@@ -1,0 +1,28 @@
+#ifndef __behavior_msgs__msg__HandConfigurationActionMessage__idl__
+#define __behavior_msgs__msg__HandConfigurationActionMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::HandConfigurationActionMessage_")
+      struct HandConfigurationActionMessage
+      {
+        /**
+         * Specifies the side of the robot that this message refers to.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The grip type
+         */
+        unsigned long grip;
+      };
+    };
+  };
+};
+
+#endif
