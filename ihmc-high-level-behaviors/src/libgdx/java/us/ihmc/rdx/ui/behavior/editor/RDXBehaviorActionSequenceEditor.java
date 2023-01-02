@@ -106,10 +106,10 @@ public class RDXBehaviorActionSequenceEditor
                case "RDXArmJointAnglesAction" -> new RDXArmJointAnglesAction();
                case "RDXChestOrientationAction" -> new RDXChestOrientationAction();
                case "RDXFootstepAction" -> newFootstepAction(null);
-               case "RDXHandConfigurationAction" -> new RDXHandConfigurationAction(ros2ControllerHelper);
+               case "RDXHandConfigurationAction" -> new RDXHandConfigurationAction();
                case "RDXHandPoseAction" -> newHandPoseAction();
-               case "RDXHandWrenchAction" -> new RDXHandWrenchAction(ros2ControllerHelper);
-               case "RDXPelvisHeightAction" -> new RDXPelvisHeightAction(ros2ControllerHelper);
+               case "RDXHandWrenchAction" -> new RDXHandWrenchAction();
+               case "RDXPelvisHeightAction" -> new RDXPelvisHeightAction();
                case "RDXWaitDurationAction" -> new RDXWaitDurationAction();
                case "RDXWalkAction" -> newWalkAction();
                default -> null;
@@ -336,8 +336,8 @@ public class RDXBehaviorActionSequenceEditor
       {
          if (ImGui.button(labels.get(side.getPascalCaseName(), "HandWrench")))
          {
-            RDXHandWrenchAction handWrenchAction = new RDXHandWrenchAction(ros2ControllerHelper);
-            handWrenchAction.setSide(side);
+            RDXHandWrenchAction handWrenchAction = new RDXHandWrenchAction();
+            handWrenchAction.getActionData().setSide(side);
             newAction = handWrenchAction;
          }
          if (side.ordinal() < 1)
@@ -345,7 +345,7 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Hand Configuration")))
       {
-         newAction = new RDXHandConfigurationAction(ros2ControllerHelper);
+         newAction = new RDXHandConfigurationAction();
       }
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
@@ -353,7 +353,7 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Pelvis Height")))
       {
-         newAction = new RDXPelvisHeightAction(ros2ControllerHelper);
+         newAction = new RDXPelvisHeightAction();
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
@@ -399,7 +399,7 @@ public class RDXBehaviorActionSequenceEditor
       for (int i = 0; i < excecutionNextIndex - 1; i++)
       {
          if (actionSequence.get(i) instanceof RDXHandPoseAction
-             && ((RDXHandPoseAction) actionSequence.get(i)).getSide() == side)
+             && ((RDXHandPoseAction) actionSequence.get(i)).getActionData().getSide() == side)
          {
             previousAction = (RDXHandPoseAction) actionSequence.get(i);
          }
@@ -430,7 +430,7 @@ public class RDXBehaviorActionSequenceEditor
 
    private RDXHandPoseAction newHandPoseAction()
    {
-      return new RDXHandPoseAction(panel3D, robotModel, syncedRobot, syncedRobot.getFullRobotModel(), ros2ControllerHelper, referenceFrameLibrary);
+      return new RDXHandPoseAction(panel3D, robotModel, syncedRobot, syncedRobot.getFullRobotModel(), referenceFrameLibrary);
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

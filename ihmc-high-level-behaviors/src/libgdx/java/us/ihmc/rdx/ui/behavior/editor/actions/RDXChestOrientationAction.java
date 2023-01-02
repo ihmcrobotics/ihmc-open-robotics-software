@@ -10,19 +10,19 @@ import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
 public class RDXChestOrientationAction extends RDXBehaviorAction
 {
-   private final ChestOrientationActionData action = new ChestOrientationActionData();
+   private final ChestOrientationActionData actionData = new ChestOrientationActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> action.getYawPitchRoll().getYaw(),
-                                                                 yaw -> action.getYawPitchRoll().setYaw(yaw),
+   private final ImDoubleWrapper yawWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getYaw(),
+                                                                 yaw -> actionData.getYawPitchRoll().setYaw(yaw),
                                                                  imDouble -> ImGui.inputDouble(labels.get("Yaw"), imDouble));
-   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> action.getYawPitchRoll().getPitch(),
-                                                                   pitch -> action.getYawPitchRoll().setPitch(pitch),
+   private final ImDoubleWrapper pitchWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getPitch(),
+                                                                   pitch -> actionData.getYawPitchRoll().setPitch(pitch),
                                                                    imDouble -> ImGui.inputDouble(labels.get("Pitch"), imDouble));
-   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> action.getYawPitchRoll().getRoll(),
-                                                                  roll -> action.getYawPitchRoll().setRoll(roll),
+   private final ImDoubleWrapper rollWidget = new ImDoubleWrapper(() -> actionData.getYawPitchRoll().getRoll(),
+                                                                  roll -> actionData.getYawPitchRoll().setRoll(roll),
                                                                   imDouble -> ImGui.inputDouble(labels.get("Roll"), imDouble));
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(action::getTrajectoryDuration,
-                                                                                action::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
+                                                                                actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
 
    public RDXChestOrientationAction()
@@ -46,12 +46,12 @@ public class RDXChestOrientationAction extends RDXBehaviorAction
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      action.saveToFile(jsonNode);
+      actionData.saveToFile(jsonNode);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      action.loadFromFile(jsonNode);
+      actionData.loadFromFile(jsonNode);
    }
 }

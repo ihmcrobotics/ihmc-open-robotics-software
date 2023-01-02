@@ -5,19 +5,15 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import ihmc_common_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import imgui.ImGui;
-import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionData;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -30,10 +26,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.JSONTools;
 
 public class RDXHandPoseAction extends RDXBehaviorAction
 {
+   private final HandPoseActionData actionData = new HandPoseActionData();
    private RDXInteractableHighlightModel highlightModel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
@@ -46,18 +42,16 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final DRCRobotModel robotModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ImDouble trajectoryDuration = new ImDouble(4.0);
-   private RobotSide side;
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
+                                                                                actionData::setTrajectoryDuration,
+                                                                                imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
                             DRCRobotModel robotModel,
                             ROS2SyncedRobotModel syncedRobot,
                             FullHumanoidRobotModel fullRobotModel,
-                            ROS2ControllerHelper ros2ControllerHelper,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
-      this.ros2ControllerHelper = ros2ControllerHelper;
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
 
@@ -76,7 +70,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
 
    public void setSide(RobotSide side, boolean authoring, RDXHandPoseAction possiblyNullPreviousAction)
    {
-      this.side = side;
+      actionData.setSide(side);
       handFrame.getTransformToParent().set(handControlTransformToHandFrames.get(side));
       handFrame.getTransformToParent().invert(); // We actually need hand to control
       handFrame.getReferenceFrame().update();
@@ -135,7 +129,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          changeDerivativeFrames();
       }
       ImGui.pushItemWidth(80.0f);
-      ImGui.inputDouble(labels.get("Trajectory duration"), trajectoryDuration);
+      trajectoryDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
    }
 
@@ -150,20 +144,13 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
-      jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryDuration", trajectoryDuration.get());
-      JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
+      actionData.saveToFile(jsonNode);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      String referenceFrameName = jsonNode.get("parentFrame").asText();
-      setReferenceFrame(referenceFrameName);
-      setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()), false, null);
-      trajectoryDuration.set(jsonNode.get("trajectoryDuration").asDouble());
-      JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
+      actionData.loadFromFile(jsonNode);
    }
 
    private void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -203,43 +190,18 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    }
 
    @Override
-   public void destroy()
-   {
-      highlightModel.dispose();
-   }
-
-   @Override
-   public void performAction()
-   {
-      FramePose3D endHandPose = new FramePose3D();
-      endHandPose.setToZero(poseGizmo.getGizmoFrame());
-      endHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-      handTrajectoryMessage.setRobotSide(side.toByte());
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
-      handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(FrameInformation.WORLD_FRAME);
-      SE3TrajectoryPointMessage trajectoryPoint = handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
-      trajectoryPoint.setTime(trajectoryDuration.get());
-      trajectoryPoint.getPosition().set(endHandPose.getPosition());
-      trajectoryPoint.getOrientation().set(endHandPose.getOrientation());
-      trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);
-      trajectoryPoint.getAngularVelocity().set(EuclidCoreTools.zeroVector3D);
-      ros2ControllerHelper.publishToController(handTrajectoryMessage);
-   }
-
-   public RobotSide getSide()
-   {
-      return side;
-   }
-
-   @Override
    public String getNameForDisplay()
    {
-      return side.getPascalCaseName() + " Hand Pose";
+      return actionData.getSide().getPascalCaseName() + " Hand Pose";
    }
 
    public ReferenceFrame getReferenceFrame()
    {
       return poseGizmo.getGizmoFrame();
+   }
+
+   public HandPoseActionData getActionData()
+   {
+      return actionData;
    }
 }
