@@ -579,8 +579,8 @@ public class AStarBodyPathFrameworkTest
 //
 //      }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-//      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
-//      test.tearDown();
+      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
+      test.tearDown();
 
       Predicate<DataSet> dataSetFilter = dataSet ->
       {
@@ -589,8 +589,8 @@ public class AStarBodyPathFrameworkTest
 
          return dataSet.getPlannerInput().getVisGraphIsTestable();
       };
-      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
-      test.runAssertionsOnAllDatasets(dataSets, test::runAssertionsWithoutOcclusion);
-      test.tearDown();
+//      List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSetFilter);
+//      test.runAssertionsOnAllDatasets(dataSets, test::runAssertionsWithoutOcclusion);
+//      test.tearDown();
    }
 }

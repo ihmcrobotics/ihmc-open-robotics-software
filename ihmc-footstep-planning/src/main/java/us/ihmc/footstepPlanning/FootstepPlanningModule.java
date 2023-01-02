@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
+import us.ihmc.footstepPlanning.bodyPath.GPUAStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -66,7 +67,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final VisibilityGraphPathPlanner visibilityGraphPlanner;
    private final NarrowPassageBodyPathOptimizer narrowPassageBodyPathOptimizer;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
-   private final AStarBodyPathPlanner bodyPathPlanner;
+   private final GPUAStarBodyPathPlanner bodyPathPlanner;
    private final List<VariableDescriptor> bodyPathVariableDescriptors;
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -117,7 +118,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.visibilityGraphPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor);
       this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, null);
-      this.bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
+      this.bodyPathPlanner = new GPUAStarBodyPathPlanner(footstepPlannerParameters, aStarBodyPathPlannerParameters, footPolygons, stopwatch);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -178,7 +179,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearLoggedData();
       bodyPathPlanner.clearLoggedData();
 
-      boolean heightMapAvailable = request.getHeightMapMessage() != null && !request.getHeightMapMessage().getHeights().isEmpty();
+      boolean heightMapAvailable = request.getHeightMapMessage() != null;//&& !request.getHeightMapMessage().getHeights().isEmpty();
       boolean planarRegionsAvailable = request.getPlanarRegionsList() != null && !request.getPlanarRegionsList().isEmpty();
 
       if (heightMapAvailable)
