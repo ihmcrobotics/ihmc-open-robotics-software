@@ -67,21 +67,6 @@ public class RDXBehaviorAction
 
    }
 
-   public void performAction()
-   {
-
-   }
-
-   public boolean isExecuting()
-   {
-      return false;
-   }
-
-   public void destroy()
-   {
-
-   }
-
    public ImBoolean getSelected()
    {
       return selected;

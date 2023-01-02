@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -12,6 +12,7 @@ import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -29,6 +30,8 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.behavior.editor.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.gizmo.RDXPathControlRingGizmo;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
@@ -38,7 +41,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
 
-import java.util.List;
 import java.util.UUID;
 
 public class RDXWalkAction extends RDXBehaviorAction
@@ -64,7 +66,7 @@ public class RDXWalkAction extends RDXBehaviorAction
                         FootstepPlanningModule footstepPlanner,
                         ROS2SyncedRobotModel syncedRobot,
                         ROS2ControllerHelper ros2ControllerHelper,
-                        List<ReferenceFrame> referenceFrameLibrary)
+                        ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.footstepPlanner = footstepPlanner;
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -241,12 +243,6 @@ public class RDXWalkAction extends RDXBehaviorAction
       {
          editGoalFootGizmos.get(side).setParentFrame(footstepPlannerGoalGizmo.getGizmoFrame());
       }
-   }
-
-   @Override
-   public void destroy()
-   {
-      footstepPlanGraphic.destroy();
    }
 
    public void plan()
