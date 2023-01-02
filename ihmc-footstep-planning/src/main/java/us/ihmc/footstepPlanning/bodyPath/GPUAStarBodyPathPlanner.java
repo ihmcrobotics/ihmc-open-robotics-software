@@ -15,26 +15,23 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
-import us.ihmc.footstepPlanning.tools.LinkedPriorityQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.thread.Activator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -43,7 +40,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -93,8 +89,6 @@ public class GPUAStarBodyPathPlanner
    private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
    /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
-   /* Computes surface normals with least-squares and penalizing roll when changing elevation */
-   private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
    /* Computes surface normals with RANSAC, used for traversibility */
    private final HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
@@ -113,11 +107,9 @@ public class GPUAStarBodyPathPlanner
    private final AtomicBoolean haltRequested = new AtomicBoolean();
    private static final int maxIterations = 3000;
 
-   private final AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
-
    private final OpenCLManager openCLManager;
    private _cl_program pathPlannerProgram;
-   private _cl_kernel computeNormalsKernel;
+   private _cl_kernel computeNormalsWithLeastSquaresKernel;
 
    private ByteBuffer heightMapDataBuffer;
    private BytedecoImage heightMapImage;
@@ -203,34 +195,32 @@ public class GPUAStarBodyPathPlanner
                                          totalCost.setToNaN();
                                          ransacTraversibilityCalculator.clearVariables();
                                       });
-
-      smoother.setRansacNormalCalculator(ransacNormalCalculator);
-      smoother.setLeastSquaresNormalCalculator(surfaceNormalCalculator);
    }
 
    public void create(int numberOfCells)
    {
       pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanner");
-      computeNormalsKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormals");
+      computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
 
       heightMapDataBuffer = ByteBuffer.allocate(Float.BYTES * numberOfCells * numberOfCells);
       this.heightMapImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, heightMapDataBuffer);
 
+      // TODO switch these al lfrom images to buffers
       this.normalXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.normalYImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.normalZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
       this.sampledHeightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
 
-      normalXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-      normalYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-      normalZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-      sampledHeightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+      normalXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      normalYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      normalZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      sampledHeightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
    public void destroy()
    {
       pathPlannerProgram.close();
-      computeNormalsKernel.close();
+      computeNormalsWithLeastSquaresKernel.close();
 
       heightMapImage.destroy(openCLManager);
       normalXImage.destroy(openCLManager);
@@ -328,7 +318,7 @@ public class GPUAStarBodyPathPlanner
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
          double patchWidth = 0.3;
-         surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
+         computeSurfaceNormals(patchWidth);
       }
 
       if (useRANSACTraversibility)
@@ -420,6 +410,27 @@ public class GPUAStarBodyPathPlanner
       }
 
       reportStatus(request, outputToPack);
+   }
+
+   private void computeSurfaceNormals(double patchWidth)
+   {
+      int numberOfCells = heightMapData.getCellsPerAxis();
+      // set the kernel arguments
+      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 0, normalXImage.getOpenCLImageObject());
+
+      openCLManager.execute2D(computeNormalsWithLeastSquaresKernel, numberOfCells, numberOfCells);
+
+      // get the data from the kernel
+      openCLManager.enqueueReadImage(normalXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalXImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(normalYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalYImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(normalZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalZImage.getBytedecoByteBufferPointer());
+   }
+
+   private UnitVector3DReadOnly getSurfaceNormal(int key)
+   {
+      return new UnitVector3D(normalXImage.getBackingDirectByteBuffer().getFloat(Float.BYTES * key),
+                              normalYImage.getBackingDirectByteBuffer().getFloat(Float.BYTES * key),
+                              normalZImage.getBackingDirectByteBuffer().getFloat(Float.BYTES * key));
    }
 
    private boolean checkEdge(BodyPathLatticePoint node, double nodeSnapHeight, BodyPathLatticePoint neighbor, int neighborIndex)
@@ -527,15 +538,13 @@ public class GPUAStarBodyPathPlanner
 
    private void computeRollCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, Pose2D bodyPose)
    {
-      UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
+      UnitVector3DReadOnly surfaceNormal = getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
                                                                                                                  bodyPose.getY(),
                                                                                                                  heightMapData.getGridCenter().getX(),
                                                                                                                  heightMapData.getGridCenter().getY(),
                                                                                                                  heightMapData.getGridResolutionXY(),
                                                                                                                  heightMapData.getCenterIndex()));
 
-      if (surfaceNormal != null)
-      {
          Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
          edge.normalize();
 
@@ -555,7 +564,6 @@ public class GPUAStarBodyPathPlanner
          double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - rollDeadband);
          rollCost.set(plannerParameters.getRollCostWeight() * inclineScale * rollAngleDeadbanded);
          edgeCost.add(rollCost);
-      }
    }
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
@@ -564,8 +572,6 @@ public class GPUAStarBodyPathPlanner
       {
          LogTools.info("Reporting status");
       }
-
-      boolean performSmoothing = plannerParameters.getPerformSmoothing() && result == BodyPathPlanningResult.FOUND_SOLUTION;
 
       outputToPack.setBodyPathPlanningResult(result);
       outputToPack.getBodyPath().clear();
@@ -581,33 +587,9 @@ public class GPUAStarBodyPathPlanner
          bodyPath.add(waypoint);
          outputToPack.getBodyPathUnsmoothed().add(waypoint);
 
-         if (!performSmoothing)
-         {
             outputToPack.getBodyPath().add(new Pose3D(waypoint, new Quaternion()));
-         }
       }
 
-      if (performSmoothing)
-      {
-         List<Pose3D> smoothedPath = smoother.doSmoothing(bodyPath, heightMapData);
-         for (int i = 0; i < bodyPath.size(); i++)
-         {
-            Pose3D waypoint = new Pose3D(smoothedPath.get(i));
-
-            if (i == 0)
-            {
-               double yaw = AngleTools.interpolateAngle(request.getStartFootPoses().get(RobotSide.LEFT).getYaw(), request.getStartFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
-               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
-            }
-            else if (i == bodyPath.size() - 1)
-            {
-               double yaw = AngleTools.interpolateAngle(request.getGoalFootPoses().get(RobotSide.LEFT).getYaw(), request.getGoalFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
-               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
-            }
-
-            outputToPack.getBodyPath().add(waypoint);
-         }
-      }
 
       outputToPack.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.totalElapsed() - planningStartTime);
       outputToPack.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
