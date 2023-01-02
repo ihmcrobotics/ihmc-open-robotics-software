@@ -112,15 +112,20 @@ public class GPUAStarBodyPathPlanner
    private final OpenCLManager openCLManager;
    private _cl_program pathPlannerProgram;
    private _cl_kernel computeNormalsWithLeastSquaresKernel;
+   private _cl_kernel snapVerticesKernel;
 
    private OpenCLFloatBuffer normalCalculationParametersBuffer = new OpenCLFloatBuffer(6);
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
+   private OpenCLIntBuffer snapOffsetsBuffer = new OpenCLIntBuffer(6);
    private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
 
    // TODO once the things that use the normal are all on the GPU, these can be replaced with _cl_mem object = openCLManager.createImage as the backing data in
    // the cpu is no longer needed
    private OpenCLFloatBuffer normalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer snappedAverageHeightBuffer = new OpenCLFloatBuffer(1);
+
+
    private int cellsPerSide = -1;
 
    private boolean firstTick = true;
@@ -225,16 +230,19 @@ public class GPUAStarBodyPathPlanner
 
       pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanning");
       computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
+      snapVerticesKernel = openCLManager.createKernel(pathPlannerProgram, "snapVertices");
    }
 
    public void firstTickSetup()
    {
       normalCalculationParametersBuffer.createOpenCLBufferObject(openCLManager);
       leastSquaresOffsetBuffer.createOpenCLBufferObject(openCLManager);
+      snapOffsetsBuffer.createOpenCLBufferObject(openCLManager);
 
       heightMapBuffer.createOpenCLBufferObject(openCLManager);
       normalXYZBuffer.createOpenCLBufferObject(openCLManager);
       sampledHeightBuffer.createOpenCLBufferObject(openCLManager);
+      snappedAverageHeightBuffer.createOpenCLBufferObject(openCLManager);
 
       firstTick = false;
    }
@@ -243,13 +251,17 @@ public class GPUAStarBodyPathPlanner
    {
       pathPlannerProgram.close();
       computeNormalsWithLeastSquaresKernel.close();
+      snapVerticesKernel.close();
 
       normalCalculationParametersBuffer.destroy(openCLManager);
       leastSquaresOffsetBuffer.destroy(openCLManager);
+      snapOffsetsBuffer.destroy(openCLManager);
 
       heightMapBuffer.destroy(openCLManager);
       normalXYZBuffer.destroy(openCLManager);
       sampledHeightBuffer.destroy(openCLManager);
+      snappedAverageHeightBuffer.destroy(openCLManager);
+
 
       openCLManager.destroy();
    }
@@ -260,6 +272,7 @@ public class GPUAStarBodyPathPlanner
       heightMapBuffer.resize(totalCells, openCLManager);
       normalXYZBuffer.resize(3 * totalCells, openCLManager);
       sampledHeightBuffer.resize(totalCells, openCLManager);
+      snappedAverageHeightBuffer.resize(totalCells, openCLManager);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -308,6 +321,25 @@ public class GPUAStarBodyPathPlanner
       }
    }
 
+   void packRadialOffsetsBuffer()
+   {
+      int connections = xSnapOffsets.size();
+      snapOffsetsBuffer.resize(2 * connections + 1, openCLManager);
+      IntPointer intPointer = snapOffsetsBuffer.getBytedecoIntBufferPointer();
+      int index = 0;
+      intPointer.put(index++, connections);
+      for (int x = 0; x < xSnapOffsets.size(); x++)
+      {
+         // pack the x offsets
+         intPointer.put(index, xSnapOffsets.get(x));
+         // pack the y offsets
+         intPointer.put(connections + index++, ySnapOffsets.get(x));
+      }
+
+      snapOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+
    private enum RejectionReason
    {
       INVALID_SNAP,
@@ -343,6 +375,7 @@ public class GPUAStarBodyPathPlanner
       gridHeightMap.clear();
 
       packRadialOffsets(heightMapData, snapRadius, xSnapOffsets, ySnapOffsets);
+      packRadialOffsetsBuffer();
 
       Pose3D startPose = new Pose3D();
       Pose3D goalPose = new Pose3D();
@@ -362,11 +395,13 @@ public class GPUAStarBodyPathPlanner
 
       populateHeightMapImage();
 
+      double patchWidth = 0.3;
+      populateSurfaceNormalsParameterBuffer(patchWidth);
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
-         double patchWidth = 0.3;
          computeSurfaceNormals(patchWidth);
       }
+      computeSnapHeights();
 
       if (useRANSACTraversibility)
       {
@@ -517,7 +552,6 @@ public class GPUAStarBodyPathPlanner
 
    private void computeSurfaceNormals(double patchWidth)
    {
-      populateSurfaceNormalsParameterBuffer(patchWidth);
       populateLeastSquaresoffsetBufferBuffer(patchWidth);
 
       // set the kernel arguments
@@ -533,6 +567,21 @@ public class GPUAStarBodyPathPlanner
       // get the data from the GPU
       sampledHeightBuffer.readOpenCLBufferObject(openCLManager);
       normalXYZBuffer.readOpenCLBufferObject(openCLManager);
+
+      openCLManager.finish();
+   }
+
+   private void computeSnapHeights()
+   {
+      openCLManager.setKernelArgument(snapVerticesKernel, 0, normalCalculationParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 1, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 2, snapOffsetsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 3, snappedAverageHeightBuffer.getOpenCLBufferObject());
+
+      int totalCells = cellsPerSide * cellsPerSide;
+      openCLManager.execute1D(snapVerticesKernel, totalCells);
+
+      snappedAverageHeightBuffer.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
    }
@@ -796,45 +845,10 @@ public class GPUAStarBodyPathPlanner
       int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
       int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
 
-      TDoubleArrayList heights = new TDoubleArrayList();
-      for (int i = 0; i < xSnapOffsets.size(); i++)
-      {
-         int xQuery = xIndex + xSnapOffsets.get(i);
-         int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
-         if (!Double.isNaN(heightQuery))
-         {
-            heights.add(heightQuery);
-         }
-      }
+      double gpuHeight = snappedAverageHeightBuffer.getBackingDirectFloatBuffer().get(HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex));
+      gridHeightMap.put(latticePoint, gpuHeight);
+      return gpuHeight;
 
-      if (heights.isEmpty())
-      {
-         gridHeightMap.put(latticePoint, Double.NaN);
-         return Double.NaN;
-      }
-
-      double maxHeight = heights.max();
-      double heightSampleDelta = 0.08;
-      double minHeight = maxHeight - heightSampleDelta;
-
-      double runningSum = 0.0;
-      int numberOfSamples = 0;
-
-      for (int i = 0; i < xSnapOffsets.size(); i++)
-      {
-         int xQuery = xIndex + xSnapOffsets.get(i);
-         int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
-         if (!Double.isNaN(heightQuery) && heightQuery > minHeight)
-         {
-            runningSum += heightQuery;
-            numberOfSamples++;
-         }
-      }
-
-      gridHeightMap.put(latticePoint, runningSum / numberOfSamples);
-      return maxHeight;
    }
 
    static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
