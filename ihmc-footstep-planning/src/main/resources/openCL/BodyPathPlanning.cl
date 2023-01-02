@@ -7,6 +7,19 @@
 #define SNAP_HEIGHT_THRESHOLD 4
 #define PATCH_WIDTH 5
 
+#define MAX_INCLINE 0
+#define COMPUTE_SURFACE_NORMAL_COST 1
+#define NOMINAL_INCLINE 2
+#define INCLINE_COST_WEIGHT 3
+#define INCLINE_COST_DEADBAND 3
+
+#define VALID -1
+#define INVALID_SNAP 0
+#define TOO_STEEP 1
+#define STEP_TOO_HIGH 2
+#define COLLISION 3
+#define NON_TRAVERSIBLE 4
+
 int key_to_x_index(int key, int center_index)
 {
     return key % (2 * center_index + 1);
@@ -215,6 +228,179 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
     sampled_height[key] = height_at_center;
 }
 
+void kernel snapVertices(global float* params,
+                         global float* height_map,
+                         global int* neighbor_offsets,
+                         global float* snapped_vertex_height)
+{
+    int key = get_global_id(0);
 
+    int center_index = (int) params[CENTER_INDEX];
+    float resolution = params[RESOLUTION];
+
+    int idx_x = key_to_x_index(key, center_index);
+    int idx_y = key_to_y_index(key, center_index);
+
+    int number_of_neighbors = neighbor_offsets[0];
+    int cells_per_side = 2 * center_index + 1;
+
+    // compute the max z
+    float max_z = -INFINITY;
+    for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
+    {
+        int neighbor_idx_x = idx_x + neighbor_offsets[1 + neighborIdx];
+        int neighbor_idx_y = idx_y + neighbor_offsets[1 + number_of_neighbors + neighborIdx];
+
+        if (neighbor_idx_x < 0 || neighbor_idx_x > cells_per_side)
+        {
+            continue;
+        }
+        if (neighbor_idx_y < 0 || neighbor_idx_y > cells_per_side)
+        {
+            continue;
+        }
+
+        int neighbor_key = indices_to_key(neighbor_idx_x, neighbor_idx_y, center_index);
+        float neighbor_z = height_map[neighbor_key];
+
+        if (!isnan(neighbor_z))
+            max_z = max(max_z, neighbor_z);
+    }
+
+    float height_sample_delta = 0.08f;
+    float min_z = max_z - height_sample_delta;
+
+    // compute the average z height
+    float running_sum = 0;
+    int number_of_samples = 0;
+    for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
+    {
+        int neighbor_idx_x = idx_x + neighbor_offsets[1 + neighborIdx];
+        int neighbor_idx_y = idx_y + neighbor_offsets[1 + number_of_neighbors + neighborIdx];
+
+        if (neighbor_idx_x < 0 || neighbor_idx_x > cells_per_side)
+        {
+            continue;
+        }
+        if (neighbor_idx_y < 0 || neighbor_idx_y > cells_per_side)
+        {
+            continue;
+        }
+
+        int neighbor_key = indices_to_key(neighbor_idx_x, neighbor_idx_y, center_index);
+        float neighbor_z = height_map[neighbor_key];
+
+        if (!isnan(neighbor_z) && neighbor_z > min_z)
+        {
+            running_sum += neighbor_z;
+            number_of_samples++;
+        }
+    }
+
+    snapped_vertex_height[key] = running_sum / number_of_samples;
+}
+
+void kernel computeEdges(global float* params,
+                         global float* planner_params,
+                         global int* neighbor_offsets,
+                         global float* height_map,
+                         global float* snapped_height_map,
+                         global float* normal_xyz_buffer,
+                         global int* edge_rejection_reason,
+                         global float* delta_height_map,
+                         global float* incline_map,
+                         global float* incline_cost_map,
+                         global float* roll_cost_map,
+                         global float* edge_cost_map)
+{
+    int key = get_global_id(0);
+
+    int center_index = (int) params[CENTER_INDEX];
+    float resolution = params[RESOLUTION];
+
+    int idx_x = key_to_x_index(key, center_index);
+    int idx_y = key_to_y_index(key, center_index);
+
+    int number_of_neighbors = neighbor_offsets[0];
+
+    // if the current snapped height is bad, invalidate all the edges and return
+    float snapped_height = snapped_height_map[key];
+    if (isnan(snapped_height))
+    {
+         for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
+         {
+             int edge_key = number_of_neighbors * key + neighborIdx;
+             edge_rejection_reason[edge_key] = INVALID_SNAP;
+         }
+         return;
+    }
+
+    float start_x = index_to_coordinate(idx_x, params[centerX], resolution, center_index);
+    float start_y = index_to_coordinate(idx_y, params[centerY], resolution, center_index);
+
+    int cells_per_side = 2 * center_index + 1;
+
+    for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
+    {
+        int neighbor_idx_x = idx_x + neighbor_offsets[1 + neighborIdx];
+        int neighbor_idx_y = idx_y + neighbor_offsets[1 + number_of_neighbors + neighborIdx];
+        int edge_key = number_of_neighbors * key + neighborIdx;
+
+        if (neighbor_idx_x < 0 || neighbor_idx_x > cells_per_side)
+        {
+            edge_rejection_reason[edge_key] = INVALID_SNAP;
+            continue;
+        }
+        if (neighbor_idx_y < 0 || neighbor_idx_y > cells_per_side)
+        {
+            edge_rejection_reason[edge_key] = INVALID_SNAP;
+            continue;
+        }
+
+        int neighbor_key = indices_to_key(neighbor_idx_x, neighbor_idx_y, center_index);
+        float snapped_neighbor_height = snapped_height_map[neighbor_key];
+        if (isnan(snapped_neighbor_height))
+        {
+            edge_rejection_reason[edge_key] = INVALID_SNAP;
+            continue;
+        }
+
+        float neighbor_x = index_to_coordinate(neighbor_idx_x, params[centerX], resolution, center_index);
+        float neighbor_y = index_to_coordinate(neighbor_idx_y, params[centerY], resolution, center_index);
+        float xy_distance = sqrt((neighbor_x - start_x) * (neighbor_x - start_x) + (neighbor_y - start_y) * (neighbor_y - start_y));
+
+        float delta_height = fabs(snapped_neighbor_height - snapped_height);
+        float incline = atan2(delta_height, xy_distance);
+
+        delta_height_map[edge_key] = delta_height;
+        incline_map[edge_key] = incline;
+
+        if (fabs(incline) > planner_params[MAX_INCLINE])
+        {
+            edge_rejection_reason[edge_key] = TOO_STEEP;
+            continue;
+        }
+
+        // TODO check for collisions
+
+        // TODO check for traversibility
+
+        float edge_cost = xy_distance;
+        float incline_cost = 0.0;
+        if (incline > planner_params[NOMINAL_INCLINE])
+        {
+            float inclineDelta = fabs( (incline - planner_params[NOMINAL_INCLINE]));
+            incline_cost = planner_params[INCLINE_COST_WEIGHT] * (max(0.0f, inclineDelta - planner_params[INCLINE_COST_DEADBAND]));
+        }
+        edge_cost += incline_cost;
+
+        // TODO compute roll cost
+
+        // TODO compute traversibility cost
+
+        edge_cost_map[edge_key] = edge_cost;
+        incline_cost_map[edge_key] = incline_cost;
+    }
+}
 
 
