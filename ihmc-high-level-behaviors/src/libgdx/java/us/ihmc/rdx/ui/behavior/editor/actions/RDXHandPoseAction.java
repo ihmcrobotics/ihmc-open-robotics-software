@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -13,6 +13,7 @@ import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -22,14 +23,14 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
+import us.ihmc.rdx.ui.behavior.editor.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ModifiableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
-
-import java.util.List;
 
 public class RDXHandPoseAction extends RDXBehaviorAction
 {
@@ -46,7 +47,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ImDouble trajectoryTime = new ImDouble(4.0);
+   private final ImDouble trajectoryDuration = new ImDouble(4.0);
    private RobotSide side;
 
    public RDXHandPoseAction(RDX3DPanel panel3D,
@@ -54,7 +55,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
                             ROS2SyncedRobotModel syncedRobot,
                             FullHumanoidRobotModel fullRobotModel,
                             ROS2ControllerHelper ros2ControllerHelper,
-                            List<ReferenceFrame> referenceFrameLibrary)
+                            ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.robotModel = robotModel;
@@ -134,7 +135,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          changeDerivativeFrames();
       }
       ImGui.pushItemWidth(80.0f);
-      ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
+      ImGui.inputDouble(labels.get("Trajectory duration"), trajectoryDuration);
       ImGui.popItemWidth();
    }
 
@@ -151,7 +152,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       jsonNode.put("parentFrame", poseGizmo.getGizmoFrame().getParent().getName());
       jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryTime", trajectoryTime.get());
+      jsonNode.put("trajectoryDuration", trajectoryDuration.get());
       JSONTools.toJSON(jsonNode, poseGizmo.getTransformToParent());
    }
 
@@ -161,7 +162,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       String referenceFrameName = jsonNode.get("parentFrame").asText();
       setReferenceFrame(referenceFrameName);
       setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()), false, null);
-      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
+      trajectoryDuration.set(jsonNode.get("trajectoryDuration").asDouble());
       JSONTools.toEuclid(jsonNode, poseGizmo.getTransformToParent());
    }
 
@@ -218,7 +219,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(FrameInformation.WORLD_FRAME);
       SE3TrajectoryPointMessage trajectoryPoint = handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
-      trajectoryPoint.setTime(trajectoryTime.get());
+      trajectoryPoint.setTime(trajectoryDuration.get());
       trajectoryPoint.getPosition().set(endHandPose.getPosition());
       trajectoryPoint.getOrientation().set(endHandPose.getOrientation());
       trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);

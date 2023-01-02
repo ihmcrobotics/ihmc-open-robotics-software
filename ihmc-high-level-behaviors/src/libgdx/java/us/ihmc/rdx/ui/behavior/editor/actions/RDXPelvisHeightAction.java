@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -11,13 +11,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
 public class RDXPelvisHeightAction extends RDXBehaviorAction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ImDouble heightInWorld = new ImDouble();
-   private final ImDouble trajectoryTime = new ImDouble(4.0);
+   private final ImDouble trajectoryDuration = new ImDouble(4.0);
 
    public RDXPelvisHeightAction(ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -31,21 +32,21 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    {
       ImGui.pushItemWidth(80.0f);
       ImGui.inputDouble(labels.get("Height in world"), heightInWorld);
-      ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
+      ImGui.inputDouble(labels.get("Trajectory duration"), trajectoryDuration);
       ImGui.popItemWidth();
    }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      jsonNode.put("trajectoryTime", trajectoryTime.get());
+      jsonNode.put("trajectoryDuration", trajectoryDuration.get());
       jsonNode.put("heightInWorld", heightInWorld.get());
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
+      trajectoryDuration.set(jsonNode.get("trajectoryDuration").asDouble());
       heightInWorld.set(jsonNode.get("heightInWorld").asDouble());
    }
 
@@ -54,7 +55,7 @@ public class RDXPelvisHeightAction extends RDXBehaviorAction
    {
       PelvisHeightTrajectoryMessage message = new PelvisHeightTrajectoryMessage();
       message.getEuclideanTrajectory()
-             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryTime.get(),
+             .set(HumanoidMessageTools.createEuclideanTrajectoryMessage(trajectoryDuration.get(),
                                                                         new Point3D(0.0, 0.0, heightInWorld.get()),
                                                                         ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());

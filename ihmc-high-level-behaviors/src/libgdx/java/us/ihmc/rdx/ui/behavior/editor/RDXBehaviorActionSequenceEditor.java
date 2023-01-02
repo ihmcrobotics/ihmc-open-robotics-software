@@ -12,8 +12,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -21,6 +21,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.ui.behavior.editor.actions.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.io.JSONFileTools;
@@ -29,7 +30,6 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class RDXBehaviorActionSequenceEditor
 {
@@ -46,7 +46,7 @@ public class RDXBehaviorActionSequenceEditor
    private int excecutionNextIndex = 0;
    private FootstepPlanningModule footstepPlanner;
    private ROS2SyncedRobotModel syncedRobot;
-   private List<ReferenceFrame> referenceFrameLibrary;
+   private ReferenceFrameLibrary referenceFrameLibrary;
    private ROS2ControllerHelper ros2ControllerHelper;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private boolean loading = false;
@@ -75,7 +75,7 @@ public class RDXBehaviorActionSequenceEditor
                       DRCRobotModel robotModel,
                       ROS2Node ros2Node,
                       ROS2SyncedRobotModel syncedRobot,
-                      List<ReferenceFrame> referenceFrameLibrary)
+                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.panel3D = panel3D;
       this.robotModel = robotModel;
@@ -103,8 +103,8 @@ public class RDXBehaviorActionSequenceEditor
             String actionType = actionNode.get("type").asText();
             RDXBehaviorAction action = switch (actionType)
             {
-               case "RDXArmJointAnglesAction" -> new RDXArmJointAnglesAction(ros2ControllerHelper);
-               case "RDXChestOrientationAction" -> new RDXChestOrientationAction(ros2ControllerHelper, syncedRobot);
+               case "RDXArmJointAnglesAction" -> new RDXArmJointAnglesAction();
+               case "RDXChestOrientationAction" -> new RDXChestOrientationAction();
                case "RDXFootstepAction" -> newFootstepAction(null);
                case "RDXHandConfigurationAction" -> new RDXHandConfigurationAction(ros2ControllerHelper);
                case "RDXHandPoseAction" -> newHandPoseAction();
@@ -162,20 +162,6 @@ public class RDXBehaviorActionSequenceEditor
    {
       for (var action : actionSequence)
          action.update();
-
-      if (automaticExecution.get())
-      {
-         boolean endOfSequence = excecutionNextIndex >= actionSequence.size();
-         if (endOfSequence)
-         {
-            automaticExecution.set(false);
-            currentlyExecutingAction = null;
-         }
-         else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting())
-         {
-            executeNextAction();
-         }
-      }
    }
 
    public void renderImGuiWidgets()
@@ -247,7 +233,7 @@ public class RDXBehaviorActionSequenceEditor
             ImGui.sameLine();
             if (ImGui.button(labels.get("Manually")))
             {
-               executeNextAction();
+               // TODO: Send a message
             }
             ImGuiTools.previousWidgetTooltip("Executes the next action.");
          }
@@ -363,7 +349,7 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Chest Orientation")))
       {
-         newAction = new RDXChestOrientationAction(ros2ControllerHelper, syncedRobot);
+         newAction = new RDXChestOrientationAction();
       }
       if (ImGui.button(labels.get("Add Pelvis Height")))
       {
@@ -371,7 +357,7 @@ public class RDXBehaviorActionSequenceEditor
       }
       if (ImGui.button(labels.get("Add Arm Joint Angles")))
       {
-         newAction = new RDXArmJointAnglesAction(ros2ControllerHelper);
+         newAction = new RDXArmJointAnglesAction();
       }
       ImGui.text("Add Footstep:");
       ImGui.sameLine();
@@ -396,13 +382,6 @@ public class RDXBehaviorActionSequenceEditor
          insertNewAction(newAction);
 
       ImGui.endChild();
-   }
-
-   private void executeNextAction()
-   {
-      currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
-      currentlyExecutingAction.performAction();
-      excecutionNextIndex++;
    }
 
    private RDXFootstepAction findNextPreviousFootstepAction()
@@ -441,7 +420,7 @@ public class RDXBehaviorActionSequenceEditor
 
    private RDXFootstepAction newFootstepAction(RDXFootstepAction possiblyNullPreviousFootstepAction)
    {
-      return new RDXFootstepAction(panel3D, robotModel, syncedRobot, ros2ControllerHelper, referenceFrameLibrary, possiblyNullPreviousFootstepAction);
+      return new RDXFootstepAction(panel3D, robotModel, syncedRobot, referenceFrameLibrary, possiblyNullPreviousFootstepAction);
    }
 
    private RDXWalkAction newWalkAction()

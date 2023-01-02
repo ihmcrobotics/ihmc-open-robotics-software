@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXHandWrenchAction extends RDXBehaviorAction
@@ -19,7 +20,7 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RobotSide side;
    private final ROS2ControllerHelper ros2ControllerHelper;
-   private final ImDouble trajectoryTime = new ImDouble(1000.0);
+   private final ImDouble trajectoryDuration = new ImDouble(1000.0);
    private final ImDouble force = new ImDouble(20.0);
 
    public RDXHandWrenchAction(ROS2ControllerHelper ros2ControllerHelper)
@@ -36,7 +37,7 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    public void renderImGuiSettingWidgets()
    {
       ImGui.pushItemWidth(80.0f);
-      ImGui.inputDouble(labels.get("Trajectory time"), trajectoryTime);
+      ImGui.inputDouble(labels.get("Trajectory duration"), trajectoryDuration);
       ImGui.inputDouble(labels.get("Force"), force);
       ImGui.popItemWidth();
    }
@@ -45,7 +46,7 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    public void saveToFile(ObjectNode jsonNode)
    {
       jsonNode.put("side", side.getLowerCaseName());
-      jsonNode.put("trajectoryTime", trajectoryTime.get());
+      jsonNode.put("trajectoryDuration", trajectoryDuration.get());
       jsonNode.put("force", force.get());
    }
 
@@ -53,7 +54,7 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
    public void loadFromFile(JsonNode jsonNode)
    {
       setSide(RobotSide.getSideFromString(jsonNode.get("side").asText()));
-      trajectoryTime.set(jsonNode.get("trajectoryTime").asDouble());
+      trajectoryDuration.set(jsonNode.get("trajectoryDuration").asDouble());
       force.set(jsonNode.get("force").asDouble());
    }
 
@@ -74,7 +75,7 @@ public class RDXHandWrenchAction extends RDXBehaviorAction
          Vector3D force0 = new Vector3D(0.0, side == RobotSide.RIGHT ? force : -force, 0.0);
          wrenchTrajectoryPoints.add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(time0, torque0, force0));
 
-         double time1 = trajectoryTime.get();
+         double time1 = trajectoryDuration.get();
          Vector3D torque1 = new Vector3D();
          Vector3D force1 = new Vector3D(0.0, side == RobotSide.RIGHT ? force : -force, 0.0);
          wrenchTrajectoryPoints.add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(time1, torque1, force1));

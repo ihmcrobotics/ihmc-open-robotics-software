@@ -1,10 +1,11 @@
-package us.ihmc.rdx.ui.behavior.editor;
+package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.type.ImDouble;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 import us.ihmc.tools.Timer;
 
 public class RDXWaitDurationAction extends RDXBehaviorAction
