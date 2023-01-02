@@ -2,21 +2,21 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "WalkAction" defined in "WalkAction_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "WalkActionMessage" defined in "WalkActionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from WalkAction_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit WalkAction_.idl instead.
+* This file was automatically generated from WalkActionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit WalkActionMessage_.idl instead.
 *
 */
-public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.WalkAction>
+public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.WalkActionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::WalkAction_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::WalkActionMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.WalkAction data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.WalkAction data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.WalkActionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -58,12 +58,12 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.WalkAction data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.WalkActionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.WalkAction data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.WalkActionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -88,7 +88,7 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.WalkAction data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
    {
       if(data.getParentFrame().size() <= 1000)
       cdr.write_type_e(data.getParentFrame());else
@@ -103,7 +103,7 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
 
    }
 
-   public static void read(behavior_msgs.msg.dds.WalkAction data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_e(data.getParentFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
@@ -117,7 +117,7 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.WalkAction data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_e("parent_frame", data.getParentFrame());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
@@ -131,7 +131,7 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WalkAction data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WalkActionMessage data)
    {
       ser.read_type_e("parent_frame", data.getParentFrame());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
@@ -144,15 +144,15 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.WalkAction src, behavior_msgs.msg.dds.WalkAction dest)
+   public static void staticCopy(behavior_msgs.msg.dds.WalkActionMessage src, behavior_msgs.msg.dds.WalkActionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.WalkAction createData()
+   public behavior_msgs.msg.dds.WalkActionMessage createData()
    {
-      return new behavior_msgs.msg.dds.WalkAction();
+      return new behavior_msgs.msg.dds.WalkActionMessage();
    }
    @Override
    public int getTypeSize()
@@ -166,24 +166,24 @@ public class WalkActionPubSubType implements us.ihmc.pubsub.TopicDataType<behavi
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.WalkAction data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.WalkAction data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.WalkAction src, behavior_msgs.msg.dds.WalkAction dest)
+   public void copy(behavior_msgs.msg.dds.WalkActionMessage src, behavior_msgs.msg.dds.WalkActionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public WalkActionPubSubType newInstance()
+   public WalkActionMessagePubSubType newInstance()
    {
-      return new WalkActionPubSubType();
+      return new WalkActionMessagePubSubType();
    }
 }

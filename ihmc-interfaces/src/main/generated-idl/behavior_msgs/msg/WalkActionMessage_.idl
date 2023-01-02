@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__WalkAction__idl__
-#define __behavior_msgs__msg__WalkAction__idl__
+#ifndef __behavior_msgs__msg__WalkActionMessage__idl__
+#define __behavior_msgs__msg__WalkActionMessage__idl__
 
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::WalkAction_")
-      struct WalkAction
+      @TypeCode(type="behavior_msgs::msg::dds_::WalkActionMessage_")
+      struct WalkActionMessage
       {
         /**
          * Name of the frame the this action is expressed in
