@@ -12,9 +12,9 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfigurat
 
 public class RDXHandConfigurationAction extends RDXBehaviorAction
 {
-   private final HandConfigurationActionData action = new HandConfigurationActionData();
+   private final HandConfigurationActionData actionData = new HandConfigurationActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(action::getSide, action::setSide, labels.get("Side"));
+   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
    private final ImInt handConfigurationIndex = new ImInt(6);
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
 
@@ -34,21 +34,21 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    {
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
-      handConfigurationIndex.set(action.getHandConfigurationIndex());
+      handConfigurationIndex.set(actionData.getHandConfigurationIndex());
       ImGui.combo(labels.get("Grip"), handConfigurationIndex, handConfigurationNames);
-      action.setHandConfigurationIndex(handConfigurationIndex.get());
+      actionData.setHandConfigurationIndex(handConfigurationIndex.get());
       ImGui.popItemWidth();
    }
 
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      action.saveToFile(jsonNode);
+      actionData.saveToFile(jsonNode);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      action.loadFromFile(jsonNode);
+      actionData.loadFromFile(jsonNode);
    }
 }

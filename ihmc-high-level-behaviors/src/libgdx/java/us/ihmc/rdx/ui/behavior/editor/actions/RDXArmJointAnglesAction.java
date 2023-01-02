@@ -12,12 +12,12 @@ import us.ihmc.rdx.ui.behavior.editor.RDXBehaviorAction;
 
 public class RDXArmJointAnglesAction extends RDXBehaviorAction
 {
-   private final ArmJointAnglesActionData action = new ArmJointAnglesActionData();
+   private final ArmJointAnglesActionData actionData = new ArmJointAnglesActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(action::getSide, action::setSide, labels.get("Side"));
+   private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
    private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesAction.NUMBER_OF_JOINTS];
-   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(action::getTrajectoryDuration,
-                                                                                action::setTrajectoryDuration,
+   private final ImDoubleWrapper trajectoryDurationWidget = new ImDoubleWrapper(actionData::getTrajectoryDuration,
+                                                                                actionData::setTrajectoryDuration,
                                                                                 imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
 
    public RDXArmJointAnglesAction()
@@ -27,9 +27,9 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
       for (int i = 0; i < ArmJointAnglesAction.NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
-         jointAngleWidgets[i] = new ImDoubleWrapper(() -> action.getJointAngles()[jointIndex],
-                                              jointAngle -> action.getJointAngles()[jointIndex] = jointAngle,
-                                              imDouble -> ImGui.inputDouble(labels.get("j" + jointIndex), imDouble));
+         jointAngleWidgets[i] = new ImDoubleWrapper(() -> actionData.getJointAngles()[jointIndex],
+                                                    jointAngle -> actionData.getJointAngles()[jointIndex] = jointAngle,
+                                                    imDouble -> ImGui.inputDouble(labels.get("j" + jointIndex), imDouble));
       }
    }
 
@@ -51,12 +51,12 @@ public class RDXArmJointAnglesAction extends RDXBehaviorAction
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      action.saveToFile(jsonNode);
+      actionData.saveToFile(jsonNode);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      action.loadFromFile(jsonNode);
+      actionData.loadFromFile(jsonNode);
    }
 }

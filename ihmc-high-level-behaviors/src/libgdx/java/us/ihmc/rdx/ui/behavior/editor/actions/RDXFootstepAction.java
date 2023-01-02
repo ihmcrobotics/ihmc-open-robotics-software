@@ -24,7 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXFootstepAction extends RDXBehaviorAction
 {
-   private final FootstepActionData action = new FootstepActionData();
+   private final FootstepActionData actionData = new FootstepActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXInteractableHighlightModel highlightModel;
    private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();
@@ -55,7 +55,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
 
    public void setSide(RobotSide side, boolean authoring)
    {
-      action.setSide(side);
+      actionData.setSide(side);
       String footBodyName = syncedRobot.getFullRobotModel().getFoot(side).getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
       highlightModel = new RDXInteractableHighlightModel(modelFileName);
@@ -118,13 +118,13 @@ public class RDXFootstepAction extends RDXBehaviorAction
    @Override
    public void saveToFile(ObjectNode jsonNode)
    {
-      action.saveToFile(jsonNode);
+      actionData.saveToFile(jsonNode);
    }
 
    @Override
    public void loadFromFile(JsonNode jsonNode)
    {
-      action.loadFromFile(jsonNode);
+      actionData.loadFromFile(jsonNode);
    }
 
    private void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -152,7 +152,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
    @Override
    public String getNameForDisplay()
    {
-      return action.getSide().getPascalCaseName() + " Footstep";
+      return actionData.getSide().getPascalCaseName() + " Footstep";
    }
 
    public ReferenceFrame getReferenceFrame()
