@@ -657,7 +657,6 @@ public class GPUAStarBodyPathPlanner
                                                                                                                  heightMapData.getGridResolutionXY(),
                                                                                                                  heightMapData.getCenterIndex()));
 
-      LogTools.info("Surface normal " + surfaceNormal);
          Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
          edge.normalize();
 
