@@ -6,6 +6,7 @@
 #define RESOLUTION 0
 #define CENTER_INDEX 1
 #define SNAP_HEIGHT_THRESHOLD 2
+#define PATCH_WIDTH 3
 
 int pointXOffsets[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
 int pointYOffsets[9] = {1, 1, 1, 0, 0, 0, -1, -1, -1};
@@ -63,7 +64,47 @@ float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vec
     return coefficients;
 }
 
-void kernel computeSurfaceNormals(read_only float* params,
+int* generateXPatchOffsets(float* params)
+{
+    float resolution = params[RESOLUTION];
+    float patch_width = params[PATCH_WIDTH];
+    int patch_cell_half_width = (int) ((patch_width / 2.0) / resolution);
+    if (patch_cell_half_width % 2 == 0)
+        patch_cell_half_width++;
+
+    int xOffsets[patch_cell_half_width * patch_cell_half_width];
+
+    int index = 0;
+    for (int x = -patch_cell_half_width; x <= patch_cell_half_width; x++)
+    {
+        for (int y = -patch_cell_half_width; y <= patch_cell_half_width; y++)
+        {
+            xOffsets[index++] = y;
+        }
+    }
+}
+
+int* generateYPatchOffsets(float* params)
+{
+    float resolution = params[RESOLUTION];
+    float patch_width = params[PATCH_WIDTH];
+    int patch_cell_half_width = (int) ((patch_width / 2.0) / resolution);
+    if (patch_cell_half_width % 2 == 0)
+        patch_cell_half_width++;
+
+    int yOffsets[patch_cell_half_width * patch_cell_half_width];
+
+    int index = 0;
+    for (int x = -patch_cell_half_width; x <= patch_cell_half_width; x++)
+    {
+        for (int y = -patch_cell_half_width; y <= patch_cell_half_width; y++)
+        {
+            yOffsets[index++] = x;
+        }
+    }
+}
+
+void kernel computeSurfaceNormalsWithLeastSquares(read_only float* params,
                                   read_only float* localization,
                                   read_only image2d_t height_map,
                                   write_only image2d_t normal_x_mat,
@@ -82,9 +123,12 @@ void kernel computeSurfaceNormals(read_only float* params,
 
     int idx = get_idx_in_layer(idx_x, idx_y, center_index);
 
+    int* pointXOffsets = generateXPatchOffsets(params);
+    int* pointYOffsets = generateYPatchOffsets(params);
+
     // compute the maximum height in the area of interest.
     float max_z = -INFINITY;
-    for (int cell = 0; cell < 9; cell++)
+    for (int cell = 0; cell < sizeof(pointXOffsets); cell++)
     {
         int idx_x_to_poll = idx_x + pointXOffsets[cell];
         int idx_y_to_poll = idx_y + pointYOffsets[cell];
@@ -117,7 +161,7 @@ void kernel computeSurfaceNormals(read_only float* params,
     float yz = 0.0;
     float zz = 0.0;
 
-    for (int cell = 0; cell < 9; cell++)
+    for (int cell = 0; cell < sizeof(pointXOffsets); cell++)
     {
         int idx_x_to_poll = idx_x + pointXOffsets[cell];
         int idx_y_to_poll = idx_y + pointYOffsets[cell];
