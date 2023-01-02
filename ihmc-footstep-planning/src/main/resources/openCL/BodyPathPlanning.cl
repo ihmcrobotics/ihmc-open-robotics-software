@@ -1,24 +1,20 @@
 #define FLOAT_TO_INT_SCALE 10000
 
-#define centerX 0
-#define centerY 1
-
 #define RESOLUTION 0
 #define CENTER_INDEX 1
-#define SNAP_HEIGHT_THRESHOLD 2
-#define PATCH_WIDTH 3
+#define centerX 2
+#define centerY 3
+#define SNAP_HEIGHT_THRESHOLD 4
+#define PATCH_WIDTH 5
 
-int pointXOffsets[9] = {-1, 0, 1, -1, 0, 1, -1, 0, 1};
-int pointYOffsets[9] = {1, 1, 1, 0, 0, 0, -1, -1, -1};
-
-int get_x_idx(float x, float center, float* params)
+int key_to_x_index(int key, int center_index)
 {
-    return coordinate_to_index(x, center, params[RESOLUTION], params[CENTER_INDEX]);
+    return key % (2 * center_index + 1);
 }
 
-int get_y_idx(float y, float center, float* params)
+int key_to_y_index(int key, int center_index)
 {
-    return coordinate_to_index(y, center, params[RESOLUTION], params[CENTER_INDEX]);
+    return key / (2 * center_index + 1);
 }
 
 int indices_to_key(int x_index, int y_index, int centerIndex)
@@ -34,7 +30,7 @@ float index_to_coordinate(int index, float grid_center, float resolution, int ce
 float determinant3x3Matrix(float* matrix)
 {
     float pos = matrix[0] * matrix[4] * matrix[8] + matrix[1] * matrix[5] * matrix[6] + matrix[2] * matrix[3] * matrix[7];
-    float neg = matrix[2] * matrix[3] * matrix[6] + matrix[1] * matrix[3] * matrix[8] + matrix[0] * matrix[5] * matrix[7];
+    float neg = matrix[2] * matrix[4] * matrix[6] + matrix[1] * matrix[3] * matrix[8] + matrix[0] * matrix[5] * matrix[7];
 
     return pos - neg;
 }
@@ -44,15 +40,37 @@ float* invert3x3Matrix(float* matrix)
     float det = determinant3x3Matrix(matrix);
     float ret[9];
 
-    ret[0] = (matrix[4] * matrix[8] - matrix[5] * matrix[7]) / det;
-    ret[1] = (matrix[2] * matrix[7] - matrix[1] * matrix[8]) / det;
-    ret[2] = (matrix[2] * matrix[5] - matrix[3] * matrix[4]) / det;
+    float detMinor00 = matrix[4] * matrix[8] - matrix[5] * matrix[7];
+    float detMinor01 = matrix[3] * matrix[8] - matrix[5] * matrix[6];
+    float detMinor02 = matrix[3] * matrix[7] - matrix[4] * matrix[6];
+
+    float detMinor10 = matrix[1] * matrix[8] - matrix[2] * matrix[7];
+    float detMinor11 = matrix[0] * matrix[8] - matrix[2] * matrix[6];
+    float detMinor12 = matrix[0] * matrix[7] - matrix[1] * matrix[6];
+
+    float detMinor20 = matrix[1] * matrix[5] - matrix[2] * matrix[4];
+    float detMinor21 = matrix[0] * matrix[5] - matrix[2] * matrix[3];
+    float detMinor22 = matrix[0] * matrix[4] - matrix[1] * matrix[3];
+
+    ret[0] = detMinor00 / det;
+    ret[1] = -detMinor10 / det;
+    ret[2] = detMinor20 / det;
+
+    ret[3] = -detMinor01 / det;
+    ret[4] = detMinor11 / det;
+    ret[5] = -detMinor21 / det;
+
+    ret[6] = detMinor02 / det;
+    ret[7] = -detMinor12 / det;
+    ret[8] = detMinor22 / det;
+
+    return ret;
 }
 
 float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vector)
 {
     float* inverse_covariance_matrix = invert3x3Matrix(covariance_matrix);
-    float coefficients[3] = {0.0, 0.0, 0.0};
+    float coefficients[3] = {0.0f, 0.0f, 0.0f};
     for (int row = 0; row < 3; row++)
     {
         for (int col = 0; col < 3; col++)
@@ -64,74 +82,32 @@ float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vec
     return coefficients;
 }
 
-int* generateXPatchOffsets(float* params)
+void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
+                                                  global int* offsets,
+                                  global float* height_map,
+                                  global float* normal_xyz_buffer,
+                                  global float* sampled_height)
 {
-    float resolution = params[RESOLUTION];
-    float patch_width = params[PATCH_WIDTH];
-    int patch_cell_half_width = (int) ((patch_width / 2.0) / resolution);
-    if (patch_cell_half_width % 2 == 0)
-        patch_cell_half_width++;
+    int key = get_global_id(0);
 
-    int xOffsets[patch_cell_half_width * patch_cell_half_width];
+    int center_index = (int) params[CENTER_INDEX];
 
-    int index = 0;
-    for (int x = -patch_cell_half_width; x <= patch_cell_half_width; x++)
-    {
-        for (int y = -patch_cell_half_width; y <= patch_cell_half_width; y++)
-        {
-            xOffsets[index++] = y;
-        }
-    }
-}
+    int idx_x = key_to_x_index(key, center_index);
+    int idx_y = key_to_y_index(key, center_index);
 
-int* generateYPatchOffsets(float* params)
-{
-    float resolution = params[RESOLUTION];
-    float patch_width = params[PATCH_WIDTH];
-    int patch_cell_half_width = (int) ((patch_width / 2.0) / resolution);
-    if (patch_cell_half_width % 2 == 0)
-        patch_cell_half_width++;
+    int cells_per_side = 2 * center_index + 1;
 
-    int yOffsets[patch_cell_half_width * patch_cell_half_width];
+    int patch_cell_half_width = offsets[0];
 
-    int index = 0;
-    for (int x = -patch_cell_half_width; x <= patch_cell_half_width; x++)
-    {
-        for (int y = -patch_cell_half_width; y <= patch_cell_half_width; y++)
-        {
-            yOffsets[index++] = x;
-        }
-    }
-}
-
-void kernel computeSurfaceNormalsWithLeastSquares(read_only float* params,
-                                  read_only float* localization,
-                                  read_only image2d_t height_map,
-                                  write_only image2d_t normal_x_mat,
-                                  write_only image2d_t normal_y_mat,
-                                  write_only image2d_t normal_z_mat,
-                                  write_only image2d_t sampled_height)
-{
-    int idx_x = get_global_id(0);
-    int idx_y = get_global_id(1);
-
-    int center_index = params[CENTER_INDEX]
-    int cells_per_side = 2 * centerIndex + 1;
-
-    float x_coordinate = index_to_coordinate(idx_x, localization[centerX], params[resolution], center_index);
-    float y_coordinate = index_to_coordinate(idx_y, localization[centerY], params[resolution], center_index);
-
-    int idx = get_idx_in_layer(idx_x, idx_y, center_index);
-
-    int* pointXOffsets = generateXPatchOffsets(params);
-    int* pointYOffsets = generateYPatchOffsets(params);
+    int connection_side_size = 2 * patch_cell_half_width + 1;
+    int connections = connection_side_size * connection_side_size;
 
     // compute the maximum height in the area of interest.
     float max_z = -INFINITY;
-    for (int cell = 0; cell < sizeof(pointXOffsets); cell++)
+    for (int cell = 0; cell < connections; cell++)
     {
-        int idx_x_to_poll = idx_x + pointXOffsets[cell];
-        int idx_y_to_poll = idx_y + pointYOffsets[cell];
+        int idx_x_to_poll = idx_x + offsets[cell + 1];
+        int idx_y_to_poll = idx_y + offsets[connections + cell + 1];
 
         // check to make sure the index is in frame
         if (idx_x_to_poll < 0 || idx_x_to_poll > cells_per_side)
@@ -139,9 +115,8 @@ void kernel computeSurfaceNormalsWithLeastSquares(read_only float* params,
         if (idx_y_to_poll < 0 || idx_y_to_poll > cells_per_side)
             continue;
 
-        int idx_to_poll = get_idx_in_layer(idx_x_to_poll, idx_y_to_poll, center_index);
-
-        float z_coordinate = read_imagef(height_map, idx_to_poll).x;
+        int key_to_poll = indices_to_key(idx_x_to_poll, idx_y_to_poll, center_index);
+        float z_coordinate = height_map[key_to_poll];
 
         if (!isnan(z_coordinate))
             max_z = max(max_z, z_coordinate);
@@ -161,27 +136,26 @@ void kernel computeSurfaceNormalsWithLeastSquares(read_only float* params,
     float yz = 0.0;
     float zz = 0.0;
 
-    for (int cell = 0; cell < sizeof(pointXOffsets); cell++)
+    for (int cell = 0; cell < connections; cell++)
     {
-        int idx_x_to_poll = idx_x + pointXOffsets[cell];
-        int idx_y_to_poll = idx_y + pointYOffsets[cell];
-        int idx_to_poll = get_idx_in_layer(idx_x_to_poll, idx_y_to_poll, center_index);
+        int idx_x_to_poll = idx_x + offsets[cell + 1];
+        int idx_y_to_poll = idx_y + offsets[connections + cell + 1];
 
         if (idx_x_to_poll < 0 || idx_x_to_poll > cells_per_side)
             continue;
         if (idx_y_to_poll < 0 || idx_y_to_poll > cells_per_side)
             continue;
 
-        float z_coordinate_to_poll = heightMap[idx_to_poll];
+        int key_to_poll = indices_to_key(idx_x_to_poll, idx_y_to_poll, center_index);
+        float z_coordinate_to_poll = height_map[key_to_poll];
 
         if (isnan(z_coordinate_to_poll) || z_coordinate_to_poll < min_z)
             continue;
 
+        float x_coordinate_to_poll = index_to_coordinate(idx_x_to_poll, params[centerX], params[RESOLUTION], center_index);
+        float y_coordinate_to_poll = index_to_coordinate(idx_y_to_poll, params[centerY], params[RESOLUTION], center_index);
 
-        float x_coordinate_to_poll = index_to_coordinate(idx_x_to_poll, localization[centerX], params[resolution], center_index);
-        float y_coordinate_to_poll = index_to_coordinate(idx_y_to_poll, localization[centerY], params[resolution], center_index);
-
-        n++;
+        n += 1.0f;
         x += x_coordinate_to_poll;
         y += y_coordinate_to_poll;
         z += z_coordinate_to_poll;
@@ -199,19 +173,32 @@ void kernel computeSurfaceNormalsWithLeastSquares(read_only float* params,
     {
         float covariance_matrix[9] = {xx, xy, x, xy, yy, y, x, y, n};
         float z_variance_vector[3] = {-xz, -yz, -z};
-        float coefficients = solveForPlaneCoefficients(covariance_matrix, z_variance_vector);
+        float* coefficients = solveForPlaneCoefficients(covariance_matrix, z_variance_vector);
 
-        float mag = sqrt(coefficients[0] * coefficients[0] + coefficients[1] * coefficients[1] + 1.0);
         float x_solution = x / n;
         float y_solution = y / n;
         float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
 
+        float mag = sqrt(coefficients[0] * coefficients[0] + coefficients[1] * coefficients[1] + 1.0);
         normal_x = coefficients[0] / mag;
         normal_y = coefficients[1] / mag;
         normal_z = 1.0 / mag;
 
+        float x_coordinate = index_to_coordinate(idx_x, params[centerX], params[RESOLUTION], center_index);
+        float y_coordinate = index_to_coordinate(idx_y, params[centerY], params[RESOLUTION], center_index);
+        float z_coordinate = height_map[key];
+
         // Given the plane equation: a*x + b*y + c*z + d = 0, with d = -(a*x0 + b*y0 + c*z0), we find z:
-        height_at_center = normal_x / normal_z * (x_solution - x_solution_to_poll) + normal_y / normal_z * (y_solution - y_solution_to_poll) + z_solution_to_poll;
+        height_at_center = normal_x / normal_z * (x_solution - x_coordinate) + normal_y / normal_z * (y_solution - y_coordinate) + z_coordinate;
+
+        if (isnan(normal_x))
+        {
+            normal_x = 0.0;
+            normal_y = 0.0;
+            normal_z = 1.0;
+
+            height_at_center = NAN;
+        }
     }
     else
     {
@@ -219,13 +206,13 @@ void kernel computeSurfaceNormalsWithLeastSquares(read_only float* params,
         normal_y = 0.0;
         normal_z = 1.0;
 
-        height_at_center = nanf;
+        height_at_center = NAN;
     }
 
-    write_imagef(normal_x_mat, key, (float4)(normal_x, 0, 0, 0));
-    write_imagef(normal_y_mat, key, (float4)(normal_y, 0, 0, 0));
-    write_imagef(normal_z_mat, key, (float4)(normal_z, 0, 0, 0));
-    write_imagef(sampled_height, key, (float4)(height_at_center, 0, 0, 0));
+    normal_xyz_buffer[3 * key] = normal_x;
+    normal_xyz_buffer[3 * key + 1] = normal_y;
+    normal_xyz_buffer[3 * key + 2] = normal_z;
+    sampled_height[key] = height_at_center;
 }
 
 

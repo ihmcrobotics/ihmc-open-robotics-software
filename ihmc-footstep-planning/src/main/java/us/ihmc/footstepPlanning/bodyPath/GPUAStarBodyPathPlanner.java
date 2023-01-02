@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
@@ -26,12 +28,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.*;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.Activator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -111,12 +113,15 @@ public class GPUAStarBodyPathPlanner
    private _cl_program pathPlannerProgram;
    private _cl_kernel computeNormalsWithLeastSquaresKernel;
 
-   private ByteBuffer heightMapDataBuffer;
-   private BytedecoImage heightMapImage;
-   private BytedecoImage normalXImage;
-   private BytedecoImage normalYImage;
-   private BytedecoImage normalZImage;
-   private BytedecoImage sampledHeightImage;
+   private OpenCLFloatBuffer normalCalculationParametersBuffer = new OpenCLFloatBuffer(6);
+   private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
+   private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
+
+   // TODO once the things that use the normal are all on the GPU, these can be replaced with _cl_mem object = openCLManager.createImage as the backing data in
+   // the cpu is no longer needed
+   private OpenCLFloatBuffer normalXYZBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
+   private int cellsPerSide = -1;
 
    private boolean firstTick = true;
 
@@ -155,7 +160,22 @@ public class GPUAStarBodyPathPlanner
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
 
       openCLManager = new OpenCLManager();
-      create(defaultMapWidth);
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
+
+      Activator nativeLoader = BytedecoTools.loadNativesOnAThread();
+      boolean doneLoading = false;
+
+      while (!doneLoading)
+      {
+         if (nativeLoader.poll())
+         {
+            if (nativeLoader.isNewlyActivated())
+            {
+               createOpenCLStuff(defaultMapWidth);
+               doneLoading = true;
+            }
+         }
+      }
 
       if (useRANSACTraversibility)
       {
@@ -197,38 +217,49 @@ public class GPUAStarBodyPathPlanner
                                       });
    }
 
-   public void create(int numberOfCells)
+   public void createOpenCLStuff(int numberOfCells)
    {
-      pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanner");
+      cellsPerSide = numberOfCells;
+
+      openCLManager.create();
+
+      pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanning");
       computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
-
-      heightMapDataBuffer = ByteBuffer.allocate(Float.BYTES * numberOfCells * numberOfCells);
-      this.heightMapImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, heightMapDataBuffer);
-
-      // TODO switch these al lfrom images to buffers
-      this.normalXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
-      this.normalYImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
-      this.normalZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
-      this.sampledHeightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
-
-      normalXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      normalYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      normalZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      sampledHeightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void destroy()
+   public void firstTickSetup()
+   {
+      normalCalculationParametersBuffer.createOpenCLBufferObject(openCLManager);
+      leastSquaresOffsetBuffer.createOpenCLBufferObject(openCLManager);
+
+      heightMapBuffer.createOpenCLBufferObject(openCLManager);
+      normalXYZBuffer.createOpenCLBufferObject(openCLManager);
+      sampledHeightBuffer.createOpenCLBufferObject(openCLManager);
+
+      firstTick = false;
+   }
+
+   public void destroyOpenCLStuff()
    {
       pathPlannerProgram.close();
       computeNormalsWithLeastSquaresKernel.close();
 
-      heightMapImage.destroy(openCLManager);
-      normalXImage.destroy(openCLManager);
-      normalYImage.destroy(openCLManager);
-      normalZImage.destroy(openCLManager);
-      sampledHeightImage.destroy(openCLManager);
+      normalCalculationParametersBuffer.destroy(openCLManager);
+      leastSquaresOffsetBuffer.destroy(openCLManager);
+
+      heightMapBuffer.destroy(openCLManager);
+      normalXYZBuffer.destroy(openCLManager);
+      sampledHeightBuffer.destroy(openCLManager);
 
       openCLManager.destroy();
+   }
+
+   private void resizeOpenCLObjects()
+   {
+      int totalCells = cellsPerSide * cellsPerSide;
+      heightMapBuffer.resize(totalCells, openCLManager);
+      normalXYZBuffer.resize(3 * totalCells, openCLManager);
+      sampledHeightBuffer.resize(totalCells, openCLManager);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -237,6 +268,9 @@ public class GPUAStarBodyPathPlanner
       {
          collisionDetector.initialize(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
       }
+
+
+
 
       this.heightMapData = heightMapData;
       ransacNormalCalculator.initialize(heightMapData);
@@ -285,6 +319,17 @@ public class GPUAStarBodyPathPlanner
 
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
+      if (firstTick)
+      {
+         firstTickSetup();
+      }
+      if (cellsPerSide != heightMapData.getCellsPerAxis())
+      {
+         this.cellsPerSide = heightMapData.getCellsPerAxis();
+         resizeOpenCLObjects();
+      }
+      LogTools.info("cells Per axis " + cellsPerSide);
+
       haltRequested.set(false);
       iterations = 0;
       reachedGoal = false;
@@ -314,6 +359,8 @@ public class GPUAStarBodyPathPlanner
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
+
+      populateHeightMapImage();
 
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
@@ -412,25 +459,90 @@ public class GPUAStarBodyPathPlanner
       reportStatus(request, outputToPack);
    }
 
+   private void populateHeightMapImage()
+   {
+      for (int x = 0; x < cellsPerSide; x++)
+      {
+         for (int y = 0; y < cellsPerSide; y++)
+         {
+            int key = HeightMapTools.indicesToKey(x, y, heightMapData.getCenterIndex());
+            heightMapBuffer.getBackingDirectFloatBuffer().put(key, (float) heightMapData.getHeightAt(key));
+         }
+      }
+
+      heightMapBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+   private void populateLeastSquaresoffsetBufferBuffer(double patchWidth)
+   {
+      int patchCellHalfWidth = (int) ((patchWidth / 2.0) / heightMapData.getGridResolutionXY());
+      if (patchCellHalfWidth % 2 == 0)
+         patchCellHalfWidth++;
+
+      int size = 2 * patchCellHalfWidth + 1;
+      int connections = size * size;
+      leastSquaresOffsetBuffer.resize(2 * connections + 1, openCLManager);
+      IntPointer intPointer = leastSquaresOffsetBuffer.getBytedecoIntBufferPointer();
+      int index = 0;
+      intPointer.put(index++, patchCellHalfWidth);
+      for (int x = -patchCellHalfWidth; x <= patchCellHalfWidth; x++)
+      {
+         for (int y = -patchCellHalfWidth; y <= patchCellHalfWidth; y++)
+         {
+            // pack the x offsets
+            intPointer.put(index, y);
+            // pack the y offsets
+            intPointer.put(connections + index++, x);
+         }
+      }
+
+      leastSquaresOffsetBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+   private void populateSurfaceNormalsParameterBuffer(double patchWidth)
+   {
+      double maxIncline = Math.toRadians(45.0);
+      float snapHeightThreshold = (float) (patchWidth * Math.sin(maxIncline));
+
+      FloatPointer floatPointer = normalCalculationParametersBuffer.getBytedecoFloatBufferPointer();
+      floatPointer.put(0, (float) heightMapData.getGridResolutionXY());
+      floatPointer.put(1, (float) heightMapData.getCenterIndex());
+      floatPointer.put(2, (float) heightMapData.getGridCenter().getX());
+      floatPointer.put(3, (float) heightMapData.getGridCenter().getY());
+      floatPointer.put(4, snapHeightThreshold);
+      floatPointer.put(5, (float) patchWidth);
+
+      normalCalculationParametersBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
    private void computeSurfaceNormals(double patchWidth)
    {
-      int numberOfCells = heightMapData.getCellsPerAxis();
+      populateSurfaceNormalsParameterBuffer(patchWidth);
+      populateLeastSquaresoffsetBufferBuffer(patchWidth);
+
       // set the kernel arguments
-      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 0, normalXImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 0, normalCalculationParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 1, leastSquaresOffsetBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 2, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 3, normalXYZBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeNormalsWithLeastSquaresKernel, 4, sampledHeightBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute2D(computeNormalsWithLeastSquaresKernel, numberOfCells, numberOfCells);
+      int totalCells = cellsPerSide * cellsPerSide;
+      openCLManager.execute1D(computeNormalsWithLeastSquaresKernel, totalCells);
 
-      // get the data from the kernel
-      openCLManager.enqueueReadImage(normalXImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalXImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(normalYImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalYImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(normalZImage.getOpenCLImageObject(), numberOfCells, numberOfCells, normalZImage.getBytedecoByteBufferPointer());
+      // get the data from the GPU
+      sampledHeightBuffer.readOpenCLBufferObject(openCLManager);
+      normalXYZBuffer.readOpenCLBufferObject(openCLManager);
+
+      openCLManager.finish();
    }
 
    private UnitVector3DReadOnly getSurfaceNormal(int key)
    {
-      return new UnitVector3D(normalXImage.getBackingDirectByteBuffer().getFloat(Float.BYTES * key),
-                              normalYImage.getBackingDirectByteBuffer().getFloat(Float.BYTES * key),
-                              normalZImage.getBackingDirectByteBuffer().getFloat(Float.BYTES * key));
+      float x = normalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key);
+      float y = normalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 1);
+      float z = normalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 2);
+      return new UnitVector3D(x, y, z);
    }
 
    private boolean checkEdge(BodyPathLatticePoint node, double nodeSnapHeight, BodyPathLatticePoint neighbor, int neighborIndex)
@@ -545,6 +657,7 @@ public class GPUAStarBodyPathPlanner
                                                                                                                  heightMapData.getGridResolutionXY(),
                                                                                                                  heightMapData.getCenterIndex()));
 
+      LogTools.info("Surface normal " + surfaceNormal);
          Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
          edge.normalize();
 
