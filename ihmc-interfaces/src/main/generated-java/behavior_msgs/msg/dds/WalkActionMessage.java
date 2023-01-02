@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class WalkAction extends Packet<WalkAction> implements Settable<WalkAction>, EpsilonComparable<WalkAction>
+public class WalkActionMessage extends Packet<WalkActionMessage> implements Settable<WalkActionMessage>, EpsilonComparable<WalkActionMessage>
 {
    /**
             * Name of the frame the this action is expressed in
@@ -33,7 +33,7 @@ public class WalkAction extends Packet<WalkAction> implements Settable<WalkActio
             */
    public double transfer_duration_;
 
-   public WalkAction()
+   public WalkActionMessage()
    {
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
@@ -41,13 +41,13 @@ public class WalkAction extends Packet<WalkAction> implements Settable<WalkActio
       right_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public WalkAction(WalkAction other)
+   public WalkActionMessage(WalkActionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WalkAction other)
+   public void set(WalkActionMessage other)
    {
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
@@ -126,19 +126,19 @@ public class WalkAction extends Packet<WalkAction> implements Settable<WalkActio
    }
 
 
-   public static Supplier<WalkActionPubSubType> getPubSubType()
+   public static Supplier<WalkActionMessagePubSubType> getPubSubType()
    {
-      return WalkActionPubSubType::new;
+      return WalkActionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WalkActionPubSubType::new;
+      return WalkActionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WalkAction other, double epsilon)
+   public boolean epsilonEquals(WalkActionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -161,9 +161,9 @@ public class WalkAction extends Packet<WalkAction> implements Settable<WalkActio
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WalkAction)) return false;
+      if(!(other instanceof WalkActionMessage)) return false;
 
-      WalkAction otherMyClass = (WalkAction) other;
+      WalkActionMessage otherMyClass = (WalkActionMessage) other;
 
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
@@ -182,7 +182,7 @@ public class WalkAction extends Packet<WalkAction> implements Settable<WalkActio
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WalkAction {");
+      builder.append("WalkActionMessage {");
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
       builder.append("transform_to_parent=");

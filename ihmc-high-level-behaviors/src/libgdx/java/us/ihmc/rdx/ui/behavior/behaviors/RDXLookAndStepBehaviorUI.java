@@ -155,7 +155,15 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       swingPlannerRemotePropertySet = new ImGuiRemoteROS2StoredPropertySet(helper,
                                                                            helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep"),
                                                                            SWING_PLANNER_PARAMETERS);
-      stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(), LookAndStepBehaviorParameters.stopForImpassibilities);
+      stopForImpassibilities = new ImBooleanWrapper(lookAndStepRemotePropertySet.getStoredPropertySet(),
+                                                    LookAndStepBehaviorParameters.stopForImpassibilities,
+                                                    stopForImpassibilities ->
+                                                    {
+                                                       if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
+                                                       {
+                                                          lookAndStepRemotePropertySet.setPropertyChanged();
+                                                       }
+                                                    });
    }
 
    @Override
@@ -254,13 +262,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
       footstepPlanningDurationPlot.renderImGuiWidgets();
 //      ImGui.text("Footstep planning regions recieved:");
 //      steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
-      stopForImpassibilities.renderImGuiWidget(stopForImpassibilities ->
-      {
-         if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
-         {
-            lookAndStepRemotePropertySet.setPropertyChanged();
-         }
-      });
+      stopForImpassibilities.renderImGuiWidget();
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
 

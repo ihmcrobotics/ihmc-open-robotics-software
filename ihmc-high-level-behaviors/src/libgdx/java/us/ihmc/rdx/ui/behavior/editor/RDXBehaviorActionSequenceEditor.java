@@ -425,7 +425,7 @@ public class RDXBehaviorActionSequenceEditor
 
    private RDXWalkAction newWalkAction()
    {
-      return new RDXWalkAction(panel3D, robotModel, footstepPlanner, syncedRobot, ros2ControllerHelper, referenceFrameLibrary);
+      return new RDXWalkAction(panel3D, robotModel, referenceFrameLibrary);
    }
 
    private RDXHandPoseAction newHandPoseAction()
