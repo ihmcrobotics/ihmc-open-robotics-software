@@ -1,0 +1,23 @@
+#ifndef __behavior_msgs__msg__WaitDurationActionMessage__idl__
+#define __behavior_msgs__msg__WaitDurationActionMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::WaitDurationActionMessage_")
+      struct WaitDurationActionMessage
+      {
+        /**
+         * Wait duration
+         */
+        double wait_duration;
+      };
+    };
+  };
+};
+
+#endif

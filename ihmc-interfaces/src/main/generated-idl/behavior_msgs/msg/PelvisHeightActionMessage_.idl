@@ -1,0 +1,27 @@
+#ifndef __behavior_msgs__msg__PelvisHeightActionMessage__idl__
+#define __behavior_msgs__msg__PelvisHeightActionMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::PelvisHeightActionMessage_")
+      struct PelvisHeightActionMessage
+      {
+        /**
+         * Duration of the trajectory
+         */
+        double trajectory_duration;
+        /**
+         * Z height in world frame
+         */
+        double height_in_world;
+      };
+    };
+  };
+};
+
+#endif
