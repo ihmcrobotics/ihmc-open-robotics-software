@@ -40,6 +40,8 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -59,6 +61,8 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -74,6 +78,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       cdr.write_type_6(data.getTrajectoryDuration());
@@ -84,6 +89,7 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
       data.setTrajectoryDuration(cdr.read_type_6());
@@ -96,6 +102,8 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(behavior_msgs.msg.dds.HandWrenchActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_6("force", data.getForce());
@@ -104,6 +112,8 @@ public class HandWrenchActionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandWrenchActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setForce(ser.read_type_6("force"));

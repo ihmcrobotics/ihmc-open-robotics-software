@@ -40,6 +40,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -57,6 +59,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -69,6 +73,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       cdr.write_type_4(data.getGrip());
@@ -77,6 +82,7 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
 
    public static void read(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
       data.setGrip(cdr.read_type_4());
@@ -87,6 +93,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(behavior_msgs.msg.dds.HandConfigurationActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_4("grip", data.getGrip());
    }
@@ -94,6 +102,8 @@ public class HandConfigurationActionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandConfigurationActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setGrip(ser.read_type_4("grip"));
    }

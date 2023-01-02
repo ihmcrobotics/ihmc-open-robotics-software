@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__FootstepActionMessage__idl__
 #define __behavior_msgs__msg__FootstepActionMessage__idl__
 
+#include "behavior_msgs/msg/./ActionInformationMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
@@ -12,6 +13,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::FootstepActionMessage_")
       struct FootstepActionMessage
       {
+        /**
+         * Used for syncing action sequences
+         */
+        behavior_msgs::msg::dds::ActionInformationMessage action_information;
         /**
          * Specifies the side of the robot that this message refers to.
          */

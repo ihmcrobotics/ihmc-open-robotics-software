@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class HandConfigurationActionMessage extends Packet<HandConfigurationActionMessage> implements Settable<HandConfigurationActionMessage>, EpsilonComparable<HandConfigurationActionMessage>
 {
    /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   /**
             * Specifies the side of the robot that this message refers to.
             */
    public byte robot_side_ = (byte) 255;
@@ -19,6 +23,7 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
 
    public HandConfigurationActionMessage()
    {
+      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
    }
 
    public HandConfigurationActionMessage(HandConfigurationActionMessage other)
@@ -29,10 +34,20 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
 
    public void set(HandConfigurationActionMessage other)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
 
       grip_ = other.grip_;
 
+   }
+
+
+   /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   {
+      return action_information_;
    }
 
    /**
@@ -83,6 +98,7 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grip_, other.grip_, epsilon)) return false;
@@ -100,6 +116,7 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
 
       HandConfigurationActionMessage otherMyClass = (HandConfigurationActionMessage) other;
 
+      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.grip_ != otherMyClass.grip_) return false;
@@ -114,6 +131,8 @@ public class HandConfigurationActionMessage extends Packet<HandConfigurationActi
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandConfigurationActionMessage {");
+      builder.append("action_information=");
+      builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("grip=");

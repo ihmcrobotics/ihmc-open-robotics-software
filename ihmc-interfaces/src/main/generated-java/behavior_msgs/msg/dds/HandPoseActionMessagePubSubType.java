@@ -40,6 +40,8 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
@@ -63,6 +65,8 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -82,6 +86,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       if(data.getParentFrame().size() <= 1000)
@@ -95,6 +100,7 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
       cdr.read_type_e(data.getParentFrame());	
@@ -107,6 +113,8 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(behavior_msgs.msg.dds.HandPoseActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_e("parent_frame", data.getParentFrame());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
@@ -117,6 +125,8 @@ public class HandPoseActionMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.HandPoseActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_e("parent_frame", data.getParentFrame());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
