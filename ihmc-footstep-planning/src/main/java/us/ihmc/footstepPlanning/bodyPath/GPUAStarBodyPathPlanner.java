@@ -2,6 +2,10 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import org.bytedeco.opencl._cl_kernel;
+import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -22,11 +26,15 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.Activator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -34,12 +42,16 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class GPUAStarBodyPathPlanner
 {
+   private static final int defaultMapWidth = (int) (5.0 / 0.03);
+
    private static final boolean debug = false;
    private static final boolean useRANSACTraversibility = true;
 
@@ -103,6 +115,19 @@ public class GPUAStarBodyPathPlanner
 
    private final AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
 
+   private final OpenCLManager openCLManager;
+   private _cl_program pathPlannerProgram;
+   private _cl_kernel computeNormalsKernel;
+
+   private ByteBuffer heightMapDataBuffer;
+   private BytedecoImage heightMapImage;
+   private BytedecoImage normalXImage;
+   private BytedecoImage normalYImage;
+   private BytedecoImage normalZImage;
+   private BytedecoImage sampledHeightImage;
+
+   private boolean firstTick = true;
+
    /* Parameters to extract */
    static final double groundClearance = 0.3;
    static final double maxIncline = Math.toRadians(55.0);
@@ -136,6 +161,9 @@ public class GPUAStarBodyPathPlanner
       this.statusCallbacks = statusCallbacks;
       this.stopwatch = stopwatch;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
+
+      openCLManager = new OpenCLManager();
+      create(defaultMapWidth);
 
       if (useRANSACTraversibility)
       {
@@ -178,6 +206,39 @@ public class GPUAStarBodyPathPlanner
 
       smoother.setRansacNormalCalculator(ransacNormalCalculator);
       smoother.setLeastSquaresNormalCalculator(surfaceNormalCalculator);
+   }
+
+   public void create(int numberOfCells)
+   {
+      pathPlannerProgram = openCLManager.loadProgram("BodyPathPlanner");
+      computeNormalsKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormals");
+
+      heightMapDataBuffer = ByteBuffer.allocate(Float.BYTES * numberOfCells * numberOfCells);
+      this.heightMapImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1, heightMapDataBuffer);
+
+      this.normalXImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.normalYImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.normalZImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+      this.sampledHeightImage = new BytedecoImage(numberOfCells, numberOfCells, opencv_core.CV_32FC1);
+
+      normalXImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+      normalYImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+      normalZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+      sampledHeightImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+   }
+
+   public void destroy()
+   {
+      pathPlannerProgram.close();
+      computeNormalsKernel.close();
+
+      heightMapImage.destroy(openCLManager);
+      normalXImage.destroy(openCLManager);
+      normalYImage.destroy(openCLManager);
+      normalZImage.destroy(openCLManager);
+      sampledHeightImage.destroy(openCLManager);
+
+      openCLManager.destroy();
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -393,8 +454,6 @@ public class GPUAStarBodyPathPlanner
          }
       }
 
-      edgeCost.set(xyDistance);
-
       if (useRANSACTraversibility)
       {
          ransacTraversibilityCalculator.computeTraversibility(neighbor, node, neighborIndex);
@@ -423,6 +482,8 @@ public class GPUAStarBodyPathPlanner
 
    private void computeEdgeCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor)
    {
+      edgeCost.set(xyDistance(node, neighbor));
+
       if (useRANSACTraversibility)
       {
          traversibilityCost.set(ransacTraversibilityCalculator.getTraversability());
