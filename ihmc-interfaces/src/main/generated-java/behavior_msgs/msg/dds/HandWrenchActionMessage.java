@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> implements Settable<HandWrenchActionMessage>, EpsilonComparable<HandWrenchActionMessage>
 {
    /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   /**
             * Specifies the side of the robot that this message refers to.
             */
    public byte robot_side_ = (byte) 255;
@@ -23,6 +27,7 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
 
    public HandWrenchActionMessage()
    {
+      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
    }
 
    public HandWrenchActionMessage(HandWrenchActionMessage other)
@@ -33,12 +38,22 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
 
    public void set(HandWrenchActionMessage other)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
 
       trajectory_duration_ = other.trajectory_duration_;
 
       force_ = other.force_;
 
+   }
+
+
+   /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   {
+      return action_information_;
    }
 
    /**
@@ -104,6 +119,7 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
@@ -123,6 +139,7 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
 
       HandWrenchActionMessage otherMyClass = (HandWrenchActionMessage) other;
 
+      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
@@ -139,6 +156,8 @@ public class HandWrenchActionMessage extends Packet<HandWrenchActionMessage> imp
       StringBuilder builder = new StringBuilder();
 
       builder.append("HandWrenchActionMessage {");
+      builder.append("action_information=");
+      builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("trajectory_duration=");

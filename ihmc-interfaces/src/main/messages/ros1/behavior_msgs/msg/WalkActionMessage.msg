@@ -1,4 +1,7 @@
 
+# Used for syncing action sequences
+behavior_msgs/ActionInformationMessage action_information
+
 # Name of the frame the this action is expressed in
 string[] parent_frame
 

@@ -40,6 +40,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -59,6 +61,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -72,6 +76,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void write(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
@@ -85,6 +90,7 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
 
    public static void read(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
       for(int i0 = 0; i0 < data.getJointAngles().length; ++i0)
@@ -101,6 +107,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void serialize(behavior_msgs.msg.dds.ArmJointAnglesActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
@@ -109,6 +117,8 @@ public class ArmJointAnglesActionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ArmJointAnglesActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));

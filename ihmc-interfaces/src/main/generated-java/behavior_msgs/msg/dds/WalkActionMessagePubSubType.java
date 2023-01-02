@@ -40,6 +40,8 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
@@ -67,6 +69,8 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getParentFrame().size(); ++i0)
       {
@@ -90,6 +94,7 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       if(data.getParentFrame().size() <= 1000)
       cdr.write_type_e(data.getParentFrame());else
           throw new RuntimeException("parent_frame field exceeds the maximum length");
@@ -105,6 +110,7 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       cdr.read_type_e(data.getParentFrame());	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToParent(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getLeftGoalFootTransformToGizmo(), cdr);	
@@ -119,6 +125,8 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(behavior_msgs.msg.dds.WalkActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_e("parent_frame", data.getParentFrame());
       ser.write_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 
@@ -133,6 +141,8 @@ public class WalkActionMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WalkActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.read_type_e("parent_frame", data.getParentFrame());
       ser.read_type_a("transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToParent());
 

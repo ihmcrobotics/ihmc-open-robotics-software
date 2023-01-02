@@ -9,12 +9,17 @@ import us.ihmc.pubsub.TopicDataType;
 public class WaitDurationActionMessage extends Packet<WaitDurationActionMessage> implements Settable<WaitDurationActionMessage>, EpsilonComparable<WaitDurationActionMessage>
 {
    /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   /**
             * Wait duration
             */
    public double wait_duration_;
 
    public WaitDurationActionMessage()
    {
+      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
    }
 
    public WaitDurationActionMessage(WaitDurationActionMessage other)
@@ -25,8 +30,18 @@ public class WaitDurationActionMessage extends Packet<WaitDurationActionMessage>
 
    public void set(WaitDurationActionMessage other)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       wait_duration_ = other.wait_duration_;
 
+   }
+
+
+   /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   {
+      return action_information_;
    }
 
    /**
@@ -62,7 +77,9 @@ public class WaitDurationActionMessage extends Packet<WaitDurationActionMessage>
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wait_duration_, other.wait_duration_, epsilon)) return false;
+
 
       return true;
    }
@@ -76,6 +93,7 @@ public class WaitDurationActionMessage extends Packet<WaitDurationActionMessage>
 
       WaitDurationActionMessage otherMyClass = (WaitDurationActionMessage) other;
 
+      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.wait_duration_ != otherMyClass.wait_duration_) return false;
 
 
@@ -88,6 +106,8 @@ public class WaitDurationActionMessage extends Packet<WaitDurationActionMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("WaitDurationActionMessage {");
+      builder.append("action_information=");
+      builder.append(this.action_information_);      builder.append(", ");
       builder.append("wait_duration=");
       builder.append(this.wait_duration_);
       builder.append("}");

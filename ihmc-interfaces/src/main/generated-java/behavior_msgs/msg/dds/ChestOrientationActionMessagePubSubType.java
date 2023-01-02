@@ -40,6 +40,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -57,6 +59,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -68,6 +72,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.write(data.getOrientation(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
@@ -75,6 +80,7 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType.read(data.getOrientation(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
@@ -84,6 +90,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(behavior_msgs.msg.dds.ChestOrientationActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_a("orientation", new ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType(), data.getOrientation());
 
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
@@ -92,6 +100,8 @@ public class ChestOrientationActionMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.ChestOrientationActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.read_type_a("orientation", new ihmc_common_msgs.msg.dds.YawPitchRollMessagePubSubType(), data.getOrientation());
 
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));

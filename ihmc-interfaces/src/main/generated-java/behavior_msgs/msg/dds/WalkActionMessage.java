@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class WalkActionMessage extends Packet<WalkActionMessage> implements Settable<WalkActionMessage>, EpsilonComparable<WalkActionMessage>
 {
    /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   /**
             * Name of the frame the this action is expressed in
             */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  parent_frame_;
@@ -35,6 +39,7 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
 
    public WalkActionMessage()
    {
+      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       left_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
@@ -49,6 +54,7 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
 
    public void set(WalkActionMessage other)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.left_goal_foot_transform_to_gizmo_, left_goal_foot_transform_to_gizmo_);
@@ -57,6 +63,15 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
 
       transfer_duration_ = other.transfer_duration_;
 
+   }
+
+
+   /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   {
+      return action_information_;
    }
 
 
@@ -143,6 +158,7 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
@@ -165,6 +181,7 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
 
       WalkActionMessage otherMyClass = (WalkActionMessage) other;
 
+      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
       if (!this.left_goal_foot_transform_to_gizmo_.equals(otherMyClass.left_goal_foot_transform_to_gizmo_)) return false;
@@ -183,6 +200,8 @@ public class WalkActionMessage extends Packet<WalkActionMessage> implements Sett
       StringBuilder builder = new StringBuilder();
 
       builder.append("WalkActionMessage {");
+      builder.append("action_information=");
+      builder.append(this.action_information_);      builder.append(", ");
       builder.append("parent_frame=");
       builder.append(this.parent_frame_);      builder.append(", ");
       builder.append("transform_to_parent=");

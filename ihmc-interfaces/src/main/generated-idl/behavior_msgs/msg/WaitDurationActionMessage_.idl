@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__WaitDurationActionMessage__idl__
 #define __behavior_msgs__msg__WaitDurationActionMessage__idl__
 
+#include "behavior_msgs/msg/./ActionInformationMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -11,6 +12,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::WaitDurationActionMessage_")
       struct WaitDurationActionMessage
       {
+        /**
+         * Used for syncing action sequences
+         */
+        behavior_msgs::msg::dds::ActionInformationMessage action_information;
         /**
          * Wait duration
          */

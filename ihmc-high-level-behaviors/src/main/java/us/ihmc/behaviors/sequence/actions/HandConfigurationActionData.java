@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ArmJointAnglesActionMessage;
+import behavior_msgs.msg.dds.HandConfigurationActionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.BehaviorActionData;
@@ -26,14 +26,16 @@ public class HandConfigurationActionData implements BehaviorActionData
       handConfigurationIndex = HandConfiguration.valueOf(jsonNode.get("grip").asText()).ordinal();
    }
 
-   public void toMessage(ArmJointAnglesActionMessage message)
+   public void toMessage(HandConfigurationActionMessage message)
    {
       message.setRobotSide(side.toByte());
+      message.setGrip(handConfigurationIndex);
    }
 
-   public void fromMessage(ArmJointAnglesActionMessage message)
+   public void fromMessage(HandConfigurationActionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
+      handConfigurationIndex = (int) message.getGrip();
    }
 
    public RobotSide getSide()

@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage> implements Settable<PelvisHeightActionMessage>, EpsilonComparable<PelvisHeightActionMessage>
 {
    /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   /**
             * Duration of the trajectory
             */
    public double trajectory_duration_;
@@ -19,6 +23,7 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
 
    public PelvisHeightActionMessage()
    {
+      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
    }
 
    public PelvisHeightActionMessage(PelvisHeightActionMessage other)
@@ -29,10 +34,20 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
 
    public void set(PelvisHeightActionMessage other)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       trajectory_duration_ = other.trajectory_duration_;
 
       height_in_world_ = other.height_in_world_;
 
+   }
+
+
+   /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   {
+      return action_information_;
    }
 
    /**
@@ -83,6 +98,7 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.height_in_world_, other.height_in_world_, epsilon)) return false;
@@ -100,6 +116,7 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
 
       PelvisHeightActionMessage otherMyClass = (PelvisHeightActionMessage) other;
 
+      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
       if(this.height_in_world_ != otherMyClass.height_in_world_) return false;
@@ -114,6 +131,8 @@ public class PelvisHeightActionMessage extends Packet<PelvisHeightActionMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("PelvisHeightActionMessage {");
+      builder.append("action_information=");
+      builder.append(this.action_information_);      builder.append(", ");
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);      builder.append(", ");
       builder.append("height_in_world=");

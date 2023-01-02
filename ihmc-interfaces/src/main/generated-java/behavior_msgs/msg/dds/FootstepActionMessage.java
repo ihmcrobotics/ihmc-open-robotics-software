@@ -9,6 +9,10 @@ import us.ihmc.pubsub.TopicDataType;
 public class FootstepActionMessage extends Packet<FootstepActionMessage> implements Settable<FootstepActionMessage>, EpsilonComparable<FootstepActionMessage>
 {
    /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage action_information_;
+   /**
             * Specifies the side of the robot that this message refers to.
             */
    public byte robot_side_ = (byte) 255;
@@ -23,6 +27,7 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
 
    public FootstepActionMessage()
    {
+      action_information_ = new behavior_msgs.msg.dds.ActionInformationMessage();
       parent_frame_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (1000, "type_d");
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
@@ -35,10 +40,20 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
 
    public void set(FootstepActionMessage other)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.staticCopy(other.action_information_, action_information_);
       robot_side_ = other.robot_side_;
 
       parent_frame_.set(other.parent_frame_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
+   }
+
+
+   /**
+            * Used for syncing action sequences
+            */
+   public behavior_msgs.msg.dds.ActionInformationMessage getActionInformation()
+   {
+      return action_information_;
    }
 
    /**
@@ -92,6 +107,7 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
       if(other == null) return false;
       if(other == this) return true;
 
+      if (!this.action_information_.epsilonEquals(other.action_information_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.parent_frame_, other.parent_frame_, epsilon)) return false;
@@ -110,6 +126,7 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
 
       FootstepActionMessage otherMyClass = (FootstepActionMessage) other;
 
+      if (!this.action_information_.equals(otherMyClass.action_information_)) return false;
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if (!this.parent_frame_.equals(otherMyClass.parent_frame_)) return false;
@@ -124,6 +141,8 @@ public class FootstepActionMessage extends Packet<FootstepActionMessage> impleme
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepActionMessage {");
+      builder.append("action_information=");
+      builder.append(this.action_information_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("parent_frame=");

@@ -40,6 +40,8 @@ public class WaitDurationActionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -55,6 +57,8 @@ public class WaitDurationActionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -64,12 +68,14 @@ public class WaitDurationActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(behavior_msgs.msg.dds.WaitDurationActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_6(data.getWaitDuration());
 
    }
 
    public static void read(behavior_msgs.msg.dds.WaitDurationActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setWaitDuration(cdr.read_type_6());
       	
 
@@ -78,13 +84,18 @@ public class WaitDurationActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(behavior_msgs.msg.dds.WaitDurationActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_6("wait_duration", data.getWaitDuration());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.WaitDurationActionMessage data)
    {
-      data.setWaitDuration(ser.read_type_6("wait_duration"));   }
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
+      data.setWaitDuration(ser.read_type_6("wait_duration"));
+   }
 
    public static void staticCopy(behavior_msgs.msg.dds.WaitDurationActionMessage src, behavior_msgs.msg.dds.WaitDurationActionMessage dest)
    {

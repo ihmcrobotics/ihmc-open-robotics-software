@@ -40,6 +40,8 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -57,6 +59,8 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += behavior_msgs.msg.dds.ActionInformationMessagePubSubType.getCdrSerializedSize(data.getActionInformation(), current_alignment);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -69,6 +73,7 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.write(data.getActionInformation(), cdr);
       cdr.write_type_6(data.getTrajectoryDuration());
 
       cdr.write_type_6(data.getHeightInWorld());
@@ -77,6 +82,7 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.CDR cdr)
    {
+      behavior_msgs.msg.dds.ActionInformationMessagePubSubType.read(data.getActionInformation(), cdr);	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
       data.setHeightInWorld(cdr.read_type_6());
@@ -87,6 +93,8 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(behavior_msgs.msg.dds.PelvisHeightActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_6("height_in_world", data.getHeightInWorld());
    }
@@ -94,6 +102,8 @@ public class PelvisHeightActionMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PelvisHeightActionMessage data)
    {
+      ser.read_type_a("action_information", new behavior_msgs.msg.dds.ActionInformationMessagePubSubType(), data.getActionInformation());
+
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setHeightInWorld(ser.read_type_6("height_in_world"));
    }
