@@ -231,7 +231,7 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
 void kernel snapVertices(global float* params,
                          global float* height_map,
                          global int* neighbor_offsets,
-                         global float* snapped_vertex_height)
+                         global float* snapped_average_vertex_height)
 {
     int key = get_global_id(0);
 
@@ -297,7 +297,7 @@ void kernel snapVertices(global float* params,
         }
     }
 
-    snapped_vertex_height[key] = running_sum / number_of_samples;
+    snapped_average_vertex_height[key] = running_sum / number_of_samples;
 }
 
 void kernel computeEdges(global float* params,
