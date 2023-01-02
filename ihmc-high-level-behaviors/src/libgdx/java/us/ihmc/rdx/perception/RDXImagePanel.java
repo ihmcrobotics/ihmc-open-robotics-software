@@ -26,8 +26,8 @@ public class RDXImagePanel
       int imageWidth = image.cols();
       int imageHeight = image.rows();
 
-      this.image = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC4, image.data());
-      normalizedScaledImage = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      this.image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, image.data());
+      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
       createPixMap(imageWidth, imageHeight);
 
       boolean flipY = false;
@@ -42,7 +42,7 @@ public class RDXImagePanel
    public RDXImagePanel(String name, int imageWidth, int imageHeight, boolean flipY)
    {
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-      image = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
+      image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
 
       setup(name, imageWidth, imageHeight, flipY);
    }
@@ -74,12 +74,11 @@ public class RDXImagePanel
    {
       if (videoPanel.getIsShowing().get())
       {
-
-         imshow("Image", rgbImage);
-         waitKey(1);
-
          image.put(rgbImage);
          display();
+
+         imshow("Image", image);
+         waitKey(1);
       }
    }
 
@@ -107,12 +106,12 @@ public class RDXImagePanel
    {
       int imageWidth = image.cols();
       int imageHeight = image.rows();
-      this.image = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC4, image.getPointer());
+      this.image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, image.data());
       createPixMap(imageWidth, imageHeight);
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 
-      normalizedScaledImage = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
 
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
@@ -126,8 +125,8 @@ public class RDXImagePanel
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 
-      image = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
-      normalizedScaledImage = new Mat(imageWidth, imageHeight, opencv_core.CV_8UC1, null);
+      image = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new MutableBytePointer(pixmap.getPixels()));
+      normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1, null);
 
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(image, 255);
    }
