@@ -43,12 +43,16 @@ int indices_to_key(int x_index, int y_index, int centerIndex)
     return x_index + y_index * (2 * centerIndex + 1);
 }
 
-int2 nextRandom(uint seed)
+uint2 nextRandom(uint seed, uint bits)
 {
-    seed = (seed * 0x5DEECE66DL + 0xBL) & ((1L << 48) - 1);
-    int result = seed >> 16;
 
-    return (int2) (result, seed);
+    long multiplier = 0x5DEECE66DL;
+    long addend = 0xBL;
+    long mask = (1L << 48) - 1;
+    seed = (seed * multiplier + addend) & (mask);
+    uint result = seed >> (48 - bits);
+
+    return (uint2) (result, seed);
 }
 
 bool epsilonEquals(float a, float b, float epsilon)
@@ -56,26 +60,30 @@ bool epsilonEquals(float a, float b, float epsilon)
     return fabs(a - b) < epsilon;
 }
 
-int2 nextRandomInt(uint seed, int bound)
+uint2 nextRandomInt(uint seed, uint bound)
 {
-    int2 result = nextRandom(seed);
-    int r = result.s0;
+    uint bits = 31;
+    uint2 result = nextRandom(seed, bits);
+    uint r = result.s0;
     seed = result.s1;
 
-    int m = bound - 1;
+    uint m = bound - 1;
     if ((bound & m) == 0)
-        r = (uint)((bound * (long) r) >> 31);
+        r = (uint)((bound * (long) r) >> bits);
     else
     {
-        int u = r;
-        while (u - (r = u % bound) + m < 0)
+        uint u = r;
+        r = u % bound;
+        while (u - r + m < 0)
         {
-            result = nextRandom(seed);
+            result = nextRandom(seed, bits);
             u = result.s0;
             seed = result.s1;
+            r = u % bound;
         }
     }
-    return (int2) (r, seed);
+ //   return (uint2) (r, seed);
+    return result;
 }
 
 float3 normal3DFromThreePoint3Ds(float3 firstPointOnPlane,
@@ -174,7 +182,7 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
     int center_index = (int) params[CENTER_INDEX];
     int cells_per_side = 2 * center_index + 1;
 
-    int seed = key;
+    uint seed = key;
 
     int idx_x = key_to_x_index(key, center_index);
     int idx_y = key_to_y_index(key, center_index);
@@ -189,29 +197,20 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
 
     int maxConsensus = -1;
 
-    int offsets_size = ransac_offsets[0];
+    int offsets_size = (int) ransac_offsets[0];
     int consensus_size = ransac_offsets[1];
-
     float3 best_normal;
 
     int consensusSampleSize = offsets_size;
 
     for (int i = 0; i < ransac_params[RANSAC_ITERATIONS]; i++)
     {
-        if (key == 0)
-        {
-            printf("Iteration = %d\n", i);
-        }
         while (true)
         {
-            if (key == 0)
-                printf("Seed = %d\n", seed);
-
-            int2 ret = nextRandomInt(seed, offsets_size);
-            int sample0 = ret.s0;
+                    // FIXME make this use the correct size
+            uint2 ret = nextRandomInt(seed, offsets_size);
+            uint sample0 = ret.s0;
             seed = ret.s1;
-            if (key == 0)
-                printf("New seed = %d\n", seed);
 
             xOffset0 = ransac_offsets[2 + sample0];
             yOffset0 = ransac_offsets[2 + offsets_size + sample0];
@@ -223,22 +222,19 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
             if (xIndex0 < 0 || xIndex0 >= cells_per_side || yIndex0 < 0 || yIndex0 >= cells_per_side)
                 continue;
 
+            // FIXME make this use the correct size
             ret = nextRandomInt(seed, offsets_size);
-            int sample1 = ret.s0;
+            uint sample1 = ret.s0;
             seed = ret.s1;
-            if (key == 0)
-                printf("New seed = %d\n", seed);
+
+            // FIXME make this use the correct size
+            sample0 = sample0 % offsets_size;
+            sample1 = sample1 % offsets_size;
+
 
             if (sample0 == sample1)
             {
-                if (key == 0)
-                    printf("Continuing because the samples are the same\n");
                 continue;
-            }
-
-            if (key == 0)
-            {
-                printf("sample index = %d, $d\n", sample0, sample1);
             }
 
             xOffset1 = ransac_offsets[2 + sample1];
@@ -248,7 +244,9 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
             yIndex1 = idx_y + yOffset1;
 
             if (xIndex1 < 0 || xIndex1 >= cells_per_side || yIndex1 < 0 || yIndex1 >= cells_per_side)
+            {
                 continue;
+            }
 
             float2 offset0 = (float2) (xOffset0, yOffset0);
             float2 offset1 = (float2) (xOffset1, yOffset1);
