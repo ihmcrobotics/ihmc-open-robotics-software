@@ -44,7 +44,8 @@ import java.util.function.Consumer;
 
 public class GPUAStarBodyPathPlanner
 {
-   private static final int defaultMapWidth = (int) (5.0 / 0.03);
+   private static final int defaultCells = (int) (5.0 / 0.03);
+   private static final int defaultNodes = (int) (5.0 / BodyPathLatticePoint.gridSizeXY);
 
    private static final boolean debug = false;
    private static final boolean useRANSACTraversibility = true;
@@ -109,7 +110,8 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeNormalsWithRansacKernel;
    private _cl_kernel snapVerticesKernel;
 
-   private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(5);
+   private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
+   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(9);
    private OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
 
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
@@ -122,10 +124,12 @@ public class GPUAStarBodyPathPlanner
    private OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer ransacNormalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer snappedAverageHeightBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
 
 
    private int cellsPerSide = -1;
+   private int nodesPerSide = -1;
+   private int nodeCenterIndex = -1;
 
    private boolean firstTick = true;
 
@@ -175,7 +179,7 @@ public class GPUAStarBodyPathPlanner
          {
             if (nativeLoader.isNewlyActivated())
             {
-               createOpenCLStuff(defaultMapWidth);
+               createOpenCLStuff(defaultCells, defaultNodes);
                doneLoading = true;
             }
          }
@@ -221,9 +225,11 @@ public class GPUAStarBodyPathPlanner
                                       });
    }
 
-   public void createOpenCLStuff(int numberOfCells)
+   public void createOpenCLStuff(int numberOfCells, int numberOfNodes)
    {
       cellsPerSide = numberOfCells;
+      this.nodesPerSide = numberOfNodes;
+      this.nodeCenterIndex = (nodesPerSide - 1) / 2;
 
       openCLManager.create();
 
@@ -236,6 +242,7 @@ public class GPUAStarBodyPathPlanner
    public void firstTickSetup()
    {
       heightMapParametersBuffer.createOpenCLBufferObject(openCLManager);
+      pathPlanningParametersBuffer.createOpenCLBufferObject(openCLManager);
       ransacNormalParametersBuffer.createOpenCLBufferObject(openCLManager);
       leastSquaresOffsetBuffer.createOpenCLBufferObject(openCLManager);
       ransacOffsetBuffer.createOpenCLBufferObject(openCLManager);
@@ -245,7 +252,7 @@ public class GPUAStarBodyPathPlanner
       leastSquaresNormalXYZBuffer.createOpenCLBufferObject(openCLManager);
       ransacNormalXYZBuffer.createOpenCLBufferObject(openCLManager);
       sampledHeightBuffer.createOpenCLBufferObject(openCLManager);
-      snappedAverageHeightBuffer.createOpenCLBufferObject(openCLManager);
+      snappedNodeHeightBuffer.createOpenCLBufferObject(openCLManager);
 
       firstTick = false;
    }
@@ -258,6 +265,7 @@ public class GPUAStarBodyPathPlanner
       snapVerticesKernel.close();
 
       heightMapParametersBuffer.destroy(openCLManager);
+      pathPlanningParametersBuffer.destroy(openCLManager);
       ransacNormalParametersBuffer.destroy(openCLManager);
       leastSquaresOffsetBuffer.destroy(openCLManager);
       ransacOffsetBuffer.destroy(openCLManager);
@@ -267,7 +275,7 @@ public class GPUAStarBodyPathPlanner
       leastSquaresNormalXYZBuffer.destroy(openCLManager);
       ransacNormalXYZBuffer.destroy(openCLManager);
       sampledHeightBuffer.destroy(openCLManager);
-      snappedAverageHeightBuffer.destroy(openCLManager);
+      snappedNodeHeightBuffer.destroy(openCLManager);
 
 
       openCLManager.destroy();
@@ -280,7 +288,9 @@ public class GPUAStarBodyPathPlanner
       leastSquaresNormalXYZBuffer.resize(3 * totalCells, openCLManager);
       ransacNormalXYZBuffer.resize(3 * totalCells, openCLManager);
       sampledHeightBuffer.resize(totalCells, openCLManager);
-      snappedAverageHeightBuffer.resize(totalCells, openCLManager);
+
+      int totalNodes = nodesPerSide * nodesPerSide;
+      snappedNodeHeightBuffer.resize(totalNodes, openCLManager);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -368,6 +378,8 @@ public class GPUAStarBodyPathPlanner
       if (cellsPerSide != heightMapData.getCellsPerAxis())
       {
          this.cellsPerSide = heightMapData.getCellsPerAxis();
+         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getGridSizeXY(), BodyPathLatticePoint.gridSizeXY);
+         this.nodesPerSide = 2 * nodeCenterIndex + 1;
          resizeOpenCLObjects();
       }
       LogTools.info("cells Per axis " + cellsPerSide);
@@ -407,6 +419,7 @@ public class GPUAStarBodyPathPlanner
 
       double patchWidth = 0.3;
       populateHeightMapParameterBuffer(patchWidth);
+      populatePathPlanningParametersBuffer();
 
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
@@ -531,8 +544,22 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(2, (float) heightMapData.getGridCenter().getX());
       floatPointer.put(3, (float) heightMapData.getGridCenter().getY());
       floatPointer.put(4, snapHeightThreshold);
+      floatPointer.put(5, (float) heightMapData.getEstimatedGroundHeight());
 
       heightMapParametersBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+   private void populatePathPlanningParametersBuffer()
+   {
+      FloatPointer floatPointer = pathPlanningParametersBuffer.getBytedecoFloatBufferPointer();
+      floatPointer.put(0, (float) BodyPathLatticePoint.gridSizeXY);
+      floatPointer.put(1, (float) nodeCenterIndex);
+      floatPointer.put(2, (float) startNode.getXIndex());
+      floatPointer.put(3, (float) startNode.getYIndex());
+//      floatPointer.put(4, snapHeightThreshold);
+//      floatPointer.put(5, (float) heightMapData.getEstimatedGroundHeight());
+
+      pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
    private void populateLeastSquaresOffsetBuffer(double patchWidth)
@@ -673,14 +700,15 @@ public class GPUAStarBodyPathPlanner
    private void computeSnapHeights()
    {
       openCLManager.setKernelArgument(snapVerticesKernel, 0, heightMapParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(snapVerticesKernel, 1, heightMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(snapVerticesKernel, 2, snapOffsetsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(snapVerticesKernel, 3, snappedAverageHeightBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 1, pathPlanningParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 2, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 3, snapOffsetsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(snapVerticesKernel, 4, snappedNodeHeightBuffer.getOpenCLBufferObject());
 
-      int totalCells = cellsPerSide * cellsPerSide;
+      int totalCells = nodesPerSide * nodesPerSide;
       openCLManager.execute1D(snapVerticesKernel, totalCells);
 
-      snappedAverageHeightBuffer.readOpenCLBufferObject(openCLManager);
+      snappedNodeHeightBuffer.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
    }
@@ -953,11 +981,10 @@ public class GPUAStarBodyPathPlanner
          return gridHeightMap.get(latticePoint);
       }
 
-      int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
+      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
 
-      double gpuHeight = snappedAverageHeightBuffer.getBackingDirectFloatBuffer().get(HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex));
+      double gpuHeight = snappedNodeHeightBuffer.getBackingDirectFloatBuffer().get(HeightMapTools.indicesToKey(xIndex, yIndex, nodeCenterIndex));
       gridHeightMap.put(latticePoint, gpuHeight);
       return gpuHeight;
 
