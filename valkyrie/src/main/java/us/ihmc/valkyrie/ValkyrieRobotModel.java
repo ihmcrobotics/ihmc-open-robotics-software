@@ -91,6 +91,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private FootContactPoints<RobotSide> simulationContactPoints = null;
    private RobotDefinition robotDefinition;
    private Consumer<RobotDefinition> robotDefinitionMutator;
+   private final boolean loadWithURDF;
 
    private ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
@@ -118,8 +119,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion)
    {
+      this(target, robotVersion, true);
+   }
+
+   public ValkyrieRobotModel(RobotTarget target, ValkyrieRobotVersion robotVersion, boolean loadWithURDF)
+   {
       this.target = target;
       this.robotVersion = robotVersion;
+      this.loadWithURDF = loadWithURDF;
 
       controllerDT = 0.004;
       estimatorDT = 0.002;
@@ -312,13 +319,27 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotDefinition == null)
       {
-         robotDefinition = RobotDefinitionTools.loadURDFModel(getURDFModelInputStream(),
-                                                              Arrays.asList(getResourceDirectories()),
-                                                              getClass().getClassLoader(),
-                                                              getJointMap().getModelName(),
-                                                              getContactPointParameters(),
-                                                              getJointMap(),
-                                                              true);
+         if (loadWithURDF)
+         {
+            robotDefinition = RobotDefinitionTools.loadURDFModel(getURDFModelInputStream(),
+                                                                 Arrays.asList(getResourceDirectories()),
+                                                                 getClass().getClassLoader(),
+                                                                 getJointMap().getModelName(),
+                                                                 getContactPointParameters(),
+                                                                 getJointMap(),
+                                                                 true);
+         }
+         else
+         {
+            robotDefinition = RobotDefinitionTools.loadSDFModel(getSDFModelInputStream(),
+                                                                Arrays.asList(getResourceDirectories()),
+                                                                getClass().getClassLoader(),
+                                                                getJointMap().getModelName(),
+                                                                getContactPointParameters(),
+                                                                getJointMap(),
+                                                                true);
+         }
+
          // For backward compatibility w.r.t. when we were using SDF file.
          // The URDF to SDF conversion appeared to sort the joints by alphabetical order.
          // The ordering matters when serializing messages such as RobotConfigurationData.
@@ -372,6 +393,44 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
       return inputStream;
    }
+
+   private InputStream getSDFModelInputStream()
+   {
+      InputStream inputStream = null;
+
+      if (customModel != null)
+      {
+
+         System.out.println("Loading robot model from: '" + customModel + "'");
+         inputStream = getClass().getClassLoader().getResourceAsStream(customModel);
+
+         if (inputStream == null)
+         {
+            try
+            {
+               inputStream = new FileInputStream(customModel);
+            }
+            catch (FileNotFoundException e)
+            {
+               throw new RuntimeException(e);
+            }
+         }
+      }
+      else
+      {
+         String sdfFile = null;
+
+         if (target == RobotTarget.REAL_ROBOT)
+            sdfFile = robotVersion.getRealRobotSdfFile();
+         else
+            sdfFile = robotVersion.getSimSdfFile();
+
+         inputStream = getClass().getClassLoader().getResourceAsStream(sdfFile);
+      }
+
+      return inputStream;
+   }
+
 
    @Override
    public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup()
