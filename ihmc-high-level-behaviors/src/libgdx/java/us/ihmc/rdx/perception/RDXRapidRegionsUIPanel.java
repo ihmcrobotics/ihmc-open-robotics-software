@@ -1,17 +1,15 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.avatar.gpuPlanarRegions.*;
+import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsCustomizer;
+import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.avatar.gpuPlanarRegions.RapidRegionsDebutOutputGenerator;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 public class RDXRapidRegionsUIPanel
 {
@@ -72,10 +70,10 @@ public class RDXRapidRegionsUIPanel
       gpuRegionParametersTuner.create(rapidPlanarRegionsExtractor.getParameters());
 
       polygonizerParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getPolygonizerParameters().getTitle());
-      polygonizerParametersTuner.create(rapidPlanarRegionsCustomizer.getPolygonizerParameters());
+      polygonizerParametersTuner.create(rapidPlanarRegionsCustomizer.getPolygonizerParameters(), true);
 
       concaveHullParametersTuner = new ImGuiStoredPropertySetTuner(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters().getTitle());
-      concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters());
+      concaveHullParametersTuner.create(rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters(), true);
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredDepthPanel = new RDXImagePanel("Blurred Depth", imageWidth, imageHeight, ImGuiVideoPanel.FLIP_Y);

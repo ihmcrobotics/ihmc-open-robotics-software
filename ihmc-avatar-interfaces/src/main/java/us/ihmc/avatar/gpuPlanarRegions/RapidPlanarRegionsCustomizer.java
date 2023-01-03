@@ -34,8 +34,8 @@ public class RapidPlanarRegionsCustomizer
 
    public RapidPlanarRegionsCustomizer()
    {
-      concaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForGPURegions");
-      polygonizerParameters = new PolygonizerParameters("ForGPURegions");
+      concaveHullFactoryParameters = new ConcaveHullFactoryParameters("ForSphericalRapidRegions");
+      polygonizerParameters = new PolygonizerParameters("ForSphericalRapidRegions");
    }
 
    public RapidPlanarRegionsCustomizer(ConcaveHullFactoryParameters concaveHullFactoryParameters, PolygonizerParameters polygonizerParameters)

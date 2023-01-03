@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui;
 import imgui.ImGui;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.tools.property.*;
 
@@ -64,12 +65,12 @@ public class ImGuiStoredPropertySetTuner extends ImGuiPanel
             }
             return FileVisitResult.CONTINUE;
          });
-         String currentWorkingVersion = versions.first();
-         if (!storedPropertySet.getCurrentVersionSuffix().equals(currentWorkingVersion))
+         if (storedPropertySet.getCurrentVersionSuffix().equals(""))
          {
+            String currentWorkingVersion = versions.first();
             storedPropertySet.updateBackingSaveFile(currentWorkingVersion);
-            storedPropertySet.load();
          }
+         storedPropertySet.load();
       }
 
       for (StoredPropertyKey<?> propertyKey : storedPropertySet.getKeyList().keys())
