@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.sequence.BehaviorActionSequence;
 import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -46,6 +47,10 @@ public class RDXBehaviorActionSequenceManager
       this.ros2Node = ros2Node;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
+
+      BehaviorActionSequence.addCommonFrames(referenceFrameLibrary, syncedRobot);
+      referenceFrameLibrary.build();
+
       reindexSequences();
    }
 
