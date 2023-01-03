@@ -13,22 +13,23 @@
 #define PATH_CENTER_INDEX 1
 #define START_X_INDEX 2
 #define START_Y_INDEX 3
-#define GROUND_CLEARANCE 4
-#define MAX_INCLINE 5
-#define COMPUTE_SURFACE_NORMAL_COST 6
-#define NOMINAL_INCLINE 7
-#define INCLINE_COST_WEIGHT 8
-#define INCLINE_COST_DEADBAND 9
-#define ROLL_COST_WEIGHT 10
-#define ALPHA_STANCE 11
-#define ALPHA_STEP 12
-#define MIN_TRAVERSIBILITY_PERCENTAGE 13
+#define GOAL_X 4
+#define GOAL_Y 5
+#define GROUND_CLEARANCE 6
+#define MAX_INCLINE 7
+#define NOMINAL_INCLINE 8
+#define INCLINE_COST_WEIGHT 9
+#define INCLINE_COST_DEADBAND 10
+#define ROLL_COST_WEIGHT 11
+#define ALPHA_STANCE 12
+#define ALPHA_STEP 13
+#define MIN_TRAVERSIBILITY_PERCENTAGE 14
 // traversibility params, but part of the same vector
-#define HALF_STANCE_WIDTH 14
-#define HEIGHT_WINDOW 15
-#define MIN_NORMAL_TO_PENALIZE 16
-#define MAX_NORMAL_TO_PENALIZE 17
-#define INCLINE_WEIGHT 18
+#define HALF_STANCE_WIDTH 15
+#define HEIGHT_WINDOW 16
+#define MIN_NORMAL_TO_PENALIZE 17
+#define MAX_NORMAL_TO_PENALIZE 18
+#define INCLINE_WEIGHT 19
 
 // These are the flags for the different rejection types for the edges
 #define VALID -1
@@ -902,6 +903,25 @@ bool collisionDetected(global float* height_map_params,
     return false;
 }
 
+void kernel computeHeuristicCost(global float* height_map_params,
+                                 global float* planner_params,
+                                 global float* heuristic_cost_map)
+{
+    int path_key = get_global_id(0);
+    int path_center_index = (int) planner_params[PATH_CENTER_INDEX];
+    float path_resolution = planner_params[PATH_RESOLUTION];
+
+    int idx_x = key_to_x_index(path_key, path_center_index);
+    int idx_y = key_to_y_index(path_key, path_center_index);
+    int2 node_index = (int2) (idx_x, idx_y);
+
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+    float2 node_position = indices_to_coordinate(node_index, center, path_resolution, path_center_index);
+    float2 goal_position = (float2) (planner_params[GOAL_X], planner_params[GOAL_Y]);
+
+    heuristic_cost_map[path_key] = length(goal_position - node_position);
+}
+
 void kernel computeEdgeData(global float* height_map_params,
                             global float* planner_params,
                             global int* neighbor_offsets,
@@ -974,6 +994,7 @@ void kernel computeEdgeData(global float* height_map_params,
         float2 neighbor_position = indices_to_coordinate(neighbor_index, center, path_resolution, path_center_index);
         int neighbor_map_key = coordinate_to_key(neighbor_position, center, map_resolution, map_center_index);
         float snapped_neighbor_height = snapped_height_map[neighbor_map_key];
+
         if (isnan(snapped_neighbor_height))
         {
             edge_rejection_reason[edge_key] = INVALID_SNAP;
@@ -1013,12 +1034,19 @@ void kernel computeEdgeData(global float* height_map_params,
             continue;
         }
 
+        // edge is valid, so set to -1
+        edge_rejection_reason[edge_key] = -1;
+
         float edge_cost = xy_distance;
         float incline_cost = 0.0;
         if (incline > planner_params[NOMINAL_INCLINE])
         {
             float inclineDelta = fabs( (incline - planner_params[NOMINAL_INCLINE]));
             incline_cost = planner_params[INCLINE_COST_WEIGHT] * (max(0.0f, inclineDelta - planner_params[INCLINE_COST_DEADBAND]));
+            if (path_key == 50)
+            {
+                printf("incline cost %f, weight %f, delta %f, deadband %f\n", incline_cost, planner_params[INCLINE_COST_WEIGHT], inclineDelta,  planner_params[INCLINE_COST_DEADBAND]);
+            }
         }
         edge_cost += incline_cost;
 
@@ -1037,7 +1065,4 @@ void kernel computeEdgeData(global float* height_map_params,
         incline_cost_map[edge_key] = incline_cost;
         traversibility_cost_map[edge_key] = traversibility_cost;
     }
-
-     if (path_key == 50)
-                printf("finished\n");
 }
