@@ -30,8 +30,8 @@ public class BodyPathRANSACTraversibilityCalculator
    static final double minNormalToPenalize = Math.toRadians(45.0);
    static final double maxNormalToPenalize = Math.toRadians(70.0);
 
-   private static final double alphaStance = 4.0;
-   private static final double alphaStep = 2.0;
+   static final double alphaStance = 4.0;
+   static final double alphaStep = 2.0;
 
    private BodyPathLatticePoint startNode;
    private final ToDoubleFunction<BodyPathLatticePoint> gridHeightMap;
