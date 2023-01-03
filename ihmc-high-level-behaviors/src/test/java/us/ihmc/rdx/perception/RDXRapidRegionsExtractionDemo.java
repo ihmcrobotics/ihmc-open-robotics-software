@@ -20,8 +20,8 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsCustomizer;
-import us.ihmc.avatar.gpuPlanarRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.rapidRegions.RapidPlanarRegionsCustomizer;
+import us.ihmc.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -70,7 +70,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private _cl_kernel unpackPointCloudKernel;
    private PerceptionDataLoader perceptionDataLoader;
 
-   private ImInt frameIndex = new ImInt(300);
+   private ImInt frameIndex = new ImInt(0);
 
    private int depthWidth;
    private int depthHeight;
@@ -128,6 +128,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
 
                   updateRapidRegionsExtractor(true);
+                  updatePointCloudRenderer(true);
                }
 
                updateRapidRegionsExtractor(false);

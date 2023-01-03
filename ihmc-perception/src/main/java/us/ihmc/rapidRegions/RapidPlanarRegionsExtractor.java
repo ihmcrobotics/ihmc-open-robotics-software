@@ -1,4 +1,4 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.rapidRegions;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
@@ -17,16 +17,17 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.util.Comparator;
 import java.util.Stack;
 
-import static us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters.*;
-
 public class RapidPlanarRegionsExtractor
 {
+   private final int TOTAL_NUM_PARAMS = 20;
+
    private BytedecoImage inputU16DepthImage;
 
    private enum SensorModel
@@ -34,7 +35,7 @@ public class RapidPlanarRegionsExtractor
       SPHERICAL, PERSPECTIVE
    }
 
-   private final GPUPlanarRegionExtractionParameters parameters = new GPUPlanarRegionExtractionParameters("Spherical");
+   private final RapidRegionsExtractorParameters parameters = new RapidRegionsExtractorParameters("Spherical");
 
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
@@ -55,7 +56,6 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
 
-
    private boolean patchSizeChanged = true;
 
    private int numberOfRegionPatches = 0;
@@ -64,8 +64,8 @@ public class RapidPlanarRegionsExtractor
    private int numberOfBoundaryPatchesInWholeImage = 0;
    private double maxSVDSolveTime = Double.NaN;
 
-   private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
-   private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
+   private final int[] adjacentY = {-1, -1, -1, 0, 0, 1, 1, 1};
+   private final int[] adjacentX = {-1, 0, 1, -1, 1, -1, 0, 1};
 
    private int imageHeight;
    private int imageWidth;
@@ -80,7 +80,6 @@ public class RapidPlanarRegionsExtractor
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
    private final RecyclingArrayList<GPUPlanarRegion> gpuPlanarRegions = new RecyclingArrayList<>(GPUPlanarRegion::new);
    private final Comparator<GPURegionRing> boundaryLengthComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
-
 
    private OpenCLManager openCLManager;
    private OpenCLFloatBuffer parametersBuffer;
@@ -111,12 +110,12 @@ public class RapidPlanarRegionsExtractor
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      parameters.set(focalLengthXPixels, fx);
-      parameters.set(focalLengthYPixels, fy);
-      parameters.set(principalOffsetXPixels, cx);
-      parameters.set(principalOffsetYPixels, cy);
+      parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
+      parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
+      parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
+      parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
 
-      parametersBuffer = new OpenCLFloatBuffer(16);
+      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
       calculateDerivativeParameters();
 
       debugger.create(imageHeight, imageWidth);
@@ -152,7 +151,7 @@ public class RapidPlanarRegionsExtractor
       this.imageHeight = imageHeight;
       this.inputU16DepthImage = depthImage;
 
-      parametersBuffer = new OpenCLFloatBuffer(16);
+      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
       calculateDerivativeParameters();
 
       debugger.create(imageHeight, imageWidth);
@@ -185,7 +184,7 @@ public class RapidPlanarRegionsExtractor
       debugger.clearDebugImage();
       wholeAlgorithmDurationStopwatch.start();
 
-      if(changed)
+      if (changed)
       {
          // Flip so the Y+ goes up instead of down.
          opencv_core.flip(inputU16DepthImage.getBytedecoOpenCVMat(), inputU16DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
@@ -195,19 +194,20 @@ public class RapidPlanarRegionsExtractor
       extractPatchGraphUsingOpenCL();
       gpuDurationStopwatch.suspend();
 
+      //      debugger.printPatchGraph(patchGraph);
       debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
       //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
       //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
       depthFirstSearchDurationStopwatch.start();
       findRegions();
+
       findBoundariesAndHoles();
       growRegionBoundaries();
       depthFirstSearchDurationStopwatch.suspend();
 
       wholeAlgorithmDurationStopwatch.suspend();
 
-      //debugger.printPatchGraph(patchGraph);
       //debugger.showDebugImage();
    }
 
@@ -220,7 +220,7 @@ public class RapidPlanarRegionsExtractor
 
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.getFilterDisparityThreshold());
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.getMergeAngularThreshold());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.getMergeDistanceThreshold());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) parameters.getMergeOrthogonalThreshold());
       parametersBuffer.getBytedecoFloatBufferPointer().put(3, patchHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(4, patchWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(5, patchImageHeight);
@@ -234,6 +234,10 @@ public class RapidPlanarRegionsExtractor
       parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterPatchImageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(14, imageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(15, imageWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) parameters.getNormalPackRange());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) parameters.getCentroidPackRange());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) parameters.getMergeRange());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) parameters.getMergeDistanceThreshold());
 
       if (patchSizeChanged)
       {
@@ -334,7 +338,7 @@ public class RapidPlanarRegionsExtractor
          {
             int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect(row, column);
 
-            if (!regionVisitedMatrix.get(row, column) && checkConnection(boundaryConnectionsEncodedAsOnes)) // all ones; fully connected
+            if (!regionVisitedMatrix.get(row, column) && checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, 200)) // all ones; fully connected
             {
                numberOfRegionPatches = 0; // also number of patches traversed
                GPUPlanarRegion planarRegion = gpuPlanarRegions.add();
@@ -532,9 +536,25 @@ public class RapidPlanarRegionsExtractor
       }
    }
 
-   public boolean checkConnection(int nodeConnection)
+   public boolean checkConnectionNonZero(int nodeConnection)
+   {
+      return nodeConnection > 0;
+   }
+
+   public boolean checkConnectionFull(int nodeConnection)
    {
       return nodeConnection == 255;
+   }
+
+   public boolean checkConnectionThreshold(int nodeConnection, int threshold)
+   {
+      return nodeConnection > threshold;
+   }
+
+   public boolean checkConnectionDirectional(int nodeConnection, int neighbor)
+   {
+      int mask = 1 << neighbor;
+      return (nodeConnection & mask) != 0;
    }
 
    public class PatchGraphRecursionBlock
@@ -558,6 +578,8 @@ public class RapidPlanarRegionsExtractor
       {
          if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
             return;
+
+         LogTools.debug("Expanding block at row: {}, column: {}, searchDepth: {}", row, column, searchDepth);
 
          if (searchDepth > regionMaxSearchDepth)
             regionMaxSearchDepth = searchDepth;
@@ -590,7 +612,7 @@ public class RapidPlanarRegionsExtractor
             if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
             {
                int boundaryConnectionsEncodedAsOnes = patchGraph.getCharDirect((row + adjacentY[i]), (column + adjacentX[i]));
-               if (checkConnection(boundaryConnectionsEncodedAsOnes)) // all ones; fully connected
+               if (checkConnectionThreshold(boundaryConnectionsEncodedAsOnes, 200)) // all ones; fully connected
                {
                   ++count;
                   depthFirstSearchStack.push(new PatchGraphRecursionBlock(row + adjacentY[i],
@@ -679,7 +701,7 @@ public class RapidPlanarRegionsExtractor
       return imageHeight;
    }
 
-   public GPUPlanarRegionExtractionParameters getParameters()
+   public RapidRegionsExtractorParameters getParameters()
    {
       return parameters;
    }
@@ -748,6 +770,5 @@ public class RapidPlanarRegionsExtractor
    {
       return depthFirstSearchDurationStopwatch;
    }
-
 }
 

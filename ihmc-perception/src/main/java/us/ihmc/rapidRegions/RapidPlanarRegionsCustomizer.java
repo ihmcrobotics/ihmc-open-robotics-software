@@ -1,4 +1,4 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.rapidRegions;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;

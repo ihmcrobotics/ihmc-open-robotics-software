@@ -1,4 +1,4 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.rapidRegions;
 
 public class GPUPlanarRegionIsland
 {

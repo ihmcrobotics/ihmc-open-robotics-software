@@ -1,5 +1,25 @@
 {
-  "title" : "GPU planar region extraction parameters",
+  "title" : "Rapid region extractor parameters",
+  "Normal pack range" : {
+    "value" : 1,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Centroid pack range" : {
+    "value" : 1,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Merge range" : {
+    "value" : 1,
+    "lowerBound" : 1,
+    "upperBound" : 10
+  },
+  "Merge orthogonal threshold" : {
+    "value" : 1.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 10.0
+  },
   "Merge distance threshold" : {
     "value" : 1.0,
     "lowerBound" : 0.0,
@@ -52,7 +72,7 @@
     "upperBound" : 10.0
   },
   "Search depth limit" : {
-    "value" : 5000,
+    "value" : 45500,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
