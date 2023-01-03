@@ -412,8 +412,8 @@ public class GPUAStarBodyPathPlanner
       {
          computeSurfaceNormalsWithLeastSquares(patchWidth);
       }
-      computeSurfaceNormalsWithRansac();
       computeSnapHeights();
+      computeSurfaceNormalsWithRansac();
 
       if (useRANSACTraversibility)
       {
@@ -624,21 +624,26 @@ public class GPUAStarBodyPathPlanner
 
       int offsets = xRansacOffsets.size();
       int consensusOffsets = xConsensusOffsets.size();
-      leastSquaresOffsetBuffer.resize(2 * (offsets + consensusOffsets + 1), openCLManager);
-      IntPointer intPointer = leastSquaresOffsetBuffer.getBytedecoIntBufferPointer();
+      ransacOffsetBuffer.resize(2 * (offsets + consensusOffsets + 1), openCLManager);
+      IntPointer intPointer = ransacOffsetBuffer.getBytedecoIntBufferPointer();
+      LogTools.info("Offsets " + offsets);
 
       int index = 0;
-      intPointer.put(index++, offsets);
-      intPointer.put(index++, consensusOffsets);
+      intPointer.put(index, offsets);
+      index++;
+      intPointer.put(index, consensusOffsets);
+      index++;
       for (int i = 0; i < offsets; i++)
       {
          intPointer.put(index, xRansacOffsets.get(i));
-         intPointer.put(offsets + index++, yRansacOffsets.get(i));
+         intPointer.put(offsets + index, yRansacOffsets.get(i));
+         index++;
       }
       for (int i = 0; i < consensusOffsets; i++)
       {
          intPointer.put(index, xConsensusOffsets.get(i));
-         intPointer.put(consensusOffsets + index++, yConsensusOffsets.get(i));
+         intPointer.put(consensusOffsets + index, yConsensusOffsets.get(i));
+         index++;
       }
 
       ransacOffsetBuffer.writeOpenCLBufferObject(openCLManager);
