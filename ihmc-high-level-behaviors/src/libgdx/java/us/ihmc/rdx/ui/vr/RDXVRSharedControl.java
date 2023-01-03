@@ -37,7 +37,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
-   private boolean assistanceFirstDisplay = false;
+   private boolean assistanceFirstDisplay = true;
    private boolean restartingMotion = false;
    private int replayPreviewCounter = 0;
 
@@ -196,10 +196,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setCurrentTaskDone(false);
             objectName = "";
             objectPose = null;
-            assistanceFirstDisplay = false;
+            assistanceFirstDisplay = true;
             previewValidated = false;
             restartingMotion = false;
             replayPreviewCounter = 0;
+            assistanceStatusList.clear();
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
          }
       }

@@ -297,6 +297,7 @@ public class RDXVRKinematicsStreamingMode
          }
          else
          {
+            // update IK ghost robot
             ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
             ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
             for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
@@ -310,14 +311,12 @@ public class RDXVRKinematicsStreamingMode
                if (sharedControlAssistant.isFirstDisplayAssistance()) // first preview
                {
                   sharedControlAssistant.saveStatusForPreview(latestStatus); // store the status
-                  sharedControlAssistant.updatePreviewModel(latestStatus);
+                  sharedControlAssistant.updatePreviewModel(latestStatus); // update shared control ghost robot
                }
-               else  // replay preview
+               else if (sharedControlAssistant.isPreviewGraphicActive()) // replay preview
                {
                   if(sharedControlAssistant.hasMotionRestarted())
                      sharedControlAssistant.resetPreviewModel();
-                  // update shared control ghost
-                  sharedControlAssistant.replayPreviewModel();
                   // update IK ghost
                   KinematicsToolboxOutputStatus statusPreview = sharedControlAssistant.getPreviewStatus();
                   ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
@@ -325,6 +324,8 @@ public class RDXVRKinematicsStreamingMode
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
                      ghostOneDoFJointsExcludingHands[i].setQ(statusPreview.getDesiredJointAngles().get(i));
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
+                  // update shared control ghost
+                  sharedControlAssistant.replayPreviewModel();
                }
             }
          }
