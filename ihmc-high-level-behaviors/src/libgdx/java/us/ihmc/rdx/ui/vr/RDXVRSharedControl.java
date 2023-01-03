@@ -20,6 +20,8 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
+import java.util.ArrayList;
+
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private ImBoolean enabledReplay;
@@ -34,10 +36,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private RDXMultiBodyGraphic ghostRobotGraphic;
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
-   private KinematicsToolboxOutputStatus statusBeforeAssistance;
-   private boolean assistanceJustStarted = false;
+   private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
+   private boolean assistanceFirstDisplay = false;
    private boolean restartingMotion = false;
-   private int counter = 0;
+   private int replayPreviewCounter = 0;
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -80,19 +82,22 @@ public class RDXVRSharedControl implements TeleoperationAssistant
 
    public void resetPreviewModel()
    {
-      ghostRobotModel.getRootJoint().setJointPosition(statusBeforeAssistance.getDesiredRootPosition());
-      ghostRobotModel.getRootJoint().setJointOrientation(statusBeforeAssistance.getDesiredRootOrientation());
+      replayPreviewCounter = 0;
+      restartingMotion = false;
+   }
+
+   public void replayPreviewModel()
+   {
+      KinematicsToolboxOutputStatus status = getPreviewStatus();
+      ghostRobotModel.getRootJoint().setJointPosition(status.getDesiredRootPosition());
+      ghostRobotModel.getRootJoint().setJointOrientation(status.getDesiredRootOrientation());
       for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
       {
-         ghostOneDoFJointsExcludingHands[i].setQ(statusBeforeAssistance.getDesiredJointAngles().get(i));
+         ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
-      if (counter >= 10)
-      {
-         restartingMotion = false;
-         counter = 0;
-      }
-      counter ++;
+
+      replayPreviewCounter++;
    }
 
    @Override
@@ -120,6 +125,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if motion is over and not validated yet, replay it
          {
+            assistanceFirstDisplay = false;
             restartingMotion = true;
          }
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
@@ -162,7 +168,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          this.enabled.set(enabled);
          if (enabled)
          {
-            assistanceJustStarted = true;
+            assistanceFirstDisplay = true;
 
             // store detected object name and pose
             if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
@@ -190,8 +196,10 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setCurrentTaskDone(false);
             objectName = "";
             objectPose = null;
-            assistanceJustStarted = false;
+            assistanceFirstDisplay = false;
             previewValidated = false;
+            restartingMotion = false;
+            replayPreviewCounter = 0;
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
          }
       }
@@ -227,20 +235,19 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       this.objectDetector = objectDetector;
    }
 
-   public void setStatusBeforeAssistance(KinematicsToolboxOutputStatus status)
+   public void saveStatusForPreview(KinematicsToolboxOutputStatus status)
    {
-      statusBeforeAssistance = new KinematicsToolboxOutputStatus(status);
-      assistanceJustStarted = false;
+      assistanceStatusList.add(new KinematicsToolboxOutputStatus(status));
    }
 
-   public KinematicsToolboxOutputStatus getStatusBeforeAssistance()
+   public KinematicsToolboxOutputStatus getPreviewStatus()
    {
-      return statusBeforeAssistance;
+      return assistanceStatusList.get(replayPreviewCounter);
    }
 
-   public boolean hasAssistanceJustStarted()
+   public boolean isFirstDisplayAssistance()
    {
-      return assistanceJustStarted;
+      return assistanceFirstDisplay;
    }
 
    public boolean hasMotionRestarted()
