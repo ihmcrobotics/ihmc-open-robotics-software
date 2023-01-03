@@ -304,27 +304,26 @@ public class RDXVRKinematicsStreamingMode
                ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
+
             if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
             {
-               // the joint angle solutions take into account previous solutions, so when jumping in position from end to beginning of motion they have to be forced
-               if (sharedControlAssistant.hasAssistanceJustStarted()) // store the initial message with initial posture
+               if (sharedControlAssistant.isFirstDisplayAssistance()) // first preview
                {
-                  sharedControlAssistant.setStatusBeforeAssistance(latestStatus);
-               }
-
-               //  if assistance motion has not restarted update preview model with latestStatus
-               if(!sharedControlAssistant.hasMotionRestarted())
+                  sharedControlAssistant.saveStatusForPreview(latestStatus); // store the status
                   sharedControlAssistant.updatePreviewModel(latestStatus);
-               else // if motion has restarted use the joint angles from the initial message for the ghost robots
+               }
+               else  // replay preview
                {
-                  sharedControlAssistant.resetPreviewModel();
-                  KinematicsToolboxOutputStatus statusBeforeAssistance = sharedControlAssistant.getStatusBeforeAssistance();
-                  ghostFullRobotModel.getRootJoint().setJointPosition(statusBeforeAssistance.getDesiredRootPosition());
-                  ghostFullRobotModel.getRootJoint().setJointOrientation(statusBeforeAssistance.getDesiredRootOrientation());
+                  if(sharedControlAssistant.hasMotionRestarted())
+                     sharedControlAssistant.resetPreviewModel();
+                  // update shared control ghost
+                  sharedControlAssistant.replayPreviewModel();
+                  // update IK ghost
+                  KinematicsToolboxOutputStatus statusPreview = sharedControlAssistant.getPreviewStatus();
+                  ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
+                  ghostFullRobotModel.getRootJoint().setJointOrientation(statusPreview.getDesiredRootOrientation());
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
-                  {
-                     ghostOneDoFJointsExcludingHands[i].setQ(statusBeforeAssistance.getDesiredJointAngles().get(i));
-                  }
+                     ghostOneDoFJointsExcludingHands[i].setQ(statusPreview.getDesiredJointAngles().get(i));
                   ghostFullRobotModel.getElevator().updateFramesRecursively();
                }
             }
