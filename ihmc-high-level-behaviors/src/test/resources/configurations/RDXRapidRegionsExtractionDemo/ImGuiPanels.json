@@ -2,6 +2,7 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
+    "Dataset Navigation Panel" : true,
     "GPU Planar Region Extraction" : true,
     "Blurred Depth" : false,
     "Filtered Depth" : false,

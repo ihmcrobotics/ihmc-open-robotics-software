@@ -188,6 +188,11 @@ public class RapidRegionsDebutOutputGenerator
       return internalColor;
    }
 
+   public void clearDebugImage()
+   {
+      debugImage.put(new Scalar(0, 0, 0, 0));
+   }
+
    public void showDebugImage()
    {
       BytedecoOpenCVTools.display("Debug Output", debugImage, 0);
