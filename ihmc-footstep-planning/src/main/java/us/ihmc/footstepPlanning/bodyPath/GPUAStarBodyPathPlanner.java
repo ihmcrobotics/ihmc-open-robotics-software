@@ -44,6 +44,7 @@ import java.util.function.Consumer;
 
 public class GPUAStarBodyPathPlanner
 {
+   private static final int numberOfNeighborsPerExpansion = 16;
    private static final int defaultCells = (int) (5.0 / 0.03);
    private static final int defaultNodes = (int) (5.0 / BodyPathLatticePoint.gridSizeXY);
 
@@ -58,6 +59,8 @@ public class GPUAStarBodyPathPlanner
    private HeightMapData heightMapData;
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
+   private final TIntArrayList neighborsOffsetX = new TIntArrayList();
+   private final TIntArrayList neighborsOffsetY = new TIntArrayList();
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
 
    private final YoBoolean containsCollision = new YoBoolean("containsCollision", registry);
@@ -109,6 +112,7 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeNormalsWithLeastSquaresKernel;
    private _cl_kernel computeNormalsWithRansacKernel;
    private _cl_kernel snapVerticesKernel;
+   private _cl_kernel computeEdgeDataKernel;
 
    private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
    private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(9);
@@ -117,14 +121,27 @@ public class GPUAStarBodyPathPlanner
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
    private OpenCLIntBuffer ransacOffsetBuffer = new OpenCLIntBuffer(4);
    private OpenCLIntBuffer snapOffsetsBuffer = new OpenCLIntBuffer(6);
-   private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLIntBuffer traversibilityOffsetsBuffer = new OpenCLIntBuffer(8);
+   private OpenCLIntBuffer collisionOffsetsBuffer = new OpenCLIntBuffer(8);
+   private OpenCLIntBuffer neighborOffsetsBuffer = new OpenCLIntBuffer(33);
 
    // TODO once the things that use the normal are all on the GPU, these can be replaced with _cl_mem object = openCLManager.createImage as the backing data in
    // the cpu is no longer needed
+   private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer ransacNormalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer edgeRejectionReasonBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer deltaHeightMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer inclineMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer rollMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer stanceTraversibilityMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer stepTraversibilityMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer inclineCostMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer rollCostMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer traversibilityCostMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer edgeCostMapBuffer = new OpenCLFloatBuffer(1);
 
 
    private int cellsPerSide = -1;
@@ -237,6 +254,7 @@ public class GPUAStarBodyPathPlanner
       computeNormalsWithLeastSquaresKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithLeastSquares");
       computeNormalsWithRansacKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithRANSAC");
       snapVerticesKernel = openCLManager.createKernel(pathPlannerProgram, "snapVertices");
+      computeEdgeDataKernel = openCLManager.createKernel(pathPlannerProgram, "computeEdgeData");
    }
 
    public void firstTickSetup()
@@ -247,12 +265,25 @@ public class GPUAStarBodyPathPlanner
       leastSquaresOffsetBuffer.createOpenCLBufferObject(openCLManager);
       ransacOffsetBuffer.createOpenCLBufferObject(openCLManager);
       snapOffsetsBuffer.createOpenCLBufferObject(openCLManager);
+      traversibilityOffsetsBuffer.createOpenCLBufferObject(openCLManager);
+      collisionOffsetsBuffer.createOpenCLBufferObject(openCLManager);
+      neighborOffsetsBuffer.createOpenCLBufferObject(openCLManager);
 
       heightMapBuffer.createOpenCLBufferObject(openCLManager);
       leastSquaresNormalXYZBuffer.createOpenCLBufferObject(openCLManager);
       ransacNormalXYZBuffer.createOpenCLBufferObject(openCLManager);
       sampledHeightBuffer.createOpenCLBufferObject(openCLManager);
       snappedNodeHeightBuffer.createOpenCLBufferObject(openCLManager);
+      edgeRejectionReasonBuffer.createOpenCLBufferObject(openCLManager);
+      deltaHeightMapBuffer.createOpenCLBufferObject(openCLManager);
+      inclineMapBuffer.createOpenCLBufferObject(openCLManager);
+      rollMapBuffer.createOpenCLBufferObject(openCLManager);
+      stanceTraversibilityMapBuffer.createOpenCLBufferObject(openCLManager);
+      stepTraversibilityMapBuffer.createOpenCLBufferObject(openCLManager);
+      inclineCostMapBuffer.createOpenCLBufferObject(openCLManager);
+      rollCostMapBuffer.createOpenCLBufferObject(openCLManager);
+      traversibilityCostMapBuffer.createOpenCLBufferObject(openCLManager);
+      edgeCostMapBuffer.createOpenCLBufferObject(openCLManager);
 
       firstTick = false;
    }
@@ -263,6 +294,7 @@ public class GPUAStarBodyPathPlanner
       computeNormalsWithLeastSquaresKernel.close();
       computeNormalsWithRansacKernel.close();
       snapVerticesKernel.close();
+      computeEdgeDataKernel.close();
 
       heightMapParametersBuffer.destroy(openCLManager);
       pathPlanningParametersBuffer.destroy(openCLManager);
@@ -270,13 +302,24 @@ public class GPUAStarBodyPathPlanner
       leastSquaresOffsetBuffer.destroy(openCLManager);
       ransacOffsetBuffer.destroy(openCLManager);
       snapOffsetsBuffer.destroy(openCLManager);
+      traversibilityOffsetsBuffer.destroy(openCLManager);
+      collisionOffsetsBuffer.destroy(openCLManager);
+      neighborOffsetsBuffer.destroy(openCLManager);
 
       heightMapBuffer.destroy(openCLManager);
       leastSquaresNormalXYZBuffer.destroy(openCLManager);
       ransacNormalXYZBuffer.destroy(openCLManager);
       sampledHeightBuffer.destroy(openCLManager);
-      snappedNodeHeightBuffer.destroy(openCLManager);
-
+      edgeRejectionReasonBuffer.destroy(openCLManager);
+      deltaHeightMapBuffer.destroy(openCLManager);
+      inclineMapBuffer.destroy(openCLManager);
+      rollMapBuffer.destroy(openCLManager);
+      stanceTraversibilityMapBuffer.destroy(openCLManager);
+      stepTraversibilityMapBuffer.destroy(openCLManager);
+      inclineCostMapBuffer.destroy(openCLManager);
+      rollCostMapBuffer.destroy(openCLManager);
+      traversibilityCostMapBuffer.destroy(openCLManager);
+      edgeCostMapBuffer.destroy(openCLManager);
 
       openCLManager.destroy();
    }
@@ -290,7 +333,18 @@ public class GPUAStarBodyPathPlanner
       sampledHeightBuffer.resize(totalCells, openCLManager);
 
       int totalNodes = nodesPerSide * nodesPerSide;
+      int totalEdges = numberOfNeighborsPerExpansion * totalNodes;
       snappedNodeHeightBuffer.resize(totalNodes, openCLManager);
+      edgeRejectionReasonBuffer.resize(totalEdges, openCLManager);
+      deltaHeightMapBuffer.resize(totalEdges, openCLManager);
+      inclineMapBuffer.resize(totalEdges, openCLManager);
+      rollMapBuffer.resize(totalEdges, openCLManager);
+      stanceTraversibilityMapBuffer.resize(2 * totalEdges, openCLManager);
+      stepTraversibilityMapBuffer.resize(2 * totalEdges, openCLManager);
+      inclineCostMapBuffer.resize(totalEdges, openCLManager);
+      rollCostMapBuffer.resize(totalEdges, openCLManager);
+      traversibilityCostMapBuffer.resize(totalEdges, openCLManager);
+      edgeCostMapBuffer.resize(totalEdges, openCLManager);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -299,9 +353,6 @@ public class GPUAStarBodyPathPlanner
       {
          collisionDetector.initialize(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
       }
-
-
-
 
       this.heightMapData = heightMapData;
 //      ransacNormalCalculator.initialize(heightMapData);
@@ -339,7 +390,7 @@ public class GPUAStarBodyPathPlanner
       }
    }
 
-   void packRadialOffsetsBuffer()
+   void populateRadialOffsetsBuffer()
    {
       int connections = xSnapOffsets.size();
       snapOffsetsBuffer.resize(2 * connections + 1, openCLManager);
@@ -357,6 +408,122 @@ public class GPUAStarBodyPathPlanner
       }
 
       snapOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+   private void populateTraversibilityOffsetsBuffer()
+   {
+      TIntArrayList zeroDegCollisionOffsetsX = new TIntArrayList();
+      TIntArrayList zeroDegCollisionOffsetsY = new TIntArrayList();
+      TIntArrayList fourtyFiveDegCollisionOffsetsX = new TIntArrayList();
+      TIntArrayList fourtyFiveDegCollisionOffsetsY = new TIntArrayList();
+      TIntArrayList twentyTwoCollisionOffsetsX = new TIntArrayList();
+      TIntArrayList twentyTwoCollisionOffsetsY = new TIntArrayList();
+
+      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
+                                            zeroDegCollisionOffsetsX,
+                                            zeroDegCollisionOffsetsY,
+                                            BodyPathRANSACTraversibilityCalculator.sampleSizeX,
+                                            BodyPathRANSACTraversibilityCalculator.sampleSizeY,
+                                            0.0);
+      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
+                                            fourtyFiveDegCollisionOffsetsX,
+                                            fourtyFiveDegCollisionOffsetsY,
+                                            BodyPathRANSACTraversibilityCalculator.sampleSizeX,
+                                            BodyPathRANSACTraversibilityCalculator.sampleSizeY,
+                                            Math.toRadians(45.0));
+      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
+                                            twentyTwoCollisionOffsetsX,
+                                            twentyTwoCollisionOffsetsY,
+                                            BodyPathRANSACTraversibilityCalculator.sampleSizeX,
+                                            BodyPathRANSACTraversibilityCalculator.sampleSizeY,
+                                            Math.toRadians(22.5));
+
+      int offsets0 = zeroDegCollisionOffsetsX.size();
+      int offsets1 = fourtyFiveDegCollisionOffsetsY.size();
+      int offsets2 = twentyTwoCollisionOffsetsY.size();
+      traversibilityOffsetsBuffer.resize(2 * offsets0 + 2 * offsets1 + 2 * offsets2 + 3, openCLManager);
+      int index = 0;
+      IntPointer intPointer = traversibilityOffsetsBuffer.getBytedecoIntBufferPointer();
+
+      intPointer.put(index++, offsets0);
+      intPointer.put(index++, offsets1);
+      intPointer.put(index++, offsets2);
+      for (int i = 0; i < offsets0; i++)
+      {
+         intPointer.put(index, zeroDegCollisionOffsetsX.get(i));
+         intPointer.put(offsets0 + index++, zeroDegCollisionOffsetsY.get(i));
+      }
+      for (int i = 0; i < offsets1; i++)
+      {
+         intPointer.put(index, fourtyFiveDegCollisionOffsetsX.get(i));
+         intPointer.put(offsets1 + index++, fourtyFiveDegCollisionOffsetsY.get(i));
+      }
+      for (int i = 0; i < offsets2; i++)
+      {
+         intPointer.put(index, twentyTwoCollisionOffsetsX.get(i));
+         intPointer.put(offsets2 + index++, twentyTwoCollisionOffsetsY.get(i));
+      }
+
+      traversibilityOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+   private void populateCollisionsOffsetsBuffer(double gridResolutionXY, double boxSizeX, double boxSizeY)
+   {
+      TIntArrayList collisionOffsetsX1 = new TIntArrayList();
+      TIntArrayList collisionOffsetsY1 = new TIntArrayList();
+      TIntArrayList collisionOffsetsX2 = new TIntArrayList();
+      TIntArrayList collisionOffsetsY2 = new TIntArrayList();
+      TIntArrayList collisionOffsetsX3 = new TIntArrayList();
+      TIntArrayList collisionOffsetsY3 = new TIntArrayList();
+
+      BodyPathCollisionDetector.packOffsets(gridResolutionXY, collisionOffsetsX1, collisionOffsetsY1, boxSizeX, boxSizeY, 0 * Math.PI / 8.0);
+      BodyPathCollisionDetector.packOffsets(gridResolutionXY, collisionOffsetsX2, collisionOffsetsY2, boxSizeX, boxSizeY, 1 * Math.PI / 8.0);
+      BodyPathCollisionDetector.packOffsets(gridResolutionXY, collisionOffsetsX3, collisionOffsetsY3, boxSizeX, boxSizeY, 2 * Math.PI / 8.0);
+
+      int offsets0 = collisionOffsetsX1.size();
+      int offsets1 = collisionOffsetsX2.size();
+      int offsets2 = collisionOffsetsX3.size();
+      collisionOffsetsBuffer.resize(2 * offsets0 + 2 * offsets1 + 2 * offsets2 + 3, openCLManager);
+      int index = 0;
+      IntPointer intPointer = collisionOffsetsBuffer.getBytedecoIntBufferPointer();
+
+      intPointer.put(index++, offsets0);
+      intPointer.put(index++, offsets1);
+      intPointer.put(index++, offsets2);
+      for (int i = 0; i < offsets0; i++)
+      {
+         intPointer.put(index, collisionOffsetsX1.get(i));
+         intPointer.put(offsets0 + index++, collisionOffsetsY1.get(i));
+      }
+      for (int i = 0; i < offsets1; i++)
+      {
+         intPointer.put(index, collisionOffsetsX2.get(i));
+         intPointer.put(offsets1 + index++, collisionOffsetsY2.get(i));
+      }
+      for (int i = 0; i < offsets2; i++)
+      {
+         intPointer.put(index, collisionOffsetsX3.get(i));
+         intPointer.put(offsets2 + index++, collisionOffsetsY3.get(i));
+      }
+
+      collisionOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
+   }
+
+   private void populateNeighborOffsetsBuffer()
+   {
+      int offsets = neighborsOffsetX.size();
+      neighborOffsetsBuffer.resize(2 * offsets + 1, openCLManager);
+      int index = 0;
+      IntPointer intPointer = neighborOffsetsBuffer.getBytedecoIntBufferPointer();
+
+      intPointer.put(index++, offsets);
+      for (int i = 0; i < offsets; i++)
+      {
+         intPointer.put(index, neighborsOffsetX.get(i));
+         intPointer.put(offsets + index, neighborsOffsetY.get(i));
+      }
+
+      neighborOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
 
@@ -397,7 +564,12 @@ public class GPUAStarBodyPathPlanner
       gridHeightMap.clear();
 
       packRadialOffsets(heightMapData, snapRadius, xSnapOffsets, ySnapOffsets);
-      packRadialOffsetsBuffer();
+      packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
+
+      populateRadialOffsetsBuffer();
+      populateTraversibilityOffsetsBuffer();
+      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
+      populateNeighborOffsetsBuffer();
 
       Pose3D startPose = new Pose3D();
       Pose3D goalPose = new Pose3D();
@@ -427,6 +599,7 @@ public class GPUAStarBodyPathPlanner
       }
       computeSnapHeights();
       computeSurfaceNormalsWithRansac();
+      computeEdgeData();
 
       if (useRANSACTraversibility)
       {
@@ -556,7 +729,21 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(1, (float) nodeCenterIndex);
       floatPointer.put(2, (float) startNode.getXIndex());
       floatPointer.put(3, (float) startNode.getYIndex());
-//      floatPointer.put(4, snapHeightThreshold);
+      floatPointer.put(4, (float) groundClearance);
+      floatPointer.put(5, (float) maxIncline);
+//      floatPointer.put(6, (float) plannerParameters.getComputeSurfaceNormalCost());
+      floatPointer.put(7, (float) nominalIncline.getValue());
+      floatPointer.put(8, (float) plannerParameters.getInclineCostWeight());
+      floatPointer.put(9, (float) plannerParameters.getInclineCostDeadband());
+      floatPointer.put(10, (float) plannerParameters.getRollCostWeight());
+      floatPointer.put(11, (float) BodyPathRANSACTraversibilityCalculator.alphaStance);
+      floatPointer.put(12, (float) BodyPathRANSACTraversibilityCalculator.alphaStep);
+      floatPointer.put(13, (float) BodyPathRANSACTraversibilityCalculator.minPercent);
+      floatPointer.put(14, (float) BodyPathRANSACTraversibilityCalculator.halfStanceWidth);
+      floatPointer.put(15, (float) BodyPathRANSACTraversibilityCalculator.heightWindow);
+      floatPointer.put(16, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
+      floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
+      floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
 //      floatPointer.put(5, (float) heightMapData.getEstimatedGroundHeight());
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
@@ -709,6 +896,45 @@ public class GPUAStarBodyPathPlanner
       openCLManager.execute1D(snapVerticesKernel, totalCells);
 
       snappedNodeHeightBuffer.readOpenCLBufferObject(openCLManager);
+
+      openCLManager.finish();
+   }
+
+   private void computeEdgeData()
+   {
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 0, heightMapParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 1, pathPlanningParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 2, neighborOffsetsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 3, traversibilityOffsetsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 4, collisionOffsetsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 5, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 6, snappedNodeHeightBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 7, leastSquaresNormalXYZBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 8, ransacNormalXYZBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 9, edgeRejectionReasonBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 10, deltaHeightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 11, inclineMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 12, rollMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 13, stanceTraversibilityMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 14, stepTraversibilityMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 15, inclineCostMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 16, rollCostMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 17, traversibilityCostMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeEdgeDataKernel, 18, edgeCostMapBuffer.getOpenCLBufferObject());
+
+      int totalCells = nodesPerSide * nodesPerSide;
+      openCLManager.execute1D(computeEdgeDataKernel, totalCells);
+
+      edgeRejectionReasonBuffer.readOpenCLBufferObject(openCLManager);
+      deltaHeightMapBuffer.readOpenCLBufferObject(openCLManager);
+      inclineMapBuffer.readOpenCLBufferObject(openCLManager);
+      rollMapBuffer.readOpenCLBufferObject(openCLManager);
+      stanceTraversibilityMapBuffer.readOpenCLBufferObject(openCLManager);
+      stepTraversibilityMapBuffer.readOpenCLBufferObject(openCLManager);
+      inclineCostMapBuffer.readOpenCLBufferObject(openCLManager);
+      rollCostMapBuffer.readOpenCLBufferObject(openCLManager);
+      traversibilityCostMapBuffer.readOpenCLBufferObject(openCLManager);
+      edgeCostMapBuffer.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
    }
@@ -946,6 +1172,36 @@ public class GPUAStarBodyPathPlanner
       return null;
    }
 
+   static void packNeighborOffsets(TIntArrayList xOffsets, TIntArrayList yOffsets)
+   {
+      xOffsets.clear();
+      yOffsets.clear();
+
+      xOffsets.add(1); yOffsets.add(0);
+      xOffsets.add(2); yOffsets.add(1);
+      xOffsets.add(1); yOffsets.add(1);
+      xOffsets.add(1); yOffsets.add(2);
+
+      xOffsets.add(0); yOffsets.add(1);
+      xOffsets.add(-1); yOffsets.add(2);
+      xOffsets.add(-1); yOffsets.add(1);
+      xOffsets.add(-2); yOffsets.add(1);
+
+      xOffsets.add(-1); yOffsets.add(0);
+      xOffsets.add(-2); yOffsets.add(-1);
+      xOffsets.add(-1); yOffsets.add(-1);
+      xOffsets.add(-1); yOffsets.add(-2);
+
+      xOffsets.add(0); yOffsets.add(-1);
+      xOffsets.add(1); yOffsets.add(-2);
+      xOffsets.add(1); yOffsets.add(-1);
+      xOffsets.add(2); yOffsets.add(-1);
+
+      if (xOffsets.size() != numberOfNeighborsPerExpansion || yOffsets.size() != numberOfNeighborsPerExpansion)
+         throw new RuntimeException("Neighbor set is wrong.");
+   }
+
+
    /**
     * Populates a 16-connected grid starting along +x and moving clockwise
     */
@@ -953,25 +1209,10 @@ public class GPUAStarBodyPathPlanner
    {
       neighbors.clear();
 
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex()));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
-
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
-
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex()));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
-
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
+      for (int i = 0; i < neighborsOffsetX.size(); i++)
+      {
+         neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + neighborsOffsetX.get(i), latticePoint.getYIndex() + neighborsOffsetY.get(i)));
+      }
    }
 
    private double snap(BodyPathLatticePoint latticePoint)

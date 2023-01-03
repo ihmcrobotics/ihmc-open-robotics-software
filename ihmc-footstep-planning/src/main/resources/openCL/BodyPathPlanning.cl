@@ -704,9 +704,16 @@ float computeSidedTraversibility(float* height_map_params,
     if (minHeight > maxHeight - 1e-3)
         return 0.0f;
 
-    int number_of_offsets = offsets[0];
-    int x_offset_start = 1 + offset_set * number_of_offsets;
+    // get the location in the offsets vector to pull from
+    int number_of_offsets = offsets[offset_set];
+    int x_offset_start = 3;
     int y_offset_start = x_offset_start + number_of_offsets;
+    for (int i = 0; i < offset_set; i++)
+    {
+        x_offset_start += offsets[i];
+        y_offset_start += offsets[i];
+    }
+
     for (int i = 0; i < number_of_offsets; i++)
     {
         int xOffset = offsets[x_offset_start + i];
@@ -861,10 +868,15 @@ bool collisionDetected(global float* height_map_params,
     int map_idx_y = coordinate_to_index(point.y, center.y, map_resolution, map_center_index);
     float height_threshold = height + planner_params[GROUND_CLEARANCE];
 
-    int number_of_offsets = collision_offsets[0];
     int offset_set = get_collision_set_index(yaw_index);
-    int x_offset_start = 1 + offset_set * number_of_offsets;
-    int y_offset_start = x_offset_start + number_of_offsets;
+    int number_of_offsets = collision_offsets[offset_set];
+    int x_offset_start = 3;
+    int y_offset_start = number_of_offsets;
+    for (int i = 0; i < offset_set; i++)
+    {
+        x_offset_start += collision_offsets[i];
+        y_offset_start += collision_offsets[i];
+    }
 
     int cells_per_side = 2 * map_center_index + 1;
 
@@ -890,7 +902,7 @@ bool collisionDetected(global float* height_map_params,
     return false;
 }
 
-void kernel computeEdgeData(global float* params,
+void kernel computeEdgeData(global float* height_map_params,
                             global float* planner_params,
                             global int* neighbor_offsets,
                             global int* traversibility_offsets,
@@ -913,15 +925,15 @@ void kernel computeEdgeData(global float* params,
     int path_key = get_global_id(0);
 
     int path_center_index = (int) planner_params[PATH_CENTER_INDEX];
-    int map_center_index = (int) params[CENTER_INDEX];
-    float map_resolution = params[HEIGHT_MAP_RESOLUTION];
+    int map_center_index = (int) height_map_params[CENTER_INDEX];
+    float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
     float path_resolution = planner_params[PATH_RESOLUTION];
 
     int idx_x = key_to_x_index(path_key, path_center_index);
     int idx_y = key_to_y_index(path_key, path_center_index);
     int2 node_index = (int2) (idx_x, idx_y);
 
-    float2 center = (float2) (params[centerX], params[centerY]);
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float2 node_position = indices_to_coordinate(node_index, center, path_resolution, path_center_index);
     int node_map_key = coordinate_to_key(node_position, center, map_resolution, map_center_index);
 
@@ -982,14 +994,14 @@ void kernel computeEdgeData(global float* params,
             continue;
         }
 
-        if (collisionDetected(params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
+        if (collisionDetected(height_map_params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
         {
             edge_rejection_reason[edge_key] = COLLISION;
             continue;
         }
 
-        float4 traversibility_measures = computeTraversibilityMeasures(params, planner_params, traversibility_offsets,
-                                                            snapped_height_map, height_map, normal_ransac_xyz_buffer, node_position, neighbor_position, neighborIdx);
+        float4 traversibility_measures = computeTraversibilityMeasures(height_map_params, planner_params, traversibility_offsets, snapped_height_map,
+                                                                       height_map, normal_ransac_xyz_buffer, node_position, neighbor_position, neighborIdx);
         stance_traversibility_map[2 * edge_key] = traversibility_measures.s0;
         stance_traversibility_map[2 * edge_key + 1] = traversibility_measures.s1;
         step_traversibility_map[2 * edge_key] = traversibility_measures.s2;
@@ -1011,7 +1023,7 @@ void kernel computeEdgeData(global float* params,
         edge_cost += incline_cost;
 
         // compute roll cost
-        float roll = computeRollAtNode(params, normal_least_squares_xyz_buffer, node_position, neighbor_position);
+        float roll = computeRollAtNode(height_map_params, normal_least_squares_xyz_buffer, node_position, neighbor_position);
         float roll_cost = computeRollCost(planner_params, incline, roll);
         edge_cost += roll_cost;
         roll_map[edge_key] = roll;
@@ -1025,4 +1037,7 @@ void kernel computeEdgeData(global float* params,
         incline_cost_map[edge_key] = incline_cost;
         traversibility_cost_map[edge_key] = traversibility_cost;
     }
+
+     if (path_key == 50)
+                printf("finished\n");
 }
