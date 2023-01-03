@@ -639,4 +639,23 @@ void kernel computeEdges(global float* params,
     }
 }
 
+//float get_yaw(int yaw_index)
+//{
+//    return yaw_index * PI / 4.0f;
+//}
+
+//double computeTraversibility(float* params,
+//                             int* offsets,float half_stance_width, float2 node, int neighbor_idx, float opposite_height, float nominal_height)
+//{
+//    node.s2 += half_stance_width;
+//    int x_index = coordinate_to_index(node.s0, params[centerX], params[RESOLUTION], params[CENTER_INDEX]);
+//    int y_index = coordinate_to_index(node.s1, params[centerY], params[RESOLUTION], params[CENTER_INDEX]);
+
+//    int numberOfSampledCells = 0;
+//    int numberOfTraversibleCells = 0;
+
+//    float traversibilityScoreNumerator = 0.0;
+//    float minHeight = max(opposite_height, nominal_height);
+//}
+
 
