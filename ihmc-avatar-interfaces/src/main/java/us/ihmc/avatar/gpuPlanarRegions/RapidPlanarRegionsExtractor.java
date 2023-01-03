@@ -182,9 +182,16 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
-   public void update()
+   public void update(boolean changed)
    {
+      debugger.clearDebugImage();
       wholeAlgorithmDurationStopwatch.start();
+
+      if(changed)
+      {
+         // Flip so the Y+ goes up instead of down.
+         opencv_core.flip(inputU16DepthImage.getBytedecoOpenCVMat(), inputU16DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+      }
 
       gpuDurationStopwatch.start();
       extractPatchGraphUsingOpenCL();
@@ -212,9 +219,6 @@ public class RapidPlanarRegionsExtractor
    public void extractPatchGraphUsingOpenCL()
    {
       calculateDerivativeParameters();
-
-      // Flip so the Y+ goes up instead of down.
-      opencv_core.flip(inputU16DepthImage.getBytedecoOpenCVMat(), inputU16DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) parameters.getFilterDisparityThreshold());
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) parameters.getMergeAngularThreshold());

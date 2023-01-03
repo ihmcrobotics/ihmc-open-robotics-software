@@ -51,7 +51,6 @@ public class RDXRapidRegionsUIPanel
    private RDXImagePanel gzImagePanel;
    private RDXImagePanel debugExtractionPanel;
 
-   private int frameIndex = 0;
    private int patchImageWidth = 0;
    private int patchImageHeight = 0;
    private int imageWidth = 0;
@@ -149,16 +148,6 @@ public class RDXRapidRegionsUIPanel
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
       ImGui.checkbox(labels.get("Render Point Cloud"), renderPointCloud);
-
-      if(ImGui.button("Load Next"))
-      {
-         frameIndex++;
-      }
-      ImGui.sameLine();
-      if(ImGui.button("Load Previous"))
-      {
-         frameIndex = Math.max(0, frameIndex - 1);
-      }
    }
 
    public void destroy()
@@ -175,11 +164,6 @@ public class RDXRapidRegionsUIPanel
    public ImBoolean getEnabled()
    {
       return enabled;
-   }
-
-   public int getFrameIndex()
-   {
-      return frameIndex;
    }
 
    public boolean getPointCloudRenderEnabled()
