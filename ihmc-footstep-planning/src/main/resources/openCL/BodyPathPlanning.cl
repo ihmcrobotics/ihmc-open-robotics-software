@@ -13,11 +13,22 @@
 #define PATH_CENTER_INDEX 1
 #define START_X_INDEX 2
 #define START_Y_INDEX 3
-#define MAX_INCLINE 4
-#define COMPUTE_SURFACE_NORMAL_COST 5
-#define NOMINAL_INCLINE 6
-#define INCLINE_COST_WEIGHT 7
-#define INCLINE_COST_DEADBAND 8
+#define GROUND_CLEARANCE 4
+#define MAX_INCLINE 5
+#define COMPUTE_SURFACE_NORMAL_COST 6
+#define NOMINAL_INCLINE 7
+#define INCLINE_COST_WEIGHT 8
+#define INCLINE_COST_DEADBAND 9
+#define ROLL_COST_WEIGHT 10
+#define ALPHA_STANCE 11
+#define ALPHA_STEP 12
+#define MIN_TRAVERSIBILITY_PERCENTAGE 13
+// traversibility params, but part of the same vector
+#define HALF_STANCE_WIDTH 14
+#define HEIGHT_WINDOW 15
+#define MIN_NORMAL_TO_PENALIZE 16
+#define MAX_NORMAL_TO_PENALIZE 17
+#define INCLINE_WEIGHT 18
 
 // These are the flags for the different rejection types for the edges
 #define VALID -1
@@ -33,12 +44,7 @@
 #define RANSAC_MIN_NORMAL_Z 2
 #define RANSAC_ACCEPTABLE_CONSENSUS 3
 
-// these are parameters defined explicitly for the traversibility calculator
-#define HALF_STANCE_WIDTH 0
-#define HEIGHT_WINDOW 1
-#define MIN_NORMAL_TO_PENALIZE 2
-#define MAX_NORMAL_TO_PENALIZE 3
-#define INCLINE_WEIGHT 4
+
 
 int key_to_x_index(int key, int center_index)
 {
@@ -324,7 +330,7 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
         {
             int xj = idx_x + ransac_offsets[offsetsStart + j];
             int yj = idx_y + ransac_offsets[offsetsStart + consensus_size + j];
-            if (xj < 0 || xj >= cells_per_side || yj < 0 || yj > cells_per_side)
+            if (xj < 0 || xj >= cells_per_side || yj < 0 || yj >= cells_per_side)
             {
                 continue;
             }
@@ -399,9 +405,9 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
         int idx_y_to_poll = idx_y + offsets[connections + cell + 1];
 
         // check to make sure the index is in frame
-        if (idx_x_to_poll < 0 || idx_x_to_poll > cells_per_side)
+        if (idx_x_to_poll < 0 || idx_x_to_poll >= cells_per_side)
             continue;
-        if (idx_y_to_poll < 0 || idx_y_to_poll > cells_per_side)
+        if (idx_y_to_poll < 0 || idx_y_to_poll >= cells_per_side)
             continue;
 
         int key_to_poll = indices_to_key(idx_x_to_poll, idx_y_to_poll, center_index);
@@ -430,9 +436,9 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
         int idx_x_to_poll = idx_x + offsets[cell + 1];
         int idx_y_to_poll = idx_y + offsets[connections + cell + 1];
 
-        if (idx_x_to_poll < 0 || idx_x_to_poll > cells_per_side)
+        if (idx_x_to_poll < 0 || idx_x_to_poll >= cells_per_side)
             continue;
-        if (idx_y_to_poll < 0 || idx_y_to_poll > cells_per_side)
+        if (idx_y_to_poll < 0 || idx_y_to_poll >= cells_per_side)
             continue;
 
         int key_to_poll = indices_to_key(idx_x_to_poll, idx_y_to_poll, center_index);
@@ -655,7 +661,7 @@ int getTraversibilityOffsetSet(int yaw_index)
 }
 
 float computeSidedTraversibility(float* height_map_params,
-                              float* traversibility_params,
+                              float* planner_params,
                             int* offsets,
                             int offset_set,
                             float* height_map_data,
@@ -666,7 +672,7 @@ float computeSidedTraversibility(float* height_map_params,
                             float opposite_height,
                             float nominal_height)
 {
-    float half_stance_width = traversibility_params[HALF_STANCE_WIDTH];
+    float half_stance_width = planner_params[HALF_STANCE_WIDTH];
     if (node_side == 1)
         half_stance_width = -half_stance_width;
 
@@ -681,10 +687,11 @@ float computeSidedTraversibility(float* height_map_params,
     int numberOfTraversibleCells = 0;
 
     float traversibilityScoreNumber = 0.0f;
-    float minHeight = max(opposite_height, nominal_height) - traversibility_params[HEIGHT_WINDOW];
-    float maxHeight = min(opposite_height, nominal_height) + traversibility_params[HEIGHT_WINDOW];
+    float minHeight = max(opposite_height, nominal_height) - planner_params[HEIGHT_WINDOW];
+    float maxHeight = min(opposite_height, nominal_height) + planner_params[HEIGHT_WINDOW];
     float averageHeight = 0.5f * (nominal_height + opposite_height);
 
+    // TODO extract the magic numbers
     float lowestNonGroundAlpha = 0.85f;
     float heightAboveGround = fabs(averageHeight - height_map_params[GROUND_HEIGHT_ESTIMATE]);
     float nonGroundAlpha = 1.0f;
@@ -720,7 +727,7 @@ float computeSidedTraversibility(float* height_map_params,
 
             float heightDeadband = 0.1f;
             float deltaHeight = max(0.0f, fabs(averageHeight - heightQuery) - heightDeadband);
-            float cellPercentage = 1.0f - deltaHeight / traversibility_params[HEIGHT_WINDOW];
+            float cellPercentage = 1.0f - deltaHeight / planner_params[HEIGHT_WINDOW];
             float nonGroundDiscount = 1.0f;
 
             if (!epsilonEquals(heightQuery, height_map_params[GROUND_HEIGHT_ESTIMATE], 1e-3))
@@ -729,10 +736,10 @@ float computeSidedTraversibility(float* height_map_params,
             float query_normal_x = normal_xyz_data[3 * query_key];
             float query_normal_y = normal_xyz_data[3 * query_key + 1];
             float query_normal_z = normal_xyz_data[3 * query_key + 2];
-            float incline = max(0.0f, acos(query_normal_z) - traversibility_params[MIN_NORMAL_TO_PENALIZE]);
-            float inclineAlpha = (traversibility_params[MAX_NORMAL_TO_PENALIZE] - incline) / (traversibility_params[MAX_NORMAL_TO_PENALIZE] - traversibility_params[MIN_NORMAL_TO_PENALIZE]);
-            inclineAlpha = min(max(inclineAlpha, 0.0f), 1.0f);
-            traversibilityScoreNumber += nonGroundDiscount * ((1.0 - traversibility_params[INCLINE_WEIGHT]) * cellPercentage + traversibility_params[INCLINE_WEIGHT] * inclineAlpha);
+            float incline = max(0.0f, acos(query_normal_z) - planner_params[MIN_NORMAL_TO_PENALIZE]);
+            float inclineAlpha = (planner_params[MAX_NORMAL_TO_PENALIZE] - incline) / (planner_params[MAX_NORMAL_TO_PENALIZE] - planner_params[MIN_NORMAL_TO_PENALIZE]);
+            inclineAlpha = clamp(inclineAlpha, 0.0f, 1.0f);
+            traversibilityScoreNumber += nonGroundDiscount * ((1.0 - planner_params[INCLINE_WEIGHT]) * cellPercentage + planner_params[INCLINE_WEIGHT] * inclineAlpha);
         }
     }
 
@@ -742,10 +749,9 @@ float computeSidedTraversibility(float* height_map_params,
         return traversibilityScoreNumber / numberOfSampledCells;
 }
 
-float4 computeTraversibility(global float* height_map_params,
+float4 computeTraversibilityMeasures(global float* height_map_params,
                              global float* planner_params,
                             global int* traversibility_offsets,
-                            float* traversibility_params,
                             global float* snapped_vertex_height,
                             global float* height_map_data,
                             global float* normal_xyz_data,
@@ -766,18 +772,18 @@ float4 computeTraversibility(global float* height_map_params,
     float child_height = snapped_vertex_height[child_key];
     int offset_set = getTraversibilityOffsetSet(yaw_idx);
 
-    float left_traversibility = computeSidedTraversibility(height_map_params, traversibility_params, traversibility_offsets, offset_set, height_map_data,
+    float left_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
                                                             normal_xyz_data, 0, child_node, yaw_idx, parent_height, child_height);
-    float right_traversibility = computeSidedTraversibility(height_map_params, traversibility_params, traversibility_offsets, offset_set, height_map_data,
+    float right_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
                                                                 normal_xyz_data, 1, child_node, yaw_idx, parent_height, child_height);
 
     float previous_left_traversibility = 1.0;
     float previous_right_traversibility = 1.0;
     if (parent_planner_x != planner_params[START_X_INDEX] && parent_planner_y != planner_params[START_Y_INDEX])
     {
-        previous_left_traversibility = computeSidedTraversibility(height_map_params, traversibility_params, traversibility_offsets, offset_set, height_map_data,
+        previous_left_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
                                                                   normal_xyz_data, 0, parent_node, yaw_idx, child_height, parent_height);
-        previous_right_traversibility = computeSidedTraversibility(height_map_params, traversibility_params, traversibility_offsets, offset_set, height_map_data,
+        previous_right_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
                                                                    normal_xyz_data, 1, parent_node, yaw_idx, child_height, parent_height);
     }
 
@@ -787,19 +793,122 @@ float4 computeTraversibility(global float* height_map_params,
     return (float4) (left_traversibility, right_traversibility, leftStepScore, rightStepScore);
 }
 
-void kernel computeEdges(global float* params,
-                         global float* planner_params,
-                         global int* neighbor_offsets,
-                         global int* traversibility_offsets,
-                         global float* height_map,
-                         global float* snapped_height_map,
-                         global float* normal_xyz_buffer,
-                         global int* edge_rejection_reason,
-                         global float* delta_height_map,
-                         global float* incline_map,
-                         global float* incline_cost_map,
-                         global float* roll_cost_map,
-                         global float* edge_cost_map)
+float computeTraversibilityCost(global float* planner_params, float4 traversibility_measures)
+{
+    float stanceTraversibility = max(traversibility_measures.s0, traversibility_measures.s1);
+    float stepTraversibility = max(traversibility_measures.s2, traversibility_measures.s3);
+
+    return planner_params[ALPHA_STANCE] * (1.0 - stanceTraversibility) + planner_params[ALPHA_STEP] * (1.0 - stepTraversibility);
+}
+
+bool computeIsTraversible(global float* planner_params, float4 traversibility_measures)
+{
+    return traversibility_measures.s0 > planner_params[MIN_TRAVERSIBILITY_PERCENTAGE] || traversibility_measures.s1 > planner_params[MIN_TRAVERSIBILITY_PERCENTAGE];
+}
+
+float computeRollAtNode(global float* height_map_params, global float* normal_least_squares_xyz_buffer, float2 parent, float2 neighbor)
+{
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+    int map_center_index = height_map_params[CENTER_INDEX];
+    float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
+
+    float2 edge = normalize(neighbor - parent);
+    float2 averageBodyPosition = 0.5f * (neighbor + parent);
+    float yaw = atan2(edge.y, edge.x);
+
+    int body_map_key = coordinate_to_key(averageBodyPosition, center, map_resolution, map_center_index);
+    float normal_x = normal_least_squares_xyz_buffer[3 * body_map_key];
+    float normal_y = normal_least_squares_xyz_buffer[3 * body_map_key + 1];
+    float normal_z = normal_least_squares_xyz_buffer[3 * body_map_key + 2];
+
+    float roll = asin(fabs(edge.y * normal_x - edge.x * normal_y));
+    return roll;
+}
+
+float computeRollCost(global float* planner_params, float incline, float roll)
+{
+    // TODO extract the magic numbers
+    // 0.12 is 7 degrees
+    float inclineScale = clamp(fabs(incline) / 0.12f, 0.0f, 1.0f);
+    float rollDeadband = 0.026f; // 1.5 degrees
+    float rollAngleDeadbanded = max(0.0f, fabs(roll) - rollDeadband);
+
+    return planner_params[ROLL_COST_WEIGHT] * inclineScale * rollAngleDeadbanded;
+}
+
+int get_collision_set_index(int yaw_index)
+{
+    if (yaw_index % 4 == 0)
+        return 0;
+    else if (yaw_index % 2 == 2)
+        return 2;
+    else
+        return 1;
+}
+
+bool collisionDetected(global float* height_map_params,
+                       global float* planner_params,
+                       global int* collision_offsets,
+                       global float* height_map,
+                       float2 point,
+                       int yaw_index,
+                       float height)
+{
+    int map_center_index = height_map_params[CENTER_INDEX];
+    float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+    int map_idx_x = coordinate_to_index(point.x, center.x, map_resolution, map_center_index);
+    int map_idx_y = coordinate_to_index(point.y, center.y, map_resolution, map_center_index);
+    float height_threshold = height + planner_params[GROUND_CLEARANCE];
+
+    int number_of_offsets = collision_offsets[0];
+    int offset_set = get_collision_set_index(yaw_index);
+    int x_offset_start = 1 + offset_set * number_of_offsets;
+    int y_offset_start = x_offset_start + number_of_offsets;
+
+    int cells_per_side = 2 * map_center_index + 1;
+
+    for (int i = 0; i < number_of_offsets; i++)
+    {
+        int x_offset = collision_offsets[x_offset_start + i];
+        int y_offset = collision_offsets[y_offset_start + i];
+        int xQuery = map_idx_x + computeCollisionOffsetX(yaw_index, x_offset, y_offset);
+        int yQuery = map_idx_y + computeCollisionOffsetY(yaw_index, x_offset, y_offset);
+
+        if (xQuery < 0 || yQuery < 0 || xQuery >= cells_per_side || yQuery >= cells_per_side)
+            continue;
+
+        int map_key = indices_to_key(xQuery, yQuery, map_center_index);
+        float heightQuery = height_map[map_key];
+
+        if (isnan(heightQuery))
+            continue;
+        if (heightQuery >= height_threshold)
+            return true;
+    }
+
+    return false;
+}
+
+void kernel computeEdgeData(global float* params,
+                            global float* planner_params,
+                            global int* neighbor_offsets,
+                            global int* traversibility_offsets,
+                            global int* collision_offsets,
+                            global float* height_map,
+                            global float* snapped_height_map,
+                            global float* normal_least_squares_xyz_buffer,
+                            global float* normal_ransac_xyz_buffer,
+                            global int* edge_rejection_reason,
+                            global float* delta_height_map,
+                            global float* incline_map,
+                            global float* roll_map,
+                            global float* stance_traversibility_map,
+                            global float* step_traversibility_map,
+                            global float* incline_cost_map,
+                            global float* roll_cost_map,
+                            global float* traversibility_cost_map,
+                            global float* edge_cost_map)
 {
     int path_key = get_global_id(0);
 
@@ -838,12 +947,12 @@ void kernel computeEdges(global float* params,
         int neighbor_idx_y = idx_y + neighbor_offsets[1 + number_of_neighbors + neighborIdx];
         int edge_key = number_of_neighbors * path_key + neighborIdx;
 
-        if (neighbor_idx_x < 0 || neighbor_idx_x > path_cells_per_side)
+        if (neighbor_idx_x < 0 || neighbor_idx_x >= path_cells_per_side)
         {
             edge_rejection_reason[edge_key] = INVALID_SNAP;
             continue;
         }
-        if (neighbor_idx_y < 0 || neighbor_idx_y > path_cells_per_side)
+        if (neighbor_idx_y < 0 || neighbor_idx_y >= path_cells_per_side)
         {
             edge_rejection_reason[edge_key] = INVALID_SNAP;
             continue;
@@ -873,9 +982,24 @@ void kernel computeEdges(global float* params,
             continue;
         }
 
-        // TODO check for collisions
+        if (collisionDetected(params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
+        {
+            edge_rejection_reason[edge_key] = COLLISION;
+            continue;
+        }
 
-        // TODO check for traversibility
+        float4 traversibility_measures = computeTraversibilityMeasures(params, planner_params, traversibility_offsets,
+                                                            snapped_height_map, height_map, normal_ransac_xyz_buffer, node_position, neighbor_position, neighborIdx);
+        stance_traversibility_map[2 * edge_key] = traversibility_measures.s0;
+        stance_traversibility_map[2 * edge_key + 1] = traversibility_measures.s1;
+        step_traversibility_map[2 * edge_key] = traversibility_measures.s2;
+        step_traversibility_map[2 * edge_key + 1] = traversibility_measures.s3;
+
+        if (!computeIsTraversible(planner_params, traversibility_measures))
+        {
+            edge_rejection_reason[edge_key] = NON_TRAVERSIBLE;
+            continue;
+        }
 
         float edge_cost = xy_distance;
         float incline_cost = 0.0;
@@ -886,11 +1010,19 @@ void kernel computeEdges(global float* params,
         }
         edge_cost += incline_cost;
 
-        // TODO compute roll cost
+        // compute roll cost
+        float roll = computeRollAtNode(params, normal_least_squares_xyz_buffer, node_position, neighbor_position);
+        float roll_cost = computeRollCost(planner_params, incline, roll);
+        edge_cost += roll_cost;
+        roll_map[edge_key] = roll;
 
-        // TODO compute traversibility cost
+        // get the traversibility cost
+        float traversibility_cost = computeTraversibilityCost(planner_params, traversibility_measures);
+        edge_cost += traversibility_cost;
 
+        roll_cost_map[edge_key] = roll_cost;
         edge_cost_map[edge_key] = edge_cost;
         incline_cost_map[edge_key] = incline_cost;
+        traversibility_cost_map[edge_key] = traversibility_cost;
     }
 }
