@@ -308,7 +308,7 @@ public class RDXVRKinematicsStreamingMode
 
             if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
             {
-               if (sharedControlAssistant.isFirstDisplayAssistance()) // first preview
+               if (sharedControlAssistant.isFirstPreview()) // first preview
                {
                   sharedControlAssistant.saveStatusForPreview(latestStatus); // store the status
                   sharedControlAssistant.updatePreviewModel(latestStatus); // update shared control ghost robot

@@ -52,7 +52,7 @@ public class ProMPAssistant
    private final AtomicBoolean isLastViaPoint = new AtomicBoolean(false); // check if last observed viapoint before update
    private int testNumber = 0;
    private boolean conditionOnlyLastObservation = true;
-   private final List<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
+   private final ArrayList<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
    private boolean isMoving = false;
 
    public ProMPAssistant()
@@ -376,6 +376,7 @@ public class ProMPAssistant
       bodyPartObservedTrajectoryMap.clear();
       bodyPartGeneratedTrajectoryMap.clear();
       bodyPartTrajectorySampleCounter.clear();
+      observationRecognitionPart.clear();
       doneInitialProcessingTask = false;
       isLastViaPoint.set(false);
       isMoving = false;
