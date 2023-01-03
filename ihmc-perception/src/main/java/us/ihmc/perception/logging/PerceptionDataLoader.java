@@ -85,8 +85,6 @@ public class PerceptionDataLoader
 
    public void loadCompressedImage(String namespace, int index, Mat mat)
    {
-      LogTools.info("Loading Image: {} {}", namespace, index);
-
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
 
@@ -96,15 +94,9 @@ public class PerceptionDataLoader
 
    public void loadCompressedDepth(String namespace, int index, Mat mat)
    {
-      LogTools.info("Loading Image: {} {}", namespace, index);
-
       Group group = hdf5Manager.getGroup(namespace);
       byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-
-      //      LogTools.info("Depth: {}", Arrays.toString(compressedByteArray));
-
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
-
    }
 
    public String getFilePath()

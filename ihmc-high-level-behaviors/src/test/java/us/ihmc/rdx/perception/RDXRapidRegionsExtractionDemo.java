@@ -128,11 +128,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
 
                   updateRapidRegionsExtractor(true);
-                  updatePointCloudRenderer(true);
                }
 
                updateRapidRegionsExtractor(false);
-               updatePointCloudRenderer(false);
 
                rapidRegionsUIPanel.render();
             }
@@ -162,7 +160,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             if(changed)
             {
-               LogTools.info("Changed frame index to {}", frameIndex.get());
                perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
                rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
                updateRapidRegionsExtractor(true);

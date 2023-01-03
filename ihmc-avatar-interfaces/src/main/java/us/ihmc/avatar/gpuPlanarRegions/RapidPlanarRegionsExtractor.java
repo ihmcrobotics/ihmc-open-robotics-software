@@ -34,7 +34,7 @@ public class RapidPlanarRegionsExtractor
       SPHERICAL, PERSPECTIVE
    }
 
-   private final GPUPlanarRegionExtractionParameters parameters = new GPUPlanarRegionExtractionParameters();
+   private final GPUPlanarRegionExtractionParameters parameters = new GPUPlanarRegionExtractionParameters("Spherical");
 
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
@@ -75,8 +75,6 @@ public class RapidPlanarRegionsExtractor
    private int patchWidth;
    private int filterPatchImageHeight;
    private int filterPatchImageWidth;
-
-   private final GPUPlanarRegionExtractionParameters gpuPlanarRegionExtractionParameters = new GPUPlanarRegionExtractionParameters();
 
    private final RapidRegionsDebutOutputGenerator debugger = new RapidRegionsDebutOutputGenerator();
    private final Stack<PatchGraphRecursionBlock> depthFirstSearchStack = new Stack<>();
@@ -370,7 +368,6 @@ public class RapidPlanarRegionsExtractor
             }
          }
       }
-      LogTools.info("Total GPUPlanarRegions Found: {}", gpuPlanarRegions.size());
    }
 
    public void findBoundariesAndHoles()
