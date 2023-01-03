@@ -1,7 +1,6 @@
 package us.ihmc.promp.test;
 
 import us.ihmc.promp.*;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,15 +20,17 @@ public class LearnProMPExample
    {
       ProMPNativeLibrary.load();
 
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/test/cppLibraryTestData/Reaching");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
+      String currentDirectory = System.getProperty("user.dir");
+      System.out.println("Current dir using System: " + currentDirectory);
+
+      String demoDirectoryAbsolute = getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching").toString().substring(6);
 
       List<String> fileList = new ArrayList<>();
       // The trajectories contained in the Reaching1 folder represent different demonstration of a given task
       // Several trajectories of different body parts have been recorded
       // 0: waist Z; 1,2,3: right hand X,Y,Z; 5,6,7: left hand X,Y,Z
       for (int i = 0; i < 10; i++) //get training files
-         fileList.add(demoDirAbs + "/pr" + (i + 1) + ".csv");
+         fileList.add(demoDirectoryAbsolute + "/pr" + (i + 1) + ".csv");
       assertTrue(fileList.size() > 0);
       // consider only right hand trajectories
       List<Long> dofs = List.of(1L, 2L, 3L);
