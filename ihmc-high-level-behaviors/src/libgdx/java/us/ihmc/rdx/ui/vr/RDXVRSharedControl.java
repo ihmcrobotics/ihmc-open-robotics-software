@@ -37,7 +37,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
-   private boolean assistanceFirstDisplay = true;
+   private boolean firstPreview = true;
    private int replayPreviewCounter = 0;
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
@@ -125,7 +125,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostRobotGraphic.setActive(true); // show ghost robot of preview
          if (proMPAssistant.isCurrentTaskDone()) // if motion is over and not validated yet, replay it
          {
-            assistanceFirstDisplay = false;
+            firstPreview = false;
             proMPAssistant.setStartTrajectories(0);
          }
          if (enabledIKStreaming.get()) // if streaming to controller has been activated again, it means the user validated the motion
@@ -164,7 +164,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          this.enabled.set(enabled);
          if (enabled)
          {
-            assistanceFirstDisplay = true;
+            firstPreview = true;
 
             // store detected object name and pose
             if (objectDetector != null && objectDetector.isEnabled() && objectDetector.hasDetectedObject())
@@ -192,7 +192,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setCurrentTaskDone(false);
             objectName = "";
             objectPose = null;
-            assistanceFirstDisplay = true;
+            firstPreview = true;
             previewValidated = false;
             replayPreviewCounter = 0;
             assistanceStatusList.clear();
@@ -241,8 +241,8 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       return assistanceStatusList.get(replayPreviewCounter);
    }
 
-   public boolean isFirstDisplayAssistance()
+   public boolean isFirstPreview()
    {
-      return assistanceFirstDisplay;
+      return firstPreview;
    }
 }
