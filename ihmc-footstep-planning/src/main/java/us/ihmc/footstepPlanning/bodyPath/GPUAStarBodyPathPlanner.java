@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
@@ -49,7 +50,6 @@ public class GPUAStarBodyPathPlanner
    private static final int defaultNodes = (int) (5.0 / BodyPathLatticePoint.gridSizeXY);
 
    private static final boolean debug = false;
-   private static final boolean useRANSACTraversibility = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -77,20 +77,14 @@ public class GPUAStarBodyPathPlanner
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
 
-   private final HashMap<BodyPathLatticePoint, Double> rollMap = new HashMap<>();
+   private final SideDependentList<YoDouble> stanceScore;
+   private final SideDependentList<YoDouble> stepScores;
+   private final YoDouble stanceTraversibility;
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
-   private final HashMap<BodyPathLatticePoint, Double> gridHeightMap = new HashMap<>();
    private BodyPathLatticePoint leastCostNode = null;
    private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
-
-   /* Indicator of how flat and planar and available footholds are, using least squares */
-   private final BodyPathLSTraversibilityCalculator leastSqTraversibilityCalculator;
-   /* Indicator of how flat and planar and available footholds are */
-   private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
-   /* Performs box collision check */
-   private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
@@ -113,9 +107,10 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeNormalsWithRansacKernel;
    private _cl_kernel snapVerticesKernel;
    private _cl_kernel computeEdgeDataKernel;
+   private _cl_kernel computeHeuristicCostKernel;
 
    private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
-   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(9);
+   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(20);
    private OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
 
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
@@ -132,7 +127,7 @@ public class GPUAStarBodyPathPlanner
    private OpenCLFloatBuffer ransacNormalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer edgeRejectionReasonBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLIntBuffer edgeRejectionReasonBuffer = new OpenCLIntBuffer(1);
    private OpenCLFloatBuffer deltaHeightMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer inclineMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer rollMapBuffer = new OpenCLFloatBuffer(1);
@@ -142,6 +137,7 @@ public class GPUAStarBodyPathPlanner
    private OpenCLFloatBuffer rollCostMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer traversibilityCostMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer edgeCostMapBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatBuffer heuristicCostMapBuffer = new OpenCLFloatBuffer(1);
 
 
    private int cellsPerSide = -1;
@@ -184,6 +180,11 @@ public class GPUAStarBodyPathPlanner
       this.stopwatch = stopwatch;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
 
+      this.stanceScore = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StanceScore", registry));
+      this.stepScores = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StepScore", registry));
+      this.stanceTraversibility = new YoDouble("stanceTraversibility", registry);
+
+
       openCLManager = new OpenCLManager();
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
 
@@ -202,17 +203,6 @@ public class GPUAStarBodyPathPlanner
          }
       }
 
-      if (useRANSACTraversibility)
-      {
-         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, this::getRansacSurfaceNormal, registry);
-         leastSqTraversibilityCalculator = null;
-      }
-      else
-      {
-         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygons, gridHeightMap, registry);
-         ransacTraversibilityCalculator = null;
-      }
-
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
       graph.setGraphExpansionCallback(edge ->
@@ -224,7 +214,7 @@ public class GPUAStarBodyPathPlanner
 
                                          edgeData.setParentNode(edge.getStartNode());
                                          edgeData.setChildNode(edge.getEndNode());
-                                         edgeData.setChildSnapHeight(gridHeightMap.get(edge.getEndNode()));
+                                         edgeData.setChildSnapHeight(snapHeight.getDoubleValue());
 
                                          edgeDataMap.put(edge, edgeData.getCopyAndClear());
 
@@ -238,7 +228,12 @@ public class GPUAStarBodyPathPlanner
                                          incline.set(0.0);
                                          heuristicCost.setToNaN();
                                          totalCost.setToNaN();
-                                         ransacTraversibilityCalculator.clearVariables();
+                                         for (RobotSide side : RobotSide.values)
+                                         {
+                                            stanceScore.get(side).setToNaN();
+                                            stepScores.get(side).setToNaN();
+                                         }
+                                         stanceTraversibility.setToNaN();
                                       });
    }
 
@@ -255,6 +250,7 @@ public class GPUAStarBodyPathPlanner
       computeNormalsWithRansacKernel = openCLManager.createKernel(pathPlannerProgram, "computeSurfaceNormalsWithRANSAC");
       snapVerticesKernel = openCLManager.createKernel(pathPlannerProgram, "snapVertices");
       computeEdgeDataKernel = openCLManager.createKernel(pathPlannerProgram, "computeEdgeData");
+      computeHeuristicCostKernel = openCLManager.createKernel(pathPlannerProgram, "computeHeuristicCost");
    }
 
    public void firstTickSetup()
@@ -284,6 +280,7 @@ public class GPUAStarBodyPathPlanner
       rollCostMapBuffer.createOpenCLBufferObject(openCLManager);
       traversibilityCostMapBuffer.createOpenCLBufferObject(openCLManager);
       edgeCostMapBuffer.createOpenCLBufferObject(openCLManager);
+      heuristicCostMapBuffer.createOpenCLBufferObject(openCLManager);
 
       firstTick = false;
    }
@@ -295,6 +292,7 @@ public class GPUAStarBodyPathPlanner
       computeNormalsWithRansacKernel.close();
       snapVerticesKernel.close();
       computeEdgeDataKernel.close();
+      computeHeuristicCostKernel.close();
 
       heightMapParametersBuffer.destroy(openCLManager);
       pathPlanningParametersBuffer.destroy(openCLManager);
@@ -320,6 +318,7 @@ public class GPUAStarBodyPathPlanner
       rollCostMapBuffer.destroy(openCLManager);
       traversibilityCostMapBuffer.destroy(openCLManager);
       edgeCostMapBuffer.destroy(openCLManager);
+      heuristicCostMapBuffer.destroy(openCLManager);
 
       openCLManager.destroy();
    }
@@ -345,27 +344,12 @@ public class GPUAStarBodyPathPlanner
       rollCostMapBuffer.resize(totalEdges, openCLManager);
       traversibilityCostMapBuffer.resize(totalEdges, openCLManager);
       edgeCostMapBuffer.resize(totalEdges, openCLManager);
+      heuristicCostMapBuffer.resize(totalEdges, openCLManager);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
-      if (this.heightMapData == null || !EuclidCoreTools.epsilonEquals(this.heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), 1e-3))
-      {
-         collisionDetector.initialize(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
-      }
-
       this.heightMapData = heightMapData;
-//      ransacNormalCalculator.initialize(heightMapData);
-      rollMap.clear();
-
-      if (useRANSACTraversibility)
-      {
-         ransacTraversibilityCalculator.setHeightMap(heightMapData);
-      }
-      else
-      {
-         leastSqTraversibilityCalculator.setHeightMap(heightMapData);
-      }
    }
 
    static void packRadialOffsets(HeightMapData heightMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
@@ -520,7 +504,7 @@ public class GPUAStarBodyPathPlanner
       for (int i = 0; i < offsets; i++)
       {
          intPointer.put(index, neighborsOffsetX.get(i));
-         intPointer.put(offsets + index, neighborsOffsetY.get(i));
+         intPointer.put(offsets + index++, neighborsOffsetY.get(i));
       }
 
       neighborOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
@@ -549,7 +533,6 @@ public class GPUAStarBodyPathPlanner
          this.nodesPerSide = 2 * nodeCenterIndex + 1;
          resizeOpenCLObjects();
       }
-      LogTools.info("cells Per axis " + cellsPerSide);
 
       haltRequested.set(false);
       iterations = 0;
@@ -561,7 +544,6 @@ public class GPUAStarBodyPathPlanner
 
       iterationData.clear();
       edgeDataMap.clear();
-      gridHeightMap.clear();
 
       packRadialOffsets(heightMapData, snapRadius, xSnapOffsets, ySnapOffsets);
       packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
@@ -583,7 +565,6 @@ public class GPUAStarBodyPathPlanner
       stack.add(startNode);
       graph.initialize(startNode);
       expandedNodeSet.clear();
-      gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
 
@@ -599,17 +580,8 @@ public class GPUAStarBodyPathPlanner
       }
       computeSnapHeights();
       computeSurfaceNormalsWithRansac();
+      computeHeuristicCost();
       computeEdgeData();
-
-      if (useRANSACTraversibility)
-      {
-//         ransacNormalCalculator.initialize(heightMapData);
-         ransacTraversibilityCalculator.initialize(startNode);
-      }
-      else
-      {
-         leastSqTraversibilityCalculator.initialize(startNode);
-      }
 
       planningLoop:
       while (true)
@@ -644,19 +616,24 @@ public class GPUAStarBodyPathPlanner
             break;
          }
 
+         int parentNodeGraphKey = getNodeGraphKey(node);
+         int edgeKeyStart = parentNodeGraphKey * numberOfNeighborsPerExpansion;
          populateNeighbors(node);
 
-         double parentSnapHeight = gridHeightMap.get(node);
+         double parentSnapHeight = snap(parentNodeGraphKey);
          for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
          {
             BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
+            int neighborNodeKey = getNodeGraphKey(neighbor);
 
-            heuristicCost.set(xyDistance(neighbor, goalNode));
+            int edgeKey = edgeKeyStart + neighborIndex;
 
-            if (!checkEdge(node, parentSnapHeight, neighbor, neighborIndex))
+            if (!checkEdge(node, neighbor, neighborNodeKey, edgeKey))
                continue;
 
-            computeEdgeCost(node, neighbor);
+            heuristicCost.set(heuristicCostMapBuffer.getBackingDirectFloatBuffer().get(neighborNodeKey));
+
+            computeEdgeCost(node, neighbor, edgeKey);
 
             totalCost.set(heuristicCost.getValue() + edgeCost.getValue());
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
@@ -690,6 +667,14 @@ public class GPUAStarBodyPathPlanner
       }
 
       reportStatus(request, outputToPack);
+   }
+
+   private int getNodeGraphKey(BodyPathLatticePoint node)
+   {
+      int nodeGraphXIdx = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
+      int nodeGraphYIdx = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
+
+      return HeightMapTools.indicesToKey(nodeGraphXIdx, nodeGraphYIdx, nodeCenterIndex);
    }
 
    private void populateHeightMapImage()
@@ -729,21 +714,22 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(1, (float) nodeCenterIndex);
       floatPointer.put(2, (float) startNode.getXIndex());
       floatPointer.put(3, (float) startNode.getYIndex());
-      floatPointer.put(4, (float) groundClearance);
-      floatPointer.put(5, (float) maxIncline);
-//      floatPointer.put(6, (float) plannerParameters.getComputeSurfaceNormalCost());
-      floatPointer.put(7, (float) nominalIncline.getValue());
-      floatPointer.put(8, (float) plannerParameters.getInclineCostWeight());
-      floatPointer.put(9, (float) plannerParameters.getInclineCostDeadband());
-      floatPointer.put(10, (float) plannerParameters.getRollCostWeight());
-      floatPointer.put(11, (float) BodyPathRANSACTraversibilityCalculator.alphaStance);
-      floatPointer.put(12, (float) BodyPathRANSACTraversibilityCalculator.alphaStep);
-      floatPointer.put(13, (float) BodyPathRANSACTraversibilityCalculator.minPercent);
-      floatPointer.put(14, (float) BodyPathRANSACTraversibilityCalculator.halfStanceWidth);
-      floatPointer.put(15, (float) BodyPathRANSACTraversibilityCalculator.heightWindow);
-      floatPointer.put(16, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
-      floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
-      floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
+      floatPointer.put(4, (float) goalNode.getX());
+      floatPointer.put(5, (float) goalNode.getY());
+      floatPointer.put(6, (float) groundClearance);
+      floatPointer.put(7, (float) maxIncline);
+      floatPointer.put(8, (float) nominalIncline.getValue());
+      floatPointer.put(9, (float) plannerParameters.getInclineCostWeight());
+      floatPointer.put(10, (float) plannerParameters.getInclineCostDeadband());
+      floatPointer.put(11, (float) plannerParameters.getRollCostWeight());
+      floatPointer.put(12, (float) BodyPathRANSACTraversibilityCalculator.alphaStance);
+      floatPointer.put(13, (float) BodyPathRANSACTraversibilityCalculator.alphaStep);
+      floatPointer.put(14, (float) BodyPathRANSACTraversibilityCalculator.minPercent);
+      floatPointer.put(15, (float) BodyPathRANSACTraversibilityCalculator.halfStanceWidth);
+      floatPointer.put(16, (float) BodyPathRANSACTraversibilityCalculator.heightWindow);
+      floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
+      floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
+      floatPointer.put(19, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
 //      floatPointer.put(5, (float) heightMapData.getEstimatedGroundHeight());
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
@@ -840,7 +826,6 @@ public class GPUAStarBodyPathPlanner
       int consensusOffsets = xConsensusOffsets.size();
       ransacOffsetBuffer.resize(2 * (offsets + consensusOffsets + 1), openCLManager);
       IntPointer intPointer = ransacOffsetBuffer.getBytedecoIntBufferPointer();
-      LogTools.info("Offsets " + offsets);
 
       int index = 0;
       intPointer.put(index, offsets);
@@ -896,6 +881,20 @@ public class GPUAStarBodyPathPlanner
       openCLManager.execute1D(snapVerticesKernel, totalCells);
 
       snappedNodeHeightBuffer.readOpenCLBufferObject(openCLManager);
+
+      openCLManager.finish();
+   }
+
+   private void computeHeuristicCost()
+   {
+      openCLManager.setKernelArgument(computeHeuristicCostKernel, 0, heightMapParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeHeuristicCostKernel, 1, pathPlanningParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeHeuristicCostKernel, 2, heuristicCostMapBuffer.getOpenCLBufferObject());
+
+      int totalCells = nodesPerSide * nodesPerSide;
+      openCLManager.execute1D(computeHeuristicCostKernel, totalCells);
+
+      heuristicCostMapBuffer.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
    }
@@ -960,137 +959,78 @@ public class GPUAStarBodyPathPlanner
       return new UnitVector3D(x, y, z);
    }
 
-   private boolean checkEdge(BodyPathLatticePoint node, double nodeSnapHeight, BodyPathLatticePoint neighbor, int neighborIndex)
+   private boolean checkEdge(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, int childNodeKey, int edgeKey)
    {
-      this.snapHeight.set(snap(neighbor));
-      if (Double.isNaN(snapHeight.getDoubleValue()))
+      int localRejectionReason = edgeRejectionReasonBuffer.getBackingDirectIntBuffer().get(edgeKey);
+
+      if (localRejectionReason == 0)
       {
+         this.snapHeight.setToNaN();
          rejectionReason.set(RejectionReason.INVALID_SNAP);
          graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
          return false;
       }
+      this.snapHeight.set(snap(childNodeKey));
 
-      double xyDistance = xyDistance(node, neighbor);
-      deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - nodeSnapHeight));
-      incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
+      deltaHeight.set(deltaHeightMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
+      incline.set(inclineMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
 
-      if (Math.abs(incline.getValue()) > plannerParameters.getMaxIncline())
+      if (localRejectionReason == 1)
       {
          rejectionReason.set(RejectionReason.TOO_STEEP);
          graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
          return false;
       }
 
-      if (plannerParameters.getCheckForCollisions())
+      if (localRejectionReason == 3)
       {
-         this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, neighborIndex, snapHeight.getDoubleValue(), groundClearance));
-         if (containsCollision.getValue())
-         {
-            rejectionReason.set(RejectionReason.COLLISION);
-            graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-            return false;
-         }
+         this.containsCollision.set(true);
+         rejectionReason.set(RejectionReason.COLLISION);
+         graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+         return false;
       }
 
-      if (useRANSACTraversibility)
-      {
-         ransacTraversibilityCalculator.computeTraversibility(neighbor, node, neighborIndex);
+      stanceScore.get(RobotSide.LEFT).set(stanceTraversibilityMapBuffer.getBackingDirectFloatBuffer().get(2 * edgeKey));
+      stanceScore.get(RobotSide.RIGHT).set(stanceTraversibilityMapBuffer.getBackingDirectFloatBuffer().get(2 * edgeKey + 1));
+      stepScores.get(RobotSide.LEFT).set(stepTraversibilityMapBuffer.getBackingDirectFloatBuffer().get(2 * edgeKey));
+      stepScores.get(RobotSide.RIGHT).set(stepTraversibilityMapBuffer.getBackingDirectFloatBuffer().get(2 * edgeKey + 1));
+      traversibilityCost.set(traversibilityCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
+      stanceTraversibility.set(Math.max(stanceScore.get(RobotSide.LEFT).getDoubleValue(), stanceScore.get(RobotSide.RIGHT).getDoubleValue()));
 
-         if (!ransacTraversibilityCalculator.isTraversible())
-         {
-            rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-            graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-            return false;
-         }
-      }
-      else
+      if (localRejectionReason == 4)
       {
-         leastSqTraversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
-
-         if (!leastSqTraversibilityCalculator.isTraversible())
-         {
-            rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-            graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-            return false;
-         }
+         rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
+         graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+         return false;
       }
 
       return true;
    }
 
-   private void computeEdgeCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor)
+   private void computeEdgeCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, int edgeKey)
    {
-      edgeCost.set(xyDistance(node, neighbor));
-
-      if (useRANSACTraversibility)
-      {
-         traversibilityCost.set(ransacTraversibilityCalculator.getTraversability());
-         if (ransacTraversibilityCalculator.isTraversible())
-            edgeCost.add(traversibilityCost);
-      }
-      else
-      {
-         traversibilityCost.set(leastSqTraversibilityCalculator.getTraversibility());
-         if (leastSqTraversibilityCalculator.isTraversible())
-            edgeCost.add(traversibilityCost);
-      }
+      edgeCost.set(edgeCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
+      inclineCost.set(inclineCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
 
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
-         double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
-         Pose2D bodyPose = new Pose2D();
+         roll.set(rollMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
+         rollCost.set(rollCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
 
-         bodyPose.set(neighbor.getX(), neighbor.getY(), yaw);
-         bodyPose.interpolate(new Pose2D(node.getX(), node.getY(), yaw), 0.5);
-         computeRollCost(node, neighbor, bodyPose);
-      }
-
-      if (incline.getValue() < nominalIncline.getValue())
-      {
-         inclineCost.set(0.0);
-      }
-      else
-      {
-         double inclineDelta = Math.abs(incline.getValue() - nominalIncline.getValue());
-         inclineCost.set(plannerParameters.getInclineCostWeight() * Math.max(0.0, inclineDelta - plannerParameters.getInclineCostDeadband()));
-         this.edgeCost.add(inclineCost);
+         Point2D bodyPose = new Point2D(neighbor.getX() + node.getX(), neighbor.getY() + node.getY());
+         bodyPose.scale(0.5);
+         leastSqNormal.set(getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
+                                                                           bodyPose.getY(),
+                                                                           heightMapData.getGridCenter().getX(),
+                                                                           heightMapData.getGridCenter().getY(),
+                                                                           heightMapData.getGridResolutionXY(),
+                                                                           heightMapData.getCenterIndex())));
       }
 
       if (edgeCost.getValue() < 0.0)
       {
          throw new RuntimeException("Negative edge cost!");
       }
-   }
-
-
-   private void computeRollCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, Pose2D bodyPose)
-   {
-      UnitVector3DReadOnly surfaceNormal = getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
-                                                                                                                 bodyPose.getY(),
-                                                                                                                 heightMapData.getGridCenter().getX(),
-                                                                                                                 heightMapData.getGridCenter().getY(),
-                                                                                                                 heightMapData.getGridResolutionXY(),
-                                                                                                                 heightMapData.getCenterIndex()));
-
-         Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
-         edge.normalize();
-
-         /* Roll is the amount of incline orthogonal to the direction of motion */
-         leastSqNormal.set(surfaceNormal);
-         roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
-         double effectiveRoll = roll.getDoubleValue();
-
-         if (rollMap.containsKey(node))
-         {
-            effectiveRoll += rollMap.get(node);
-         }
-
-         rollMap.put(neighbor, roll.getValue());
-         double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
-         double rollDeadband = Math.toRadians(1.5);
-         double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - rollDeadband);
-         rollCost.set(plannerParameters.getRollCostWeight() * inclineScale * rollAngleDeadbanded);
-         edgeCost.add(rollCost);
    }
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
@@ -1110,7 +1050,7 @@ public class GPUAStarBodyPathPlanner
 
       for (int i = 0; i < path.size(); i++)
       {
-         Point3D waypoint = new Point3D(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i)));
+         Point3D waypoint = new Point3D(path.get(i).getX(), path.get(i).getY(), snap(getNodeGraphKey(path.get(i))));
          bodyPath.add(waypoint);
          outputToPack.getBodyPathUnsmoothed().add(waypoint);
 
@@ -1215,20 +1155,9 @@ public class GPUAStarBodyPathPlanner
       }
    }
 
-   private double snap(BodyPathLatticePoint latticePoint)
+   private double snap(int nodeKey)
    {
-      if (gridHeightMap.containsKey(latticePoint))
-      {
-         return gridHeightMap.get(latticePoint);
-      }
-
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
-
-      double gpuHeight = snappedNodeHeightBuffer.getBackingDirectFloatBuffer().get(HeightMapTools.indicesToKey(xIndex, yIndex, nodeCenterIndex));
-      gridHeightMap.put(latticePoint, gpuHeight);
-      return gpuHeight;
-
+      return snappedNodeHeightBuffer.getBackingDirectFloatBuffer().get(nodeKey);
    }
 
    static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
