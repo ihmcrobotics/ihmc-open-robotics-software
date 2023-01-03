@@ -4,16 +4,18 @@ import us.ihmc.promp.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.promp.global.promp.EigenMatrixXd;
+import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
 
 /**
  * This example shows you how to load training trajectories and learn a multidimensional ProMP for the specified dofs.
  * The ProMP can be intuitively analyzed by plotting its mean trajectory and std deviation.
  */
-public class LearnProMPExample
+public class LearnProMPExampleTest
 {
    @Test
    public void testLearningProMP()
@@ -23,7 +25,7 @@ public class LearnProMPExample
       String currentDirectory = System.getProperty("user.dir");
       System.out.println("Current dir using System: " + currentDirectory);
 
-      String demoDirectoryAbsolute = getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching").toString().substring(6);
+      String demoDirectoryAbsolute = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching")).toString().substring(6);
 
       List<String> fileList = new ArrayList<>();
       // The trajectories contained in the Reaching1 folder represent different demonstration of a given task
@@ -50,11 +52,11 @@ public class LearnProMPExample
       int n_rbf = 20;
       ProMP myProMP = new ProMP(trajectoryGroup, n_rbf);
       EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
-      assertTrue(meanTrajectory.cols() == dofs.size());
-      assertTrue(meanTrajectory.rows() == t_len);
+      assertEquals(meanTrajectory.cols(), dofs.size());
+      assertEquals(meanTrajectory.rows(), t_len);
       EigenMatrixXd stdDeviationTrajectory = myProMP.gen_traj_std_dev();
-      assertTrue(stdDeviationTrajectory.cols() == dofs.size());
-      assertTrue(stdDeviationTrajectory.rows() == t_len);
+      assertEquals(stdDeviationTrajectory.cols(), dofs.size());
+      assertEquals(stdDeviationTrajectory.rows(), t_len);
       EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
       TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
