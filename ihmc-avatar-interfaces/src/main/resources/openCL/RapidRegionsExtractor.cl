@@ -1,6 +1,6 @@
 #define FILTER_DISPARITY_THRESHOLD 0
 #define MERGE_ANGULAR_THRESHOLD 1
-#define MERGE_DISTANCE_THRESHOLD 2
+#define MERGE_ORTHOGONAL_THRESHOLD 2
 #define PATCH_HEIGHT 3
 #define PATCH_WIDTH 4
 #define SUB_H 5
@@ -14,6 +14,10 @@
 #define FILTER_SUB_W 13
 #define INPUT_HEIGHT 14
 #define INPUT_WIDTH 15
+#define NORMAL_PACK_RANGE 16
+#define CENTROID_PACK_RANGE 17
+#define MERGE_RANGE 18
+#define MERGE_DISTANCE_THRESHOLD 19
 
 float4 back_project_spherical(int2 pos, float depth, global float* params)
 {
@@ -54,7 +58,7 @@ float3 estimate_perspective_normal(read_only image2d_t in, int x, int y, global 
 {
    float residual = 0;
    float Z = 0;
-   int m = 1;
+   int m = (int)params[NORMAL_PACK_RANGE];
    int count = 0;
    float4 normal = (float4)(0,0,0,0);
    if (y >= 0 && y < (int) params[SUB_H] && x >= 0 && x < (int) params[SUB_W])
@@ -98,7 +102,7 @@ float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex,
 {
    float residual = 0;
    float radius = 0;
-   int m = 2;
+   int m = (int)params[NORMAL_PACK_RANGE];
    int count = 0;
    float4 normal = (float4)(0,0,0,0);
 
@@ -205,7 +209,7 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* param
     float dist = length(vec);
     float sim = fabs(dot(an, bn));
     float perpDist = fabs(dot(ag-bg, bn)) + fabs(dot(bg-ag, an));
-    if (perpDist < params[MERGE_DISTANCE_THRESHOLD] && (dist < 0.8f) && sim > params[MERGE_ANGULAR_THRESHOLD])
+    if (perpDist < params[MERGE_ORTHOGONAL_THRESHOLD] && (dist < params[MERGE_DISTANCE_THRESHOLD]) && sim > params[MERGE_ANGULAR_THRESHOLD])
     {
         return true;
     }
@@ -401,7 +405,7 @@ void kernel packKernel(  read_only image2d_t in,
     //                        (int)params[PATCH_WIDTH],
     //                        (int)params[FILTER_DISPARITY_THRESHOLD],
     //                        params[MERGE_ANGULAR_THRESHOLD],
-    //                        params[MERGE_DISTANCE_THRESHOLD]);
+    //                        params[MERGE_ORTHOGONAL_THRESHOLD]);
 
    //if(cIndex >= 0 && cIndex < (int)params[SUB_H] && rIndex >= 0 && rIndex < (int)params[SUB_W])
    {
@@ -432,7 +436,7 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
      int cIndex = get_global_id(0);
      int rIndex = get_global_id(1);
 
-     int m = 1;
+     int m = (int)params[MERGE_RANGE];
 
      if(rIndex >= m && rIndex < (int)params[SUB_H]-m && cIndex >= m && cIndex < (int)params[SUB_W]-m)
      {
