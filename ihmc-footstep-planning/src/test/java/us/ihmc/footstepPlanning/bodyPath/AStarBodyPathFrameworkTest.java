@@ -245,7 +245,7 @@ public class AStarBodyPathFrameworkTest
 
 //      Assert.assertTrue("Errors: " + errorMessages, errorMessages.isEmpty());
       LogTools.info("Finished testing.");
-      ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
+//      ThreadTools.sleepForever(); // Apparently need to give some time for the prints to appear in the right order.
    }
 
    private String runAssertionsWithoutOcclusion(DataSet dataset)
@@ -579,7 +579,10 @@ public class AStarBodyPathFrameworkTest
 //
 //      }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-      test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
+      for (int i = 0; i < 50; i++)
+      {
+         test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
+      }
       test.tearDown();
 
       Predicate<DataSet> dataSetFilter = dataSet ->

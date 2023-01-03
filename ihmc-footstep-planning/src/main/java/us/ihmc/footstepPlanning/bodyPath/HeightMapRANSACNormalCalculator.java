@@ -7,12 +7,13 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.Random;
 
-public class HeightMapRANSACNormalCalculator
+public class HeightMapRANSACNormalCalculator implements NormalProvider
 {
    static final int iterations = 100;
    static final double minRansacRadius = 0.04;
@@ -199,7 +200,7 @@ public class HeightMapRANSACNormalCalculator
       surfaceNormals[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)] = surfaceNormal;
    }
 
-   public UnitVector3DBasics getSurfaceNormal(int key)
+   public UnitVector3DReadOnly getSurfaceNormal(int key)
    {
       if (key < 0 || key >= surfaceNormals.length)
       {
@@ -214,7 +215,8 @@ public class HeightMapRANSACNormalCalculator
       return surfaceNormals[key];
    }
 
-   public UnitVector3DBasics getSurfaceNormal(int xIndex, int yIndex)
+   @Override
+   public UnitVector3DReadOnly getSurfaceNormal(int xIndex, int yIndex)
    {
       return getSurfaceNormal(HeightMapTools.indicesToKey(xIndex, yIndex, heightMapData.getCenterIndex()));
    }

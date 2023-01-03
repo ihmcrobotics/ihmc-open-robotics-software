@@ -87,8 +87,6 @@ public class GPUAStarBodyPathPlanner
    private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
    /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
-   /* Computes surface normals with RANSAC, used for traversibility */
-   private final HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
@@ -185,7 +183,7 @@ public class GPUAStarBodyPathPlanner
 
       if (useRANSACTraversibility)
       {
-         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
+         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, this::getRansacSurfaceNormal, registry);
          leastSqTraversibilityCalculator = null;
       }
       else
@@ -296,7 +294,7 @@ public class GPUAStarBodyPathPlanner
 
 
       this.heightMapData = heightMapData;
-      ransacNormalCalculator.initialize(heightMapData);
+//      ransacNormalCalculator.initialize(heightMapData);
       rollMap.clear();
 
       if (useRANSACTraversibility)
@@ -337,13 +335,15 @@ public class GPUAStarBodyPathPlanner
       snapOffsetsBuffer.resize(2 * connections + 1, openCLManager);
       IntPointer intPointer = snapOffsetsBuffer.getBytedecoIntBufferPointer();
       int index = 0;
-      intPointer.put(index++, connections);
+      intPointer.put(index, connections);
+      index++;
       for (int x = 0; x < xSnapOffsets.size(); x++)
       {
          // pack the x offsets
          intPointer.put(index, xSnapOffsets.get(x));
          // pack the y offsets
-         intPointer.put(connections + index++, ySnapOffsets.get(x));
+         intPointer.put(connections + index, ySnapOffsets.get(x));
+         index++;
       }
 
       snapOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
@@ -417,7 +417,7 @@ public class GPUAStarBodyPathPlanner
 
       if (useRANSACTraversibility)
       {
-         ransacNormalCalculator.initialize(heightMapData);
+//         ransacNormalCalculator.initialize(heightMapData);
          ransacTraversibilityCalculator.initialize(startNode);
       }
       else
@@ -686,6 +686,19 @@ public class GPUAStarBodyPathPlanner
    }
 
    private UnitVector3DReadOnly getSurfaceNormal(int key)
+   {
+      float x = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key);
+      float y = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 1);
+      float z = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 2);
+      return new UnitVector3D(x, y, z);
+   }
+
+   private UnitVector3DReadOnly getRansacSurfaceNormal(int xIndex, int yIndex)
+   {
+      return getRansacSurfaceNormal(HeightMapTools.indicesToKey(xIndex, yIndex, heightMapData.getCenterIndex()));
+   }
+
+   private UnitVector3DReadOnly getRansacSurfaceNormal(int key)
    {
       float x = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key);
       float y = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 1);
