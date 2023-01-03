@@ -177,11 +177,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             if (enabledReplay.get())
                this.enabled.set(false); // check no concurrency with replay
 
-            if (!enabledIKStreaming.get() && !isPreviewActive())
+            if (!enabledIKStreaming.get() && !isPreviewGraphicActive())
                this.enabled.set(false);  // if preview disabled we do not want to start the assistance while we're not streaming to the controller
-            else if (isPreviewActive())
+            else if (isPreviewGraphicActive())
                enabledIKStreaming.set(false); // if preview is enabled we do not want to stream to the controller
-            previewSetToActive = isPreviewActive();
+            previewSetToActive = isPreviewGraphicActive();
          }
          else // deactivated
          {
