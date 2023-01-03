@@ -312,11 +312,21 @@ public class RDXVRKinematicsStreamingMode
                   sharedControlAssistant.setStatusBeforeAssistance(latestStatus);
                }
 
-               // if motion has restarted use the joint angles from the initial message for the ghost robots
-               if(sharedControlAssistant.hasMotionRestarted())
-                  sharedControlAssistant.resetPreviewModel();
-               else  // if motion has not restarted update model with latestStatus
+               //  if assistance motion has not restarted update preview model with latestStatus
+               if(!sharedControlAssistant.hasMotionRestarted())
                   sharedControlAssistant.updatePreviewModel(latestStatus);
+               else // if motion has restarted use the joint angles from the initial message for the ghost robots
+               {
+                  sharedControlAssistant.resetPreviewModel();
+                  KinematicsToolboxOutputStatus statusBeforeAssistance = sharedControlAssistant.getStatusBeforeAssistance();
+                  ghostFullRobotModel.getRootJoint().setJointPosition(statusBeforeAssistance.getDesiredRootPosition());
+                  ghostFullRobotModel.getRootJoint().setJointOrientation(statusBeforeAssistance.getDesiredRootOrientation());
+                  for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
+                  {
+                     ghostOneDoFJointsExcludingHands[i].setQ(statusBeforeAssistance.getDesiredJointAngles().get(i));
+                  }
+                  ghostFullRobotModel.getElevator().updateFramesRecursively();
+               }
             }
          }
       }

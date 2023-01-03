@@ -37,6 +37,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private KinematicsToolboxOutputStatus statusBeforeAssistance;
    private boolean assistanceJustStarted = false;
    private boolean restartingMotion = false;
+   private int counter = 0;
 
    public RDXVRSharedControl(DRCRobotModel robotModel, ImBoolean enabledIKStreaming, ImBoolean enabledReplay)
    {
@@ -86,8 +87,12 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostOneDoFJointsExcludingHands[i].setQ(statusBeforeAssistance.getDesiredJointAngles().get(i));
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
-
-      restartingMotion = false;
+      if (counter >= 10)
+      {
+         restartingMotion = false;
+         counter = 0;
+      }
+      counter ++;
    }
 
    @Override
