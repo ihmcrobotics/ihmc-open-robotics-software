@@ -121,7 +121,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          {
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             previewValidated = true;
-            restartingMotion = true;
+            restartingMotion = true; // play the motion from beginning
          }
          if (restartingMotion)
          {

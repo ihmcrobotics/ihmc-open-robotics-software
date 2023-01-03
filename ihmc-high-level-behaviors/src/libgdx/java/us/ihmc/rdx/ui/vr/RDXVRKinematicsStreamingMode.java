@@ -314,13 +314,7 @@ public class RDXVRKinematicsStreamingMode
 
                // if motion has restarted use the joint angles from the initial message for the ghost robots
                if(sharedControlAssistant.hasMotionRestarted())
-               {
-//                  for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
-//                  {
-//                     ghostOneDoFJointsExcludingHands[i].setQ(sharedControlAssistant.getStatusBeforeAssistance().getDesiredJointAngles().get(i));
-//                  }
                   sharedControlAssistant.resetPreviewModel();
-               }
                else  // if motion has not restarted update model with latestStatus
                   sharedControlAssistant.updatePreviewModel(latestStatus);
             }
