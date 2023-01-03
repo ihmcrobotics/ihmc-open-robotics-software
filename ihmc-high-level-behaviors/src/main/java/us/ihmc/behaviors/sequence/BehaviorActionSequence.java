@@ -8,6 +8,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -71,6 +72,9 @@ public class BehaviorActionSequence
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
 
+      addCommonFrames(referenceFrameLibrary, syncedRobot);
+      referenceFrameLibrary.build();
+
       updateSubscription = ros2.subscribe(UPDATE_TOPIC);
       ros2.subscribeViaCallback(ARM_JOINT_ANGLES_UPDATE_TOPIC,
                                 message -> armJointAnglesMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
@@ -90,6 +94,17 @@ public class BehaviorActionSequence
                                 message -> waitDurationMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
       ros2.subscribeViaCallback(WALK_UPDATE_TOPIC,
                                 message -> walkMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
+   }
+
+   public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
+   {
+      referenceFrameLibrary.add(ReferenceFrame.getWorldFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getChestFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
+      referenceFrameLibrary.add(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
    }
 
    public void update()
