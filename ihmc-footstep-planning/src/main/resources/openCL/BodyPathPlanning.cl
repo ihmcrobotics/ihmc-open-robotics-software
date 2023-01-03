@@ -1,24 +1,32 @@
 #define FLOAT_TO_INT_SCALE 10000
 
+// These are the height map parameters
 #define RESOLUTION 0
 #define CENTER_INDEX 1
 #define centerX 2
 #define centerY 3
 #define SNAP_HEIGHT_THRESHOLD 4
-#define PATCH_WIDTH 5
 
 #define MAX_INCLINE 0
 #define COMPUTE_SURFACE_NORMAL_COST 1
 #define NOMINAL_INCLINE 2
 #define INCLINE_COST_WEIGHT 3
-#define INCLINE_COST_DEADBAND 3
+#define INCLINE_COST_DEADBAND 4
 
+// These are the flags for the different rejection types for the edges
 #define VALID -1
 #define INVALID_SNAP 0
 #define TOO_STEEP 1
 #define STEP_TOO_HIGH 2
 #define COLLISION 3
 #define NON_TRAVERSIBLE 4
+
+// these are parameters defined explicitly for the RANSAC normal calculator
+// TODO extract these into their own parameters vector
+#define RANSAC_ITERATIONS 0
+#define RANSAC_DISTANCE_EPSILON 1
+#define RANSAC_MIN_NORMAL_Z 2
+#define RANSAC_ACCEPTABLE_CONSENSUS 3
 
 int key_to_x_index(int key, int center_index)
 {
@@ -33,6 +41,66 @@ int key_to_y_index(int key, int center_index)
 int indices_to_key(int x_index, int y_index, int centerIndex)
 {
     return x_index + y_index * (2 * centerIndex + 1);
+}
+
+int2 nextRandom(uint seed)
+{
+    seed = (seed * 0x5DEECE66DL + 0xBL) & ((1L << 48) - 1);
+    int result = seed >> 16;
+
+    return (int2) (result, seed);
+}
+
+bool epsilonEquals(float a, float b, float epsilon)
+{
+    return fabs(a - b) < epsilon;
+}
+
+int2 nextRandomInt(uint seed, int bound)
+{
+    int2 result = nextRandom(seed);
+    int r = result.s0;
+    seed = result.s1;
+
+    int m = bound - 1;
+    if ((bound & m) == 0)
+        r = (uint)((bound * (long) r) >> 31);
+    else
+    {
+        int u = r;
+        while (u - (r = u % bound) + m < 0)
+        {
+            result = nextRandom(seed);
+            u = result.s0;
+            seed = result.s1;
+        }
+    }
+    return (int2) (r, seed);
+}
+
+float3 normal3DFromThreePoint3Ds(float3 firstPointOnPlane,
+                                 float3 secondPointOnPlane,
+                                 float3 thirdPointOnPlane)
+{
+
+    float3 v1 = secondPointOnPlane - firstPointOnPlane;
+    float3 v2 = thirdPointOnPlane - firstPointOnPlane;
+
+    float3 normal = cross(v1, v2);
+
+    return normalize(normal);
+}
+
+float signedDistanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
+{
+    float3 delta = pointQuery - pointOnPlane;
+
+    return dot(delta, planeNormal);
+}
+
+float distanceFromPoint3DToPlane3D(float3 pointQuery, float3 pointOnPlane, float3 planeNormal)
+{
+    return fabs(signedDistanceFromPoint3DToPlane3D(pointQuery, pointOnPlane, planeNormal));
 }
 
 float index_to_coordinate(int index, float grid_center, float resolution, int center_index)
@@ -95,11 +163,188 @@ float* solveForPlaneCoefficients(float* covariance_matrix, float* z_variance_vec
     return coefficients;
 }
 
+void kernel computeSurfaceNormalsWithRANSAC(global float* params,
+                                            global float* ransac_params,
+                                            global int* ransac_offsets,
+                                            global float* height_map,
+                                            global float* normal_xyz_buffer)
+{
+    int key = get_global_id(0);
+
+    int center_index = (int) params[CENTER_INDEX];
+    int cells_per_side = 2 * center_index + 1;
+
+    int seed = key;
+
+    int idx_x = key_to_x_index(key, center_index);
+    int idx_y = key_to_y_index(key, center_index);
+
+    float x_coordinate = index_to_coordinate(idx_x, params[centerX], params[RESOLUTION], center_index);
+    float y_coordinate = index_to_coordinate(idx_y, params[centerY], params[RESOLUTION], center_index);
+
+    float3 point = (float3) (x_coordinate, y_coordinate, height_map[key]);
+
+    int xOffset0, yOffset0, xOffset1, yOffset1;
+    int xIndex0, yIndex0, xIndex1, yIndex1;
+
+    int maxConsensus = -1;
+
+    int offsets_size = ransac_offsets[0];
+    int consensus_size = ransac_offsets[1];
+
+    float3 best_normal;
+
+    int consensusSampleSize = offsets_size;
+
+    for (int i = 0; i < ransac_params[RANSAC_ITERATIONS]; i++)
+    {
+        if (key == 0)
+        {
+            printf("Iteration = %d\n", i);
+        }
+        while (true)
+        {
+            if (key == 0)
+                printf("Seed = %d\n", seed);
+
+            int2 ret = nextRandomInt(seed, offsets_size);
+            int sample0 = ret.s0;
+            seed = ret.s1;
+            if (key == 0)
+                printf("New seed = %d\n", seed);
+
+            xOffset0 = ransac_offsets[2 + sample0];
+            yOffset0 = ransac_offsets[2 + offsets_size + sample0];
+
+            xIndex0 = idx_x + xOffset0;
+            yIndex0 = idx_y + yOffset0;
+
+            // TODO skip if we've already done that sample
+            if (xIndex0 < 0 || xIndex0 >= cells_per_side || yIndex0 < 0 || yIndex0 >= cells_per_side)
+                continue;
+
+            ret = nextRandomInt(seed, offsets_size);
+            int sample1 = ret.s0;
+            seed = ret.s1;
+            if (key == 0)
+                printf("New seed = %d\n", seed);
+
+            if (sample0 == sample1)
+            {
+                if (key == 0)
+                    printf("Continuing because the samples are the same\n");
+                continue;
+            }
+
+            if (key == 0)
+            {
+                printf("sample index = %d, $d\n", sample0, sample1);
+            }
+
+            xOffset1 = ransac_offsets[2 + sample1];
+            yOffset1 = ransac_offsets[2 + offsets_size + sample1];
+
+            xIndex1 = idx_x + xOffset1;
+            yIndex1 = idx_y + yOffset1;
+
+            if (xIndex1 < 0 || xIndex1 >= cells_per_side || yIndex1 < 0 || yIndex1 >= cells_per_side)
+                continue;
+
+            float2 offset0 = (float2) (xOffset0, yOffset0);
+            float2 offset1 = (float2) (xOffset1, yOffset1);
+            float dotProduct = dot(offset0, offset1) / (length(offset0) * length(offset1));
+
+            if (epsilonEquals(fabs(dotProduct), 1.0f, 1e-5))
+            {
+                continue;
+            }
+
+            break;
+        }
+
+        // get the 3D points that correspond to the two random samples
+        int key0 = indices_to_key(xIndex0, yIndex0, center_index);
+        float x_coordinate0 = index_to_coordinate(xIndex0, params[centerX], params[RESOLUTION], center_index);
+        float y_coordinate0 = index_to_coordinate(yIndex0, params[centerY], params[RESOLUTION], center_index);
+        float z_coordinate0 = height_map[key0];
+        float3 point0 = (float3) (x_coordinate0, y_coordinate0, z_coordinate0);
+
+        int key1 = indices_to_key(xIndex1, yIndex1, center_index);
+        float x_coordinate1 = index_to_coordinate(xIndex1, params[centerX], params[RESOLUTION], center_index);
+        float y_coordinate1 = index_to_coordinate(yIndex1, params[centerY], params[RESOLUTION], center_index);
+        float z_coordinate1 = height_map[key1];
+        float3 point1 = (float3) (x_coordinate1, y_coordinate1, z_coordinate1);
+
+        // compute the normal from the triple of points
+        float3 candidate_normal = normal3DFromThreePoint3Ds(point, point0, point1);
+
+        // if the normal is too vertical, keep looking
+        if (fabs(candidate_normal.s2) < ransac_params[RANSAC_MIN_NORMAL_Z])
+        {
+            continue;
+        }
+
+        int consensus = 0;
+        int offsetsStart = 2 + 2 * offsets_size;
+        for (int j = 0; j < consensus_size; j++)
+        {
+            int xj = idx_x + ransac_offsets[offsetsStart + j];
+            int yj = idx_y + ransac_offsets[offsetsStart + consensus_size + j];
+            if (xj < 0 || xj >= cells_per_side || yj < 0 || yj > cells_per_side)
+            {
+                continue;
+            }
+
+            // get the neighboring point
+            int keyConsensus = indices_to_key(xj, yj, center_index);
+            float x_consensus = index_to_coordinate(xj, params[centerX], params[RESOLUTION], center_index);
+            float y_consensus = index_to_coordinate(yj, params[centerY], params[RESOLUTION], center_index);
+            float z_consensus = height_map[keyConsensus];
+            float3 consensus_point = (float3) (x_consensus, y_consensus, z_consensus);
+
+            // check the distance of the neighboring points to the plane
+            float distanceToPlane = distanceFromPoint3DToPlane3D(consensus_point, point, candidate_normal);
+
+            // if the distance is less than an epsilon, we can say that point is on the plane.
+            if (distanceToPlane < ransac_params[RANSAC_DISTANCE_EPSILON])
+            {
+                consensus++;
+            }
+        }
+
+        // if this plane has more matching points, it's a better option
+        if (consensus > maxConsensus)
+        {
+            maxConsensus = consensus;
+            best_normal = candidate_normal;
+        }
+
+        // if we have enough matching points, terminate the search
+        if (maxConsensus > ransac_params[RANSAC_ACCEPTABLE_CONSENSUS] * consensusSampleSize)
+        {
+            break;
+        }
+    }
+
+    // if the normal is upside down, negate it.
+    if (best_normal.s2 < 0.0)
+    {
+        best_normal = -1.0f * best_normal;
+       // best_normal[0] = -best_normal[0];
+       // best_normal[1] = -best_normal[1];
+       // best_normal[2] = -best_normal[2];
+    }
+
+    normal_xyz_buffer[3 * key] = best_normal.s0;
+    normal_xyz_buffer[3 * key + 1] = best_normal.s1;
+    normal_xyz_buffer[3 * key + 2] = best_normal.s2;
+}
+
 void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
                                                   global int* offsets,
-                                  global float* height_map,
-                                  global float* normal_xyz_buffer,
-                                  global float* sampled_height)
+                                                  global float* height_map,
+                                                  global float* normal_xyz_buffer,
+                                                  global float* sampled_height)
 {
     int key = get_global_id(0);
 
@@ -110,10 +355,7 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
 
     int cells_per_side = 2 * center_index + 1;
 
-    int patch_cell_half_width = offsets[0];
-
-    int connection_side_size = 2 * patch_cell_half_width + 1;
-    int connections = connection_side_size * connection_side_size;
+    int connections = offsets[0];
 
     // compute the maximum height in the area of interest.
     float max_z = -INFINITY;
@@ -180,7 +422,8 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
         zz += z_coordinate_to_poll * z_coordinate_to_poll;
     }
 
-    float normal_x, normal_y, normal_z, height_at_center;
+    float3 normal;
+    float height_at_center;
 
     if (n > 3)
     {
@@ -192,39 +435,32 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
         float y_solution = y / n;
         float z_solution = -coefficients[0] * x_solution - coefficients[1] * y_solution - coefficients[2];
 
-        float mag = sqrt(coefficients[0] * coefficients[0] + coefficients[1] * coefficients[1] + 1.0);
-        normal_x = coefficients[0] / mag;
-        normal_y = coefficients[1] / mag;
-        normal_z = 1.0 / mag;
+        normal = (float3) (coefficients[0], coefficients[1], 1.0);
+        normalize(normal);
 
         float x_coordinate = index_to_coordinate(idx_x, params[centerX], params[RESOLUTION], center_index);
         float y_coordinate = index_to_coordinate(idx_y, params[centerY], params[RESOLUTION], center_index);
         float z_coordinate = height_map[key];
 
         // Given the plane equation: a*x + b*y + c*z + d = 0, with d = -(a*x0 + b*y0 + c*z0), we find z:
-        height_at_center = normal_x / normal_z * (x_solution - x_coordinate) + normal_y / normal_z * (y_solution - y_coordinate) + z_coordinate;
+        height_at_center = normal.s0 / normal.s2 * (x_solution - x_coordinate) + normal.s1 / normal.s2 * (y_solution - y_coordinate) + z_coordinate;
 
-        if (isnan(normal_x))
+        if (isnan(normal.s0))
         {
-            normal_x = 0.0;
-            normal_y = 0.0;
-            normal_z = 1.0;
+            normal = (float3) (0.0f, 0.0f, 1.0f);
 
             height_at_center = NAN;
         }
     }
     else
     {
-        normal_x = 0.0;
-        normal_y = 0.0;
-        normal_z = 1.0;
-
+        normal = (float3) (0.0f, 0.0f, 1.0f);
         height_at_center = NAN;
     }
 
-    normal_xyz_buffer[3 * key] = normal_x;
-    normal_xyz_buffer[3 * key + 1] = normal_y;
-    normal_xyz_buffer[3 * key + 2] = normal_z;
+    normal_xyz_buffer[3 * key] = normal.s0;
+    normal_xyz_buffer[3 * key + 1] = normal.s1;
+    normal_xyz_buffer[3 * key + 2] = normal.s2;
     sampled_height[key] = height_at_center;
 }
 
@@ -337,6 +573,7 @@ void kernel computeEdges(global float* params,
 
     float start_x = index_to_coordinate(idx_x, params[centerX], resolution, center_index);
     float start_y = index_to_coordinate(idx_y, params[centerY], resolution, center_index);
+    float2 start = (float2) (start_x, start_y);
 
     int cells_per_side = 2 * center_index + 1;
 
@@ -367,7 +604,8 @@ void kernel computeEdges(global float* params,
 
         float neighbor_x = index_to_coordinate(neighbor_idx_x, params[centerX], resolution, center_index);
         float neighbor_y = index_to_coordinate(neighbor_idx_y, params[centerY], resolution, center_index);
-        float xy_distance = sqrt((neighbor_x - start_x) * (neighbor_x - start_x) + (neighbor_y - start_y) * (neighbor_y - start_y));
+        float2 neighbor = (float2) (neighbor_x, neighbor_y);
+        float xy_distance = length(neighbor - start);
 
         float delta_height = fabs(snapped_neighbor_height - snapped_height);
         float incline = atan2(delta_height, xy_distance);
