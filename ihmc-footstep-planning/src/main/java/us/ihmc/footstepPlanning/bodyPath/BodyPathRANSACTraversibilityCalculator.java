@@ -4,6 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -34,7 +35,7 @@ public class BodyPathRANSACTraversibilityCalculator
 
    private BodyPathLatticePoint startNode;
    private final ToDoubleFunction<BodyPathLatticePoint> gridHeightMap;
-   private final HeightMapRANSACNormalCalculator surfaceNormalCalculator;
+   private final NormalProvider surfaceNormalCalculator;
    private HeightMapData heightMapData;
    private final Pose2D stepPose = new Pose2D();
 
@@ -53,7 +54,7 @@ public class BodyPathRANSACTraversibilityCalculator
    private final TIntArrayList twentyTwoDegCollisionOffsetsY = new TIntArrayList();
 
    public BodyPathRANSACTraversibilityCalculator(ToDoubleFunction<BodyPathLatticePoint> gridHeightMap,
-                                                 HeightMapRANSACNormalCalculator surfaceNormalCalculator,
+                                                 NormalProvider surfaceNormalCalculator,
                                                  YoRegistry registry)
    {
       this.gridHeightMap = gridHeightMap;
@@ -189,7 +190,7 @@ public class BodyPathRANSACTraversibilityCalculator
                nonGroundDiscount = nonGroundAlpha;
             }
 
-            UnitVector3DBasics normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
+            UnitVector3DReadOnly normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
             double incline = Math.max(0.0, Math.acos(normal.getZ()) - minNormalToPenalize);
             double inclineAlpha = MathTools.clamp((maxNormalToPenalize - incline) / (maxNormalToPenalize - minNormalToPenalize), 0.0, 1.0);
             traversibilityScoreNumerator += nonGroundDiscount * ((1.0 - inclineWeight) * cellPercentage + inclineWeight * inclineAlpha);

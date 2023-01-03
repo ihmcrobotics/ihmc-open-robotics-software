@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -625,7 +626,7 @@ public class AStarBodyPathSmootherWaypoint
                double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - heightDeadband);
                double cellPercentage = 1.0 - deltaHeight / heightWindow;
 
-               UnitVector3DBasics normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);
+               UnitVector3DReadOnly normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);
                double incline = Math.acos(normal.getZ());
                double inclineAlpha = MathTools.clamp(EuclidCoreTools.interpolate(0.0, 1.0, (incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize)), 0.0, 1.0);
                traversibilityScoreNumerator += cellPercentage * ((1.0 - inclineWeight) * nonGroundAlpha + inclineWeight * inclineAlpha);
