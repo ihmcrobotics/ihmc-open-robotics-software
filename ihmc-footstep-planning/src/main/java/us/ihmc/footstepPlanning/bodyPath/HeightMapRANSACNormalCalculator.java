@@ -14,14 +14,14 @@ import java.util.Random;
 
 public class HeightMapRANSACNormalCalculator
 {
-   private static final int iterations = 100;
-   private static final double minRansacRadius = 0.04;
-   private static final double maxRansacRadius = 0.16;
-   private static final double consensusRadius = 0.12;
-   private static final double distanceEpsilon = 0.032;
-   private static final double maxAngleToConsider = Math.toRadians(65.0);
-   private static final double minNormalZ = Math.acos(maxAngleToConsider);
-   private static final double acceptableConcensus = 0.3;
+   static final int iterations = 100;
+   static final double minRansacRadius = 0.04;
+   static final double maxRansacRadius = 0.16;
+   static final double consensusRadius = 0.12;
+   static final double distanceEpsilon = 0.032;
+   static final double maxAngleToConsider = Math.toRadians(65.0);
+   static final double minNormalZ = Math.acos(maxAngleToConsider);
+   static final double acceptableConcensus = 0.3;
 
    private UnitVector3DBasics[] surfaceNormals;
    private boolean[] hasComputedNormal;
