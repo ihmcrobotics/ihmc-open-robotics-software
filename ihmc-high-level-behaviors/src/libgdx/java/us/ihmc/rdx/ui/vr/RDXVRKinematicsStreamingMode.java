@@ -315,8 +315,6 @@ public class RDXVRKinematicsStreamingMode
                }
                else if (sharedControlAssistant.isPreviewGraphicActive()) // replay preview
                {
-                  if(sharedControlAssistant.hasMotionRestarted())
-                     sharedControlAssistant.resetPreviewModel();
                   // update IK ghost
                   KinematicsToolboxOutputStatus statusPreview = sharedControlAssistant.getPreviewStatus();
                   ghostFullRobotModel.getRootJoint().setJointPosition(statusPreview.getDesiredRootPosition());
