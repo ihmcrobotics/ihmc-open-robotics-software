@@ -1,4 +1,4 @@
-package us.ihmc.rapidRegions;
+package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
@@ -17,7 +17,6 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 

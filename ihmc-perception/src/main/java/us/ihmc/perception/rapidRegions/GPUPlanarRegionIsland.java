@@ -1,4 +1,4 @@
-package us.ihmc.rapidRegions;
+package us.ihmc.perception.rapidRegions;
 
 public class GPUPlanarRegionIsland
 {

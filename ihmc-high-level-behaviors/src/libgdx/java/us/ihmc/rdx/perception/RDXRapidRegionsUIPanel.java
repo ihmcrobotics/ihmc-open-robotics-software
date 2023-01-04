@@ -2,9 +2,9 @@ package us.ihmc.rdx.perception;
 
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.rapidRegions.RapidPlanarRegionsCustomizer;
-import us.ihmc.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.rapidRegions.RapidRegionsDebutOutputGenerator;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;

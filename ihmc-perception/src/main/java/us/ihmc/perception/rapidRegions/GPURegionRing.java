@@ -1,4 +1,4 @@
-package us.ihmc.rapidRegions;
+package us.ihmc.perception.rapidRegions;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
