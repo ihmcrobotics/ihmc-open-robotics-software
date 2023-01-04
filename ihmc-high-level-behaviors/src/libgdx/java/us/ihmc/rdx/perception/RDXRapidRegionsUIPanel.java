@@ -111,12 +111,12 @@ public class RDXRapidRegionsUIPanel
 
    public void render()
    {
-      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getNxImage().getBytedecoOpenCVMat());
-      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getNyImage().getBytedecoOpenCVMat());
-      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getNzImage().getBytedecoOpenCVMat());
-      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCxImage().getBytedecoOpenCVMat());
-      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCyImage().getBytedecoOpenCVMat());
-      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCzImage().getBytedecoOpenCVMat());
+      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getNxImage().getBytedecoOpenCVMat());
+      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getNyImage().getBytedecoOpenCVMat());
+      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getNzImage().getBytedecoOpenCVMat());
+      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getCxImage().getBytedecoOpenCVMat());
+      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getCyImage().getBytedecoOpenCVMat());
+      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getCzImage().getBytedecoOpenCVMat());
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
    }
