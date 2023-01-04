@@ -30,6 +30,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    public static final double MAX_PERIOD = UnitConversions.hertzToSeconds(30.0);
 
    private final Activator nativesLoadedActivator;
+   private final ROS2SyncedRobotModel syncedRobot;
    private SpinnakerSystemManager spinnakerSystemManager;
    private final ROS2Helper ros2Helper;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -47,7 +48,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_node");
       ros2Helper = new ROS2Helper(ros2Node);
 
-      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       // Helpful to view relative sensor transforms when robot controller is not running
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
@@ -85,6 +86,8 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                   blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node, arUcoMarkersToTrack);
                }
             }
+
+            syncedRobot.update();
 
             for (RobotSide side : blackflies.sides())
             {
