@@ -1,4 +1,4 @@
-package us.ihmc.rapidRegions;
+package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;

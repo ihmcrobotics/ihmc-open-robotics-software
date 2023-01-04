@@ -1,4 +1,4 @@
-package us.ihmc.rapidRegions;
+package us.ihmc.perception.rapidRegions;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
