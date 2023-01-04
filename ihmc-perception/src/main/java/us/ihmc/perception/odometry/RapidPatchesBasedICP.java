@@ -2,18 +2,13 @@ package us.ihmc.perception.odometry;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-
-import static org.bytedeco.opencv.global.opencv_core.CV_32F;
-import static org.bytedeco.opencv.global.opencv_core.CV_8UC2;
 
 public class RapidPatchesBasedICP
 {
@@ -48,17 +43,41 @@ public class RapidPatchesBasedICP
       this.currentFeatureMat = new Mat(patchRows, patchColumns, opencv_core.CV_32FC(6));
       this.previousFeatureMat = new Mat(patchRows, patchColumns, opencv_core.CV_32FC(6));
 
-      parametersBuffer = new OpenCLFloatBuffer( 3);
-      previousFeatureBuffer = new OpenCLFloatBuffer( patchRows * patchColumns * 6, previousFeatureMat.data().asBuffer().asFloatBuffer());
-      currentFeatureBuffer = new OpenCLFloatBuffer( patchRows * patchColumns * 6, currentFeatureMat.data().asBuffer().asFloatBuffer());
+      parametersBuffer = new OpenCLFloatBuffer(3);
+      previousFeatureBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 6, previousFeatureMat.data().asBuffer().asFloatBuffer());
+      currentFeatureBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 6, currentFeatureMat.data().asBuffer().asFloatBuffer());
    }
 
    public void update(Mat featureMap)
    {
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) 0.1f);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) 0.2f);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) 0.3f);
+
+      this.currentFeatureMat.put(featureMap);
+
       if (!initialized)
       {
+         parametersBuffer.createOpenCLBufferObject(openCLManager);
+         previousFeatureBuffer.createOpenCLBufferObject(openCLManager);
+         currentFeatureBuffer.createOpenCLBufferObject(openCLManager);
+      }
+      else
+      {
+         parametersBuffer.writeOpenCLBufferObject(openCLManager);
+         previousFeatureBuffer.writeOpenCLBufferObject(openCLManager);
+         currentFeatureBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
+      openCLManager.setKernelArgument(icpKernel, 0, previousFeatureBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(icpKernel, 1, currentFeatureBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(icpKernel, 2, parametersBuffer.getOpenCLBufferObject());
+
+      openCLManager.execute2D(icpKernel, patchRows, patchColumns);
+
+      openCLManager.finish();
+
+      previousFeatureMat = currentFeatureMat.clone();
    }
 
    public void testInitialization()
@@ -90,27 +109,14 @@ public class RapidPatchesBasedICP
 
       opencv_core.merge(finalMats, currentFeatureMat);
 
-      previousFeatureBuffer.createOpenCLBufferObject(openCLManager);
-      currentFeatureBuffer.createOpenCLBufferObject(openCLManager);
+      LogTools.info("First");
+      update(currentFeatureMat);
 
-      //previousFeatureBuffer.writeOpenCLBufferObject(openCLManager);
-      //currentFeatureBuffer.writeOpenCLBufferObject(openCLManager);
+      LogTools.info("Second");
+      update(currentFeatureMat);
 
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) 0.1f);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) 0.2f);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) 0.3f);
-
-      parametersBuffer.createOpenCLBufferObject(openCLManager);
-      previousFeatureBuffer.createOpenCLBufferObject(openCLManager);
-      currentFeatureBuffer.createOpenCLBufferObject(openCLManager);
-
-      openCLManager.setKernelArgument(icpKernel, 0, previousFeatureBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(icpKernel, 1, currentFeatureBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(icpKernel, 2, parametersBuffer.getOpenCLBufferObject());
-
-      openCLManager.execute2D(icpKernel, patchRows, patchColumns);
-
-      openCLManager.finish();
+      LogTools.info("Third");
+      update(currentFeatureMat);
    }
 
    public static void main(String[] args)
