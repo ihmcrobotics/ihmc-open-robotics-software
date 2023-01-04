@@ -54,6 +54,16 @@ public class VirtualModelMomentumController
       fullEffortMatrix.zero();
    }
 
+   public DMatrixRMaj getFullEffortMatrix()
+   {
+      return fullEffortMatrix;
+   }
+
+   public DMatrixRMaj getTempFullJacobian()
+   {
+      return tempFullJacobian;
+   }
+
    /**
     * Adds a {@link VirtualEffortCommand} to the {@link VirtualModelMomentumController}.
     * <p>
