@@ -6,9 +6,17 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+
+import java.util.ArrayList;
 
 public class RapidPatchesBasedICP
 {
@@ -29,7 +37,8 @@ public class RapidPatchesBasedICP
    private OpenCLFloatBuffer previousFeatureBuffer;
    private OpenCLFloatBuffer currentFeatureBuffer;
 
-   public RapidPatchesBasedICP(int patchRows, int patchColumns)
+
+   public void create(int patchRows, int patchColumns)
    {
       openCLManager = new OpenCLManager();
       openCLManager.create();
@@ -67,15 +76,15 @@ public class RapidPatchesBasedICP
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
          previousFeatureBuffer.writeOpenCLBufferObject(openCLManager);
          currentFeatureBuffer.writeOpenCLBufferObject(openCLManager);
+
+         openCLManager.setKernelArgument(icpKernel, 0, previousFeatureBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(icpKernel, 1, currentFeatureBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(icpKernel, 2, parametersBuffer.getOpenCLBufferObject());
+
+         openCLManager.execute2D(icpKernel, patchRows, patchColumns);
+
+         openCLManager.finish();
       }
-
-      openCLManager.setKernelArgument(icpKernel, 0, previousFeatureBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(icpKernel, 1, currentFeatureBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(icpKernel, 2, parametersBuffer.getOpenCLBufferObject());
-
-      openCLManager.execute2D(icpKernel, patchRows, patchColumns);
-
-      openCLManager.finish();
 
       previousFeatureMat = currentFeatureMat.clone();
    }
@@ -119,9 +128,87 @@ public class RapidPatchesBasedICP
       update(currentFeatureMat);
    }
 
+   public void testAlignmentICP()
+   {
+      ArrayList<Point3D> cube = new ArrayList<>();
+      cube.add(new Point3D(1.0, 1.0, 1.0));
+      cube.add(new Point3D(1.0, -1.0, 1.0));
+      cube.add(new Point3D(-1.0, -1.0, 1.0));
+      cube.add(new Point3D(-1.0, 1.0, 1.0));
+      cube.add(new Point3D(1.0, 1.0, -1.0));
+      cube.add(new Point3D(1.0, -1.0, -1.0));
+      cube.add(new Point3D(-1.0, -1.0, -1.0));
+      cube.add(new Point3D(-1.0, 1.0, -1.0));
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.appendPitchRotation(0.123);
+      transform.appendYawRotation(0.231);
+      //transform.appendTranslation(0.2, 0.3, 0.4);
+
+      ArrayList<Point3D> transformedCube = new ArrayList<>();
+      for (Point3D point3d : cube)
+      {
+         Point3D transformedPoint = new Point3D();
+         transform.transform(point3d, transformedPoint);
+         transformedCube.add(transformedPoint);
+      }
+
+      SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
+      DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
+      DMatrixRMaj svdVt = new DMatrixRMaj(3, 3);
+      DMatrixRMaj patchMatrix = new DMatrixRMaj(3, 3);
+
+      DMatrixRMaj matrixOne = new DMatrixRMaj(3, cube.size());
+      DMatrixRMaj matrixTwo = new DMatrixRMaj(3, transformedCube.size());
+
+      for (int i = 0; i < cube.size(); i++)
+      {
+         Point3D pointOne = cube.get(i);
+         matrixOne.set(0, i, pointOne.getX());
+         matrixOne.set(1, i, pointOne.getY());
+         matrixOne.set(2, i, pointOne.getZ());
+
+         Point3D pointTwo = transformedCube.get(i);
+         matrixTwo.set(0, i, pointTwo.getX());
+         matrixTwo.set(1, i, pointTwo.getY());
+         matrixTwo.set(2, i, pointTwo.getZ());
+
+         LogTools.info("Matrix1: {}", matrixOne);
+         LogTools.info("Matrix2: {}", matrixTwo);
+
+         CommonOps_DDRM.multAddTransB(matrixOne, matrixTwo, patchMatrix);
+      }
+
+      if (svd.decompose(patchMatrix))
+      {
+         svd.getU(svdU, false);
+         svd.getV(svdVt, true);
+
+         DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
+         CommonOps_DDRM.mult(svdU, svdVt, rotationMatrix);
+
+         LogTools.info("Rotation Matrix: " + rotationMatrix);
+
+         RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
+         rigidBodyTransform.setRotationAndZeroTranslation(rotationMatrix);
+
+         LogTools.info("Transform: \n{}", rigidBodyTransform);
+
+         Point3D angles = new Point3D();
+         rigidBodyTransform.getRotation().getEuler(angles);
+
+         LogTools.info("Angles: {}", angles);
+      }
+   }
+
+
+
    public static void main(String[] args)
    {
-      RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP(10, 10);
-      rapidPatchesBasedICP.testInitialization();
+      RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
+      rapidPatchesBasedICP.create(10,10);
+      //rapidPatchesBasedICP.testInitialization();
+      //rapidPatchesBasedICP.testAlignmentICP();
+
    }
 }
