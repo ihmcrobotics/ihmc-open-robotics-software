@@ -591,7 +591,7 @@ void kernel snapVertices(global float* height_map_params,
 
 float get_yaw(int yaw_index)
 {
-    return yaw_index * M_PI_8_F;
+    return yaw_index * M_PI_4_F / 2.0f;
 }
 
 int computeCollisionOffsetX(int yaw_idx, int x_offset, int y_offset)
@@ -697,6 +697,7 @@ float computeSidedTraversibility(float* height_map_params,
     float minHeight = max(opposite_height, nominal_height) - planner_params[HEIGHT_WINDOW];
     float maxHeight = min(opposite_height, nominal_height) + planner_params[HEIGHT_WINDOW];
     float averageHeight = 0.5f * (nominal_height + opposite_height);
+    float windowWidth = (maxHeight - minHeight) / 2.0f;
 
     // TODO extract the magic numbers
     float lowestNonGroundAlpha = 0.85f;
@@ -742,7 +743,7 @@ float computeSidedTraversibility(float* height_map_params,
 
             float heightDeadband = 0.1f;
             float deltaHeight = max(0.0f, fabs(averageHeight - heightQuery) - heightDeadband);
-            float cellPercentage = 1.0f - deltaHeight / planner_params[HEIGHT_WINDOW];
+            float cellPercentage = 1.0f - deltaHeight / windowWidth;
             float nonGroundDiscount = 1.0f;
 
             if (!epsilonEquals(heightQuery, height_map_params[GROUND_HEIGHT_ESTIMATE], 1e-3))
