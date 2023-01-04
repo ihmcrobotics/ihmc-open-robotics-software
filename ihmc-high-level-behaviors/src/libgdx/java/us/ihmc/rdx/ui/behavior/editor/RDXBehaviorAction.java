@@ -3,12 +3,11 @@ package us.ihmc.rdx.ui.behavior.editor;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.sequence.BehaviorActionData;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 
-public class RDXBehaviorAction
+public abstract class RDXBehaviorAction
 {
    private String nameForDisplay = "";
    private final ImBoolean selected = new ImBoolean();
@@ -57,15 +56,7 @@ public class RDXBehaviorAction
 
    }
 
-   public void saveToFile(ObjectNode jsonNode)
-   {
-
-   }
-
-   public void loadFromFile(JsonNode jsonNode)
-   {
-
-   }
+   public abstract BehaviorActionData getActionData();
 
    public ImBoolean getSelected()
    {

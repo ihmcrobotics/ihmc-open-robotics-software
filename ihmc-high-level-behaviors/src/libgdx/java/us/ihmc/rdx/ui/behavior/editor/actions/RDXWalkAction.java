@@ -181,15 +181,9 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
-   public void saveToFile(ObjectNode jsonNode)
+   public WalkActionData getActionData()
    {
-      actionData.saveToFile(jsonNode);
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      actionData.loadFromFile(jsonNode);
+      return actionData;
    }
 
    private void updateParentFrame(ReferenceFrame newParentFrame)

@@ -141,18 +141,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          poseGizmo.getRenderables(renderables, pool);
    }
 
-   @Override
-   public void saveToFile(ObjectNode jsonNode)
-   {
-      actionData.saveToFile(jsonNode);
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      actionData.loadFromFile(jsonNode);
-   }
-
    private void setToReferenceFrame(ReferenceFrame referenceFrame)
    {
       if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrame.getName()))
@@ -200,6 +188,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       return poseGizmo.getGizmoFrame();
    }
 
+   @Override
    public HandPoseActionData getActionData()
    {
       return actionData;

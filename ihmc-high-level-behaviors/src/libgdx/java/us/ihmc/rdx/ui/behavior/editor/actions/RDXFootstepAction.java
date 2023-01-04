@@ -3,8 +3,6 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.ReferenceFrameLibrary;
@@ -116,15 +114,9 @@ public class RDXFootstepAction extends RDXBehaviorAction
    }
 
    @Override
-   public void saveToFile(ObjectNode jsonNode)
+   public FootstepActionData getActionData()
    {
-      actionData.saveToFile(jsonNode);
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      actionData.loadFromFile(jsonNode);
+      return actionData;
    }
 
    private void setToReferenceFrame(ReferenceFrame referenceFrame)
