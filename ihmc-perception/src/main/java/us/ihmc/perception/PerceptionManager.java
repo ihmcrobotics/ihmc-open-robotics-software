@@ -23,6 +23,8 @@ public class PerceptionManager
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("perception_manager");
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
 
+   public static final double REAL_MARKER_WIDTH = 0.1680;
+
    /** This refers to the edges of the black parts with no margin. The margins included will be wider than this. */
    public static final double DOOR_MARKER_WIDTH = 0.2032;
 
@@ -47,6 +49,7 @@ public class PerceptionManager
    );
 
    public static final long BOX_MARKER_ID = 2;
+   public static final double BOX_MARKER_WIDTH = 0.210101;
    public static final RigidBodyTransform BOX_TRANSFORM_TO_MARKER = new RigidBodyTransform(
          new YawPitchRoll(Math.toRadians(180.0), Math.toRadians(0.0), Math.toRadians(-90.0)),
          new Point3D(0.07, 0.15, 0.17)
