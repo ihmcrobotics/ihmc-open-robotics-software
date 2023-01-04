@@ -566,7 +566,7 @@ public class AStarBodyPathFrameworkTest
    {
       AStarBodyPathFrameworkTest test = new AStarBodyPathFrameworkTest();
 
-      DataSetName dataSetName = DataSetName._20191119_135944_RobotPlatform;
+      DataSetName dataSetName = DataSetName._20171215_214801_StairsUpDown;
 
 //      VISUALIZE = true;
 //      test.setup();

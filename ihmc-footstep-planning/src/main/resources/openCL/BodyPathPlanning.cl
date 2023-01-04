@@ -515,6 +515,7 @@ void kernel snapVertices(global float* height_map_params,
 
     int map_center_index = (int) height_map_params[CENTER_INDEX];
     float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
+
     int path_center_index = (int) planner_params[PATH_CENTER_INDEX];
     float path_resolution = planner_params[PATH_RESOLUTION];
 
@@ -677,12 +678,17 @@ float computeSidedTraversibility(float* height_map_params,
     if (node_side == 1)
         half_stance_width = -half_stance_width;
 
-    node.s1 += half_stance_width;
+    float yaw = get_yaw(neighbor_idx);
+    float x_translation = sin(yaw) * half_stance_width;
+    float y_translation = cos(yaw) * half_stance_width;
+    node.x += x_translation;
+    node.y += y_translation;
+
     int center_index = (int) height_map_params[CENTER_INDEX];
     int cells_per_side = 2 * center_index + 1;
 
-    int x_index = coordinate_to_index(node.s0, height_map_params[centerX], height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
-    int y_index = coordinate_to_index(node.s1, height_map_params[centerY], height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+    int x_index = coordinate_to_index(node.x, height_map_params[centerX], height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+    int y_index = coordinate_to_index(node.y, height_map_params[centerY], height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
 
     int numberOfSampledCells = 0;
     int numberOfTraversibleCells = 0;
@@ -702,6 +708,7 @@ float computeSidedTraversibility(float* height_map_params,
         nonGroundAlpha = lowestNonGroundAlpha + (1.0f - lowestNonGroundAlpha) * heightAboveGround / groundProximity;
     }
 
+    // cell is not traversible
     if (minHeight > maxHeight - 1e-3)
         return 0.0f;
 
@@ -739,7 +746,9 @@ float computeSidedTraversibility(float* height_map_params,
             float nonGroundDiscount = 1.0f;
 
             if (!epsilonEquals(heightQuery, height_map_params[GROUND_HEIGHT_ESTIMATE], 1e-3))
+            {
                 nonGroundDiscount = nonGroundAlpha;
+            }
 
             float query_normal_x = normal_xyz_data[3 * query_key];
             float query_normal_y = normal_xyz_data[3 * query_key + 1];
@@ -752,9 +761,14 @@ float computeSidedTraversibility(float* height_map_params,
     }
 
     if (numberOfSampledCells < 10)
+    {
         return 0.0f;
+    }
     else
-        return traversibilityScoreNumber / numberOfSampledCells;
+    {
+        float traversibility = traversibilityScoreNumber / numberOfSampledCells;
+        return traversibility;
+    }
 }
 
 float4 computeTraversibilityMeasures(global float* height_map_params,
@@ -897,7 +911,9 @@ bool collisionDetected(global float* height_map_params,
         if (isnan(heightQuery))
             continue;
         if (heightQuery >= height_threshold)
+        {
             return true;
+        }
     }
 
     return false;
@@ -955,12 +971,11 @@ void kernel computeEdgeData(global float* height_map_params,
 
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float2 node_position = indices_to_coordinate(node_index, center, path_resolution, path_center_index);
-    int node_map_key = coordinate_to_key(node_position, center, map_resolution, map_center_index);
 
     int number_of_neighbors = neighbor_offsets[0];
 
     // if the current snapped height is bad, invalidate all the edges and return
-    float snapped_height = snapped_height_map[node_map_key];
+    float snapped_height = snapped_height_map[path_key];
     if (isnan(snapped_height))
     {
          for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
@@ -992,8 +1007,8 @@ void kernel computeEdgeData(global float* height_map_params,
 
         int2 neighbor_index = (int2) (neighbor_idx_x, neighbor_idx_y);
         float2 neighbor_position = indices_to_coordinate(neighbor_index, center, path_resolution, path_center_index);
-        int neighbor_map_key = coordinate_to_key(neighbor_position, center, map_resolution, map_center_index);
-        float snapped_neighbor_height = snapped_height_map[neighbor_map_key];
+        int neighbor_path_key = indices_to_key(neighbor_idx_x, neighbor_idx_y, path_center_index);
+        float snapped_neighbor_height = snapped_height_map[neighbor_path_key];
 
         if (isnan(snapped_neighbor_height))
         {
@@ -1043,10 +1058,6 @@ void kernel computeEdgeData(global float* height_map_params,
         {
             float inclineDelta = fabs( (incline - planner_params[NOMINAL_INCLINE]));
             incline_cost = planner_params[INCLINE_COST_WEIGHT] * (max(0.0f, inclineDelta - planner_params[INCLINE_COST_DEADBAND]));
-            if (path_key == 50)
-            {
-                printf("incline cost %f, weight %f, delta %f, deadband %f\n", incline_cost, planner_params[INCLINE_COST_WEIGHT], inclineDelta,  planner_params[INCLINE_COST_DEADBAND]);
-            }
         }
         edge_cost += incline_cost;
 
