@@ -74,6 +74,7 @@ public class GPUAStarBodyPathPlanner
    private final YoDouble rollCost = new YoDouble("rollCost", registry);
    private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
    private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D ransacNormal = new YoFrameVector3D("ransacNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
 
@@ -224,6 +225,7 @@ public class GPUAStarBodyPathPlanner
                                          deltaHeight.set(Double.NaN);
                                          rejectionReason.set(null);
                                          leastSqNormal.setToZero();
+                                         ransacNormal.setToZero();
                                          roll.set(0.0);
                                          incline.set(0.0);
                                          heuristicCost.setToNaN();
@@ -625,6 +627,7 @@ public class GPUAStarBodyPathPlanner
          {
             BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
             int neighborNodeKey = getNodeGraphKey(neighbor);
+            ransacNormal.set(getRansacSurfaceNormal(neighborNodeKey));
 
             int edgeKey = edgeKeyStart + neighborIndex;
 
