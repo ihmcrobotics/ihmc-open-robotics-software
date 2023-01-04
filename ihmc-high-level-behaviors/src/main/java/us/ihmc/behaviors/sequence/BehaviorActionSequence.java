@@ -119,55 +119,55 @@ public class BehaviorActionSequence
 
          BehaviorAction[] actionArray = new BehaviorAction[numberOfActionsReceived];
 
-         for (ArmJointAnglesActionMessage message : armJointAnglesMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (ArmJointAnglesActionMessage message : armJointAnglesMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             ArmJointAnglesAction action = new ArmJointAnglesAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (ChestOrientationActionMessage message : chestOrientationMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (ChestOrientationActionMessage message : chestOrientationMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             ChestOrientationAction action = new ChestOrientationAction(ros2, syncedRobot);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (FootstepActionMessage message : footstepMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (FootstepActionMessage message : footstepMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             FootstepAction action = new FootstepAction(ros2, syncedRobot, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandConfigurationActionMessage message : handConfigurationMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (HandConfigurationActionMessage message : handConfigurationMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             HandConfigurationAction action = new HandConfigurationAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandPoseActionMessage message : handPoseMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (HandPoseActionMessage message : handPoseMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             HandPoseAction action = new HandPoseAction(ros2, referenceFrameLibrary);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (HandWrenchActionMessage message : handWrenchMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (HandWrenchActionMessage message : handWrenchMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             HandWrenchAction action = new HandWrenchAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (PelvisHeightActionMessage message : pelvisHeightMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (PelvisHeightActionMessage message : pelvisHeightMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             PelvisHeightAction action = new PelvisHeightAction(ros2);
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (WaitDurationActionMessage message : waitDurationMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (WaitDurationActionMessage message : waitDurationMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             WaitDurationAction action = new WaitDurationAction();
             action.fromMessage(message);
             actionArray[(int) message.getActionInformation().getActionIndex()] = action;
          }
-         for (WalkActionMessage message : walkMessageReceiver.pollActionList(sequenceUpdateUUID))
+         for (WalkActionMessage message : walkMessageReceiver.removeActionList(sequenceUpdateUUID))
          {
             WalkAction action = new WalkAction(ros2, syncedRobot, robotModel, footstepPlanner, referenceFrameLibrary);
             action.fromMessage(message);

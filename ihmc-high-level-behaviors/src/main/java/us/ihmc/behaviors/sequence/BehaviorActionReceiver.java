@@ -28,7 +28,7 @@ public class BehaviorActionReceiver<T>
       }
    }
 
-   public ArrayList<T> pollActionList(long sequenceUpdateUUID)
+   public ArrayList<T> removeActionList(long sequenceUpdateUUID)
    {
       return receivedActionsByUUID.remove(sequenceUpdateUUID);
    }
