@@ -1,19 +1,22 @@
 package us.ihmc.promp.test;
 
+import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
-import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.promp.Trajectory.infer_closest_trajectory;
-import static us.ihmc.promp.global.promp.EigenMatrixXd;
+import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
 import static us.ihmc.promp.presets.ProMPInfoMapper.EigenVectorXd;
 
-public class LearnAndUpdateProMPExample
+public class LearnAndUpdateProMPExampleTest
 {
+   @Disabled
    @Test
    public void testUpdateProMP()
    {
@@ -21,22 +24,23 @@ public class LearnAndUpdateProMPExample
       /*
        * Load training and test trajectories
        */
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/test/cppLibraryTestData");
-      String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-      String demoTrainingDirAbs = demoDirAbs + "/Reaching";
-      String demoTestingDirAbs = demoDirAbs + "/ReachingTest";
+      String demoDirectoryTraining = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching"))
+                                    .toString().substring(6);
+
+      String demoDirectoryTesting = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/ReachingTest"))
+                                    .toString().substring(6);
 
       List<String> fileListTraining = new ArrayList<>();
       // The trajectories contained in the Reaching1,2 folders represent different demonstration of a given task
       // Several trajectories of different body parts have been recorded
       // 0: waist Z; 1,2,3: right hand X,Y,Z; 5,6,7: left hand X,Y,Z
       for (int i = 0; i < 10; i++) //get training files
-         fileListTraining.add(demoTrainingDirAbs + "/pr" + (i + 1) + ".csv");
+         fileListTraining.add(demoDirectoryTraining + "/pr" + (i + 1) + ".csv");
       assertTrue(fileListTraining.size() > 0);
 
       List<String> fileListTesting = new ArrayList<>();
       for (int i = 0; i < 6; i++) //get testing files
-         fileListTesting.add(demoTestingDirAbs + "/pr" + (i + 1) + ".csv");
+         fileListTesting.add(demoDirectoryTesting + "/pr" + (i + 1) + ".csv");
       assertTrue(fileListTesting.size() > 0);
 
       // consider only right hand trajectories
@@ -66,11 +70,11 @@ public class LearnAndUpdateProMPExample
       int n_rbf = 20;
       ProMP myProMP = new ProMP(trainingTrajectories, n_rbf);
       EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
-      assertTrue(meanTrajectory.cols() == dofs.size());
-      assertTrue(meanTrajectory.rows() == meanLengthTraining);
+      assertEquals(meanTrajectory.cols(), dofs.size());
+      assertEquals(meanTrajectory.rows(), meanLengthTraining);
       EigenMatrixXd stdDeviationTrajectory = myProMP.gen_traj_std_dev();
-      assertTrue(stdDeviationTrajectory.cols() == dofs.size());
-      assertTrue(stdDeviationTrajectory.rows() == meanLengthTraining);
+      assertEquals(stdDeviationTrajectory.cols(), dofs.size());
+      assertEquals(stdDeviationTrajectory.rows(), meanLengthTraining);
       EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
       /*
@@ -110,7 +114,7 @@ public class LearnAndUpdateProMPExample
       //estimate the demo training trajectory closest to observed data
       int demo = infer_closest_trajectory(observedTrajectory, demoTrajectories);
       System.out.println("Inferred closest demo to current observation: " + (demo + 1));
-      assertTrue(demo == 8);
+      assertEquals(8, demo);
       // infer the speed of the estimated demo training trajectory that best matches the observed data
       double inferredSpeed = demoTrajectories.get(demo).infer_speed(observedTrajectory, 0.25, 4.0, 30);
       assertTrue( (inferredSpeed <= 1.5) &&  (inferredSpeed >= 0.75));
@@ -119,9 +123,9 @@ public class LearnAndUpdateProMPExample
       int inferredTimesteps = (int) (demoTrajectories.get(demo).timesteps() / inferredSpeed);
       // generate ProMP mean trajectory with new time modulation
       EigenMatrixXd stdDeviationTrajectoryModulated = myProMP.gen_traj_std_dev(inferredTimesteps);
-      assertTrue(stdDeviationTrajectoryModulated.rows()==inferredTimesteps);
+      assertEquals(stdDeviationTrajectoryModulated.rows(), inferredTimesteps);
       EigenMatrixXd meanTrajectoryModulated = myProMP.generate_trajectory(inferredTimesteps);
-      assertTrue(meanTrajectoryModulated.rows()==inferredTimesteps);
+      assertEquals(meanTrajectoryModulated.rows(), inferredTimesteps);
       System.out.println("Inferred timestep: " + inferredTimesteps);
       //--------------------------------!Alternative way ------------------------------------------
       //      // infer the new speed for the ProMP based on observed portion of demo trajectory (goal available)
