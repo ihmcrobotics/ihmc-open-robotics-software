@@ -112,11 +112,11 @@ public class MultiContactForceOptimizer
       qpSolver.setMaxNumberOfIterations(500);
       qpSolver.setConvergenceThreshold(1e-9);
       qpSolver.setQuadraticCostFunction(quadraticCost, linearCost, 0.0);
-      qpSolver.setLinearInequalityConstraints(Aeq, beq);
+      qpSolver.setLinearEqualityConstraints(Aeq, beq);
       qpSolver.setLinearInequalityConstraints(Ain, bin);
 
       qpSolver.solve(rho);
-      boolean success = MatrixTools.containsNaN(rho);
+      boolean success = !MatrixTools.containsNaN(rho);
 
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
