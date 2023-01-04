@@ -1078,3 +1078,126 @@ void kernel computeEdgeData(global float* height_map_params,
         traversibility_cost_map[edge_key] = traversibility_cost;
     }
 }
+
+float computeSmootherTraversibility(global float* height_map_params,
+                                    global float* planner_params,
+                                    global float* traversibility_offsets,
+                                    global float* height_map_data,
+                                    global float* normal_xyz_data,
+                                    int side,
+                                    float signY,
+                                    float nominal_height,
+                                    float2 waypoint_position,
+                                    float waypoint_yaw)
+{
+    int number_of_sampled_cells = 0;
+
+    float traversibility_score_numerator = 0.0f;
+    float min_height = nominal_height - planner_params[HEIGHT_WINDOW];
+    float max_height = nominal_height + planner_params[HEIGHT_WINDOW];
+
+    int center_index = height_map_params[CENTER_INDEX];
+    int cells_per_side = 2 * center_index + 1;
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+    float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
+
+    float cYaw = cos(waypoint_yaw);
+    float sYaw = sin(waypoint_yaw);
+
+    int number_of_offsets = traversibility_offsets[0];
+    for (int i = 0; i < number_of_offsets; i++)
+    {
+        float offset_x = traversibility_offsets[1 + i];
+        float offset_y = traversibility_offsets[1 + number_of_offsets + i];
+        if (side = 0)
+            offset_y += planner_params[HALF_STANCE_WIDTH];
+        else
+            offset_y -= planner_params[HALF_STANCE_WIDTH];
+
+        float x_offset = cYaw * offset_x - sYaw * signY * offset_y;
+        float y_offset = sYaw * offset_x + cYaw * signY * offset_y;
+        float2 offset = (float2) (x_offset, y_offset);
+
+        float2 twiddled_position = waypoint_position + offset;
+        int twiddled_x_index = coordinate_to_index(twiddled_position.x, center.x, resolution, center_index);
+        int twiddled_y_index = coordinate_to_index(twiddled_position.y, center.y, resolution, center_index);
+
+        if (twiddled_x_index < 0 || twiddled_y_index < 0 || twiddled_x_index >= cells_per_side || twiddled_y_index >= cells_per_side)
+            continue;
+
+        int twiddled_key = indices_to_key(twiddled_x_index, twiddled_y_index, center_index);
+        float twiddled_height = height_map_data[twiddled_key];
+
+        number_of_sampled_cells++;
+
+        if (twiddled_height > min_height && twiddled_height < max_height)
+        {
+            if (epsilonEquals(twiddled_height, height_map_params[GROUND_HEIGHT_ESTIMATE], 1e-3))
+            {
+                traversibility_score_numerator += 1.0f;
+            }
+            else
+            {
+                float non_ground_alpha = twiddled_height - height_map_params[GROUND_HEIGHT_ESTIMATE];
+
+                float height_deadband = 0.05;
+                float delta_height = max(0.0f, fabs(nominal_height - twiddled_height) - height_deadband;
+                float cell_percentage = 1.0 - delta_height / planner_params[HEIGHT_WINDOW];
+
+                float normal_z = normal_xyz_data[3 * twiddled_key + 2];
+                float incline = acos(normal_z);
+                float incline_alpha = (incline - planner_params[MIN_NORMAL_TO_PENALIZE]) / (planner_params[MAX_NORMAL_TO_PENALIZE] - planner_params[MIN_NORMAL_TO_PENALIZE]);
+                incline_alpha = clamp(0.0f, 1.0f, incline_alpha);
+                traversibility_score_numerator += cell_percentage * ((1.0 - planner_params[INCLINE_WEIGHT]) * non_ground_alpha + planner_params[INCLINE_WEIGHT] * incline_alpha;
+            }
+        }
+    }
+
+    if (number_of_sampled_cells < 10)
+    {
+        return 0.0f;
+    }
+    else
+    {
+        return traversibility_score_numerator / number_of_sampled_cells;
+    }
+}
+
+void kernel computeSmootherWaypointTraversibility(global float* height_map_params,
+                                                  global float* planner_params,
+                                                  global float* traversibility_nominal_offsets,
+                                                  global float* height_map_data,
+                                                  global float* normal_xyz_data,
+                                                  global float* waypoint_xyzYaw,
+                                                  global float* waypoint_traversibility)
+{
+    int waypoint_key = get_global_id(0);
+
+    float2 waypoint_position = (float2) (waypoint_xyzYaw[4 * waypoint_key], waypoint_xyzYaw[4 * waypoint_key + 1]);
+    float waypoint_z = waypoint_xyzYaw[4 * waypoint_key + 2];
+    float waypoint_yaw = waypoint_xyzYaw[4 * waypoint_key + 3];
+
+    float left_traversibility = computeSmootherTraversibility(height_map_params,
+                                                              planner_params,
+                                                              traversibility_nominal_offsets,
+                                                              height_map_data,
+                                                              normal_xyz_data,
+                                                              0,
+                                                              1.0f,
+                                                              waypoint_z,
+                                                              waypoint_position,
+                                                              waypoint_yaw);
+    float right_traversibility = computeSmootherTraversibility(height_map_params,
+                                                               planner_params,
+                                                               traversibility_nominal_offsets,
+                                                               height_map_data,
+                                                               normal_xyz_data,
+                                                               1,
+                                                               1.0f,
+                                                               waypoint_z,
+                                                               waypoint_position,
+                                                               waypoint_yaw);
+
+    waypoint_traversibility[2 * waypoint_key] = left_traversibility;
+    waypoint_traversibility[2 * waypoint_key + 1] = right_traversibility;
+}
