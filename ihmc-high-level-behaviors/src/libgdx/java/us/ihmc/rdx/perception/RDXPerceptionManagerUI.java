@@ -34,7 +34,7 @@ public class RDXPerceptionManagerUI
       pullDoorFrame = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PULL_DOOR_FRAME, "environmentObjects/door/doorFrame/DoorFrame.g3dj");
       pullDoorPanel = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PULL_DOOR_PANEL, "environmentObjects/door/doorPanel/DoorPanel.g3dj");
       pushDoorFrame = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PUSH_DOOR_FRAME, "environmentObjects/door/doorFrame/DoorFrame.g3dj");
-      pushDoorPanel = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PUSH_DOOR_PANEL, "environmentObjects/door/doorFrame/DoorPanel.g3dj");
+      pushDoorPanel = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PUSH_DOOR_PANEL, "environmentObjects/door/doorPanel/DoorPanel.g3dj");
    }
 
    public void update()
