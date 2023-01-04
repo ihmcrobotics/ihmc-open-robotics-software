@@ -21,8 +21,9 @@ public class RDXVirtualGhostObject extends RDXModelInstance
    private static final ColorDefinition GHOST_COLOR = ColorDefinitions.parse("0x4B61D1").derive(0.0, 1.0, 1.0, 0.5);
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final RigidBodyTransform transformToParent = new RigidBodyTransform();
-   private final ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                        transformToParent);
+   private final ReferenceFrame referenceFrame
+         = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), transformToParent);
+
    public RDXVirtualGhostObject(String modelName)
    {
       super(RDXModelLoader.load(modelName));

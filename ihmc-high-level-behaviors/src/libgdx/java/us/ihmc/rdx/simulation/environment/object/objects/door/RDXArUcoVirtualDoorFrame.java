@@ -3,9 +3,8 @@ package us.ihmc.rdx.simulation.environment.object.objects.door;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.OpenCVArUcoMarker;
+import us.ihmc.perception.PerceptionManager;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class RDXArUcoVirtualDoorFrame extends RDXVirtualGhostObject
@@ -23,19 +22,13 @@ public class RDXArUcoVirtualDoorFrame extends RDXVirtualGhostObject
 
       arUcoMarker = new OpenCVArUcoMarker(id, 0.2032);
 
-      if (id == 0) // pull door
+      if (id == PerceptionManager.PULL_DOOR_MARKER_ID)
       {
-         double x = 0.0;
-         double y = -0.678702 - 0.005 - 0.006;
-         double z = 1.14141 + 0.02;
-         transformToMarker.set(new YawPitchRoll(Math.toRadians(180.0), 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
+         transformToMarker.set(PerceptionManager.PULL_DOOR_FRAME_TRANSFORM_TO_MARKER);
       }
-      else if (id == 1) // push door
+      else if (id == PerceptionManager.PUSH_DOOR_MARKER_ID)
       {
-         double x = 0.0;
-         double y = 0.678702 + 0.005 - 0.006;
-         double z = 1.14141 + 0.02;
-         transformToMarker.set(new YawPitchRoll(0.0, 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
+         transformToMarker.set(PerceptionManager.PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER);
       }
 
       virtualFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(String.format("%s%dFrame", name, id), markerFrame, transformToMarker);
