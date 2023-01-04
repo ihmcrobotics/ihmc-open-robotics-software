@@ -1,6 +1,7 @@
 package us.ihmc.perception;
 
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.DetectedObjectMessage;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -11,10 +12,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
+import us.ihmc.perception.objects.DetectedObjectPublisher;
 import us.ihmc.perception.objects.DoorPerceptionManager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
@@ -22,6 +25,15 @@ public class PerceptionManager
 {
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("perception_manager");
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = BASE_TOPIC.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
+   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_FRAME
+         = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_pull_door_frame");
+   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PULL_DOOR_PANEL
+         = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_pull_door_panel");
+   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PUSH_DOOR_FRAME
+         = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_push_door_frame");
+   public static final ROS2Topic<DetectedObjectMessage> DETECTED_PUSH_DOOR_PANEL
+         = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_push_door_panel");
+   public static final ROS2Topic<DetectedObjectMessage> DETECTED_BOX = BASE_TOPIC.withType(DetectedObjectMessage.class).withSuffix("detected_box");
 
    public static final double REAL_MARKER_WIDTH = 0.1680;
 
@@ -60,10 +72,13 @@ public class PerceptionManager
    private final DoorPerceptionManager pullDoorManager;
    private final DoorPerceptionManager pushDoorManager;
    private final ArUcoMarkerObject box = new ArUcoMarkerObject(BOX_MARKER_ID, "Box");
+   private final ROS2Helper ros2;
+
+   private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
 
    public PerceptionManager(ReferenceFrame cameraFrame)
    {
-      ROS2Helper ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
+      ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
 
       arUcoMarkerPosesSubscription = ros2.subscribe(ARUCO_MARKER_POSES);
 
@@ -79,12 +94,34 @@ public class PerceptionManager
 
       box.setObjectTransformToMarker(transform -> transform.set(BOX_TRANSFORM_TO_MARKER));
       markerUpdaters.put(BOX_MARKER_ID, box::updateMarkerTransform);
+
+      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
+                                                               DETECTED_PULL_DOOR_FRAME,
+                                                               PULL_DOOR_MARKER_ID,
+                                                               pullDoorManager.getDoorFrame().getObjectFrame()));
+      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
+                                                               DETECTED_PULL_DOOR_PANEL,
+                                                               PULL_DOOR_MARKER_ID,
+                                                               pullDoorManager.getDoorPanel().getObjectFrame()));
+      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
+                                                               DETECTED_PUSH_DOOR_FRAME,
+                                                               PUSH_DOOR_MARKER_ID,
+                                                               pushDoorManager.getDoorFrame().getObjectFrame()));
+      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
+                                                               DETECTED_PUSH_DOOR_PANEL,
+                                                               PUSH_DOOR_MARKER_ID,
+                                                               pushDoorManager.getDoorPanel().getObjectFrame()));
    }
 
    public void update()
    {
       if (arUcoMarkerPosesSubscription.getMessageNotification().poll())
       {
+         for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)
+         {
+            detectedObjectPublisher.reset();
+         }
+
          ArUcoMarkerPoses arUcoMarkerPosesMessage = arUcoMarkerPosesSubscription.getMessageNotification().read();
          for (int i = 0; i < arUcoMarkerPosesMessage.getMarkerId().size(); i++)
          {
@@ -94,6 +131,16 @@ public class PerceptionManager
                markerUpdater.accept(arUcoMarkerPosesMessage.getPosition().get(i),
                                     arUcoMarkerPosesMessage.getOrientation().get(i));
             }
+
+            for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)
+            {
+               detectedObjectPublisher.markDetected(arUcoMarkerPosesMessage.getMarkerId().get(i));
+            }
+         }
+
+         for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)
+         {
+            detectedObjectPublisher.publish();
          }
       }
    }
