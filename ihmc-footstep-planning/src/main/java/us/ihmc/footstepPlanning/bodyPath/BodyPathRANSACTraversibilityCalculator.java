@@ -270,6 +270,6 @@ public class BodyPathRANSACTraversibilityCalculator
 
    private static double getYaw(int yawIndex)
    {
-      return yawIndex * Math.PI / 4.0;
+      return yawIndex * Math.PI / 8.0;
    }
 }

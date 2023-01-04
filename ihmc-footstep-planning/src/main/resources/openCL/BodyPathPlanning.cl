@@ -591,7 +591,7 @@ void kernel snapVertices(global float* height_map_params,
 
 float get_yaw(int yaw_index)
 {
-    return yaw_index * M_PI_4_F;
+    return yaw_index * M_PI_8_F;
 }
 
 int computeCollisionOffsetX(int yaw_idx, int x_offset, int y_offset)
