@@ -5,6 +5,8 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -22,6 +24,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.util.Comparator;
 import java.util.Stack;
+
+import static org.bytedeco.opencv.global.opencv_core.CV_32FC;
+import static org.bytedeco.opencv.global.opencv_core.CV_8UC2;
 
 public class RapidPlanarRegionsExtractor
 {
@@ -54,6 +59,9 @@ public class RapidPlanarRegionsExtractor
    private BMatrixRMaj boundaryVisitedMatrix;
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
+
+   private Mat previousFeatureMap;
+   private Mat currentFeatureMap;
 
    private boolean patchSizeChanged = true;
 
@@ -128,6 +136,8 @@ public class RapidPlanarRegionsExtractor
 
       patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
 
+      currentFeatureMap = new Mat(patchImageHeight, patchImageWidth, CV_32FC(6));
+
       planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
@@ -163,6 +173,8 @@ public class RapidPlanarRegionsExtractor
       czImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
 
+      currentFeatureMap = new Mat(patchImageHeight, patchImageWidth, CV_32FC(6));
+
       openCLManager.create();
       planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
@@ -192,6 +204,15 @@ public class RapidPlanarRegionsExtractor
       gpuDurationStopwatch.start();
       extractPatchGraphUsingOpenCL();
       gpuDurationStopwatch.suspend();
+
+      MatVector finalMats = new MatVector();
+      finalMats.push_back(nxImage.getBytedecoOpenCVMat());
+      finalMats.push_back(nyImage.getBytedecoOpenCVMat());
+      finalMats.push_back(nzImage.getBytedecoOpenCVMat());
+      finalMats.push_back(cxImage.getBytedecoOpenCVMat());
+      finalMats.push_back(cyImage.getBytedecoOpenCVMat());
+      finalMats.push_back(czImage.getBytedecoOpenCVMat());
+      opencv_core.merge(finalMats, currentFeatureMap);
 
       //      debugger.printPatchGraph(patchGraph);
       debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
