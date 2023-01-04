@@ -1,7 +1,5 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.behaviors.sequence.actions.HandConfigurationActionData;
@@ -41,14 +39,8 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void saveToFile(ObjectNode jsonNode)
+   public HandConfigurationActionData getActionData()
    {
-      actionData.saveToFile(jsonNode);
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      actionData.loadFromFile(jsonNode);
+      return actionData;
    }
 }

@@ -1,6 +1,9 @@
 package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.*;
+import std_msgs.msg.dds.Bool;
+import std_msgs.msg.dds.Empty;
+import std_msgs.msg.dds.Int32;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -39,6 +42,11 @@ public class BehaviorActionSequence
          = COMMAND_TOPIC.withType(WaitDurationActionMessage.class).withSuffix("wait_duration_update");
    public static final ROS2Topic<WalkActionMessage> WALK_UPDATE_TOPIC
          = COMMAND_TOPIC.withType(WalkActionMessage.class).withSuffix("walk_update");
+   public static final ROS2Topic<Empty> MANUALLY_EXECUTE_NEXT_ACTION_TOPIC = COMMAND_TOPIC.withType(Empty.class).withSuffix("manually_execute_next_action");
+   public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
+   public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
+   public static final ROS2Topic<Int32> CURRENT_ACTION_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("current_action_index");
+   public static final ROS2Topic<Int32> CURRENT_ACTION_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("current_action_index");
 
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2;
@@ -47,6 +55,7 @@ public class BehaviorActionSequence
    private final FootstepPlanningModule footstepPlanner;
 
    private final LinkedList<BehaviorAction> actionSequence = new LinkedList<>();
+   private final IHMCROS2Input<Empty> manuallyExecuteSubscription;
    private boolean automaticExecution = false;
    private int excecutionNextIndex = 0;
    private BehaviorAction currentlyExecutingAction = null;
@@ -62,6 +71,7 @@ public class BehaviorActionSequence
    private final BehaviorActionReceiver<PelvisHeightActionMessage> pelvisHeightMessageReceiver = new BehaviorActionReceiver<>();
    private final BehaviorActionReceiver<WaitDurationActionMessage> waitDurationMessageReceiver = new BehaviorActionReceiver<>();
    private final BehaviorActionReceiver<WalkActionMessage> walkMessageReceiver = new BehaviorActionReceiver<>();
+   public final Int32 currentActionIndexStatusMessage = new Int32();
 
    public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -94,6 +104,7 @@ public class BehaviorActionSequence
                                 message -> waitDurationMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
       ros2.subscribeViaCallback(WALK_UPDATE_TOPIC,
                                 message -> walkMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
+      manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
    }
 
    public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
@@ -190,6 +201,9 @@ public class BehaviorActionSequence
       for (var action : actionSequence)
          action.update();
 
+      currentActionIndexStatusMessage.setData(excecutionNextIndex);
+      ros2.publish(CURRENT_ACTION_INDEX_STATUS_TOPIC, currentActionIndexStatusMessage);
+
       if (automaticExecution)
       {
          boolean endOfSequence = excecutionNextIndex >= actionSequence.size();
@@ -202,6 +216,10 @@ public class BehaviorActionSequence
          {
             executeNextAction();
          }
+      }
+      else if (manuallyExecuteSubscription.getMessageNotification().poll())
+      {
+         executeNextAction();
       }
    }
 

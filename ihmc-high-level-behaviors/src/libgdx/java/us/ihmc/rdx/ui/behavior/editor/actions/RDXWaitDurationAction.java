@@ -1,7 +1,5 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionData;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -25,15 +23,9 @@ public class RDXWaitDurationAction extends RDXBehaviorAction
    }
 
    @Override
-   public void saveToFile(ObjectNode jsonNode)
+   public WaitDurationActionData getActionData()
    {
-      actionData.saveToFile(jsonNode);
-   }
-
-   @Override
-   public void loadFromFile(JsonNode jsonNode)
-   {
-      actionData.loadFromFile(jsonNode);
+      return actionData;
    }
 
    @Override
