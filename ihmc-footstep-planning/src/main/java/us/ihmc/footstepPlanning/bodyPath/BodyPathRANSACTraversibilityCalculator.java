@@ -23,8 +23,8 @@ public class BodyPathRANSACTraversibilityCalculator
    static final double sampleSizeX = 0.35;
    static final double sampleSizeY = 0.35;
    static final double halfStanceWidth = 0.25;
-   static final double heightWindow = 0.15;
-   static final double inclineWeight = 0.1;
+   static final double heightWindow = 0.2;
+   static final double inclineWeight = 0.0;
 
    static final double minPercent = 0.2;
    static final double minNormalToPenalize = Math.toRadians(45.0);
@@ -148,6 +148,7 @@ public class BodyPathRANSACTraversibilityCalculator
       double minHeight = Math.max(oppositeHeight, nominalHeight) - heightWindow;
       double maxHeight = Math.min(oppositeHeight, nominalHeight) + heightWindow;
       double averageHeight = 0.5 * (nominalHeight + oppositeHeight);
+      double windowWidth = (maxHeight - minHeight) / 2.0;
 
       double lowestNonGroundAlpha = 0.85;
       double heightAboveGround = Math.abs(averageHeight - heightMapData.getEstimatedGroundHeight());
@@ -182,7 +183,7 @@ public class BodyPathRANSACTraversibilityCalculator
 
             double heightDeadband = 0.1;
             double deltaHeight = Math.max(0.0, Math.abs(averageHeight - heightQuery) - heightDeadband);
-            double cellPercentage = 1.0 - deltaHeight / heightWindow;
+            double cellPercentage = 1.0 - deltaHeight / windowWidth;
             double nonGroundDiscount = 1.0;
 
             if (!heightMapData.isCellAtGroundPlane(xQuery, yQuery))
