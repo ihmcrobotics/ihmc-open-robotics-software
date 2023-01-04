@@ -22,10 +22,10 @@ public class RDXArUcoVirtualBox extends RDXVirtualGhostObject
 
       arUcoMarker = new OpenCVArUcoMarker(id, 0.210101);
 
-      double x = 0.0;
-      double y = -0.102365;
-      double z = -0.062277;
-      transformToMarker.set(new YawPitchRoll(Math.toRadians(180.0), 0.0, Math.toRadians(180.0)), new Point3D(x, y, z));
+      double x = 0.0 + 0.07;
+      double y = 0.0 + 0.15;
+      double z = 0.0 + 0.17;
+      transformToMarker.set(new YawPitchRoll(Math.toRadians(180.0), Math.toRadians(0.0), Math.toRadians(-90.0)), new Point3D(x, y, z));
 
       virtualFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(markerFrame, transformToMarker);
    }
@@ -33,15 +33,7 @@ public class RDXArUcoVirtualBox extends RDXVirtualGhostObject
    @Override
    public void update()
    {
-//      double x = 0.0;
-//      double y = -0.102365 - 0.5;
-//      double z = -0.062277;
-      double x = 0.0 + 0.07;
-      double y = 0.0 + 0.15;
-      double z = 0.0 + 0.17;
-      transformToMarker.set(new YawPitchRoll(Math.toRadians(180.0), Math.toRadians(0.0), Math.toRadians(-90.0)), new Point3D(x, y, z));
       virtualFrame.update();
-
       markerFrame.update();
 
       virtualFrame.getTransformToDesiredFrame(getTransformToParent(), ReferenceFrame.getWorldFrame());

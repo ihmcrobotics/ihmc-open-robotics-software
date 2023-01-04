@@ -23,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
+import us.ihmc.perception.PerceptionManager;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -200,7 +201,7 @@ public class DualBlackflyCamera
                   }
                }
 
-               ros2Helper.publish(DualBlackflyComms.FRAME_POSE, arUcoMarkerPoses);
+               ros2Helper.publish(PerceptionManager.ARUCO_MARKER_POSES, arUcoMarkerPoses);
             }
 
             convertColorDuration.start();
