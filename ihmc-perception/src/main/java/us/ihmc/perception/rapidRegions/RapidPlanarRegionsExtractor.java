@@ -135,13 +135,14 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
-   public void create(OpenCLManager openCLManager, BytedecoImage depthImage, int imageWidth, int imageHeight)
+   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage, int imageWidth, int imageHeight)
    {
       this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.inputU16DepthImage = depthImage;
+      this.planarRegionExtractionProgram = program;
 
       parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
       calculateDerivativeParameters();
@@ -152,8 +153,6 @@ public class RapidPlanarRegionsExtractor
       previousFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
       patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
 
-      openCLManager.create();
-      planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
       copyKernel = openCLManager.createKernel(planarRegionExtractionProgram, "copyKernel");

@@ -553,13 +553,101 @@ void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* 
    }
 
 /*
-* Centroid Calculation Kernel for Iterative Closest Point
-* */
-void kernel centroidReduceKernel(read_only image2d_t one0, read_only image2d_t one1, read_only image2d_t one2, read_only image2d_t one3, read_only image2d_t one4,
-                                 read_only image2d_t one5, write_only image2d_t two0, write_only image2d_t two1, write_only image2d_t two2,
-                                 write_only image2d_t two3, write_only image2d_t two4, write_only image2d_t two5, global float* mean, global float* params)
+ * Correspondence Kernel for Iterative Closest Point
+ * */
+void kernel correspondenceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2,
+                                read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
+                                read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
+                                read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
+                                read_write image2d_t matchRow, read_write image2d_t matchColumn,
+                                global float* params
+)
 {
     int cIndex = get_global_id(0);
+    int rIndex = get_global_id(1);
+
+    int totalRows = params[0];
+    int totalColumns = params[1];
+
+    float4 pointOne = (float4)(0,0,0,0);
+    float4 pointTwo = (float4)(0,0,0,0);
+    float4 normalOne = (float4)(0,0,0,0);
+    float4 normalTwo = (float4)(0,0,0,0);
+
+    if(rIndex == 0 && cIndex == 0) printf("CorrespondenceKernel\n");
+
+    float minLength = 10000000;
+    float distance = 0;
+
+    uint minRowIndex = 0;
+    uint minColumnIndex = 0;
+
+    float nx1 = read_imagef(one0, (int2)(cIndex,rIndex)).x;
+    float ny1 = read_imagef(one1, (int2)(cIndex,rIndex)).x;
+    float nz1 = read_imagef(one2, (int2)(cIndex,rIndex)).x;
+    float gx1 = read_imagef(one3, (int2)(cIndex,rIndex)).x;
+    float gy1 = read_imagef(one4, (int2)(cIndex,rIndex)).x;
+    float gz1 = read_imagef(one5, (int2)(cIndex,rIndex)).x;
+
+
+    pointOne = (float4)(gx1,gy1,gz1,0);
+    normalOne = (float4)(nx1,ny1,nz1,0);
+
+    int rowOne = rIndex;
+    int columnOne = cIndex;
+
+    for(int i = 0; i< 10; i++)
+    {
+        for(int j = 0; j < 10; j++)
+        {
+            int rowTwo = rIndex + i;
+            int columnTwo = cIndex + j;
+
+            if(rowTwo >= 0 && rowTwo < totalRows && columnTwo >= 0 && columnTwo < totalColumns)
+            {
+                float nx2 = read_imagef(two0, (int2)(columnTwo, rowTwo)).x;
+                float ny2 = read_imagef(two1, (int2)(columnTwo, rowTwo)).x;
+                float nz2 = read_imagef(two2, (int2)(columnTwo, rowTwo)).x;
+                float gx2 = read_imagef(two3, (int2)(columnTwo, rowTwo)).x;
+                float gy2 = read_imagef(two4, (int2)(columnTwo, rowTwo)).x;
+                float gz2 = read_imagef(two5, (int2)(columnTwo, rowTwo)).x;
+
+                pointTwo = (float4)(gx2,gy2,gz2,0);
+                normalTwo = (float4)(nx2,ny2,nz2,0);
+
+                //pointTwo = (float4)(cloudTwo[j*3+0], cloudTwo[j*3+1], cloudTwo[j*3+2], 0);
+                //pointTwo = transform(pointTwo, (float4)(transformTwo[0], transformTwo[1], transformTwo[2], 0),
+                //(float4)(transformTwo[3], transformTwo[4], transformTwo[5], 0),
+                //(float4)(transformTwo[6], transformTwo[7], transformTwo[8], 0),
+                //(float4)(transformTwo[9], transformTwo[10], transformTwo[11], 0));
+
+                distance = length(pointTwo - pointOne);
+                if(distance < minLength)
+                {
+                   minRowIndex = (uint)(rIndex+j);
+                   minColumnIndex = (uint)(cIndex+i);
+                   minLength = distance;
+                }
+            }
+        }
+    }
+
+    write_imageui(matchRow, (int2)(cIndex,rIndex), (uint4)(minRowIndex,0,0,0));
+    write_imageui(matchColumn, (int2)(cIndex,rIndex), (uint4)(minColumnIndex,0,0,0));
+}
+
+/*
+* Centroid Calculation Kernel for Iterative Closest Point
+* */
+void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2,
+                                 read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
+                                 read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
+                                 read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
+                                 read_write image2d_t matchRowImage, read_write image2d_t matchColumnImage, global float* mean, global float* params)
+{
+    int cIndex = get_global_id(0);
+
+
     float4 pointOne = (float4)(0,0,0,0);
     float4 pointTwo = (float4)(0,0,0,0);
     float columnMeanVec[6];
@@ -569,41 +657,52 @@ void kernel centroidReduceKernel(read_only image2d_t one0, read_only image2d_t o
     for(int k = 0; k<6; k++)
     {
         columnMeanVec[k] = 0;
-        mean[gid*6 + k] = 0;
+        mean[cIndex * 6 + k] = 0;
     }
 
-    for(rIndex = 0; rIndex<params[0]; rIndex++)
+    for(int rIndex = 0; rIndex<params[0]; rIndex++)
     {
-        countOne += 1;
+        if(rIndex == 0 && cIndex == 0) printf("CentroidReduceKernel\n");
 
-        float cx1 = read_imagef(one3, (int2)(cIndex,rIndex)).x;
-        float cy1 = read_imagef(one4, (int2)(cIndex,rIndex)).x;
-        float cz1 = read_imagef(one5, (int2)(cIndex,rIndex)).x;
+        int2 pos = (int2)(cIndex,rIndex);
 
-        pointTwo = (float4)(cx1,cy1,cz1,0);
-        columnMeanVec[0] += pointOne.x;
-        columnMeanVec[1] += pointOne.y;
-        columnMeanVec[2] += pointOne.z;
+        uint matchRow = (uint) read_imageui(matchRowImage, pos).x;
+        uint matchColumn = (uint) read_imageui(matchColumnImage, pos).x;
+        int2 matchPos = (int2)(matchColumn, matchRow);
 
-        float cx2 = read_imagef(two3, (int2)(cIndex,rIndex)).x;
-        float cy2 = read_imagef(two4, (int2)(cIndex,rIndex)).x;
-        float cz2 = read_imagef(two5, (int2)(cIndex,rIndex)).x;
 
-        pointTwo = (float4)(cx2,cy2,cz2,0);
-        columnMeanVec[3] += pointTwo.x;
-        columnMeanVec[4] += pointTwo.y;
-        columnMeanVec[5] += pointTwo.z;
+        if(matchRow != 0 && matchColumn != 0)
+        {
+            countOne += 1;
+            float cx1 = read_imagef(one3, pos).x;
+            float cy1 = read_imagef(one4, pos).x;
+            float cz1 = read_imagef(one5, pos).x;
+            pointOne = (float4)(cx1,cy1,cz1,0);
+            columnMeanVec[0] += pointOne.x;
+            columnMeanVec[1] += pointOne.y;
+            columnMeanVec[2] += pointOne.z;
+
+            countTwo += 1;
+            float cx2 = read_imagef(two3, matchPos).x;
+            float cy2 = read_imagef(two4, matchPos).x;
+            float cz2 = read_imagef(two5, matchPos).x;
+            pointTwo = (float4)(cx2,cy2,cz2,0);
+            columnMeanVec[3] += pointTwo.x;
+            columnMeanVec[4] += pointTwo.y;
+            columnMeanVec[5] += pointTwo.z;
+        }
     }
 
-    mean[gid*6 + 0] = (float)columnMeanVec[0] / (float)countOne;
-    mean[gid*6 + 1] = (float)columnMeanVec[1] / (float)countOne;
-    mean[gid*6 + 2] = (float)columnMeanVec[2] / (float)countOne;
-    mean[gid*6 + 3] = (float)columnMeanVec[3] / (float)countTwo;
-    mean[gid*6 + 4] = (float)columnMeanVec[4] / (float)countTwo;
-    mean[gid*6 + 5] = (float)columnMeanVec[5] / (float)countTwo;
+    mean[cIndex * 6 + 0] = (float)columnMeanVec[0] / (float)countOne;
+    mean[cIndex * 6 + 1] = (float)columnMeanVec[1] / (float)countOne;
+    mean[cIndex * 6 + 2] = (float)columnMeanVec[2] / (float)countOne;
 
-     //   printf("Mean(%d) Count(%d): (%.3lf, %.3lf, %.3lf, %.3lf, %.3lf, %.3lf)\n", gid, count,
-     //          mean[gid*6], mean[gid*6 + 1], mean[gid*6 + 2], mean[gid*6 + 3], mean[gid*6 + 4], mean[gid*6 + 5]);
+    mean[cIndex * 6 + 3] = (float)columnMeanVec[3] / (float)countTwo;
+    mean[cIndex * 6 + 4] = (float)columnMeanVec[4] / (float)countTwo;
+    mean[cIndex * 6 + 5] = (float)columnMeanVec[5] / (float)countTwo;
+
+     //   printf("Mean(%d) Count(%d): (%.3lf, %.3lf, %.3lf, %.3lf, %.3lf, %.3lf)\n", cIndex, count,
+     //          mean[cIndex*6], mean[cIndex*6 + 1], mean[cIndex*6 + 2], mean[cIndex*6 + 3], mean[cIndex*6 + 4], mean[cIndex*6 + 5]);
 }
 
 /*
@@ -620,8 +719,6 @@ void kernel correlationKernel(read_only image2d_t in0, read_only image2d_t in1, 
     float4 pointTwo = (float4)(0,0,0,0);
     float4 normalOne = (float4)(0,0,0,0);
     float4 normalTwo = (float4)(0,0,0,0);
-
-    //   if(gid==0) printf("CorrespondenceKernel\n");
 
     float minLength = 10000000;
     float distance = 0;

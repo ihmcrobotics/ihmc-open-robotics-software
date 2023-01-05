@@ -97,13 +97,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             openCLManager = new OpenCLManager();
             openCLManager.create();
+            openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
 
             pointCloudRenderer.create(depthHeight * depthWidth);
 
-            rapidPlanarRegionsExtractor.create(openCLManager, bytedecoDepthImage, depthWidth, depthHeight);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight);
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
