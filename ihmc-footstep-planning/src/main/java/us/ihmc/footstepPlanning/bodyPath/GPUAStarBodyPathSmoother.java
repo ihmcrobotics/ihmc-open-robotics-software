@@ -10,6 +10,7 @@ import org.bytedeco.opencl._cl_program;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -307,7 +308,7 @@ public class GPUAStarBodyPathSmoother
                gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
 
                /* Roll-z gradient */
-               Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(leastSquaresNormalBuffer, leastSquaresSampledHeightBuffer);
+               Vector2DReadOnly rollGradient = waypoints[waypointIndex].computeRollInclineGradient(leastSquaresNormalBuffer, leastSquaresSampledHeightBuffer);
                gradients[waypointIndex - 1].sub(rollGradient);
                gradients[waypointIndex + 1].add(rollGradient);
 
