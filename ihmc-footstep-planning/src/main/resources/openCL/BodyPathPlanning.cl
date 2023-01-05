@@ -1,4 +1,5 @@
 #define FLOAT_TO_INT_SCALE 10000
+#define EPS_ANGLE_SHIFT 1.0e-12;
 
 // These are the height map parameters
 #define HEIGHT_MAP_RESOLUTION 0
@@ -38,6 +39,17 @@
 #define STEP_TOO_HIGH 2
 #define COLLISION 3
 #define NON_TRAVERSIBLE 4
+
+// These are the variables for the smoother
+#define NUMBER_OF_WAYPOINTS 0
+#define EQUAL_SPACING_WEIGHT 1
+#define MIN_CURVATURE_TO_PENALIZE 2
+#define GRADIENT_EPSILON 3
+#define SMOOTHNESS_WEIGHT 4
+#define BOX_SIZE_X 5
+#define BOX_SIZE_Y 6
+#define BOX_GROUND_OFFSET 7
+#define COLLISION_WEIGHT 8
 
 // these are parameters defined explicitly for the RANSAC normal calculator
 #define RANSAC_ITERATIONS 0
@@ -1109,7 +1121,7 @@ float computeSmootherTraversibility(global float* height_map_params,
     {
         float offset_x = traversibility_offsets[1 + i];
         float offset_y = traversibility_offsets[1 + number_of_offsets + i];
-        if (side = 0)
+        if (side == 0)
             offset_y += planner_params[HALF_STANCE_WIDTH];
         else
             offset_y -= planner_params[HALF_STANCE_WIDTH];
@@ -1141,14 +1153,14 @@ float computeSmootherTraversibility(global float* height_map_params,
                 float non_ground_alpha = twiddled_height - height_map_params[GROUND_HEIGHT_ESTIMATE];
 
                 float height_deadband = 0.05;
-                float delta_height = max(0.0f, fabs(nominal_height - twiddled_height) - height_deadband;
+                float delta_height = max(0.0f, fabs(nominal_height - twiddled_height) - height_deadband);
                 float cell_percentage = 1.0 - delta_height / planner_params[HEIGHT_WINDOW];
 
                 float normal_z = normal_xyz_data[3 * twiddled_key + 2];
                 float incline = acos(normal_z);
                 float incline_alpha = (incline - planner_params[MIN_NORMAL_TO_PENALIZE]) / (planner_params[MAX_NORMAL_TO_PENALIZE] - planner_params[MIN_NORMAL_TO_PENALIZE]);
                 incline_alpha = clamp(0.0f, 1.0f, incline_alpha);
-                traversibility_score_numerator += cell_percentage * ((1.0 - planner_params[INCLINE_WEIGHT]) * non_ground_alpha + planner_params[INCLINE_WEIGHT] * incline_alpha;
+                traversibility_score_numerator += cell_percentage * ((1.0 - planner_params[INCLINE_WEIGHT]) * non_ground_alpha + planner_params[INCLINE_WEIGHT] * incline_alpha);
             }
         }
     }
@@ -1163,7 +1175,7 @@ float computeSmootherTraversibility(global float* height_map_params,
     }
 }
 
-void kernel computeSmootherWaypointTraversibility(global float* height_map_params,
+void kernel computeCurrentWaypointTraversibility(global float* height_map_params,
                                                   global float* planner_params,
                                                   global float* traversibility_nominal_offsets,
                                                   global float* height_map_data,
@@ -1200,4 +1212,160 @@ void kernel computeSmootherWaypointTraversibility(global float* height_map_param
 
     waypoint_traversibility[2 * waypoint_key] = left_traversibility;
     waypoint_traversibility[2 * waypoint_key + 1] = right_traversibility;
+}
+
+float shiftAngleInRange(float angleToShift, float angleStart)
+{
+    angleStart -= EPS_ANGLE_SHIFT;
+
+    float TwoPi = 2.0f * M_PI_F;
+    float deltaFromStart = fmod((angleToShift - angleStart), TwoPi);
+
+    if (deltaFromStart < 0)
+        deltaFromStart += TwoPi;
+
+    return angleStart + deltaFromStart;
+}
+
+float trimAngleMinusPiToPi(float angleToShift)
+{
+    return shiftAngleInRange(angleToShift, -M_PI_F);
+}
+
+float angleDifferenceMinusPiToPi(float angleA, float angleB)
+{
+    return trimAngleMinusPiToPi(angleA - angleB);
+}
+
+float computeDeltaHeadingMagnitude(float x0, float y0, float x1, float y1, float x2, float y2, float deadband)
+{
+    float heading0 = atan2(y1 - y0, x1 - x0);
+    float heading1 = atan2(y2 - y1, x2 - x1);
+    return max(fabs(angleDifferenceMinusPiToPi(heading1, heading0)) - deadband, 0.0f);
+}
+
+void kernel computeWaypointSmoothnessGradient(global float* height_map_params,
+                                              global float* planner_params,
+                                              global float* smoothing_params,
+                                              global float* waypoint_xyzYaw,
+                                              global int* waypont_turn_points,
+                                              global float* waypoint_gradients)
+{
+    int waypoint_key = get_global_id(0);
+
+    // return if it's the first or last gradient
+    if (waypoint_key == 0 || waypoint_key == (smoothing_params[NUMBER_OF_WAYPOINTS] - 1))
+        return;
+
+    int isTurnPoint = waypont_turn_points[waypoint_key] == 1;
+
+    float x0 = waypoint_xyzYaw[4 * (waypoint_key - 1)];
+    float y0 = waypoint_xyzYaw[4 * (waypoint_key - 1) + 1];
+    float x1 = waypoint_xyzYaw[4 * waypoint_key];
+    float y1 = waypoint_xyzYaw[4 * waypoint_key + 1];
+    float x2 = waypoint_xyzYaw[4 * (waypoint_key + 1)];
+    float y2 = waypoint_xyzYaw[4 * (waypoint_key + 1) + 1];
+
+    // Equal spacing gradient
+    float spacingGradientX = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (x2 - 2.0 * x1 + x0);
+    float spacingGradientY = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (y2 - 2.0 * y1 + y0);
+    float alphaTurnPoint = isTurnPoint ? 0.1 : 1.0;
+
+    float2 gradient = alphaTurnPoint * (float2) (spacingGradientX, spacingGradientY);
+
+    // Smoothness gradient
+    float2 smoothnessGradient = (float2) (0.0f, 0.0f);
+    if (!isTurnPoint)
+    {
+        float min_curvature_to_penalize = smoothing_params[MIN_CURVATURE_TO_PENALIZE];
+        float gradient_epsilon = smoothing_params[GRADIENT_EPSILON];
+        float exp = 1.5f;
+        float f0 = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, min_curvature_to_penalize), exp);
+        float fPdx = pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradient_epsilon, y1, x2, y2, min_curvature_to_penalize), exp);
+        float fPdy = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradient_epsilon, x2, y2, min_curvature_to_penalize), exp);
+        smoothnessGradient = (float2) (fPdx - f0, fPdy - f0);
+        smoothnessGradient *= smoothing_params[SMOOTHNESS_WEIGHT] / gradient_epsilon;
+        gradient += smoothnessGradient;
+    }
+    waypoint_gradients[2 * waypoint_key] = gradient.x;
+    waypoint_gradients[2 * waypoint_key + 1] = gradient.y;
+}
+
+void kernel computeWaypointCollisionGradient(global float* height_map_params,
+                                              global float* planner_params,
+                                              global float* smoothing_params,
+                                              global float* height_map_data,
+                                              global float* waypoint_xyzYaw,
+                                              global int* waypont_turn_points,
+                                              global float* waypoint_gradients,
+                                              global float* max_collision_map)
+{
+    int waypoint_key = get_global_id(0);
+
+     // return if it's the first two or last two gradient
+     if (waypoint_key < 2 || waypoint_key > (smoothing_params[NUMBER_OF_WAYPOINTS] - 3))
+         return;
+
+     int maxOffset = (int) round(0.5 * length((float2) (smoothing_params[BOX_SIZE_X], smoothing_params[BOX_SIZE_Y])) / height_map_params[HEIGHT_MAP_RESOLUTION]);
+
+     float3 waypoint = (float3) (waypoint_xyzYaw[4 * waypoint_key], waypoint_xyzYaw[4 * waypoint_key + 1], waypoint_xyzYaw[4 * waypoint_key + 2]);
+     float heading = waypoint_xyzYaw[4 * waypoint_key + 3];
+
+     float sH = sin(heading);
+     float cH = cos(heading);
+
+     float2 gradient = (float2) (0.0f, 0.0f);
+     int numCollisions = 0;
+     float height_threshold = waypoint.z + smoothing_params[BOX_GROUND_OFFSET];
+     float max_collision = 0.0f;
+
+     int center_index = height_map_params[CENTER_INDEX];
+     int cells_per_axis = 2 * center_index + 1;
+     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+
+     int idx_x = coordinate_to_index(waypoint.x, center.x, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+     int idx_y = coordinate_to_index(waypoint.y, center.y, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+
+     for (int xi = -maxOffset; xi <= maxOffset; xi++)
+     {
+        for (int yi = -maxOffset; yi <= maxOffset; yi++)
+        {
+            int indexXi = idx_x + xi;
+            int indexYi = idx_y + yi;
+
+            if (indexXi < 0 || indexXi >= cells_per_axis || indexYi < 0 || indexYi >= cells_per_axis)
+                continue;
+
+            int2 indices = (int2) (indexXi, indexYi);
+            float2 position = indices_to_coordinate(indices, center, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+
+            float dx = position.x - waypoint.x;
+            float dy = position.y - waypoint.y;
+
+            float dxLocal = cH * dx + sH * dy;
+            float dyLocal = -sH * dx + cH * dy;
+
+            if (fabs(dxLocal) > 0.5 * smoothing_params[BOX_SIZE_X] || fabs(dyLocal) > 0.5 * smoothing_params[BOX_SIZE_Y])
+                continue;
+
+            int key = indices_to_key(indices.x, indices.y, center_index);
+            float height = height_map_data[key];
+            if (height < height_threshold)
+                continue;
+
+            float lateral_penetration = 0.5 * smoothing_params[BOX_SIZE_Y] - fabs(dyLocal);
+            max_collision = max(max_collision, lateral_penetration);
+
+            gradient.x += sign(dyLocal) * -lateral_penetration * sH;
+            gradient.y += sign(dyLocal) * lateral_penetration * cH;
+            numCollisions++;
+        }
+     }
+
+     if (numCollisions > 0)
+        gradient = smoothing_params[COLLISION_WEIGHT] / numCollisions * gradient;
+
+    max_collision_map[waypoint_key] = max_collision;
+    waypoint_gradients[2 * waypoint_key] = gradient.x;
+    waypoint_gradients[2 * waypoint_key + 1] = gradient.y;
 }
