@@ -1,25 +1,27 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.perception.OpenCLFloatBuffer;
+import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,16 +39,13 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.*;
+import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.boxSizeX;
+import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.boxSizeY;
 import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathSmoother.*;
-import static us.ihmc.footstepPlanning.bodyPath.BodyPathRANSACTraversibilityCalculator.*;
 
-public class AStarBodyPathSmootherWaypoint
+public class GPUAStarBodyPathSmootherWaypoint
 {
-   static final double boxGroundOffset = 0.35;
-   private static final double nonGroundDiscount = 0.6;
-
-   private static final FrameBox3D collisionBox = new FrameBox3D();
+    private static final FrameBox3D collisionBox = new FrameBox3D();
 
    static
    {
@@ -56,27 +55,13 @@ public class AStarBodyPathSmootherWaypoint
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
 
-   private HeightMapData heightMapData;
    private final int waypointIndex;
    private final YoFramePoint3D initialWaypoint;
    private final YoFramePoseUsingYawPitchRoll waypoint;
    private final PoseReferenceFrame waypointFrame;
    private final SideDependentList<ReferenceFrame> nominalStepFrames;
-   private HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator;
-   private HeightMapRANSACNormalCalculator ransacNormalCalculator;
    private final YoBoolean isTurnPoint;
-   private int previousCellKey, cellKey;
-
-   private final TIntArrayList xSnapOffsets = new TIntArrayList();
-   private final TIntArrayList ySnapOffsets = new TIntArrayList();
-
-   private final TIntArrayList groundPlaneXOffsets = new TIntArrayList();
-   private final TIntArrayList groundPlaneYOffsets = new TIntArrayList();
-
-   private final TDoubleArrayList xTraversibilityGradientOffsets = new TDoubleArrayList();
-   private final TDoubleArrayList yTraversibilityGradientOffsets = new TDoubleArrayList();
-   private final TDoubleArrayList xTraversibilityNominalOffsets = new TDoubleArrayList();
-   private final TDoubleArrayList yTraversibilityNominalOffsets = new TDoubleArrayList();
+   private int previousCellKey, cellKey, dataKey;
 
    private final SideDependentList<YoDouble> traversibilitySamplePos;
    private final SideDependentList<YoDouble> traversibilitySampleNeg;
@@ -110,19 +95,18 @@ public class AStarBodyPathSmootherWaypoint
    private final SideDependentList<YoFrameVector3D> yoNominalTraversibility;
    private final FrameVector3D tempVector = new FrameVector3D();
    private final FramePose3D tempPose = new FramePose3D();
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    private final SideDependentList<YoFramePoint3D> yoElevatedStepPositions;
    private final SideDependentList<YoFrameVector3D> yoSidedTraversibility;
    private final SideDependentList<YoInteger> yoGroundPlaneCells;
 
    private int pathSize;
-   private AStarBodyPathSmootherWaypoint[] waypoints;
+   private GPUAStarBodyPathSmootherWaypoint[] waypoints;
    private final YoVector2D rollDelta;
 
-   public AStarBodyPathSmootherWaypoint(int waypointIndex,
-                                        YoGraphicsListRegistry graphicsListRegistry,
-                                        YoRegistry parentRegistry)
+   public GPUAStarBodyPathSmootherWaypoint(int waypointIndex,
+                                           YoGraphicsListRegistry graphicsListRegistry,
+                                           YoRegistry parentRegistry)
    {
       this.waypointIndex = waypointIndex;
 
@@ -158,18 +142,7 @@ public class AStarBodyPathSmootherWaypoint
       yoElevatedStepPositions = new SideDependentList<>(side -> new YoFramePoint3D(side.getCamelCaseNameForStartOfExpression() + "DebugStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
       yoSidedTraversibility = new SideDependentList<>(side -> new YoFrameVector3D(side.getCamelCaseNameForStartOfExpression() + "DebugTrav" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
 
-      int minMaxXOffsetGroundPlane = 1;
-      int minYOffsetGroundPlane = 0;
-      int maxYOffsetGroundPlane = 4;
       yoGroundPlaneCells = new SideDependentList<>(side -> new YoInteger(side.getCamelCaseNameForStartOfExpression() + "GroundCells" + waypointIndex, registry));
-      for (int xi = -minMaxXOffsetGroundPlane; xi <= minMaxXOffsetGroundPlane; xi++)
-      {
-         for (int yi = minYOffsetGroundPlane; yi <= maxYOffsetGroundPlane; yi++)
-         {
-            groundPlaneXOffsets.add(xi);
-            groundPlaneYOffsets.add(yi);
-         }
-      }
 
       if (visualize)
       {
@@ -225,20 +198,28 @@ public class AStarBodyPathSmootherWaypoint
       }
    }
 
-   public void initialize(List<Point3D> bodyPath, HeightMapData heightMapData, HeightMapRANSACNormalCalculator ransacNormalCalculator, HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator)
+   private int getMapBufferKey(HeightMapData heightMapData)
    {
-      this.heightMapData = heightMapData;
+      return HeightMapTools.coordinateToKey(waypoint.getX(),
+                                            waypoint.getY(),
+                                            heightMapData.getGridCenter().getX(),
+                                            heightMapData.getGridCenter().getY(),
+                                            heightMapData.getGridResolutionXY(),
+                                            heightMapData.getCenterIndex());
+   }
+
+   private int getDataBufferKey(HeightMapData heightMapData)
+   {
+      int mapKey = getMapBufferKey(heightMapData);
+      int yawIndex = GPUAStarBodyPathSmoother.yawToIndex(waypoint.getYaw());
+      return mapKey * GPUAStarBodyPathSmoother.yawDiscretizations + yawIndex;
+   }
+
+   public void initialize(List<Point3D> bodyPath)
+   {
       this.pathSize = bodyPath.size();
-      this.ransacNormalCalculator = ransacNormalCalculator;
-      this.leastSquaresSurfaceNormalCalculator = leastSquaresSurfaceNormalCalculator;
 
       isTurnPoint.set(false);
-      AStarBodyPathPlanner.packRadialOffsets(heightMapData, AStarBodyPathPlanner.snapRadius, xSnapOffsets, ySnapOffsets);
-
-      xTraversibilityGradientOffsets.clear();
-      yTraversibilityGradientOffsets.clear();
-      xTraversibilityNominalOffsets.clear();
-      yTraversibilityNominalOffsets.clear();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -252,30 +233,6 @@ public class AStarBodyPathSmootherWaypoint
          }
       }
 
-      int minYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow - 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
-      int maxYTraversibilityGradWindow = (int) Math.round((yOffsetTraversibilityGradientWindow + 0.5 * traversibilitySampleWindowY) / heightMapData.getGridResolutionXY());
-      int minXTraversibilityGradWindow = (int) Math.round(-0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int maxXTraversibilityGradWindow = (int) Math.round(0.5 * traversibilitySampleWindowX / heightMapData.getGridResolutionXY());
-      int minMaxYTraversibilityNomWindow = (int) Math.round(0.5 * yOffsetTraversibilityNominalWindow / heightMapData.getGridResolutionXY());
-
-      for (int xi = minXTraversibilityGradWindow; xi <= maxXTraversibilityGradWindow; xi++)
-      {
-         for (int yi = minYTraversibilityGradWindow; yi <= maxYTraversibilityGradWindow; yi++)
-         {
-            double dx = xi * heightMapData.getGridResolutionXY();
-            double dy = yi * heightMapData.getGridResolutionXY();
-            xTraversibilityGradientOffsets.add(dx);
-            yTraversibilityGradientOffsets.add(dy);
-         }
-
-         for (int yi = -minMaxYTraversibilityNomWindow; yi <= minMaxYTraversibilityNomWindow; yi++)
-         {
-            double dx = xi * heightMapData.getGridResolutionXY();
-            double dy = yi * heightMapData.getGridResolutionXY();
-            xTraversibilityNominalOffsets.add(dx);
-            yTraversibilityNominalOffsets.add(dy);
-         }
-      }
 
       if (visualize)
       {
@@ -308,7 +265,7 @@ public class AStarBodyPathSmootherWaypoint
       yoGroundPlaneGradient.setToNaN();
    }
 
-   public void setNeighbors(AStarBodyPathSmootherWaypoint[] waypoints)
+   public void setNeighbors(GPUAStarBodyPathSmootherWaypoint[] waypoints)
    {
       this.waypoints = waypoints;
    }
@@ -344,71 +301,14 @@ public class AStarBodyPathSmootherWaypoint
       return isTurnPoint.getValue();
    }
 
-   public Vector2D computeCollisionGradient()
+   public Vector2D computeCollisionGradient(HeightMapData heightMapData, OpenCLIntBuffer maxCollisionsBuffer, OpenCLFloatBuffer collisionGradientsBuffer)
    {
-      int maxOffset = (int) Math.round(0.5 * EuclidCoreTools.norm(boxSizeX, boxSizeY) / heightMapData.getGridResolutionXY());
-
-      double waypointX = waypoint.getX();
-      double waypointY = waypoint.getY();
-      double waypointZ = waypoint.getZ();
-      double heading = waypoint.getYaw();
-
-      double sH = Math.sin(heading);
-      double cH = Math.cos(heading);
-
-      int indexX = HeightMapTools.coordinateToIndex(waypointX, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-      int indexY = HeightMapTools.coordinateToIndex(waypointY, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      int key = getDataBufferKey(heightMapData );
+      maxCollision.set(maxCollisionsBuffer.getBackingDirectIntBuffer().get(key));
 
       Vector2D gradient = new Vector2D();
-      int numCollisions = 0;
-      double heightThreshold = waypointZ + boxGroundOffset;
-      maxCollision.set(0.0);
-
-      for (int xi = -maxOffset; xi <= maxOffset; xi++)
-      {
-         for (int yi = -maxOffset; yi <= maxOffset; yi++)
-         {
-            int indexXI = indexX + xi;
-            int indexYI = indexY + yi;
-
-            if (indexXI < 0 || indexXI >= heightMapData.getCellsPerAxis() || indexYI < 0 || indexYI >= heightMapData.getCellsPerAxis())
-            {
-               continue;
-            }
-
-            double px = HeightMapTools.indexToCoordinate(indexXI, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            double py = HeightMapTools.indexToCoordinate(indexYI, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-
-            double dx = px - waypointX;
-            double dy = py - waypointY;
-
-            double dxLocal = cH * dx + sH * dy;
-            double dyLocal = -sH * dx + cH * dy;
-
-            if (Math.abs(dxLocal) > 0.5 * boxSizeX || Math.abs(dyLocal) > 0.5 * boxSizeY)
-            {
-               continue;
-            }
-
-            double height = heightMapData.getHeightAt(indexXI, indexYI);
-            if (height < heightThreshold)
-            {
-               continue;
-            }
-
-            double lateralPenetration = 0.5 * boxSizeY - Math.abs(dyLocal);
-            maxCollision.set(Math.max(maxCollision.getValue(), lateralPenetration));
-
-            gradient.addX(Math.signum(dyLocal) * -lateralPenetration * sH);
-            gradient.addY(Math.signum(dyLocal) * lateralPenetration * cH);
-            numCollisions++;
-         }
-      }
-
-      if (numCollisions > 0)
-      {
-         gradient.scale(collisionWeight / numCollisions);
-      }
+      gradient.setX(collisionGradientsBuffer.getBackingDirectFloatBuffer().get(2 * key));
+      gradient.setY(collisionGradientsBuffer.getBackingDirectFloatBuffer().get(2 * key + 1));
 
       if (visualize)
       {
@@ -418,37 +318,30 @@ public class AStarBodyPathSmootherWaypoint
       return gradient;
    }
 
-   public Vector2DBasics computeRollInclineGradient(HeightMapData heightMapData)
+   public Vector2DBasics computeRollInclineGradient(OpenCLFloatBuffer leastSquaresNormalXYZBuffer, OpenCLFloatBuffer leastSquaresSampledHeightBuffer)
    {
-      int key = HeightMapTools.coordinateToKey(waypoint.getX(), waypoint.getY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-      UnitVector3DBasics surfaceNormal = leastSquaresSurfaceNormalCalculator.getSurfaceNormal(key);
+      UnitVector3D surfaceNormal = new UnitVector3D();
+      surfaceNormal.set(leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * cellKey),
+                        leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * cellKey + 1),
+                        leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * cellKey + 2));
 
-      if (surfaceNormal != null)
-      {
-         yoSurfaceNormal.set(surfaceNormal);
-         tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
-         tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-         double rollDotY = tempVector.dot(surfaceNormal);
-         alphaRoll.set(rollDotY);
-         tempVector.scale(alphaRoll.getValue());
+      yoSurfaceNormal.set(surfaceNormal);
+      tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
+      tempVector.changeFrame(ReferenceFrame.getWorldFrame());
+      double rollDotY = tempVector.dot(surfaceNormal);
+      alphaRoll.set(rollDotY);
+      tempVector.scale(alphaRoll.getValue());
 
-         AStarBodyPathSmootherWaypoint previous = waypoints[Math.max(0, waypointIndex - 1)];
-         AStarBodyPathSmootherWaypoint next = waypoints[Math.min(pathSize - 1, waypointIndex + 1)];
+      GPUAStarBodyPathSmootherWaypoint previous = waypoints[Math.max(0, waypointIndex - 1)];
+      GPUAStarBodyPathSmootherWaypoint next = waypoints[Math.min(pathSize - 1, waypointIndex + 1)];
 
-         double incline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
-         elevationIncline.set(incline);
+      double incline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
+      elevationIncline.set(incline);
 
-         double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
-         rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
+      double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
+      rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
 
-         sampledLSNormalHeight.set(leastSquaresSurfaceNormalCalculator.getSampledHeight(key));
-      }
-      else
-      {
-         elevationIncline.set(Double.NaN);
-         yoSurfaceNormal.setToZero();
-         rollDelta.setToZero();
-      }
+      sampledLSNormalHeight.set(leastSquaresSampledHeightBuffer.getBackingDirectFloatBuffer().get(cellKey));
 
       return rollDelta;
    }
@@ -466,17 +359,18 @@ public class AStarBodyPathSmootherWaypoint
       return tempVector;
    }
 
-   public void computeCurrentTraversibility()
+   public void computeCurrentTraversibility(OpenCLFloatBuffer leftTraversibilityBuffer, OpenCLFloatBuffer rightTraversibilityBuffer)
    {
-      for (RobotSide side : RobotSide.values)
-      {
-         YoDouble nominalTraversibility = traversibilitySampleNominal.get(side);
-         nominalTraversibility.set(computeTraversibility(side, 1.0, waypoint.getZ(), xTraversibilityNominalOffsets, yTraversibilityNominalOffsets));
-         yoNominalTraversibility.get(side).setZ(nominalTraversibility.getValue());
-      }
+      YoDouble leftNominalTraversibility = traversibilitySampleNominal.get(RobotSide.LEFT);
+      YoDouble rightNominalTraversibility = traversibilitySampleNominal.get(RobotSide.RIGHT);
+      leftNominalTraversibility.set(leftTraversibilityBuffer.getBackingDirectFloatBuffer().get(dataKey));
+      rightNominalTraversibility.set(rightTraversibilityBuffer.getBackingDirectFloatBuffer().get(dataKey));
+      yoNominalTraversibility.get(RobotSide.LEFT).setZ(leftNominalTraversibility.getValue());
+      yoNominalTraversibility.get(RobotSide.RIGHT).setZ(rightNominalTraversibility.getValue());
    }
 
-   public Tuple3DReadOnly computeTraversibilityGradient()
+   public Tuple3DReadOnly computeTraversibilityGradient(OpenCLFloatBuffer leftTraversibilitiesForGradientBuffer,
+                                                        OpenCLFloatBuffer rightTraversibilitesForGradientBuffer)
    {
       yoTraversibilityGradient.setToZero();
 
@@ -499,9 +393,14 @@ public class AStarBodyPathSmootherWaypoint
          {
             continue;
          }
+         OpenCLFloatBuffer sidedBuffer;
+         if (side == RobotSide.LEFT)
+            sidedBuffer = leftTraversibilitiesForGradientBuffer;
+         else
+            sidedBuffer = rightTraversibilitesForGradientBuffer;
 
-         traversibilitySamplePos.get(side).set(computeTraversibility(side, 1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
-         traversibilitySampleNeg.get(side).set(computeTraversibility(side, -1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
+         traversibilitySampleNeg.get(side).set(sidedBuffer.getBackingDirectFloatBuffer().get(2 * dataKey));
+         traversibilitySamplePos.get(side).set(sidedBuffer.getBackingDirectFloatBuffer().get(2 * dataKey + 1));
 
          double alpha = EuclidCoreTools.clamp((localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - maxLocalTraversibilityThresholdDiscount), 0.0, 1.0);
          tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
@@ -516,7 +415,10 @@ public class AStarBodyPathSmootherWaypoint
       return yoTraversibilityGradient;
    }
 
-   public Tuple3DReadOnly computeGroundPlaneGradient()
+   public Tuple3DReadOnly computeGroundPlaneGradient(HeightMapData heightMapData,
+                                                     OpenCLIntBuffer leftGroundPlaneCellsBuffer,
+                                                     OpenCLIntBuffer rightGroundPlaneCellsBuffer,
+                                                     OpenCLFloatBuffer groundPlaneGradientBuffer)
    {
       yoGroundPlaneGradient.setToZero();
       for (RobotSide side : RobotSide.values)
@@ -533,40 +435,11 @@ public class AStarBodyPathSmootherWaypoint
          return yoGroundPlaneGradient;
       }
 
-      for (RobotSide side : RobotSide.values)
-      {
-         int groundPlaneCells = 0;
+      yoGroundPlaneCells.get(RobotSide.LEFT).set(leftGroundPlaneCellsBuffer.getBackingDirectIntBuffer().get(dataKey));
+      yoGroundPlaneCells.get(RobotSide.RIGHT).set(rightGroundPlaneCellsBuffer.getBackingDirectIntBuffer().get(dataKey));
 
-         for (int i = 0; i < groundPlaneXOffsets.size(); i++)
-         {
-            tempPoint.setToZero(nominalStepFrames.get(side));
-            tempPoint.addX(heightMapData.getGridResolutionXY() * groundPlaneXOffsets.get(i));
-            tempPoint.addY(side.negateIfRightSide(heightMapData.getGridResolutionXY() * groundPlaneYOffsets.get(i)));
-
-            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-
-            if (xQuery < 0 || xQuery >= heightMapData.getCellsPerAxis() || yQuery < 0 || yQuery >= heightMapData.getCellsPerAxis())
-            {
-               continue;
-            }
-
-            boolean isGroundPlane = heightMapData.isCellAtGroundPlane(xQuery, yQuery);
-            if (isGroundPlane)
-            {
-               groundPlaneCells++;
-            }
-         }
-
-         yoGroundPlaneCells.get(side).set(groundPlaneCells);
-      }
-
-      double groundPlaneCellCountDelta = ((double) yoGroundPlaneCells.get(RobotSide.LEFT).getValue() - yoGroundPlaneCells.get(RobotSide.RIGHT).getValue()) / groundPlaneXOffsets.size();
-      tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
-      tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-      yoGroundPlaneGradient.set(tempVector);
-      yoGroundPlaneGradient.scale(groundPlaneCellCountDelta * flatGroundWeight);
+      yoGroundPlaneGradient.setX(groundPlaneGradientBuffer.getBackingDirectFloatBuffer().get(2 * dataKey));
+      yoGroundPlaneGradient.setY(groundPlaneGradientBuffer.getBackingDirectFloatBuffer().get(2 * dataKey + 1));
 
       return yoGroundPlaneGradient;
    }
@@ -582,74 +455,18 @@ public class AStarBodyPathSmootherWaypoint
       return max;
    }
 
-   private AStarBodyPathSmootherWaypoint getNeighbor(int index)
+   private GPUAStarBodyPathSmootherWaypoint getNeighbor(int index)
    {
       return waypoints[MathTools.clamp(index, 0, pathSize - 1)];
    }
 
-   private double computeTraversibility(RobotSide side, double signY, double nominalHeight, TDoubleArrayList xOffsets, TDoubleArrayList yOffsets)
-   {
-      int numberOfSampledCells = 0;
-
-      double traversibilityScoreNumerator = 0.0;
-      double minHeight = nominalHeight - heightWindow;
-      double maxHeight = nominalHeight + heightWindow;
-
-      for (int i = 0; i < xOffsets.size(); i++)
-      {
-         tempPoint.setToZero(nominalStepFrames.get(side));
-         tempPoint.addX(xOffsets.get(i));
-         tempPoint.addY(signY * yOffsets.get(i));
-
-         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         int xQuery = HeightMapTools.coordinateToIndex(tempPoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-         int yQuery = HeightMapTools.coordinateToIndex(tempPoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
-
-         if (xQuery < 0 || yQuery < 0 || xQuery >= heightMapData.getCellsPerAxis() || yQuery >= heightMapData.getCellsPerAxis())
-         {
-            continue;
-         }
-
-         numberOfSampledCells++;
-         if (heightQuery > minHeight && heightQuery < maxHeight)
-         {
-            if (heightMapData.isCellAtGroundPlane(xQuery, yQuery))
-            {
-               traversibilityScoreNumerator += 1.0;
-            }
-            else
-            {
-               double nonGroundAlpha = heightQuery - heightMapData.getEstimatedGroundHeight() < heightWindow ? nonGroundDiscount : 1.0;
-
-               double heightDeadband = 0.05;
-               double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - heightDeadband);
-               double cellPercentage = 1.0 - deltaHeight / heightWindow;
-
-               UnitVector3DReadOnly normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);
-               double incline = Math.acos(normal.getZ());
-               double inclineAlpha = MathTools.clamp(EuclidCoreTools.interpolate(0.0, 1.0, (incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize)), 0.0, 1.0);
-               traversibilityScoreNumerator += cellPercentage * ((1.0 - inclineWeight) * nonGroundAlpha + inclineWeight * inclineAlpha);
-            }
-         }
-      }
-
-      if (numberOfSampledCells < 10)
-      {
-         return 0.0;
-      }
-      else
-      {
-         return traversibilityScoreNumerator / numberOfSampledCells;
-      }
-   }
-
-   public void update(boolean firstTick)
+   public void update(boolean firstTick, HeightMapData heightMapData, OpenCLFloatBuffer snapHeightBUffer)
    {
       // Cell key
-      int currentKey = HeightMapTools.coordinateToKey(waypoint.getX(), waypoint.getY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      int currentKey = getMapBufferKey(heightMapData);
       previousCellKey = cellKey;
       cellKey = currentKey;
+      dataKey = getDataBufferKey(heightMapData);
 
       if (firstTick)
       {
@@ -657,8 +474,8 @@ public class AStarBodyPathSmootherWaypoint
       }
 
       // Update orientation
-      AStarBodyPathSmootherWaypoint previous = waypoints[waypointIndex - 1];
-      AStarBodyPathSmootherWaypoint next = waypoints[waypointIndex + 1];
+      GPUAStarBodyPathSmootherWaypoint previous = waypoints[waypointIndex - 1];
+      GPUAStarBodyPathSmootherWaypoint next = waypoints[waypointIndex + 1];
 
       double x0 = previous.getPosition().getX();
       double y0 = previous.getPosition().getY();
@@ -674,7 +491,7 @@ public class AStarBodyPathSmootherWaypoint
       // Compute new height if shifted
       if (firstTick || cellKey != previousCellKey)
       {
-         computeHeight();
+         computeHeight(heightMapData, snapHeightBUffer);
       }
 
       // Update frames
@@ -691,41 +508,14 @@ public class AStarBodyPathSmootherWaypoint
       }
    }
 
-   private void computeHeight()
+   private void computeHeight(HeightMapData heightMapData, OpenCLFloatBuffer snappedHeightBuffer)
    {
-      int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapData.getGridSizeXY(), BodyPathLatticePoint.gridSizeXY);
+      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, centerIndex);
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
 
-      double previousHeight = waypoint.getZ();
-      double heightSampleDelta = 0.08;
-      double minHeight = previousHeight - heightSampleDelta;
-      double maxHeight = previousHeight + heightSampleDelta;
-
-      double runningSum = 0.0;
-      int numberOfSamples = 0;
-
-      for (int i = 0; i < xSnapOffsets.size(); i++)
-      {
-         int xQuery = xIndex + xSnapOffsets.get(i);
-         int yQuery = yIndex + ySnapOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
-
-         if (!Double.isNaN(heightQuery) && MathTools.intervalContains(heightQuery, minHeight, maxHeight))
-         {
-            runningSum += heightQuery;
-            numberOfSamples++;
-         }
-      }
-
-      if (numberOfSamples > 0)
-      {
-         waypoint.setZ(runningSum / numberOfSamples);
-      }
-      else
-      {
-         waypoint.setZ(0.5 * (waypoints[waypointIndex - 1].getPosition().getZ() + waypoints[waypointIndex + 1].getPosition().getZ()));
-      }
+      waypoint.setZ(snappedHeightBuffer.getBackingDirectFloatBuffer().get(key));
    }
 
    public void updateGradientGraphics(double spacingGradientX, double spacingGradientY, double smoothnessGradientX, double smoothnessGradientY)
