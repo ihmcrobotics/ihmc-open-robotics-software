@@ -26,10 +26,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.OpenCLFloatBuffer;
-import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.*;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.odometry.RapidPatchesBasedICP;
@@ -99,14 +96,15 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
             openCLManager = new OpenCLManager();
             openCLManager.create();
+            openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
 
             pointCloudRenderer.create(depthHeight * depthWidth);
 
-            rapidPlanarRegionsExtractor.create(openCLManager, bytedecoDepthImage, depthWidth, depthHeight);
-            rapidPatchesBasedICP.create(rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight);
+            rapidPatchesBasedICP.create(openCLManager, openCLProgram, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
@@ -304,7 +302,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
    public static void main(String[] args)
    {
-      new RDXRapidPatchesBasedICPDemo();
+      testHeadless();
    }
 
    @Override
@@ -315,5 +313,35 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
       if(rapidRegionsUIPanel.get3DPlanarRegionsRenderEnabled())
          planarRegionsGraphic.getRenderables(renderables, pool);
+   }
+
+   public static void testHeadless()
+   {
+      int depthWidth = 2048;
+      int depthHeight = 128;
+
+      OpenCLManager openCLManager = new OpenCLManager();
+      openCLManager.create();
+      _cl_program program = openCLManager.loadProgram("RapidRegionsExtractor");
+
+      PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
+      perceptionDataLoader.openLogFile(System.getProperty("user.home") + "/.ihmc/logs/perception/20230102_152006_PerceptionLog.hdf5");
+
+      BytedecoImage bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+      RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
+      RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
+
+      rapidPlanarRegionsExtractor.create(openCLManager, program, bytedecoDepthImage, depthWidth, depthHeight);
+      rapidPatchesBasedICP.create(openCLManager, program, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
+
+      perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
+      opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+      rapidPlanarRegionsExtractor.extractPatchGraphUsingOpenCL();
+      rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
+
+      perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 1, bytedecoDepthImage.getBytedecoOpenCVMat());
+      opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+      rapidPlanarRegionsExtractor.extractPatchGraphUsingOpenCL();
+      rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
    }
 }

@@ -2,19 +2,22 @@ package us.ihmc.perception.odometry;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.logging.PerceptionDataLoader;
+import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -27,13 +30,17 @@ public class RapidPatchesBasedICP
    private boolean initialized = false;
 
    private OpenCLManager openCLManager;
+   private _cl_kernel correspondenceKernel;
    private _cl_kernel centroidReduceKernel;
    private _cl_kernel correlationKernel;
-   private _cl_kernel addReduceKernel;
+//   private _cl_kernel addReduceKernel;
 
    private OpenCLFloatBuffer parametersBuffer;
    private OpenCLFloatBuffer centroidBuffer;
    private OpenCLFloatBuffer correlBuffer;
+
+   private BytedecoImage rowMatchIndexImage;
+   private BytedecoImage columnMatchIndexImage;
 
    private final Point3D centroidPrevious = new Point3D();
    private final Point3D centroidCurrent = new Point3D();
@@ -46,9 +53,10 @@ public class RapidPatchesBasedICP
    public void create(OpenCLManager openCLManager, _cl_program program, int patchRows, int patchColumns)
    {
       this.openCLManager = openCLManager;
+      this.correspondenceKernel = openCLManager.createKernel(program, "correspondenceKernel");
       this.centroidReduceKernel = openCLManager.createKernel(program, "centroidReduceKernel");
       this.correlationKernel = openCLManager.createKernel(program, "correlationKernel");
-      this.addReduceKernel = openCLManager.createKernel(program, "addReduceKernel");
+//      this.addReduceKernel = openCLManager.createKernel(program, "addReduceKernel");
 
       this.patchRows = patchRows;
       this.patchColumns = patchColumns;
@@ -56,6 +64,10 @@ public class RapidPatchesBasedICP
       parametersBuffer = new OpenCLFloatBuffer(4);
       centroidBuffer = new OpenCLFloatBuffer(patchColumns * 6);
       correlBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 9);
+
+      rowMatchIndexImage = new BytedecoImage(patchColumns, patchRows, opencv_core.CV_16UC1);
+      columnMatchIndexImage = new BytedecoImage(patchColumns, patchRows, opencv_core.CV_16UC1);
+
    }
 
    public void update(PatchFeatureGrid previousFeatureGrid, PatchFeatureGrid currentFeatureGrid)
@@ -70,30 +82,48 @@ public class RapidPatchesBasedICP
          parametersBuffer.createOpenCLBufferObject(openCLManager);
          centroidBuffer.createOpenCLBufferObject(openCLManager);
          correlBuffer.createOpenCLBufferObject(openCLManager);
+
+         rowMatchIndexImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         columnMatchIndexImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+
+         initialized = true;
       }
       else
       {
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
+         setFeatureGridKernelArguments(correspondenceKernel, previousFeatureGrid, currentFeatureGrid);
+         openCLManager.setKernelArgument(correspondenceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(correspondenceKernel, 13, columnMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(correspondenceKernel, 14, parametersBuffer.getOpenCLBufferObject());
+
+         LogTools.info("Before Correspondence Kernel");
+         openCLManager.execute2D(correspondenceKernel, patchColumns, patchRows);
+         LogTools.info("After Correspondence Kernel");
+
          setFeatureGridKernelArguments(centroidReduceKernel, previousFeatureGrid, currentFeatureGrid);
-         openCLManager.setKernelArgument(centroidReduceKernel, 12, centroidBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(centroidReduceKernel, 13, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 13, columnMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 14, centroidBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 15, parametersBuffer.getOpenCLBufferObject());
 
-         setFeatureGridKernelArguments(correlationKernel, previousFeatureGrid, currentFeatureGrid);
-         openCLManager.setKernelArgument(correlationKernel, 12, correlBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(correlationKernel, 13, parametersBuffer.getOpenCLBufferObject());
-
-         setFeatureGridKernelArguments(addReduceKernel, previousFeatureGrid, currentFeatureGrid);
-         openCLManager.setKernelArgument(addReduceKernel, 12, correlBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(addReduceKernel, 13, parametersBuffer.getOpenCLBufferObject());
-
+         LogTools.info("Before Centroid Kernel");
          openCLManager.execute1D(centroidReduceKernel, patchColumns);
+         LogTools.info("After Centroid Kernel");
+
+//         setFeatureGridKernelArguments(correlationKernel, previousFeatureGrid, currentFeatureGrid);
+//         openCLManager.setKernelArgument(correlationKernel, 12, correlBuffer.getOpenCLBufferObject());
+//         openCLManager.setKernelArgument(correlationKernel, 13, parametersBuffer.getOpenCLBufferObject());
+
+//         setFeatureGridKernelArguments(addReduceKernel, previousFeatureGrid, currentFeatureGrid);
+//         openCLManager.setKernelArgument(addReduceKernel, 12, correlBuffer.getOpenCLBufferObject());
+//         openCLManager.setKernelArgument(addReduceKernel, 13, parametersBuffer.getOpenCLBufferObject());
+
          openCLManager.finish();
 
+//         finalCentroidReduce(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
 
-         finalCentroidReduce(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
-
-         centroidBuffer.readOpenCLBufferObject(openCLManager);
+//         centroidBuffer.readOpenCLBufferObject(openCLManager);
       }
    }
 
@@ -213,20 +243,5 @@ public class RapidPatchesBasedICP
 
          LogTools.info("Angles: {}", angles);
       }
-   }
-
-
-
-   public static void main(String[] args)
-   {
-
-      OpenCLManager openCLManager = new OpenCLManager();
-      openCLManager.create();
-      _cl_program program = openCLManager.loadProgram("RapidPatchesBasedICP");
-
-      RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
-      rapidPatchesBasedICP.create(openCLManager, program, 10,10);
-      //rapidPatchesBasedICP.testInitialization();
-      //rapidPatchesBasedICP.testAlignmentICP();
    }
 }
