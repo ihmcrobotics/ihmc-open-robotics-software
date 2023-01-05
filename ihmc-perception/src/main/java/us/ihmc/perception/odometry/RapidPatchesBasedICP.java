@@ -9,123 +9,134 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
 
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
 public class RapidPatchesBasedICP
 {
-
-   private Mat currentFeatureMat;
-   private Mat previousFeatureMat;
-
    private int patchColumns;
    private int patchRows;
 
    private boolean initialized = false;
 
    private OpenCLManager openCLManager;
-   private _cl_kernel icpKernel;
-   private _cl_program icpProgram;
+   private _cl_kernel centroidReduceKernel;
+   private _cl_kernel correlationKernel;
+   private _cl_kernel addReduceKernel;
 
    private OpenCLFloatBuffer parametersBuffer;
-   private OpenCLFloatBuffer previousFeatureBuffer;
-   private OpenCLFloatBuffer currentFeatureBuffer;
+   private OpenCLFloatBuffer centroidBuffer;
+   private OpenCLFloatBuffer correlBuffer;
+
+   private final Point3D centroidPrevious = new Point3D();
+   private final Point3D centroidCurrent = new Point3D();
 
 
-   public void create(int patchRows, int patchColumns)
+   public void create(OpenCLManager openCLManager, _cl_program program, int patchRows, int patchColumns)
    {
-      openCLManager = new OpenCLManager();
-      openCLManager.create();
-
-      icpProgram = openCLManager.loadProgram("RapidPatchesBasedICP");
-      icpKernel = openCLManager.createKernel(icpProgram, "icpKernel");
+      this.openCLManager = openCLManager;
+      this.centroidReduceKernel = openCLManager.createKernel(program, "centroidReduceKernel");
+      this.correlationKernel = openCLManager.createKernel(program, "correlationKernel");
+      this.addReduceKernel = openCLManager.createKernel(program, "addReduceKernel");
 
       this.patchRows = patchRows;
       this.patchColumns = patchColumns;
 
-      this.currentFeatureMat = new Mat(patchRows, patchColumns, opencv_core.CV_32FC(6));
-      this.previousFeatureMat = new Mat(patchRows, patchColumns, opencv_core.CV_32FC(6));
-
       parametersBuffer = new OpenCLFloatBuffer(3);
-      previousFeatureBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 6, previousFeatureMat.data().asBuffer().asFloatBuffer());
-      currentFeatureBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 6, currentFeatureMat.data().asBuffer().asFloatBuffer());
+      centroidBuffer = new OpenCLFloatBuffer(patchColumns * 6);
+      correlBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 9);
    }
 
-   public void update(Mat featureMap)
+   public void update(PatchFeatureGrid previousFeatureGrid, PatchFeatureGrid currentFeatureGrid)
    {
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) 0.1f);
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) 0.2f);
       parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) 0.3f);
 
-      this.currentFeatureMat.put(featureMap);
-
       if (!initialized)
       {
          parametersBuffer.createOpenCLBufferObject(openCLManager);
-         previousFeatureBuffer.createOpenCLBufferObject(openCLManager);
-         currentFeatureBuffer.createOpenCLBufferObject(openCLManager);
+         centroidBuffer.createOpenCLBufferObject(openCLManager);
+         correlBuffer.createOpenCLBufferObject(openCLManager);
       }
       else
       {
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
-         previousFeatureBuffer.writeOpenCLBufferObject(openCLManager);
-         currentFeatureBuffer.writeOpenCLBufferObject(openCLManager);
 
-         openCLManager.setKernelArgument(icpKernel, 0, previousFeatureBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(icpKernel, 1, currentFeatureBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(icpKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         setFeatureGridKernelArguments(centroidReduceKernel, previousFeatureGrid, currentFeatureGrid);
+         openCLManager.setKernelArgument(centroidReduceKernel, 12, centroidBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 13, parametersBuffer.getOpenCLBufferObject());
 
-         openCLManager.execute2D(icpKernel, patchRows, patchColumns);
+         setFeatureGridKernelArguments(correlationKernel, previousFeatureGrid, currentFeatureGrid);
+         openCLManager.setKernelArgument(correlationKernel, 12, correlBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(correlationKernel, 13, parametersBuffer.getOpenCLBufferObject());
 
+         setFeatureGridKernelArguments(addReduceKernel, previousFeatureGrid, currentFeatureGrid);
+         openCLManager.setKernelArgument(addReduceKernel, 12, correlBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(addReduceKernel, 13, parametersBuffer.getOpenCLBufferObject());
+
+         openCLManager.execute1D(centroidReduceKernel, patchColumns);
          openCLManager.finish();
-      }
 
-      previousFeatureMat = currentFeatureMat.clone();
+
+         finalCentroidReduce(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
+
+         centroidBuffer.readOpenCLBufferObject(openCLManager);
+
+
+      }
    }
 
-   public void testInitialization()
+   private Point3D finalCentroidReduce(FloatBuffer buffer, Point3D centroidOneToPack, Point3D centroidTwoToPack)
    {
-      Mat ones = new Mat(patchRows, patchColumns, opencv_core.CV_32FC1, new Scalar(1.0));
-      Mat twos = new Mat(patchRows, patchColumns, opencv_core.CV_32FC1, new Scalar(2.0));
-      Mat threes = new Mat(patchRows, patchColumns, opencv_core.CV_32FC1, new Scalar(3.0));
-      Mat fours = new Mat(patchRows, patchColumns, opencv_core.CV_32FC1, new Scalar(4.0));
-      Mat fives = new Mat(patchRows, patchColumns, opencv_core.CV_32FC1, new Scalar(5.0));
-      Mat sixes = new Mat(patchRows, patchColumns, opencv_core.CV_32FC1, new Scalar(6.0));
+      int countOne = 0;
+      int countTwo = 0;
+      Point3D centroidOne = new Point3D();
+      Point3D centroidTwo = new Point3D();
+      for (int i = 0; i < patchColumns; i++)
+      {
+         centroidOne.set(buffer.get(i * 6), buffer.get(i * 6 + 1), buffer.get(i * 6 + 2));
+         centroidTwo.set(buffer.get(i * 6 + 3), buffer.get(i * 6 + 4), buffer.get(i * 6 + 5));
 
-      MatVector finalMats = new MatVector();
-      finalMats.push_back(ones);
-      finalMats.push_back(twos);
-      finalMats.push_back(threes);
-      finalMats.push_back(fours);
-      finalMats.push_back(fives);
-      finalMats.push_back(sixes);
+         if (centroidOne.norm() > 0.3 && centroidOne.norm() < 100)
+         {
+            countOne++;
+            centroidOneToPack.add(centroidOne);
+         }
 
-      opencv_core.merge(finalMats, previousFeatureMat);
+         if (centroidTwo.norm() > 0.3 && centroidTwo.norm() < 100)
+         {
+            countTwo++;
+            centroidTwoToPack.add(centroidTwo);
+         }
+      }
 
-      finalMats.clear();
-      finalMats.push_back(sixes);
-      finalMats.push_back(fives);
-      finalMats.push_back(fours);
-      finalMats.push_back(threes);
-      finalMats.push_back(twos);
-      finalMats.push_back(ones);
+      centroidOneToPack.scale(1.0 / countOne);
+      centroidTwoToPack.scale(1.0 / countTwo);
+   }
 
-      opencv_core.merge(finalMats, currentFeatureMat);
+   private void setFeatureGridKernelArguments(_cl_kernel kernel, PatchFeatureGrid previousFeatureGrid, PatchFeatureGrid currentFeatureGrid)
+   {
+      openCLManager.setKernelArgument(kernel, 0, previousFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 1, previousFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 2, previousFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 3, previousFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 4, previousFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 5, previousFeatureGrid.getCzImage().getOpenCLImageObject());
 
-      LogTools.info("First");
-      update(currentFeatureMat);
-
-      LogTools.info("Second");
-      update(currentFeatureMat);
-
-      LogTools.info("Third");
-      update(currentFeatureMat);
+      openCLManager.setKernelArgument(kernel, 6, currentFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 7, currentFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 8, currentFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 9, currentFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 10, currentFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 11, currentFeatureGrid.getCzImage().getOpenCLImageObject());
    }
 
    public void testAlignmentICP()
@@ -205,10 +216,14 @@ public class RapidPatchesBasedICP
 
    public static void main(String[] args)
    {
+
+      OpenCLManager openCLManager = new OpenCLManager();
+      openCLManager.create();
+      _cl_program program = openCLManager.loadProgram("RapidPatchesBasedICP");
+
       RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
-      rapidPatchesBasedICP.create(10,10);
+      rapidPatchesBasedICP.create(openCLManager, program, 10,10);
       //rapidPatchesBasedICP.testInitialization();
       //rapidPatchesBasedICP.testAlignmentICP();
-
    }
 }
