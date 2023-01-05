@@ -30,14 +30,14 @@ public class AStarBodyPathSmoother
    static final double traversibilityWeight = 20.0;
    static final double flatGroundWeight = 4.0;
 
-   private static final int maxPoints = 80;
-   private static final double gradientEpsilon = 1e-6;
-   private static final double hillClimbGain = 1e-3;
-   private static final double minCurvatureToPenalize = Math.toRadians(5.0);
+   static final int maxPoints = 80;
+   static final double gradientEpsilon = 1e-6;
+   static final double hillClimbGain = 1e-3;
+   static final double minCurvatureToPenalize = Math.toRadians(5.0);
 
-   private static final int minIterations = 20;
-   private static final double gradientMagnitudeToTerminate = 0.9;
-   private static final double gradientMagnitudeToTerminateSq = EuclidCoreTools.square(gradientMagnitudeToTerminate);
+   static final int minIterations = 20;
+   static final double gradientMagnitudeToTerminate = 0.9;
+   static final double gradientMagnitudeToTerminateSq = EuclidCoreTools.square(gradientMagnitudeToTerminate);
 
    static final double halfStanceWidthTraversibility = 0.18;
    static final double yOffsetTraversibilityNominalWindow = 0.27;
@@ -45,12 +45,12 @@ public class AStarBodyPathSmoother
    static final double traversibilitySampleWindowX = 0.2;
    static final double traversibilitySampleWindowY = 0.14;
 
-   private static final int iterations = 180;
+   static final int iterations = 180;
 
-   private static final int turnPointIteration = 12;
+   static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
-   private static final int minTurnPointProximity = 7;
-   private static final double turnPointYawThreshold = Math.toRadians(30.0);
+   static final int minTurnPointProximity = 7;
+   static final double turnPointYawThreshold = Math.toRadians(30.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -188,11 +188,6 @@ public class AStarBodyPathSmoother
                /* Ground plane gradient */
                Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradient();
                gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
-
-               if (waypoints[waypointIndex].isTurnPoint())
-               {
-                  continue;
-               }
 
                /* Roll-z gradient */
                Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(heightMapData);

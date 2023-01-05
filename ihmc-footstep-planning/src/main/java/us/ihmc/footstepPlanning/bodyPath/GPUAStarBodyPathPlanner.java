@@ -27,6 +27,7 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.perception.*;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -140,6 +141,8 @@ public class GPUAStarBodyPathPlanner
    private OpenCLFloatBuffer edgeCostMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer heuristicCostMapBuffer = new OpenCLFloatBuffer(1);
 
+   private GPUAStarBodyPathSmoother smoother;
+
 
    private int cellsPerSide = -1;
    private int nodesPerSide = -1;
@@ -179,6 +182,7 @@ public class GPUAStarBodyPathPlanner
       this.plannerParameters = plannerParameters;
       this.statusCallbacks = statusCallbacks;
       this.stopwatch = stopwatch;
+      // TODO get the heuristics from the map
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
 
       this.stanceScore = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StanceScore", registry));
@@ -188,6 +192,8 @@ public class GPUAStarBodyPathPlanner
 
       openCLManager = new OpenCLManager();
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
+
+      smoother = new GPUAStarBodyPathSmoother(null, openCLManager, null, null);
 
       Activator nativeLoader = BytedecoTools.loadNativesOnAThread();
       boolean doneLoading = false;
@@ -253,6 +259,8 @@ public class GPUAStarBodyPathPlanner
       snapVerticesKernel = openCLManager.createKernel(pathPlannerProgram, "snapVertices");
       computeEdgeDataKernel = openCLManager.createKernel(pathPlannerProgram, "computeEdgeData");
       computeHeuristicCostKernel = openCLManager.createKernel(pathPlannerProgram, "computeHeuristicCost");
+
+      smoother.createOpenCLStuff(pathPlannerProgram, numberOfCells, numberOfNodes);
    }
 
    public void firstTickSetup()
@@ -283,6 +291,8 @@ public class GPUAStarBodyPathPlanner
       traversibilityCostMapBuffer.createOpenCLBufferObject(openCLManager);
       edgeCostMapBuffer.createOpenCLBufferObject(openCLManager);
       heuristicCostMapBuffer.createOpenCLBufferObject(openCLManager);
+
+      smoother.firstTickSetup();
 
       firstTick = false;
    }
@@ -321,6 +331,8 @@ public class GPUAStarBodyPathPlanner
       traversibilityCostMapBuffer.destroy(openCLManager);
       edgeCostMapBuffer.destroy(openCLManager);
       heuristicCostMapBuffer.destroy(openCLManager);
+
+      smoother.destroyOpenCLStuff();
 
       openCLManager.destroy();
    }
@@ -534,6 +546,7 @@ public class GPUAStarBodyPathPlanner
          this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getGridSizeXY(), BodyPathLatticePoint.gridSizeXY);
          this.nodesPerSide = 2 * nodeCenterIndex + 1;
          resizeOpenCLObjects();
+         smoother.resizeOpenCLObjects(cellsPerSide);
       }
 
       haltRequested.set(false);
@@ -763,8 +776,6 @@ public class GPUAStarBodyPathPlanner
 
       leastSquaresOffsetBuffer.writeOpenCLBufferObject(openCLManager);
    }
-
-
 
    private void computeSurfaceNormalsWithLeastSquares(double patchWidth)
    {
@@ -1043,6 +1054,8 @@ public class GPUAStarBodyPathPlanner
          LogTools.info("Reporting status");
       }
 
+      boolean performSmoothing = plannerParameters.getPerformSmoothing() && result == BodyPathPlanningResult.FOUND_SOLUTION;
+
       outputToPack.setBodyPathPlanningResult(result);
       outputToPack.getBodyPath().clear();
       outputToPack.getBodyPathUnsmoothed().clear();
@@ -1057,8 +1070,40 @@ public class GPUAStarBodyPathPlanner
          bodyPath.add(waypoint);
          outputToPack.getBodyPathUnsmoothed().add(waypoint);
 
+         if (!performSmoothing)
             outputToPack.getBodyPath().add(new Pose3D(waypoint, new Quaternion()));
       }
+
+      if (performSmoothing)
+      {
+         List<Pose3D> smoothedPath = smoother.doSmoothing(bodyPath,
+                                                          heightMapData,
+                                                          heightMapParametersBuffer,
+                                                          pathPlanningParametersBuffer,
+                                                          heightMapBuffer,
+                                                          snappedNodeHeightBuffer,
+                                                          ransacNormalParametersBuffer,
+                                                          leastSquaresNormalXYZBuffer,
+                                                          sampledHeightBuffer);
+         for (int i = 0; i < bodyPath.size(); i++)
+         {
+            Pose3D waypoint = new Pose3D(smoothedPath.get(i));
+
+            if (i == 0)
+            {
+               double yaw = AngleTools.interpolateAngle(request.getStartFootPoses().get(RobotSide.LEFT).getYaw(), request.getStartFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
+               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+            else if (i == bodyPath.size() - 1)
+            {
+               double yaw = AngleTools.interpolateAngle(request.getGoalFootPoses().get(RobotSide.LEFT).getYaw(), request.getGoalFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
+               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+
+            outputToPack.getBodyPath().add(waypoint);
+         }
+      }
+
 
 
       outputToPack.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.totalElapsed() - planningStartTime);
