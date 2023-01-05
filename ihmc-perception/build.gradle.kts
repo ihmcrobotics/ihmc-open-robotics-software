@@ -21,10 +21,10 @@ ihmc {
 
 mainDependencies {
    api(ihmc.sourceSetProject("javacv"))
+   api(ihmc.sourceSetProject("slam-wrapper"))
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
@@ -39,6 +39,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
+   api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
