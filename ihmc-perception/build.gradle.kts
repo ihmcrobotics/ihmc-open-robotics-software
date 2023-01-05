@@ -24,7 +24,7 @@ mainDependencies {
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:ihmc-native-library-loader:2.0.1")
+   api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("org.georegression:georegression:0.22")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
