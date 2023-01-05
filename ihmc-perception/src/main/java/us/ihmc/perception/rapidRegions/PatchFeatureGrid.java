@@ -9,6 +9,9 @@ public class PatchFeatureGrid
 {
    private OpenCLManager openCLManager;
 
+   private int rows = 0;
+   private int columns = 0;
+
    private BytedecoImage nxImage;
    private BytedecoImage nyImage;
    private BytedecoImage nzImage;
@@ -19,6 +22,9 @@ public class PatchFeatureGrid
    public PatchFeatureGrid(OpenCLManager openCLManager, int columns, int rows)
    {
       this.openCLManager = openCLManager;
+      this.columns = columns;
+      this.rows = rows;
+
       nxImage = new BytedecoImage(columns, rows, opencv_core.CV_32FC1);
       nyImage = new BytedecoImage(columns, rows, opencv_core.CV_32FC1);
       nzImage = new BytedecoImage(columns, rows, opencv_core.CV_32FC1);
@@ -29,6 +35,9 @@ public class PatchFeatureGrid
 
    public void resize(int columns, int rows)
    {
+      this.columns = columns;
+      this.rows = rows;
+
       nxImage.resize(columns, rows, openCLManager, null);
       nyImage.resize(columns, rows, openCLManager, null);
       nzImage.resize(columns, rows, openCLManager, null);
@@ -65,6 +74,16 @@ public class PatchFeatureGrid
       cxImage.destroy(openCLManager);
       cyImage.destroy(openCLManager);
       czImage.destroy(openCLManager);
+   }
+
+   public int getRows()
+   {
+      return rows;
+   }
+
+   public int getColumns()
+   {
+      return columns;
    }
 
    public BytedecoImage getNxImage()
