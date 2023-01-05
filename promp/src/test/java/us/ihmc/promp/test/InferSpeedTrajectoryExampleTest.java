@@ -1,6 +1,5 @@
 package us.ihmc.promp.test;
 
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
 
 import java.io.File;
@@ -20,7 +19,6 @@ import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
  */
 public class InferSpeedTrajectoryExampleTest
 {
-//   @Disabled
    @Test
    public void testSpeedInference() throws URISyntaxException
    {

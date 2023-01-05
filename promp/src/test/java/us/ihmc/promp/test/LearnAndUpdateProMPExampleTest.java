@@ -1,11 +1,9 @@
 package us.ihmc.promp.test;
 
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +19,6 @@ public class LearnAndUpdateProMPExampleTest
 {
    private final boolean SAVEFILES = false;
 
-//   @Disabled
    @Test
    public void testUpdateProMP() throws URISyntaxException
    {
@@ -184,7 +181,7 @@ public class LearnAndUpdateProMPExampleTest
          // update the time modulation of the ProMP object with estimated value
          System.out.println("Old ProMp timestep: " + myProMP.get_traj_length());
          myProMP.update_time_modulation((double) myProMP.get_traj_length() / inferredTimesteps);
-         assertTrue(myProMP.get_traj_length() == inferredTimesteps);
+         assertEquals(myProMP.get_traj_length(), inferredTimesteps);
          System.out.println("New ProMp timestep: " + myProMP.get_traj_length());
 
          /*
@@ -225,7 +222,7 @@ public class LearnAndUpdateProMPExampleTest
          myProMP.condition_goal(viaPoint, viaPointStdDeviation);
          //generate updated mean trajectory
          meanTrajectoryConditioned = myProMP.generate_trajectory();
-         assertTrue(meanTrajectoryConditioned.rows() == conditioningTimestep);
+         assertEquals(meanTrajectoryConditioned.rows(), conditioningTimestep);
          for (int i = 0; i < viaPoint.size(); i++)
             assertTrue(meanTrajectoryConditioned.coeff(conditioningTimestep - 1, i) >= viaPoint.coeff(i) - 0.01
                        && meanTrajectoryConditioned.coeff(conditioningTimestep - 1, i) <= viaPoint.coeff(i) + 0.01);

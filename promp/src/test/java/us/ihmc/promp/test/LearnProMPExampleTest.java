@@ -1,6 +1,5 @@
 package us.ihmc.promp.test;
 
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
 
 import java.io.File;
@@ -22,7 +21,6 @@ public class LearnProMPExampleTest
 {
    private final boolean SAVEFILES = false;
 
-//   @Disabled
    @Test
    public void testLearningProMP() throws URISyntaxException
    {
