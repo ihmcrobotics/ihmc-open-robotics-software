@@ -109,15 +109,22 @@ public class RDXFootstepPlanning
          soleFramePose.get(pose3D);
       });
 
+      boolean assumeFlatGround = true;
       if (heightMapMessage != null)
+      {
+         assumeFlatGround = false;
          request.setHeightMapMessage(heightMapMessage);
+      }
       if (planarRegionsListMessage != null)
+      {
          request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         assumeFlatGround = false;
+      }
 
       request.setPlanBodyPath(false);
       // TODO: Set start footholds!!
       //      request.setPlanarRegionsList(...);
-//      request.setAssumeFlatGround(true); // FIXME Assuming flat ground
+      request.setAssumeFlatGround(assumeFlatGround);
       //      request.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
       //      request.setSwingPlannerType(swingPlannerType);
       //      request.setSnapGoalSteps(true);
