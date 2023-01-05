@@ -3,6 +3,8 @@ package us.ihmc.promp.test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,14 +20,14 @@ import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
  */
 public class InferSpeedTrajectoryExampleTest
 {
-   @Disabled
+//   @Disabled
    @Test
-   public void testSpeedInference()
+   public void testSpeedInference() throws URISyntaxException
    {
       ProMPNativeLibrary.load();
 
-      String demoDirectory = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching"))
-                                            .toString().substring(6);
+      File fileTraining = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching")).toURI());
+      String demoDirectory = fileTraining.getPath();
 
       List<String> fileListTraining = new ArrayList<>();
       // The trajectories contained in the Reaching1,2 folders represent different demonstration of a given task

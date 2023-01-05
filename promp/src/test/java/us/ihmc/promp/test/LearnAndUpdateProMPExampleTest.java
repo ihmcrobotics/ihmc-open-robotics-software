@@ -3,6 +3,9 @@ package us.ihmc.promp.test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -16,19 +19,20 @@ import static us.ihmc.promp.presets.ProMPInfoMapper.EigenVectorXd;
 
 public class LearnAndUpdateProMPExampleTest
 {
-   @Disabled
+//   @Disabled
    @Test
-   public void testUpdateProMP()
+   public void testUpdateProMP() throws URISyntaxException
    {
       ProMPNativeLibrary.load();
       /*
        * Load training and test trajectories
        */
-      String demoDirectoryTraining = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching"))
-                                    .toString().substring(6);
 
-      String demoDirectoryTesting = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/ReachingTest"))
-                                    .toString().substring(6);
+      File fileTraining = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching")).toURI());
+      String demoDirectoryTraining = fileTraining.getPath();
+
+      File fileTesting = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/ReachingTest")).toURI());
+      String demoDirectoryTesting = fileTesting.getPath();
 
       List<String> fileListTraining = new ArrayList<>();
       // The trajectories contained in the Reaching1,2 folders represent different demonstration of a given task

@@ -3,6 +3,8 @@ package us.ihmc.promp.test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.promp.*;
 
+import java.io.File;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,17 +20,16 @@ import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
  */
 public class LearnProMPExampleTest
 {
-   @Disabled
+//   @Disabled
    @Test
-   public void testLearningProMP()
+   public void testLearningProMP() throws URISyntaxException
    {
       ProMPNativeLibrary.load();
 
-      String currentDirectory = System.getProperty("user.dir");
-      System.out.println("Current dir using System: " + currentDirectory);
+      File file = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching")).toURI());
+      String demoDirectory = file.getPath();
 
-      String demoDirectory = Objects.requireNonNull(getClass().getClassLoader().getResource("promp/cppLibraryTestData/Reaching"))
-                                            .toString().substring(6);
+      System.out.println("Current dir using System: " + demoDirectory);
 
       List<String> fileList = new ArrayList<>();
       // The trajectories contained in the Reaching1 folder represent different demonstration of a given task
