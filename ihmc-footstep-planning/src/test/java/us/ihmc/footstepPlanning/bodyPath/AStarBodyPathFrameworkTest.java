@@ -566,7 +566,7 @@ public class AStarBodyPathFrameworkTest
    {
       AStarBodyPathFrameworkTest test = new AStarBodyPathFrameworkTest();
 
-      DataSetName dataSetName = DataSetName._20171215_214801_StairsUpDown;
+      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
 
 //      VISUALIZE = true;
 //      test.setup();
@@ -579,10 +579,10 @@ public class AStarBodyPathFrameworkTest
 //
 //      }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-//      for (int i = 0; i < 50; i++)
-//      {
+      for (int i = 0; i < 50; i++)
+      {
          test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
-//      }
+      }
       test.tearDown();
 
       Predicate<DataSet> dataSetFilter = dataSet ->
