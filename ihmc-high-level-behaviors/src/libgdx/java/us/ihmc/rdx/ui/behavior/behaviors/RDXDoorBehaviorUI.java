@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXDoorObject;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIDefinition;
@@ -30,6 +31,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehavior
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
@@ -180,9 +182,9 @@ public class RDXDoorBehaviorUI extends RDXBehaviorUIInterface
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN())
+      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN() && sceneLevels.contains(RDXSceneLevel.MODEL))
          door.getCollisionMeshRenderables(renderables, pool);
    }
 

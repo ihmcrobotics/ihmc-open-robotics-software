@@ -31,6 +31,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -123,7 +124,7 @@ public class RDXBehaviorUIManager
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);
-      baseUI.getPrimaryScene().addRenderableProvider(this::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+      baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
    }
 
    public void handleVREvents(RDXVRContext vrContext)
@@ -196,9 +197,14 @@ public class RDXBehaviorUIManager
       yoEnabled.set(enabled);
    }
 
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      highestLevelUI.getRenderables(renderables, pool);
+      highestLevelUI.getRenderables(renderables, pool, sceneLevels);
+   }
+
+   public void setBehaviorModuleHost(String hostname)
+   {
+      behaviorModuleHost.set(hostname);
    }
 
    public void connectViaKryo(String hostname)
