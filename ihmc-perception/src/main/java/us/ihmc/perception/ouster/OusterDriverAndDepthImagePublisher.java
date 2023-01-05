@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
-public class OusterDepthImageNode
+public class OusterDriverAndDepthImagePublisher
 {
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -48,7 +48,7 @@ public class OusterDepthImageNode
    private long sequenceNumber = 0;
    private final ImageMessage outputImageMessage = new ImageMessage();
 
-   public OusterDepthImageNode(Supplier<ReferenceFrame> sensorFrameUpdater)
+   public OusterDriverAndDepthImagePublisher(Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.sensorFrameUpdater = sensorFrameUpdater;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
@@ -139,6 +139,6 @@ public class OusterDepthImageNode
 
    public static void main(String[] args)
    {
-      new OusterDepthImageNode(ReferenceFrame::getWorldFrame);
+      new OusterDriverAndDepthImagePublisher(ReferenceFrame::getWorldFrame);
    }
 }
