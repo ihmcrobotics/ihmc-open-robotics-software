@@ -39,6 +39,10 @@ public class RapidPatchesBasedICP
    private final Point3D centroidCurrent = new Point3D();
 
 
+   private final Point3D centroidOne = new Point3D();
+   private final Point3D centroidTwo = new Point3D();
+
+
    public void create(OpenCLManager openCLManager, _cl_program program, int patchRows, int patchColumns)
    {
       this.openCLManager = openCLManager;
@@ -49,16 +53,17 @@ public class RapidPatchesBasedICP
       this.patchRows = patchRows;
       this.patchColumns = patchColumns;
 
-      parametersBuffer = new OpenCLFloatBuffer(3);
+      parametersBuffer = new OpenCLFloatBuffer(4);
       centroidBuffer = new OpenCLFloatBuffer(patchColumns * 6);
       correlBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 9);
    }
 
    public void update(PatchFeatureGrid previousFeatureGrid, PatchFeatureGrid currentFeatureGrid)
    {
-      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) 0.1f);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) 0.2f);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(2, (float) 0.3f);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, (float) currentFeatureGrid.getRows());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, (float) currentFeatureGrid.getColumns());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, 0.3f);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(3, 100.0f);
 
       if (!initialized)
       {
@@ -89,17 +94,15 @@ public class RapidPatchesBasedICP
          finalCentroidReduce(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
 
          centroidBuffer.readOpenCLBufferObject(openCLManager);
-
-
       }
    }
 
-   private Point3D finalCentroidReduce(FloatBuffer buffer, Point3D centroidOneToPack, Point3D centroidTwoToPack)
+   private void finalCentroidReduce(FloatBuffer buffer, Point3D centroidOneToPack, Point3D centroidTwoToPack)
    {
       int countOne = 0;
       int countTwo = 0;
-      Point3D centroidOne = new Point3D();
-      Point3D centroidTwo = new Point3D();
+      centroidOne.set(0,0,0);
+      centroidTwo.set(0,0,0);
       for (int i = 0; i < patchColumns; i++)
       {
          centroidOne.set(buffer.get(i * 6), buffer.get(i * 6 + 1), buffer.get(i * 6 + 2));
