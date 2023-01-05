@@ -99,10 +99,14 @@ int createGradientInt(double input)
    return color;
 }
 
-// TODO: create (R,G,B) based on eyeDepth ( distance from me )
 int createRGB(double input)
 {
-    bool sinusoidal = false;
+   createRGB(input, false);
+}
+
+// TODO: create (R,G,B) based on eyeDepth ( distance from me )
+int createRGB(double input, bool sinusoidal)
+{
     if(sinusoidal)
     {
         // maximum depth value
