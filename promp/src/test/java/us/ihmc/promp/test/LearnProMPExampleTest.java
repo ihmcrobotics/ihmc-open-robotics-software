@@ -20,6 +20,8 @@ import static us.ihmc.promp.presets.ProMPInfoMapper.EigenMatrixXd;
  */
 public class LearnProMPExampleTest
 {
+   private final boolean SAVEFILES = false;
+
 //   @Disabled
    @Test
    public void testLearningProMP() throws URISyntaxException
@@ -63,14 +65,18 @@ public class LearnProMPExampleTest
       assertEquals(stdDeviationTrajectory.rows(), t_len);
       EigenMatrixXd covarianceTrajectory = myProMP.generate_trajectory_covariance();
 
-      TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
-      for (int i = 0; i < demoTrajectories.size(); i++)
+
+      if (SAVEFILES)
       {
-         ProMPUtil.saveAsCSV(demoTrajectories.get(i).matrix(), ("/demo" + (i + 1) + ".csv"));
+         TrajectoryVector demoTrajectories = trajectoryGroup.trajectories();
+         for (int i = 0; i < demoTrajectories.size(); i++)
+         {
+            ProMPUtil.saveAsCSV(demoTrajectories.get(i).matrix(), ("/demo" + (i + 1) + ".csv"));
+         }
+         ProMPUtil.saveAsCSV(meanTrajectory, "/mean.csv");
+         ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/stdDeviation.csv");
+         ProMPUtil.saveAsCSV(covarianceTrajectory, "/covariance.csv");
       }
-      ProMPUtil.saveAsCSV(meanTrajectory, "/mean.csv");
-      ProMPUtil.saveAsCSV(stdDeviationTrajectory, "/stdDeviation.csv");
-      ProMPUtil.saveAsCSV(covarianceTrajectory, "/covariance.csv");
 
       meanTrajectory.debugPrintMatrix("meanTrajectory");
       stdDeviationTrajectory.debugPrintMatrix("stdDeviationTrajectory");
