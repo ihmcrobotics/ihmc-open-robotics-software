@@ -1,0 +1,20 @@
+{
+  "testNumberUseOnlyForTesting": 2,
+  "logging" : true,
+  "numberBasisFunctions": 20,
+  "numberObservations": 50,
+  "conditionOnlyLastObservation": true,
+  "allowedIncreaseDecreaseSpeedFactor": 2,
+  "numberOfInferredSpeeds": 30,
+  "tasks":[
+    {
+      "name":"PushDoor",
+      "bodyPartForRecognition": "rightHand",
+      "bodyPartWithObservableGoal": "rightHand",
+      "bodyParts":[
+        { "name":"leftHand", "geometry":"Pose" },
+        { "name":"rightHand", "geometry":"Pose" }
+      ]
+    }
+  ]
+}

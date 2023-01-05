@@ -37,7 +37,7 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:ihmc-native-library-loader:2.0.1")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -59,7 +59,7 @@ openpnpDependencies {
 val javaCPPVersion = "1.5.8"
 
 bytedecoDependencies {
-   api("us.ihmc:euclid:0.18.1")
+   api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:ihmc-commons:0.31.0")
    apiBytedecoNatives("javacpp")
    apiBytedecoNatives("openblas", "0.3.21-")

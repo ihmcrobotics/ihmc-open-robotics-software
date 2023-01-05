@@ -29,11 +29,6 @@ public class SDFDescriptionJointLimitRemover implements SDFDescriptionMutator
    }
 
    @Override
-   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-   }
-
-   @Override
    public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
    {
    }

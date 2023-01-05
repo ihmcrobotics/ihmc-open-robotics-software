@@ -13,18 +13,19 @@ import java.nio.file.Paths;
 
 public class KinematicsRecordReplay
 {
-   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "");
-   private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/").toString());
+   private final TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, "", 1);
+   private final ImString recordPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs").toString());
    private final ImBoolean enablerRecording = new ImBoolean(false);
    private boolean isRecording = false;
-   private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/myFile.csv").toString());
+   private final ImString replayPath = new ImString(Paths.get(System.getProperty("user.home"), ".ihmc/logs/1.csv").toString());
    private final ImBoolean enablerReplay = new ImBoolean(false);
    private boolean isReplaying = false;
-   private ImBoolean enabledKinematicsStreaming;
+   private final ImBoolean enabledKinematicsStreaming;
 
-   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming)
+   public KinematicsRecordReplay(ImBoolean enabledKinematicsStreaming, int numberParts)
    {
       this.enabledKinematicsStreaming = enabledKinematicsStreaming;
+      trajectoryRecorder.setNumberParts(numberParts);
    }
 
    public void processRecordReplayInput(InputDigitalActionData triggerButton)
@@ -35,7 +36,7 @@ public class KinematicsRecordReplay
          isRecording = !isRecording;
          // check if recording file path has been set to a different one from previous recording. In case update file path.
          if (trajectoryRecorder.hasSavedRecording() && !(trajectoryRecorder.getPath().equals(recordPath.get())))
-            trajectoryRecorder.setPath(recordPath.get());
+            trajectoryRecorder.setPath(recordPath.get()); //recorder is reset when changing path
       }
       // check replay is on and trigger button has been pressed once. if button is pressed again replay is stopped
       if (enablerReplay.get() && triggerButton.bChanged() && !triggerButton.bState())
@@ -43,7 +44,7 @@ public class KinematicsRecordReplay
          isReplaying = !isReplaying;
          // check if replay file has been set to a different one from previous replay. In case update file path.
          if (trajectoryRecorder.hasDoneReplay() && !(trajectoryRecorder.getPath().equals(replayPath.get())))
-            trajectoryRecorder.setPath(replayPath.get());
+            trajectoryRecorder.setPath(replayPath.get()); //replayer is reset when changing path
       }
    }
 
@@ -65,6 +66,7 @@ public class KinematicsRecordReplay
       }
       else if (!(trajectoryRecorder.hasSavedRecording()))
       {
+         trajectoryRecorder.concatenateData();
          trajectoryRecorder.saveRecording();
       }
    }
@@ -73,17 +75,14 @@ public class KinematicsRecordReplay
    {
       framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
       // Read file with stored trajectories: read setpoint per timestep until file is over
-      Double[] dataPoint = trajectoryRecorder.play();
-      if (!trajectoryRecorder.hasDoneReplay())
-      {
-         // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
-         framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
-         framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
-      }
-      else
+      Double[] dataPoint = trajectoryRecorder.play(true); //play split data (a body part per time)
+      // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
+      framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
+      framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
+      if (trajectoryRecorder.hasDoneReplay())
       {
          isReplaying = false;
-         enablerReplay.set(isReplaying);
+         enablerReplay.set(false);
       }
    }
 
@@ -124,6 +123,16 @@ public class KinematicsRecordReplay
          if (enablerRecording.get() || enabledKinematicsStreaming.get())
             this.enablerReplay.set(false); //check no concurrency replay and record/streaming
       }
+   }
+
+   public ImBoolean isRecordingEnabled()
+   {
+      return enablerRecording;
+   }
+
+   public ImBoolean isReplayingEnabled()
+   {
+      return enablerReplay;
    }
 
    public boolean isRecording()

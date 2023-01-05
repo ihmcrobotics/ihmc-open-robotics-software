@@ -5,7 +5,9 @@ import us.ihmc.tools.io.WorkspaceDirectory;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.promp.global.promp.EigenMatrixXd;
 
 /**
@@ -14,13 +16,14 @@ import static us.ihmc.promp.global.promp.EigenMatrixXd;
  */
 public class InferSpeedTrajectoryExample
 {
-   public static void main(String[] args)
+   @Test
+   public void testSpeedInference()
    {
       ProMPNativeLibrary.load();
 
-      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/demos");
+      WorkspaceDirectory demoDir = new WorkspaceDirectory("ihmc-open-robotics-software", "promp/etc/test/cppLibraryTestData");
       String demoDirAbs = demoDir.getDirectoryPath().toAbsolutePath().toString();
-      String demoTrainingDirAbs = demoDirAbs + "/Reaching1";
+      String demoTrainingDirAbs = demoDirAbs + "/Reaching";
 
       List<String> fileListTraining = new ArrayList<>();
       // The trajectories contained in the Reaching1,2 folders represent different demonstration of a given task
@@ -28,7 +31,7 @@ public class InferSpeedTrajectoryExample
       // 0: waist Z; 1,2,3: right hand X,Y,Z; 5,6,7: left hand X,Y,Z
       for (int i = 0; i < 10; i++) //get training files
          fileListTraining.add(demoTrainingDirAbs + "/pr" + (i + 1) + ".csv");
-
+      assertTrue(fileListTraining.size() > 0);
       // consider only right hand trajectories
       List<Long> dofs = List.of(1L, 2L, 3L);
       TrajectoryGroup trainingTrajectories = new TrajectoryGroup();
@@ -41,11 +44,14 @@ public class InferSpeedTrajectoryExample
       trainingTrajectories.load_csv_trajectories(fileListStringVectorTraining, doFsSizeTVector);
       // make all training trajectories have the same length
       long meanLengthTraining = trainingTrajectories.normalize_length();
+      assertTrue(meanLengthTraining > 0);
 
       int n_rbf = 20;
 
       ProMP myProMP = new ProMP(trainingTrajectories, n_rbf);
       EigenMatrixXd meanTrajectory = myProMP.generate_trajectory();
+      assertTrue(meanTrajectory.cols() == dofs.size());
+      assertTrue(meanTrajectory.rows() == meanLengthTraining);
 
       // Test speed inference on a trajectory
       Trajectory trajectoryOriginal = new Trajectory(meanTrajectory, 1.0);
@@ -63,11 +69,13 @@ public class InferSpeedTrajectoryExample
       Trajectory trajectoryModulated = trajectoryOriginal.modulate(timestepOriginal / newSpeed); //you can modulate the trajectory object
       //      EigenMatrixXd meanModulatedTrajectory = myProMP.generate_trajectory_with_speed(newSpeed); //or directly modulate the mean trajectory of the proMP
       long timestepNew = trajectoryModulated.timesteps();
+      assertTrue(timestepNew == timestepOriginal / 2);
       System.out.println("timestepNew: " + timestepNew);
       //      System.out.println("timestepNew: " + meanModulatedTrajectory.rows());
 
       // infer the new speed for the modulated trajectory
       double inferredSpeed = trajectoryOriginal.infer_speed(trajectoryModulated.matrix(), 0.25, 4.0, 20); //new speed in range 0.25-4
+      assertTrue( (inferredSpeed <= newSpeed + 0.1) &&  (inferredSpeed >= newSpeed - 0.1));
       //      double inferredSpeed = trajectoryOriginal.infer_speed(meanModulatedTrajectory, 0.25, 4.0, 20); //new speed in range 0.25-4
       System.out.println("Inferred speed for modulated trajectory: " + inferredSpeed);
    }
