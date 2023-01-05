@@ -16,7 +16,7 @@ kernel void discretizePoints(global float* pointCloudBuffer,
    worldFramePoint.y = pointCloudBuffer[worldPointStartIndex + 1];
    worldFramePoint.z = pointCloudBuffer[worldPointStartIndex + 2];
 
-   int color = createGradientInt((double) worldFramePoint.z);
+   int color = calculateInterpolatedGradientColorInt((double) worldFramePoint.z);
 
    int discreteX = (int) round(worldFramePoint.x / discreteResolution);
    int discreteY = (int) round(worldFramePoint.y / discreteResolution);
