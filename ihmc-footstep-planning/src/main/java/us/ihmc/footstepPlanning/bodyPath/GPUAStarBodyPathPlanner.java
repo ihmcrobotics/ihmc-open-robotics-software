@@ -1189,7 +1189,6 @@ public class GPUAStarBodyPathPlanner
          throw new RuntimeException("Neighbor set is wrong.");
    }
 
-
    /**
     * Populates a 16-connected grid starting along +x and moving clockwise
     */
@@ -1208,14 +1207,9 @@ public class GPUAStarBodyPathPlanner
       return snappedNodeHeightBuffer.getBackingDirectFloatBuffer().get(nodeKey);
    }
 
-   static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
-   {
-      return EuclidCoreTools.norm(startNode.getX() - endNode.getX(), startNode.getY() - endNode.getY());
-   }
-
    private double heuristics(BodyPathLatticePoint node)
    {
-      return xyDistance(node, goalNode);
+      return heuristicCostMapBuffer.getBytedecoFloatBufferPointer().get(getNodeGraphKey(node));
    }
 
    public void halt()
