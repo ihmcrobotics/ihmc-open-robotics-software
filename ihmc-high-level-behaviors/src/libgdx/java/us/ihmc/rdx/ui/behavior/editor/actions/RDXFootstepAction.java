@@ -24,12 +24,12 @@ public class RDXFootstepAction extends RDXBehaviorAction
 {
    private final FootstepActionData actionData = new FootstepActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXInteractableHighlightModel highlightModel;
-   private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();
+   private RDXInteractableHighlightModel ankleFrameHighlightModel;
+   private final RDXPose3DGizmo solePoseGizmo;
    private final DRCRobotModel robotModel;
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform soleTransformToWorld = new RigidBodyTransform();
    private final RigidBodyTransform ankleToSoleFrameTransform = new RigidBodyTransform();
    private final boolean wasInitializedToPreviousStep;
 
@@ -42,7 +42,8 @@ public class RDXFootstepAction extends RDXBehaviorAction
       this.syncedRobot = syncedRobot;
       this.robotModel = robotModel;
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
-      poseGizmo.create(panel3D);
+      solePoseGizmo = new RDXPose3DGizmo(actionData.getTransformToParent(), ReferenceFrame.getWorldFrame());
+      solePoseGizmo.create(panel3D);
 
       wasInitializedToPreviousStep = possiblyNullPreviousFootstepAction != null;
       if (wasInitializedToPreviousStep)
@@ -56,7 +57,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
       actionData.setSide(side);
       String footBodyName = syncedRobot.getFullRobotModel().getFoot(side).getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(footBodyName));
-      highlightModel = new RDXInteractableHighlightModel(modelFileName);
+      ankleFrameHighlightModel = new RDXInteractableHighlightModel(modelFileName);
       ankleToSoleFrameTransform.set(robotModel.getJointMap().getSoleToParentFrameTransform(side));
       ankleToSoleFrameTransform.invert();
 
@@ -69,9 +70,10 @@ public class RDXFootstepAction extends RDXBehaviorAction
    @Override
    public void update()
    {
-      poseGizmo.updateTransforms();
-      poseGizmo.getGizmoFrame().getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      highlightModel.setPose(tempTransform, ankleToSoleFrameTransform);
+      solePoseGizmo.updateTransforms();
+      solePoseGizmo.getGizmoFrame().getTransformToDesiredFrame(soleTransformToWorld, ReferenceFrame.getWorldFrame());
+      ankleFrameHighlightModel.setPose(soleTransformToWorld, ankleToSoleFrameTransform);
+      actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getName());
    }
 
    @Override
@@ -79,7 +81,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
    {
       if (getSelected().get())
       {
-         poseGizmo.calculate3DViewPick(input);
+         solePoseGizmo.calculate3DViewPick(input);
       }
    }
 
@@ -88,7 +90,7 @@ public class RDXFootstepAction extends RDXBehaviorAction
    {
       if (getSelected().get())
       {
-         poseGizmo.process3DViewInput(input);
+         solePoseGizmo.process3DViewInput(input);
       }
    }
 
@@ -98,19 +100,19 @@ public class RDXFootstepAction extends RDXBehaviorAction
       if (referenceFrameLibraryCombo.combo())
       {
          FramePose3D poseToKeep = new FramePose3D();
-         poseToKeep.setToZero(poseGizmo.getGizmoFrame());
-         poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-         poseToKeep.changeFrame(poseGizmo.getGizmoFrame().getParent());
-         poseToKeep.get(poseGizmo.getTransformToParent());
+         poseToKeep.setToZero(solePoseGizmo.getGizmoFrame());
+         solePoseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         poseToKeep.changeFrame(solePoseGizmo.getGizmoFrame().getParent());
+         poseToKeep.get(solePoseGizmo.getTransformToParent());
       }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      highlightModel.getRenderables(renderables, pool);
+      ankleFrameHighlightModel.getRenderables(renderables, pool);
       if (getSelected().get())
-         poseGizmo.getRenderables(renderables, pool);
+         solePoseGizmo.getRenderables(renderables, pool);
    }
 
    @Override
@@ -123,21 +125,13 @@ public class RDXFootstepAction extends RDXBehaviorAction
    {
       if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrame.getName()))
       {
-         poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
-         poseGizmo.getTransformToParent().set(referenceFrame.getTransformToParent());
+         solePoseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         solePoseGizmo.getTransformToParent().set(referenceFrame.getTransformToParent());
       }
       else
       {
-         poseGizmo.setParentFrame(ReferenceFrame.getWorldFrame());
-         poseGizmo.getTransformToParent().set(referenceFrame.getTransformToWorldFrame());
-      }
-   }
-
-   private void setReferenceFrame(String referenceFrameName)
-   {
-      if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrameName))
-      {
-         poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+         solePoseGizmo.setParentFrame(ReferenceFrame.getWorldFrame());
+         solePoseGizmo.getTransformToParent().set(referenceFrame.getTransformToWorldFrame());
       }
    }
 
@@ -149,6 +143,6 @@ public class RDXFootstepAction extends RDXBehaviorAction
 
    public ReferenceFrame getReferenceFrame()
    {
-      return poseGizmo.getGizmoFrame();
+      return solePoseGizmo.getGizmoFrame();
    }
 }

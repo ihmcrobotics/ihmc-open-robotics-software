@@ -28,6 +28,11 @@ public abstract class RDXBehaviorAction
 
    }
 
+   public void updateAfterLoading()
+   {
+
+   }
+
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
 

@@ -12,9 +12,9 @@ public class RDXPerceptionObjectUpdater
    private final RDXVirtualGhostObject object;
    private final IHMCROS2Input<DetectedObjectMessage> subscription;
 
-   public RDXPerceptionObjectUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String modelFileName)
+   public RDXPerceptionObjectUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String modelFileName, String frameName)
    {
-      object = new RDXVirtualGhostObject(modelFileName);
+      object = new RDXVirtualGhostObject(modelFileName, frameName);
       subscription = ros2.subscribe(updateTopic);
    }
 

@@ -3,8 +3,6 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -33,7 +31,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    private RDXInteractableHighlightModel highlightModel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    /** Gizmo is control frame */
-   private final RDXPose3DGizmo poseGizmo = new RDXPose3DGizmo();
+   private final RDXPose3DGizmo poseGizmo;
    private final SideDependentList<String> handNames = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handControlTransformToHandFrames = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handGraphicTransformToHandFrames = new SideDependentList<>();
@@ -62,10 +60,17 @@ public class RDXHandPoseAction extends RDXBehaviorAction
          handGraphicTransformToHandFrames.put(side, robotModel.getUIParameters().getHandGraphicToHandFrameTransform(side));
       }
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
+      poseGizmo = new RDXPose3DGizmo(actionData.getTransformToParent(), ReferenceFrame.getWorldFrame());
       poseGizmo.create(panel3D);
 
       handFrame = new ModifiableReferenceFrame(poseGizmo.getGizmoFrame());
       graphicFrame = new ModifiableReferenceFrame(handFrame.getReferenceFrame());
+   }
+
+   @Override
+   public void updateAfterLoading()
+   {
+      setSide(actionData.getSide(), false, null);
    }
 
    public void setSide(RobotSide side, boolean authoring, RDXHandPoseAction possiblyNullPreviousAction)
@@ -96,6 +101,7 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    {
       poseGizmo.updateTransforms();
       highlightModel.setPose(graphicFrame.getReferenceFrame());
+      actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getName());
    }
 
    @Override
@@ -153,15 +159,6 @@ public class RDXHandPoseAction extends RDXBehaviorAction
       {
          poseGizmo.setParentFrame(ReferenceFrame.getWorldFrame());
          poseGizmo.getTransformToParent().set(referenceFrame.getTransformToWorldFrame());
-         changeDerivativeFrames();
-      }
-   }
-
-   private void setReferenceFrame(String referenceFrameName)
-   {
-      if (referenceFrameLibraryCombo.setSelectedReferenceFrame(referenceFrameName))
-      {
-         poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
          changeDerivativeFrames();
       }
    }

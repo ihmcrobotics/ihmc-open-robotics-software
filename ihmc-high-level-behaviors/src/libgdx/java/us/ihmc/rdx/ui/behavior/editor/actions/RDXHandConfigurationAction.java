@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.behavior.editor.actions;
 
 import imgui.internal.ImGui;
-import imgui.type.ImInt;
 import us.ihmc.behaviors.sequence.actions.HandConfigurationActionData;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
@@ -13,8 +12,12 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    private final HandConfigurationActionData actionData = new HandConfigurationActionData();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget = new ImIntegerWrapper(actionData::getSide, actionData::setSide, labels.get("Side"));
-   private final ImInt handConfigurationIndex = new ImInt(6);
    private final String[] handConfigurationNames = new String[HandConfiguration.values.length];
+   private final ImIntegerWrapper handConfigurationIndex = new ImIntegerWrapper(actionData::getHandConfigurationIndex,
+                                                                                actionData::setHandConfigurationIndex,
+                                                                                imInt -> ImGui.combo(labels.get("Grip"),
+                                                                                                     imInt,
+                                                                                                     handConfigurationNames));
 
    public RDXHandConfigurationAction()
    {
@@ -32,9 +35,7 @@ public class RDXHandConfigurationAction extends RDXBehaviorAction
    {
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
-      handConfigurationIndex.set(actionData.getHandConfigurationIndex());
-      ImGui.combo(labels.get("Grip"), handConfigurationIndex, handConfigurationNames);
-      actionData.setHandConfigurationIndex(handConfigurationIndex.get());
+      handConfigurationIndex.renderImGuiWidget();
       ImGui.popItemWidth();
    }
 

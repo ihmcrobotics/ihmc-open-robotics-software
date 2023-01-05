@@ -125,6 +125,7 @@ public class RDXBehaviorActionSequenceEditor
             };
 
             action.getActionData().loadFromFile(actionNode);
+            action.updateAfterLoading();
             insertNewAction(action);
          });
       });
