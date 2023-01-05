@@ -130,7 +130,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
          }
          else if (colorBasedOnWorldZ)
          {
-            float4 rgba8888Color = createGradientFloat4(worldFramePoint.z);
+            float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
             pointColorR = (rgba8888Color.x);
             pointColorG = (rgba8888Color.y);
             pointColorB = (rgba8888Color.z);

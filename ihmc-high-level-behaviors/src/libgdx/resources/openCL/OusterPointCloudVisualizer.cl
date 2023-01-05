@@ -88,7 +88,7 @@ kernel void imageToPointCloud(global float* parameters,
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 
-   float4 rgba8888Color = createGradientFloat4(worldFramePoint.z);
+   float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
    float pointColorR = (rgba8888Color.x);
    float pointColorG = (rgba8888Color.y);
    float pointColorB = (rgba8888Color.z);

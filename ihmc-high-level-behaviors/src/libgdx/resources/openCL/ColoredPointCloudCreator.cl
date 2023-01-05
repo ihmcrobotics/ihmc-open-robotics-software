@@ -92,24 +92,24 @@ kernel void createPointCloud(read_only image2d_t depthImageMeters,
         }
        else
        {
-         color = createRGB((double) worldFramePoint.z, sinusoidal);
+         color = calculateGradientColor((double) worldFramePoint.z, sinusoidal);
 //          color = (255 << 24) | (255 << 16) | (255 << 8) | 255; // white is default
        }
 
     }
     else if(viewMode == DEPTH)
     {
-//              float4 rgb = createRGBFromDepth(eyeDepthInMeters);
+//              float4 rgb = calculateGradientColorFromDepth(eyeDepthInMeters);
 //              color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
-          color = createRGB((double) eyeDepthInMeters, sinusoidal);
+          color = calculateGradientColor((double) eyeDepthInMeters, sinusoidal);
 //              printf("%f, %f, %f\n", rgb.x,rgb.y,rgb.z);
     }
     else
     {
-//               float4 rgb = createRGBFromZDepth(zUp3DZ);
+//               float4 rgb = calculateGradientColorFromZDepth(zUp3DZ);
 //               color = ((int)rgb.x << 24) | ((int)rgb.y << 16) | ((int)rgb.z << 8) | 255;
 //               printf("r: %f, g: %f, b: %f\n", rgb.x,rgb.y,rgb.z);
-         color = createRGB((double) worldFramePoint.z, sinusoidal);
+         color = calculateGradientColor((double) worldFramePoint.z, sinusoidal);
     }
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
