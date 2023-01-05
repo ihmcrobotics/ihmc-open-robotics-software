@@ -31,10 +31,22 @@ public class RDXPerceptionManagerUI
    {
       this.ros2 = ros2;
 
-      pullDoorFrame = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PULL_DOOR_FRAME, "environmentObjects/door/doorFrame/DoorFrame.g3dj");
-      pullDoorPanel = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PULL_DOOR_PANEL, "environmentObjects/door/doorPanel/DoorPanel.g3dj");
-      pushDoorFrame = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PUSH_DOOR_FRAME, "environmentObjects/door/doorFrame/DoorFrame.g3dj");
-      pushDoorPanel = new RDXPerceptionObjectUpdater(ros2, PerceptionManager.DETECTED_PUSH_DOOR_PANEL, "environmentObjects/door/doorPanel/DoorPanel.g3dj");
+      pullDoorFrame = new RDXPerceptionObjectUpdater(ros2,
+                                                     PerceptionManager.DETECTED_PULL_DOOR_FRAME,
+                                                     "environmentObjects/door/doorFrame/DoorFrame.g3dj",
+                                                     String.format("PullDoor%dFrame", PerceptionManager.PULL_DOOR_MARKER_ID));
+      pullDoorPanel = new RDXPerceptionObjectUpdater(ros2,
+                                                     PerceptionManager.DETECTED_PULL_DOOR_PANEL,
+                                                     "environmentObjects/door/doorPanel/DoorPanel.g3dj",
+                                                     String.format("PullDoor%dPanel", PerceptionManager.PULL_DOOR_MARKER_ID));
+      pushDoorFrame = new RDXPerceptionObjectUpdater(ros2,
+                                                     PerceptionManager.DETECTED_PUSH_DOOR_FRAME,
+                                                     "environmentObjects/door/doorFrame/DoorFrame.g3dj",
+                                                     String.format("PushDoor%dFrame", PerceptionManager.PUSH_DOOR_MARKER_ID));
+      pushDoorPanel = new RDXPerceptionObjectUpdater(ros2,
+                                                     PerceptionManager.DETECTED_PUSH_DOOR_PANEL,
+                                                     "environmentObjects/door/doorPanel/DoorPanel.g3dj",
+                                                     String.format("PushDoor%dPanel", PerceptionManager.PUSH_DOOR_MARKER_ID));
    }
 
    public void update()

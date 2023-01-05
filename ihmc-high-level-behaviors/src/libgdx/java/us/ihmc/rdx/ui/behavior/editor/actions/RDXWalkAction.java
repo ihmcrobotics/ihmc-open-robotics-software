@@ -3,8 +3,6 @@ package us.ihmc.rdx.ui.behavior.editor.actions;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -33,8 +31,7 @@ public class RDXWalkAction extends RDXBehaviorAction
    private final ImGuiReferenceFrameLibraryCombo referenceFrameLibraryCombo;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
-   private final RDXPathControlRingGizmo footstepPlannerGoalGizmo = new RDXPathControlRingGizmo();
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final RDXPathControlRingGizmo footstepPlannerGoalGizmo;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final SideDependentList<ImBoolean> editGoalFootPoses = new SideDependentList<>();
    private final SideDependentList<RDXPose3DGizmo> editGoalFootGizmos = new SideDependentList<>();
@@ -52,13 +49,14 @@ public class RDXWalkAction extends RDXBehaviorAction
       footstepPlanGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       referenceFrameLibraryCombo = new ImGuiReferenceFrameLibraryCombo(referenceFrameLibrary);
 
+      footstepPlannerGoalGizmo = new RDXPathControlRingGizmo(actionData.getTransformToParent(), ReferenceFrame.getWorldFrame());
       footstepPlannerGoalGizmo.create(panel3D.getCamera3D());
-      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
 
       for (RobotSide side : RobotSide.values)
       {
          editGoalFootPoses.put(side, new ImBoolean(false));
-         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(footstepPlannerGoalGizmo.getGizmoFrame());
+         RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(actionData.getGoalFootstepToGizmos().get(side), footstepPlannerGoalGizmo.getGizmoFrame());
          footGizmo.create(panel3D);
          editGoalFootGizmos.put(side, footGizmo);
 
@@ -93,6 +91,8 @@ public class RDXWalkAction extends RDXBehaviorAction
          goalFeetGraphics.get(side).setPose(goalFootPose);
       }
       footstepPlanGraphic.update();
+
+      actionData.setParentFrameName(referenceFrameLibraryCombo.getSelectedReferenceFrame().getName());
    }
 
    @Override
