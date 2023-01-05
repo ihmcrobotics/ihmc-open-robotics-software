@@ -38,7 +38,7 @@ import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathSmoother.*;
 
 public class GPUAStarBodyPathSmoother
 {
-   static final int yawDiscretizations = 16;
+   static final int yawDiscretizations = 8;
 
    private static final int iterations = 180;
 
