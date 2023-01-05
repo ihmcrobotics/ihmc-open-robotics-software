@@ -504,27 +504,188 @@ void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* 
     int cIndex = get_global_id(0);
     int rIndex = get_global_id(1);
 
-    //if(cIndex == 0 && rIndex == 0) printf("Spherical Projection Kernel: %d, %d\n", (int)params[INPUT_HEIGHT], (int)params[INPUT_WIDTH]);
+   //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
+   {
+      int2 pos = (int2)(cIndex,rIndex);
 
-    //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
-    {
-       int2 pos = (int2)(cIndex,rIndex);
+      float scaleToMeters = 0.001f;
+      float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
 
-       float scaleToMeters = 0.001f;
-       float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
+      if(radius > 0.1f)
+      {
+         float4 point = back_project_spherical(pos, radius, params);
 
-        if(radius > 0.1f)
-        {
-            float4 point = back_project_spherical(pos, radius, params);
+         int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
 
-            int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
+         cloud[index] = point.x;
+         cloud[index + 1] = point.y;
+         cloud[index + 2] = point.z;
 
-            cloud[index] = point.x;
-            cloud[index + 1] = point.y;
-            cloud[index + 2] = point.z;
-
-            //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
-        }
-    }
+         //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
+      }
+   }
 }
+
+   /*
+   * Copy kernel to move feature grid map into cache buffer
+   * */
+   void kernel copyKernel(read_only image2d_t in0, read_only image2d_t in1, read_only image2d_t in2, read_only image2d_t in3, read_only image2d_t in4,
+                           read_only image2d_t in5, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2,
+                           write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, global float* params)
+   {
+      int cIndex = get_global_id(0);
+      int rIndex = get_global_id(1);
+
+      float n1=read_imagef(in0,(int2)(cIndex,rIndex)).x;
+      float n2=read_imagef(in1,(int2)(cIndex,rIndex)).x;
+      float n3=read_imagef(in2,(int2)(cIndex,rIndex)).x;
+      float g1=read_imagef(in3,(int2)(cIndex,rIndex)).x;
+      float g2=read_imagef(in4,(int2)(cIndex,rIndex)).x;
+      float g3=read_imagef(in5,(int2)(cIndex,rIndex)).x;
+
+      write_imagef(out0,(int2)(cIndex,rIndex),(float4)(n1,0,0,0));
+      write_imagef(out1,(int2)(cIndex,rIndex),(float4)(n2,0,0,0));
+      write_imagef(out2,(int2)(cIndex,rIndex),(float4)(n3,0,0,0));
+      write_imagef(out3,(int2)(cIndex,rIndex),(float4)(g1,0,0,0));
+      write_imagef(out4,(int2)(cIndex,rIndex),(float4)(g2,0,0,0));
+      write_imagef(out5,(int2)(cIndex,rIndex),(float4)(g3,0,0,0));
+
+   }
+
+      /*
+       * Centroid Calculation Kernel for Iterative Closest Point
+       * */
+      void kernel centroidKernel(read_only image2d_t one0, read_only image2d_t one1, read_only image2d_t one2, read_only image2d_t one3, read_only image2d_t one4,
+                                 read_only image2d_t one5, write_only image2d_t two0, write_only image2d_t two1, write_only image2d_t two2,
+                                 write_only image2d_t two3, write_only image2d_t two4, write_only image2d_t two5, global float* mean, global float* params)
+      {
+         int cIndex = get_global_id(0);
+         int rIndex = get_global_id(1);
+
+         int gid = cIndex * 10 + rIndex;
+
+         //   if(gid==0) printf("CentroidKernel() Works!\n");
+
+         float4 pointOne = (float4)(0,0,0,0);
+         float4 pointTwo = (float4)(0,0,0,0);
+
+         float meanVec[6];
+
+         int count = 0;
+
+         for(int k = 0; k<6; k++)
+         {
+            meanVec[k] = 0;
+            mean[gid*6 + k] = 0;
+         }
+
+         for(int i = 0; i< 10; i++)
+         {
+            for(int j = 0; j < 10; j++)
+            {
+               count += 1;
+
+               float cx1 = read_imagef(one3, (int2)(cIndex,rIndex)).x;
+               float cy1 = read_imagef(one4, (int2)(cIndex,rIndex)).x;
+               float cz1 = read_imagef(one5, (int2)(cIndex,rIndex)).x;
+
+               float cx2 = read_imagef(two3, (int2)(cIndex,rIndex)).x;
+               float cy2 = read_imagef(two4, (int2)(cIndex,rIndex)).x;
+               float cz2 = read_imagef(two5, (int2)(cIndex,rIndex)).x;
+
+               pointTwo = (float4)(cx1,cy1,cz1,0);
+               pointTwo = (float4)(cx2,cy2,cz2,0);
+
+               meanVec[0] += pointOne.x;
+               meanVec[1] += pointOne.y;
+               meanVec[2] += pointOne.z;
+               meanVec[3] += pointTwo.x;
+               meanVec[4] += pointTwo.y;
+               meanVec[5] += pointTwo.z;
+            }
+         }
+
+         // Store final 6x1 "correl" into gid'th block in "correlation"
+         for(int k = 0; k<6; k++)
+         {
+            mean[gid*6 + k] = (float)meanVec[k] / (float)count;
+         }
+         //   printf("Mean(%d) Count(%d): (%.3lf, %.3lf, %.3lf, %.3lf, %.3lf, %.3lf)\n", gid, count,
+         //          mean[gid*6], mean[gid*6 + 1], mean[gid*6 + 2], mean[gid*6 + 3], mean[gid*6 + 4], mean[gid*6 + 5]);
+      }
+
+
+
+      /*
+    * ICP Kernel for Iterative Closest Point
+    * */
+   void kernel correlationKernel(read_only image2d_t in0, read_only image2d_t in1, read_only image2d_t in2, read_only image2d_t in3, read_only image2d_t in4,
+   read_only image2d_t in5, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2,
+   write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, global float* correl, global float* params)
+   {
+      int cIndex=get_global_id(0);
+      int rIndex=get_global_id(1);
+
+      float4 pointOne = (float4)(0,0,0,0);
+      float4 pointTwo = (float4)(0,0,0,0);
+      float4 normalOne = (float4)(0,0,0,0);
+      float4 normalTwo = (float4)(0,0,0,0);
+
+      //   if(gid==0) printf("CorrespondenceKernel\n");
+
+      float minLength = 10000000;
+      float distance = 0;
+      int minIndex = -1;
+
+      float nx1 = read_imagef(in0, (int2)(cIndex,rIndex)).x;
+      float ny1 = read_imagef(in1, (int2)(cIndex,rIndex)).x;
+      float nz1 = read_imagef(in2, (int2)(cIndex,rIndex)).x;
+      float gx1 = read_imagef(in3, (int2)(cIndex,rIndex)).x;
+      float gy1 = read_imagef(in4, (int2)(cIndex,rIndex)).x;
+      float gz1 = read_imagef(in5, (int2)(cIndex,rIndex)).x;
+
+
+      pointOne = (float4)(gx1,gy1,gz1,0);
+      normalOne = (float4)(nx1,ny1,nz1,0);
+
+      for(int i = 0; i< 10; i++)
+      {
+         for(int j = 0; j < 10; j++)
+         {
+            float nx2 = read_imagef(in0, (int2)(cIndex,rIndex)).x;
+            float ny2 = read_imagef(in1, (int2)(cIndex,rIndex)).x;
+            float nz2 = read_imagef(in2, (int2)(cIndex,rIndex)).x;
+            float gx2 = read_imagef(in3, (int2)(cIndex,rIndex)).x;
+            float gy2 = read_imagef(in4, (int2)(cIndex,rIndex)).x;
+            float gz2 = read_imagef(in5, (int2)(cIndex,rIndex)).x;
+
+            pointTwo = (float4)(gx2,gy2,gz2,0);
+            normalTwo = (float4)(nx2,ny2,nz2,0);
+
+            //pointTwo = (float4)(cloudTwo[j*3+0], cloudTwo[j*3+1], cloudTwo[j*3+2], 0);
+            //pointTwo = transform(pointTwo, (float4)(transformTwo[0], transformTwo[1], transformTwo[2], 0),
+            //(float4)(transformTwo[3], transformTwo[4], transformTwo[5], 0),
+            //(float4)(transformTwo[6], transformTwo[7], transformTwo[8], 0),
+            //(float4)(transformTwo[9], transformTwo[10], transformTwo[11], 0));
+
+            distance = length(pointTwo - pointOne);
+            if(distance < minLength)
+            {
+               minIndex = j;
+               minLength = distance;
+            }
+         }
+      }
+
+      // Add 9x1 correlation vector into "correl" array
+      correl[0] += pointOne.x * pointTwo.x;
+      correl[1] += pointOne.x * pointTwo.y;
+      correl[2] += pointOne.x * pointTwo.z;
+      correl[3] += pointOne.y * pointTwo.x;
+      correl[4] += pointOne.y * pointTwo.y;
+      correl[5] += pointOne.y * pointTwo.z;
+      correl[6] += pointOne.z * pointTwo.x;
+      correl[7] += pointOne.z * pointTwo.y;
+      correl[8] += pointOne.z * pointTwo.z;
+   }
 

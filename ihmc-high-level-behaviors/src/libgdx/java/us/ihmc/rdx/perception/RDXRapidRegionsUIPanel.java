@@ -2,7 +2,6 @@ package us.ihmc.rdx.perception;
 
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
@@ -111,12 +110,12 @@ public class RDXRapidRegionsUIPanel
 
    public void render()
    {
-      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getNxImage().getBytedecoOpenCVMat());
-      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getNyImage().getBytedecoOpenCVMat());
-      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getNzImage().getBytedecoOpenCVMat());
-      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getCxImage().getBytedecoOpenCVMat());
-      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getCyImage().getBytedecoOpenCVMat());
-      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getPatchFeatureGrid().getCzImage().getBytedecoOpenCVMat());
+      nxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNxImage().getBytedecoOpenCVMat());
+      nyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNyImage().getBytedecoOpenCVMat());
+      nzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getNzImage().getBytedecoOpenCVMat());
+      gxImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCxImage().getBytedecoOpenCVMat());
+      gyImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCyImage().getBytedecoOpenCVMat());
+      gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
    }

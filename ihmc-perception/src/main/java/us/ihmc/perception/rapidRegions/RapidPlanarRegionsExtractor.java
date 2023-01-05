@@ -5,8 +5,6 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.MatVector;
 import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -44,7 +42,9 @@ public class RapidPlanarRegionsExtractor
 
    private SensorModel sensorModel;
 
-   private PatchFeatureGrid patchFeatureGrid;
+   private PatchFeatureGrid currentFeatureGrid;
+   private PatchFeatureGrid previousFeatureGrid;
+
    private BytedecoImage patchGraph;
 
    private BMatrixRMaj regionVisitedMatrix;
@@ -82,6 +82,7 @@ public class RapidPlanarRegionsExtractor
    private _cl_program planarRegionExtractionProgram;
    private _cl_kernel packKernel;
    private _cl_kernel mergeKernel;
+   private _cl_kernel copyKernel;
 
    // TODO: Remove
    private _cl_kernel sphericalBackProjectionKernel;
@@ -116,12 +117,13 @@ public class RapidPlanarRegionsExtractor
 
       debugger.create(imageHeight, imageWidth);
 
-      patchFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
+      currentFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
       patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
 
       planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
+      copyKernel = openCLManager.createKernel(planarRegionExtractionProgram, "copyKernel");
 
       // TODO: Remove
       cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
@@ -146,13 +148,15 @@ public class RapidPlanarRegionsExtractor
 
       debugger.create(imageHeight, imageWidth);
 
-      patchFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
+      currentFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
+      previousFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
       patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
 
       openCLManager.create();
       planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
+      copyKernel = openCLManager.createKernel(planarRegionExtractionProgram, "copyKernel");
 
       // TODO: Remove
       cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
@@ -190,6 +194,8 @@ public class RapidPlanarRegionsExtractor
       findBoundariesAndHoles();
       growRegionBoundaries();
       depthFirstSearchDurationStopwatch.suspend();
+
+      copyFeatureGridMapUsingOpenCL();
 
       wholeAlgorithmDurationStopwatch.suspend();
 
@@ -229,7 +235,8 @@ public class RapidPlanarRegionsExtractor
          patchSizeChanged = false;
          LogTools.info("Resizing patch image to {}x{}", patchImageWidth, patchImageHeight);
 
-         patchFeatureGrid.resize(patchImageWidth, patchImageHeight);
+         currentFeatureGrid.resize(patchImageWidth, patchImageHeight);
+         previousFeatureGrid.resize(patchImageWidth, patchImageHeight);
          patchGraph.resize(patchImageWidth, patchImageHeight, openCLManager, null);
 
          regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
@@ -243,7 +250,8 @@ public class RapidPlanarRegionsExtractor
          firstRun = false;
          inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-         patchFeatureGrid.createOpenCLImages();
+         currentFeatureGrid.createOpenCLImages();
+         previousFeatureGrid.createOpenCLImages();
 
          patchGraph.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
@@ -258,26 +266,26 @@ public class RapidPlanarRegionsExtractor
       _cl_mem inputImage = inputU16DepthImage.getOpenCLImageObject();
 
       openCLManager.setKernelArgument(packKernel, 0, inputImage);
-      openCLManager.setKernelArgument(packKernel, 1, patchFeatureGrid.getNxImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 2, patchFeatureGrid.getNyImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 3, patchFeatureGrid.getNzImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 4, patchFeatureGrid.getCxImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 5, patchFeatureGrid.getCyImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 6, patchFeatureGrid.getCzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 1, currentFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 2, currentFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 3, currentFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 4, currentFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 5, currentFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 6, currentFeatureGrid.getCzImage().getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 7, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(packKernel, patchImageWidth, patchImageHeight);
 
-      openCLManager.setKernelArgument(mergeKernel, 0, patchFeatureGrid.getNxImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 1, patchFeatureGrid.getNyImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 2, patchFeatureGrid.getNzImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 3, patchFeatureGrid.getCxImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 4, patchFeatureGrid.getCyImage().getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 5, patchFeatureGrid.getCzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 0, currentFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 1, currentFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 2, currentFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 3, currentFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 4, currentFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 5, currentFeatureGrid.getCzImage().getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 6, patchGraph.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(mergeKernel, patchImageWidth, patchImageHeight);
 
-      patchFeatureGrid.readOpenCLImages();
+      currentFeatureGrid.readOpenCLImages();
       patchGraph.readOpenCLImage(openCLManager);
 
       // TODO: Remove
@@ -287,6 +295,25 @@ public class RapidPlanarRegionsExtractor
       openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
       cloudBuffer.readOpenCLBufferObject(openCLManager);
 
+      openCLManager.finish();
+   }
+
+   public void copyFeatureGridMapUsingOpenCL()
+   {
+      openCLManager.setKernelArgument(copyKernel, 0, currentFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 1, currentFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 2, currentFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 3, currentFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 4, currentFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 5, currentFeatureGrid.getCzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 6, previousFeatureGrid.getNxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 7, previousFeatureGrid.getNyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 8, previousFeatureGrid.getNzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 9, previousFeatureGrid.getCxImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 10, previousFeatureGrid.getCyImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 11, previousFeatureGrid.getCzImage().getOpenCLImageObject());
+      openCLManager.setKernelArgument(copyKernel, 12, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.execute2D(copyKernel, patchImageWidth, patchImageHeight);
       openCLManager.finish();
    }
 
@@ -421,9 +448,9 @@ public class RapidPlanarRegionsExtractor
                                         //float vertexY = -cxImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
                                         //float vertexZ = cyImage.getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
-                                        float vertexX = patchFeatureGrid.getCxImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        float vertexY = patchFeatureGrid.getCyImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
-                                        float vertexZ = patchFeatureGrid.getCzImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        float vertexX = currentFeatureGrid.getCxImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        float vertexY = currentFeatureGrid.getCyImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
+                                        float vertexZ = currentFeatureGrid.getCzImage().getFloatDirect((int) boundaryIndex.getY(), (int) boundaryIndex.getX());
 
                                         Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                                         boundaryVertex.set(vertexX, vertexY, vertexZ);
@@ -566,12 +593,12 @@ public class RapidPlanarRegionsExtractor
          //float cz = cyImage.getFloatDirect(row, column);
          //float cx = czImage.getFloatDirect(row, column);
 
-         float nx = patchFeatureGrid.getNxImage().getFloatDirect(row, column);
-         float ny = patchFeatureGrid.getNyImage().getFloatDirect(row, column);
-         float nz = patchFeatureGrid.getNzImage().getFloatDirect(row, column);
-         float cx = patchFeatureGrid.getCxImage().getFloatDirect(row, column);
-         float cy = patchFeatureGrid.getCyImage().getFloatDirect(row, column);
-         float cz = patchFeatureGrid.getCzImage().getFloatDirect(row, column);
+         float nx = currentFeatureGrid.getNxImage().getFloatDirect(row, column);
+         float ny = currentFeatureGrid.getNyImage().getFloatDirect(row, column);
+         float nz = currentFeatureGrid.getNzImage().getFloatDirect(row, column);
+         float cx = currentFeatureGrid.getCxImage().getFloatDirect(row, column);
+         float cy = currentFeatureGrid.getCyImage().getFloatDirect(row, column);
+         float cz = currentFeatureGrid.getCzImage().getFloatDirect(row, column);
 
          planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
@@ -605,7 +632,7 @@ public class RapidPlanarRegionsExtractor
 
    public void destroy()
    {
-      patchFeatureGrid.destroy();
+      currentFeatureGrid.destroy();
       patchGraph.destroy(openCLManager);
       inputU16DepthImage.destroy(openCLManager);
       openCLManager.destroy();
@@ -707,9 +734,14 @@ public class RapidPlanarRegionsExtractor
       return depthFirstSearchDurationStopwatch;
    }
 
-   public PatchFeatureGrid getPatchFeatureGrid()
+   public PatchFeatureGrid getCurrentFeatureGrid()
    {
-      return patchFeatureGrid;
+      return currentFeatureGrid;
+   }
+
+   public PatchFeatureGrid getPreviousFeatureGrid()
+   {
+      return currentFeatureGrid;
    }
 }
 
