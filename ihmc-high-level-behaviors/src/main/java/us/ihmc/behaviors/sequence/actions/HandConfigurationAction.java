@@ -17,7 +17,7 @@ public class HandConfigurationAction extends HandConfigurationActionData impleme
    }
 
    @Override
-   public void performAction()
+   public void executeAction()
    {
       HandDesiredConfigurationMessage message
             = HumanoidMessageTools.createHandDesiredConfigurationMessage(getSide(),

@@ -52,9 +52,10 @@ public class RDXBehaviorActionSequenceEditor
    private ROS2ControllerHelper ros2;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private boolean loading = false;
-   private int nextActionIndexStatus;
+   private long receivedStatusMessageCount = 0;
+   private int executionNextIndexStatus;
    private final Int32 currentActionIndexCommandMessage = new Int32();
-   private IHMCROS2Input<Int32> nextActionIndexStatusSubscription;
+   private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
    private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
@@ -91,7 +92,7 @@ public class RDXBehaviorActionSequenceEditor
       this.referenceFrameLibrary = referenceFrameLibrary;
       ros2 = new ROS2ControllerHelper(ros2Node, robotModel);
 
-      nextActionIndexStatusSubscription = ros2.subscribe(BehaviorActionSequence.CURRENT_ACTION_INDEX_STATUS_TOPIC);
+      executionNextIndexStatusSubscription = ros2.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
       automaticExecutionStatusSubscription = ros2.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
    }
 
@@ -136,7 +137,7 @@ public class RDXBehaviorActionSequenceEditor
    private void commandNextActionIndex(int nextActionIndex)
    {
       currentActionIndexCommandMessage.setData(nextActionIndex);
-      ros2.publish(BehaviorActionSequence.CURRENT_ACTION_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
+      ros2.publish(BehaviorActionSequence.EXECUTION_NEXT_INDEX_COMMAND_TOPIC, currentActionIndexCommandMessage);
    }
 
    public void saveToFile()
@@ -220,25 +221,27 @@ public class RDXBehaviorActionSequenceEditor
       ImGuiTools.previousWidgetTooltip("Collapse all action settings");
       ImGui.sameLine();
 
-      nextActionIndexStatus = nextActionIndexStatusSubscription.getLatest().getData();
+      if (executionNextIndexStatusSubscription.getMessageNotification().poll())
+         ++receivedStatusMessageCount;
+      executionNextIndexStatus = executionNextIndexStatusSubscription.getLatest().getData();
 
       if (ImGui.button(labels.get("<")))
       {
-         if (nextActionIndexStatus > 0)
-            commandNextActionIndex(nextActionIndexStatus - 1);
+         if (executionNextIndexStatus > 0)
+            commandNextActionIndex(executionNextIndexStatus - 1);
       }
       ImGuiTools.previousWidgetTooltip("Go to previous action");
       ImGui.sameLine();
-      ImGui.text("Index: " + String.format("%03d", nextActionIndexStatus));
+      ImGui.text("Index: " + String.format("%03d", executionNextIndexStatus));
       ImGui.sameLine();
       if (ImGui.button(labels.get(">")))
       {
-         if (nextActionIndexStatus < actionSequence.size())
-            commandNextActionIndex(nextActionIndexStatus + 1);
+         if (executionNextIndexStatus < actionSequence.size())
+            commandNextActionIndex(executionNextIndexStatus + 1);
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
-      boolean endOfSequence = nextActionIndexStatus >= actionSequence.size();
+      boolean endOfSequence = executionNextIndexStatus >= actionSequence.size();
       if (!endOfSequence)
       {
          ImGui.sameLine();
@@ -263,6 +266,7 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
 
+      // TODO: Automatically sync between this UI and remote process
       if (ImGui.button("Send to robot"))
       {
          long updateUUID = UUID.randomUUID().getLeastSignificantBits();
@@ -349,13 +353,13 @@ public class RDXBehaviorActionSequenceEditor
          }
       }
 
-      ImGui.text("Current action:");
+      ImGui.text(String.format("Status # %d: Current action:", receivedStatusMessageCount));
       ImGui.sameLine();
-      endOfSequence = nextActionIndexStatus >= actionSequence.size();
+      endOfSequence = executionNextIndexStatus >= actionSequence.size();
       if (endOfSequence)
          ImGui.text("End of sequence.");
       else
-         ImGui.text(actionSequence.get(nextActionIndexStatus).getNameForDisplay());
+         ImGui.text(actionSequence.get(executionNextIndexStatus).getNameForDisplay());
 
       ImGui.separator();
 
@@ -368,7 +372,7 @@ public class RDXBehaviorActionSequenceEditor
       for (int i = 0; i < actionSequence.size(); i++)
       {
          RDXBehaviorAction action = actionSequence.get(i);
-         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), nextActionIndexStatus == i))
+         if (ImGui.radioButton(labels.get("", "playbackNextIndex", i), executionNextIndexStatus == i))
          {
             commandNextActionIndex(i);
          }
@@ -496,7 +500,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXFootstepAction findNextPreviousFootstepAction()
    {
       RDXFootstepAction previousAction = null;
-      for (int i = 0; i < nextActionIndexStatus; i++)
+      for (int i = 0; i < executionNextIndexStatus; i++)
          if (actionSequence.get(i) instanceof RDXFootstepAction)
             previousAction = (RDXFootstepAction) actionSequence.get(i);
       return previousAction;
@@ -505,7 +509,7 @@ public class RDXBehaviorActionSequenceEditor
    private RDXHandPoseAction findNextPreviousHandPoseAction(RobotSide side)
    {
       RDXHandPoseAction previousAction = null;
-      for (int i = 0; i < nextActionIndexStatus - 1; i++)
+      for (int i = 0; i < executionNextIndexStatus - 1; i++)
       {
          if (actionSequence.get(i) instanceof RDXHandPoseAction
              && ((RDXHandPoseAction) actionSequence.get(i)).getActionData().getSide() == side)
@@ -518,13 +522,13 @@ public class RDXBehaviorActionSequenceEditor
 
    private void insertNewAction(RDXBehaviorAction action)
    {
-      actionSequence.add(nextActionIndexStatus, action);
+      actionSequence.add(executionNextIndexStatus, action);
       for (int i = 0; i < actionSequence.size(); i++)
       {
          // When loading, we want to deselect all the actions, otherwise the last one ends up being selected.
-         actionSequence.get(i).getSelected().set(!loading && i == nextActionIndexStatus);
+         actionSequence.get(i).getSelected().set(!loading && i == executionNextIndexStatus);
       }
-      nextActionIndexStatus++;
+      executionNextIndexStatus++;
    }
 
    private RDXFootstepAction newFootstepAction(RDXFootstepAction possiblyNullPreviousFootstepAction)

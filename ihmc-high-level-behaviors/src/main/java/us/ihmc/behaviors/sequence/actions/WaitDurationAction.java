@@ -8,7 +8,7 @@ public class WaitDurationAction extends WaitDurationActionData implements Behavi
    private final Timer timer = new Timer();
 
    @Override
-   public void performAction()
+   public void executeAction()
    {
       timer.reset();
    }

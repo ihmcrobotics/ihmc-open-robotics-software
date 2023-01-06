@@ -38,7 +38,7 @@ public class FootstepAction extends FootstepActionData implements BehaviorAction
    }
 
    @Override
-   public void performAction()
+   public void executeAction()
    {
       double swingDuration = 1.2;
       double transferDuration = 0.8;
