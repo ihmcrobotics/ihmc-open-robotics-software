@@ -57,7 +57,7 @@ public class RapidPatchesBasedICP
       this.patchRows = patchRows;
       this.patchColumns = patchColumns;
 
-      parametersBuffer = new OpenCLFloatBuffer(4);
+      parametersBuffer = new OpenCLFloatBuffer(10);
       centroidBuffer = new OpenCLFloatBuffer(patchColumns * 6);
       correlBuffer = new OpenCLFloatBuffer(patchRows * patchColumns * 9);
 
@@ -108,13 +108,13 @@ public class RapidPatchesBasedICP
          LogTools.info("After Centroid Kernel");
 
          setFeatureGridKernelArguments(correlReduceKernel, previousFeatureGrid, currentFeatureGrid);
-         openCLManager.setKernelArgument(centroidReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(centroidReduceKernel, 13, columnMatchIndexImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(centroidReduceKernel, 14, correlBuffer.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(centroidReduceKernel, 15, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(correlReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(correlReduceKernel, 13, columnMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(correlReduceKernel, 14, correlBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(correlReduceKernel, 15, parametersBuffer.getOpenCLBufferObject());
 
          LogTools.info("Before Correlation Kernel");
-         openCLManager.execute2D(correlReduceKernel, patchColumns, patchRows);
+         openCLManager.execute1D(correlReduceKernel, patchColumns);
          LogTools.info("After Correlation Kernel");
 
 

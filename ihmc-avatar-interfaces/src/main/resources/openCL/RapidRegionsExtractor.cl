@@ -711,22 +711,23 @@ void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t
 void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2,
                               read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
                               read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
-                              read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5, global float* correl, global float* params)
+                              read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
+										read_write image2d_t matchRowImage, read_write image2d_t matchColumnImage, global float* correlation, global float* params)
 {
     int cIndex = get_global_id(0);
 
-
+	 float correl[9];
     float4 pointOne = (float4)(0,0,0,0);
     float4 pointTwo = (float4)(0,0,0,0);
     float columnMeanVec[6];
     int countOne = 0;
     int countTwo = 0;
 
-    for(int k = 0; k<6; k++)
-    {
-        columnMeanVec[k] = 0;
-        mean[cIndex * 6 + k] = 0;
-    }
+	for(int k = 0; k<9; k++)
+	{
+		correl[k] = 0;
+		correlation[cIndex*9 + k] = 0;
+	}
 
     for(int rIndex = 0; rIndex<params[0]; rIndex++)
     {
@@ -745,31 +746,34 @@ void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t o
             float cx1 = read_imagef(one3, pos).x;
             float cy1 = read_imagef(one4, pos).x;
             float cz1 = read_imagef(one5, pos).x;
-            pointOne = (float4)(cx1,cy1,cz1,0);
-            columnMeanVec[0] += pointOne.x;
-            columnMeanVec[1] += pointOne.y;
-            columnMeanVec[2] += pointOne.z;
+            pointOne = (float4)(cx1 - params[4], cy1 - params[5], cz1 - params[6],0);
+
 
             countTwo += 1;
             float cx2 = read_imagef(two3, matchPos).x;
             float cy2 = read_imagef(two4, matchPos).x;
             float cz2 = read_imagef(two5, matchPos).x;
-            pointTwo = (float4)(cx2,cy2,cz2,0);
-            columnMeanVec[3] += pointTwo.x;
-            columnMeanVec[4] += pointTwo.y;
-            columnMeanVec[5] += pointTwo.z;
+            pointTwo = (float4)(cx2 - params[7], cy2 - params[8], cz2 - params[9], 0);
+
+				// float weight = 1.0/(float)(length(pointOne - pointTwo));
+
+				// Add 9x1 correlation vector into "correl" array
+				correl[0] += pointOne.x * pointTwo.x;
+				correl[1] += pointOne.x * pointTwo.y;
+				correl[2] += pointOne.x * pointTwo.z;
+				correl[3] += pointOne.y * pointTwo.x;
+				correl[4] += pointOne.y * pointTwo.y;
+				correl[5] += pointOne.y * pointTwo.z;
+				correl[6] += pointOne.z * pointTwo.x;
+				correl[7] += pointOne.z * pointTwo.y;
+				correl[8] += pointOne.z * pointTwo.z;
         }
     }
 
-    // Add 9x1 correlation vector into "correl" array
-    correl[0] += pointOne.x * pointTwo.x;
-    correl[1] += pointOne.x * pointTwo.y;
-    correl[2] += pointOne.x * pointTwo.z;
-    correl[3] += pointOne.y * pointTwo.x;
-    correl[4] += pointOne.y * pointTwo.y;
-    correl[5] += pointOne.y * pointTwo.z;
-    correl[6] += pointOne.z * pointTwo.x;
-    correl[7] += pointOne.z * pointTwo.y;
-    correl[8] += pointOne.z * pointTwo.z;
+		// Store final 9x1 "correl" into cIndex'th block in "correlation"
+		for(int k = 0; k<9; k++)
+		{
+			correlation[cIndex * 9 + k] = correl[k];
+		}
 }
 
