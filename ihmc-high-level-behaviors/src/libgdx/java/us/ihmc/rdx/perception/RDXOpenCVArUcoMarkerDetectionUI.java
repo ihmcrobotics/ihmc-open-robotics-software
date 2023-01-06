@@ -64,6 +64,11 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImPlotDoublePlotLine restOfStuffPlotLine = new ImPlotDoublePlotLine("Other stuff");
 
+   public RDXOpenCVArUcoMarkerDetectionUI()
+   {
+      this("UI");
+   }
+
    public RDXOpenCVArUcoMarkerDetectionUI(String namePostfix)
    {
       this.namePostfix = namePostfix;
@@ -127,7 +132,9 @@ public class RDXOpenCVArUcoMarkerDetectionUI
             arUcoMarkerDetection.drawDetectedMarkers(imageForDrawing.getBytedecoOpenCVMat(), idColor);
             arUcoMarkerDetection.drawRejectedPoints(imageForDrawing.getBytedecoOpenCVMat());
 
-            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(), markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_RGB2RGBA);
+            opencv_imgproc.cvtColor(imageForDrawing.getBytedecoOpenCVMat(),
+                                    markerImagePanel.getBytedecoImage().getBytedecoOpenCVMat(),
+                                    opencv_imgproc.COLOR_RGB2RGBA);
 
             markerImagePanel.draw();
          }
