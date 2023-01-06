@@ -33,7 +33,7 @@ public class HandPoseAction extends HandPoseActionData implements BehaviorAction
    }
 
    @Override
-   public void performAction()
+   public void executeAction()
    {
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
       handTrajectoryMessage.setRobotSide(getSide().toByte());

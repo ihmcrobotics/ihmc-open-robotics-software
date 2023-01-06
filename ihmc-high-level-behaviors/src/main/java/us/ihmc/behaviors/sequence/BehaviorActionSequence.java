@@ -13,6 +13,7 @@ import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.HashMap;
@@ -45,8 +46,8 @@ public class BehaviorActionSequence
    public static final ROS2Topic<Empty> MANUALLY_EXECUTE_NEXT_ACTION_TOPIC = COMMAND_TOPIC.withType(Empty.class).withSuffix("manually_execute_next_action");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_COMMAND_TOPIC = COMMAND_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
    public static final ROS2Topic<Bool> AUTOMATIC_EXECUTION_STATUS_TOPIC = STATUS_TOPIC.withType(Bool.class).withSuffix("automatic_execution");
-   public static final ROS2Topic<Int32> CURRENT_ACTION_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("current_action_index");
-   public static final ROS2Topic<Int32> CURRENT_ACTION_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("current_action_index");
+   public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_COMMAND_TOPIC = COMMAND_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
+   public static final ROS2Topic<Int32> EXECUTION_NEXT_INDEX_STATUS_TOPIC = STATUS_TOPIC.withType(Int32.class).withSuffix("execution_next_index");
 
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2;
@@ -56,6 +57,8 @@ public class BehaviorActionSequence
 
    private final LinkedList<BehaviorAction> actionSequence = new LinkedList<>();
    private final IHMCROS2Input<Empty> manuallyExecuteSubscription;
+   private final IHMCROS2Input<Bool> automaticExecutionSubscription;
+   private final IHMCROS2Input<Int32> executionNextIndexSubscription;
    private boolean automaticExecution = false;
    private int excecutionNextIndex = 0;
    private BehaviorAction currentlyExecutingAction = null;
@@ -71,7 +74,8 @@ public class BehaviorActionSequence
    private final BehaviorActionReceiver<PelvisHeightActionMessage> pelvisHeightMessageReceiver = new BehaviorActionReceiver<>();
    private final BehaviorActionReceiver<WaitDurationActionMessage> waitDurationMessageReceiver = new BehaviorActionReceiver<>();
    private final BehaviorActionReceiver<WalkActionMessage> walkMessageReceiver = new BehaviorActionReceiver<>();
-   public final Int32 currentActionIndexStatusMessage = new Int32();
+   public final Int32 executionNextIndexStatusMessage = new Int32();
+   public final Bool automaticExecutionStatusMessage = new Bool();
 
    public BehaviorActionSequence(DRCRobotModel robotModel, ROS2ControllerHelper ros2, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -105,6 +109,8 @@ public class BehaviorActionSequence
       ros2.subscribeViaCallback(WALK_UPDATE_TOPIC,
                                 message -> walkMessageReceiver.receive(message, message.getActionInformation(), receivedMessagesForID));
       manuallyExecuteSubscription = ros2.subscribe(MANUALLY_EXECUTE_NEXT_ACTION_TOPIC);
+      automaticExecutionSubscription = ros2.subscribe(AUTOMATIC_EXECUTION_COMMAND_TOPIC);
+      executionNextIndexSubscription = ros2.subscribe(EXECUTION_NEXT_INDEX_COMMAND_TOPIC);
    }
 
    public static void addCommonFrames(ReferenceFrameLibrary referenceFrameLibrary, ROS2SyncedRobotModel syncedRobot)
@@ -194,6 +200,8 @@ public class BehaviorActionSequence
 
          if (excecutionNextIndex > numberOfActionsReceived)
             excecutionNextIndex = numberOfActionsReceived;
+
+         LogTools.info("Updated action sequence recieved with {} actions. Execution next index: {}", actionSequence.size(), excecutionNextIndex);
       }
 
       syncedRobot.update();
@@ -201,8 +209,16 @@ public class BehaviorActionSequence
       for (var action : actionSequence)
          action.update();
 
-      currentActionIndexStatusMessage.setData(excecutionNextIndex);
-      ros2.publish(CURRENT_ACTION_INDEX_STATUS_TOPIC, currentActionIndexStatusMessage);
+      if (automaticExecutionSubscription.getMessageNotification().poll())
+         automaticExecution = automaticExecutionSubscription.getMessageNotification().read().getData();
+      if (executionNextIndexSubscription.getMessageNotification().poll())
+         excecutionNextIndex = executionNextIndexSubscription.getMessageNotification().read().getData();
+
+      // Throttle this output?
+      executionNextIndexStatusMessage.setData(excecutionNextIndex);
+      ros2.publish(EXECUTION_NEXT_INDEX_STATUS_TOPIC, executionNextIndexStatusMessage);
+      automaticExecutionStatusMessage.setData(automaticExecution);
+      ros2.publish(AUTOMATIC_EXECUTION_STATUS_TOPIC, automaticExecutionStatusMessage);
 
       if (automaticExecution)
       {
@@ -214,11 +230,13 @@ public class BehaviorActionSequence
          }
          else if (currentlyExecutingAction == null || !currentlyExecutingAction.isExecuting())
          {
+            LogTools.info("Automatically executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
             executeNextAction();
          }
       }
       else if (manuallyExecuteSubscription.getMessageNotification().poll())
       {
+         LogTools.info("Manually executing action: {}", actionSequence.get(excecutionNextIndex).getClass().getSimpleName());
          executeNextAction();
       }
    }
@@ -226,7 +244,7 @@ public class BehaviorActionSequence
    private void executeNextAction()
    {
       currentlyExecutingAction = actionSequence.get(excecutionNextIndex);
-      currentlyExecutingAction.performAction();
+      currentlyExecutingAction.executeAction();
       excecutionNextIndex++;
    }
 }
