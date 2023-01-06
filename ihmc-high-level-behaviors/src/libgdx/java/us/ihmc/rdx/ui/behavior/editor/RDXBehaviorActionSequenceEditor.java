@@ -52,13 +52,15 @@ public class RDXBehaviorActionSequenceEditor
    private ROS2ControllerHelper ros2;
    private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
    private boolean loading = false;
+   private volatile long receivedSequenceStatusMessageCount = 0;
    private long receivedStatusMessageCount = 0;
    private int executionNextIndexStatus;
    private final Int32 currentActionIndexCommandMessage = new Int32();
    private IHMCROS2Input<Int32> executionNextIndexStatusSubscription;
+   private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
+   private IHMCROS2Input<ActionSequenceUpdateMessage> sequenceStatusSubscription;
    private final Empty manuallyExecuteNextActionMessage = new Empty();
    private final Bool automaticExecutionCommandMessage = new Bool();
-   private IHMCROS2Input<Bool> automaticExecutionStatusSubscription;
 
    public RDXBehaviorActionSequenceEditor(WorkspaceFile fileToLoadFrom)
    {
@@ -94,6 +96,8 @@ public class RDXBehaviorActionSequenceEditor
 
       executionNextIndexStatusSubscription = ros2.subscribe(BehaviorActionSequence.EXECUTION_NEXT_INDEX_STATUS_TOPIC);
       automaticExecutionStatusSubscription = ros2.subscribe(BehaviorActionSequence.AUTOMATIC_EXECUTION_STATUS_TOPIC);
+      sequenceStatusSubscription = ros2.subscribe(BehaviorActionSequence.SEQUENCE_STATUS_TOPIC);
+      sequenceStatusSubscription.addCallback(message -> ++receivedSequenceStatusMessageCount);
    }
 
    public void loadNameFromFile()
@@ -241,8 +245,11 @@ public class RDXBehaviorActionSequenceEditor
       }
       ImGuiTools.previousWidgetTooltip("Go to next action");
 
+      long remoteSequenceSize = sequenceStatusSubscription.getLatest().getSequenceSize();
+      boolean outOfSync = remoteSequenceSize != actionSequence.size();
+
       boolean endOfSequence = executionNextIndexStatus >= actionSequence.size();
-      if (!endOfSequence)
+      if (!endOfSequence && !outOfSync)
       {
          ImGui.sameLine();
          ImGui.text("Execute");
@@ -351,6 +358,14 @@ public class RDXBehaviorActionSequenceEditor
                ros2.publish(BehaviorActionSequence.WALK_UPDATE_TOPIC, walkActionMessage);
             }
          }
+      }
+      ImGui.sameLine();
+      ImGui.text("# " + receivedSequenceStatusMessageCount);
+      if (outOfSync)
+      {
+         ImGui.sameLine();
+         ImGui.text(String.format("Out of sync! # Actions: Local: %d Remote: %d", actionSequence.size(), remoteSequenceSize));
+         ImGuiTools.previousWidgetTooltip("Try clicking \"Send to robot\"");
       }
 
       ImGui.text(String.format("Status # %d: Current action:", receivedStatusMessageCount));

@@ -37,16 +37,15 @@ public class WalkAction extends WalkActionData implements BehaviorAction
 
    public WalkAction(ROS2ControllerHelper ros2ControllerHelper,
                      ROS2SyncedRobotModel syncedRobot,
-                     DRCRobotModel robotModel,
                      FootstepPlanningModule footstepPlanner,
+                     FootstepPlannerParametersBasics footstepPlannerParameters,
                      ReferenceFrameLibrary referenceFrameLibrary)
    {
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.footstepPlanner = footstepPlanner;
+      this.footstepPlannerParameters = footstepPlannerParameters;
       this.referenceFrameLibrary = referenceFrameLibrary;
-
-      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
    }
 
    @Override
