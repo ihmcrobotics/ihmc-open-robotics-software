@@ -708,60 +708,57 @@ void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t
 /*
 * ICP Kernel for Iterative Closest Point
 * */
-void kernel correlationKernel(read_only image2d_t in0, read_only image2d_t in1, read_only image2d_t in2, read_only image2d_t in3, read_only image2d_t in4,
-                        read_only image2d_t in5, write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2,
-                        write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, global float* correl, global float* params)
+void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2,
+                              read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
+                              read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
+                              read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5, global float* correl, global float* params)
 {
-    int cIndex=get_global_id(0);
-    int rIndex=get_global_id(1);
+    int cIndex = get_global_id(0);
+
 
     float4 pointOne = (float4)(0,0,0,0);
     float4 pointTwo = (float4)(0,0,0,0);
-    float4 normalOne = (float4)(0,0,0,0);
-    float4 normalTwo = (float4)(0,0,0,0);
+    float columnMeanVec[6];
+    int countOne = 0;
+    int countTwo = 0;
 
-    float minLength = 10000000;
-    float distance = 0;
-    int minIndex = -1;
-
-    float nx1 = read_imagef(in0, (int2)(cIndex,rIndex)).x;
-    float ny1 = read_imagef(in1, (int2)(cIndex,rIndex)).x;
-    float nz1 = read_imagef(in2, (int2)(cIndex,rIndex)).x;
-    float gx1 = read_imagef(in3, (int2)(cIndex,rIndex)).x;
-    float gy1 = read_imagef(in4, (int2)(cIndex,rIndex)).x;
-    float gz1 = read_imagef(in5, (int2)(cIndex,rIndex)).x;
-
-
-    pointOne = (float4)(gx1,gy1,gz1,0);
-    normalOne = (float4)(nx1,ny1,nz1,0);
-
-    for(int i = 0; i< 10; i++)
+    for(int k = 0; k<6; k++)
     {
-     for(int j = 0; j < 10; j++)
-     {
-        float nx2 = read_imagef(in0, (int2)(cIndex,rIndex)).x;
-        float ny2 = read_imagef(in1, (int2)(cIndex,rIndex)).x;
-        float nz2 = read_imagef(in2, (int2)(cIndex,rIndex)).x;
-        float gx2 = read_imagef(in3, (int2)(cIndex,rIndex)).x;
-        float gy2 = read_imagef(in4, (int2)(cIndex,rIndex)).x;
-        float gz2 = read_imagef(in5, (int2)(cIndex,rIndex)).x;
+        columnMeanVec[k] = 0;
+        mean[cIndex * 6 + k] = 0;
+    }
 
-        pointTwo = (float4)(gx2,gy2,gz2,0);
-        normalTwo = (float4)(nx2,ny2,nz2,0);
+    for(int rIndex = 0; rIndex<params[0]; rIndex++)
+    {
+        if(rIndex == 0 && cIndex == 0) printf("CentroidReduceKernel\n");
 
-        //pointTwo = (float4)(cloudTwo[j*3+0], cloudTwo[j*3+1], cloudTwo[j*3+2], 0);
-        //pointTwo = transform(pointTwo, (float4)(transformTwo[0], transformTwo[1], transformTwo[2], 0),
-        //(float4)(transformTwo[3], transformTwo[4], transformTwo[5], 0),
-        //(float4)(transformTwo[6], transformTwo[7], transformTwo[8], 0),
-        //(float4)(transformTwo[9], transformTwo[10], transformTwo[11], 0));
+        int2 pos = (int2)(cIndex,rIndex);
 
-        distance = length(pointTwo - pointOne);
-        if(distance < minLength)
+        uint matchRow = (uint) read_imageui(matchRowImage, pos).x;
+        uint matchColumn = (uint) read_imageui(matchColumnImage, pos).x;
+        int2 matchPos = (int2)(matchColumn, matchRow);
+
+
+        if(matchRow != 0 && matchColumn != 0)
         {
-           minIndex = j;
-           minLength = distance;
+            countOne += 1;
+            float cx1 = read_imagef(one3, pos).x;
+            float cy1 = read_imagef(one4, pos).x;
+            float cz1 = read_imagef(one5, pos).x;
+            pointOne = (float4)(cx1,cy1,cz1,0);
+            columnMeanVec[0] += pointOne.x;
+            columnMeanVec[1] += pointOne.y;
+            columnMeanVec[2] += pointOne.z;
+
+            countTwo += 1;
+            float cx2 = read_imagef(two3, matchPos).x;
+            float cy2 = read_imagef(two4, matchPos).x;
+            float cz2 = read_imagef(two5, matchPos).x;
+            pointTwo = (float4)(cx2,cy2,cz2,0);
+            columnMeanVec[3] += pointTwo.x;
+            columnMeanVec[4] += pointTwo.y;
+            columnMeanVec[5] += pointTwo.z;
         }
-     }
     }
 
     // Add 9x1 correlation vector into "correl" array
