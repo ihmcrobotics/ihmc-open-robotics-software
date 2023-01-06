@@ -273,7 +273,7 @@ public class RDXBehaviorActionSequenceEditor
          ActionSequenceUpdateMessage actionSequenceUpdateMessage = new ActionSequenceUpdateMessage();
          actionSequenceUpdateMessage.setSequenceUpdateUuid(updateUUID);
          actionSequenceUpdateMessage.setSequenceSize(actionSequence.size());
-         ros2.publish(BehaviorActionSequence.UPDATE_TOPIC, actionSequenceUpdateMessage);
+         ros2.publish(BehaviorActionSequence.SEQUENCE_COMMAND_TOPIC, actionSequenceUpdateMessage);
 
          for (int i = 0; i < actionSequence.size(); i++)
          {
