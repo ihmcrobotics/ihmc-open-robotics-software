@@ -42,7 +42,7 @@ public class FootstepActionData implements BehaviorActionData
    public void fromMessage(FootstepActionMessage message)
    {
       side = RobotSide.fromByte(message.getRobotSide());
-      parentFrameName = message.getParentFrame().toString();
+      parentFrameName = message.getParentFrame().getString(0);
       MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
    }
 

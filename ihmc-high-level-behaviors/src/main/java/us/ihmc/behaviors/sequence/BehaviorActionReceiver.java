@@ -4,6 +4,7 @@ import behavior_msgs.msg.dds.ActionInformationMessage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class BehaviorActionReceiver<T>
 {
@@ -28,8 +29,13 @@ public class BehaviorActionReceiver<T>
       }
    }
 
-   public ArrayList<T> removeActionList(long sequenceUpdateUUID)
+   /**
+    * @return list containing all the actions received for this UUID or an empty list if no actions were received for this UUID
+    */
+   public List<T> removeActionList(long sequenceUpdateUUID)
    {
-      return receivedActionsByUUID.remove(sequenceUpdateUUID);
+      ArrayList<T> removedActionList = receivedActionsByUUID.remove(sequenceUpdateUUID);
+      // List.of() returns the same contant empty list on each call
+      return removedActionList == null ? List.of() : removedActionList;
    }
 }

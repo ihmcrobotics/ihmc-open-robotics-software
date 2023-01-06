@@ -45,7 +45,7 @@ public class HandPoseActionData implements BehaviorActionData
 
    public void fromMessage(HandPoseActionMessage message)
    {
-      parentFrameName = message.getParentFrame().toString();
+      parentFrameName = message.getParentFrame().getString(0);
       side = RobotSide.fromByte(message.getRobotSide());
       trajectoryDuration = message.getTrajectoryDuration();
       MessageTools.toEuclid(message.getTransformToParent(), transformToParent);

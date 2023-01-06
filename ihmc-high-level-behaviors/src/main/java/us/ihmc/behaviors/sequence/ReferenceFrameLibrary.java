@@ -43,8 +43,7 @@ public class ReferenceFrameLibrary
    {
       for (int i = 0; i < referenceFrames.size(); i++)
       {
-         ReferenceFrame referenceFrame = referenceFrames.get(i);
-         if (referenceFrameName.equals(referenceFrame.getName()))
+         if (referenceFrameName.equals(referenceFrameNames[i]))
          {
             return i;
          }
