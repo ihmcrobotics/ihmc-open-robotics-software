@@ -71,6 +71,9 @@ public class RDXHandPoseAction extends RDXBehaviorAction
    public void updateAfterLoading()
    {
       setSide(actionData.getSide(), false, null);
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
+      poseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+      changeDerivativeFrames();
    }
 
    public void setSide(RobotSide side, boolean authoring, RDXHandPoseAction possiblyNullPreviousAction)
