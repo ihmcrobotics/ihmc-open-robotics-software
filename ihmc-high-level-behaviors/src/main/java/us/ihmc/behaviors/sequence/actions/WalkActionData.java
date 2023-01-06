@@ -63,7 +63,7 @@ public class WalkActionData implements BehaviorActionData
 
    public void fromMessage(WalkActionMessage message)
    {
-      parentFrameName = message.getParentFrame().toString();
+      parentFrameName = message.getParentFrame().getString(0);
       MessageTools.toEuclid(message.getTransformToParent(), transformToParent);
       MessageTools.toEuclid(message.getLeftGoalFootTransformToGizmo(), goalFootstepToGizmos.get(RobotSide.LEFT));
       MessageTools.toEuclid(message.getRightGoalFootTransformToGizmo(), goalFootstepToGizmos.get(RobotSide.RIGHT));
