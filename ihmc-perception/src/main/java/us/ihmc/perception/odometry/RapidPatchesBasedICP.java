@@ -11,13 +11,9 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.logging.PerceptionDataLoader;
-import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.rapidRegions.PatchFeatureGrid;
-import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -32,7 +28,7 @@ public class RapidPatchesBasedICP
    private OpenCLManager openCLManager;
    private _cl_kernel correspondenceKernel;
    private _cl_kernel centroidReduceKernel;
-   private _cl_kernel correlationKernel;
+   private _cl_kernel correlReduceKernel;
 //   private _cl_kernel addReduceKernel;
 
    private OpenCLFloatBuffer parametersBuffer;
@@ -55,7 +51,7 @@ public class RapidPatchesBasedICP
       this.openCLManager = openCLManager;
       this.correspondenceKernel = openCLManager.createKernel(program, "correspondenceKernel");
       this.centroidReduceKernel = openCLManager.createKernel(program, "centroidReduceKernel");
-      this.correlationKernel = openCLManager.createKernel(program, "correlationKernel");
+      this.correlReduceKernel = openCLManager.createKernel(program, "correlReduceKernel");
 //      this.addReduceKernel = openCLManager.createKernel(program, "addReduceKernel");
 
       this.patchRows = patchRows;
@@ -111,9 +107,17 @@ public class RapidPatchesBasedICP
          openCLManager.execute1D(centroidReduceKernel, patchColumns);
          LogTools.info("After Centroid Kernel");
 
-//         setFeatureGridKernelArguments(correlationKernel, previousFeatureGrid, currentFeatureGrid);
-//         openCLManager.setKernelArgument(correlationKernel, 12, correlBuffer.getOpenCLBufferObject());
-//         openCLManager.setKernelArgument(correlationKernel, 13, parametersBuffer.getOpenCLBufferObject());
+         setFeatureGridKernelArguments(correlReduceKernel, previousFeatureGrid, currentFeatureGrid);
+         openCLManager.setKernelArgument(centroidReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 13, columnMatchIndexImage.getOpenCLImageObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 14, correlBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(centroidReduceKernel, 15, parametersBuffer.getOpenCLBufferObject());
+
+         LogTools.info("Before Correlation Kernel");
+         openCLManager.execute2D(correlReduceKernel, patchColumns, patchRows);
+         LogTools.info("After Correlation Kernel");
+
+
 
 //         setFeatureGridKernelArguments(addReduceKernel, previousFeatureGrid, currentFeatureGrid);
 //         openCLManager.setKernelArgument(addReduceKernel, 12, correlBuffer.getOpenCLBufferObject());
