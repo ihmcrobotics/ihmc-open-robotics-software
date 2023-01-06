@@ -52,6 +52,13 @@ public class RDXFootstepAction extends RDXBehaviorAction
       }
    }
 
+   @Override
+   public void updateAfterLoading()
+   {
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
+      solePoseGizmo.setParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+   }
+
    public void setSide(RobotSide side, boolean authoring)
    {
       actionData.setSide(side);

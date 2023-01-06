@@ -96,6 +96,13 @@ public class RDXWalkAction extends RDXBehaviorAction
    }
 
    @Override
+   public void updateAfterLoading()
+   {
+      referenceFrameLibraryCombo.setSelectedReferenceFrame(actionData.getParentFrameName());
+      updateParentFrame(referenceFrameLibraryCombo.getSelectedReferenceFrame());
+   }
+
+   @Override
    public void calculate3DViewPick(ImGui3DViewInput input)
    {
       if (getSelected().get())
