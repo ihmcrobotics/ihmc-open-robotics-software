@@ -20,8 +20,8 @@ public class DoorPerceptionManager
    {
       this.markerID = markerID;
       this.cameraFrame = cameraFrame;
-      doorPanel = new ArUcoMarkerObject(markerID, String.format("%s%dPanel", name, markerID));
-      doorFrame = new ArUcoMarkerObject(markerID, String.format("%s%dFrame", name, markerID));
+      doorPanel = new ArUcoMarkerObject(markerID, String.format("%sDoor%dPanel", name, markerID));
+      doorFrame = new ArUcoMarkerObject(markerID, String.format("%sDoor%dFrame", name, markerID));
    }
 
    public void updateMarkerTransform(Tuple3DReadOnly position, QuaternionReadOnly orientation)
