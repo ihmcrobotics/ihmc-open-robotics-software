@@ -60,11 +60,14 @@ public class RDXCVImagePanel
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
 
-   public void drawFloatImage(Mat floatImage)
+   /**
+    * @param singleChannelImage Can be float, unsigned integer, etc
+    */
+   public void drawDepthImage(Mat singleChannelImage)
    {
       if (videoPanel.getIsShowing().get())
       {
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+         BytedecoOpenCVTools.clampTo8BitUnsignedChar(singleChannelImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
          BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
          draw();
       }

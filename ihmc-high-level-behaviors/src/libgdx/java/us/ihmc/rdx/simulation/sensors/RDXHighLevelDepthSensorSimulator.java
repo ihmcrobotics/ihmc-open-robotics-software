@@ -256,7 +256,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       {
          openCLManager = new OpenCLManager();
          openCLManager.create();
-         openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator");
+         openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator", "PerceptionCommon.cl");
          discretizePointsKernel = openCLManager.createKernel(openCLProgram, "discretizePoints");
          parametersBuffer = new OpenCLFloatBuffer(5);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
