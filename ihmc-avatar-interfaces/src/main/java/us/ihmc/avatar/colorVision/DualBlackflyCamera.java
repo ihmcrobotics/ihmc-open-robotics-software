@@ -3,6 +3,7 @@ package us.ihmc.avatar.colorVision;
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_calib3d;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -148,8 +149,9 @@ public class DualBlackflyCamera
 
 //            opencv_core.flip(blackflySourceImage.getBytedecoOpenCVMat(), blackflySourceImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_BOTH);
 
-//            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
-            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
+            opencv_calib3d.undistort(blackflySourceImage.getBytedecoOpenCVMat(), undistortedImageMat, cameraMatrix, distortionCoefficients);
+            Mat postDistortionMat = undistortedImageMat;
+//            Mat postDistortionMat = blackflySourceImage.getBytedecoOpenCVMat();
 
             if (side == RobotSide.RIGHT)
             {
@@ -162,6 +164,7 @@ public class DualBlackflyCamera
                                               syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());
                }
 
+               arUcoMarkerDetection.update();
                arUcoMarkerDetection.drawDetectedMarkers(postDistortionMat);
                arUcoMarkerDetection.drawRejectedPoints(postDistortionMat);
                arUcoMarkerPublisher.update();
