@@ -76,10 +76,15 @@ int indices_to_key(int x_index, int y_index, int centerIndex)
     return x_index + y_index * (2 * centerIndex + 1);
 }
 
-int index_to_yaw(int yaw_index, int yaw_total_indices)
+float index_to_yaw(int yaw_index, int yaw_total_indices)
 {
     int center_index = yaw_total_indices / 2;
     return M_2_PI_F * (yaw_index - center_index) / yaw_total_indices;
+}
+
+int yaw_to_index(float yaw, int yaw_total_indices)
+{
+    return ((int) (yaw / yaw_total_indices)) + (yaw_total_indices / 2);
 }
 
 int coordinate_to_index(float coordinate, float center, float resolution, int center_index)
@@ -151,6 +156,23 @@ uint2 nextRandomInt(uint seed, uint bound)
     }
  //   return (uint2) (r, seed);
     return result;
+}
+
+
+float2 rotate_vector(float2 vector, float cH, float sH)
+{
+    float dxLocal = cH * vector.x - sH * vector.y;
+    float dyLocal = sH * vector.x + cH * vector.y;
+
+    return (float2) (dxLocal, dyLocal);
+}
+
+float2 rotate_vector_by_yaw(float2 vector, float yaw)
+{
+    float cY = cos(yaw);
+    float sY = sin(yaw);
+
+    return rotate_vector(vector, cY, sY);
 }
 
 float3 normal3DFromThreePoint3Ds(float3 firstPointOnPlane,
@@ -699,10 +721,9 @@ float computeSidedTraversibility(float* height_map_params,
         half_stance_width = -half_stance_width;
 
     float yaw = get_yaw(neighbor_idx);
-    float x_translation = sin(yaw) * half_stance_width;
-    float y_translation = cos(yaw) * half_stance_width;
-    node.x += x_translation;
-    node.y += y_translation;
+    float2 offset = (float2) (0.0f, half_stance_width);
+    float2 translation = rotate_vector_by_yaw(offset, -yaw);
+    node += translation;
 
     int center_index = (int) height_map_params[CENTER_INDEX];
     int cells_per_side = 2 * center_index + 1;
@@ -1121,8 +1142,9 @@ float computeSmootherTraversibility(global float* height_map_params,
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
 
-    float cYaw = cos(waypoint_yaw);
-    float sYaw = sin(waypoint_yaw);
+    float cYaw = cos(-waypoint_yaw);
+    float sYaw = sin(-waypoint_yaw);
+
 
     int number_of_offsets = traversibility_offsets[0];
     for (int i = 0; i < number_of_offsets; i++)
@@ -1134,9 +1156,12 @@ float computeSmootherTraversibility(global float* height_map_params,
         else
             offset_y -= planner_params[HALF_STANCE_WIDTH];
 
-        float x_offset = cYaw * offset_x - sYaw * signY * offset_y;
-        float y_offset = sYaw * offset_x + cYaw * signY * offset_y;
-        float2 offset = (float2) (x_offset, y_offset);
+        float2 fixed_offset = (float2) (offset_x, offset_y);
+        float2 offset = rotate_vector(fixed_offset, cYaw, sYaw);
+
+        //float x_offset = cYaw * offset_x - sYaw * signY * offset_y;
+        //float y_offset = sYaw * offset_x + cYaw * signY * offset_y;
+        //float2 offset = (float2) (x_offset, y_offset);
 
         float2 twiddled_position = waypoint_position + offset;
         int twiddled_x_index = coordinate_to_index(twiddled_position.x, center.x, resolution, center_index);
@@ -1252,52 +1277,7 @@ float computeDeltaHeadingMagnitude(float x0, float y0, float x1, float y1, float
     return max(fabs(angleDifferenceMinusPiToPi(heading1, heading0)) - deadband, 0.0f);
 }
 
-void kernel computeWaypointSmoothnessGradient(global float* height_map_params,
-                                              global float* planner_params,
-                                              global float* smoothing_params,
-                                              global float* waypoint_xyzYaw,
-                                              global int* waypont_turn_points,
-                                              global float* waypoint_gradients)
-{
-    int waypoint_key = get_global_id(0);
 
-    // return if it's the first or last gradient
-    if (waypoint_key == 0 || waypoint_key == (smoothing_params[NUMBER_OF_WAYPOINTS] - 1))
-        return;
-
-    int isTurnPoint = waypont_turn_points[waypoint_key] == 1;
-
-    float x0 = waypoint_xyzYaw[4 * (waypoint_key - 1)];
-    float y0 = waypoint_xyzYaw[4 * (waypoint_key - 1) + 1];
-    float x1 = waypoint_xyzYaw[4 * waypoint_key];
-    float y1 = waypoint_xyzYaw[4 * waypoint_key + 1];
-    float x2 = waypoint_xyzYaw[4 * (waypoint_key + 1)];
-    float y2 = waypoint_xyzYaw[4 * (waypoint_key + 1) + 1];
-
-    // Equal spacing gradient
-    float spacingGradientX = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (x2 - 2.0 * x1 + x0);
-    float spacingGradientY = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (y2 - 2.0 * y1 + y0);
-    float alphaTurnPoint = isTurnPoint ? 0.1 : 1.0;
-
-    float2 gradient = alphaTurnPoint * (float2) (spacingGradientX, spacingGradientY);
-
-    // Smoothness gradient
-    float2 smoothnessGradient = (float2) (0.0f, 0.0f);
-    if (!isTurnPoint)
-    {
-        float min_curvature_to_penalize = smoothing_params[MIN_CURVATURE_TO_PENALIZE];
-        float gradient_epsilon = smoothing_params[GRADIENT_EPSILON];
-        float exp = 1.5f;
-        float f0 = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, min_curvature_to_penalize), exp);
-        float fPdx = pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradient_epsilon, y1, x2, y2, min_curvature_to_penalize), exp);
-        float fPdy = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradient_epsilon, x2, y2, min_curvature_to_penalize), exp);
-        smoothnessGradient = (float2) (fPdx - f0, fPdy - f0);
-        smoothnessGradient *= smoothing_params[SMOOTHNESS_WEIGHT] / gradient_epsilon;
-        gradient += smoothnessGradient;
-    }
-    waypoint_gradients[2 * waypoint_key] = gradient.x;
-    waypoint_gradients[2 * waypoint_key + 1] = gradient.y;
-}
 
 void kernel computeWaypointCurrentTraversibilityMap(global float* height_map_params,
                                                     global float* planner_params,
@@ -1585,4 +1565,188 @@ void kernel computeWaypointGroundPlaneGradientMap(global float* height_map_param
 
     gradient_map[2 * results_key] = gradient.x;
     gradient_map[2 * results_key + 1] = gradient.y;
+}
+
+void kernel computeWaypointSmoothnessGradient(global float* height_map_params,
+                                              global float* planner_params,
+                                              global float* smoothing_params,
+                                              global float* waypoint_xyzYaw,
+                                              global int* waypont_turn_points,
+                                              global float* waypoint_gradients)
+{
+    int waypoint_key = get_global_id(0);
+
+    // return if it's the first or last gradient
+    if (waypoint_key == 0 || waypoint_key == (smoothing_params[NUMBER_OF_WAYPOINTS] - 1))
+        return;
+
+    int isTurnPoint = waypont_turn_points[waypoint_key] == 1;
+
+    float x0 = waypoint_xyzYaw[4 * (waypoint_key - 1)];
+    float y0 = waypoint_xyzYaw[4 * (waypoint_key - 1) + 1];
+    float x1 = waypoint_xyzYaw[4 * waypoint_key];
+    float y1 = waypoint_xyzYaw[4 * waypoint_key + 1];
+    float x2 = waypoint_xyzYaw[4 * (waypoint_key + 1)];
+    float y2 = waypoint_xyzYaw[4 * (waypoint_key + 1) + 1];
+
+    // Equal spacing gradient
+    float spacingGradientX = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (x2 - 2.0 * x1 + x0);
+    float spacingGradientY = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (y2 - 2.0 * y1 + y0);
+    float alphaTurnPoint = isTurnPoint ? 0.1 : 1.0;
+
+    float2 gradient = alphaTurnPoint * (float2) (spacingGradientX, spacingGradientY);
+
+    // Smoothness gradient
+    float2 smoothnessGradient = (float2) (0.0f, 0.0f);
+    if (!isTurnPoint)
+    {
+        float min_curvature_to_penalize = smoothing_params[MIN_CURVATURE_TO_PENALIZE];
+        float gradient_epsilon = smoothing_params[GRADIENT_EPSILON];
+        float exp = 1.5f;
+        float f0 = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, min_curvature_to_penalize), exp);
+        float fPdx = pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradient_epsilon, y1, x2, y2, min_curvature_to_penalize), exp);
+        float fPdy = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradient_epsilon, x2, y2, min_curvature_to_penalize), exp);
+        smoothnessGradient = (float2) (fPdx - f0, fPdy - f0);
+        smoothnessGradient *= smoothing_params[SMOOTHNESS_WEIGHT] / gradient_epsilon;
+        gradient += smoothnessGradient;
+    }
+    waypoint_gradients[2 * waypoint_key] = gradient.x;
+    waypoint_gradients[2 * waypoint_key + 1] = gradient.y;
+}
+
+void kernel getCurrentTraversibility(global float* height_map_params,
+                                      global float* planner_params,
+                                      global float* smoothing_params,
+                                      global float* waypoint_xyzYaw,
+                                      global float* left_traversibility_map,
+                                      global float* right_traversibility_map,
+                                      global float* traversibility_values)
+{
+    int waypoint_key = get_global_id(0);
+
+    // return if it's the first or last waypoint
+    if (waypoint_key == 0 || waypoint_key == (smoothing_params[NUMBER_OF_WAYPOINTS] - 1))
+        return;
+
+    float2 waypoint_xy = (float2) (waypoint_xyzYaw[4 * waypoint_key], waypoint_xyzYaw[4 * waypoint_key + 1]);
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+    int center_index = height_map_params[CENTER_INDEX];
+
+    int map_key = coordinate_to_key(waypoint_xy, center, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+    int yaw_key = yaw_to_index(waypoint_xyzYaw[4 * waypoint_key + 3], smoothing_params[YAW_DISCRETIZATIONS]);
+
+    int data_key = smoothing_params[YAW_DISCRETIZATIONS] * map_key + yaw_key;
+
+    traversibility_values[2 * waypoint_key] = left_traversibility_map[data_key];
+    traversibility_values[2 * waypoint_key + 1] = right_traversibility_map[data_key];
+}
+
+void kernel computeWaypointMapGradients(global float* height_map_params,
+                                              global float* planner_params,
+                                              global float* smoothing_params,
+                                              global float* waypoint_xyzYaw,
+                                              global int* waypont_turn_points,
+                                              global float* collision_gradient_map,
+                                              global int* max_collisions_map,
+                                              global float* left_traversibilities_for_gradient_map,
+                                              global float* right_traversibilities_for_gradient_map,
+                                              global float* waypoint_traversibility_values,
+                                              global int* left_ground_plane_cells_map,
+                                              global int* right_ground_plane_cells_map,
+                                              global float* ground_plane_gradient_map,
+                                              global int* waypoint_max_collisions,
+                                              global float* waypoint_collision_gradients,
+                                              global float* waypoint_traversibility_samples,
+                                              global float* waypoint_traversibility_gradients,
+                                              global int* waypoint_ground_plane_cells,
+                                              global float* waypoint_ground_plane_gradients)
+{
+    int waypoint_key = get_global_id(0);
+
+    // return if it's the first or last gradient
+    if (waypoint_key < 2 || waypoint_key > (smoothing_params[NUMBER_OF_WAYPOINTS] - 3))
+        return;
+
+    float2 waypoint_xy = (float2) (waypoint_xyzYaw[4 * waypoint_key], waypoint_xyzYaw[4 * waypoint_key + 1]);
+    float waypoint_z = waypoint_xyzYaw[4 * waypoint_key + 2];
+    float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
+    int center_index = height_map_params[CENTER_INDEX];
+
+    int map_key = coordinate_to_key(waypoint_xy, center, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+    int yaw_key = yaw_to_index(waypoint_xyzYaw[4 * waypoint_key + 3], smoothing_params[YAW_DISCRETIZATIONS]);
+
+    int data_key = smoothing_params[YAW_DISCRETIZATIONS] * map_key + yaw_key;
+
+    // get the collision gradient
+    waypoint_max_collisions[waypoint_key] = max_collisions_map[data_key];
+    waypoint_collision_gradients[2 * waypoint_key] = collision_gradient_map[2 * data_key];
+    waypoint_collision_gradients[2 * waypoint_key + 1] = collision_gradient_map[2 * data_key + 1];
+
+    // get the traversibility gradient
+    for (int side = 0; side <= 1; side++)
+    {
+        float local_traversibility_threshold = 0.9f;
+        float max_local_traversibility_threshold_discount = 0.75f;
+
+        float current_traversibility = waypoint_traversibility_values[2 * waypoint_key + side];
+        float previous_traversibility_0 = waypoint_traversibility_values[2 * (waypoint_key - 1) + side];
+        float previous_traversibility_1 = waypoint_traversibility_values[2 * (waypoint_key - 2) + side];
+        float next_traversibility_0 = waypoint_traversibility_values[2 * (waypoint_key + 1) + side];
+        float next_traversibility_1 = waypoint_traversibility_values[2 * (waypoint_key + 2) + side];
+        float max_local_traversibility = max(max(max(max(current_traversibility, previous_traversibility_0), previous_traversibility_1), next_traversibility_0), next_traversibility_1);
+
+        if (max_local_traversibility > local_traversibility_threshold)
+        {
+           int goal_key = 4 * waypoint_key + 2 * side;
+
+            waypoint_traversibility_samples[goal_key] = 0.0f;
+            waypoint_traversibility_samples[goal_key + 1] = 0.0f;
+            waypoint_traversibility_gradients[goal_key] = 0.0f;
+            waypoint_traversibility_gradients[goal_key + 1] = 0.0f;
+        }
+        else
+        {
+            float* sided_buffer;
+            if (side == 0)
+                sided_buffer = left_traversibilities_for_gradient_map;
+            else
+                sided_buffer = right_traversibilities_for_gradient_map;
+
+            int goal_key = 4 * waypoint_key + 2 * side;
+            float negative_sample = sided_buffer[2 * data_key];
+            float positive_sample = sided_buffer[2 * data_key + 1];
+            waypoint_traversibility_samples[goal_key] = negative_sample;
+            waypoint_traversibility_samples[goal_key + 1] = positive_sample;
+
+            float alpha = (local_traversibility_threshold - max_local_traversibility) / (local_traversibility_threshold - max_local_traversibility_threshold_discount);
+            alpha = clamp(alpha, 0.0f, 1.0f);
+
+            float2 delta = (float2) (0.0f, alpha * (positive_sample - negative_sample));
+            float2 gradient = rotate_vector_by_yaw(delta, waypoint_xyzYaw[4 * waypoint_key + 3]);;
+
+            waypoint_traversibility_gradients[goal_key] = gradient.x;
+            waypoint_traversibility_gradients[goal_key + 1] = gradient.y;
+        }
+    }
+
+    // get the ground plane gradient
+    float ground_plane_estimate = height_map_params[GROUND_HEIGHT_ESTIMATE];
+    float height_threshold_for_ground = 0.015f;
+    float current_height_above_ground_plane = waypoint_z - ground_plane_estimate;
+    float next_height_above_ground_plane = waypoint_xyzYaw[4 * (waypoint_key + 1) + 3] - ground_plane_estimate;
+
+    if (waypont_turn_points[waypoint_key] == 1 || current_height_above_ground_plane > height_threshold_for_ground || next_height_above_ground_plane > height_threshold_for_ground)
+    {
+        waypoint_ground_plane_cells[2 * waypoint_key] = 0;
+        waypoint_ground_plane_cells[2 * waypoint_key + 1] = 0;
+        waypoint_ground_plane_gradients[2 * waypoint_key] = 0.0f;
+        waypoint_ground_plane_gradients[2 * waypoint_key + 1] = 0.0f;
+    }
+    else
+    {
+        waypoint_ground_plane_cells[2 * waypoint_key] = left_ground_plane_cells_map[data_key];
+        waypoint_ground_plane_cells[2 * waypoint_key + 1] = right_ground_plane_cells_map[data_key];
+        waypoint_ground_plane_gradients[2 * waypoint_key] = ground_plane_gradient_map[2 * data_key];
+        waypoint_ground_plane_gradients[2 * waypoint_key + 1] = ground_plane_gradient_map[2 * data_key + 1];
+    }
 }
