@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.perception.OpenCLFloatBuffer;
+import us.ihmc.perception.OpenCLFloatMem;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -305,14 +306,13 @@ public class GPUAStarBodyPathSmootherWaypoint
       return isTurnPoint.getValue();
    }
 
-   public Vector2DReadOnly computeCollisionGradient(HeightMapData heightMapData, OpenCLIntBuffer maxCollisionsBuffer, OpenCLFloatBuffer collisionGradientsBuffer)
+   public Vector2DReadOnly computeCollisionGradientFromGPU(int waypointIndex, OpenCLIntBuffer waypointMaxCollisionBuffer, OpenCLFloatBuffer waypointCollisionGradientsBuffer )
    {
-      int key = getDataBufferKey(heightMapData);
-      maxCollision.set(maxCollisionsBuffer.getBackingDirectIntBuffer().get(key));
+      maxCollision.set(waypointMaxCollisionBuffer.getBackingDirectIntBuffer().get(waypointIndex));
 
       Vector2D gradient = new Vector2D();
-      gradient.setX(collisionGradientsBuffer.getBackingDirectFloatBuffer().get(2 * key));
-      gradient.setY(collisionGradientsBuffer.getBackingDirectFloatBuffer().get(2 * key + 1));
+      gradient.setX(waypointCollisionGradientsBuffer.getBackingDirectFloatBuffer().get(2 * waypointIndex));
+      gradient.setY(waypointCollisionGradientsBuffer.getBackingDirectFloatBuffer().get(2 * waypointIndex + 1));
 
       if (visualize)
       {
@@ -363,55 +363,34 @@ public class GPUAStarBodyPathSmootherWaypoint
       return tempVector;
    }
 
-   public void computeCurrentTraversibility(OpenCLFloatBuffer leftTraversibilityBuffer, OpenCLFloatBuffer rightTraversibilityBuffer)
+   public void computeCurrentTraversibilityFromGPU(OpenCLFloatBuffer traversabilitySamplesBuffer)
    {
       YoDouble leftNominalTraversibility = traversibilitySampleNominal.get(RobotSide.LEFT);
       YoDouble rightNominalTraversibility = traversibilitySampleNominal.get(RobotSide.RIGHT);
-      leftNominalTraversibility.set(leftTraversibilityBuffer.getBackingDirectFloatBuffer().get(dataKey));
-      rightNominalTraversibility.set(rightTraversibilityBuffer.getBackingDirectFloatBuffer().get(dataKey));
+      leftNominalTraversibility.set(traversabilitySamplesBuffer.getBackingDirectFloatBuffer().get(2 * waypointIndex));
+      rightNominalTraversibility.set(traversabilitySamplesBuffer.getBackingDirectFloatBuffer().get(2 * waypointIndex + 1));
       yoNominalTraversibility.get(RobotSide.LEFT).setZ(leftNominalTraversibility.getValue());
       yoNominalTraversibility.get(RobotSide.RIGHT).setZ(rightNominalTraversibility.getValue());
    }
 
-   public Tuple3DReadOnly computeTraversibilityGradient(OpenCLFloatBuffer leftTraversibilitiesForGradientBuffer,
-                                                        OpenCLFloatBuffer rightTraversibilitesForGradientBuffer)
+   public Tuple3DReadOnly computeTraversibilityGradientFromGPU(OpenCLFloatBuffer waypointTraversibilitySamples,
+                                                               OpenCLFloatBuffer waypointTraversibilityBuffer)
    {
       yoTraversibilityGradient.setToZero();
 
       for (RobotSide side : RobotSide.values)
       {
-         YoFrameVector3D sidedTraversibility = yoSidedTraversibility.get(side);
-         sidedTraversibility.setToZero();
+         int key = 4 * waypointIndex;
+         if (side == RobotSide.RIGHT)
+            key += 2;
 
-         double localTraversibilityThreshold = 0.9;
-         double maxLocalTraversibilityThresholdDiscount = 0.75;
+         traversibilitySampleNeg.get(side).set(waypointTraversibilitySamples.getBackingDirectFloatBuffer().get(key));
+         traversibilitySamplePos.get(side).set(waypointTraversibilitySamples.getBackingDirectFloatBuffer().get(key + 1));
 
-         double currentTraversibility = traversibilitySampleNominal.get(side).getValue();
-         double previousTraversibility0 = getNeighbor(waypointIndex - 1).traversibilitySampleNominal.get(side).getValue();
-         double previousTraversibility1 = getNeighbor(waypointIndex - 2).traversibilitySampleNominal.get(side).getValue();
-         double nextTraversibility0 = getNeighbor(waypointIndex + 1).traversibilitySampleNominal.get(side).getValue();
-         double nextTraversibility1 = getNeighbor(waypointIndex + 2).traversibilitySampleNominal.get(side).getValue();
-         double maxLocalTraversibility = max(currentTraversibility, previousTraversibility0, previousTraversibility1, nextTraversibility0, nextTraversibility1);
+         tempVector.setX(waypointTraversibilityBuffer.getBackingDirectFloatBuffer().get(key));
+         tempVector.setY(waypointTraversibilityBuffer.getBackingDirectFloatBuffer().get(key + 1));
 
-         if (maxLocalTraversibility > localTraversibilityThreshold)
-         {
-            continue;
-         }
-         OpenCLFloatBuffer sidedBuffer;
-         if (side == RobotSide.LEFT)
-            sidedBuffer = leftTraversibilitiesForGradientBuffer;
-         else
-            sidedBuffer = rightTraversibilitesForGradientBuffer;
-
-         traversibilitySampleNeg.get(side).set(sidedBuffer.getBackingDirectFloatBuffer().get(2 * dataKey));
-         traversibilitySamplePos.get(side).set(sidedBuffer.getBackingDirectFloatBuffer().get(2 * dataKey + 1));
-
-         double alpha = EuclidCoreTools.clamp((localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - maxLocalTraversibilityThresholdDiscount), 0.0, 1.0);
-         tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
-         tempVector.scale(alpha * (traversibilitySamplePos.get(side).getValue() - traversibilitySampleNeg.get(side).getValue()));
-         tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-
-         sidedTraversibility.set(tempVector);
+         yoSidedTraversibility.get(side).set(tempVector);
          yoTraversibilityGradient.add(tempVector);
       }
 
@@ -419,49 +398,16 @@ public class GPUAStarBodyPathSmootherWaypoint
       return yoTraversibilityGradient;
    }
 
-   public Tuple3DReadOnly computeGroundPlaneGradient(HeightMapData heightMapData,
-                                                     OpenCLIntBuffer leftGroundPlaneCellsBuffer,
-                                                     OpenCLIntBuffer rightGroundPlaneCellsBuffer,
-                                                     OpenCLFloatBuffer groundPlaneGradientBuffer)
+   public Tuple3DReadOnly computeGroundPlaneGradientFromGPU(OpenCLIntBuffer wayointGroundPlaneCells,
+                                                     OpenCLFloatBuffer waypointGroundPlaneGradients)
    {
-      yoGroundPlaneGradient.setToZero();
-      for (RobotSide side : RobotSide.values)
-      {
-         yoGroundPlaneCells.get(side).set(0);
-      }
+      yoGroundPlaneCells.get(RobotSide.LEFT).set(wayointGroundPlaneCells.getBackingDirectIntBuffer().get(2 * waypointIndex));
+      yoGroundPlaneCells.get(RobotSide.RIGHT).set(wayointGroundPlaneCells.getBackingDirectIntBuffer().get(2 * waypointIndex + 1));
 
-      double heightThresholdForGround = 0.015;
-      double currentHeightAboveGroundPlane = waypoint.getZ() - heightMapData.getEstimatedGroundHeight();
-      double nextHeightAboveGroundPlane = getNeighbor(waypointIndex + 1).getPosition().getZ() - heightMapData.getEstimatedGroundHeight();
-
-      if (currentHeightAboveGroundPlane > heightThresholdForGround || nextHeightAboveGroundPlane > heightThresholdForGround)
-      {
-         return yoGroundPlaneGradient;
-      }
-
-      yoGroundPlaneCells.get(RobotSide.LEFT).set(leftGroundPlaneCellsBuffer.getBackingDirectIntBuffer().get(dataKey));
-      yoGroundPlaneCells.get(RobotSide.RIGHT).set(rightGroundPlaneCellsBuffer.getBackingDirectIntBuffer().get(dataKey));
-
-      yoGroundPlaneGradient.setX(groundPlaneGradientBuffer.getBackingDirectFloatBuffer().get(2 * dataKey));
-      yoGroundPlaneGradient.setY(groundPlaneGradientBuffer.getBackingDirectFloatBuffer().get(2 * dataKey + 1));
+      yoGroundPlaneGradient.setX(waypointGroundPlaneGradients.getBackingDirectFloatBuffer().get(2 * waypointIndex));
+      yoGroundPlaneGradient.setY(waypointGroundPlaneGradients.getBackingDirectFloatBuffer().get(2 * waypointIndex + 1));
 
       return yoGroundPlaneGradient;
-   }
-
-   private static double max(double... x)
-   {
-      double max = -Double.MAX_VALUE;
-      for (int i = 0; i < x.length; i++)
-      {
-         if (x[i] > max)
-            max = x[i];
-      }
-      return max;
-   }
-
-   private GPUAStarBodyPathSmootherWaypoint getNeighbor(int index)
-   {
-      return waypoints[MathTools.clamp(index, 0, pathSize - 1)];
    }
 
    public void update(boolean firstTick, HeightMapData heightMapData, OpenCLFloatBuffer snapHeightBUffer)

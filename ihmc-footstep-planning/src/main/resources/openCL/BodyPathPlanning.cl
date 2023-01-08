@@ -1341,17 +1341,20 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
                                                 global float* waypoint_gradients,
                                                 global float* max_collision_map)
 {
-    int map_key = get_global_id(0);
-    int yaw_key = get_global_id(0);
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+    int yaw_key = get_global_id(2);
 
-    int maxOffset = (int) round(0.5 * length((float2) (smoothing_params[BOX_SIZE_X], smoothing_params[BOX_SIZE_Y])) / height_map_params[HEIGHT_MAP_RESOLUTION]);
+    float box_size_x = smoothing_params[BOX_SIZE_X];
+    float box_size_y = smoothing_params[BOX_SIZE_Y];
+    float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
+
+    int maxOffset = (int) round(0.5 * length((float2) (box_size_x, box_size_y)) / resolution);
     int center_index = height_map_params[CENTER_INDEX];
 
-    int idx_x = key_to_x_index(map_key, center_index);
-    int idx_y = key_to_y_index(map_key, center_index);
 
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
-    float2 waypoint_xy = indices_to_coordinate((int2) (idx_x, idx_y), center, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+    float2 waypoint_xy = indices_to_coordinate((int2) (idx_x, idx_y), center, resolution, center_index);
     float heading = index_to_yaw(yaw_key, smoothing_params[YAW_DISCRETIZATIONS]);
 
     int path_key = coordinate_to_key(waypoint_xy, center, planner_params[PATH_RESOLUTION], planner_params[PATH_CENTER_INDEX]);
@@ -1364,6 +1367,9 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
     int numCollisions = 0;
     float height_threshold = waypointZ + smoothing_params[BOX_GROUND_OFFSET];
     float max_collision = 0.0f;
+
+    float half_box_size_x = 0.5f * box_size_x;
+    float half_box_size_y = 0.5f * box_size_y;
 
     int cells_per_axis = 2 * center_index + 1;
 
@@ -1378,14 +1384,16 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
                 continue;
 
             int2 indices = (int2) (indexXi, indexYi);
-            float2 position = indices_to_coordinate(indices, center, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
+            float2 position = indices_to_coordinate(indices, center, resolution, center_index);
 
             float2 delta = position - waypoint_xy;
 
             float dxLocal = cH * delta.x + sH * delta.y;
             float dyLocal = -sH * delta.x + cH * delta.y;
 
-            if (fabs(dxLocal) > 0.5 * smoothing_params[BOX_SIZE_X] || fabs(dyLocal) > 0.5 * smoothing_params[BOX_SIZE_Y])
+            float absDyLocal = fabs(dyLocal);
+
+            if (fabs(dxLocal) > half_box_size_y || absDyLocal > half_box_size_y)
                 continue;
 
             int query_key = indices_to_key(indices.x, indices.y, center_index);
@@ -1393,11 +1401,12 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
             if (query_height < height_threshold)
                 continue;
 
-            float lateral_penetration = 0.5 * smoothing_params[BOX_SIZE_Y] - fabs(dyLocal);
+            float lateral_penetration = half_box_size_y - absDyLocal;
             max_collision = max(max_collision, lateral_penetration);
 
-            gradient.x += sign(dyLocal) * -lateral_penetration * sH;
-            gradient.y += sign(dyLocal) * lateral_penetration * cH;
+            float penetration = sign(dyLocal) * lateral_penetration;
+            gradient.x += -penetration * sH;
+            gradient.y += penetration * cH;
             numCollisions++;
         }
     }
@@ -1405,6 +1414,7 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
     if (numCollisions > 0)
        gradient = smoothing_params[COLLISION_WEIGHT] / numCollisions * gradient;
 
+    int map_key = indices_to_key(idx_x, idx_y, center_index);
     int result_key = smoothing_params[YAW_DISCRETIZATIONS] * map_key + yaw_key;
     max_collision_map[result_key] = max_collision;
     waypoint_gradients[2 * result_key] = gradient.x;
@@ -1567,9 +1577,7 @@ void kernel computeWaypointGroundPlaneGradientMap(global float* height_map_param
     gradient_map[2 * results_key + 1] = gradient.y;
 }
 
-void kernel computeWaypointSmoothnessGradient(global float* height_map_params,
-                                              global float* planner_params,
-                                              global float* smoothing_params,
+void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
                                               global float* waypoint_xyzYaw,
                                               global int* waypont_turn_points,
                                               global float* waypoint_gradients)
@@ -1597,30 +1605,31 @@ void kernel computeWaypointSmoothnessGradient(global float* height_map_params,
     float2 gradient = alphaTurnPoint * (float2) (spacingGradientX, spacingGradientY);
 
     // Smoothness gradient
-    float2 smoothnessGradient = (float2) (0.0f, 0.0f);
     if (!isTurnPoint)
     {
         float min_curvature_to_penalize = smoothing_params[MIN_CURVATURE_TO_PENALIZE];
         float gradient_epsilon = smoothing_params[GRADIENT_EPSILON];
+        float smoothness_weight = smoothing_params[SMOOTHNESS_WEIGHT];
         float exp = 1.5f;
-        float f0 = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, min_curvature_to_penalize), exp);
-        float fPdx = pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradient_epsilon, y1, x2, y2, min_curvature_to_penalize), exp);
-        float fPdy = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradient_epsilon, x2, y2, min_curvature_to_penalize), exp);
-        smoothnessGradient = (float2) (fPdx - f0, fPdy - f0);
-        smoothnessGradient *= smoothing_params[SMOOTHNESS_WEIGHT] / gradient_epsilon;
-        gradient += smoothnessGradient;
+        double f0 = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, min_curvature_to_penalize), exp);
+        double fPdx = pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradient_epsilon, y1, x2, y2, min_curvature_to_penalize), exp);
+        double fPdy = pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradient_epsilon, x2, y2, min_curvature_to_penalize), exp);
+        float smoothnessGradientX = smoothness_weight * (fPdx - f0) / gradient_epsilon;
+        float smoothnessGradientY = smoothness_weight * (fPdy - f0) / gradient_epsilon;
+
+        gradient.x += smoothnessGradientX;
+        gradient.y += smoothnessGradientY;
     }
     waypoint_gradients[2 * waypoint_key] = gradient.x;
     waypoint_gradients[2 * waypoint_key + 1] = gradient.y;
 }
 
 void kernel getCurrentTraversibility(global float* height_map_params,
-                                      global float* planner_params,
                                       global float* smoothing_params,
                                       global float* waypoint_xyzYaw,
                                       global float* left_traversibility_map,
                                       global float* right_traversibility_map,
-                                      global float* traversibility_values)
+                                      global float* waypoint_traversibility_values)
 {
     int waypoint_key = get_global_id(0);
 
@@ -1637,12 +1646,11 @@ void kernel getCurrentTraversibility(global float* height_map_params,
 
     int data_key = smoothing_params[YAW_DISCRETIZATIONS] * map_key + yaw_key;
 
-    traversibility_values[2 * waypoint_key] = left_traversibility_map[data_key];
-    traversibility_values[2 * waypoint_key + 1] = right_traversibility_map[data_key];
+    waypoint_traversibility_values[2 * waypoint_key] = left_traversibility_map[data_key];
+    waypoint_traversibility_values[2 * waypoint_key + 1] = right_traversibility_map[data_key];
 }
 
 void kernel computeWaypointMapGradients(global float* height_map_params,
-                                              global float* planner_params,
                                               global float* smoothing_params,
                                               global float* waypoint_xyzYaw,
                                               global int* waypont_turn_points,
