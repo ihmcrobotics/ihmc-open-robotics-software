@@ -54,8 +54,6 @@ public class GPUAStarBodyPathSmoother
    private final boolean visualize;
 
    private int pathSize;
-   private HeightMapLeastSquaresNormalCalculator leastSquaresNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
-
    private final GPUAStarBodyPathSmootherWaypoint[] waypoints = new GPUAStarBodyPathSmootherWaypoint[maxPoints];
 
    /* Cost gradient in the direction of higher cost for each coordinate */
@@ -63,30 +61,28 @@ public class GPUAStarBodyPathSmoother
 
    private final OpenCLManager openCLManager;
 
-   private _cl_program pathPlannerProgram;
-   private _cl_kernel computeCollisionGradientKernel;
-   private _cl_kernel computeTraversibilityKernel;
-   private _cl_kernel computeTraversibilityForGradientKernel;
+   private _cl_kernel computeCollisionGradientMapKernel;
+   private _cl_kernel computeTraversibilityMapKernel;
+   private _cl_kernel computeTraversibilityForGradientMapKernel;
    private _cl_kernel computeGroundPlaneGradientKernel;
    private _cl_kernel computeWaypointSmoothessGradientKernel;
-   private _cl_kernel getCurrentTraversibilityKernel;
+   private _cl_kernel getWaypointCurrentTraversibilityKernel;
    private _cl_kernel computeWaypointMapGradientsKernel;
 
-   private OpenCLFloatBuffer smoothingParametersBuffer = new OpenCLFloatBuffer(11);
-   private OpenCLFloatMem collisionGradientsMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatBuffer smoothingParametersBuffer = new OpenCLFloatBuffer(11);
+   private final OpenCLFloatBuffer traversibilityOffsetsForGradientBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer traversibilityOffsetsForNominalBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLIntBuffer offsetsForGroundPlaneGradientBuffer = new OpenCLIntBuffer(1);
 
-   private OpenCLFloatBuffer traversibilityOffsetsForGradientBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer traversibilityOffsetsForNominalBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLIntBuffer offsetsForGroundPlaneGradientBuffer = new OpenCLIntBuffer(1);
-
-   private OpenCLIntMem maxCollisionsMapBuffer = new OpenCLIntMem(1);
-   private OpenCLFloatMem leftTraversibilitiesBuffer = new OpenCLFloatMem(1);
-   private OpenCLFloatMem rightTraversibilitiesBuffer = new OpenCLFloatMem(1);
-   private OpenCLFloatMem leftTraversibilitiesForGradientBuffer = new OpenCLFloatMem(1);
-   private OpenCLFloatMem rightTraversibilitiesForGradientBuffer = new OpenCLFloatMem(1);
-   private OpenCLIntMem leftGroundPlaneCellsBuffer = new OpenCLIntMem(1);
-   private OpenCLIntMem rightGroundPlaneCellsBuffer = new OpenCLIntMem(1);
-   private OpenCLFloatMem groundPlaneGradientBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatMem collisionGradientsMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLIntMem maxCollisionsMapBuffer = new OpenCLIntMem(1);
+   private final OpenCLFloatMem leftTraversibilitiesMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatMem rightTraversibilitiesMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatMem leftTraversibilitiesForGradientMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatMem rightTraversibilitiesForGradientMapBuffer = new OpenCLFloatMem(1);
+   private final OpenCLIntMem leftGroundPlaneCellsMapBuffer = new OpenCLIntMem(1);
+   private final OpenCLIntMem rightGroundPlaneCellsMapBuffer = new OpenCLIntMem(1);
+   private final OpenCLFloatMem groundPlaneGradientMapBuffer = new OpenCLFloatMem(1);
 
    private OpenCLFloatBuffer waypointXYZYawBuffer = new OpenCLFloatBuffer(1);
    private OpenCLIntBuffer waypointTurnPointsBuffer = new OpenCLIntBuffer(1);
@@ -100,8 +96,6 @@ public class GPUAStarBodyPathSmoother
    private OpenCLFloatBuffer waypointGroundPlaneGradients = new OpenCLFloatBuffer(1);
 
    private int cellsPerSide = -1;
-   private int nodesPerSide = -1;
-   private int nodeCenterIndex = -1;
 
    public GPUAStarBodyPathSmoother(TickAndUpdatable tickAndUpdatable,
                                    OpenCLManager openCLManager,
@@ -150,16 +144,13 @@ public class GPUAStarBodyPathSmoother
    public void createOpenCLStuff(_cl_program pathPlannerProgram, int numberOfCells, int numberOfNodes)
    {
       cellsPerSide = numberOfCells;
-      this.nodesPerSide = numberOfNodes;
-      this.nodeCenterIndex = (nodesPerSide - 1) / 2;
 
-      this.pathPlannerProgram = pathPlannerProgram;
-      computeCollisionGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointCollisionGradientMap");
-      computeTraversibilityKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointCurrentTraversibilityMap");
-      computeTraversibilityForGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointTraversibilityForGradientMap");
-      computeGroundPlaneGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointGroundPlaneGradientMap");
+      computeCollisionGradientMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeCollisionGradientMap");
+      computeTraversibilityMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeCurrentTraversibilityMap");
+      computeTraversibilityForGradientMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeTraversibilityForGradientMap");
+      computeGroundPlaneGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeGroundPlaneGradientMap");
       computeWaypointSmoothessGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointSmoothnessGradient");
-      getCurrentTraversibilityKernel = openCLManager.createKernel(pathPlannerProgram, "getCurrentTraversibility");
+      getWaypointCurrentTraversibilityKernel = openCLManager.createKernel(pathPlannerProgram, "getWaypointCurrentTraversibility");
       computeWaypointMapGradientsKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointMapGradients");
    }
 
@@ -172,13 +163,13 @@ public class GPUAStarBodyPathSmoother
 
       collisionGradientsMapBuffer.createOpenCLBufferObject(openCLManager);
       maxCollisionsMapBuffer.createOpenCLBufferObject(openCLManager);
-      leftTraversibilitiesBuffer.createOpenCLBufferObject(openCLManager);
-      rightTraversibilitiesBuffer.createOpenCLBufferObject(openCLManager);
-      leftTraversibilitiesForGradientBuffer.createOpenCLBufferObject(openCLManager);
-      rightTraversibilitiesForGradientBuffer.createOpenCLBufferObject(openCLManager);
-      leftGroundPlaneCellsBuffer.createOpenCLBufferObject(openCLManager);
-      rightGroundPlaneCellsBuffer.createOpenCLBufferObject(openCLManager);
-      groundPlaneGradientBuffer.createOpenCLBufferObject(openCLManager);
+      leftTraversibilitiesMapBuffer.createOpenCLBufferObject(openCLManager);
+      rightTraversibilitiesMapBuffer.createOpenCLBufferObject(openCLManager);
+      leftTraversibilitiesForGradientMapBuffer.createOpenCLBufferObject(openCLManager);
+      rightTraversibilitiesForGradientMapBuffer.createOpenCLBufferObject(openCLManager);
+      leftGroundPlaneCellsMapBuffer.createOpenCLBufferObject(openCLManager);
+      rightGroundPlaneCellsMapBuffer.createOpenCLBufferObject(openCLManager);
+      groundPlaneGradientMapBuffer.createOpenCLBufferObject(openCLManager);
 
       waypointXYZYawBuffer.createOpenCLBufferObject(openCLManager);
       waypointTurnPointsBuffer.createOpenCLBufferObject(openCLManager);
@@ -197,12 +188,12 @@ public class GPUAStarBodyPathSmoother
 
    public void destroyOpenCLStuff()
    {
-      computeCollisionGradientKernel.close();
-      computeTraversibilityKernel.close();
-      computeTraversibilityForGradientKernel.close();
+      computeCollisionGradientMapKernel.close();
+      computeTraversibilityMapKernel.close();
+      computeTraversibilityForGradientMapKernel.close();
       computeGroundPlaneGradientKernel.close();
       computeWaypointSmoothessGradientKernel.close();
-      getCurrentTraversibilityKernel.close();
+      getWaypointCurrentTraversibilityKernel.close();
       computeWaypointMapGradientsKernel.close();
 
       smoothingParametersBuffer.destroy(openCLManager);
@@ -212,13 +203,13 @@ public class GPUAStarBodyPathSmoother
 
       collisionGradientsMapBuffer.destroy(openCLManager);
       maxCollisionsMapBuffer.destroy(openCLManager);
-      leftTraversibilitiesBuffer.destroy(openCLManager);
-      rightTraversibilitiesBuffer.destroy(openCLManager);
-      leftTraversibilitiesForGradientBuffer.destroy(openCLManager);
-      rightTraversibilitiesForGradientBuffer.destroy(openCLManager);
-      leftGroundPlaneCellsBuffer.destroy(openCLManager);
-      rightGroundPlaneCellsBuffer.destroy(openCLManager);
-      groundPlaneGradientBuffer.destroy(openCLManager);
+      leftTraversibilitiesMapBuffer.destroy(openCLManager);
+      rightTraversibilitiesMapBuffer.destroy(openCLManager);
+      leftTraversibilitiesForGradientMapBuffer.destroy(openCLManager);
+      rightTraversibilitiesForGradientMapBuffer.destroy(openCLManager);
+      leftGroundPlaneCellsMapBuffer.destroy(openCLManager);
+      rightGroundPlaneCellsMapBuffer.destroy(openCLManager);
+      groundPlaneGradientMapBuffer.destroy(openCLManager);
 
       waypointXYZYawBuffer.destroy(openCLManager);
       waypointTurnPointsBuffer.destroy(openCLManager);
@@ -238,13 +229,13 @@ public class GPUAStarBodyPathSmoother
       int totalCells = cellsPerSide * cellsPerSide;
       collisionGradientsMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
       maxCollisionsMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      leftTraversibilitiesBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      rightTraversibilitiesBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      leftTraversibilitiesForGradientBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
-      rightTraversibilitiesForGradientBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
-      leftGroundPlaneCellsBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      rightGroundPlaneCellsBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      groundPlaneGradientBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
+      leftTraversibilitiesMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
+      rightTraversibilitiesMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
+      leftTraversibilitiesForGradientMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
+      rightTraversibilitiesForGradientMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
+      leftGroundPlaneCellsMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
+      rightGroundPlaneCellsMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
+      groundPlaneGradientMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
    }
 
    private void resizeForWayponts(int waypoints)
@@ -452,15 +443,15 @@ public class GPUAStarBodyPathSmoother
                                           OpenCLFloatBuffer heightMapBuffer,
                                           OpenCLFloatBuffer snappedNodeHeightBuffer)
    {
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 3, heightMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 4, snappedNodeHeightBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 5, collisionGradientsMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeCollisionGradientKernel, 6, maxCollisionsMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 3, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 4, snappedNodeHeightBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 5, collisionGradientsMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCollisionGradientMapKernel, 6, maxCollisionsMapBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute3D(computeCollisionGradientKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
+      openCLManager.execute3D(computeCollisionGradientMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
 
       openCLManager.finish();
    }
@@ -504,18 +495,17 @@ public class GPUAStarBodyPathSmoother
                                         OpenCLFloatBuffer snappedNodeHeightBuffer,
                                         OpenCLFloatBuffer normalXYZBuffer)
    {
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 3, traversibilityOffsetsForNominalBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 4, heightMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 5, snappedNodeHeightBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 6, normalXYZBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 7, leftTraversibilitiesBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityKernel, 8, rightTraversibilitiesBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 3, traversibilityOffsetsForNominalBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 4, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 5, snappedNodeHeightBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 6, normalXYZBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 7, leftTraversibilitiesMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 8, rightTraversibilitiesMapBuffer.getOpenCLBufferObject());
 
-      int totalCells = cellsPerSide * cellsPerSide;
-      openCLManager.execute2D(computeTraversibilityKernel, totalCells, yawDiscretizations);
+      openCLManager.execute3D(computeTraversibilityMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
 
       openCLManager.finish();
    }
@@ -561,18 +551,17 @@ public class GPUAStarBodyPathSmoother
                                                  OpenCLFloatBuffer snappedNodeHeightBuffer,
                                                  OpenCLFloatBuffer normalXYZBuffer)
    {
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 3, traversibilityOffsetsForGradientBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 4, heightMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 5, snappedNodeHeightBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 6, normalXYZBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 7, leftTraversibilitiesForGradientBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityForGradientKernel, 8, rightTraversibilitiesForGradientBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 3, traversibilityOffsetsForGradientBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 4, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 5, snappedNodeHeightBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 6, normalXYZBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 7, leftTraversibilitiesForGradientMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeTraversibilityForGradientMapKernel, 8, rightTraversibilitiesForGradientMapBuffer.getOpenCLBufferObject());
 
-      int totalCells = cellsPerSide * cellsPerSide;
-      openCLManager.execute2D(computeTraversibilityForGradientKernel, totalCells, yawDiscretizations);
+      openCLManager.execute3D(computeTraversibilityForGradientMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
 
       openCLManager.finish();
    }
@@ -613,9 +602,9 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 3, offsetsForGroundPlaneGradientBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 4, heightMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 5, leftGroundPlaneCellsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 6, rightGroundPlaneCellsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 7, groundPlaneGradientBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 5, leftGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 6, rightGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 7, groundPlaneGradientMapBuffer.getOpenCLBufferObject());
 
       int totalCells = cellsPerSide * cellsPerSide;
       openCLManager.execute2D(computeGroundPlaneGradientKernel, totalCells, yawDiscretizations);
@@ -654,14 +643,14 @@ public class GPUAStarBodyPathSmoother
 
    private void getCurrentTraversibilityValues(OpenCLFloatBuffer heightMapParamsBuffer)
    {
-      openCLManager.setKernelArgument(getCurrentTraversibilityKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(getCurrentTraversibilityKernel, 1, smoothingParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(getCurrentTraversibilityKernel, 2, waypointXYZYawBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(getCurrentTraversibilityKernel, 3, leftTraversibilitiesBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(getCurrentTraversibilityKernel, 4, rightTraversibilitiesBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(getCurrentTraversibilityKernel, 5, waypointTravesibilityValues.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(getWaypointCurrentTraversibilityKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(getWaypointCurrentTraversibilityKernel, 1, smoothingParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(getWaypointCurrentTraversibilityKernel, 2, waypointXYZYawBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(getWaypointCurrentTraversibilityKernel, 3, leftTraversibilitiesMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(getWaypointCurrentTraversibilityKernel, 4, rightTraversibilitiesMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(getWaypointCurrentTraversibilityKernel, 5, waypointTravesibilityValues.getOpenCLBufferObject());
 
-      openCLManager.execute1D(getCurrentTraversibilityKernel, pathSize);
+      openCLManager.execute1D(getWaypointCurrentTraversibilityKernel, pathSize);
 
       waypointTravesibilityValues.readOpenCLBufferObject(openCLManager);
 
@@ -677,11 +666,11 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 3, waypointTurnPointsBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 4, collisionGradientsMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 5, maxCollisionsMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 6, leftTraversibilitiesForGradientBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 7, rightTraversibilitiesForGradientBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 6, leftTraversibilitiesForGradientMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 7, rightTraversibilitiesForGradientMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 8, waypointTravesibilityValues.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 9, leftGroundPlaneCellsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 10, rightGroundPlaneCellsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 9, leftGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 10, rightGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 11, waypointGroundPlaneGradients.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 12, waypointMaxCollisions.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 13, waypointCollisionGradients.getOpenCLBufferObject());

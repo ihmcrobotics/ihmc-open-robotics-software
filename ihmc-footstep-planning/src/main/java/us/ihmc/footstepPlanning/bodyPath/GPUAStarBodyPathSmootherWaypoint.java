@@ -63,7 +63,7 @@ public class GPUAStarBodyPathSmootherWaypoint
    private final PoseReferenceFrame waypointFrame;
    private final SideDependentList<ReferenceFrame> nominalStepFrames;
    private final YoBoolean isTurnPoint;
-   private int previousCellKey, cellKey, dataKey;
+   private int previousCellKey, cellKey;
 
    private final SideDependentList<YoDouble> traversibilitySamplePos;
    private final SideDependentList<YoDouble> traversibilitySampleNeg;
@@ -410,13 +410,12 @@ public class GPUAStarBodyPathSmootherWaypoint
       return yoGroundPlaneGradient;
    }
 
-   public void update(boolean firstTick, HeightMapData heightMapData, OpenCLFloatBuffer snapHeightBUffer)
+   public void update(boolean firstTick, HeightMapData heightMapData, OpenCLFloatBuffer snapHeightBuffer)
    {
       // Cell key
       int currentKey = getMapBufferKey(heightMapData);
       previousCellKey = cellKey;
       cellKey = currentKey;
-      dataKey = getDataBufferKey(heightMapData);
 
       if (firstTick)
       {
@@ -441,7 +440,7 @@ public class GPUAStarBodyPathSmootherWaypoint
       // Compute new height if shifted
       if (firstTick || cellKey != previousCellKey)
       {
-         computeHeight(heightMapData, snapHeightBUffer);
+         computeHeight(heightMapData, snapHeightBuffer);
       }
 
       // Update frames
