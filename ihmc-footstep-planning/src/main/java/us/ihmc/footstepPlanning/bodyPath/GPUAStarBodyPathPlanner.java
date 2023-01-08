@@ -126,7 +126,7 @@ public class GPUAStarBodyPathPlanner
    // the cpu is no longer needed
    private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer ransacNormalXYZBuffer = new OpenCLFloatBuffer(1);
+   private OpenCLFloatMem ransacNormalXYZBuffer = new OpenCLFloatMem(1);
    private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
    private OpenCLIntBuffer edgeRejectionReasonBuffer = new OpenCLIntBuffer(1);
@@ -876,9 +876,6 @@ public class GPUAStarBodyPathPlanner
 
       int totalCells = cellsPerSide * cellsPerSide;
       openCLManager.execute1D(computeNormalsWithRansacKernel, totalCells);
-
-      // get the data from the GPU
-      ransacNormalXYZBuffer.readOpenCLBufferObject(openCLManager);
 
       openCLManager.finish();
    }

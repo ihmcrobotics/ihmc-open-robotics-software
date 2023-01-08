@@ -1208,45 +1208,6 @@ float computeSmootherTraversibility(global float* height_map_params,
     }
 }
 
-void kernel computeCurrentWaypointTraversibility(global float* height_map_params,
-                                                  global float* planner_params,
-                                                  global float* traversibility_nominal_offsets,
-                                                  global float* height_map_data,
-                                                  global float* normal_xyz_data,
-                                                  global float* waypoint_xyzYaw,
-                                                  global float* waypoint_traversibility)
-{
-    int waypoint_key = get_global_id(0);
-
-    float2 waypoint_position = (float2) (waypoint_xyzYaw[4 * waypoint_key], waypoint_xyzYaw[4 * waypoint_key + 1]);
-    float waypoint_z = waypoint_xyzYaw[4 * waypoint_key + 2];
-    float waypoint_yaw = waypoint_xyzYaw[4 * waypoint_key + 3];
-
-    float left_traversibility = computeSmootherTraversibility(height_map_params,
-                                                              planner_params,
-                                                              traversibility_nominal_offsets,
-                                                              height_map_data,
-                                                              normal_xyz_data,
-                                                              0,
-                                                              1.0f,
-                                                              waypoint_z,
-                                                              waypoint_position,
-                                                              waypoint_yaw);
-    float right_traversibility = computeSmootherTraversibility(height_map_params,
-                                                               planner_params,
-                                                               traversibility_nominal_offsets,
-                                                               height_map_data,
-                                                               normal_xyz_data,
-                                                               1,
-                                                               1.0f,
-                                                               waypoint_z,
-                                                               waypoint_position,
-                                                               waypoint_yaw);
-
-    waypoint_traversibility[2 * waypoint_key] = left_traversibility;
-    waypoint_traversibility[2 * waypoint_key + 1] = right_traversibility;
-}
-
 float shiftAngleInRange(float angleToShift, float angleStart)
 {
     angleStart -= EPS_ANGLE_SHIFT;
@@ -1279,7 +1240,7 @@ float computeDeltaHeadingMagnitude(float x0, float y0, float x1, float y1, float
 
 
 
-void kernel computeWaypointCurrentTraversibilityMap(global float* height_map_params,
+void kernel computeCurrentTraversibilityMap(global float* height_map_params,
                                                     global float* planner_params,
                                                     global float* smoother_params,
                                                     global float* traversibility_nominal_offsets,
@@ -1289,23 +1250,20 @@ void kernel computeWaypointCurrentTraversibilityMap(global float* height_map_par
                                                     global float* waypoint_left_traversibility,
                                                     global float* waypoint_right_traversibility)
 {
-    int map_key = get_global_id(0);
-    int yaw_key = get_global_id(1);
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+    int yaw_key = get_global_id(2);
 
     int center_index = height_map_params[CENTER_INDEX];
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
 
-    int idx_x = key_to_x_index(map_key, center_index);
-    int idx_y = key_to_x_index(map_key, center_index);
+    int map_key = indices_to_key(idx_x, idx_y, center_index);
 
     float2 waypoint_position = indices_to_coordinate((int2) (idx_x, idx_y), center, resolution, center_index);
-    float waypoint_z = height_map_data[map_key];
-    float waypoint_yaw = index_to_yaw(yaw_key, smoother_params[YAW_DISCRETIZATIONS]);
-
     int path_key = coordinate_to_key(waypoint_position, center, planner_params[PATH_RESOLUTION], planner_params[PATH_CENTER_INDEX]);
-    float waypointZ = snapped_node_height_data[path_key];
-
+    float waypoint_z = snapped_node_height_data[path_key];
+    float waypoint_yaw = index_to_yaw(yaw_key, smoother_params[YAW_DISCRETIZATIONS]);
 
     float left_traversibility = computeSmootherTraversibility(height_map_params,
                                                               planner_params,
@@ -1333,13 +1291,13 @@ void kernel computeWaypointCurrentTraversibilityMap(global float* height_map_par
     waypoint_right_traversibility[result_key] = right_traversibility;
 }
 
-void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
-                                                global float* planner_params,
-                                                global float* smoothing_params,
-                                                global float* height_map_data,
-                                                global float* snapped_height_map_data,
-                                                global float* waypoint_gradients,
-                                                global float* max_collision_map)
+void kernel computeCollisionGradientMap(global float* height_map_params,
+                                        global float* planner_params,
+                                        global float* smoothing_params,
+                                        global float* height_map_data,
+                                        global float* snapped_height_map_data,
+                                        global float* waypoint_gradients,
+                                        global float* max_collision_map)
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
@@ -1351,7 +1309,6 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
 
     int maxOffset = (int) round(0.5 * length((float2) (box_size_x, box_size_y)) / resolution);
     int center_index = height_map_params[CENTER_INDEX];
-
 
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float2 waypoint_xy = indices_to_coordinate((int2) (idx_x, idx_y), center, resolution, center_index);
@@ -1421,7 +1378,7 @@ void kernel computeWaypointCollisionGradientMap(global float* height_map_params,
     waypoint_gradients[2 * result_key + 1] = gradient.y;
 }
 
-void kernel computeWaypointTraversibilityForGradientMap(global float* height_map_params,
+void kernel computeTraversibilityForGradientMap(global float* height_map_params,
                                                         global float* planner_params,
                                                         global float* smoother_params,
                                                         global float* traversibility_gradient_offsets,
@@ -1431,15 +1388,13 @@ void kernel computeWaypointTraversibilityForGradientMap(global float* height_map
                                                         global float* waypoint_left_traversibility,
                                                         global float* waypoint_right_traversibility)
 {
-    int map_key = get_global_id(0);
-    int yaw_key = get_global_id(1);
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+    int yaw_key = get_global_id(2);
 
     int center_index = height_map_params[CENTER_INDEX];
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
-
-    int idx_x = key_to_x_index(map_key, center_index);
-    int idx_y = key_to_x_index(map_key, center_index);
 
     float2 waypoint_position = indices_to_coordinate((int2) (idx_x, idx_y), center, resolution, center_index);
     float waypoint_yaw = index_to_yaw(yaw_key, smoother_params[YAW_DISCRETIZATIONS]);
@@ -1488,6 +1443,7 @@ void kernel computeWaypointTraversibilityForGradientMap(global float* height_map
                                                                    waypoint_position,
                                                                    waypoint_yaw);
 
+    int map_key = indices_to_key(idx_x, idx_y, center_index);
     int result_key = smoother_params[YAW_DISCRETIZATIONS] * map_key + yaw_key;
     waypoint_left_traversibility[2 * result_key] = left_neg_traversibility;
     waypoint_left_traversibility[2 * result_key + 1] = left_pos_traversibility;
@@ -1495,7 +1451,7 @@ void kernel computeWaypointTraversibilityForGradientMap(global float* height_map
     waypoint_right_traversibility[2 * result_key + 1] = right_pos_traversibility;
 }
 
-void kernel computeWaypointGroundPlaneGradientMap(global float* height_map_params,
+void kernel computeGroundPlaneGradientMap(global float* height_map_params,
                                                   global float* planner_params,
                                                   global float* smoother_params,
                                                   global int* ground_plane_offsets,
@@ -1504,15 +1460,15 @@ void kernel computeWaypointGroundPlaneGradientMap(global float* height_map_param
                                                   global int* right_cells_map,
                                                   global float* gradient_map)
 {
-    int map_key = get_global_id(0);
-    int yaw_key = get_global_id(1);
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
+    int yaw_key = get_global_id(2);
 
     int center_index = height_map_params[CENTER_INDEX];
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
 
-    int idx_x = key_to_x_index(map_key, center_index);
-    int idx_y = key_to_x_index(map_key, center_index);
+    int map_key = indices_to_key(idx_x, idx_y, center_index);
 
     float2 waypoint_position = indices_to_coordinate((int2) (idx_x, idx_y), center, resolution, center_index);
     float waypoint_yaw = index_to_yaw(yaw_key, smoother_params[YAW_DISCRETIZATIONS]);
@@ -1580,7 +1536,7 @@ void kernel computeWaypointGroundPlaneGradientMap(global float* height_map_param
 void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
                                               global float* waypoint_xyzYaw,
                                               global int* waypont_turn_points,
-                                              global float* waypoint_gradients)
+                                              global float* waypoint_smoothness_gradients)
 {
     int waypoint_key = get_global_id(0);
 
@@ -1620,11 +1576,11 @@ void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
         gradient.x += smoothnessGradientX;
         gradient.y += smoothnessGradientY;
     }
-    waypoint_gradients[2 * waypoint_key] = gradient.x;
-    waypoint_gradients[2 * waypoint_key + 1] = gradient.y;
+    waypoint_smoothness_gradients[2 * waypoint_key] = gradient.x;
+    waypoint_smoothness_gradients[2 * waypoint_key + 1] = gradient.y;
 }
 
-void kernel getCurrentTraversibility(global float* height_map_params,
+void kernel getWaypointCurrentTraversibility(global float* height_map_params,
                                       global float* smoothing_params,
                                       global float* waypoint_xyzYaw,
                                       global float* left_traversibility_map,
