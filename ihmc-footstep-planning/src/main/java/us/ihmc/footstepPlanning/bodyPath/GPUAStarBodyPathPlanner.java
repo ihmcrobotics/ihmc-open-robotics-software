@@ -75,7 +75,6 @@ public class GPUAStarBodyPathPlanner
    private final YoDouble rollCost = new YoDouble("rollCost", registry);
    private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
    private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D ransacNormal = new YoFrameVector3D("ransacNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
 
@@ -231,7 +230,6 @@ public class GPUAStarBodyPathPlanner
                                          deltaHeight.set(Double.NaN);
                                          rejectionReason.set(null);
                                          leastSqNormal.setToZero();
-                                         ransacNormal.setToZero();
                                          roll.set(0.0);
                                          incline.set(0.0);
                                          heuristicCost.setToNaN();
@@ -640,7 +638,6 @@ public class GPUAStarBodyPathPlanner
          {
             BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
             int neighborNodeKey = getNodeGraphKey(neighbor);
-            ransacNormal.set(getRansacSurfaceNormal(neighborNodeKey));
 
             int edgeKey = edgeKeyStart + neighborIndex;
 
@@ -932,8 +929,7 @@ public class GPUAStarBodyPathPlanner
       openCLManager.setKernelArgument(computeEdgeDataKernel, 17, traversibilityCostMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeEdgeDataKernel, 18, edgeCostMapBuffer.getOpenCLBufferObject());
 
-      int totalCells = nodesPerSide * nodesPerSide;
-      openCLManager.execute1D(computeEdgeDataKernel, totalCells);
+      openCLManager.execute2D(computeEdgeDataKernel, nodesPerSide, nodesPerSide);
 
       edgeRejectionReasonBuffer.readOpenCLBufferObject(openCLManager);
       deltaHeightMapBuffer.readOpenCLBufferObject(openCLManager);
@@ -950,19 +946,6 @@ public class GPUAStarBodyPathPlanner
    }
 
    private UnitVector3DReadOnly getSurfaceNormal(int key)
-   {
-      float x = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key);
-      float y = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 1);
-      float z = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 2);
-      return new UnitVector3D(x, y, z);
-   }
-
-   private UnitVector3DReadOnly getRansacSurfaceNormal(int xIndex, int yIndex)
-   {
-      return getRansacSurfaceNormal(HeightMapTools.indicesToKey(xIndex, yIndex, heightMapData.getCenterIndex()));
-   }
-
-   private UnitVector3DReadOnly getRansacSurfaceNormal(int key)
    {
       float x = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key);
       float y = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key + 1);
@@ -1206,7 +1189,7 @@ public class GPUAStarBodyPathPlanner
 
    private double heuristics(BodyPathLatticePoint node)
    {
-      return heuristicCostMapBuffer.getBytedecoFloatBufferPointer().get(getNodeGraphKey(node));
+      return heuristicCostMapBuffer.getBackingDirectFloatBuffer().get(getNodeGraphKey(node));
    }
 
    public void halt()
