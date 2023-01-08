@@ -1000,15 +1000,15 @@ void kernel computeEdgeData(global float* height_map_params,
                             global float* traversibility_cost_map,
                             global float* edge_cost_map)
 {
-    int path_key = get_global_id(0);
+    int idx_x = get_global_id(0);
+    int idx_y = get_global_id(1);
 
     int path_center_index = (int) planner_params[PATH_CENTER_INDEX];
     int map_center_index = (int) height_map_params[CENTER_INDEX];
     float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
     float path_resolution = planner_params[PATH_RESOLUTION];
 
-    int idx_x = key_to_x_index(path_key, path_center_index);
-    int idx_y = key_to_y_index(path_key, path_center_index);
+    int path_key = indices_to_key(idx_x, idx_y, path_center_index);
     int2 node_index = (int2) (idx_x, idx_y);
 
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
