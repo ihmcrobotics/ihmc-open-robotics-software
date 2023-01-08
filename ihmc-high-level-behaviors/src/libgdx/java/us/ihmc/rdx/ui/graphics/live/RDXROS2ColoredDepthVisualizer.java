@@ -160,7 +160,7 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
 
       openCLManager = new OpenCLManager();
       openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("ColoredPointCloudCreator");
+      openCLProgram = openCLManager.loadProgram("ColoredPointCloudCreator", "PerceptionCommon.cl");
       createPointCloudKernel = openCLManager.createKernel(openCLProgram, "createPointCloud");
 
       parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUMBER_OF_PARAMETERS);
@@ -291,10 +291,10 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
             colorMessageSizeReadout.update(colorImageMessage.getData().size());
             depthSequenceDiscontinuityPlot.update(depthImageMessage.getSequenceNumber());
             colorSequenceDiscontinuityPlot.update(colorImageMessage.getSequenceNumber());
-            depthDelayPlot.addValue(TimeTools.calculateDelay(depthImageMessage.getAcquisitionTimeSecondsSinceEpoch(),
-                                                             depthImageMessage.getAcquisitionTimeAdditionalNanos()));
-            colorDelayPlot.addValue(TimeTools.calculateDelay(colorImageMessage.getAcquisitionTimeSecondsSinceEpoch(),
-                                                             colorImageMessage.getAcquisitionTimeAdditionalNanos()));
+            depthDelayPlot.addValue(TimeTools.calculateDelay(depthImageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                                             depthImageMessage.getAcquisitionTime().getAdditionalNanos()));
+            colorDelayPlot.addValue(TimeTools.calculateDelay(colorImageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+                                                             colorImageMessage.getAcquisitionTime().getAdditionalNanos()));
 
             depthAvailable = false;
             colorAvailable = false;

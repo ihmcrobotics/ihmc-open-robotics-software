@@ -22,6 +22,11 @@ import java.time.Instant;
 import java.util.function.Consumer;
 
 /**
+ * This class is written to do no operations on incoming Ouster data for maximum performance.
+ * It just lines the incoming data up into a single buffer representing one full frame. It also
+ * does so on the event that the UDP datagrams are received by Netty for the fastest possible
+ * response. All operations on this data should be done externally by OpenCL kernels.
+ *
  * Ouster Firmware User Manual: https://data.ouster.io/downloads/software-user-manual/firmware-user-manual-v2.3.0.pdf
  * Software User Manual: https://data.ouster.io/downloads/software-user-manual/software-user-manual-v2p0.pdf
  * 
@@ -139,6 +144,7 @@ public class NettyOuster
                }
                nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
 
+               // Copying UDP datagram content into correct position in whole frame buffer.
                lidarFrameByteBuffer.position(measurementID * measurementBlockSize);
                content.getBytes(0, lidarFrameByteBuffer);
 
@@ -199,8 +205,8 @@ public class NettyOuster
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(jsonResponse);
 
+            // Lidar mode contains the frequency like 1024x20 or 2048x10
             lidarMode = root.get("lidar_mode").asText();
-
             LogTools.info("Lidar mode: {}", lidarMode);
          }
          catch (JsonProcessingException jsonProcessingException)
@@ -282,6 +288,10 @@ public class NettyOuster
       this.onFrameReceived = onFrameReceived;
    }
 
+   /**
+    * This getter allows access to the whole frame buffer.
+    * This contains all the data the Ouster gives us in an unmodified format.
+    */
    public ByteBuffer getLidarFrameByteBuffer()
    {
       return lidarFrameByteBuffer;
@@ -297,6 +307,9 @@ public class NettyOuster
       return pixelsPerColumn;
    }
 
+   /**
+    * This getter allows access to the pixel shift buffer which is necessary to line the rows up correctly.
+    */
    public ByteBuffer getPixelShiftBuffer()
    {
       return pixelShiftBuffer;

@@ -42,9 +42,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
@@ -76,11 +74,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
+      current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getAcquisitionTime(), current_alignment);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
@@ -109,10 +103,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       cdr.write_type_4(data.getSequenceNumber());
 
-      cdr.write_type_4(data.getAcquisitionTimeSecondsSinceEpoch());
-
-      cdr.write_type_4(data.getAcquisitionTimeAdditionalNanos());
-
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getAcquisitionTime(), cdr);
       cdr.write_type_3(data.getImageWidth());
 
       cdr.write_type_3(data.getImageHeight());
@@ -132,10 +123,7 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    {
       data.setSequenceNumber(cdr.read_type_4());
       	
-      data.setAcquisitionTimeSecondsSinceEpoch(cdr.read_type_4());
-      	
-      data.setAcquisitionTimeAdditionalNanos(cdr.read_type_4());
-      	
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getAcquisitionTime(), cdr);	
       data.setImageWidth(cdr.read_type_3());
       	
       data.setImageHeight(cdr.read_type_3());
@@ -153,8 +141,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    public final void serialize(perception_msgs.msg.dds.ImageMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_number", data.getSequenceNumber());
-      ser.write_type_4("acquisition_time_seconds_since_epoch", data.getAcquisitionTimeSecondsSinceEpoch());
-      ser.write_type_4("acquisition_time_additional_nanos", data.getAcquisitionTimeAdditionalNanos());
+      ser.write_type_a("acquisition_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getAcquisitionTime());
+
       ser.write_type_3("image_width", data.getImageWidth());
       ser.write_type_3("image_height", data.getImageHeight());
       ser.write_type_e("data", data.getData());
@@ -171,8 +159,8 @@ public class ImageMessagePubSubType implements us.ihmc.pubsub.TopicDataType<perc
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.ImageMessage data)
    {
       data.setSequenceNumber(ser.read_type_4("sequence_number"));
-      data.setAcquisitionTimeSecondsSinceEpoch(ser.read_type_4("acquisition_time_seconds_since_epoch"));
-      data.setAcquisitionTimeAdditionalNanos(ser.read_type_4("acquisition_time_additional_nanos"));
+      ser.read_type_a("acquisition_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getAcquisitionTime());
+
       data.setImageWidth(ser.read_type_3("image_width"));
       data.setImageHeight(ser.read_type_3("image_height"));
       ser.read_type_e("data", data.getData());

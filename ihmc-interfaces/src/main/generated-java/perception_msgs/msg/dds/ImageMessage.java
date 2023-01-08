@@ -17,13 +17,9 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
             */
    public long sequence_number_;
    /**
-            * Use precise time measurements to measure delay between processes
+            * The instant right after we got data from the sensor. Used to measure delay between processes
             */
-   public long acquisition_time_seconds_since_epoch_;
-   /**
-            * Use precise time measurements to measure delay between processes
-            */
-   public long acquisition_time_additional_nanos_;
+   public ihmc_common_msgs.msg.dds.InstantMessage acquisition_time_;
    /**
             * Image width in pixels
             */
@@ -55,6 +51,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
    public ImageMessage()
    {
+      acquisition_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
       data_ = new us.ihmc.idl.IDLSequence.Byte (25000000, "type_9");
 
       position_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -72,10 +69,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
    {
       sequence_number_ = other.sequence_number_;
 
-      acquisition_time_seconds_since_epoch_ = other.acquisition_time_seconds_since_epoch_;
-
-      acquisition_time_additional_nanos_ = other.acquisition_time_additional_nanos_;
-
+      ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.acquisition_time_, acquisition_time_);
       image_width_ = other.image_width_;
 
       image_height_ = other.image_height_;
@@ -103,34 +97,13 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       return sequence_number_;
    }
 
-   /**
-            * Use precise time measurements to measure delay between processes
-            */
-   public void setAcquisitionTimeSecondsSinceEpoch(long acquisition_time_seconds_since_epoch)
-   {
-      acquisition_time_seconds_since_epoch_ = acquisition_time_seconds_since_epoch;
-   }
-   /**
-            * Use precise time measurements to measure delay between processes
-            */
-   public long getAcquisitionTimeSecondsSinceEpoch()
-   {
-      return acquisition_time_seconds_since_epoch_;
-   }
 
    /**
-            * Use precise time measurements to measure delay between processes
+            * The instant right after we got data from the sensor. Used to measure delay between processes
             */
-   public void setAcquisitionTimeAdditionalNanos(long acquisition_time_additional_nanos)
+   public ihmc_common_msgs.msg.dds.InstantMessage getAcquisitionTime()
    {
-      acquisition_time_additional_nanos_ = acquisition_time_additional_nanos;
-   }
-   /**
-            * Use precise time measurements to measure delay between processes
-            */
-   public long getAcquisitionTimeAdditionalNanos()
-   {
-      return acquisition_time_additional_nanos_;
+      return acquisition_time_;
    }
 
    /**
@@ -234,10 +207,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_number_, other.sequence_number_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acquisition_time_seconds_since_epoch_, other.acquisition_time_seconds_since_epoch_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.acquisition_time_additional_nanos_, other.acquisition_time_additional_nanos_, epsilon)) return false;
-
+      if (!this.acquisition_time_.epsilonEquals(other.acquisition_time_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.image_width_, other.image_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.image_height_, other.image_height_, epsilon)) return false;
@@ -264,10 +234,7 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
 
       if(this.sequence_number_ != otherMyClass.sequence_number_) return false;
 
-      if(this.acquisition_time_seconds_since_epoch_ != otherMyClass.acquisition_time_seconds_since_epoch_) return false;
-
-      if(this.acquisition_time_additional_nanos_ != otherMyClass.acquisition_time_additional_nanos_) return false;
-
+      if (!this.acquisition_time_.equals(otherMyClass.acquisition_time_)) return false;
       if(this.image_width_ != otherMyClass.image_width_) return false;
 
       if(this.image_height_ != otherMyClass.image_height_) return false;
@@ -290,10 +257,8 @@ public class ImageMessage extends Packet<ImageMessage> implements Settable<Image
       builder.append("ImageMessage {");
       builder.append("sequence_number=");
       builder.append(this.sequence_number_);      builder.append(", ");
-      builder.append("acquisition_time_seconds_since_epoch=");
-      builder.append(this.acquisition_time_seconds_since_epoch_);      builder.append(", ");
-      builder.append("acquisition_time_additional_nanos=");
-      builder.append(this.acquisition_time_additional_nanos_);      builder.append(", ");
+      builder.append("acquisition_time=");
+      builder.append(this.acquisition_time_);      builder.append(", ");
       builder.append("image_width=");
       builder.append(this.image_width_);      builder.append(", ");
       builder.append("image_height=");

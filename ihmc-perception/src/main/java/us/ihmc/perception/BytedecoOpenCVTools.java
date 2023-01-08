@@ -88,6 +88,9 @@ public class BytedecoOpenCVTools
       destination.put(depth);
    }
 
+   /**
+    * Not an incorrect name, but overspecified for a general operation.
+    */
    public static void convert8BitGrayTo8BitRGBA(Mat source, Mat destination)
    {
       convertGrayToRGBA(source, destination);

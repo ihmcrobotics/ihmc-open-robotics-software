@@ -4,6 +4,11 @@ import imgui.internal.ImGui;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.tools.thread.Throttler;
 
+/**
+ * Keep track of the size of the incoming messages while slowing it down
+ * to reduce String manipulation and allow the user to read values without them
+ * switching too quickly. Extracted to simplify visualizers.
+ */
 public class RDXMessageSizeReadout
 {
    private String messageSizeString;
