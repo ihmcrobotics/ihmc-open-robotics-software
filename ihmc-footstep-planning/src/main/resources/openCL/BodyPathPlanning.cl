@@ -1002,6 +1002,7 @@ void kernel computeEdgeData(global float* height_map_params,
 {
     int idx_x = get_global_id(0);
     int idx_y = get_global_id(1);
+    int neighborIdx = get_global_id(2);
 
     int path_center_index = (int) planner_params[PATH_CENTER_INDEX];
     int map_center_index = (int) height_map_params[CENTER_INDEX];
@@ -1020,18 +1021,18 @@ void kernel computeEdgeData(global float* height_map_params,
     float snapped_height = snapped_height_map[path_key];
     if (isnan(snapped_height))
     {
-         for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
-         {
+        // for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
+        // {
              int edge_key = number_of_neighbors * path_key + neighborIdx;
              edge_rejection_reason[edge_key] = INVALID_SNAP;
-         }
+        // }
          return;
     }
 
     int path_cells_per_side = 2 * path_center_index + 1;
 
-    for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
-    {
+    //for (int neighborIdx = 0; neighborIdx < number_of_neighbors; neighborIdx++)
+    //{
         int neighbor_idx_x = idx_x + neighbor_offsets[1 + neighborIdx];
         int neighbor_idx_y = idx_y + neighbor_offsets[1 + number_of_neighbors + neighborIdx];
         int edge_key = number_of_neighbors * path_key + neighborIdx;
@@ -1039,12 +1040,12 @@ void kernel computeEdgeData(global float* height_map_params,
         if (neighbor_idx_x < 0 || neighbor_idx_x >= path_cells_per_side)
         {
             edge_rejection_reason[edge_key] = INVALID_SNAP;
-            continue;
+            return;
         }
         if (neighbor_idx_y < 0 || neighbor_idx_y >= path_cells_per_side)
         {
             edge_rejection_reason[edge_key] = INVALID_SNAP;
-            continue;
+            return;
         }
 
         int2 neighbor_index = (int2) (neighbor_idx_x, neighbor_idx_y);
@@ -1055,7 +1056,7 @@ void kernel computeEdgeData(global float* height_map_params,
         if (isnan(snapped_neighbor_height))
         {
             edge_rejection_reason[edge_key] = INVALID_SNAP;
-            continue;
+            return;
         }
 
         float xy_distance = length(neighbor_position - node_position);
@@ -1069,13 +1070,13 @@ void kernel computeEdgeData(global float* height_map_params,
         if (fabs(incline) > planner_params[MAX_INCLINE])
         {
             edge_rejection_reason[edge_key] = TOO_STEEP;
-            continue;
+            return;
         }
 
         if (collisionDetected(height_map_params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
         {
             edge_rejection_reason[edge_key] = COLLISION;
-            continue;
+            return;
         }
 
         float4 traversibility_measures = computeTraversibilityMeasures(height_map_params, planner_params, traversibility_offsets, snapped_height_map,
@@ -1088,7 +1089,7 @@ void kernel computeEdgeData(global float* height_map_params,
         if (!computeIsTraversible(planner_params, traversibility_measures))
         {
             edge_rejection_reason[edge_key] = NON_TRAVERSIBLE;
-            continue;
+            return;
         }
 
         // edge is valid, so set to -1
@@ -1117,7 +1118,7 @@ void kernel computeEdgeData(global float* height_map_params,
         edge_cost_map[edge_key] = edge_cost;
         incline_cost_map[edge_key] = incline_cost;
         traversibility_cost_map[edge_key] = traversibility_cost;
-    }
+    //}
 }
 
 float computeSmootherTraversibility(global float* height_map_params,

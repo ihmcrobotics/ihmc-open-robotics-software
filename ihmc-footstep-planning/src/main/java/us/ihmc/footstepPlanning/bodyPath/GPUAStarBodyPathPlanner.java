@@ -929,7 +929,7 @@ public class GPUAStarBodyPathPlanner
       openCLManager.setKernelArgument(computeEdgeDataKernel, 17, traversibilityCostMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeEdgeDataKernel, 18, edgeCostMapBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute2D(computeEdgeDataKernel, nodesPerSide, nodesPerSide);
+      openCLManager.execute3D(computeEdgeDataKernel, nodesPerSide, nodesPerSide, numberOfNeighborsPerExpansion);
 
       edgeRejectionReasonBuffer.readOpenCLBufferObject(openCLManager);
       deltaHeightMapBuffer.readOpenCLBufferObject(openCLManager);
