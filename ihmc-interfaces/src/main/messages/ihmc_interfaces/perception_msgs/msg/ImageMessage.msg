@@ -4,10 +4,8 @@
 # Sequence number. Used for detecting out of order or dropped messages
 uint32 sequence_number
 
-# Use precise time measurements to measure delay between processes
-uint32 acquisition_time_seconds_since_epoch
-# Use precise time measurements to measure delay between processes
-uint32 acquisition_time_additional_nanos
+# The instant right after we got data from the sensor. Used to measure delay between processes
+ihmc_common_msgs/InstantMessage acquisition_time
 
 # Image width in pixels
 uint16 image_width

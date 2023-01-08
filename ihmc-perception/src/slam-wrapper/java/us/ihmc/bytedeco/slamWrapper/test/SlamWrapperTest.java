@@ -1,9 +1,8 @@
 package us.ihmc.bytedeco.slamWrapper.test;
 
-import us.ihmc.bytedeco.slamWrapper.FactorGraph;
-import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.perception.slamWrapper.FactorGraph;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
@@ -79,7 +78,7 @@ public class SlamWrapperTest
 
    public static void rawTest()
    {
-      SlamWrapper.FactorGraphExternal factorGraphExternal = new SlamWrapper.FactorGraphExternal();
+      FactorGraph factorGraphExternal = new FactorGraph();
 
       //      factorGraphExternal.helloWorldTest();
 

@@ -6,6 +6,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -149,10 +150,8 @@ public class RealsenseColorAndDepthPublisher
             colorImageMessage.setSequenceNumber(colorSequenceNumber++);
             depthImageMessage.setSequenceNumber(depthSequenceNumber++);
 
-            depthImageMessage.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
-            depthImageMessage.setAcquisitionTimeAdditionalNanos(now.getNano());
-            colorImageMessage.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
-            colorImageMessage.setAcquisitionTimeAdditionalNanos(now.getNano());
+            MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
+            MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);

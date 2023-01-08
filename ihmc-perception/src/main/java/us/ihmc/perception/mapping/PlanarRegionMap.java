@@ -1,12 +1,12 @@
 package us.ihmc.perception.mapping;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.slamWrapper.FactorGraph;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -33,7 +33,7 @@ public class PlanarRegionMap
    private MatchingMode matcher;
 
    private PlanarRegionMappingParameters parameters;
-   private SlamWrapper.FactorGraphExternal factorGraph;
+   private FactorGraph factorGraph;
 
    private final RigidBodyTransform previousSensorToWorldFrameTransform = new RigidBodyTransform();
    private final RigidBodyTransform worldToSensorFrameTransform = new RigidBodyTransform();
@@ -66,8 +66,8 @@ public class PlanarRegionMap
       {
          this.merger = MergingMode.SMOOTHING;
 
-         BytedecoTools.loadGTSAMNatives();
-         factorGraph = new SlamWrapper.FactorGraphExternal();
+         BytedecoTools.loadSlamWrapper();
+         factorGraph = new FactorGraph();
       }
       else
       {

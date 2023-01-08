@@ -2,6 +2,9 @@ package us.ihmc.rdx.ui.graphics.live;
 
 import us.ihmc.rdx.imgui.ImGuiPlot;
 
+/**
+ * Used to detect dropped messages.
+ */
 public class RDXSequenceDiscontinuityPlot
 {
    private long expectedNextSequenceNumber = -1;
