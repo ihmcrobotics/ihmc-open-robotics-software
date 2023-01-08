@@ -338,6 +338,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
       opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
       rapidPlanarRegionsExtractor.extractPatchGraphUsingOpenCL();
       rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
+      rapidPlanarRegionsExtractor.copyFeatureGridMapUsingOpenCL();
 
       perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 1, bytedecoDepthImage.getBytedecoOpenCVMat());
       opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
