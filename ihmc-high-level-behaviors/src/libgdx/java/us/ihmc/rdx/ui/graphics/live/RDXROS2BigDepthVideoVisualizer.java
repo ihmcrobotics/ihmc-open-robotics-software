@@ -6,7 +6,6 @@ import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -20,7 +19,6 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
-import us.ihmc.tools.thread.Throttler;
 
 public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
 {
@@ -38,8 +36,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private Mat inputDepthMat;
    private Mat normalizedScaledImage;
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
-   private String messageSizeString;
-   private final Throttler messageSizeStatusThrottler = new Throttler();
+   private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
    public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
    {
@@ -89,11 +86,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
 
                inputDepthMat.data(messageBytePointer);
 
-               if (messageSizeStatusThrottler.run(1.0))
-               { // Only doing this at 1 Hz to improve readability and because String building and formatting is expensive to do every tick
-                  String kilobytes = FormattingTools.getFormattedDecimal1D((double) numberOfBytes / 1000.0);
-                  messageSizeString = String.format("Message size: ~%s KB", kilobytes);
-               }
+               messageSizeReadout.update(numberOfBytes);
             }
 
             if (normalizedScaledImage == null)
@@ -124,11 +117,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
       ImGui.sameLine();
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      if (messageSizeString != null)
-      {
-         ImGui.sameLine();
-         ImGui.text(messageSizeString);
-      }
+      messageSizeReadout.renderImGuiWidgets();
       if (getHasReceivedOne())
       {
          getFrequencyPlot().renderImGuiWidgets();

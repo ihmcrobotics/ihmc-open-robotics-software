@@ -27,7 +27,7 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 {
    private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
    private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
-   public static final double MAX_PERIOD = UnitConversions.hertzToSeconds(30.0);
+   public static final double MAX_PERIOD = UnitConversions.hertzToSeconds(20.0);
 
    private final Activator nativesLoadedActivator;
    private final ROS2SyncedRobotModel syncedRobot;

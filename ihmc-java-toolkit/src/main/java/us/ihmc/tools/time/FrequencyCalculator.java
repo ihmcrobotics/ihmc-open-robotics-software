@@ -34,4 +34,9 @@ public class FrequencyCalculator
    {
       return frequency;
    }
+
+   public boolean anyPingsYet()
+   {
+      return !deltas.isEmpty();
+   }
 }

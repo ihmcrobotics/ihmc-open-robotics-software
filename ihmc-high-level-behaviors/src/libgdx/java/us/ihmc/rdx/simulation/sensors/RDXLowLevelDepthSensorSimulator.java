@@ -148,7 +148,7 @@ public class RDXLowLevelDepthSensorSimulator
 
       openCLManager = new OpenCLManager();
       openCLManager.create();
-      openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator");
+      openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator", "PerceptionCommon.cl");
 
       normalizedDeviceCoordinateDepthImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       noiseImage = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
@@ -301,7 +301,7 @@ public class RDXLowLevelDepthSensorSimulator
       openCLManager.finish();
 
       if (depthPanel.getVideoPanel().getIsShowing().get())
-         depthPanel.drawFloatImage(metersDepthImage.getBytedecoOpenCVMat());
+         depthPanel.drawDepthImage(metersDepthImage.getBytedecoOpenCVMat());
    }
 
    public void renderTuningSliders()

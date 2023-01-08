@@ -87,7 +87,7 @@ public class RDXRealsenseD435UI
                   frameReadFrequency.ping();
                   depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, d435.getDepthToMeterConversion(), 0.0);
 
-                  depthImagePanel.drawFloatImage(depth32FC1Image.getBytedecoOpenCVMat());
+                  depthImagePanel.drawDepthImage(depth32FC1Image.getBytedecoOpenCVMat());
                }
             }
 
