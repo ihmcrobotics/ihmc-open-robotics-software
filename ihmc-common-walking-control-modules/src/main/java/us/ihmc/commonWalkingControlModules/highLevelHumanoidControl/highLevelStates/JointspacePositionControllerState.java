@@ -433,6 +433,8 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          queueInitialPoint(position);
          trajectoryDone.set(false);
 
+         fillAndReinitializeTrajectories();
+         jointTrajectoryGenerator.compute(0.0);
       }
 
       private void resetLastCommandId()
