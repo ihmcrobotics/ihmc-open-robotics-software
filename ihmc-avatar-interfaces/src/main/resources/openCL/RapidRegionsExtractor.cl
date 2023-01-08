@@ -350,7 +350,7 @@ void smooth_non_boundary(read_only image2d_t in, int x, int y, write_only image2
    }
 }
 
-float4 transform(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
+float4 transform4(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
 {
    return (float4)(dot(r1, point) + t.x, dot(r2, point) + t.y, dot(r3, point) + t.z, 0);
 }
@@ -574,7 +574,7 @@ void kernel correspondenceKernel(read_write image2d_t one0, read_write image2d_t
     float4 normalOne = (float4)(0,0,0,0);
     float4 normalTwo = (float4)(0,0,0,0);
 
-    if(rIndex == 0 && cIndex == 0) printf("CorrespondenceKernel\n");
+    if(rIndex == 0 && cIndex == 0) printf("Correspondence Kernel\n");
 
     float minLength = 10000000;
     float distance = 0;
@@ -662,7 +662,7 @@ void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t
 
     for(int rIndex = 0; rIndex<params[0]; rIndex++)
     {
-        if(rIndex == 0 && cIndex == 0) printf("CentroidReduceKernel\n");
+        if(rIndex == 0 && cIndex == 0) printf("Centroid Reduce Kernel\n");
 
         int2 pos = (int2)(cIndex,rIndex);
 
@@ -731,7 +731,7 @@ void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t o
 
     for(int rIndex = 0; rIndex<params[0]; rIndex++)
     {
-        if(rIndex == 0 && cIndex == 0) printf("CentroidReduceKernel\n");
+        if(rIndex == 0 && cIndex == 0) printf("Correlation Reduce Kernel\n");
 
         int2 pos = (int2)(cIndex,rIndex);
 

@@ -245,7 +245,7 @@ public class PerceptionDataLogger
 
    public void logDepthOuster(ImageMessage message)
    {
-      LogTools.info("Depth Map Received: {}", message.getAcquisitionTimeSecondsSinceEpoch());
+      LogTools.info("Depth Map Received: {}", message.getAcquisitionTime());
 
       if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {

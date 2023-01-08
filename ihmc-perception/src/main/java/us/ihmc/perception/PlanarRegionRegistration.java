@@ -1,16 +1,10 @@
 package us.ihmc.perception;
 
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.bytedeco.slamWrapper.SlamWrapper;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -18,6 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.slamWrapper.FactorGraph;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -37,7 +32,7 @@ import java.util.List;
 
 public class PlanarRegionRegistration
 {
-   private SlamWrapper.FactorGraphExternal factorGraph;
+   private FactorGraph factorGraph;
    private int frameIndex = 0;
    private boolean modified = false;
 
@@ -51,7 +46,7 @@ public class PlanarRegionRegistration
 
    public PlanarRegionRegistration()
    {
-      factorGraph = new SlamWrapper.FactorGraphExternal();
+      factorGraph = new FactorGraph();
       previousRegions = new PlanarRegionsList();
       currentRegions = loadRegions(regionFilePath + "0000.txt", 0);
 
