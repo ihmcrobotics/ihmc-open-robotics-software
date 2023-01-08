@@ -15,7 +15,6 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -68,7 +67,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    private OpenCLFloatBuffer pointCloudVertexBuffer;
    private OpenCLIntBuffer decompressedOpenCLIntBuffer;
    private OpenCLFloatBuffer parametersOpenCLFloatBuffer;
-   private String messageSizeString;
+   private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -152,8 +151,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
                numberOfSegments = (int) fusedMessage.getNumberOfSegments();
                totalNumberOfPoints = pointsPerSegment * numberOfSegments;
                int bytesPerSegment = pointsPerSegment * DiscretizedColoredPointCloud.DISCRETE_BYTES_PER_POINT;
-               String kilobytes = FormattingTools.getFormattedDecimal1D((double) bytesPerSegment / 1000.0);
-               messageSizeString = String.format("Message size: %s KB", kilobytes);
+               messageSizeReadout.update(bytesPerSegment);
                pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
                decompressionInputDirectBuffer = ByteBuffer.allocateDirect(bytesPerSegment);
                decompressionInputDirectBuffer.order(ByteOrder.nativeOrder());
@@ -273,11 +271,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
       ImGui.pushItemWidth(30.0f);
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
       ImGui.popItemWidth();
-      if (messageSizeString != null)
-      {
-         ImGui.sameLine();
-         ImGui.text(messageSizeString);
-      }
+      messageSizeReadout.renderImGuiWidgets();
       frequencyPlot.renderImGuiWidgets();
       segmentIndexPlot.renderImGuiWidgets();
    }

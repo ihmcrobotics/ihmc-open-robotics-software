@@ -23,7 +23,7 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.postgresql:postgresql:42.2.5")
 
-   api("us.ihmc:ihmc-native-library-loader:2.0.1")
+   api("us.ihmc:ihmc-native-library-loader:2.0.2")
    api("us.ihmc:euclid:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
    api("us.ihmc:ihmc-manipulation-planning:source")
