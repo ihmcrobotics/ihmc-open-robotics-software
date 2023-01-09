@@ -44,7 +44,6 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final AtomicBoolean renderGroundCells = new AtomicBoolean(false);
    private final AtomicBoolean renderGroundPlane = new AtomicBoolean(false);
 
-   private final AtomicBoolean isGeneratingMeshes = new AtomicBoolean();
    private final AtomicReference<List<RDXMultiColorMeshBuilder>> latestMeshBuilder = new AtomicReference<>(null);
    private final AtomicReference<ModelInstance> latestModel = new AtomicReference<>(null);
 
@@ -78,10 +77,7 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       LogTools.debug("Receiving height map with {} cells, ground plane at {}", heightMapMessage.getKeys().size(), heightMapMessage.getEstimatedGroundHeight());
 
-      if (!isGeneratingMeshes.getAndSet(true))
-      {
-         executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
-      }
+      executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
    }
 
    private void generateMeshes(HeightMapMessage heightMapMessage)
@@ -139,8 +135,6 @@ public class RDXGridMapGraphic implements RenderableProvider
          meshBuilders.add(generateGroundPlaneMesh(gridSizeXy, gridCenterX, gridCenterY, groundHeight));
 
       latestMeshBuilder.set(meshBuilders);
-
-      isGeneratingMeshes.set(false);
    }
 
    private static List<RDXMultiColorMeshBuilder> generateHeightCells(IntToDoubleFunction heightsProvider,
