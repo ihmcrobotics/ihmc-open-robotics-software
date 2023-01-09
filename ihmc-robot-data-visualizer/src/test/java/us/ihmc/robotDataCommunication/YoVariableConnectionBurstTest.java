@@ -57,6 +57,7 @@ public class YoVariableConnectionBurstTest
       ThreadTools.sleepSeconds(5);
    }
 
+
    @Test
    public void TestYoVariableConnectionBurst()
    {
@@ -128,10 +129,11 @@ public class YoVariableConnectionBurstTest
       //Check if last 8 values of the YoVariable match the buffer data
       for(int i = lastIndex; i > (lastIndex - 8); i--)
       {
-         assertEquals(filledBuffer[i] , (double) i);
+         assertEquals("Buffer at i: " + filledBuffer[i] + " but buffer at i + 1: " + filledBuffer[i + 1], filledBuffer[i] , (double) i);
          assertFalse(filledBuffer[i] == filledBuffer[i - 1]);
       }
 
       scsYoVariablesUpdatedListener.closeAndDispose();
+      server.close();
    }
 }
