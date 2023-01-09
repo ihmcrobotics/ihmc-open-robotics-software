@@ -212,6 +212,7 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathStartNodeToVisualize = topic("BodyPathStartNodeToVisualize");
    public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathCandidateNodeToVisualize = topic("BodyPathCandidateNodeToVisualize");
+   public static final Topic<Boolean> ShowBodyPathPlanData = topic("ShowBodyPathPlanData");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");

@@ -579,7 +579,7 @@ public class AStarBodyPathFrameworkTest
 //
 //      }
 //      test.runAssertionsOnDataset(dataset -> test.runAssertionsSimulateDynamicReplanning(dataset, walkerMarchingSpeed, 5000, false), dataSetName);
-      for (int i = 0; i < 50; i++)
+//      for (int i = 0; i < 50; i++)
       {
          test.runAssertionsOnDataset(test::runAssertionsWithoutOcclusion, dataSetName);
       }
