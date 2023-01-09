@@ -110,6 +110,8 @@ public class RapidPatchesBasedICP
          centroidBuffer.readOpenCLBufferObject(openCLManager);
          collectCentroid(centroidBuffer.getBackingDirectFloatBuffer(), centroidPrevious, centroidCurrent);
 
+         LogTools.info("Centroid One: " + centroidOne + ", Centroid Two: " + centroidTwo);
+
          setFeatureGridKernelArguments(correlReduceKernel, previousFeatureGrid, currentFeatureGrid);
          openCLManager.setKernelArgument(correlReduceKernel, 12, rowMatchIndexImage.getOpenCLImageObject());
          openCLManager.setKernelArgument(correlReduceKernel, 13, columnMatchIndexImage.getOpenCLImageObject());
@@ -155,12 +157,14 @@ public class RapidPatchesBasedICP
          {
             countOne++;
             centroidOneToPack.add(centroidOne);
+            System.out.println(centroidOne.getX() + " " + centroidOne.getY());
          }
 
          if (centroidTwo.norm() > 0.3 && centroidTwo.norm() < 100)
          {
             countTwo++;
             centroidTwoToPack.add(centroidTwo);
+            //LogTools.info("Centroid Two: " + centroidTwo + ", Count: " + countTwo);
          }
       }
 
