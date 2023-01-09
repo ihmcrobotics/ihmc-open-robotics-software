@@ -1261,4 +1261,14 @@ public class MessageTools
       instantMessage.setSecondsSinceEpoch(instant.getEpochSecond());
       instantMessage.setAdditionalNanos(instant.getNano());
    }
+
+   /**
+    * Instant is immutable so there is no allocation free option.
+    * If allocation free is needed, just pass around the two longs separately.
+    * If needed, we could make a MutableInstant class.
+    */
+   public static Instant toInstant(InstantMessage instantMessage)
+   {
+      return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
+   }
 }
