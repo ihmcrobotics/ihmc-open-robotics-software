@@ -40,7 +40,7 @@ public class DoorPerceptionManager
          markerPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), position, orientation);
 
          double distanceToMarker = cameraPose.getPosition().distance(markerPose.getPosition());
-         if (distanceToMarker < 0.9)
+         if (distanceToMarker < 3.0)
          {
             doorFrameLockedIn = true;
          }
