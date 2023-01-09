@@ -4,14 +4,21 @@ import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 
+import java.util.function.Function;
+
 public class SCS2JointDesiredOutputWriterFactory
 {
-   private JointDesiredOutputWriter customOutputWriter = null;
+   public record OutputWriterInfo(ControllerInput controllerInput, ControllerOutput controllerOutput, boolean writeBeforeEstimatorTick) { }
+   private Function<OutputWriterInfo, JointDesiredOutputWriter> customOutputWriterSupplier = outputWriterInfo -> null;
    private boolean writeBeforeEstimatorTick = true;
 
-   public void setCustomJointDesiredOutputWriter(JointDesiredOutputWriter customOutputWriter)
+   public SCS2JointDesiredOutputWriterFactory()
    {
-      this.customOutputWriter = customOutputWriter;
+   }
+
+   public SCS2JointDesiredOutputWriterFactory(Function<OutputWriterInfo, JointDesiredOutputWriter> customOutputWriterSupplier)
+   {
+      this.customOutputWriterSupplier = customOutputWriterSupplier;
    }
 
    public void setWriteBeforeEstimatorTick(boolean writeBeforeEstimatorTick)
@@ -19,8 +26,16 @@ public class SCS2JointDesiredOutputWriterFactory
       this.writeBeforeEstimatorTick = writeBeforeEstimatorTick;
    }
 
-   public JointDesiredOutputWriter build(ControllerInput input, ControllerOutput output)
+   public boolean getWriteBeforeEstimatorTick()
    {
-      return new SCS2OutputWriter(input, output, writeBeforeEstimatorTick, customOutputWriter);
+      return writeBeforeEstimatorTick;
+   }
+
+   public JointDesiredOutputWriter build(ControllerInput controllerInput, ControllerOutput controllerOutput)
+   {
+      return new SCS2OutputWriter(controllerInput,
+                                  controllerOutput,
+                                  writeBeforeEstimatorTick,
+                                  customOutputWriterSupplier.apply(new OutputWriterInfo(controllerInput, controllerOutput, writeBeforeEstimatorTick)));
    }
 }
