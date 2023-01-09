@@ -96,7 +96,6 @@ public class GPUAStarBodyPathPlanner
    private final List<Consumer<FootstepPlannerOutput>> statusCallbacks;
    private final Stopwatch stopwatch;
    private double planningStartTime;
-   private int iterations = 0;
    private BodyPathPlanningResult result = null;
    private boolean reachedGoal = false;
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -121,8 +120,6 @@ public class GPUAStarBodyPathPlanner
    private OpenCLIntBuffer collisionOffsetsBuffer = new OpenCLIntBuffer(8);
    private OpenCLIntBuffer neighborOffsetsBuffer = new OpenCLIntBuffer(33);
 
-   // TODO once the things that use the normal are all on the GPU, these can be replaced with _cl_mem object = openCLManager.createImage as the backing data in
-   // the cpu is no longer needed
    private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatMem ransacNormalXYZBuffer = new OpenCLFloatMem(1);
@@ -140,21 +137,13 @@ public class GPUAStarBodyPathPlanner
    private OpenCLFloatBuffer edgeCostMapBuffer = new OpenCLFloatBuffer(1);
    private OpenCLFloatBuffer heuristicCostMapBuffer = new OpenCLFloatBuffer(1);
 
-   private GPUAStarBodyPathSmoother smoother;
-
+   private final GPUAStarBodyPathSmoother smoother;
 
    private int cellsPerSide = -1;
    private int nodesPerSide = -1;
    private int nodeCenterIndex = -1;
 
    private boolean firstTick = true;
-
-   /* Parameters to extract */
-   static final double groundClearance = 0.3;
-   static final double maxIncline = Math.toRadians(55.0);
-   static final double snapRadius = 0.15;
-   static final double boxSizeY = 1.2;
-   static final double boxSizeX = 0.35;
 
    public GPUAStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
                                   AStarBodyPathPlannerParametersReadOnly plannerParameters,
@@ -181,13 +170,13 @@ public class GPUAStarBodyPathPlanner
       this.plannerParameters = plannerParameters;
       this.statusCallbacks = statusCallbacks;
       this.stopwatch = stopwatch;
-      // TODO get the heuristics from the map
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
 
       this.stanceScore = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StanceScore", registry));
       this.stepScores = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StepScore", registry));
       this.stanceTraversibility = new YoDouble("stanceTraversibility", registry);
 
+      packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
 
       openCLManager = new OpenCLManager();
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
@@ -364,28 +353,6 @@ public class GPUAStarBodyPathPlanner
       this.heightMapData = heightMapData;
    }
 
-   static void packRadialOffsets(HeightMapData heightMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
-   {
-      int minMaxOffsetXY = (int) Math.round(radius / heightMapData.getGridResolutionXY());
-
-      xOffsets.clear();
-      yOffsets.clear();
-
-      for (int i = -minMaxOffsetXY; i <= minMaxOffsetXY; i++)
-      {
-         for (int j = -minMaxOffsetXY; j <= minMaxOffsetXY; j++)
-         {
-            double x = i * heightMapData.getGridResolutionXY();
-            double y = j * heightMapData.getGridResolutionXY();
-            if (EuclidCoreTools.norm(x, y) < radius && !(i == 0 && j == 0))
-            {
-               xOffsets.add(i);
-               yOffsets.add(j);
-            }
-         }
-      }
-   }
-
    void populateRadialOffsetsBuffer()
    {
       int connections = xSnapOffsets.size();
@@ -548,7 +515,7 @@ public class GPUAStarBodyPathPlanner
       }
 
       haltRequested.set(false);
-      iterations = 0;
+      int iterations = 0;
       reachedGoal = false;
       stopwatch.start();
       result = BodyPathPlanningResult.PLANNING;
@@ -558,12 +525,11 @@ public class GPUAStarBodyPathPlanner
       iterationData.clear();
       edgeDataMap.clear();
 
-      packRadialOffsets(heightMapData, snapRadius, xSnapOffsets, ySnapOffsets);
-      packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
+      AStarBodyPathPlanner.packRadialOffsets(heightMapData, AStarBodyPathPlanner.snapRadius, xSnapOffsets, ySnapOffsets);
 
       populateRadialOffsetsBuffer();
       populateTraversibilityOffsetsBuffer();
-      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
+      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), AStarBodyPathPlanner.boxSizeX, AStarBodyPathPlanner.boxSizeY);
       populateNeighborOffsetsBuffer();
 
       Pose3D startPose = new Pose3D();
@@ -729,8 +695,8 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(3, (float) startNode.getYIndex());
       floatPointer.put(4, (float) goalNode.getX());
       floatPointer.put(5, (float) goalNode.getY());
-      floatPointer.put(6, (float) groundClearance);
-      floatPointer.put(7, (float) maxIncline);
+      floatPointer.put(6, (float) AStarBodyPathPlanner.groundClearance);
+      floatPointer.put(7, (float) plannerParameters.getMaxIncline());
       floatPointer.put(8, (float) nominalIncline.getValue());
       floatPointer.put(9, (float) plannerParameters.getInclineCostWeight());
       floatPointer.put(10, (float) plannerParameters.getInclineCostDeadband());
@@ -744,7 +710,6 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
       floatPointer.put(19, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
       floatPointer.put(20, (float) plannerParameters.getTraversibilityWeight());
-//      floatPointer.put(5, (float) heightMapData.getEstimatedGroundHeight());
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
@@ -1084,8 +1049,6 @@ public class GPUAStarBodyPathPlanner
             outputToPack.getBodyPath().add(waypoint);
          }
       }
-
-
 
       outputToPack.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.totalElapsed() - planningStartTime);
       outputToPack.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());

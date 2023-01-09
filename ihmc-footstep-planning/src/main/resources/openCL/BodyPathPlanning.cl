@@ -155,7 +155,7 @@ uint2 nextRandomInt(uint seed, uint bound)
             r = u % bound;
         }
     }
- //   return (uint2) (r, seed);
+
     return result;
 }
 
@@ -317,7 +317,6 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
             sample0 = sample0 % offsets_size;
             sample1 = sample1 % offsets_size;
 
-
             if (sample0 == sample1)
             {
                 continue;
@@ -411,12 +410,9 @@ void kernel computeSurfaceNormalsWithRANSAC(global float* params,
     }
 
     // if the normal is upside down, negate it.
-    if (best_normal.s2 < 0.0)
+    if (best_normal.s2 < 0.0f)
     {
-        best_normal = -1.0f * best_normal;
-       // best_normal[0] = -best_normal[0];
-       // best_normal[1] = -best_normal[1];
-       // best_normal[2] = -best_normal[2];
+        best_normal = -best_normal;
     }
 
     normal_xyz_buffer[3 * key] = best_normal.s0;
@@ -532,7 +528,6 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
         if (isnan(normal.s0))
         {
             normal = (float3) (0.0f, 0.0f, 1.0f);
-
             height_at_center = NAN;
         }
     }
@@ -599,6 +594,7 @@ void kernel snapVertices(global float* height_map_params,
             max_z = max(max_z, neighbor_z);
     }
 
+    // TODO extract magic number
     float height_sample_delta = 0.08f;
     float min_z = max_z - height_sample_delta;
 
@@ -706,16 +702,16 @@ int getTraversibilityOffsetSet(int yaw_index)
 }
 
 float computeSidedTraversibility(float* height_map_params,
-                              float* planner_params,
-                            int* offsets,
-                            int offset_set,
-                            float* height_map_data,
-                            float* normal_xyz_data,
-                            int node_side,
-                            float2 node,
-                            int neighbor_idx,
-                            float opposite_height,
-                            float nominal_height)
+                                 float* planner_params,
+                                 int* offsets,
+                                 int offset_set,
+                                 float* height_map_data,
+                                 float* normal_xyz_data,
+                                 int node_side,
+                                 float2 node,
+                                 int neighbor_idx,
+                                 float opposite_height,
+                                 float nominal_height)
 {
     float half_stance_width = planner_params[HALF_STANCE_WIDTH];
     if (node_side == 1)
@@ -783,6 +779,7 @@ float computeSidedTraversibility(float* height_map_params,
         {
             numberOfTraversibleCells++;
 
+            // TODO extract magic numbers
             float heightDeadband = 0.1f;
             float deltaHeight = max(0.0f, fabs(averageHeight - heightQuery) - heightDeadband);
             float cellPercentage = 1.0f - deltaHeight / windowWidth;
@@ -799,7 +796,7 @@ float computeSidedTraversibility(float* height_map_params,
             float incline = max(0.0f, acos(query_normal_z) - planner_params[MIN_NORMAL_TO_PENALIZE]);
             float inclineAlpha = (planner_params[MAX_NORMAL_TO_PENALIZE] - incline) / (planner_params[MAX_NORMAL_TO_PENALIZE] - planner_params[MIN_NORMAL_TO_PENALIZE]);
             inclineAlpha = clamp(inclineAlpha, 0.0f, 1.0f);
-            traversibilityScoreNumber += nonGroundDiscount * ((1.0 - planner_params[INCLINE_WEIGHT]) * cellPercentage + planner_params[INCLINE_WEIGHT] * inclineAlpha);
+            traversibilityScoreNumber += nonGroundDiscount * ((1.0f - planner_params[INCLINE_WEIGHT]) * cellPercentage + planner_params[INCLINE_WEIGHT] * inclineAlpha);
         }
     }
 
@@ -815,14 +812,14 @@ float computeSidedTraversibility(float* height_map_params,
 }
 
 float4 computeTraversibilityMeasures(global float* height_map_params,
-                             global float* planner_params,
-                            global int* traversibility_offsets,
-                            global float* snapped_vertex_height,
-                            global float* height_map_data,
-                            global float* normal_xyz_data,
-                            float2 parent_node,
-                            float2 child_node,
-                            int yaw_idx)
+                                     global float* planner_params,
+                                     global int* traversibility_offsets,
+                                     global float* snapped_vertex_height,
+                                     global float* height_map_data,
+                                     global float* normal_xyz_data,
+                                     float2 parent_node,
+                                     float2 child_node,
+                                     int yaw_idx)
 {
     int path_center_index = planner_params[PATH_CENTER_INDEX];
 
@@ -832,18 +829,17 @@ float4 computeTraversibilityMeasures(global float* height_map_params,
     int parent_planner_x = (int) round(parent_node.x / planner_params[PATH_RESOLUTION]);
     int parent_planner_y = (int) round(parent_node.y / planner_params[PATH_RESOLUTION]);
 
-
     float parent_height = snapped_vertex_height[parent_key];
     float child_height = snapped_vertex_height[child_key];
     int offset_set = getTraversibilityOffsetSet(yaw_idx);
 
     float left_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
-                                                            normal_xyz_data, 0, child_node, yaw_idx, parent_height, child_height);
+                                                           normal_xyz_data, 0, child_node, yaw_idx, parent_height, child_height);
     float right_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
-                                                                normal_xyz_data, 1, child_node, yaw_idx, parent_height, child_height);
+                                                            normal_xyz_data, 1, child_node, yaw_idx, parent_height, child_height);
 
-    float previous_left_traversibility = 1.0;
-    float previous_right_traversibility = 1.0;
+    float previous_left_traversibility = 1.0f;
+    float previous_right_traversibility = 1.0f;
     if (parent_planner_x != planner_params[START_X_INDEX] && parent_planner_y != planner_params[START_Y_INDEX])
     {
         previous_left_traversibility = computeSidedTraversibility(height_map_params, planner_params, traversibility_offsets, offset_set, height_map_data,
@@ -863,7 +859,7 @@ float computeTraversibilityCost(global float* planner_params, float4 traversibil
     float stanceTraversibility = max(traversibility_measures.s0, traversibility_measures.s1);
     float stepTraversibility = max(traversibility_measures.s2, traversibility_measures.s3);
 
-    return planner_params[TRAVERSIBILITY_WEIGHT] * (planner_params[ALPHA_STANCE] * (1.0 - stanceTraversibility) + planner_params[ALPHA_STEP] * (1.0 - stepTraversibility));
+    return planner_params[TRAVERSIBILITY_WEIGHT] * (planner_params[ALPHA_STANCE] * (1.0f - stanceTraversibility) + planner_params[ALPHA_STEP] * (1.0f - stepTraversibility));
 }
 
 bool computeIsTraversible(global float* planner_params, float4 traversibility_measures)
@@ -1187,6 +1183,7 @@ float computeSmootherTraversibility(global float* height_map_params,
             {
                 float non_ground_alpha = twiddled_height - height_map_params[GROUND_HEIGHT_ESTIMATE];
 
+                // TODO extract magic number
                 float height_deadband = 0.05;
                 float delta_height = max(0.0f, fabs(nominal_height - twiddled_height) - height_deadband);
                 float cell_percentage = 1.0 - delta_height / planner_params[HEIGHT_WINDOW];
@@ -1200,6 +1197,7 @@ float computeSmootherTraversibility(global float* height_map_params,
         }
     }
 
+    // TODO extract magic number
     if (number_of_sampled_cells < 10)
     {
         return 0.0f;
@@ -1347,6 +1345,7 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
 
             float2 delta = position - waypoint_xy;
 
+            // TODO use convenience function
             float dxLocal = cH * delta.x + sH * delta.y;
             float dyLocal = -sH * delta.x + cH * delta.y;
 
@@ -1496,6 +1495,7 @@ void kernel computeGroundPlaneGradientMap(global float* height_map_params,
                 delta.y = -delta.y;
             delta *= height_map_params[HEIGHT_MAP_RESOLUTION];
 
+            // TODO use convenience function
             float dxLocal = cH * delta.x + sH * delta.y;
             float dyLocal = -sH * delta.x + cH * delta.y;
 
@@ -1555,6 +1555,7 @@ void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
     float x2 = waypoint_xyzYaw[4 * (waypoint_key + 1)];
     float y2 = waypoint_xyzYaw[4 * (waypoint_key + 1) + 1];
 
+    // TODO extract magic numbers
     // Equal spacing gradient
     float spacingGradientX = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (x2 - 2.0 * x1 + x0);
     float spacingGradientY = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (y2 - 2.0 * y1 + y0);
@@ -1651,6 +1652,7 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
     // get the traversibility gradient
     for (int side = 0; side <= 1; side++)
     {
+        // TODO extract magic numbers
         float local_traversibility_threshold = 0.9f;
         float max_local_traversibility_threshold_discount = 0.75f;
 
@@ -1696,6 +1698,7 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
     }
 
     // get the ground plane gradient
+    // TODO extract magic numbers
     float ground_plane_estimate = height_map_params[GROUND_HEIGHT_ESTIMATE];
     float height_threshold_for_ground = 0.015f;
     float current_height_above_ground_plane = waypoint_z - ground_plane_estimate;
