@@ -341,7 +341,7 @@ public class RDXGridMapGraphic implements RenderableProvider
 
    public static Color computeColorFromHeight(double height)
    {
-      // Using interpolation between keu color points
+      // Using interpolation between key color points
       double r = 0, g = 0, b = 0;
       double redR = 1.0, redG = 0.0, redB = 0.0;
       double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
