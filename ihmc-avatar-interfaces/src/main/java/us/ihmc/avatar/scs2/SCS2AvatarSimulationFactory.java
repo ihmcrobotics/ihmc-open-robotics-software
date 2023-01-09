@@ -108,7 +108,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class SCS2AvatarSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
+   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory
+         = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
    protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>("realtimeROS2Node");
@@ -117,11 +118,13 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
    protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
-   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber
+         = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
-   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory", new SCS2JointDesiredOutputWriterFactory());
+   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory
+         = new OptionalFactoryField<>("outputWriterFactory", new SCS2JointDesiredOutputWriterFactory());
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
    protected final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
@@ -130,7 +133,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
-   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
+   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters
+         = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
    protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
@@ -138,7 +142,8 @@ public class SCS2AvatarSimulationFactory
 
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
    private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
-   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
+   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters
+         = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
