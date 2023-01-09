@@ -11,7 +11,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.TimestampedPlanarRegionsListMessage;
 import sensor_msgs.Image;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -24,6 +23,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -305,11 +305,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             }
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
-            TimestampedPlanarRegionsListMessage timestampedPlanarRegionsListMessage = new TimestampedPlanarRegionsListMessage();
-            timestampedPlanarRegionsListMessage.getPlanarRegions().set(planarRegionsListMessage);
-            timestampedPlanarRegionsListMessage.setLastUpdatedSecondsSinceEpoch(now.getEpochSecond());
-            timestampedPlanarRegionsListMessage.setLastUpdatedAdditionalNanos(now.getNano());
-            ros2Helper.publish(ROS2Tools.RAPID_REGIONS, timestampedPlanarRegionsListMessage);
+            MessageTools.toMessage(now, planarRegionsListMessage.getLastUpdated());
+            ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
