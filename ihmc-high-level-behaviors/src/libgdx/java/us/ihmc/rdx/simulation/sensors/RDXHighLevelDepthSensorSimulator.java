@@ -520,7 +520,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          if (pointCloudMessageType.equals(LidarScanMessage.class) || pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
          {
             ros2PointsToPublish.clear();
-            int ignoredPointCounter = 0;
 
             for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
                             && (FLOATS_PER_POINT * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
@@ -534,8 +533,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                   if (ros2ColorsToPublish != null)
                      ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
                }
-               else
-                  ignoredPointCounter++;
             }
 
             if (!ros2PointsToPublish.isEmpty())
