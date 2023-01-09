@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.live;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
@@ -23,6 +22,7 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
 import us.ihmc.perception.OpenCLFloatBuffer;
@@ -37,9 +37,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
@@ -240,9 +241,9 @@ public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer implements Ren
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
       {
          for (RDXPointCloudRenderer pointCloudRenderer : pointCloudRenderers)
          {
