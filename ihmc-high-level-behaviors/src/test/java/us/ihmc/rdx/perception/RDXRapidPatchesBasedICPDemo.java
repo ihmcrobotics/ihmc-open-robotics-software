@@ -334,15 +334,22 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
       rapidPlanarRegionsExtractor.create(openCLManager, program, bytedecoDepthImage, depthWidth, depthHeight);
       rapidPatchesBasedICP.create(openCLManager, program, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
 
+      LogTools.info("Initialization Update");
       perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
       opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
-      rapidPlanarRegionsExtractor.extractPatchGraphUsingOpenCL();
+
+      rapidPlanarRegionsExtractor.computePatchFeatureGrid();
       rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
+
+      LogTools.info("Copying Feature Grid");
       rapidPlanarRegionsExtractor.copyFeatureGridMapUsingOpenCL();
 
+      LogTools.info("Initialization Update");
       perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 1, bytedecoDepthImage.getBytedecoOpenCVMat());
       opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
-      rapidPlanarRegionsExtractor.extractPatchGraphUsingOpenCL();
+
+      LogTools.info("Extracting Patch Graph");
+      rapidPlanarRegionsExtractor.computePatchFeatureGrid();
       rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
    }
 }

@@ -179,7 +179,7 @@ public class RapidPlanarRegionsExtractor
       }
 
       gpuDurationStopwatch.start();
-      extractPatchGraphUsingOpenCL();
+      computePatchFeatureGrid();
       gpuDurationStopwatch.suspend();
 
       //      debugger.printPatchGraph(patchGraph);
@@ -204,7 +204,7 @@ public class RapidPlanarRegionsExtractor
    /**
     * Extracts features and generates patch graph from the input depth image on the GPU.
     */
-   public void extractPatchGraphUsingOpenCL()
+   public void computePatchFeatureGrid()
    {
       calculateDerivativeParameters();
 
@@ -294,7 +294,6 @@ public class RapidPlanarRegionsExtractor
       openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
       cloudBuffer.readOpenCLBufferObject(openCLManager);
 
-      openCLManager.finish();
    }
 
    public void copyFeatureGridMapUsingOpenCL()
@@ -313,7 +312,6 @@ public class RapidPlanarRegionsExtractor
       openCLManager.setKernelArgument(copyKernel, 11, previousFeatureGrid.getCzImage().getOpenCLImageObject());
       openCLManager.setKernelArgument(copyKernel, 12, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(copyKernel, patchImageWidth, patchImageHeight);
-      openCLManager.finish();
    }
 
    /**
@@ -740,7 +738,7 @@ public class RapidPlanarRegionsExtractor
 
    public PatchFeatureGrid getPreviousFeatureGrid()
    {
-      return currentFeatureGrid;
+      return previousFeatureGrid;
    }
 }
 

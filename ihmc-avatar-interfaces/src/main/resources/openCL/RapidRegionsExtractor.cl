@@ -396,16 +396,16 @@ void kernel packKernel(  read_only image2d_t in,
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
 
-    //if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
-    //                        (int)params[INPUT_HEIGHT],
-    //                        (int)params[INPUT_WIDTH],
-    //                        (int)params[SUB_H],
-    //                        (int)params[SUB_W],
-    //                        (int)params[PATCH_HEIGHT],
-    //                        (int)params[PATCH_WIDTH],
-    //                        (int)params[FILTER_DISPARITY_THRESHOLD],
-    //                        params[MERGE_ANGULAR_THRESHOLD],
-    //                        params[MERGE_ORTHOGONAL_THRESHOLD]);
+    if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+                            (int)params[INPUT_HEIGHT],
+                            (int)params[INPUT_WIDTH],
+                            (int)params[SUB_H],
+                            (int)params[SUB_W],
+                            (int)params[PATCH_HEIGHT],
+                            (int)params[PATCH_WIDTH],
+                            (int)params[FILTER_DISPARITY_THRESHOLD],
+                            params[MERGE_ANGULAR_THRESHOLD],
+                            params[MERGE_ORTHOGONAL_THRESHOLD]);
 
    //if(cIndex >= 0 && cIndex < (int)params[SUB_H] && rIndex >= 0 && rIndex < (int)params[SUB_W])
    {
@@ -419,7 +419,7 @@ void kernel packKernel(  read_only image2d_t in,
       write_imagef(out4, (int2)(cIndex,rIndex), (float4)(centroid.y,0,0,0));
       write_imagef(out5, (int2)(cIndex,rIndex), (float4)(centroid.z,0,0,0));
 
-      //printf("PackKernel[%d,%d]\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", rIndex, cIndex, centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
+//      printf("PackKernel[%d,%d]\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", rIndex, cIndex, centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
    }
 }
 
@@ -478,6 +478,8 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
             }
         }
         write_imageui(out6, (int2)(cIndex,rIndex), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
+
+//         printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
     }
 }
 
@@ -550,16 +552,18 @@ void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* 
       write_imagef(out4,(int2)(cIndex,rIndex),(float4)(g2,0,0,0));
       write_imagef(out5,(int2)(cIndex,rIndex),(float4)(g3,0,0,0));
 
+//      printf("CopyKernel[%d,%d] -> (%.3lf, %.3lf, %.3lf) (%.3lf, %.3lf, %.3lf)\n", rIndex, cIndex, n1, n2, n3, g1, g2, g3);
+
    }
 
 /*
  * Correspondence Kernel for Iterative Closest Point
  * */
-void kernel correspondenceKernel(read_write image2d_t one0, read_write image2d_t one1, read_write image2d_t one2,
-                                read_write image2d_t one3, read_write image2d_t one4, read_write image2d_t one5,
-                                read_write image2d_t two0, read_write image2d_t two1, read_write image2d_t two2,
-                                read_write image2d_t two3, read_write image2d_t two4, read_write image2d_t two5,
-                                read_write image2d_t matchRow, read_write image2d_t matchColumn,
+void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t one1, read_only image2d_t one2,
+                                read_only image2d_t one3, read_only image2d_t one4, read_only image2d_t one5,
+                                read_only image2d_t two0, read_only image2d_t two1, read_only image2d_t two2,
+                                read_only image2d_t two3, read_only image2d_t two4, read_only image2d_t two5,
+                                write_only image2d_t matchRow, write_only image2d_t matchColumn,
                                 global float* params
 )
 {
@@ -596,9 +600,19 @@ void kernel correspondenceKernel(read_write image2d_t one0, read_write image2d_t
     int rowOne = rIndex;
     int columnOne = cIndex;
 
-    for(int i = 0; i< 10; i++)
+    float radius = length(pointOne.xyz);
+    if(radius < params[2] && radius > params[3])
     {
-        for(int j = 0; j < 10; j++)
+        write_imageui(matchRow, (int2)(cIndex,rIndex), (uint4)(0,0,0,0));
+        write_imageui(matchColumn, (int2)(cIndex,rIndex), (uint4)(0,0,0,0));
+        return;
+    }
+
+//    printf("CorrespondenceKernel: (%d,%d) -> (%.2lf, %.2lf, %.2lf)\n", rIndex, cIndex, pointOne.x, pointOne.y, pointOne.z);
+
+    for(int i = 0; i< 4; i++)
+    {
+        for(int j = 0; j < 4; j++)
         {
             int rowTwo = rIndex + i;
             int columnTwo = cIndex + j;
@@ -615,6 +629,7 @@ void kernel correspondenceKernel(read_write image2d_t one0, read_write image2d_t
                 pointTwo = (float4)(gx2,gy2,gz2,0);
                 normalTwo = (float4)(nx2,ny2,nz2,0);
 
+
                 //pointTwo = (float4)(cloudTwo[j*3+0], cloudTwo[j*3+1], cloudTwo[j*3+2], 0);
                 //pointTwo = transform(pointTwo, (float4)(transformTwo[0], transformTwo[1], transformTwo[2], 0),
                 //(float4)(transformTwo[3], transformTwo[4], transformTwo[5], 0),
@@ -622,15 +637,22 @@ void kernel correspondenceKernel(read_write image2d_t one0, read_write image2d_t
                 //(float4)(transformTwo[9], transformTwo[10], transformTwo[11], 0));
 
                 distance = length(pointTwo - pointOne);
+//                printf("Match: (%.2lf, %.2lf, %.2lf) : (%.2lf, %.2lf, %.2lf) -> [%.2lf]\n", pointOne.x, pointOne.y, pointOne.z, pointTwo.x, pointTwo.y, pointTwo.z, distance);
                 if(distance < minLength)
                 {
-                   minRowIndex = (uint)(rIndex+j);
-                   minColumnIndex = (uint)(cIndex+i);
+                   minRowIndex = (uint)(rowTwo);
+                   minColumnIndex = (uint)(columnTwo);
                    minLength = distance;
                 }
             }
         }
     }
+
+//    if(minColumnIndex != 0 && minRowIndex != 0)
+//    {
+//        printf("Match: (%d, %d) -> [%d, %d] : {%.2lf}\n", rowOne, columnOne, minRowIndex, minColumnIndex, minLength);
+//    }
+
 
     write_imageui(matchRow, (int2)(cIndex,rIndex), (uint4)(minRowIndex,0,0,0));
     write_imageui(matchColumn, (int2)(cIndex,rIndex), (uint4)(minColumnIndex,0,0,0));
