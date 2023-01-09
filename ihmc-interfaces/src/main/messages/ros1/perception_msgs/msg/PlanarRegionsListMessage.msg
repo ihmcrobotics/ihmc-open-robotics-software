@@ -6,6 +6,9 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Approximate last update time
+ihmc_common_msgs/InstantMessage last_updated
+
 # ID number referring to each planar region, it should be unique.
 int32[] region_id
 
