@@ -28,6 +28,8 @@ public class RemoteHeightMapUpdater
    private final ROS2Node ros2Node;
 
    private static final long updateDTMillis = 100;
+   private static final int initialPublishFrequency = 5;
+
 
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
@@ -68,11 +70,8 @@ public class RemoteHeightMapUpdater
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.FILTER_PARAMETERS, heightMapUpdater.getHeightMapFilterParameters());
 
-      int initialPublishFrequency = 5;
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);
       heightMapUpdater.setEnableUpdates(true);
-      heightMapUpdater.setGridCenterX(2.0);
-      heightMapUpdater.setGridCenterY(0.0);
 
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
