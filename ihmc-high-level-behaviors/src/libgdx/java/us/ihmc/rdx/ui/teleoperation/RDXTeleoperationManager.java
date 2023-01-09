@@ -19,6 +19,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -74,6 +75,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final RDXFootstepPlanning footstepPlanning;
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
@@ -129,6 +131,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       this.yoVariableClientHelper = yoVariableClientHelper;
 
+      this.footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+
       teleoperationParameters = new RDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
       teleoperationParameters.load();
 
@@ -137,7 +141,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
       robotLowLevelMessenger = new RDXRobotLowLevelMessenger(communicationHelper, teleoperationParameters);
 
       desiredRobot = new RDXDesiredRobot(robotModel, syncedRobot);
-
 
       ROS2ControllerHelper slidersROS2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
       pelvisHeightSlider = new RDXPelvisHeightSlider(syncedRobot, slidersROS2ControllerHelper, teleoperationParameters);
@@ -177,7 +180,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
-//      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), false, footstepPlanning::planAsync);
+      footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> footstepPlanning.setFootstepPlannerParameters(footstepPlannerParameters));
       teleoperationParametersTuner.create(teleoperationParameters);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);

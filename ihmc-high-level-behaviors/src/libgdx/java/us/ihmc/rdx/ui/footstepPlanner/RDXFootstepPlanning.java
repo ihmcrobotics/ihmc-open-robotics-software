@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.footstepPlanner;
 
-import com.kitfox.svg.A;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import perception_msgs.msg.dds.HeightMapMessage;
@@ -21,6 +20,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RDXFootstepPlanning
 {
    private final ROS2SyncedRobotModel syncedRobot;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final FootstepPlannerRequest request;
@@ -48,6 +47,7 @@ public class RDXFootstepPlanning
    private final AtomicReference<Pose3DReadOnly> goalPoseReference = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegionsReference = new AtomicReference<>();
    private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<FootstepPlannerParametersReadOnly> footstepPlannerParametersReference = new AtomicReference<>();
    private final AtomicReference<FootstepPlannerOutput> outputReference = new AtomicReference<>();
 
    private final AtomicBoolean hasNewPlanAvailable = new AtomicBoolean(false);
@@ -56,7 +56,6 @@ public class RDXFootstepPlanning
    {
       this.syncedRobot = syncedRobot;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      footstepPlannerParameters = footstepPlanner.getFootstepPlannerParameters();
       request = new FootstepPlannerRequest();
       footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
 
@@ -65,10 +64,16 @@ public class RDXFootstepPlanning
 
    public void planAsync()
    {
-      executor.clearQueueAndExecute(this::plan);
+      if (checkAllInputsAreSet())
+         executor.clearQueueAndExecute(this::plan);
    }
 
-   private void setGoalFootPosesFromMidFeetPose(Pose3DReadOnly goalPose)
+   private boolean checkAllInputsAreSet()
+   {
+      return goalPoseReference.get() != null;
+   }
+
+   private void setGoalFootPosesFromMidFeetPose(FootstepPlannerParametersReadOnly footstepPlannerParameters, Pose3DReadOnly goalPose)
    {
       request.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
    }
@@ -100,7 +105,13 @@ public class RDXFootstepPlanning
       if (goalPose == null)
          return;
 
-      setGoalFootPosesFromMidFeetPose(goalPose);
+      FootstepPlannerParametersReadOnly footstepPlannerParameters = footstepPlannerParametersReference.getAndSet(null);
+      if (footstepPlannerParameters != null)
+         footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      else
+         footstepPlannerParameters = footstepPlanner.getFootstepPlannerParameters();
+
+      setGoalFootPosesFromMidFeetPose(footstepPlannerParameters, goalPose);
       setStanceSideToClosestToGoal(goalPose);
 
       request.getStartFootPoses().forEach((side, pose3D) ->
@@ -196,6 +207,9 @@ public class RDXFootstepPlanning
    {
       this.heightMapDataReference.set(heightMapMessage);
    }
+
+   public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   {}
 
    public boolean isReadyToWalk()
    {
