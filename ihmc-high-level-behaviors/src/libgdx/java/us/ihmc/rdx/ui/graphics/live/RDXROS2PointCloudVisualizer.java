@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.live;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImBoolean;
@@ -23,6 +22,7 @@ import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -38,9 +38,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
@@ -277,9 +278,9 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements Render
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 

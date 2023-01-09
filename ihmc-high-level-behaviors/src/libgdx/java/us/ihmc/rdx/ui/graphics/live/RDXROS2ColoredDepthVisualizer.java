@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.live;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -26,6 +25,7 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.tools.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.visualizers.RDXVisualizer;
@@ -36,8 +36,9 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
+import java.util.Set;
 
-public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer
 {
    private final static int TOTAL_NUMBER_OF_PARAMETERS = 24;
 
@@ -389,9 +390,9 @@ public class RDXROS2ColoredDepthVisualizer extends RDXVisualizer implements Rend
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (isActive())
+      if (isActive() && sceneLevelCheck(sceneLevels))
          pointCloudRenderer.getRenderables(renderables, pool);
    }
 
