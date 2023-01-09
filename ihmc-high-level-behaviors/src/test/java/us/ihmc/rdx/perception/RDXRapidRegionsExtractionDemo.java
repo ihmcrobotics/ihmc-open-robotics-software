@@ -55,12 +55,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
    private ImGuiPanel navigationPanel;
 
+   private String sensorTopicName;
+
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-   private final RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
+   private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
 
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
@@ -72,24 +74,19 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    private ImInt frameIndex = new ImInt(0);
 
-   private int depthWidth;
-   private int depthHeight;
    private int totalNumberOfPoints;
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
 
    public RDXRapidRegionsExtractionDemo()
    {
-      depthHeight = 128;
-      depthWidth = 2048;
-
       perceptionDataLoader = new PerceptionDataLoader();
-      perceptionDataLoader.openLogFile(System.getProperty("user.home") + "/.ihmc/logs/perception/20230102_152006_PerceptionLog.hdf5");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
+
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
@@ -99,21 +96,44 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             openCLManager.create();
             openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
-            bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
-            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
-
-            pointCloudRenderer.create(depthHeight * depthWidth);
-
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight);
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
-
-            rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
-            baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
 
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
+            createL515(768, 1024);
+
+//            updateRapidRegionsExtractor(true);
+
             //submitToPointCloudRenderer(depthWidth, depthHeight, bytedecoDepthImage, openCLManager);
+         }
+
+         private void createOuster(int depthHeight, int depthWidth)
+         {
+            sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
+            perceptionDataLoader.openLogFile(System.getProperty("user.home") + "/.ihmc/logs/perception/20230102_152006_PerceptionLog.hdf5");
+            bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+            pointCloudRenderer.create(depthHeight * depthWidth);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight);
+            rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
+
+            rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
+            baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
+         }
+
+         private void createL515(int depthHeight, int depthWidth)
+         {
+            sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
+            perceptionDataLoader.openLogFile("/home/bmishra/Workspace/Data/Sensor_Logs/Depth/Good/20221216_141954_PerceptionLog.hdf5");
+            bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+            perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight,730.7891, 731.0859, 528.6094, 408.1602);
+            rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
+
+            pointCloudRenderer.create(depthHeight * depthWidth);
+            rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
+            baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
          }
 
          @Override
@@ -143,26 +163,24 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
          private void renderNavigationPanel()
          {
-            boolean changed = ImGui.sliderInt("Frame Index",
-                                              frameIndex.getData(),
-                                              0,
-                                              (int) (perceptionDataLoader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME) - 1));
+            boolean changed = ImGui.sliderInt("Frame Index", frameIndex.getData(),0,
+                                              (int) (perceptionDataLoader.getHDF5Manager().getCount(sensorTopicName) - 1));
 
-            if(imgui.internal.ImGui.button("Load Previous"))
+            if (imgui.internal.ImGui.button("Load Previous"))
             {
                frameIndex.set(Math.max(0, frameIndex.get() - 1));
                changed = true;
             }
             imgui.internal.ImGui.sameLine();
-            if(imgui.internal.ImGui.button("Load Next"))
+            if (imgui.internal.ImGui.button("Load Next"))
             {
                frameIndex.set(frameIndex.get() + 1);
                changed = true;
             }
 
-            if(changed)
+            if (changed)
             {
-               perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+               perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
                rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
                updateRapidRegionsExtractor(true);
                updatePointCloudRenderer(true);
@@ -180,7 +198,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    public void updatePointCloudRenderer(boolean forceUpdate)
    {
-      if(rapidRegionsUIPanel.getPointCloudRenderEnabled())
+      if (rapidRegionsUIPanel.getPointCloudRenderEnabled())
       {
          pointCloudRenderer.setPointsToRender(rapidPlanarRegionsExtractor.getDebugger().getDebugPoints(), Color.GRAY);
          pointCloudRenderer.updateMesh();
@@ -190,15 +208,13 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    /* A one-time method to convert depth map to renderable pointcloud. */
    public void submitToPointCloudRenderer(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
    {
-      depthWidth = width;
-      depthHeight = height;
 
       openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
 
       bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
-      totalNumberOfPoints = depthWidth * depthHeight;
+      totalNumberOfPoints = height * width;
       pointCloudRenderer.create(totalNumberOfPoints);
 
       pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
@@ -223,8 +239,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
       parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
       parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
-      parametersOpenCLFloatBuffer.setParameter(depthWidth);
-      parametersOpenCLFloatBuffer.setParameter(depthHeight);
+      parametersOpenCLFloatBuffer.setParameter(width);
+      parametersOpenCLFloatBuffer.setParameter(height);
       parametersOpenCLFloatBuffer.setParameter(0.01f);
 
       parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
@@ -235,7 +251,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 1, bytedecoImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-      openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
+      openCLManager.execute2D(unpackPointCloudKernel, width, height);
 
       pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
       pointCloudRenderer.updateMeshFastestAfterKernel();
@@ -301,10 +317,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if(rapidRegionsUIPanel.getPointCloudRenderEnabled())
+      if (rapidRegionsUIPanel.getPointCloudRenderEnabled())
          pointCloudRenderer.getRenderables(renderables, pool);
 
-      if(rapidRegionsUIPanel.get3DPlanarRegionsRenderEnabled())
+      if (rapidRegionsUIPanel.get3DPlanarRegionsRenderEnabled())
          planarRegionsGraphic.getRenderables(renderables, pool);
    }
 }

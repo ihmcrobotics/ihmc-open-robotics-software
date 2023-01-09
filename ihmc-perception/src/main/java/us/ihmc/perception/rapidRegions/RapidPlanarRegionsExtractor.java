@@ -25,16 +25,16 @@ import java.util.Stack;
 
 public class RapidPlanarRegionsExtractor
 {
-   private final int TOTAL_NUM_PARAMS = 20;
+   private final int TOTAL_NUM_PARAMS = 21;
 
    private BytedecoImage inputU16DepthImage;
 
-   private enum SensorModel
+   public enum SensorModel
    {
       SPHERICAL, PERSPECTIVE
    }
 
-   private final RapidRegionsExtractorParameters parameters = new RapidRegionsExtractorParameters("Spherical");
+   private RapidRegionsExtractorParameters parameters;
 
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
    private final Stopwatch gpuDurationStopwatch = new Stopwatch();
@@ -86,6 +86,7 @@ public class RapidPlanarRegionsExtractor
 
    // TODO: Remove
    private _cl_kernel sphericalBackProjectionKernel;
+   private _cl_kernel perspectiveBackProjectionKernel;
    private OpenCLFloatBuffer cloudBuffer;
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
@@ -99,55 +100,45 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager, BytedecoImage depthImage, int imageWidth, int imageHeight, double fx, double fy, double cx, double cy)
+   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage, int imageWidth, int imageHeight, double fx, double fy, double cx, double cy)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
+      this.planarRegionExtractionProgram = program;
       this.inputU16DepthImage = depthImage;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
-      parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
-      parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
-      parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
+      this.parameters = new RapidRegionsExtractorParameters();
+      this.parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
+      this.parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
+      this.parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
+      this.parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
 
-      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
-      calculateDerivativeParameters();
-
-      debugger.create(imageHeight, imageWidth);
-
-      currentFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
-      patchGraph = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
-
-      planarRegionExtractionProgram = openCLManager.loadProgram("RapidRegionsExtractor");
-      packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
-      mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
-      copyKernel = openCLManager.createKernel(planarRegionExtractionProgram, "copyKernel");
-
-      // TODO: Remove
-      cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
-      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
-
-      regionVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
-      boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
-      boundaryMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
-      regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
+      perspectiveBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "perspectiveBackProjectionKernel");
+      this.create();
    }
 
    public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage, int imageWidth, int imageHeight)
    {
       this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
+      this.planarRegionExtractionProgram = program;
+      this.inputU16DepthImage = depthImage;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-      this.inputU16DepthImage = depthImage;
-      this.planarRegionExtractionProgram = program;
 
-      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
+      this.parameters = new RapidRegionsExtractorParameters("Spherical");
+      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
+      this.create();
+   }
+
+   public void create()
+   {
       calculateDerivativeParameters();
-
       debugger.create(imageHeight, imageWidth);
+      parametersBuffer = new OpenCLFloatBuffer(TOTAL_NUM_PARAMS);
+      cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
 
       currentFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
       previousFeatureGrid = new PatchFeatureGrid(openCLManager, patchImageWidth, patchImageHeight);
@@ -156,10 +147,6 @@ public class RapidPlanarRegionsExtractor
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
       copyKernel = openCLManager.createKernel(planarRegionExtractionProgram, "copyKernel");
-
-      // TODO: Remove
-      cloudBuffer = new OpenCLFloatBuffer(imageHeight * imageWidth * 3);
-      sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
 
       regionVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
       boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
@@ -182,20 +169,18 @@ public class RapidPlanarRegionsExtractor
       computePatchFeatureGrid();
       gpuDurationStopwatch.suspend();
 
-      //      debugger.printPatchGraph(patchGraph);
-      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
+//      debugger.printPatchGraph(patchGraph);
+//      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
       //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
       //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
       depthFirstSearchDurationStopwatch.start();
       findRegions();
-
       findBoundariesAndHoles();
       growRegionBoundaries();
       depthFirstSearchDurationStopwatch.suspend();
 
       copyFeatureGridMapUsingOpenCL();
-
       wholeAlgorithmDurationStopwatch.suspend();
 
       //debugger.showDebugImage();
@@ -228,6 +213,7 @@ public class RapidPlanarRegionsExtractor
       parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) parameters.getCentroidPackRange());
       parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) parameters.getMergeRange());
       parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) parameters.getMergeDistanceThreshold());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(20, (sensorModel == SensorModel.SPHERICAL ? 1.0f : 0.0f));
 
       if (patchSizeChanged)
       {
@@ -288,11 +274,23 @@ public class RapidPlanarRegionsExtractor
       patchGraph.readOpenCLImage(openCLManager);
 
       // TODO: Remove
-      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
-      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
-      openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
-      cloudBuffer.readOpenCLBufferObject(openCLManager);
+      if(sensorModel == SensorModel.SPHERICAL)
+      {
+         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 0, inputImage);
+         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(sphericalBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.execute2D(sphericalBackProjectionKernel, imageWidth, imageHeight);
+         cloudBuffer.readOpenCLBufferObject(openCLManager);
+      }
+
+      if(sensorModel == SensorModel.PERSPECTIVE)
+      {
+         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 0, inputImage);
+         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 1, cloudBuffer.getOpenCLBufferObject());
+         openCLManager.setKernelArgument(perspectiveBackProjectionKernel, 2, parametersBuffer.getOpenCLBufferObject());
+         openCLManager.execute2D(perspectiveBackProjectionKernel, imageWidth, imageHeight);
+         cloudBuffer.readOpenCLBufferObject(openCLManager);
+      }
 
    }
 

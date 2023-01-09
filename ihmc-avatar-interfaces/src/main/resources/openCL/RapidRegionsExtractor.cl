@@ -18,6 +18,7 @@
 #define CENTROID_PACK_RANGE 17
 #define MERGE_RANGE 18
 #define MERGE_DISTANCE_THRESHOLD 19
+#define EXTRACTION_MODE 20
 
 float4 back_project_spherical(int2 pos, float depth, global float* params)
 {
@@ -396,28 +397,39 @@ void kernel packKernel(  read_only image2d_t in,
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
 
-    if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
-                            (int)params[INPUT_HEIGHT],
-                            (int)params[INPUT_WIDTH],
-                            (int)params[SUB_H],
-                            (int)params[SUB_W],
-                            (int)params[PATCH_HEIGHT],
-                            (int)params[PATCH_WIDTH],
-                            (int)params[FILTER_DISPARITY_THRESHOLD],
-                            params[MERGE_ANGULAR_THRESHOLD],
-                            params[MERGE_ORTHOGONAL_THRESHOLD]);
+    float3 normal;
+    float3 centroid;
+
+//    if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+//                            (int)params[INPUT_HEIGHT],
+//                            (int)params[INPUT_WIDTH],
+//                            (int)params[SUB_H],
+//                            (int)params[SUB_W],
+//                            (int)params[PATCH_HEIGHT],
+//                            (int)params[PATCH_WIDTH],
+//                            (int)params[FILTER_DISPARITY_THRESHOLD],
+//                            params[MERGE_ANGULAR_THRESHOLD],
+//                            params[MERGE_ORTHOGONAL_THRESHOLD]);
 
    //if(cIndex >= 0 && cIndex < (int)params[SUB_H] && rIndex >= 0 && rIndex < (int)params[SUB_W])
    {
-       float3 normal = estimate_spherical_normal(in, rIndex, cIndex, params);
-       float3 centroid = estimate_spherical_centroid(in, rIndex, cIndex, params);
+        if(params[EXTRACTION_MODE] > 0.5f)
+        {
+           normal = estimate_spherical_normal(in, rIndex, cIndex, params);
+           centroid = estimate_spherical_centroid(in, rIndex, cIndex, params);
+        }
+        else
+        {
+           normal = estimate_perspective_normal(in, rIndex, cIndex, params);
+           centroid = estimate_perspective_centroid(in, rIndex, cIndex, params);
+        }
 
-      write_imagef(out0, (int2)(cIndex,rIndex), (float4)(normal.x,0,0,0));
-      write_imagef(out1, (int2)(cIndex,rIndex), (float4)(normal.y,0,0,0));
-      write_imagef(out2, (int2)(cIndex,rIndex), (float4)(normal.z,0,0,0));
-      write_imagef(out3, (int2)(cIndex,rIndex), (float4)(centroid.x,0,0,0));
-      write_imagef(out4, (int2)(cIndex,rIndex), (float4)(centroid.y,0,0,0));
-      write_imagef(out5, (int2)(cIndex,rIndex), (float4)(centroid.z,0,0,0));
+        write_imagef(out0, (int2)(cIndex,rIndex), (float4)(normal.x,0,0,0));
+        write_imagef(out1, (int2)(cIndex,rIndex), (float4)(normal.y,0,0,0));
+        write_imagef(out2, (int2)(cIndex,rIndex), (float4)(normal.z,0,0,0));
+        write_imagef(out3, (int2)(cIndex,rIndex), (float4)(centroid.x,0,0,0));
+        write_imagef(out4, (int2)(cIndex,rIndex), (float4)(centroid.y,0,0,0));
+        write_imagef(out5, (int2)(cIndex,rIndex), (float4)(centroid.z,0,0,0));
 
 //      printf("PackKernel[%d,%d]\t Centroid:(%.4lf, %.4lf, %.4lf)\t Normal:(%.4lf,%.4lf,%.4lf)\n", rIndex, cIndex, centroid.x, centroid.y, centroid.z, normal.x, normal.y, normal.z);
    }
@@ -437,6 +449,8 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
      int rIndex = get_global_id(1);
 
      int m = (int)params[MERGE_RANGE];
+
+//    if(cIndex == 0 && rIndex == 0) printf("MergeKernel:(%d)\n", params[MERGE_RANGE]);
 
      if(rIndex >= m && rIndex < (int)params[SUB_H]-m && cIndex >= m && cIndex < (int)params[SUB_W]-m)
      {
@@ -496,6 +510,36 @@ void kernel segmentKernel(read_only image2d_t color, write_only image2d_t filter
    {
       fillDeadPixels(color, x, y, filteredImage, params);
    }
+}
+
+/*
+ * Perspective Back-Projection Kernel for Structured Light And Perspective Time-of-Flight Sensors
+ * */
+void kernel perspectiveBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
+{
+        int cIndex = get_global_id(0);
+        int rIndex = get_global_id(1);
+
+       //if(rIndex >= 0 && rIndex < (int)params[INPUT_HEIGHT] && cIndex >= 0 && cIndex < (int)params[INPUT_WIDTH])
+       {
+          int2 pos = (int2)(cIndex,rIndex);
+
+          float scaleToMeters = 0.001f;
+          float radius = ((float)read_imageui(in, pos).x) * scaleToMeters;
+
+          if(radius > 0.1f)
+          {
+             float4 point = back_project_perspective(pos, radius, params);
+
+             int index = ((rIndex * params[INPUT_WIDTH]) + cIndex) * 3;
+
+             cloud[index] = point.x;
+             cloud[index + 1] = point.y;
+             cloud[index + 2] = point.z;
+
+             //printf("[%d] Spherical(%d,%d):\t Radius: %.3lf, Point:(%.4lf, %.4lf, %.4lf)\n", index, rIndex, cIndex, radius, cloud[index], cloud[index+1], cloud[index+2]);
+          }
+       }
 }
 
 /*
@@ -578,7 +622,7 @@ void kernel correspondenceKernel(read_only image2d_t one0, read_only image2d_t o
     float4 normalOne = (float4)(0,0,0,0);
     float4 normalTwo = (float4)(0,0,0,0);
 
-    if(rIndex == 0 && cIndex == 0) printf("Correspondence Kernel\n");
+//    if(rIndex == 0 && cIndex == 0) printf("Correspondence Kernel\n");
 
     float minLength = 10000000;
     float distance = 0;
@@ -684,7 +728,7 @@ void kernel centroidReduceKernel(read_write image2d_t one0, read_write image2d_t
 
     for(int rIndex = 0; rIndex<params[0]; rIndex++)
     {
-        if(rIndex == 0 && cIndex == 0) printf("Centroid Reduce Kernel\n");
+//        if(rIndex == 0 && cIndex == 0) printf("Centroid Reduce Kernel\n");
 
         int2 pos = (int2)(cIndex,rIndex);
 
@@ -753,7 +797,7 @@ void kernel correlReduceKernel(read_write image2d_t one0, read_write image2d_t o
 
     for(int rIndex = 0; rIndex<params[0]; rIndex++)
     {
-        if(rIndex == 0 && cIndex == 0) printf("Correlation Reduce Kernel\n");
+//        if(rIndex == 0 && cIndex == 0) printf("Correlation Reduce Kernel\n");
 
         int2 pos = (int2)(cIndex,rIndex);
 
