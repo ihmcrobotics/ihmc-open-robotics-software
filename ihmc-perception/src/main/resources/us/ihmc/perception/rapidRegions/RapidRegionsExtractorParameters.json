@@ -32,7 +32,7 @@
   },
   "Filter disparity threshold" : 2000.0,
   "Patch size" : {
-    "value" : 2,
+    "value" : 4,
     "lowerBound" : 2,
     "upperBound" : 20
   },

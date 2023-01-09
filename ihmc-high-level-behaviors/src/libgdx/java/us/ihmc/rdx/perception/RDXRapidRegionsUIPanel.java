@@ -17,7 +17,6 @@ public class RDXRapidRegionsUIPanel
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
    private RapidRegionsDebutOutputGenerator rapidRegionsDebutOutputGenerator;
 
-
    private ImGuiStoredPropertySetTuner gpuRegionParametersTuner;
    private ImGuiStoredPropertySetTuner polygonizerParametersTuner;
    private ImGuiStoredPropertySetTuner concaveHullParametersTuner;
