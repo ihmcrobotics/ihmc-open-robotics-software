@@ -29,6 +29,7 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
    public static final BooleanStoredPropertyKey checkForCollisions = keys.addBooleanKey("Check for collisions");
    public static final BooleanStoredPropertyKey computeSurfaceNormalCost = keys.addBooleanKey("Compute surface normal cost");
    public static final BooleanStoredPropertyKey performSmoothing = keys.addBooleanKey("Perform smoothing");
+   public static final DoubleStoredPropertyKey traversibilityWeight = keys.addDoubleKey("Traversibility weight");
 
    /**
     * Loads this property set.

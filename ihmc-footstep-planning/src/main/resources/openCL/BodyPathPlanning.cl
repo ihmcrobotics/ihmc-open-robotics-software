@@ -31,6 +31,7 @@
 #define MIN_NORMAL_TO_PENALIZE 17
 #define MAX_NORMAL_TO_PENALIZE 18
 #define INCLINE_WEIGHT 19
+#define TRAVERSIBILITY_WEIGHT 20
 
 // These are the flags for the different rejection types for the edges
 #define VALID -1
@@ -862,7 +863,7 @@ float computeTraversibilityCost(global float* planner_params, float4 traversibil
     float stanceTraversibility = max(traversibility_measures.s0, traversibility_measures.s1);
     float stepTraversibility = max(traversibility_measures.s2, traversibility_measures.s3);
 
-    return planner_params[ALPHA_STANCE] * (1.0 - stanceTraversibility) + planner_params[ALPHA_STEP] * (1.0 - stepTraversibility);
+    return planner_params[TRAVERSIBILITY_WEIGHT] * (planner_params[ALPHA_STANCE] * (1.0 - stanceTraversibility) + planner_params[ALPHA_STEP] * (1.0 - stepTraversibility));
 }
 
 bool computeIsTraversible(global float* planner_params, float4 traversibility_measures)

@@ -42,4 +42,9 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
    {
       set(AStarBodyPathPlannerParameters.performSmoothing, performSmoothing);
    }
+
+   default void setTraversibilityWeight(double traversibilityWeight)
+   {
+      set(AStarBodyPathPlannerParameters.traversibilityWeight, traversibilityWeight);
+   }
 }

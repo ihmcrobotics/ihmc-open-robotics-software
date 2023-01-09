@@ -111,7 +111,7 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeHeuristicCostKernel;
 
    private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
-   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(20);
+   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(21);
    private OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
 
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
@@ -743,6 +743,7 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
       floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
       floatPointer.put(19, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
+      floatPointer.put(20, (float) plannerParameters.getTraversibilityWeight());
 //      floatPointer.put(5, (float) heightMapData.getEstimatedGroundHeight());
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
