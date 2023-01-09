@@ -1,10 +1,14 @@
 package us.ihmc.avatar.colorVision;
 
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCVArUcoMarker;
@@ -38,7 +42,9 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
    private final SideDependentList<DualBlackflyCamera> blackflies = new SideDependentList<>();
    private final Throttler throttler = new Throttler();
    private volatile boolean running = true;
-   private List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private final List<OpenCVArUcoMarker> arUcoMarkersToTrack;
+   private final RigidBodyTransform objectDetectionCameraTransform;
+   private final IHMCROS2Input<RigidBodyTransformMessage> frameUpdateSubscription;
 
    public DualBlackflyAndAruCoMarkerOnRobotProcess(DRCRobotModel robotModel, List<OpenCVArUcoMarker> arUcoMarkersToTrack)
    {
@@ -65,6 +71,9 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
+      objectDetectionCameraTransform = robotModel.getSensorInformation().getObjectDetectionCameraTransform();
+      frameUpdateSubscription = ros2Helper.subscribe(ROS2Tools.OBJECT_DETECTION_FRAME_UPDATE);
+
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "DualBlackflyShutdown"));
       ThreadTools.startAThread(this::update, "DualBlackflyNode");
    }
@@ -85,6 +94,11 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
                   DualBlackflyCamera blackfly = blackflies.get(side);
                   blackfly.create(spinnakerSystemManager.createBlackfly(blackfly.getSerialNumber()), side, ros2Helper, realtimeROS2Node, arUcoMarkersToTrack);
                }
+            }
+
+            if (frameUpdateSubscription.getMessageNotification().poll())
+            {
+               MessageTools.toEuclid(frameUpdateSubscription.getMessageNotification().read(), objectDetectionCameraTransform);
             }
 
             syncedRobot.update();

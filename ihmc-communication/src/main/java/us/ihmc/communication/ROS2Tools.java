@@ -160,6 +160,9 @@ public class ROS2Tools
    public static final ROS2Topic<RigidBodyTransformMessage> OBJECT_DETECTION_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                      .withModule("frame_update")
                                                                                                      .withSuffix("object_detection");
+   public static final ROS2Topic<RigidBodyTransformMessage> EXPERIMENTAL_CAMERA_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                        .withModule("frame_update")
+                                                                                                        .withSuffix("d435");
    public static final ROS2Topic<RigidBodyTransformMessage> STEPPING_FRAME_UPDATE = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                              .withModule("frame_update")
                                                                                              .withSuffix("stepping");
