@@ -24,7 +24,7 @@
             <Spinner fx:id="gridCenterX" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Spinner fx:id="gridCenterY" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-            <Button onAction="#loadFile" text="Load file" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <Button onAction="#loadFile" text="Reset center" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
             <Button onAction="#export" text="Export" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
             <Button onAction="#importHeightMap" text="Import" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
 
@@ -52,8 +52,9 @@
     </left>
     <center>
         <GridPane>
-            <TableView fx:id="parameterTable" GridPane.rowIndex="0"/>
-            <TableView fx:id="filterParameterTable" GridPane.rowIndex="1"/>
+        <TableView fx:id="parameterTable" GridPane.rowIndex="0"/>
+        <TableView fx:id="filterParameterTable" GridPane.rowIndex="1"/>
         </GridPane>
     </center>
+
 </BorderPane>
