@@ -6,5 +6,6 @@
   "Max incline" : 0.96,
   "Check for collisions" : true,
   "Compute surface normal cost" : true,
-  "Perform smoothing" : true
+  "Perform smoothing" : true,
+  "Traversibility weight" : 1.0
 }

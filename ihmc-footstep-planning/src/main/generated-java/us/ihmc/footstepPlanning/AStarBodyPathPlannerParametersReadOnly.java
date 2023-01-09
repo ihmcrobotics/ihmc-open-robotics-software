@@ -44,4 +44,9 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
    {
       return get(performSmoothing);
    }
+
+   default double getTraversibilityWeight()
+   {
+      return get(traversibilityWeight);
+   }
 }
