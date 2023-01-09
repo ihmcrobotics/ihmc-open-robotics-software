@@ -16,6 +16,7 @@ import us.ihmc.perception.OpenCVArUcoMarker;
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertTrue;
+import static us.ihmc.euclid.tools.EuclidCoreTestTools.assertGeometricallyEquals;
 import static us.ihmc.robotics.Assert.assertEquals;
 
 public class ArUcoObjectPoseTest
@@ -54,24 +55,24 @@ public class ArUcoObjectPoseTest
       objectPose.changeFrame(objectWithArUco.getMarkerFrame()); // transform object pose in marker frame
       LogTools.info("Object: {}", objectPose);
       // check that object pose in marker frame equals to transform marker to object
-      assertTrue((float) objectPose.getTranslation().getX() == (float) arucoInfo.getObjectTranslation(objectId).getX());
-      assertTrue((float) objectPose.getTranslation().getY() == (float) arucoInfo.getObjectTranslation(objectId).getY());
-      assertTrue((float) objectPose.getTranslation().getZ() == (float) arucoInfo.getObjectTranslation(objectId).getZ());
-      assertTrue((float) Math.round(objectPose.getOrientation().getYaw() * 1000) / 1000 == (float) arucoInfo.getObjectYawPitchRoll(objectId).getYaw());
-      assertTrue((float) Math.round(objectPose.getOrientation().getRoll() * 1000) / 1000 == (float) arucoInfo.getObjectYawPitchRoll(objectId).getRoll());
-      assertTrue((float) Math.round(objectPose.getOrientation().getPitch() * 1000) / 1000 == (float) arucoInfo.getObjectYawPitchRoll(objectId).getPitch());
+      assertEquals(objectPose.getTranslation().getX(), arucoInfo.getObjectTranslation(objectId).getX(), 1e-10);
+      assertEquals(objectPose.getTranslation().getY(), arucoInfo.getObjectTranslation(objectId).getY(), 1e-10);
+      assertEquals(objectPose.getTranslation().getZ(), arucoInfo.getObjectTranslation(objectId).getZ(), 1e-10);
+      assertEquals(objectPose.getOrientation().getYaw(), arucoInfo.getObjectYawPitchRoll(objectId).getYaw(), 1e-10);
+      assertEquals(objectPose.getOrientation().getRoll(), arucoInfo.getObjectYawPitchRoll(objectId).getRoll(), 1e-10);
+      assertEquals(objectPose.getOrientation().getPitch(), arucoInfo.getObjectYawPitchRoll(objectId).getPitch(), 1e-10);
       objectPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform back to world frame
 
       ReferenceFrame objectFrame = objectWithArUco.getObjectFrame();
       markerPose.changeFrame(objectFrame); // transform marker pose in object frame
       LogTools.info("Marker: {}", markerPose);
       // check that marker pose in object frame equals to inverse transform marker to object
-      assertTrue((float) markerPose.getTranslation().getX() == -(float) arucoInfo.getObjectTranslation(objectId).getX());
-      assertTrue((float) markerPose.getTranslation().getY() == -(float) arucoInfo.getObjectTranslation(objectId).getY());
-      assertTrue((float) markerPose.getTranslation().getZ() == -(float) arucoInfo.getObjectTranslation(objectId).getZ());
-      assertTrue((float) Math.round(markerPose.getOrientation().getYaw() * 1000) / 1000 == -(float) arucoInfo.getObjectYawPitchRoll(objectId).getYaw());
-      assertTrue((float) Math.round(markerPose.getOrientation().getRoll() * 1000) / 1000 == -(float) arucoInfo.getObjectYawPitchRoll(objectId).getRoll());
-      assertTrue((float) Math.round(markerPose.getOrientation().getPitch() * 1000) / 1000 == -(float) arucoInfo.getObjectYawPitchRoll(objectId).getPitch());
+      assertEquals(markerPose.getTranslation().getX(), -arucoInfo.getObjectTranslation(objectId).getX(), 1e-10);
+      assertEquals(markerPose.getTranslation().getY(), -arucoInfo.getObjectTranslation(objectId).getY(), 1e-10);
+      assertEquals(markerPose.getTranslation().getZ(), -arucoInfo.getObjectTranslation(objectId).getZ(), 1e-10);
+      assertEquals(markerPose.getOrientation().getYaw(), -arucoInfo.getObjectYawPitchRoll(objectId).getYaw(), 1e-10);
+      assertEquals(markerPose.getOrientation().getRoll(), -arucoInfo.getObjectYawPitchRoll(objectId).getRoll(), 1e-10);
+      assertEquals(markerPose.getOrientation().getPitch(), -arucoInfo.getObjectYawPitchRoll(objectId).getPitch(), 1e-10);
       markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform back to world frame
 
       ///////////////////////////////////////////////////////////////////////////////
@@ -87,17 +88,9 @@ public class ArUcoObjectPoseTest
 
       RigidBodyTransform transformObjectToGoal = new RigidBodyTransform(); // new RigidBodyTransform(recordedGoalPose); // cannot create transform from pose like this probably
       recordedGoalPoseObjectFrame.get(transformObjectToGoal); // pack transformObjectToGoal, from recordedGoalPose in object frame
-      LogTools.info("Translation Object to Goal: {}", transformObjectToGoal.getTranslation());
-      LogTools.info("Object: {}", objectPose);
       //      objectPose.applyInverseTransform(transformObjectToGoal);
       objectPose.appendTransform(transformObjectToGoal);
       LogTools.info("Result: {}", objectPose);
-      assertEquals((float) objectPose.getTranslation().getX(), (float) recordedGoalPoseWorldFrame.getX());
-      assertEquals((float) objectPose.getTranslation().getY(), (float) recordedGoalPoseWorldFrame.getY());
-      assertEquals((float) objectPose.getTranslation().getZ(), (float) recordedGoalPoseWorldFrame.getZ());
-      assertEquals((float) objectPose.getOrientation().getX(), (float) recordedGoalPoseWorldFrame.getOrientation().getX());
-      assertEquals((float) objectPose.getOrientation().getY(), (float) recordedGoalPoseWorldFrame.getOrientation().getY());
-      assertEquals((float) objectPose.getOrientation().getZ(), (float) recordedGoalPoseWorldFrame.getOrientation().getZ());
-      assertEquals((float) objectPose.getOrientation().getS(), (float) recordedGoalPoseWorldFrame.getOrientation().getS());
+      assertGeometricallyEquals(objectPose,recordedGoalPoseWorldFrame,1e-10);
    }
 }
