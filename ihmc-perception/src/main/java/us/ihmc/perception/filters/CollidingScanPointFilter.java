@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
+package us.ihmc.perception.filters;
 
 import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
