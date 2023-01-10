@@ -11,7 +11,6 @@ import org.bytedeco.opencl._cl_program;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -64,7 +63,7 @@ public class GPUAStarBodyPathSmoother
    private final OpenCLManager openCLManager;
 
    private _cl_kernel computeCollisionGradientMapKernel;
-   private _cl_kernel computeTraversibilityMapKernel;
+   private _cl_kernel computeCurrentTraversibilityMapKernel;
    private _cl_kernel computeTraversibilityForGradientMapKernel;
    private _cl_kernel computeGroundPlaneGradientKernel;
    private _cl_kernel computeWaypointSmoothessGradientKernel;
@@ -152,7 +151,7 @@ public class GPUAStarBodyPathSmoother
       cellsPerSide = numberOfCells;
 
       computeCollisionGradientMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeCollisionGradientMap");
-      computeTraversibilityMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeCurrentTraversibilityMap");
+      computeCurrentTraversibilityMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeCurrentTraversibilityMap");
       computeTraversibilityForGradientMapKernel = openCLManager.createKernel(pathPlannerProgram, "computeTraversibilityForGradientMap");
       computeGroundPlaneGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeGroundPlaneGradientMap");
       computeWaypointSmoothessGradientKernel = openCLManager.createKernel(pathPlannerProgram, "computeWaypointSmoothnessGradient");
@@ -195,7 +194,7 @@ public class GPUAStarBodyPathSmoother
    public void destroyOpenCLStuff()
    {
       computeCollisionGradientMapKernel.close();
-      computeTraversibilityMapKernel.close();
+      computeCurrentTraversibilityMapKernel.close();
       computeTraversibilityForGradientMapKernel.close();
       computeGroundPlaneGradientKernel.close();
       computeWaypointSmoothessGradientKernel.close();
@@ -509,17 +508,17 @@ public class GPUAStarBodyPathSmoother
                                         OpenCLFloatBuffer snappedNodeHeightBuffer,
                                         OpenCLFloatBuffer normalXYZBuffer)
    {
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 3, traversibilityOffsetsForNominalBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 4, heightMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 5, snappedNodeHeightBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 6, normalXYZBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 7, leftTraversibilitiesMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeTraversibilityMapKernel, 8, rightTraversibilitiesMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 0, heightMapParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 1, plannerParamsBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 2, smoothingParametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 3, traversibilityOffsetsForNominalBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 4, heightMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 5, snappedNodeHeightBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 6, normalXYZBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 7, leftTraversibilitiesMapBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeCurrentTraversibilityMapKernel, 8, rightTraversibilitiesMapBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute3D(computeTraversibilityMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
+      openCLManager.execute3D(computeCurrentTraversibilityMapKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
 
       openCLManager.finish();
    }
