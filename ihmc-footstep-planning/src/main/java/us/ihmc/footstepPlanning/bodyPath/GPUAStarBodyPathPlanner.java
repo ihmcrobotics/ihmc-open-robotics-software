@@ -181,7 +181,7 @@ public class GPUAStarBodyPathPlanner
       openCLManager = new OpenCLManager();
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
 
-      smoother = new GPUAStarBodyPathSmoother(null, openCLManager, null, null);
+      smoother = new GPUAStarBodyPathSmoother(plannerParameters, null, openCLManager, null, null);
 
       Activator nativeLoader = BytedecoTools.loadNativesOnAThread();
       boolean doneLoading = false;
@@ -382,23 +382,24 @@ public class GPUAStarBodyPathPlanner
       TIntArrayList twentyTwoCollisionOffsetsX = new TIntArrayList();
       TIntArrayList twentyTwoCollisionOffsetsY = new TIntArrayList();
 
+      double width = plannerParameters.getTraversibilitySearchWidth() / 2.0;
       BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
                                             zeroDegCollisionOffsetsX,
                                             zeroDegCollisionOffsetsY,
-                                            BodyPathRANSACTraversibilityCalculator.sampleSizeX,
-                                            BodyPathRANSACTraversibilityCalculator.sampleSizeY,
+                                            width,
+                                            width,
                                             0.0);
       BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
                                             fourtyFiveDegCollisionOffsetsX,
                                             fourtyFiveDegCollisionOffsetsY,
-                                            BodyPathRANSACTraversibilityCalculator.sampleSizeX,
-                                            BodyPathRANSACTraversibilityCalculator.sampleSizeY,
+                                            width,
+                                            width,
                                             Math.toRadians(45.0));
       BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(),
                                             twentyTwoCollisionOffsetsX,
                                             twentyTwoCollisionOffsetsY,
-                                            BodyPathRANSACTraversibilityCalculator.sampleSizeX,
-                                            BodyPathRANSACTraversibilityCalculator.sampleSizeY,
+                                            width,
+                                            width,
                                             Math.toRadians(22.5));
 
       int offsets0 = zeroDegCollisionOffsetsX.size();
@@ -525,11 +526,11 @@ public class GPUAStarBodyPathPlanner
       iterationData.clear();
       edgeDataMap.clear();
 
-      AStarBodyPathPlanner.packRadialOffsets(heightMapData, AStarBodyPathPlanner.snapRadius, xSnapOffsets, ySnapOffsets);
+      AStarBodyPathPlanner.packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 
       populateRadialOffsetsBuffer();
       populateTraversibilityOffsetsBuffer();
-      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), AStarBodyPathPlanner.boxSizeX, AStarBodyPathPlanner.boxSizeY);
+      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
       populateNeighborOffsetsBuffer();
 
       Pose3D startPose = new Pose3D();
@@ -553,12 +554,12 @@ public class GPUAStarBodyPathPlanner
       populateHeightMapParameterBuffer(patchWidth);
       populatePathPlanningParametersBuffer();
 
+      computeSnapHeights();
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
          computeSurfaceNormalsWithLeastSquares(patchWidth);
+         computeSurfaceNormalsWithRansac();
       }
-      computeSnapHeights();
-      computeSurfaceNormalsWithRansac();
       computeHeuristicCost();
       computeEdgeData();
 
@@ -695,29 +696,31 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(3, (float) startNode.getYIndex());
       floatPointer.put(4, (float) goalNode.getX());
       floatPointer.put(5, (float) goalNode.getY());
-      floatPointer.put(6, (float) AStarBodyPathPlanner.groundClearance);
-      floatPointer.put(7, (float) plannerParameters.getMaxIncline());
+      floatPointer.put(6, (float) plannerParameters.getCollisionBoxGroundClearance());
+      floatPointer.put(7, (float) Math.toRadians(plannerParameters.getMaxIncline()));
       floatPointer.put(8, (float) nominalIncline.getValue());
       floatPointer.put(9, (float) plannerParameters.getInclineCostWeight());
       floatPointer.put(10, (float) plannerParameters.getInclineCostDeadband());
       floatPointer.put(11, (float) plannerParameters.getRollCostWeight());
       floatPointer.put(12, (float) Math.toRadians(plannerParameters.getRollCostDeadband()));
       floatPointer.put(13, (float) Math.toRadians(plannerParameters.getMaxPenalizedRollAngle()));
-      floatPointer.put(14, (float) BodyPathRANSACTraversibilityCalculator.alphaStance);
-      floatPointer.put(15, (float) BodyPathRANSACTraversibilityCalculator.alphaStep);
-      floatPointer.put(16, (float) BodyPathRANSACTraversibilityCalculator.minPercent);
-      floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.halfStanceWidth);
-      floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.heightWindow);
-      floatPointer.put(19, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
-      floatPointer.put(20, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
-      floatPointer.put(21, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
+      floatPointer.put(14, (float) plannerParameters.getMinSnapHeightThreshold());
+      floatPointer.put(15, (plannerParameters.getCheckForCollisions() ? 1.0f : 0.0f));
+      floatPointer.put(15, (plannerParameters.getComputeSurfaceNormalCost() ? 1.0f : 0.0f));
+      floatPointer.put(14, (float) plannerParameters.getTraversibilityStanceWeight());
+      floatPointer.put(15, (float) plannerParameters.getTraversibilityStepWeight());
+      floatPointer.put(16, (float) plannerParameters.getMinTraversibilityScore());
+      floatPointer.put(17, (float) plannerParameters.getHalfStanceWidth());
+      floatPointer.put(18, (float) plannerParameters.getTraversibilityHeightWindowWidth());
+      floatPointer.put(19, (float) plannerParameters.getMinNormalAngleToPenalizeForTraversibility());
+      floatPointer.put(20, (float) plannerParameters.getMaxNormalAngleToPenalizeForTraversibility());
+      floatPointer.put(21, (float) plannerParameters.getTraversibilityInclineWeight());
       floatPointer.put(22, (float) plannerParameters.getTraversibilityWeight());
-      floatPointer.put(23, (float) BodyPathRANSACTraversibilityCalculator.heightDeadband);
-      floatPointer.put(24, (float) BodyPathRANSACTraversibilityCalculator.heightProximityForSayingWalkingOnGround);
-      floatPointer.put(25, (float) BodyPathRANSACTraversibilityCalculator.lowestNonGroundDiscountWhenWalkingOnGround);
-      floatPointer.put(26, (float) BodyPathRANSACTraversibilityCalculator.minimumCellsForTraversible);
-      floatPointer.put(27, (float) BodyPathRANSACTraversibilityCalculator.minimumCellsForTraversible);
-      floatPointer.put(27, (float) AStarBodyPathPlanner.snapHeightThreshold);
+      floatPointer.put(23, (float) plannerParameters.getTraversibilityHeightWindowDeadband());
+      floatPointer.put(24, (float) plannerParameters.getHeightProximityForSayingWalkingOnGround());
+      floatPointer.put(25, (float) plannerParameters.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
+      floatPointer.put(26, (float) plannerParameters.getMinOccupiedNeighborsForTraversibility());
+      floatPointer.put(27, (float) plannerParameters.getMinSnapHeightThreshold());
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }

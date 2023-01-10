@@ -24,6 +24,9 @@
 #define ROLL_COST_WEIGHT 11
 #define ROLL_DEADBAND 12
 #define MAX_PENALIZED_ROLL_ANGLE 13
+#define CHECK_FOR_COLLISIONS 13
+#define COMPUTE_SURFACE_NORMALS 13
+#define COMPUTE_TRAVERSIBILITY 14
 #define TRAVERSIBILITY_STANCE_ALPHA 14
 #define TRAVERSIBILITY_STEP_ALPHA 15
 #define MIN_TRAVERSIBILITY_PERCENTAGE 16
@@ -620,7 +623,6 @@ void kernel snapVertices(global float* height_map_params,
             max_z = max(max_z, neighbor_z);
     }
 
-    // TODO extract magic number
     float height_sample_delta = planner_params[MIN_SNAP_HEIGHT_THRESHOLD];
     float min_z = max_z - height_sample_delta;
 
@@ -1090,10 +1092,13 @@ void kernel computeEdgeData(global float* height_map_params,
             return;
         }
 
-        if (collisionDetected(height_map_params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
+        if (planner_params[CHECK_FOR_COLLISIONS == 1.0F)
         {
-            edge_rejection_reason[edge_key] = COLLISION;
-            return;
+            if (collisionDetected(height_map_params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
+            {
+                edge_rejection_reason[edge_key] = COLLISION;
+                return;
+            }
         }
 
         float4 traversibility_measures = computeTraversibilityMeasures(height_map_params, planner_params, traversibility_offsets, snapped_height_map,
@@ -1121,20 +1126,31 @@ void kernel computeEdgeData(global float* height_map_params,
         }
         edge_cost += incline_cost;
 
-        // compute roll cost
-        float roll = computeRollAtNode(height_map_params, normal_least_squares_xyz_buffer, node_position, neighbor_position);
-        float roll_cost = computeRollCost(planner_params, incline, roll);
-        edge_cost += roll_cost;
-        roll_map[edge_key] = roll;
+        if (planner_params[COMPUTE_SURFACE_NORMALS] == 1.0f)
+        {
+            // compute roll cost
+            float roll = computeRollAtNode(height_map_params, normal_least_squares_xyz_buffer, node_position, neighbor_position);
+            float roll_cost = computeRollCost(planner_params, incline, roll);
+            edge_cost += roll_cost;
+            roll_map[edge_key] = roll;
+            roll_cost_map[edge_key] = roll_cost;
+        }
+        else
+        {
+            roll_map[edge_key] = 0.0f;
+            roll_cost_map[edge_key] = 0.0f;
+        }
 
-        // get the traversibility cost
-        float traversibility_cost = computeTraversibilityCost(planner_params, traversibility_measures);
-        edge_cost += traversibility_cost;
+        if (planner_params[COMPUTE_SURFACE_NORMALS] == 1.0f && planner_params[COMPUTE_TRAVERSIBILITY])
+        {
+            // get the traversibility cost
+            float traversibility_cost = computeTraversibilityCost(planner_params, traversibility_measures);
+            edge_cost += traversibility_cost;
+            traversibility_cost_map[edge_key] = traversibility_cost;
+        }
 
-        roll_cost_map[edge_key] = roll_cost;
         edge_cost_map[edge_key] = edge_cost;
         incline_cost_map[edge_key] = incline_cost;
-        traversibility_cost_map[edge_key] = traversibility_cost;
     //}
 }
 

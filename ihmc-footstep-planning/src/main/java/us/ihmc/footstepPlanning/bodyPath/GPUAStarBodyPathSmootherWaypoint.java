@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -41,19 +42,10 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.boxSizeX;
-import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.boxSizeY;
 import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathSmoother.*;
 
 public class GPUAStarBodyPathSmootherWaypoint
 {
-    private static final FrameBox3D collisionBox = new FrameBox3D();
-
-   static
-   {
-      collisionBox.getSize().set(boxSizeX, boxSizeY, 0.6);
-   }
-
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
 
@@ -105,7 +97,8 @@ public class GPUAStarBodyPathSmootherWaypoint
    private GPUAStarBodyPathSmootherWaypoint[] waypoints;
    private final YoVector2D rollDelta;
 
-   public GPUAStarBodyPathSmootherWaypoint(int waypointIndex,
+   public GPUAStarBodyPathSmootherWaypoint(AStarBodyPathPlannerParametersReadOnly plannerParameters,
+                                           int waypointIndex,
                                            YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
@@ -147,6 +140,9 @@ public class GPUAStarBodyPathSmootherWaypoint
       {
          yoNominalStepPoses = new SideDependentList<>(side -> new YoFramePoseUsingYawPitchRoll(side.getCamelCaseNameForStartOfExpression() + "nominalStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
          yoElevatedStepPositions = new SideDependentList<>(side -> new YoFramePoint3D(side.getCamelCaseNameForStartOfExpression() + "DebugStepPose" + waypointIndex, ReferenceFrame.getWorldFrame(), registry));
+
+         FrameBox3D collisionBox = new FrameBox3D();
+         collisionBox.getSize().set(plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY(), 0.6);
 
          waypointGraphic = new YoGraphicPosition("waypointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.Red());
          turnPointGraphic = new YoGraphicPosition("turnPointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.White());

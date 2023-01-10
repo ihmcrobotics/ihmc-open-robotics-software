@@ -4,6 +4,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -19,25 +20,6 @@ import static us.ihmc.footstepPlanning.bodyPath.BodyPathCollisionDetector.comput
 
 public class BodyPathRANSACTraversibilityCalculator
 {
-   static final double sampleSizeX = 0.35;
-   static final double sampleSizeY = 0.35;
-   static final double halfStanceWidth = 0.25;
-   static final double heightWindow = 0.2;
-   static final double inclineWeight = 0.0;
-
-   static final double heightProximityForSayingWalkingOnGround = 0.07;
-   static final double lowestNonGroundDiscountWhenWalkingOnGround = 0.85;
-
-   static final double minPercent = 0.2;
-   static final double minNormalToPenalize = Math.toRadians(45.0);
-   static final double maxNormalToPenalize = Math.toRadians(70.0);
-   static final double heightDeadband = 0.1;
-
-   static final double alphaStance = 4.0;
-   static final double alphaStep = 2.0;
-
-   static final int minimumCellsForTraversible = 10;
-
    private BodyPathLatticePoint startNode;
    private final ToDoubleFunction<BodyPathLatticePoint> gridHeightMap;
    private final NormalProvider surfaceNormalCalculator;
@@ -58,10 +40,14 @@ public class BodyPathRANSACTraversibilityCalculator
    private final TIntArrayList twentyTwoDegCollisionOffsetsX = new TIntArrayList();
    private final TIntArrayList twentyTwoDegCollisionOffsetsY = new TIntArrayList();
 
-   public BodyPathRANSACTraversibilityCalculator(ToDoubleFunction<BodyPathLatticePoint> gridHeightMap,
+   private final AStarBodyPathPlannerParametersReadOnly parameters;
+
+   public BodyPathRANSACTraversibilityCalculator(AStarBodyPathPlannerParametersReadOnly traversibilityCalculatorParameters,
+                                                 ToDoubleFunction<BodyPathLatticePoint> gridHeightMap,
                                                  NormalProvider surfaceNormalCalculator,
                                                  YoRegistry registry)
    {
+      this.parameters = traversibilityCalculatorParameters;
       this.gridHeightMap = gridHeightMap;
       this.stanceScore = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StanceScore", registry));
       this.stepScores = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StepScore", registry));
@@ -73,9 +59,10 @@ public class BodyPathRANSACTraversibilityCalculator
    void setHeightMap(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), zeroDegCollisionOffsetsX, zeroDegCollisionOffsetsY, sampleSizeX, sampleSizeY, 0.0);
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), fourtyFiveDegCollisionOffsetsX, fourtyFiveDegCollisionOffsetsY, sampleSizeX, sampleSizeY, Math.toRadians(45.0));
-      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), twentyTwoDegCollisionOffsetsX, twentyTwoDegCollisionOffsetsY, sampleSizeX, sampleSizeY, Math.toRadians(22.5));
+      double size = parameters.getTraversibilitySearchWidth() / 2.0;
+      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), zeroDegCollisionOffsetsX, zeroDegCollisionOffsetsY, size, size, 0.0);
+      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), fourtyFiveDegCollisionOffsetsX, fourtyFiveDegCollisionOffsetsY, size, size, Math.toRadians(45.0));
+      BodyPathCollisionDetector.packOffsets(heightMapData.getGridResolutionXY(), twentyTwoDegCollisionOffsetsX, twentyTwoDegCollisionOffsetsY, size, size, Math.toRadians(22.5));
    }
 
    void initialize(BodyPathLatticePoint startNode)
@@ -123,7 +110,7 @@ public class BodyPathRANSACTraversibilityCalculator
 
    boolean isTraversible()
    {
-      return stanceScore.get(RobotSide.LEFT).getValue() >= minPercent || stanceScore.get(RobotSide.RIGHT).getValue() >= minPercent;
+      return stanceScore.get(RobotSide.LEFT).getValue() >= parameters.getMinTraversibilityScore() || stanceScore.get(RobotSide.RIGHT).getValue() >= parameters.getMinTraversibilityScore();
    }
 
    double getTraversability()
@@ -132,13 +119,14 @@ public class BodyPathRANSACTraversibilityCalculator
       double rightStepScore = stepScores.get(RobotSide.RIGHT).getDoubleValue();
       double stepTraversibility = Math.max(leftStepScore, rightStepScore);
 
-      return alphaStance * (1.0 - stanceTraversibility.getValue()) + alphaStep * (1.0 - stepTraversibility);
+      return parameters.getTraversibilityStanceWeight() * (1.0 - stanceTraversibility.getValue())
+             + parameters.getTraversibilityStepWeight() * (1.0 - stepTraversibility);
    }
 
    private double compute(RobotSide side, BodyPathLatticePoint node, int yawIndex, double oppositeHeight, double nominalHeight, boolean updateYoVariables)
    {
       stepPose.set(node.getX(), node.getY(), getYaw(yawIndex));
-      stepPose.appendTranslation(0.0, side.negateIfRightSide(halfStanceWidth));
+      stepPose.appendTranslation(0.0, side.negateIfRightSide(parameters.getHalfStanceWidth()));
 
       int xIndex = HeightMapTools.coordinateToIndex(stepPose.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
       int yIndex = HeightMapTools.coordinateToIndex(stepPose.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
@@ -150,20 +138,20 @@ public class BodyPathRANSACTraversibilityCalculator
       int numberOfTraversibleCells = 0;
 
       double traversibilityScoreNumerator = 0.0;
-      double minHeight = Math.max(oppositeHeight, nominalHeight) - heightWindow;
-      double maxHeight = Math.min(oppositeHeight, nominalHeight) + heightWindow;
+      double minHeight = Math.max(oppositeHeight, nominalHeight) - parameters.getTraversibilityHeightWindowWidth();
+      double maxHeight = Math.min(oppositeHeight, nominalHeight) + parameters.getTraversibilityHeightWindowWidth();
       double averageHeight = 0.5 * (nominalHeight + oppositeHeight);
       double windowWidth = (maxHeight - minHeight) / 2.0;
 
       double heightAboveGround = Math.abs(averageHeight - heightMapData.getEstimatedGroundHeight());
       boolean isWalkingOnGround = false;
       double discountForNonGroundPointsWhenWalkingOnGround = 1.0;
-      if (heightAboveGround < heightProximityForSayingWalkingOnGround)
+      if (heightAboveGround < parameters.getHeightProximityForSayingWalkingOnGround())
       {
          isWalkingOnGround = true;
-         double lowestNonGroundAlpha = lowestNonGroundDiscountWhenWalkingOnGround;
+         double lowestNonGroundAlpha = parameters.getTraversibilityNonGroundDiscountWhenWalkingOnGround();
 
-         discountForNonGroundPointsWhenWalkingOnGround = lowestNonGroundAlpha + (1.0 - lowestNonGroundAlpha) * heightAboveGround / heightProximityForSayingWalkingOnGround;
+         discountForNonGroundPointsWhenWalkingOnGround = lowestNonGroundAlpha + (1.0 - lowestNonGroundAlpha) * heightAboveGround / parameters.getHeightProximityForSayingWalkingOnGround();
       }
 
       if (minHeight > maxHeight - 1e-3)
@@ -188,7 +176,7 @@ public class BodyPathRANSACTraversibilityCalculator
          {
             numberOfTraversibleCells++;
 
-            double deltaHeight = Math.max(0.0, Math.abs(averageHeight - heightQuery) - heightDeadband);
+            double deltaHeight = Math.max(0.0, Math.abs(averageHeight - heightQuery) - parameters.getTraversibilityHeightWindowDeadband());
             double cellPercentage = 1.0 - deltaHeight / windowWidth;
             double nonGroundDiscount = 1.0;
 
@@ -196,6 +184,10 @@ public class BodyPathRANSACTraversibilityCalculator
             {
                nonGroundDiscount = discountForNonGroundPointsWhenWalkingOnGround;
             }
+
+            double minNormalToPenalize = Math.toRadians(parameters.getMinNormalAngleToPenalizeForTraversibility());
+            double maxNormalToPenalize = Math.toRadians(parameters.getMaxNormalAngleToPenalizeForTraversibility());
+            double inclineWeight = parameters.getTraversibilityInclineWeight();
 
             UnitVector3DReadOnly normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
             double incline = Math.max(0.0, Math.acos(normal.getZ()) - minNormalToPenalize);
@@ -209,7 +201,7 @@ public class BodyPathRANSACTraversibilityCalculator
          traversibileCells.get(side).set(numberOfTraversibleCells);
       }
 
-      if (numberOfSampledCells < minimumCellsForTraversible)
+      if (numberOfSampledCells < parameters.getMinOccupiedNeighborsForTraversibility())
       {
          return 0.0;
       }

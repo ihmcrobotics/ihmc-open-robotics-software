@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
@@ -97,11 +98,15 @@ public class GPUAStarBodyPathSmoother
 
    private int cellsPerSide = -1;
 
-   public GPUAStarBodyPathSmoother(TickAndUpdatable tickAndUpdatable,
+   private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
+
+   public GPUAStarBodyPathSmoother(AStarBodyPathPlannerParametersReadOnly plannerParameters,
+                                   TickAndUpdatable tickAndUpdatable,
                                    OpenCLManager openCLManager,
                                    YoGraphicsListRegistry graphicsListRegistry,
                                    YoRegistry parentRegistry)
    {
+      this.plannerParameters = plannerParameters;
       this.openCLManager = openCLManager;
 
       for (int i = 0; i < maxPoints; i++)
@@ -111,7 +116,7 @@ public class GPUAStarBodyPathSmoother
 
       for (int i = 0; i < maxPoints; i++)
       {
-         waypoints[i] = new GPUAStarBodyPathSmootherWaypoint(i, graphicsListRegistry, (parentRegistry == null) ? null : registry);
+         waypoints[i] = new GPUAStarBodyPathSmootherWaypoint(plannerParameters, i, graphicsListRegistry, (parentRegistry == null) ? null : registry);
       }
 
       if (parentRegistry == null)
@@ -430,8 +435,8 @@ public class GPUAStarBodyPathSmoother
       floatPointer.put(2, (float) minCurvatureToPenalize);
       floatPointer.put(3, (float) gradientEpsilon);
       floatPointer.put(4, (float) smoothnessWeight);
-      floatPointer.put(5, (float) AStarBodyPathPlanner.boxSizeX);
-      floatPointer.put(6, (float) AStarBodyPathPlanner.boxSizeY);
+      floatPointer.put(5, (float) plannerParameters.getCollisionBoxSizeX());
+      floatPointer.put(6, (float) plannerParameters.getCollisionBoxSizeY());
       floatPointer.put(7, (float) AStarBodyPathSmootherWaypoint.boxGroundOffset);
       floatPointer.put(8, (float) collisionWeight);
       floatPointer.put(9, (float) yawDiscretizations);
