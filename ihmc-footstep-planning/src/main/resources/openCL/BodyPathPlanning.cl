@@ -16,31 +16,31 @@
 #define START_Y_INDEX 3
 #define GOAL_X 4
 #define GOAL_Y 5
-#define GROUND_CLEARANCE 6
-#define MAX_INCLINE 7
-#define NOMINAL_INCLINE 8
-#define INCLINE_COST_WEIGHT 9
-#define INCLINE_COST_DEADBAND 10
-#define ROLL_COST_WEIGHT 11
-#define ROLL_DEADBAND 12
-#define MAX_PENALIZED_ROLL_ANGLE 13
-#define CHECK_FOR_COLLISIONS 13
-#define COMPUTE_SURFACE_NORMALS 13
-#define COMPUTE_TRAVERSIBILITY 14
-#define TRAVERSIBILITY_STANCE_ALPHA 14
-#define TRAVERSIBILITY_STEP_ALPHA 15
-#define MIN_TRAVERSIBILITY_PERCENTAGE 16
-#define HALF_STANCE_WIDTH 17
-#define TRAVERSIBILITY_HEIGHT_WINDOW 18
-#define TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE 19
-#define TRAVERSIBILITY_MAX_NORMAL_TO_PENALIZE 20
-#define TRAVERSIBILITY_INCLINE_WEIGHT 21
-#define TRAVERSIBILITY_WEIGHT 22
-#define TRAVERSIBILITY_HEIGHT_DEADBAND 23
-#define TRAVERSIBILITY_HEIGHT_PROXIMITY_FOR_SAYING_WALKING_ON_GROUND 24
-#define TRAVERSIBILITY_LOWEST_NON_GROUND_DISCOUNT_WHEN_WALKING_ON_GROUND 25
-#define MINIMUM_CELLS_FOR_TRAVERSIBLE 26
-#define MIN_SNAP_HEIGHT_THRESHOLD 27
+#define NOMINAL_INCLINE 6
+#define CHECK_FOR_COLLISIONS 7
+#define COMPUTE_SURFACE_NORMALS 8
+#define COMPUTE_TRAVERSIBILITY 9
+#define MIN_SNAP_HEIGHT_THRESHOLD 10
+#define GROUND_CLEARANCE 11
+#define MAX_INCLINE 12
+#define INCLINE_COST_WEIGHT 13
+#define INCLINE_COST_DEADBAND 14
+#define ROLL_COST_WEIGHT 15
+#define ROLL_DEADBAND 16
+#define MAX_PENALIZED_ROLL_ANGLE 17
+#define TRAVERSIBILITY_STANCE_ALPHA 18
+#define TRAVERSIBILITY_STEP_ALPHA 19
+#define MIN_TRAVERSIBILITY_PERCENTAGE 20
+#define HALF_STANCE_WIDTH 21
+#define TRAVERSIBILITY_HEIGHT_WINDOW 22
+#define TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE 23
+#define TRAVERSIBILITY_MAX_NORMAL_TO_PENALIZE 24
+#define TRAVERSIBILITY_INCLINE_WEIGHT 25
+#define TRAVERSIBILITY_WEIGHT 26
+#define TRAVERSIBILITY_HEIGHT_DEADBAND 27
+#define TRAVERSIBILITY_HEIGHT_PROXIMITY_FOR_SAYING_WALKING_ON_GROUND 28
+#define TRAVERSIBILITY_LOWEST_NON_GROUND_DISCOUNT_WHEN_WALKING_ON_GROUND 29
+#define MINIMUM_CELLS_FOR_TRAVERSIBLE 30
 
 // These are the flags for the different rejection types for the edges
 #define VALID -1
@@ -1092,7 +1092,7 @@ void kernel computeEdgeData(global float* height_map_params,
             return;
         }
 
-        if (planner_params[CHECK_FOR_COLLISIONS == 1.0F)
+        if (planner_params[CHECK_FOR_COLLISIONS] == 1.0F)
         {
             if (collisionDetected(height_map_params, planner_params, collision_offsets, height_map, neighbor_position, neighborIdx, snapped_neighbor_height))
             {
@@ -1387,11 +1387,12 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
             float2 delta = position - waypoint_xy;
 
             // rotating this offset to the local frame
+            //float2 delta_local = (float2) (cH * delta.x + sH * delta.y, -sH * delta.x + cH * delta.y);//rotate_vector(delta, cH, sH);
             float2 delta_local = rotate_vector(delta, cH, sH);
 
             float absDyLocal = fabs(delta_local.y);
 
-            if (fabs(delta_local.x) > half_box_size_y || absDyLocal > half_box_size_y)
+            if (fabs(delta_local.x) > half_box_size_x || absDyLocal > half_box_size_y)
                 continue;
 
             int query_key = indices_to_key(indices.x, indices.y, center_index);
@@ -1404,6 +1405,8 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
 
             float2 penetration = (float2) (0.0f, sign(delta_local.y) * lateral_penetration);
             gradient += inverse_rotate_vector(penetration, cH, sH);
+            //gradient.x += sign(delta_local.y) * -lateral_penetration * sH;
+            //gradient.y += sign(delta_local.y) * lateral_penetration * cH;
 
             numCollisions++;
         }
@@ -1445,6 +1448,7 @@ void kernel computeTraversibilityForGradientMap(global float* height_map_params,
 
     float left_neg_traversibility = computeSmootherTraversibility(height_map_params,
                                                                   planner_params,
+                                                                  smoother_params,
                                                                   traversibility_gradient_offsets,
                                                                   height_map_data,
                                                                   normal_xyz_data,
@@ -1455,6 +1459,7 @@ void kernel computeTraversibilityForGradientMap(global float* height_map_params,
                                                                   waypoint_yaw);
     float left_pos_traversibility = computeSmootherTraversibility(height_map_params,
                                                                   planner_params,
+                                                                  smoother_params,
                                                                   traversibility_gradient_offsets,
                                                                   height_map_data,
                                                                   normal_xyz_data,
@@ -1465,6 +1470,7 @@ void kernel computeTraversibilityForGradientMap(global float* height_map_params,
                                                                   waypoint_yaw);
     float right_neg_traversibility = computeSmootherTraversibility(height_map_params,
                                                                    planner_params,
+                                                                   smoother_params,
                                                                    traversibility_gradient_offsets,
                                                                    height_map_data,
                                                                    normal_xyz_data,
@@ -1475,6 +1481,7 @@ void kernel computeTraversibilityForGradientMap(global float* height_map_params,
                                                                    waypoint_yaw);
     float right_pos_traversibility = computeSmootherTraversibility(height_map_params,
                                                                    planner_params,
+                                                                   smoother_params,
                                                                    traversibility_gradient_offsets,
                                                                    height_map_data,
                                                                    normal_xyz_data,
@@ -1585,6 +1592,8 @@ void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
         return;
 
     int isTurnPoint = waypont_turn_points[waypoint_key] == 1;
+    if (isTurnPoint)
+        printf("key point %d is a turn point\n", waypoint_key);
 
     float x0 = waypoint_xyzYaw[4 * (waypoint_key - 1)];
     float y0 = waypoint_xyzYaw[4 * (waypoint_key - 1) + 1];
@@ -1721,9 +1730,9 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
             waypoint_traversibility_samples[goal_key + 1] = positive_sample;
 
             float discount = (local_traversibility_threshold - max_local_traversibility) / (local_traversibility_threshold - smoothing_params[TRAVERSIBILITY_THRESHOLD_FOR_NO_DISCOUNT]);
-            discount = clamp(alpha, 0.0f, 1.0f);
+            discount = clamp(discount, 0.0f, 1.0f);
 
-            float2 delta_local = (float2) (0.0f, alpha * (positive_sample - negative_sample));
+            float2 delta_local = (float2) (0.0f, discount * (positive_sample - negative_sample));
             float2 gradient = inverse_rotate_vector_by_yaw(delta_local, waypoint_xyzYaw[4 * waypoint_key + 3]);;
 
             waypoint_traversibility_gradients[goal_key] = gradient.x;

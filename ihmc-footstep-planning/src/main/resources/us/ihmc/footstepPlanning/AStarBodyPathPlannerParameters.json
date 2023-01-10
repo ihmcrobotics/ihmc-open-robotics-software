@@ -121,7 +121,7 @@
     "Weight placed on the gradient for avoiding collisions"
   ],
   "Smoother smoothness weight": [
-    0.7,
+    0.1,
     "Weight placed on the gradient for minimizing the angle between successive segments of the body path"
   ],
   "Smoother turn point smoothness discount": [
@@ -145,7 +145,7 @@
     "Weight placed on a gradient that drives the waypoint towards the initial value"
   ],
   "Smoother traversibility weight": [
-    0.0,
+    20.0,
     "Weight placed on the gradient for maximizing the traversibility of the body path plan."
   ],
   "Smoother ground plane weight": [

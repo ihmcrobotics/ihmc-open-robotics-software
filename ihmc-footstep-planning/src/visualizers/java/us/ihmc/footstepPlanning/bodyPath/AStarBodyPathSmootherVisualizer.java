@@ -41,7 +41,7 @@ public class AStarBodyPathSmootherVisualizer
    {
       scs = new SimulationConstructionSet(new Robot("Dummy"));
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      smoother = new AStarBodyPathSmoother(scs, graphicsListRegistry, scs.getRootRegistry());
+      smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters(), scs, graphicsListRegistry, scs.getRootRegistry());
 
       if (heightMapData != null)
       {
@@ -275,7 +275,7 @@ public class AStarBodyPathSmootherVisualizer
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 
       AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), new AStarBodyPathPlannerParameters(), PlannerTools.createDefaultFootPolygons());
-      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
+      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother(new AStarBodyPathPlannerParameters());
 
       for (int i = 0; i < datasets.length; i++)
       {
