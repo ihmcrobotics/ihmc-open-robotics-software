@@ -160,6 +160,63 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
     * value will increase the traversibility score when walking on the ground.
     */
    public static final DoubleStoredPropertyKey traversibilityNonGroundDiscountWhenWalkingOnGround = keys.addDoubleKey("Traversibility non ground discount when walking on ground");
+   /**
+    * Weight placed on the gradient for avoiding collisions
+    */
+   public static final DoubleStoredPropertyKey smootherCollisionWeight = keys.addDoubleKey("Smoother collision weight");
+   /**
+    * Weight placed on the gradient for minimizing the angle between successive
+    * segments of the body path
+    */
+   public static final DoubleStoredPropertyKey smootherSmoothnessWeight = keys.addDoubleKey("Smoother smoothness weight");
+   /**
+    * Discount applied to the smoothness gradients of turn points.
+    */
+   public static final DoubleStoredPropertyKey smootherTurnPointSmoothnessDiscount = keys.addDoubleKey("Smoother turn point smoothness discount");
+   /**
+    * Min curvature in degrees to penalize with a gradient.
+    */
+   public static final DoubleStoredPropertyKey smootherMinCurvatureToPenalize = keys.addDoubleKey("Smoother min curvature to penalize");
+   /**
+    * Weight placed on the gradient for making the vertices of the body path plan an
+    * equal distance apart.
+    */
+   public static final DoubleStoredPropertyKey smootherEqualSpacingWeight = keys.addDoubleKey("Smoother equal spacing weight");
+   /**
+    * Weight placed on the gradient for minimizing the roll cost of the body path plan
+    */
+   public static final DoubleStoredPropertyKey smootherRollWeight = keys.addDoubleKey("Smoother roll weight");
+   /**
+    * Weight placed on a gradient that drives the waypoint towards the initial value
+    */
+   public static final DoubleStoredPropertyKey smootherDisplacementWeight = keys.addDoubleKey("Smoother displacement weight");
+   /**
+    * Weight placed on the gradient for maximizing the traversibility of the body path
+    * plan.
+    */
+   public static final DoubleStoredPropertyKey smootherTraversibilityWeight = keys.addDoubleKey("Smoother traversibility weight");
+   /**
+    * Weight placed on the gradient pushing the body path plan towards the most cells
+    * in the ground plane.
+    */
+   public static final DoubleStoredPropertyKey smootherGroundPlaneWeight = keys.addDoubleKey("Smoother ground plane weight");
+   /**
+    * Traversibility threshold that results in a zero gradient for traversibility
+    */
+   public static final DoubleStoredPropertyKey smootherMinimumTraversibilityToSearchFor = keys.addDoubleKey("Smoother minimum traversibility to search for");
+   /**
+    * Traversibility threshold above which the traversibility gradient begins to carry
+    * less weight.
+    */
+   public static final DoubleStoredPropertyKey smootherTraversibilityThresholdForNoDiscount = keys.addDoubleKey("Smoother traversibility threshold for no discount");
+   /**
+    * Gain applied to the smoother gradient for iterative modifications
+    */
+   public static final DoubleStoredPropertyKey smootherHillClimbGain = keys.addDoubleKey("Smoother hill climb gain");
+   /**
+    * Minimum gradient vector magnitude to terminate the smoother iterations
+    */
+   public static final DoubleStoredPropertyKey smootherGradientThresholdToTerminate = keys.addDoubleKey("Smoother gradient threshold to terminate");
 
    /**
     * Loads this property set.

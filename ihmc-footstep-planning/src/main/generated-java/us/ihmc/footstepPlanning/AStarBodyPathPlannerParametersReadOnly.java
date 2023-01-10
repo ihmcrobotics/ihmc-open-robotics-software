@@ -263,4 +263,113 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
    {
       return get(traversibilityNonGroundDiscountWhenWalkingOnGround);
    }
+
+   /**
+    * Weight placed on the gradient for avoiding collisions
+    */
+   default double getSmootherCollisionWeight()
+   {
+      return get(smootherCollisionWeight);
+   }
+
+   /**
+    * Weight placed on the gradient for minimizing the angle between successive
+    * segments of the body path
+    */
+   default double getSmootherSmoothnessWeight()
+   {
+      return get(smootherSmoothnessWeight);
+   }
+
+   /**
+    * Discount applied to the smoothness gradients of turn points.
+    */
+   default double getSmootherTurnPointSmoothnessDiscount()
+   {
+      return get(smootherTurnPointSmoothnessDiscount);
+   }
+
+   /**
+    * Min curvature in degrees to penalize with a gradient.
+    */
+   default double getSmootherMinCurvatureToPenalize()
+   {
+      return get(smootherMinCurvatureToPenalize);
+   }
+
+   /**
+    * Weight placed on the gradient for making the vertices of the body path plan an
+    * equal distance apart.
+    */
+   default double getSmootherEqualSpacingWeight()
+   {
+      return get(smootherEqualSpacingWeight);
+   }
+
+   /**
+    * Weight placed on the gradient for minimizing the roll cost of the body path plan
+    */
+   default double getSmootherRollWeight()
+   {
+      return get(smootherRollWeight);
+   }
+
+   /**
+    * Weight placed on a gradient that drives the waypoint towards the initial value
+    */
+   default double getSmootherDisplacementWeight()
+   {
+      return get(smootherDisplacementWeight);
+   }
+
+   /**
+    * Weight placed on the gradient for maximizing the traversibility of the body path
+    * plan.
+    */
+   default double getSmootherTraversibilityWeight()
+   {
+      return get(smootherTraversibilityWeight);
+   }
+
+   /**
+    * Weight placed on the gradient pushing the body path plan towards the most cells
+    * in the ground plane.
+    */
+   default double getSmootherGroundPlaneWeight()
+   {
+      return get(smootherGroundPlaneWeight);
+   }
+
+   /**
+    * Traversibility threshold that results in a zero gradient for traversibility
+    */
+   default double getSmootherMinimumTraversibilityToSearchFor()
+   {
+      return get(smootherMinimumTraversibilityToSearchFor);
+   }
+
+   /**
+    * Traversibility threshold above which the traversibility gradient begins to carry
+    * less weight.
+    */
+   default double getSmootherTraversibilityThresholdForNoDiscount()
+   {
+      return get(smootherTraversibilityThresholdForNoDiscount);
+   }
+
+   /**
+    * Gain applied to the smoother gradient for iterative modifications
+    */
+   default double getSmootherHillClimbGain()
+   {
+      return get(smootherHillClimbGain);
+   }
+
+   /**
+    * Minimum gradient vector magnitude to terminate the smoother iterations
+    */
+   default double getSmootherGradientThresholdToTerminate()
+   {
+      return get(smootherGradientThresholdToTerminate);
+   }
 }

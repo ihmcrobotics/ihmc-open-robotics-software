@@ -140,7 +140,7 @@ public class AStarBodyPathSmootherWaypoint
       nominalStepFrames = new SideDependentList<>(side -> ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(
             side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex,
             waypointFrame,
-            new Vector3D(0.0, side.negateIfRightSide(halfStanceWidthTraversibility), 0.0)));
+            new Vector3D(0.0, side.negateIfRightSide(plannerParameters.getHalfStanceWidth()), 0.0)));
 
       yoSmoothnessGradient = new YoFrameVector3D("smoothGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       yoEqualSpacingGradient = new YoFrameVector3D("spacingGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
@@ -477,7 +477,7 @@ public class AStarBodyPathSmootherWaypoint
 
       if (numCollisions > 0)
       {
-         gradient.scale(collisionWeight / numCollisions);
+         gradient.scale(plannerParameters.getSmootherCollisionWeight() / numCollisions);
       }
 
       if (visualize)
@@ -513,8 +513,10 @@ public class AStarBodyPathSmootherWaypoint
          double incline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
          elevationIncline.set(incline);
 
+         // TODO remove hidden parameters
          double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
-         rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
+         rollDelta.set(plannerParameters.getSmootherRollWeight() * inclineClipped * tempVector.getX(),
+                       plannerParameters.getSmootherRollWeight() * inclineClipped * tempVector.getY());
 
          sampledLSNormalHeight.set(leastSquaresSurfaceNormalCalculator.getSampledHeight(key));
       }
@@ -535,7 +537,7 @@ public class AStarBodyPathSmootherWaypoint
       tempVector.changeFrame(waypointFrame);
       tempVector.setX(0.0);
       tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-      tempVector.scale(displacementWeight);
+      tempVector.scale(plannerParameters.getSmootherDisplacementWeight());
       yoDisplacementGradient.set(tempVector);
 
       return tempVector;
@@ -560,7 +562,7 @@ public class AStarBodyPathSmootherWaypoint
          YoFrameVector3D sidedTraversibility = yoSidedTraversibility.get(side);
          sidedTraversibility.setToZero();
 
-         double localTraversibilityThreshold = traversibilityThreshold;
+         double localTraversibilityThreshold = plannerParameters.getSmootherMinimumTraversibilityToSearchFor();
 
          double currentTraversibility = traversibilitySampleNominal.get(side).getValue();
          double previousTraversibility0 = getNeighbor(waypointIndex - 1).traversibilitySampleNominal.get(side).getValue();
@@ -580,7 +582,7 @@ public class AStarBodyPathSmootherWaypoint
                                 .set(computeTraversibility(side, -1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
 
          double alpha = EuclidCoreTools.clamp(
-               (localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - traversibilityThresholdForNoDiscount), 0.0, 1.0);
+               (localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - plannerParameters.getSmootherTraversibilityThresholdForNoDiscount()), 0.0, 1.0);
          tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
          tempVector.scale(alpha * (traversibilitySamplePos.get(side).getValue() - traversibilitySampleNeg.get(side).getValue()));
          tempVector.changeFrame(ReferenceFrame.getWorldFrame());
@@ -589,7 +591,7 @@ public class AStarBodyPathSmootherWaypoint
          yoTraversibilityGradient.add(tempVector);
       }
 
-      yoTraversibilityGradient.scale(traversibilityWeight);
+      yoTraversibilityGradient.scale(plannerParameters.getSmootherTraversibilityWeight());
       return yoTraversibilityGradient;
    }
 
@@ -650,7 +652,7 @@ public class AStarBodyPathSmootherWaypoint
       tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
       tempVector.changeFrame(ReferenceFrame.getWorldFrame());
       yoGroundPlaneGradient.set(tempVector);
-      yoGroundPlaneGradient.scale(groundPlaneCellCountDelta * flatGroundWeight);
+      yoGroundPlaneGradient.scale(groundPlaneCellCountDelta * plannerParameters.getSmootherGroundPlaneWeight());
 
       return yoGroundPlaneGradient;
    }

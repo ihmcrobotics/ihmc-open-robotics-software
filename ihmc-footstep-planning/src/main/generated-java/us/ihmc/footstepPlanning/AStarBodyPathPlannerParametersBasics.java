@@ -261,4 +261,113 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
    {
       set(AStarBodyPathPlannerParameters.traversibilityNonGroundDiscountWhenWalkingOnGround, traversibilityNonGroundDiscountWhenWalkingOnGround);
    }
+
+   /**
+    * Weight placed on the gradient for avoiding collisions
+    */
+   default void setSmootherCollisionWeight(double smootherCollisionWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherCollisionWeight, smootherCollisionWeight);
+   }
+
+   /**
+    * Weight placed on the gradient for minimizing the angle between successive
+    * segments of the body path
+    */
+   default void setSmootherSmoothnessWeight(double smootherSmoothnessWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherSmoothnessWeight, smootherSmoothnessWeight);
+   }
+
+   /**
+    * Discount applied to the smoothness gradients of turn points.
+    */
+   default void setSmootherTurnPointSmoothnessDiscount(double smootherTurnPointSmoothnessDiscount)
+   {
+      set(AStarBodyPathPlannerParameters.smootherTurnPointSmoothnessDiscount, smootherTurnPointSmoothnessDiscount);
+   }
+
+   /**
+    * Min curvature in degrees to penalize with a gradient.
+    */
+   default void setSmootherMinCurvatureToPenalize(double smootherMinCurvatureToPenalize)
+   {
+      set(AStarBodyPathPlannerParameters.smootherMinCurvatureToPenalize, smootherMinCurvatureToPenalize);
+   }
+
+   /**
+    * Weight placed on the gradient for making the vertices of the body path plan an
+    * equal distance apart.
+    */
+   default void setSmootherEqualSpacingWeight(double smootherEqualSpacingWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherEqualSpacingWeight, smootherEqualSpacingWeight);
+   }
+
+   /**
+    * Weight placed on the gradient for minimizing the roll cost of the body path plan
+    */
+   default void setSmootherRollWeight(double smootherRollWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherRollWeight, smootherRollWeight);
+   }
+
+   /**
+    * Weight placed on a gradient that drives the waypoint towards the initial value
+    */
+   default void setSmootherDisplacementWeight(double smootherDisplacementWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherDisplacementWeight, smootherDisplacementWeight);
+   }
+
+   /**
+    * Weight placed on the gradient for maximizing the traversibility of the body path
+    * plan.
+    */
+   default void setSmootherTraversibilityWeight(double smootherTraversibilityWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherTraversibilityWeight, smootherTraversibilityWeight);
+   }
+
+   /**
+    * Weight placed on the gradient pushing the body path plan towards the most cells
+    * in the ground plane.
+    */
+   default void setSmootherGroundPlaneWeight(double smootherGroundPlaneWeight)
+   {
+      set(AStarBodyPathPlannerParameters.smootherGroundPlaneWeight, smootherGroundPlaneWeight);
+   }
+
+   /**
+    * Traversibility threshold that results in a zero gradient for traversibility
+    */
+   default void setSmootherMinimumTraversibilityToSearchFor(double smootherMinimumTraversibilityToSearchFor)
+   {
+      set(AStarBodyPathPlannerParameters.smootherMinimumTraversibilityToSearchFor, smootherMinimumTraversibilityToSearchFor);
+   }
+
+   /**
+    * Traversibility threshold above which the traversibility gradient begins to carry
+    * less weight.
+    */
+   default void setSmootherTraversibilityThresholdForNoDiscount(double smootherTraversibilityThresholdForNoDiscount)
+   {
+      set(AStarBodyPathPlannerParameters.smootherTraversibilityThresholdForNoDiscount, smootherTraversibilityThresholdForNoDiscount);
+   }
+
+   /**
+    * Gain applied to the smoother gradient for iterative modifications
+    */
+   default void setSmootherHillClimbGain(double smootherHillClimbGain)
+   {
+      set(AStarBodyPathPlannerParameters.smootherHillClimbGain, smootherHillClimbGain);
+   }
+
+   /**
+    * Minimum gradient vector magnitude to terminate the smoother iterations
+    */
+   default void setSmootherGradientThresholdToTerminate(double smootherGradientThresholdToTerminate)
+   {
+      set(AStarBodyPathPlannerParameters.smootherGradientThresholdToTerminate, smootherGradientThresholdToTerminate);
+   }
 }
