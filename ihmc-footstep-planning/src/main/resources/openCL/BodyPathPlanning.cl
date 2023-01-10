@@ -1592,8 +1592,6 @@ void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
         return;
 
     int isTurnPoint = waypont_turn_points[waypoint_key] == 1;
-    if (isTurnPoint)
-        printf("key point %d is a turn point\n", waypoint_key);
 
     float x0 = waypoint_xyzYaw[4 * (waypoint_key - 1)];
     float y0 = waypoint_xyzYaw[4 * (waypoint_key - 1) + 1];

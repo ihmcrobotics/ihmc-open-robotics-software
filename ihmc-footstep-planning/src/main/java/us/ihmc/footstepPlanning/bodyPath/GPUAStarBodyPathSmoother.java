@@ -8,6 +8,7 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -232,15 +233,16 @@ public class GPUAStarBodyPathSmoother
    public void resizeOpenCLObjects(int cellsPerSide)
    {
       int totalCells = cellsPerSide * cellsPerSide;
+      int cellsWithYaw = yawDiscretizations * totalCells;
       collisionGradientsMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
       maxCollisionsMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
       leftTraversibilitiesMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
       rightTraversibilitiesMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      leftTraversibilitiesForGradientMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
-      rightTraversibilitiesForGradientMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
-      leftGroundPlaneCellsMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      rightGroundPlaneCellsMapBuffer.resize(yawDiscretizations * totalCells, openCLManager);
-      groundPlaneGradientMapBuffer.resize(2 * yawDiscretizations * totalCells, openCLManager);
+      leftTraversibilitiesForGradientMapBuffer.resize(2 * cellsWithYaw, openCLManager);
+      rightTraversibilitiesForGradientMapBuffer.resize(2 * cellsWithYaw, openCLManager);
+      leftGroundPlaneCellsMapBuffer.resize(cellsWithYaw, openCLManager);
+      rightGroundPlaneCellsMapBuffer.resize(cellsWithYaw, openCLManager);
+      groundPlaneGradientMapBuffer.resize(2 * cellsWithYaw, openCLManager);
    }
 
    private void resizeForWayponts(int waypoints)
@@ -391,7 +393,7 @@ public class GPUAStarBodyPathSmoother
                gradientMagnitudeSq += EuclidCoreTools.normSquared(gradients[i].getX(), gradients[i].getY());
             }
 
-            if (gradientMagnitudeSq < plannerParameters.getSmootherGradientThresholdToTerminate() && iteration.getValue() > minIterations)
+            if (gradientMagnitudeSq < MathTools.square(plannerParameters.getSmootherGradientThresholdToTerminate()) && iteration.getValue() > minIterations)
             {
                break;
             }
@@ -618,8 +620,7 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 6, rightGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeGroundPlaneGradientKernel, 7, groundPlaneGradientMapBuffer.getOpenCLBufferObject());
 
-      int totalCells = cellsPerSide * cellsPerSide;
-      openCLManager.execute2D(computeGroundPlaneGradientKernel, totalCells, yawDiscretizations);
+      openCLManager.execute3D(computeGroundPlaneGradientKernel, cellsPerSide, cellsPerSide, yawDiscretizations);
 
       openCLManager.finish();
    }
@@ -683,7 +684,7 @@ public class GPUAStarBodyPathSmoother
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 8, waypointTravesibilityValues.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 9, leftGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 10, rightGroundPlaneCellsMapBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 11, waypointGroundPlaneGradients.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 11, groundPlaneGradientMapBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 12, waypointMaxCollisions.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 13, waypointCollisionGradients.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeWaypointMapGradientsKernel, 14, waypointTraversibilitySamples.getOpenCLBufferObject());
