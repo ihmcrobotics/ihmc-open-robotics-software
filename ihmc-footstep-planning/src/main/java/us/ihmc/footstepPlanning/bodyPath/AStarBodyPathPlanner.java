@@ -105,6 +105,7 @@ public class AStarBodyPathPlanner
 
    /* Parameters to extract */
    static final double groundClearance = 0.3;
+   static final double snapHeightThreshold = 0.08;
    static final double snapRadius = 0.15;
    static final double boxSizeY = 1.2;
    static final double boxSizeX = 0.35;
@@ -469,9 +470,9 @@ public class AStarBodyPathPlanner
          }
 
          rollMap.put(neighbor, roll.getValue());
-         double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
-         double rollDeadband = Math.toRadians(1.5);
-         double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - rollDeadband);
+         double maxAngle = Math.toRadians(plannerParameters.getMaxPenalizedRollAngle() - plannerParameters.getRollCostDeadband());
+         double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / maxAngle, 0.0, 1.0);
+         double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - Math.toRadians(plannerParameters.getRollCostDeadband()));
          rollCost.set(plannerParameters.getRollCostWeight() * inclineScale * rollAngleDeadbanded);
          edgeCost.add(rollCost);
       }
@@ -640,8 +641,7 @@ public class AStarBodyPathPlanner
       }
 
       double maxHeight = heights.max();
-      double heightSampleDelta = 0.08;
-      double minHeight = maxHeight - heightSampleDelta;
+      double minHeight = maxHeight - snapHeightThreshold;
 
       double runningSum = 0.0;
       int numberOfSamples = 0;

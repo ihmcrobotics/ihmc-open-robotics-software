@@ -1,6 +1,8 @@
 {
   "title" : "AStarBodyPathPlannerParameters",
   "Roll cost weight" : 1.5,
+  "Roll cost deadband" : 1.5,
+  "Max penalized roll angle" : 7.0,
   "Incline cost weight" : 0.0,
   "Incline cost deadband" : 0.05,
   "Max incline" : 0.96,

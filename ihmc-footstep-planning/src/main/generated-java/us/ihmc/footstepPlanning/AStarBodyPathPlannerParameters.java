@@ -23,6 +23,8 @@ public class AStarBodyPathPlannerParameters extends StoredPropertySet implements
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey rollCostWeight = keys.addDoubleKey("Roll cost weight");
+   public static final DoubleStoredPropertyKey rollCostDeadband = keys.addDoubleKey("Roll cost deadband");
+   public static final DoubleStoredPropertyKey maxPenalizedRollAngle = keys.addDoubleKey("Max penalized roll angle");
    public static final DoubleStoredPropertyKey inclineCostWeight = keys.addDoubleKey("Incline cost weight");
    public static final DoubleStoredPropertyKey inclineCostDeadband = keys.addDoubleKey("Incline cost deadband");
    public static final DoubleStoredPropertyKey maxIncline = keys.addDoubleKey("Max incline");

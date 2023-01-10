@@ -69,7 +69,7 @@ public class GPUAStarBodyPathSmoother
    private _cl_kernel getWaypointCurrentTraversibilityKernel;
    private _cl_kernel computeWaypointMapGradientsKernel;
 
-   private final OpenCLFloatBuffer smoothingParametersBuffer = new OpenCLFloatBuffer(11);
+   private final OpenCLFloatBuffer smoothingParametersBuffer = new OpenCLFloatBuffer(15);
    private final OpenCLFloatBuffer traversibilityOffsetsForGradientBuffer = new OpenCLFloatBuffer(1);
    private final OpenCLFloatBuffer traversibilityOffsetsForNominalBuffer = new OpenCLFloatBuffer(1);
    private final OpenCLIntBuffer offsetsForGroundPlaneGradientBuffer = new OpenCLIntBuffer(1);
@@ -436,6 +436,10 @@ public class GPUAStarBodyPathSmoother
       floatPointer.put(8, (float) collisionWeight);
       floatPointer.put(9, (float) yawDiscretizations);
       floatPointer.put(10, (float) flatGroundWeight);
+      floatPointer.put(11, (float) AStarBodyPathSmootherWaypoint.traversibilitySmoothingHeightDeadband);
+      floatPointer.put(12, (float) turnPointSmoothnessDiscount);
+      floatPointer.put(13, (float) traversibilityThreshold);
+      floatPointer.put(14, (float) traversibilityThresholdForNoDiscount);
    }
 
    private void computeCollisionsGradient(OpenCLFloatBuffer heightMapParamsBuffer,
@@ -695,37 +699,6 @@ public class GPUAStarBodyPathSmoother
    {
       gradientToSet.setX(waypointSmoothnessGradients.getBackingDirectFloatBuffer().get(2 * waypointIndex));
       gradientToSet.setY(waypointSmoothnessGradients.getBackingDirectFloatBuffer().get(2 * waypointIndex + 1));
-
-      boolean isTurnPoint = waypoints[waypointIndex].isTurnPoint();
-
-      double x0 = waypoints[waypointIndex - 1].getPosition().getX();
-      double y0 = waypoints[waypointIndex - 1].getPosition().getY();
-      double x1 = waypoints[waypointIndex].getPosition().getX();
-      double y1 = waypoints[waypointIndex].getPosition().getY();
-      double x2 = waypoints[waypointIndex + 1].getPosition().getX();
-      double y2 = waypoints[waypointIndex + 1].getPosition().getY();
-
-      /* Equal spacing gradient */
-      double spacingGradientX = -4.0 * AStarBodyPathSmoother.equalSpacingWeight * (x2 - 2.0 * x1 + x0);
-      double spacingGradientY = -4.0 * AStarBodyPathSmoother.equalSpacingWeight * (y2 - 2.0 * y1 + y0);
-      double alphaTurnPoint = isTurnPoint ? 0.1 : 1.0;
-      Vector2D gradientExpected = new Vector2D();
-      gradientExpected.setX(alphaTurnPoint * spacingGradientX);
-      gradientExpected.setY(alphaTurnPoint * spacingGradientY);
-
-      /* Smoothness gradient */
-      double smoothnessGradientX, smoothnessGradientY;
-      if (!isTurnPoint)
-      {
-         double exp = 1.5;
-         double f0 = Math.pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, minCurvatureToPenalize), exp);
-         double fPdx = Math.pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradientEpsilon, y1, x2, y2, minCurvatureToPenalize), exp);
-         double fPdy = Math.pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradientEpsilon, x2, y2, minCurvatureToPenalize), exp);
-         smoothnessGradientX = smoothnessWeight * (fPdx - f0) / gradientEpsilon;
-         smoothnessGradientY = smoothnessWeight * (fPdy - f0) / gradientEpsilon;
-         gradientExpected.addX(smoothnessGradientX);
-         gradientExpected.addY(smoothnessGradientY);
-      }
    }
 
    private static double computeDeltaHeadingMagnitude(double x0, double y0, double x1, double y1, double x2, double y2, double deadband)

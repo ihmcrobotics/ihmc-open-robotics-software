@@ -13,6 +13,16 @@ public interface AStarBodyPathPlannerParametersBasics extends AStarBodyPathPlann
       set(AStarBodyPathPlannerParameters.rollCostWeight, rollCostWeight);
    }
 
+   default void setRollCostDeadband(double rollCostDeadband)
+   {
+      set(AStarBodyPathPlannerParameters.rollCostDeadband, rollCostDeadband);
+   }
+
+   default void setMaxPenalizedRollAngle(double maxPenalizedRollAngle)
+   {
+      set(AStarBodyPathPlannerParameters.maxPenalizedRollAngle, maxPenalizedRollAngle);
+   }
+
    default void setInclineCostWeight(double inclineCostWeight)
    {
       set(AStarBodyPathPlannerParameters.inclineCostWeight, inclineCostWeight);
