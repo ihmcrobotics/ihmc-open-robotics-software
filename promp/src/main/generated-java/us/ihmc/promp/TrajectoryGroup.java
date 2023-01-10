@@ -88,4 +88,10 @@ public class TrajectoryGroup extends Pointer {
          * \brief	return the vector of trajectories
          */
         public native @Const @ByRef TrajectoryVector trajectories();
+
+        /**
+         * \brief	return the mean end value of the trajectory
+         * @param dof of the trajectory of interest
+         */
+        public native double get_mean_end_value(int dof);
     }
