@@ -1,6 +1,5 @@
 package us.ihmc.rdx.perception;
 
-import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
@@ -10,8 +9,11 @@ import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_videoio.VideoCapture;
 import org.bytedeco.opencv.opencv_videoio.VideoWriter;
+import perception_msgs.msg.dds.BigVideoPacket;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -19,22 +21,15 @@ import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoTools;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.Throttler;
 
 import java.io.File;
 
-import static org.bytedeco.opencv.global.opencv_calib3d.*;
-import static org.bytedeco.opencv.global.opencv_core.*;
-
 public class RDXCameraCalibrationDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
-                                                  "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources");
+   private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
    private VideoCapture videoCapture;
    private int imageHeight = 1080;
@@ -58,46 +53,46 @@ public class RDXCameraCalibrationDemo
 
    private final Object measurementSyncObject = new Object();
 
+   private Point2fVectorVector imagePoints = new Point2fVectorVector();
+   private Mat cameraMatrix;
+   private Mat distortionCoefficients = new Mat();
+   private MatVector rvecs = new MatVector();
+   private MatVector tvecs = new MatVector();
+   private FloatVector reprojectionErrors = new FloatVector();
+   private double totalAvgError;
+   private Mat newObjectPoints;
+   private float gridWidth;
+   private boolean releaseObject;
+   private Size imageSize;
+   private Size boardSize = new Size(9, 6);
+   private int squareSize = 13;
 
+   enum CalibrationPattern
+   {
+      NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID
+   }
 
+   private CalibrationPattern calibrationPattern = CalibrationPattern.CHESSBOARD;
+   private Point3fVectorVector objectPoints;
 
-
-   Point2fVectorVector imagePoints = new Point2fVectorVector();
-   Mat cameraMatrix;
-   Mat distortionCoefficients = new Mat();
-   MatVector rvecs = new MatVector();
-   MatVector tvecs = new MatVector();
-   FloatVector reprojectionErrors = new FloatVector();
-   double totalAvgError;
-   Mat newObjectPoints;
-   float gridWidth;
-   boolean releaseObject;
-   Size imageSize;
-   Size boardSize = new Size(9,6);
-   int squareSize = 13;
-   enum CalibrationPattern {NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID}
-   CalibrationPattern calibrationPattern = CalibrationPattern.CHESSBOARD;
-   Point3fVectorVector objectPoints;
-
-   Size patternSize = new Size(9, 6); //width, height
-   Mat matOfCorners = new Mat();
-   Point2fVector tempPoint2fVector = new Point2fVector();
-   Mat tempMat = new Mat();
-   RDXCVImagePanel undistortedVideoPanel;
-   RDXCVImagePanel testImagePanel;
-   Mat imageAtIndex = null;
-   MatVector images = new MatVector();
-   boolean firstRun = true;
-   Mat newCameraMatrix = new Mat();
-   String calibrationPhotoDirectory= "ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/configurations/cameraCalibrationPhotos/";
-   File dir;
-   int currentNumberOfImagesInDirectory = 0;
-   ImBoolean takingPhotosIsActive = new ImBoolean(false);
-   Size winSize = new Size(11, 11); //Half of search window for cornerSubPix
-   Size zeroZone = new Size(-1, -1);
-   TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 30, 0.0001);
-   Throttler throttler = new Throttler();
-
+   private Size patternSize = new Size(9, 6); //width, height
+   private Mat matOfCorners = new Mat();
+   private Point2fVector tempPoint2fVector = new Point2fVector();
+   private Mat tempMat = new Mat();
+   private RDXCVImagePanel undistortedVideoPanel;
+   private RDXCVImagePanel testImagePanel;
+   private Mat imageAtIndex = null;
+   private MatVector images = new MatVector();
+   private boolean firstRun = true;
+   private Mat newCameraMatrix = new Mat();
+   private String calibrationPhotoDirectory = "ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/configurations/cameraCalibrationPhotos/";
+   private File dir;
+   private int currentNumberOfImagesInDirectory = 0;
+   private ImBoolean takingPhotosIsActive = new ImBoolean(false);
+   private Size winSize = new Size(11, 11); //Half of search window for cornerSubPix
+   private Size zeroZone = new Size(-1, -1);
+   private TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 30, 0.0001);
+   private Throttler throttler = new Throttler();
 
    public RDXCameraCalibrationDemo()
    {
@@ -140,8 +135,8 @@ public class RDXCameraCalibrationDemo
                   videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
                   videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
                   videoCapture.set(opencv_videoio.CAP_PROP_FPS, requestedFPS);
-                  //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
-                  //                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 720.0);
+                  // videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
+                  // videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 720.0);
 
                   imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
                   imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
@@ -163,58 +158,55 @@ public class RDXCameraCalibrationDemo
                   compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
                   ThreadTools.startAsDaemon(() ->
-                                            {
-                                               while (true)
-                                               {
-                                                  // If encoding is running slower than reading, we want to wait a little so the read
-                                                  // is freshest going into the encode and publish. We do this because we don't want
-                                                  // to there to be more than one publish thread going
-                                                  boolean shouldSleep;
-                                                  double sleepTime;
-                                                  synchronized (measurementSyncObject)
-                                                  {
-                                                     double averageThreadTwoDuration = threadTwoDuration.averageLap();
-                                                     double averageThreadOneDuration = threadOneDuration.averageLap();
-                                                     shouldSleep = !Double.isNaN(averageThreadTwoDuration) && !Double.isNaN(averageThreadOneDuration)
-                                                                   && averageThreadTwoDuration > averageThreadOneDuration;
-                                                     sleepTime = averageThreadTwoDuration - averageThreadOneDuration;
+                  {
+                     while (true)
+                     {
+                        // If encoding is running slower than reading, we want to wait a little so the read
+                        // is freshest going into the encode and publish. We do this because we don't want
+                        // to there to be more than one publish thread going
+                        boolean shouldSleep;
+                        double sleepTime;
+                        synchronized (measurementSyncObject)
+                        {
+                           double averageThreadTwoDuration = threadTwoDuration.averageLap();
+                           double averageThreadOneDuration = threadOneDuration.averageLap();
+                           shouldSleep = !Double.isNaN(averageThreadTwoDuration) && !Double.isNaN(averageThreadOneDuration)
+                                         && averageThreadTwoDuration > averageThreadOneDuration;
+                           sleepTime = averageThreadTwoDuration - averageThreadOneDuration;
 
-                                                     if (Double.isNaN(threadOneDuration.lap()))
-                                                        threadOneDuration.reset();
-                                                  }
+                           if (Double.isNaN(threadOneDuration.lap()))
+                              threadOneDuration.reset();
+                        }
 
-                                                  if (shouldSleep)
-                                                     ThreadTools.sleepSeconds(sleepTime);
+                        if (shouldSleep)
+                           ThreadTools.sleepSeconds(sleepTime);
 
-                                                  readDurationPlot.start();
-                                                  boolean imageWasRead = videoCapture.read(bgrImage);
-                                                  readDurationPlot.stop();
-                                                  readFrequencyPlot.ping();
+                        readDurationPlot.start();
+                        boolean imageWasRead = videoCapture.read(bgrImage);
+                        readDurationPlot.stop();
+                        readFrequencyPlot.ping();
 
-                                                  if (!imageWasRead)
-                                                  {
-                                                     LogTools.error("Image was not read!");
-                                                  }
+                        if (!imageWasRead)
+                        {
+                           LogTools.error("Image was not read!");
+                        }
 
-                                                  // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
+                        // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
 
-                                                  swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-                                                                                                                      {
-                                                                                                                         data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                                                                                                                         opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-                                                                                                                      });
+                        swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
+                        {
+                           data.updateOnImageUpdateThread(imageWidth, imageHeight);
+                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+                        });
 
-                                                  opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
+                        opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
 
-                                                  synchronized (measurementSyncObject)
-                                                  {
-                                                     threadOneDuration.suspend();
-                                                  }
-
-                                               }
-                                            }, "CameraRead");
-
-
+                        synchronized (measurementSyncObject)
+                        {
+                           threadOneDuration.suspend();
+                        }
+                     }
+                  }, "CameraRead");
 
                   dir = new File(calibrationPhotoDirectory);
                   File[] directoryListing = dir.listFiles();
@@ -234,51 +226,32 @@ public class RDXCameraCalibrationDemo
                   currentNumberOfImagesInDirectory = (int) images.size();
                }
 
-
-
-
                //Calibration Code
                swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
                {
                   if (cameraMatrix != null)
                   {
-                     newCameraMatrix = getOptimalNewCameraMatrix(cameraMatrix,
-                                                                 distortionCoefficients,
-                                                                 imageSize,
-                                                                 1.0);
+                     newCameraMatrix = opencv_calib3d.getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1.0);
 
                      data.getBytedecoImage().getBytedecoOpenCVMat().copyTo(tempMat);
-                     undistort(tempMat,
-                               undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
-                               cameraMatrix,
-                               distortionCoefficients,
-                               newCameraMatrix);
-
-
+                     opencv_calib3d.undistort(tempMat,
+                                              undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
+                                              cameraMatrix,
+                                              distortionCoefficients,
+                                              newCameraMatrix);
                   }
 
-
-                  if (takingPhotosIsActive.get() == true && throttler.run(0.5))
+                  if (takingPhotosIsActive.get() && throttler.run(0.5))
                   {
 
-                     opencv_imgproc.cvtColor(data.getBytedecoImage().getBytedecoOpenCVMat(),
-                                             tempMat,
-                                             opencv_imgproc.COLOR_BGR2RGB);
-                     opencv_imgcodecs.imwrite(
-                           calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg", tempMat);
+                     opencv_imgproc.cvtColor(data.getBytedecoImage().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
+                     opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg",
+                                              tempMat);
                      currentNumberOfImagesInDirectory++;
                   }
                });
 
-
-
-
-
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-                                                                                    {
-                                                                                       data.updateOnUIThread(swapCVPanel.getVideoPanel());
-                                                                                    });
-
+               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data -> data.updateOnUIThread(swapCVPanel.getVideoPanel()));
             }
 
             testImagePanel.draw();
@@ -287,7 +260,6 @@ public class RDXCameraCalibrationDemo
             baseUI.renderEnd();
          }
       });
-
    }
 
    private void renderImGuiWidgets()
@@ -305,7 +277,7 @@ public class RDXCameraCalibrationDemo
          compressedBytesPlot.renderImGuiWidgets();
       }
       ImGui.text(("There are currently {} photos" + currentNumberOfImagesInDirectory));
-      if(ImGui.checkbox("Record photos for calibration", takingPhotosIsActive))
+      if (ImGui.checkbox("Record photos for calibration", takingPhotosIsActive))
       {
 
       }
@@ -331,15 +303,12 @@ public class RDXCameraCalibrationDemo
             LogTools.info("There are {} many photos", images.size());
             //numOfImagesInDirectory = (int) images.size();
 
-
-            if (data != null && data.getBytedecoImage() != null
-                && data.getBytedecoImage().getBytedecoOpenCVMat() != null)
+            if (data != null && data.getBytedecoImage() != null && data.getBytedecoImage().getBytedecoOpenCVMat() != null)
             {
 
                data.getBytedecoImage().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
 
                undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat().copyTo(tempMat);
-
 
                gridWidth = (float) squareSize * (boardSize.width() - 1);
 
@@ -347,13 +316,16 @@ public class RDXCameraCalibrationDemo
                {
 
                   imageAtIndex = images.get(imageIndex);
-                  if(imageAtIndex.channels()==3)
+                  if (imageAtIndex.channels() == 3)
                   {
                      opencv_imgproc.cvtColor(imageAtIndex, imageAtIndex, opencv_imgproc.COLOR_BGR2GRAY);
                   }
                   imageSize = imageAtIndex.size(); //VIDEO OR IMAGE size???
 
-                  boolean found = findChessboardCorners(imageAtIndex, patternSize, matOfCorners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+                  boolean found = opencv_calib3d.findChessboardCorners(imageAtIndex,
+                                                                       patternSize,
+                                                                       matOfCorners,
+                                                                       opencv_calib3d.CALIB_CB_ADAPTIVE_THRESH | opencv_calib3d.CALIB_CB_NORMALIZE_IMAGE);
 
                   if (found == true)
                   {
@@ -383,14 +355,16 @@ public class RDXCameraCalibrationDemo
                {
                   imageAtIndex = images.get(20);
 
-                  boolean found = findChessboardCorners(imageAtIndex, patternSize, matOfCorners, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+                  boolean found = opencv_calib3d.findChessboardCorners(imageAtIndex,
+                                                                       patternSize,
+                                                                       matOfCorners,
+                                                                       opencv_calib3d.CALIB_CB_ADAPTIVE_THRESH | opencv_calib3d.CALIB_CB_NORMALIZE_IMAGE);
                   if (found)
                   {
-                     drawChessboardCorners(imageAtIndex, patternSize, matOfCorners, found);
+                     opencv_calib3d.drawChessboardCorners(imageAtIndex, patternSize, matOfCorners, found);
                      opencv_imgproc.cvtColor(imageAtIndex, testImagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_GRAY2RGBA);
                   }
                }
-
             }
          });
       }
@@ -428,54 +402,56 @@ public class RDXCameraCalibrationDemo
       //cornersOfPattern.clear();
       objectPoints.get(0).clear();
 
-      switch(calibrationPattern)
+      switch (calibrationPattern)
       {
          case CHESSBOARD:
          case CIRCLES_GRID:
-            for(int y = 0; y<boardSize.height(); y++)
+            for (int y = 0; y < boardSize.height(); y++)
             {
-               for(int x = 0; x<boardSize.width();x++)
+               for (int x = 0; x < boardSize.width(); x++)
                {
-                  objectPoints.get(0).push_back(new Point3f(x*squareSize, y*squareSize, 0));
+                  objectPoints.get(0).push_back(new Point3f(x * squareSize, y * squareSize, 0));
                }
             }
             break;
          case ASYMMETRIC_CIRCLES_GRID:
-            for(int y = 0; y<boardSize.height(); y++)
+            for (int y = 0; y < boardSize.height(); y++)
             {
-               for(int x = 0; x<boardSize.width();x++)
+               for (int x = 0; x < boardSize.width(); x++)
                {
-                  objectPoints.get(0).push_back(new Point3f((2*x+y%2)*squareSize, y*squareSize, 0));
+                  objectPoints.get(0).push_back(new Point3f((2 * x + y % 2) * squareSize, y * squareSize, 0));
                }
             }
       }
-
-
    }
 
    private boolean runCalibration()
    {
       cameraMatrix = Mat.eye(3, 3, opencv_core.CV_64F).asMat();
 
-      distortionCoefficients = Mat.zeros(8,1,opencv_core.CV_64F).asMat();
+      distortionCoefficients = Mat.zeros(8, 1, opencv_core.CV_64F).asMat();
 
-      objectPoints = new Point3fVectorVector(1) ;
-
-
+      objectPoints = new Point3fVectorVector(1);
 
       calcBoardCornerPositions();
-      objectPoints.get(0).get(boardSize.width()-1).x(objectPoints.get(0).get(0).x() + gridWidth);
+      objectPoints.get(0).get(boardSize.width() - 1).x(objectPoints.get(0).get(0).x() + gridWidth);
       newObjectPoints = new Mat(objectPoints);
-
 
       objectPoints.resize(imagePoints.size()); //Docs resized it by (imagePoints.size(), objectPoints[0])
 
-      calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix, distortionCoefficients, rvecs, tvecs, 0,new TermCriteria( TermCriteria.EPS+TermCriteria.COUNT, 30, 0.0001 ) );
+      opencv_calib3d.calibrateCamera(objectPoints,
+                                     imagePoints,
+                                     imageSize,
+                                     cameraMatrix,
+                                     distortionCoefficients,
+                                     rvecs,
+                                     tvecs,
+                                     0,
+                                     new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 30, 0.0001));
 
-      boolean inRange = checkRange(cameraMatrix) && checkRange(distortionCoefficients);
+      boolean inRange = opencv_core.checkRange(cameraMatrix) && opencv_core.checkRange(distortionCoefficients);
 
       //totalAvgError = computeReprojectionErrors();
-
 
       return inRange;
    }
@@ -495,5 +471,4 @@ public class RDXCameraCalibrationDemo
    {
       new RDXCameraCalibrationDemo();
    }
-
 }
