@@ -9,6 +9,7 @@ import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -31,6 +32,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private RDXObjectDetector objectDetector;
    private String objectName = "";
    private FramePose3D objectPose;
+   private ReferenceFrame objectFrame;
    private boolean previewValidated = false;
    private FullHumanoidRobotModel ghostRobotModel;
    private RDXMultiBodyGraphic ghostRobotGraphic;
@@ -98,7 +100,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    @Override
    public void processFrameInformation(Pose3DReadOnly observedPose, String bodyPart)
    {
-      proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectPose, objectName);
+      proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectFrame, objectName);
 
       if (previewSetToActive)
          ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
@@ -164,6 +166,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             {
                objectName = objectDetector.getObjectName();
                objectPose = objectDetector.getObjectPose();
+               objectFrame = objectDetector.getObjectFrame();
                LogTools.info("Detected object {} pose: {}", objectName, objectPose);
             }
 
@@ -185,6 +188,7 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             proMPAssistant.setCurrentTaskDone(false);
             objectName = "";
             objectPose = null;
+            objectFrame = null;
             firstPreview = true;
             previewValidated = false;
             replayPreviewCounter = 0;

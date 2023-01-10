@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -180,13 +181,58 @@ public class ProMPAssistant
       }
    }
 
+   public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, ReferenceFrame objectFrame, String objectName)
+   {
+      if (taskDetected(objectName))
+      {
+         if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
+         {
+            FramePose3D lastObservedPose = new FramePose3D();
+            lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
+            lastObservedPose.getOrientation()
+                            .set(observedPose.getOrientation().getX(),
+                                 observedPose.getOrientation().getY(),
+                                 observedPose.getOrientation().getZ(),
+                                 observedPose.getOrientation().getS());
+
+            if (userIsMoving(lastObservedPose, bodyPart)) // check if user has started moving after activating the assistance (pressed the button)
+            {
+               // store observed pose
+               bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
+               LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
+               if (!bodyPartGoal.isEmpty() && objectFrame != null) // if there is an observable object and goal
+               { // immediately update the task with first observation transformed in task frame
+                  lastObservedPose.changeFrame(objectFrame);
+                  LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
+                  updateTask();
+                  generateTaskTrajectories();
+                  doneInitialProcessingTask = true;
+                  lastObservedPose.changeFrame(ReferenceFrame.getWorldFrame()); // switch back to world frame for replay preview
+                  LogTools.info("Generating prediction ...");
+               }
+               else // if there is no observable object and goal, wait to get few observations before updating
+               {
+                  // update the proMP prediction according to observations and generate mean trajectory
+                  if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
+                  {
+                     updateTask();
+                     generateTaskTrajectories();
+                     doneInitialProcessingTask = true;
+                     LogTools.info("Generating prediction ...");
+                  }
+               }
+            }
+         }
+      }
+   }
+
    public void processFrameAndObjectInformation(Pose3DReadOnly observedPose, String bodyPart, FramePose3D objectPose, String objectName)
    {
       if (taskDetected(objectName))
       {
          if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
          {
-            Pose3D lastObservedPose = new Pose3D();
+            FramePose3D lastObservedPose = new FramePose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
             lastObservedPose.getOrientation()
                             .set(observedPose.getOrientation().getX(),
@@ -242,7 +288,7 @@ public class ProMPAssistant
       return !currentTask.isEmpty();
    }
 
-   private boolean userIsMoving(Pose3D lastObservedPose, String bodyPart)
+   private boolean userIsMoving(FramePose3DReadOnly lastObservedPose, String bodyPart)
    {
       if (bodyPart.equals(bodyPartRecognition) && !isMoving)
       {
@@ -337,6 +383,7 @@ public class ProMPAssistant
             else
             {
                FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
+               generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
