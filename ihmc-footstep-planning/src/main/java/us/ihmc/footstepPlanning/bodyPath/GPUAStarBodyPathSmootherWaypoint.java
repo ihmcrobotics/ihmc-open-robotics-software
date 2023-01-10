@@ -22,6 +22,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLFloatMem;
 import us.ihmc.perception.OpenCLIntBuffer;
@@ -406,6 +407,7 @@ public class GPUAStarBodyPathSmootherWaypoint
 
       yoGroundPlaneGradient.setX(waypointGroundPlaneGradients.getBackingDirectFloatBuffer().get(2 * waypointIndex));
       yoGroundPlaneGradient.setY(waypointGroundPlaneGradients.getBackingDirectFloatBuffer().get(2 * waypointIndex + 1));
+      yoGroundPlaneGradient.setZ(0.0);
 
       return yoGroundPlaneGradient;
    }

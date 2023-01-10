@@ -566,7 +566,7 @@ public class AStarBodyPathFrameworkTest
    {
       AStarBodyPathFrameworkTest test = new AStarBodyPathFrameworkTest();
 
-      DataSetName dataSetName = DataSetName._20171215_214730_CinderBlockField;
+      DataSetName dataSetName = DataSetName._20171114_135559_PartialShallowMaze;
 
 //      VISUALIZE = true;
 //      test.setup();
