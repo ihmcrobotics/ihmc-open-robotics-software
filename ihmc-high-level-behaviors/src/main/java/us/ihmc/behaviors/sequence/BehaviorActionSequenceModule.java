@@ -23,6 +23,7 @@ public class BehaviorActionSequenceModule
       ROS2ControllerHelper ros2 = new ROS2ControllerHelper(PubSubImplementation.FAST_RTPS, "behavior_action_sequence", robotModel);
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2.getROS2NodeInterface());
+      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
       perceptionManager = new PerceptionManager(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame());
 
