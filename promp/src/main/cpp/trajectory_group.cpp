@@ -107,7 +107,7 @@ double TrajectoryGroup::get_mean_end_value(int dof)
     double mean_end_value = 0.0;
     for (Trajectory traj : _trajs)
     {
-        MatrixXd dataTrajectory = traj.matrix();
+        Eigen::MatrixXd dataTrajectory = traj.matrix();
         int rows = dataTrajectory.rows();
         mean_end_value += dataTrajectory(rows-1,dof);
     }
