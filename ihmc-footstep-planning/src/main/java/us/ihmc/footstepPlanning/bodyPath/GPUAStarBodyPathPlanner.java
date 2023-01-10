@@ -110,7 +110,7 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeHeuristicCostKernel;
 
    private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
-   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(21);
+   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(28);
    private OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
 
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
@@ -701,15 +701,23 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(9, (float) plannerParameters.getInclineCostWeight());
       floatPointer.put(10, (float) plannerParameters.getInclineCostDeadband());
       floatPointer.put(11, (float) plannerParameters.getRollCostWeight());
-      floatPointer.put(12, (float) BodyPathRANSACTraversibilityCalculator.alphaStance);
-      floatPointer.put(13, (float) BodyPathRANSACTraversibilityCalculator.alphaStep);
-      floatPointer.put(14, (float) BodyPathRANSACTraversibilityCalculator.minPercent);
-      floatPointer.put(15, (float) BodyPathRANSACTraversibilityCalculator.halfStanceWidth);
-      floatPointer.put(16, (float) BodyPathRANSACTraversibilityCalculator.heightWindow);
-      floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
-      floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
-      floatPointer.put(19, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
-      floatPointer.put(20, (float) plannerParameters.getTraversibilityWeight());
+      floatPointer.put(12, (float) Math.toRadians(plannerParameters.getRollCostDeadband()));
+      floatPointer.put(13, (float) Math.toRadians(plannerParameters.getMaxPenalizedRollAngle()));
+      floatPointer.put(14, (float) BodyPathRANSACTraversibilityCalculator.alphaStance);
+      floatPointer.put(15, (float) BodyPathRANSACTraversibilityCalculator.alphaStep);
+      floatPointer.put(16, (float) BodyPathRANSACTraversibilityCalculator.minPercent);
+      floatPointer.put(17, (float) BodyPathRANSACTraversibilityCalculator.halfStanceWidth);
+      floatPointer.put(18, (float) BodyPathRANSACTraversibilityCalculator.heightWindow);
+      floatPointer.put(19, (float) BodyPathRANSACTraversibilityCalculator.minNormalToPenalize);
+      floatPointer.put(20, (float) BodyPathRANSACTraversibilityCalculator.maxNormalToPenalize);
+      floatPointer.put(21, (float) BodyPathRANSACTraversibilityCalculator.inclineWeight);
+      floatPointer.put(22, (float) plannerParameters.getTraversibilityWeight());
+      floatPointer.put(23, (float) BodyPathRANSACTraversibilityCalculator.heightDeadband);
+      floatPointer.put(24, (float) BodyPathRANSACTraversibilityCalculator.heightProximityForSayingWalkingOnGround);
+      floatPointer.put(25, (float) BodyPathRANSACTraversibilityCalculator.lowestNonGroundDiscountWhenWalkingOnGround);
+      floatPointer.put(26, (float) BodyPathRANSACTraversibilityCalculator.minimumCellsForTraversible);
+      floatPointer.put(27, (float) BodyPathRANSACTraversibilityCalculator.minimumCellsForTraversible);
+      floatPointer.put(27, (float) AStarBodyPathPlanner.snapHeightThreshold);
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }

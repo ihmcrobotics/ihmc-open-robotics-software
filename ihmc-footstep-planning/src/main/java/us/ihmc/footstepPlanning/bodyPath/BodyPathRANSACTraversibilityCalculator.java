@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.bodyPath;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -26,12 +25,18 @@ public class BodyPathRANSACTraversibilityCalculator
    static final double heightWindow = 0.2;
    static final double inclineWeight = 0.0;
 
+   static final double heightProximityForSayingWalkingOnGround = 0.07;
+   static final double lowestNonGroundDiscountWhenWalkingOnGround = 0.85;
+
    static final double minPercent = 0.2;
    static final double minNormalToPenalize = Math.toRadians(45.0);
    static final double maxNormalToPenalize = Math.toRadians(70.0);
+   static final double heightDeadband = 0.1;
 
    static final double alphaStance = 4.0;
    static final double alphaStep = 2.0;
+
+   static final int minimumCellsForTraversible = 10;
 
    private BodyPathLatticePoint startNode;
    private final ToDoubleFunction<BodyPathLatticePoint> gridHeightMap;
@@ -150,13 +155,15 @@ public class BodyPathRANSACTraversibilityCalculator
       double averageHeight = 0.5 * (nominalHeight + oppositeHeight);
       double windowWidth = (maxHeight - minHeight) / 2.0;
 
-      double lowestNonGroundAlpha = 0.85;
       double heightAboveGround = Math.abs(averageHeight - heightMapData.getEstimatedGroundHeight());
-      double nonGroundAlpha = 1.0;
-      double groundProximity = 0.07;
-      if (heightAboveGround < groundProximity)
+      boolean isWalkingOnGround = false;
+      double discountForNonGroundPointsWhenWalkingOnGround = 1.0;
+      if (heightAboveGround < heightProximityForSayingWalkingOnGround)
       {
-         nonGroundAlpha = lowestNonGroundAlpha + (1.0 - lowestNonGroundAlpha) * heightAboveGround / groundProximity;
+         isWalkingOnGround = true;
+         double lowestNonGroundAlpha = lowestNonGroundDiscountWhenWalkingOnGround;
+
+         discountForNonGroundPointsWhenWalkingOnGround = lowestNonGroundAlpha + (1.0 - lowestNonGroundAlpha) * heightAboveGround / heightProximityForSayingWalkingOnGround;
       }
 
       if (minHeight > maxHeight - 1e-3)
@@ -181,14 +188,13 @@ public class BodyPathRANSACTraversibilityCalculator
          {
             numberOfTraversibleCells++;
 
-            double heightDeadband = 0.1;
             double deltaHeight = Math.max(0.0, Math.abs(averageHeight - heightQuery) - heightDeadband);
             double cellPercentage = 1.0 - deltaHeight / windowWidth;
             double nonGroundDiscount = 1.0;
 
-            if (!heightMapData.isCellAtGroundPlane(xQuery, yQuery))
+            if (isWalkingOnGround && !heightMapData.isCellAtGroundPlane(xQuery, yQuery))
             {
-               nonGroundDiscount = nonGroundAlpha;
+               nonGroundDiscount = discountForNonGroundPointsWhenWalkingOnGround;
             }
 
             UnitVector3DReadOnly normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
@@ -203,7 +209,7 @@ public class BodyPathRANSACTraversibilityCalculator
          traversibileCells.get(side).set(numberOfTraversibleCells);
       }
 
-      if (numberOfSampledCells < 10)
+      if (numberOfSampledCells < minimumCellsForTraversible)
       {
          return 0.0;
       }

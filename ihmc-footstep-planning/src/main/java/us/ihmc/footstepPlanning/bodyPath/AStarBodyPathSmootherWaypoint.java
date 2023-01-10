@@ -45,6 +45,7 @@ public class AStarBodyPathSmootherWaypoint
 {
    static final double boxGroundOffset = 0.35;
    private static final double nonGroundDiscount = 0.6;
+   static final double traversibilitySmoothingHeightDeadband = 0.05;
 
    private static final FrameBox3D collisionBox = new FrameBox3D();
 
@@ -485,8 +486,7 @@ public class AStarBodyPathSmootherWaypoint
          YoFrameVector3D sidedTraversibility = yoSidedTraversibility.get(side);
          sidedTraversibility.setToZero();
 
-         double localTraversibilityThreshold = 0.9;
-         double maxLocalTraversibilityThresholdDiscount = 0.75;
+         double localTraversibilityThreshold = traversibilityThreshold;
 
          double currentTraversibility = traversibilitySampleNominal.get(side).getValue();
          double previousTraversibility0 = getNeighbor(waypointIndex - 1).traversibilitySampleNominal.get(side).getValue();
@@ -503,7 +503,7 @@ public class AStarBodyPathSmootherWaypoint
          traversibilitySamplePos.get(side).set(computeTraversibility(side, 1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
          traversibilitySampleNeg.get(side).set(computeTraversibility(side, -1.0, waypoint.getZ(), xTraversibilityGradientOffsets, yTraversibilityGradientOffsets));
 
-         double alpha = EuclidCoreTools.clamp((localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - maxLocalTraversibilityThresholdDiscount), 0.0, 1.0);
+         double alpha = EuclidCoreTools.clamp((localTraversibilityThreshold - maxLocalTraversibility) / (localTraversibilityThreshold - traversibilityThresholdForNoDiscount), 0.0, 1.0);
          tempVector.setIncludingFrame(waypointFrame, Axis3D.Y);
          tempVector.scale(alpha * (traversibilitySamplePos.get(side).getValue() - traversibilitySampleNeg.get(side).getValue()));
          tempVector.changeFrame(ReferenceFrame.getWorldFrame());
@@ -620,10 +620,9 @@ public class AStarBodyPathSmootherWaypoint
             }
             else
             {
-               double nonGroundAlpha = heightQuery - heightMapData.getEstimatedGroundHeight() < heightWindow ? nonGroundDiscount : 1.0;
+               double nonGroundAlpha = Math.abs(heightQuery - heightMapData.getEstimatedGroundHeight()) < heightWindow ? nonGroundDiscount : 1.0;
 
-               double heightDeadband = 0.05;
-               double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - heightDeadband);
+               double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - traversibilitySmoothingHeightDeadband);
                double cellPercentage = 1.0 - deltaHeight / heightWindow;
 
                UnitVector3DReadOnly normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);

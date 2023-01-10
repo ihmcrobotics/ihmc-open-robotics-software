@@ -29,6 +29,9 @@ public class AStarBodyPathSmoother
    static final double displacementWeight = 0.0;
    static final double traversibilityWeight = 20.0;
    static final double flatGroundWeight = 4.0;
+   static final double turnPointSmoothnessDiscount = 0.1;
+   static final double traversibilityThreshold = 0.9;
+   static final double traversibilityThresholdForNoDiscount = 0.75;
 
    static final int maxPoints = 80;
    static final double gradientEpsilon = 1e-6;
@@ -264,7 +267,7 @@ public class AStarBodyPathSmoother
       /* Equal spacing gradient */
       double spacingGradientX = -4.0 * equalSpacingWeight * (x2 - 2.0 * x1 + x0);
       double spacingGradientY = -4.0 * equalSpacingWeight * (y2 - 2.0 * y1 + y0);
-      double alphaTurnPoint = isTurnPoint ?  0.1 : 1.0;
+      double alphaTurnPoint = isTurnPoint ?  turnPointSmoothnessDiscount : 1.0;
       gradientToSet.setX(alphaTurnPoint * spacingGradientX);
       gradientToSet.setY(alphaTurnPoint * spacingGradientY);
 

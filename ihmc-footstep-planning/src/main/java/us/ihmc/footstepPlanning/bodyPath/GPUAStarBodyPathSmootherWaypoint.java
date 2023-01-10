@@ -342,6 +342,7 @@ public class GPUAStarBodyPathSmootherWaypoint
       double incline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
       elevationIncline.set(incline);
 
+      // Todo extract these parameters
       double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
       rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
 
@@ -467,13 +468,6 @@ public class GPUAStarBodyPathSmootherWaypoint
       int planKey = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
 
       waypoint.setZ(snappedHeightBuffer.getBackingDirectFloatBuffer().get(planKey));
-   }
-
-   public void updateGradientGraphics(double spacingGradientX, double spacingGradientY, double smoothnessGradientX, double smoothnessGradientY)
-   {
-      yoEqualSpacingGradient.set(-spacingGradientX, -spacingGradientY, 0.0);
-      yoSmoothnessGradient.set(-smoothnessGradientX, -smoothnessGradientY, 0.0);
-      yoRollGradient.setToZero();
    }
 
    public void updateRollGraphics(double gradientX, double gradientY)

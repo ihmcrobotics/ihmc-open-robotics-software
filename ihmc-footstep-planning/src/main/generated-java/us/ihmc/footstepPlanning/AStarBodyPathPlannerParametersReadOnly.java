@@ -15,6 +15,16 @@ public interface AStarBodyPathPlannerParametersReadOnly extends StoredPropertySe
       return get(rollCostWeight);
    }
 
+   default double getRollCostDeadband()
+   {
+      return get(rollCostDeadband);
+   }
+
+   default double getMaxPenalizedRollAngle()
+   {
+      return get(maxPenalizedRollAngle);
+   }
+
    default double getInclineCostWeight()
    {
       return get(inclineCostWeight);

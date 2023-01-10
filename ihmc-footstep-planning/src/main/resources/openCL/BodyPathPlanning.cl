@@ -6,7 +6,7 @@
 #define CENTER_INDEX 1
 #define centerX 2
 #define centerY 3
-#define SNAP_HEIGHT_THRESHOLD 4
+#define SNAP_HEIGHT_THRESHOLD_FOR_LEAST_SQUARES 4
 #define GROUND_HEIGHT_ESTIMATE 5
 
 // these are the path planning parameters
@@ -22,16 +22,22 @@
 #define INCLINE_COST_WEIGHT 9
 #define INCLINE_COST_DEADBAND 10
 #define ROLL_COST_WEIGHT 11
-#define ALPHA_STANCE 12
-#define ALPHA_STEP 13
-#define MIN_TRAVERSIBILITY_PERCENTAGE 14
-// traversibility params, but part of the same vector
-#define HALF_STANCE_WIDTH 15
-#define HEIGHT_WINDOW 16
-#define MIN_NORMAL_TO_PENALIZE 17
-#define MAX_NORMAL_TO_PENALIZE 18
-#define INCLINE_WEIGHT 19
-#define TRAVERSIBILITY_WEIGHT 20
+#define ROLL_DEADBAND 12
+#define MAX_PENALIZED_ROLL_ANGLE 13
+#define TRAVERSIBILITY_STANCE_ALPHA 14
+#define TRAVERSIBILITY_STEP_ALPHA 15
+#define MIN_TRAVERSIBILITY_PERCENTAGE 16
+#define HALF_STANCE_WIDTH 17
+#define TRAVERSIBILITY_HEIGHT_WINDOW 18
+#define TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE 19
+#define TRAVERSIBILITY_MAX_NORMAL_TO_PENALIZE 20
+#define TRAVERSIBILITY_INCLINE_WEIGHT 21
+#define TRAVERSIBILITY_WEIGHT 22
+#define TRAVERSIBILITY_HEIGHT_DEADBAND 23
+#define TRAVERSIBILITY_HEIGHT_PROXIMITY_FOR_SAYING_WALKING_ON_GROUND 24
+#define TRAVERSIBILITY_LOWEST_NON_GROUND_DISCOUNT_WHEN_WALKING_ON_GROUND 25
+#define MINIMUM_CELLS_FOR_TRAVERSIBLE 26
+#define MIN_SNAP_HEIGHT_THRESHOLD 27
 
 // These are the flags for the different rejection types for the edges
 #define VALID -1
@@ -53,6 +59,10 @@
 #define COLLISION_WEIGHT 8
 #define YAW_DISCRETIZATIONS 9
 #define FLAT_GROUND_WEIGHT 10
+#define TRAVERSIBILITY_SMOOTHING_HEIGHT_DEADBAND 11
+#define TURN_POINT_SMOOTHNESS_DISCOUNT 12
+#define SMOOTHER_TRAVERSIBILITY_THRESHOLD 13
+#define TRAVERSIBILITY_THRESHOLD_FOR_NO_DISCOUNT 14
 
 // these are parameters defined explicitly for the RANSAC normal calculator
 #define RANSAC_ITERATIONS 0
@@ -174,6 +184,22 @@ float2 rotate_vector_by_yaw(float2 vector, float yaw)
     float sY = sin(yaw);
 
     return rotate_vector(vector, cY, sY);
+}
+
+float2 inverse_rotate_vector(float2 vector, float cH, float sH)
+{
+    float dxLocal = cH * vector.x + sH * vector.y;
+    float dyLocal = -sH * vector.x + cH * vector.y;
+
+    return (float2) (dxLocal, dyLocal);
+}
+
+float2 inverse_rotate_vector_by_yaw(float2 vector, float yaw)
+{
+    float cY = cos(yaw);
+    float sY = sin(yaw);
+
+    return inverse_rotate_vector(vector, cY, sY);
 }
 
 float3 normal3DFromThreePoint3Ds(float3 firstPointOnPlane,
@@ -458,18 +484,18 @@ void kernel computeSurfaceNormalsWithLeastSquares(global float* params,
     }
 
     // fit a plane to points in the patch, which are a three by three grid.
-    float min_z = max_z - params[SNAP_HEIGHT_THRESHOLD];
+    float min_z = max_z - params[SNAP_HEIGHT_THRESHOLD_FOR_LEAST_SQUARES];
 
-    float n = 0;
-    float x = 0.0;
-    float y = 0.0;
-    float z = 0.0;
-    float xx = 0.0;
-    float xy = 0.0;
-    float xz = 0.0;
-    float yy = 0.0;
-    float yz = 0.0;
-    float zz = 0.0;
+    float n = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    float xx = 0.0f;
+    float xy = 0.0f;
+    float xz = 0.0f;
+    float yy = 0.0f;
+    float yz = 0.0f;
+    float zz = 0.0f;
 
     for (int cell = 0; cell < connections; cell++)
     {
@@ -595,7 +621,7 @@ void kernel snapVertices(global float* height_map_params,
     }
 
     // TODO extract magic number
-    float height_sample_delta = 0.08f;
+    float height_sample_delta = planner_params[MIN_SNAP_HEIGHT_THRESHOLD];
     float min_z = max_z - height_sample_delta;
 
     // compute the average z height
@@ -718,8 +744,8 @@ float computeSidedTraversibility(float* height_map_params,
         half_stance_width = -half_stance_width;
 
     float yaw = get_yaw(neighbor_idx);
-    float2 offset = (float2) (0.0f, half_stance_width);
-    float2 translation = rotate_vector_by_yaw(offset, -yaw);
+    float2 local_offset = (float2) (0.0f, half_stance_width);
+    float2 translation = inverse_rotate_vector_by_yaw(local_offset, yaw);
     node += translation;
 
     int center_index = (int) height_map_params[CENTER_INDEX];
@@ -732,19 +758,18 @@ float computeSidedTraversibility(float* height_map_params,
     int numberOfTraversibleCells = 0;
 
     float traversibilityScoreNumber = 0.0f;
-    float minHeight = max(opposite_height, nominal_height) - planner_params[HEIGHT_WINDOW];
-    float maxHeight = min(opposite_height, nominal_height) + planner_params[HEIGHT_WINDOW];
+    float minHeight = max(opposite_height, nominal_height) - planner_params[TRAVERSIBILITY_HEIGHT_WINDOW];
+    float maxHeight = min(opposite_height, nominal_height) + planner_params[TRAVERSIBILITY_HEIGHT_WINDOW];
     float averageHeight = 0.5f * (nominal_height + opposite_height);
     float windowWidth = (maxHeight - minHeight) / 2.0f;
 
-    // TODO extract the magic numbers
-    float lowestNonGroundAlpha = 0.85f;
+    float lowestNonGroundAlpha = planner_params[TRAVERSIBILITY_LOWEST_NON_GROUND_DISCOUNT_WHEN_WALKING_ON_GROUND];
     float heightAboveGround = fabs(averageHeight - height_map_params[GROUND_HEIGHT_ESTIMATE]);
-    float nonGroundAlpha = 1.0f;
-    float groundProximity = 0.07f;
+    float discountForNonGroundPointsWhenWalkingOnGround = 1.0f;
+    float groundProximity = planner_params[TRAVERSIBILITY_HEIGHT_PROXIMITY_FOR_SAYING_WALKING_ON_GROUND];
     if (heightAboveGround < groundProximity)
     {
-        nonGroundAlpha = lowestNonGroundAlpha + (1.0f - lowestNonGroundAlpha) * heightAboveGround / groundProximity;
+        discountForNonGroundPointsWhenWalkingOnGround = lowestNonGroundAlpha + (1.0f - lowestNonGroundAlpha) * heightAboveGround / groundProximity;
     }
 
     // cell is not traversible
@@ -779,28 +804,26 @@ float computeSidedTraversibility(float* height_map_params,
         {
             numberOfTraversibleCells++;
 
-            // TODO extract magic numbers
-            float heightDeadband = 0.1f;
-            float deltaHeight = max(0.0f, fabs(averageHeight - heightQuery) - heightDeadband);
+            float deltaHeight = max(0.0f, fabs(averageHeight - heightQuery) - planner_params[TRAVERSIBILITY_HEIGHT_DEADBAND]);
             float cellPercentage = 1.0f - deltaHeight / windowWidth;
             float nonGroundDiscount = 1.0f;
 
             if (!epsilonEquals(heightQuery, height_map_params[GROUND_HEIGHT_ESTIMATE], 1e-3))
             {
-                nonGroundDiscount = nonGroundAlpha;
+                nonGroundDiscount = discountForNonGroundPointsWhenWalkingOnGround;
             }
 
             float query_normal_x = normal_xyz_data[3 * query_key];
             float query_normal_y = normal_xyz_data[3 * query_key + 1];
             float query_normal_z = normal_xyz_data[3 * query_key + 2];
-            float incline = max(0.0f, acos(query_normal_z) - planner_params[MIN_NORMAL_TO_PENALIZE]);
-            float inclineAlpha = (planner_params[MAX_NORMAL_TO_PENALIZE] - incline) / (planner_params[MAX_NORMAL_TO_PENALIZE] - planner_params[MIN_NORMAL_TO_PENALIZE]);
+            float incline = max(0.0f, acos(query_normal_z) - planner_params[TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE]);
+            float inclineAlpha = (planner_params[TRAVERSIBILITY_MAX_NORMAL_TO_PENALIZE] - incline) / (planner_params[TRAVERSIBILITY_MAX_NORMAL_TO_PENALIZE] - planner_params[TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE]);
             inclineAlpha = clamp(inclineAlpha, 0.0f, 1.0f);
-            traversibilityScoreNumber += nonGroundDiscount * ((1.0f - planner_params[INCLINE_WEIGHT]) * cellPercentage + planner_params[INCLINE_WEIGHT] * inclineAlpha);
+            traversibilityScoreNumber += nonGroundDiscount * ((1.0f - planner_params[TRAVERSIBILITY_INCLINE_WEIGHT]) * cellPercentage + planner_params[TRAVERSIBILITY_INCLINE_WEIGHT] * inclineAlpha);
         }
     }
 
-    if (numberOfSampledCells < 10)
+    if (numberOfSampledCells < planner_params[MINIMUM_CELLS_FOR_TRAVERSIBLE])
     {
         return 0.0f;
     }
@@ -859,7 +882,7 @@ float computeTraversibilityCost(global float* planner_params, float4 traversibil
     float stanceTraversibility = max(traversibility_measures.s0, traversibility_measures.s1);
     float stepTraversibility = max(traversibility_measures.s2, traversibility_measures.s3);
 
-    return planner_params[TRAVERSIBILITY_WEIGHT] * (planner_params[ALPHA_STANCE] * (1.0f - stanceTraversibility) + planner_params[ALPHA_STEP] * (1.0f - stepTraversibility));
+    return planner_params[TRAVERSIBILITY_WEIGHT] * (planner_params[TRAVERSIBILITY_STANCE_ALPHA] * (1.0f - stanceTraversibility) + planner_params[TRAVERSIBILITY_STEP_ALPHA] * (1.0f - stepTraversibility));
 }
 
 bool computeIsTraversible(global float* planner_params, float4 traversibility_measures)
@@ -874,8 +897,7 @@ float computeRollAtNode(global float* height_map_params, global float* normal_le
     float map_resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
 
     float2 edge = normalize(neighbor - parent);
-    float2 averageBodyPosition = 0.5f * (neighbor + parent);
-    float yaw = atan2(edge.y, edge.x);
+    float2 averageBodyPosition = (neighbor + parent) / 2.0f;
 
     int body_map_key = coordinate_to_key(averageBodyPosition, center, map_resolution, map_center_index);
     float normal_x = normal_least_squares_xyz_buffer[3 * body_map_key];
@@ -888,13 +910,11 @@ float computeRollAtNode(global float* height_map_params, global float* normal_le
 
 float computeRollCost(global float* planner_params, float incline, float roll)
 {
-    // TODO extract the magic numbers
-    // 0.12 is 7 degrees
-    float inclineScale = clamp(fabs(incline) / 0.12f, 0.0f, 1.0f);
-    float rollDeadband = 0.026f; // 1.5 degrees
-    float rollAngleDeadbanded = max(0.0f, fabs(roll) - rollDeadband);
+    float maxPenalizedRoll = planner_params[MAX_PENALIZED_ROLL_ANGLE] - planner_params[ROLL_DEADBAND];
+    float inclineScale = clamp(fabs(incline) / maxPenalizedRoll, 0.0f, 1.0f);
+    float deadbandedRollAngle = max(0.0f, fabs(roll) - planner_params[ROLL_DEADBAND]);
 
-    return planner_params[ROLL_COST_WEIGHT] * inclineScale * rollAngleDeadbanded;
+    return planner_params[ROLL_COST_WEIGHT] * inclineScale * deadbandedRollAngle;
 }
 
 int get_collision_set_index(int yaw_index)
@@ -1093,7 +1113,7 @@ void kernel computeEdgeData(global float* height_map_params,
         edge_rejection_reason[edge_key] = -1;
 
         float edge_cost = xy_distance;
-        float incline_cost = 0.0;
+        float incline_cost = 0.0f;
         if (incline > planner_params[NOMINAL_INCLINE])
         {
             float inclineDelta = fabs( (incline - planner_params[NOMINAL_INCLINE]));
@@ -1120,6 +1140,7 @@ void kernel computeEdgeData(global float* height_map_params,
 
 float computeSmootherTraversibility(global float* height_map_params,
                                     global float* planner_params,
+                                    global float* smoothing_params,
                                     global float* traversibility_offsets,
                                     global float* height_map_data,
                                     global float* normal_xyz_data,
@@ -1132,17 +1153,16 @@ float computeSmootherTraversibility(global float* height_map_params,
     int number_of_sampled_cells = 0;
 
     float traversibility_score_numerator = 0.0f;
-    float min_height = nominal_height - planner_params[HEIGHT_WINDOW];
-    float max_height = nominal_height + planner_params[HEIGHT_WINDOW];
+    float min_height = nominal_height - planner_params[TRAVERSIBILITY_HEIGHT_WINDOW];
+    float max_height = nominal_height + planner_params[TRAVERSIBILITY_HEIGHT_WINDOW];
 
     int center_index = height_map_params[CENTER_INDEX];
     int cells_per_side = 2 * center_index + 1;
     float2 center = (float2) (height_map_params[centerX], height_map_params[centerY]);
     float resolution = height_map_params[HEIGHT_MAP_RESOLUTION];
 
-    float cYaw = cos(-waypoint_yaw);
-    float sYaw = sin(-waypoint_yaw);
-
+    float cYaw = cos(waypoint_yaw);
+    float sYaw = sin(waypoint_yaw);
 
     int number_of_offsets = traversibility_offsets[0];
     for (int i = 0; i < number_of_offsets; i++)
@@ -1154,14 +1174,10 @@ float computeSmootherTraversibility(global float* height_map_params,
         else
             offset_y -= planner_params[HALF_STANCE_WIDTH];
 
-        float2 fixed_offset = (float2) (offset_x, offset_y);
-        float2 offset = rotate_vector(fixed_offset, cYaw, sYaw);
+        float2 local_offset = (float2) (offset_x, offset_y);
+        float2 map_offset = inverse_rotate_vector(local_offset, cYaw, sYaw);
 
-        //float x_offset = cYaw * offset_x - sYaw * signY * offset_y;
-        //float y_offset = sYaw * offset_x + cYaw * signY * offset_y;
-        //float2 offset = (float2) (x_offset, y_offset);
-
-        float2 twiddled_position = waypoint_position + offset;
+        float2 twiddled_position = waypoint_position + map_offset;
         int twiddled_x_index = coordinate_to_index(twiddled_position.x, center.x, resolution, center_index);
         int twiddled_y_index = coordinate_to_index(twiddled_position.y, center.y, resolution, center_index);
 
@@ -1181,24 +1197,31 @@ float computeSmootherTraversibility(global float* height_map_params,
             }
             else
             {
-                float non_ground_alpha = twiddled_height - height_map_params[GROUND_HEIGHT_ESTIMATE];
-
                 // TODO extract magic number
-                float height_deadband = 0.05;
+                float non_ground_alpha;
+                if (twiddled_height - height_map_params[GROUND_HEIGHT_ESTIMATE] < planner_params[TRAVERSIBILITY_HEIGHT_WINDOW])
+                {
+                    non_ground_alpha = 0.6f;
+                }
+                else
+                {
+                    non_ground_alpha = 1.0f;
+                }
+
+                float height_deadband = smoothing_params[TRAVERSIBILITY_SMOOTHING_HEIGHT_DEADBAND];
                 float delta_height = max(0.0f, fabs(nominal_height - twiddled_height) - height_deadband);
-                float cell_percentage = 1.0 - delta_height / planner_params[HEIGHT_WINDOW];
+                float cell_percentage = 1.0f - delta_height / planner_params[TRAVERSIBILITY_HEIGHT_WINDOW];
 
                 float normal_z = normal_xyz_data[3 * twiddled_key + 2];
                 float incline = acos(normal_z);
-                float incline_alpha = (incline - planner_params[MIN_NORMAL_TO_PENALIZE]) / (planner_params[MAX_NORMAL_TO_PENALIZE] - planner_params[MIN_NORMAL_TO_PENALIZE]);
+                float incline_alpha = (incline - planner_params[TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE]) / (planner_params[TRAVERSIBILITY_MAX_NORMAL_TO_PENALIZE] - planner_params[TRAVERSIBILITY_MIN_NORMAL_TO_PENALIZE]);
                 incline_alpha = clamp(0.0f, 1.0f, incline_alpha);
-                traversibility_score_numerator += cell_percentage * ((1.0 - planner_params[INCLINE_WEIGHT]) * non_ground_alpha + planner_params[INCLINE_WEIGHT] * incline_alpha);
+                traversibility_score_numerator += cell_percentage * ((1.0f - planner_params[TRAVERSIBILITY_INCLINE_WEIGHT]) * non_ground_alpha + planner_params[TRAVERSIBILITY_INCLINE_WEIGHT] * incline_alpha);
             }
         }
     }
 
-    // TODO extract magic number
-    if (number_of_sampled_cells < 10)
+    if (number_of_sampled_cells < planner_params[MINIMUM_CELLS_FOR_TRAVERSIBLE])
     {
         return 0.0f;
     }
@@ -1215,7 +1238,7 @@ float shiftAngleInRange(float angleToShift, float angleStart)
     float TwoPi = 2.0f * M_PI_F;
     float deltaFromStart = fmod((angleToShift - angleStart), TwoPi);
 
-    if (deltaFromStart < 0)
+    if (deltaFromStart < 0.0f)
         deltaFromStart += TwoPi;
 
     return angleStart + deltaFromStart;
@@ -1267,6 +1290,7 @@ void kernel computeCurrentTraversibilityMap(global float* height_map_params,
 
     float left_traversibility = computeSmootherTraversibility(height_map_params,
                                                               planner_params,
+                                                              smoother_params,
                                                               traversibility_nominal_offsets,
                                                               height_map_data,
                                                               normal_xyz_data,
@@ -1277,6 +1301,7 @@ void kernel computeCurrentTraversibilityMap(global float* height_map_params,
                                                               waypoint_yaw);
     float right_traversibility = computeSmootherTraversibility(height_map_params,
                                                                planner_params,
+                                                               smoother_params,
                                                                traversibility_nominal_offsets,
                                                                height_map_data,
                                                                normal_xyz_data,
@@ -1345,13 +1370,12 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
 
             float2 delta = position - waypoint_xy;
 
-            // TODO use convenience function
-            float dxLocal = cH * delta.x + sH * delta.y;
-            float dyLocal = -sH * delta.x + cH * delta.y;
+            // rotating this offset to the local frame
+            float2 delta_local = rotate_vector(delta, cH, sH);
 
-            float absDyLocal = fabs(dyLocal);
+            float absDyLocal = fabs(delta_local.y);
 
-            if (fabs(dxLocal) > half_box_size_y || absDyLocal > half_box_size_y)
+            if (fabs(delta_local.x) > half_box_size_y || absDyLocal > half_box_size_y)
                 continue;
 
             int query_key = indices_to_key(indices.x, indices.y, center_index);
@@ -1362,9 +1386,9 @@ void kernel computeCollisionGradientMap(global float* height_map_params,
             float lateral_penetration = half_box_size_y - absDyLocal;
             max_collision = max(max_collision, lateral_penetration);
 
-            float penetration = sign(dyLocal) * lateral_penetration;
-            gradient.x += -penetration * sH;
-            gradient.y += penetration * cH;
+            float2 penetration = (float2) (0.0f, sign(delta_local.y) * lateral_penetration);
+            gradient += inverse_rotate_vector(penetration, cH, sH);
+
             numCollisions++;
         }
     }
@@ -1495,11 +1519,9 @@ void kernel computeGroundPlaneGradientMap(global float* height_map_params,
                 delta.y = -delta.y;
             delta *= height_map_params[HEIGHT_MAP_RESOLUTION];
 
-            // TODO use convenience function
-            float dxLocal = cH * delta.x + sH * delta.y;
-            float dyLocal = -sH * delta.x + cH * delta.y;
+            float2 delta_map = inverse_rotate_vector(delta, cH, sH);
 
-            float2 query_position = waypoint_position + (float2) (dxLocal, dyLocal);
+            float2 query_position = waypoint_position + delta_map;
             int query_idx_x = coordinate_to_index(query_position.x, center.x, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
             int query_idx_y = coordinate_to_index(query_position.y, center.y, height_map_params[HEIGHT_MAP_RESOLUTION], center_index);
 
@@ -1555,11 +1577,10 @@ void kernel computeWaypointSmoothnessGradient(global float* smoothing_params,
     float x2 = waypoint_xyzYaw[4 * (waypoint_key + 1)];
     float y2 = waypoint_xyzYaw[4 * (waypoint_key + 1) + 1];
 
-    // TODO extract magic numbers
     // Equal spacing gradient
-    float spacingGradientX = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (x2 - 2.0 * x1 + x0);
-    float spacingGradientY = -4.0 * smoothing_params[EQUAL_SPACING_WEIGHT] * (y2 - 2.0 * y1 + y0);
-    float alphaTurnPoint = isTurnPoint ? 0.1 : 1.0;
+    float spacingGradientX = -4.0f * smoothing_params[EQUAL_SPACING_WEIGHT] * (x2 - 2.0f * x1 + x0);
+    float spacingGradientY = -4.0f * smoothing_params[EQUAL_SPACING_WEIGHT] * (y2 - 2.0f * y1 + y0);
+    float alphaTurnPoint = isTurnPoint ? smoothing_params[TURN_POINT_SMOOTHNESS_DISCOUNT] : 1.0f;
 
     float2 gradient = alphaTurnPoint * (float2) (spacingGradientX, spacingGradientY);
 
@@ -1652,9 +1673,7 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
     // get the traversibility gradient
     for (int side = 0; side <= 1; side++)
     {
-        // TODO extract magic numbers
-        float local_traversibility_threshold = 0.9f;
-        float max_local_traversibility_threshold_discount = 0.75f;
+        float local_traversibility_threshold = smoothing_params[SMOOTHER_TRAVERSIBILITY_THRESHOLD];
 
         float current_traversibility = waypoint_traversibility_values[2 * waypoint_key + side];
         float previous_traversibility_0 = waypoint_traversibility_values[2 * (waypoint_key - 1) + side];
@@ -1663,10 +1682,10 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
         float next_traversibility_1 = waypoint_traversibility_values[2 * (waypoint_key + 2) + side];
         float max_local_traversibility = max(max(max(max(current_traversibility, previous_traversibility_0), previous_traversibility_1), next_traversibility_0), next_traversibility_1);
 
+        int goal_key = 4 * waypoint_key + 2 * side;
+
         if (max_local_traversibility > local_traversibility_threshold)
         {
-           int goal_key = 4 * waypoint_key + 2 * side;
-
             waypoint_traversibility_samples[goal_key] = 0.0f;
             waypoint_traversibility_samples[goal_key + 1] = 0.0f;
             waypoint_traversibility_gradients[goal_key] = 0.0f;
@@ -1680,17 +1699,16 @@ void kernel computeWaypointMapGradients(global float* height_map_params,
             else
                 sided_buffer = right_traversibilities_for_gradient_map;
 
-            int goal_key = 4 * waypoint_key + 2 * side;
             float negative_sample = sided_buffer[2 * data_key];
             float positive_sample = sided_buffer[2 * data_key + 1];
             waypoint_traversibility_samples[goal_key] = negative_sample;
             waypoint_traversibility_samples[goal_key + 1] = positive_sample;
 
-            float alpha = (local_traversibility_threshold - max_local_traversibility) / (local_traversibility_threshold - max_local_traversibility_threshold_discount);
-            alpha = clamp(alpha, 0.0f, 1.0f);
+            float discount = (local_traversibility_threshold - max_local_traversibility) / (local_traversibility_threshold - smoothing_params[TRAVERSIBILITY_THRESHOLD_FOR_NO_DISCOUNT]);
+            discount = clamp(alpha, 0.0f, 1.0f);
 
-            float2 delta = (float2) (0.0f, alpha * (positive_sample - negative_sample));
-            float2 gradient = rotate_vector_by_yaw(delta, waypoint_xyzYaw[4 * waypoint_key + 3]);;
+            float2 delta_local = (float2) (0.0f, alpha * (positive_sample - negative_sample));
+            float2 gradient = inverse_rotate_vector_by_yaw(delta_local, waypoint_xyzYaw[4 * waypoint_key + 3]);;
 
             waypoint_traversibility_gradients[goal_key] = gradient.x;
             waypoint_traversibility_gradients[goal_key + 1] = gradient.y;
