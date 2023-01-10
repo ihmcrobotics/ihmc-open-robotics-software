@@ -23,27 +23,11 @@ import java.util.stream.Collectors;
 
 public class AStarBodyPathSmoother
 {
-   static final double collisionWeight = 700.0;
-   static final double smoothnessWeight = 0.7;
-   static final double equalSpacingWeight = 2.0;
-   static final double rollWeight = 20.0;
-   static final double displacementWeight = 0.0;
-   static final double traversibilityWeight = 20.0;
-   static final double flatGroundWeight = 4.0;
-   static final double turnPointSmoothnessDiscount = 0.1;
-   static final double traversibilityThreshold = 0.9;
-   static final double traversibilityThresholdForNoDiscount = 0.75;
-
    static final int maxPoints = 80;
    static final double gradientEpsilon = 1e-6;
-   static final double hillClimbGain = 1e-3;
-   static final double minCurvatureToPenalize = Math.toRadians(5.0);
 
    static final int minIterations = 20;
-   static final double gradientMagnitudeToTerminate = 0.9;
-   static final double gradientMagnitudeToTerminateSq = EuclidCoreTools.square(gradientMagnitudeToTerminate);
 
-   static final double halfStanceWidthTraversibility = 0.18;
    static final double yOffsetTraversibilityNominalWindow = 0.27;
    static final double yOffsetTraversibilityGradientWindow = 0.12;
    static final double traversibilitySampleWindowX = 0.2;
@@ -64,6 +48,7 @@ public class AStarBodyPathSmoother
    private final boolean visualize;
 
    private int pathSize;
+   private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private HeightMapLeastSquaresNormalCalculator leastSquaresNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
    private HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
@@ -79,6 +64,7 @@ public class AStarBodyPathSmoother
 
    public AStarBodyPathSmoother(AStarBodyPathPlannerParametersReadOnly plannerParameters, TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
+      this.plannerParameters = plannerParameters;
       for (int i = 0; i < maxPoints; i++)
       {
          gradients[i] = new YoVector2D("gradient" + i, registry);
@@ -217,7 +203,7 @@ public class AStarBodyPathSmoother
                gradientMagnitudeSq += EuclidCoreTools.normSquared(gradients[i].getX(), gradients[i].getY());
             }
 
-            if (gradientMagnitudeSq < gradientMagnitudeToTerminate && iteration.getValue() > minIterations)
+            if (gradientMagnitudeSq < plannerParameters.getSmootherGradientThresholdToTerminate() && iteration.getValue() > minIterations)
             {
                break;
             }
@@ -225,8 +211,8 @@ public class AStarBodyPathSmoother
 
          for (int j = 1; j < pathSize - 1; j++)
          {
-            waypoints[j].getPosition().subX(hillClimbGain * gradients[j].getX());
-            waypoints[j].getPosition().subY(hillClimbGain * gradients[j].getY());
+            waypoints[j].getPosition().subX(plannerParameters.getSmootherHillClimbGain() * gradients[j].getX());
+            waypoints[j].getPosition().subY(plannerParameters.getSmootherHillClimbGain() * gradients[j].getY());
          }
 
          for (int j = 1; j < pathSize - 1; j++)
@@ -266,9 +252,9 @@ public class AStarBodyPathSmoother
       double y2 = waypoints[waypointIndex + 1].getPosition().getY();
 
       /* Equal spacing gradient */
-      double spacingGradientX = -4.0 * equalSpacingWeight * (x2 - 2.0 * x1 + x0);
-      double spacingGradientY = -4.0 * equalSpacingWeight * (y2 - 2.0 * y1 + y0);
-      double alphaTurnPoint = isTurnPoint ?  turnPointSmoothnessDiscount : 1.0;
+      double spacingGradientX = -4.0 * plannerParameters.getSmootherEqualSpacingWeight() * (x2 - 2.0 * x1 + x0);
+      double spacingGradientY = -4.0 * plannerParameters.getSmootherEqualSpacingWeight() * (y2 - 2.0 * y1 + y0);
+      double alphaTurnPoint = isTurnPoint ?  plannerParameters.getSmootherTurnPointSmoothnessDiscount() : 1.0;
       gradientToSet.setX(alphaTurnPoint * spacingGradientX);
       gradientToSet.setY(alphaTurnPoint * spacingGradientY);
 
@@ -281,12 +267,13 @@ public class AStarBodyPathSmoother
       }
       else
       {
+         double minCurvatureToPenalize = Math.toRadians(plannerParameters.getSmootherMinCurvatureToPenalize());
          double exp = 1.5;
          double f0 = Math.pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1, x2, y2, minCurvatureToPenalize), exp);
          double fPdx = Math.pow(computeDeltaHeadingMagnitude(x0, y0, x1 + gradientEpsilon, y1, x2, y2, minCurvatureToPenalize), exp);
          double fPdy = Math.pow(computeDeltaHeadingMagnitude(x0, y0, x1, y1 + gradientEpsilon, x2, y2, minCurvatureToPenalize), exp);
-         smoothnessGradientX = smoothnessWeight * (fPdx - f0) / gradientEpsilon;
-         smoothnessGradientY = smoothnessWeight * (fPdy - f0) / gradientEpsilon;
+         smoothnessGradientX = plannerParameters.getSmootherSmoothnessWeight() * (fPdx - f0) / gradientEpsilon;
+         smoothnessGradientY = plannerParameters.getSmootherSmoothnessWeight() * (fPdy - f0) / gradientEpsilon;
          gradientToSet.addX(smoothnessGradientX);
          gradientToSet.addY(smoothnessGradientY);
       }

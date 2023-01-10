@@ -49,6 +49,7 @@ public class GPUAStarBodyPathSmootherWaypoint
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
 
+   private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private final int waypointIndex;
    private final YoFramePoint3D initialWaypoint;
    private final YoFramePoseUsingYawPitchRoll waypoint;
@@ -102,6 +103,7 @@ public class GPUAStarBodyPathSmootherWaypoint
                                            YoGraphicsListRegistry graphicsListRegistry,
                                            YoRegistry parentRegistry)
    {
+      this.plannerParameters = plannerParameters;
       this.waypointIndex = waypointIndex;
 
       YoRegistry registry = new YoRegistry("Waypoint" + waypointIndex);
@@ -116,7 +118,7 @@ public class GPUAStarBodyPathSmootherWaypoint
       waypoint = new YoFramePoseUsingYawPitchRoll("waypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       initialWaypoint = new YoFramePoint3D("initWaypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       waypointFrame = new PoseReferenceFrame("waypointFrame" + waypointIndex, ReferenceFrame.getWorldFrame());
-      nominalStepFrames = new SideDependentList<>(side -> ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex, waypointFrame, new Vector3D(0.0, side.negateIfRightSide(halfStanceWidthTraversibility), 0.0)));
+      nominalStepFrames = new SideDependentList<>(side -> ReferenceFrameTools.constructFrameWithUnchangingTranslationFromParent(side.getCamelCaseNameForStartOfExpression() + "nominalStepFrame" + waypointIndex, waypointFrame, new Vector3D(0.0, side.negateIfRightSide(plannerParameters.getHalfStanceWidth()), 0.0)));
 
       yoSmoothnessGradient = new YoFrameVector3D("smoothGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
       yoEqualSpacingGradient = new YoFrameVector3D("spacingGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
@@ -340,7 +342,8 @@ public class GPUAStarBodyPathSmootherWaypoint
 
       // Todo extract these parameters
       double inclineClipped = EuclidCoreTools.clamp((Math.abs(incline) - Math.toRadians(2.0)) / Math.toRadians(7.0), 0.0, 1.0);
-      rollDelta.set(rollWeight * inclineClipped * tempVector.getX(), rollWeight * inclineClipped * tempVector.getY());
+      rollDelta.set(plannerParameters.getSmootherRollWeight() * inclineClipped * tempVector.getX(),
+                    plannerParameters.getSmootherRollWeight() * inclineClipped * tempVector.getY());
 
       sampledLSNormalHeight.set(leastSquaresSampledHeightBuffer.getBackingDirectFloatBuffer().get(cellKey));
 
@@ -354,7 +357,7 @@ public class GPUAStarBodyPathSmootherWaypoint
       tempVector.changeFrame(waypointFrame);
       tempVector.setX(0.0);
       tempVector.changeFrame(ReferenceFrame.getWorldFrame());
-      tempVector.scale(displacementWeight);
+      tempVector.scale(plannerParameters.getSmootherDisplacementWeight());
       yoDisplacementGradient.set(tempVector);
 
       return tempVector;
@@ -391,7 +394,7 @@ public class GPUAStarBodyPathSmootherWaypoint
          yoTraversibilityGradient.add(tempVector);
       }
 
-      yoTraversibilityGradient.scale(traversibilityWeight);
+      yoTraversibilityGradient.scale(plannerParameters.getSmootherTraversibilityWeight());
       return yoTraversibilityGradient;
    }
 

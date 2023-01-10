@@ -391,7 +391,7 @@ public class GPUAStarBodyPathSmoother
                gradientMagnitudeSq += EuclidCoreTools.normSquared(gradients[i].getX(), gradients[i].getY());
             }
 
-            if (gradientMagnitudeSq < gradientMagnitudeToTerminate && iteration.getValue() > minIterations)
+            if (gradientMagnitudeSq < plannerParameters.getSmootherGradientThresholdToTerminate() && iteration.getValue() > minIterations)
             {
                break;
             }
@@ -399,8 +399,8 @@ public class GPUAStarBodyPathSmoother
 
          for (int j = 1; j < pathSize - 1; j++)
          {
-            waypoints[j].getPosition().subX(hillClimbGain * gradients[j].getX());
-            waypoints[j].getPosition().subY(hillClimbGain * gradients[j].getY());
+            waypoints[j].getPosition().subX(plannerParameters.getSmootherHillClimbGain() * gradients[j].getX());
+            waypoints[j].getPosition().subY(plannerParameters.getSmootherHillClimbGain() * gradients[j].getY());
          }
 
          for (int j = 1; j < pathSize - 1; j++)
@@ -431,20 +431,20 @@ public class GPUAStarBodyPathSmoother
    private void populateSmoothingParametersBuffer()
    {
       FloatPointer floatPointer = smoothingParametersBuffer.getBytedecoFloatBufferPointer();
-      floatPointer.put(1, (float) equalSpacingWeight);
-      floatPointer.put(2, (float) minCurvatureToPenalize);
+      floatPointer.put(1, (float) plannerParameters.getSmootherEqualSpacingWeight());
+      floatPointer.put(2, (float) Math.toRadians(plannerParameters.getSmootherMinCurvatureToPenalize()));
       floatPointer.put(3, (float) gradientEpsilon);
-      floatPointer.put(4, (float) smoothnessWeight);
+      floatPointer.put(4, (float) plannerParameters.getSmootherSmoothnessWeight());
       floatPointer.put(5, (float) plannerParameters.getCollisionBoxSizeX());
       floatPointer.put(6, (float) plannerParameters.getCollisionBoxSizeY());
       floatPointer.put(7, (float) AStarBodyPathSmootherWaypoint.boxGroundOffset);
-      floatPointer.put(8, (float) collisionWeight);
+      floatPointer.put(8, (float) plannerParameters.getSmootherCollisionWeight());
       floatPointer.put(9, (float) yawDiscretizations);
-      floatPointer.put(10, (float) flatGroundWeight);
+      floatPointer.put(10, (float) plannerParameters.getSmootherGroundPlaneWeight());
       floatPointer.put(11, (float) AStarBodyPathSmootherWaypoint.traversibilitySmoothingHeightDeadband);
-      floatPointer.put(12, (float) turnPointSmoothnessDiscount);
-      floatPointer.put(13, (float) traversibilityThreshold);
-      floatPointer.put(14, (float) traversibilityThresholdForNoDiscount);
+      floatPointer.put(12, (float) plannerParameters.getSmootherTurnPointSmoothnessDiscount());
+      floatPointer.put(13, (float) plannerParameters.getSmootherMinimumTraversibilityToSearchFor());
+      floatPointer.put(14, (float) plannerParameters.getSmootherTraversibilityThresholdForNoDiscount());
    }
 
    private void computeCollisionsGradient(OpenCLFloatBuffer heightMapParamsBuffer,
