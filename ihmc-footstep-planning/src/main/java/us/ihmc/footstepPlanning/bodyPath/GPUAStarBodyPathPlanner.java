@@ -110,7 +110,7 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeHeuristicCostKernel;
 
    private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
-   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(28);
+   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(31);
    private OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
 
    private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
@@ -696,31 +696,31 @@ public class GPUAStarBodyPathPlanner
       floatPointer.put(3, (float) startNode.getYIndex());
       floatPointer.put(4, (float) goalNode.getX());
       floatPointer.put(5, (float) goalNode.getY());
-      floatPointer.put(6, (float) plannerParameters.getCollisionBoxGroundClearance());
-      floatPointer.put(7, (float) Math.toRadians(plannerParameters.getMaxIncline()));
-      floatPointer.put(8, (float) nominalIncline.getValue());
-      floatPointer.put(9, (float) plannerParameters.getInclineCostWeight());
-      floatPointer.put(10, (float) plannerParameters.getInclineCostDeadband());
-      floatPointer.put(11, (float) plannerParameters.getRollCostWeight());
-      floatPointer.put(12, (float) Math.toRadians(plannerParameters.getRollCostDeadband()));
-      floatPointer.put(13, (float) Math.toRadians(plannerParameters.getMaxPenalizedRollAngle()));
-      floatPointer.put(14, (float) plannerParameters.getMinSnapHeightThreshold());
-      floatPointer.put(15, (plannerParameters.getCheckForCollisions() ? 1.0f : 0.0f));
-      floatPointer.put(15, (plannerParameters.getComputeSurfaceNormalCost() ? 1.0f : 0.0f));
-      floatPointer.put(14, (float) plannerParameters.getTraversibilityStanceWeight());
-      floatPointer.put(15, (float) plannerParameters.getTraversibilityStepWeight());
-      floatPointer.put(16, (float) plannerParameters.getMinTraversibilityScore());
-      floatPointer.put(17, (float) plannerParameters.getHalfStanceWidth());
-      floatPointer.put(18, (float) plannerParameters.getTraversibilityHeightWindowWidth());
-      floatPointer.put(19, (float) plannerParameters.getMinNormalAngleToPenalizeForTraversibility());
-      floatPointer.put(20, (float) plannerParameters.getMaxNormalAngleToPenalizeForTraversibility());
-      floatPointer.put(21, (float) plannerParameters.getTraversibilityInclineWeight());
-      floatPointer.put(22, (float) plannerParameters.getTraversibilityWeight());
-      floatPointer.put(23, (float) plannerParameters.getTraversibilityHeightWindowDeadband());
-      floatPointer.put(24, (float) plannerParameters.getHeightProximityForSayingWalkingOnGround());
-      floatPointer.put(25, (float) plannerParameters.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
-      floatPointer.put(26, (float) plannerParameters.getMinOccupiedNeighborsForTraversibility());
-      floatPointer.put(27, (float) plannerParameters.getMinSnapHeightThreshold());
+      floatPointer.put(6, (float) nominalIncline.getValue());
+      floatPointer.put(7, (plannerParameters.getCheckForCollisions() ? 1.0f : 0.0f));
+      floatPointer.put(8, (plannerParameters.getComputeSurfaceNormalCost() ? 1.0f : 0.0f));
+      floatPointer.put(9, (plannerParameters.getComputeTraversibility() ? 1.0f : 0.0f));
+      floatPointer.put(10, (float) plannerParameters.getMinSnapHeightThreshold());
+      floatPointer.put(11, (float) plannerParameters.getCollisionBoxGroundClearance());
+      floatPointer.put(12, (float) Math.toRadians(plannerParameters.getMaxIncline()));
+      floatPointer.put(13, (float) plannerParameters.getInclineCostWeight());
+      floatPointer.put(14, (float) plannerParameters.getInclineCostDeadband());
+      floatPointer.put(15, (float) plannerParameters.getRollCostWeight());
+      floatPointer.put(16, (float) Math.toRadians(plannerParameters.getRollCostDeadband()));
+      floatPointer.put(17, (float) Math.toRadians(plannerParameters.getMaxPenalizedRollAngle()));
+      floatPointer.put(18, (float) plannerParameters.getTraversibilityStanceWeight());
+      floatPointer.put(19, (float) plannerParameters.getTraversibilityStepWeight());
+      floatPointer.put(20, (float) plannerParameters.getMinTraversibilityScore());
+      floatPointer.put(21, (float) plannerParameters.getHalfStanceWidth());
+      floatPointer.put(22, (float) plannerParameters.getTraversibilityHeightWindowWidth());
+      floatPointer.put(23, (float) plannerParameters.getMinNormalAngleToPenalizeForTraversibility());
+      floatPointer.put(24, (float) plannerParameters.getMaxNormalAngleToPenalizeForTraversibility());
+      floatPointer.put(25, (float) plannerParameters.getTraversibilityInclineWeight());
+      floatPointer.put(26, (float) plannerParameters.getTraversibilityWeight());
+      floatPointer.put(27, (float) plannerParameters.getTraversibilityHeightWindowDeadband());
+      floatPointer.put(28, (float) plannerParameters.getHeightProximityForSayingWalkingOnGround());
+      floatPointer.put(29, (float) plannerParameters.getTraversibilityNonGroundDiscountWhenWalkingOnGround());
+      floatPointer.put(30, (float) plannerParameters.getMinOccupiedNeighborsForTraversibility());
 
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }

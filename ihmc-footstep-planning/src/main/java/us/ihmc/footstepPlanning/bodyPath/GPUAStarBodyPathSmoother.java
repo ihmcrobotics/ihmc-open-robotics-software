@@ -431,13 +431,14 @@ public class GPUAStarBodyPathSmoother
    private void populateSmoothingParametersBuffer()
    {
       FloatPointer floatPointer = smoothingParametersBuffer.getBytedecoFloatBufferPointer();
+      floatPointer.put(0, (float) pathSize);
       floatPointer.put(1, (float) plannerParameters.getSmootherEqualSpacingWeight());
       floatPointer.put(2, (float) Math.toRadians(plannerParameters.getSmootherMinCurvatureToPenalize()));
       floatPointer.put(3, (float) gradientEpsilon);
       floatPointer.put(4, (float) plannerParameters.getSmootherSmoothnessWeight());
       floatPointer.put(5, (float) plannerParameters.getCollisionBoxSizeX());
       floatPointer.put(6, (float) plannerParameters.getCollisionBoxSizeY());
-      floatPointer.put(7, (float) AStarBodyPathSmootherWaypoint.boxGroundOffset);
+      floatPointer.put(7, (float) plannerParameters.getCollisionBoxGroundClearance());
       floatPointer.put(8, (float) plannerParameters.getSmootherCollisionWeight());
       floatPointer.put(9, (float) yawDiscretizations);
       floatPointer.put(10, (float) plannerParameters.getSmootherGroundPlaneWeight());
@@ -445,6 +446,8 @@ public class GPUAStarBodyPathSmoother
       floatPointer.put(12, (float) plannerParameters.getSmootherTurnPointSmoothnessDiscount());
       floatPointer.put(13, (float) plannerParameters.getSmootherMinimumTraversibilityToSearchFor());
       floatPointer.put(14, (float) plannerParameters.getSmootherTraversibilityThresholdForNoDiscount());
+
+      smoothingParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
    private void computeCollisionsGradient(OpenCLFloatBuffer heightMapParamsBuffer,
