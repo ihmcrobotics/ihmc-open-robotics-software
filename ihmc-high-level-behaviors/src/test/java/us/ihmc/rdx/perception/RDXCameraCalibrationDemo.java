@@ -53,50 +53,49 @@ public class RDXCameraCalibrationDemo
 
    private final Object measurementSyncObject = new Object();
 
-   private Point2fVectorVector imagePoints = new Point2fVectorVector();
+   private final Point2fVectorVector imagePoints = new Point2fVectorVector();
    private Mat cameraMatrix;
    private Mat distortionCoefficients = new Mat();
-   private MatVector rvecs = new MatVector();
-   private MatVector tvecs = new MatVector();
-   private FloatVector reprojectionErrors = new FloatVector();
+   private final MatVector rvecs = new MatVector();
+   private final MatVector tvecs = new MatVector();
+   private final FloatVector reprojectionErrors = new FloatVector();
    private double totalAvgError;
    private Mat newObjectPoints;
    private float gridWidth;
    private boolean releaseObject;
    private Size imageSize;
-   private Size boardSize = new Size(9, 6);
-   private int squareSize = 13;
+   private final Size boardSize = new Size(9, 6);
+   private final int squareSize = 13;
 
    enum CalibrationPattern
    {
       NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID
    }
 
-   private CalibrationPattern calibrationPattern = CalibrationPattern.CHESSBOARD;
+   private final CalibrationPattern calibrationPattern = CalibrationPattern.CHESSBOARD;
    private Point3fVectorVector objectPoints;
 
-   private Size patternSize = new Size(9, 6); //width, height
-   private Mat matOfCorners = new Mat();
-   private Point2fVector tempPoint2fVector = new Point2fVector();
-   private Mat tempMat = new Mat();
+   private final Size patternSize = new Size(9, 6); //width, height
+   private final Mat matOfCorners = new Mat();
+   private final Point2fVector tempPoint2fVector = new Point2fVector();
+   private final Mat tempMat = new Mat();
    private RDXCVImagePanel undistortedVideoPanel;
    private RDXCVImagePanel testImagePanel;
    private Mat imageAtIndex = null;
-   private MatVector images = new MatVector();
-   private boolean firstRun = true;
+   private final MatVector images = new MatVector();
    private Mat newCameraMatrix = new Mat();
-   private String calibrationPhotoDirectory = "ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/configurations/cameraCalibrationPhotos/";
+   private final String calibrationPhotoDirectory
+         = "ihmc-open-robotics-software/ihmc-high-level-behaviors/src/libgdx/resources/configurations/cameraCalibrationPhotos/";
    private File dir;
    private int currentNumberOfImagesInDirectory = 0;
-   private ImBoolean takingPhotosIsActive = new ImBoolean(false);
-   private Size winSize = new Size(11, 11); //Half of search window for cornerSubPix
-   private Size zeroZone = new Size(-1, -1);
-   private TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 30, 0.0001);
-   private Throttler throttler = new Throttler();
+   private final ImBoolean takingPhotosIsActive = new ImBoolean(false);
+   private final Size winSize = new Size(11, 11); //Half of search window for cornerSubPix
+   private final Size zeroZone = new Size(-1, -1);
+   private final TermCriteria termCriteria = new TermCriteria(TermCriteria.EPS + TermCriteria.COUNT, 30, 0.0001);
+   private final Throttler throttler = new Throttler();
 
    public RDXCameraCalibrationDemo()
    {
-
       baseUI.getImGuiPanelManager().addPanel(diagnosticPanel);
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -327,7 +326,7 @@ public class RDXCameraCalibrationDemo
                                                                        matOfCorners,
                                                                        opencv_calib3d.CALIB_CB_ADAPTIVE_THRESH | opencv_calib3d.CALIB_CB_NORMALIZE_IMAGE);
 
-                  if (found == true)
+                  if (found)
                   {
 
                      if (calibrationPattern == CalibrationPattern.CHESSBOARD)
