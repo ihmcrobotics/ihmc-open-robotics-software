@@ -101,14 +101,7 @@ public class AStarBodyPathPlanner
    private final AtomicBoolean haltRequested = new AtomicBoolean();
    private static final int maxIterations = 3000;
 
-   private final AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
-
-   /* Parameters to extract */
-   static final double groundClearance = 0.3;
-   static final double snapHeightThreshold = 0.08;
-   static final double snapRadius = 0.15;
-   static final double boxSizeY = 1.2;
-   static final double boxSizeX = 0.35;
+   private final AStarBodyPathSmoother smoother;
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
                                AStarBodyPathPlannerParametersReadOnly plannerParameters,
@@ -139,7 +132,10 @@ public class AStarBodyPathPlanner
 
       if (useRANSACTraversibility)
       {
-         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
+         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(plannerParameters,
+                                                                                     gridHeightMap::get,
+                                                                                     ransacNormalCalculator,
+                                                                                     registry);
          leastSqTraversibilityCalculator = null;
       }
       else
@@ -176,6 +172,7 @@ public class AStarBodyPathPlanner
                                          ransacTraversibilityCalculator.clearVariables();
                                       });
 
+      smoother = new AStarBodyPathSmoother(plannerParameters);
       smoother.setRansacNormalCalculator(ransacNormalCalculator);
       smoother.setLeastSquaresNormalCalculator(surfaceNormalCalculator);
    }
@@ -184,7 +181,7 @@ public class AStarBodyPathPlanner
    {
       if (this.heightMapData == null || !EuclidCoreTools.epsilonEquals(this.heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), 1e-3))
       {
-         collisionDetector.initialize(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
+         collisionDetector.initialize(heightMapData.getGridResolutionXY(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
       }
 
       this.heightMapData = heightMapData;
@@ -246,7 +243,7 @@ public class AStarBodyPathPlanner
       edgeDataMap.clear();
       gridHeightMap.clear();
 
-      packRadialOffsets(heightMapData, snapRadius, xSnapOffsets, ySnapOffsets);
+      packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
 
       Pose3D startPose = new Pose3D();
       Pose3D goalPose = new Pose3D();
@@ -334,7 +331,7 @@ public class AStarBodyPathPlanner
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
-            if (Math.abs(incline.getValue()) > plannerParameters.getMaxIncline())
+            if (Math.abs(incline.getValue()) > Math.toRadians(plannerParameters.getMaxIncline()))
             {
                rejectionReason.set(RejectionReason.TOO_STEEP);
                graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
@@ -343,7 +340,11 @@ public class AStarBodyPathPlanner
 
             if (plannerParameters.getCheckForCollisions())
             {
-               this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, neighborIndex, snapHeight.getDoubleValue(), groundClearance));
+               this.containsCollision.set(collisionDetector.collisionDetected(heightMapData,
+                                                                              neighbor,
+                                                                              neighborIndex,
+                                                                              snapHeight.getDoubleValue(),
+                                                                              plannerParameters.getCollisionBoxGroundClearance()));
                if (containsCollision.getValue())
                {
                   rejectionReason.set(RejectionReason.COLLISION);
@@ -354,32 +355,35 @@ public class AStarBodyPathPlanner
 
             edgeCost.set(xyDistance);
 
-            if (useRANSACTraversibility)
+            if (plannerParameters.getComputeSurfaceNormalCost() && plannerParameters.getComputeTraversibility())
             {
-               traversibilityCost.set(ransacTraversibilityCalculator.computeTraversibility(neighbor, node, neighborIndex));
-               if (ransacTraversibilityCalculator.isTraversible())
+               if (useRANSACTraversibility)
                {
-                  edgeCost.add(traversibilityCost);
+                  traversibilityCost.set(ransacTraversibilityCalculator.computeTraversibility(neighbor, node, neighborIndex));
+                  if (ransacTraversibilityCalculator.isTraversible())
+                  {
+                     edgeCost.add(traversibilityCost);
+                  }
+                  else
+                  {
+                     rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
+                     graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+                     continue;
+                  }
                }
                else
                {
-                  rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-                  graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-                  continue;
-               }
-            }
-            else
-            {
-               double traversibilityIndicator = leastSqTraversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
-               if (leastSqTraversibilityCalculator.isTraversible())
-               {
-                  edgeCost.add(traversibilityIndicator);
-               }
-               else
-               {
-                  rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-                  graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-                  continue;
+                  double traversibilityIndicator = leastSqTraversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
+                  if (leastSqTraversibilityCalculator.isTraversible())
+                  {
+                     edgeCost.add(traversibilityIndicator);
+                  }
+                  else
+                  {
+                     rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
+                     graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+                     continue;
+                  }
                }
             }
 
@@ -390,8 +394,6 @@ public class AStarBodyPathPlanner
 
                bodyPose.set(neighbor.getX(), neighbor.getY(), yaw);
                bodyPose.interpolate(new Pose2D(node.getX(), node.getY(), yaw), 0.5);
-               computeRollCost(node, neighbor, bodyPose);
-
                computeRollCost(node, neighbor, bodyPose);
             }
 
@@ -641,7 +643,7 @@ public class AStarBodyPathPlanner
       }
 
       double maxHeight = heights.max();
-      double minHeight = maxHeight - snapHeightThreshold;
+      double minHeight = maxHeight - plannerParameters.getMinSnapHeightThreshold();
 
       double runningSum = 0.0;
       int numberOfSamples = 0;
@@ -658,8 +660,9 @@ public class AStarBodyPathPlanner
          }
       }
 
-      gridHeightMap.put(latticePoint, runningSum / numberOfSamples);
-      return maxHeight;
+      double averageHeight = runningSum / numberOfSamples;
+      gridHeightMap.put(latticePoint, averageHeight);
+      return averageHeight;
    }
 
    static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)

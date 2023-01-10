@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -71,12 +72,12 @@ public class AStarBodyPathSmoother
    /* Cost gradient in the direction of higher cost for each coordinate */
    private final YoVector2D[] gradients = new YoVector2D[maxPoints];
 
-   public AStarBodyPathSmoother()
+   public AStarBodyPathSmoother(AStarBodyPathPlannerParametersReadOnly plannerParameters)
    {
-      this(null, null, null);
+      this(plannerParameters, null, null, null);
    }
 
-   public AStarBodyPathSmoother(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
+   public AStarBodyPathSmoother(AStarBodyPathPlannerParametersReadOnly plannerParameters, TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       for (int i = 0; i < maxPoints; i++)
       {
@@ -85,7 +86,7 @@ public class AStarBodyPathSmoother
 
       for (int i = 0; i < maxPoints; i++)
       {
-         waypoints[i] = new AStarBodyPathSmootherWaypoint(i, graphicsListRegistry, (parentRegistry == null) ? null : registry);
+         waypoints[i] = new AStarBodyPathSmootherWaypoint(i, plannerParameters, graphicsListRegistry, (parentRegistry == null) ? null : registry);
       }
 
       if (parentRegistry == null)
