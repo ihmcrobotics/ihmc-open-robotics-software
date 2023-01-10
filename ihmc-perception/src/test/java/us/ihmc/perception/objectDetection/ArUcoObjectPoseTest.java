@@ -22,7 +22,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 public class ArUcoObjectPoseTest
 {
    @Test
-   public void testFramePoseTransformsArUco()
+   public void framePoseTransformsArUcoTest()
    {
       ArUcoObjectInfo arucoInfo = new ArUcoObjectInfo();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();

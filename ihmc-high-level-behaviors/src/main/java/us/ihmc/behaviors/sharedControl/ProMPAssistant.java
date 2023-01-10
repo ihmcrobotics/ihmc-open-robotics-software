@@ -7,6 +7,7 @@ import org.json.simple.parser.ParseException;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -202,11 +203,14 @@ public class ProMPAssistant
                   if (!bodyPartGoal.isEmpty() && objectPose != null) // if there is an observable goal this body part can reach
                   {
                      taskGoalPose = new FramePose3D(objectPose);
-                     taskGoalPose.appendRotation(taskTransformGoalMap.get(currentTask).getRotation());
-                     taskGoalPose.appendTranslation(taskTransformGoalMap.get(currentTask).getTranslation());
+                     taskGoalPose.appendTransform(taskTransformGoalMap.get(currentTask));
                   }
-                  LogTools.info("handle world: {}", objectPose);
+                  LogTools.info("Object world: {}", objectPose);
                   LogTools.info("GOAL world: {}", taskGoalPose);
+                  FramePose3D recordedGoalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                 new Point3D(0.878, -0.267, 0.608),
+                                                                 new Quaternion(0.677, -0.184, 0.158, 0.695));
+                  LogTools.info("Recorded GOAL world: {}", recordedGoalPose);
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
