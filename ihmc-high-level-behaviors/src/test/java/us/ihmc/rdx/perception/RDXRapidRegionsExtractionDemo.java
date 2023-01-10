@@ -101,7 +101,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            createL515(768, 1024);
+//            createL515(768, 1024);
+            createOuster(128, 2048);
 
 //            updateRapidRegionsExtractor(true);
 
@@ -115,7 +116,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
             pointCloudRenderer.create(depthHeight * depthWidth);
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
             rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
 
             rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
@@ -128,7 +129,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.openLogFile("/home/bmishra/Workspace/Data/Sensor_Logs/Depth/Good/20221216_141954_PerceptionLog.hdf5");
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight,730.7891, 731.0859, 528.6094, 408.1602);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight,730.7891, 731.0859, 528.6094, 408.1602);
             rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
 
             pointCloudRenderer.create(depthHeight * depthWidth);
@@ -262,7 +263,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-      rapidPlanarRegionsExtractor.update(changed);
+      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, changed);
       rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegionsExtractor.getGPUPlanarRegions(),
                                                                  ReferenceFrame.getWorldFrame(),
                                                                  regionsWithPose);
