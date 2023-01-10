@@ -60,6 +60,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    private int depthWidth;
    private int depthHeight;
+   private volatile boolean newMessageAvailable = false;
 
    public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
@@ -89,6 +90,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
          subscriber.takeNextData(imageMessage, sampleInfo);
          delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
                                                      imageMessage.getAcquisitionTime().getAdditionalNanos()));
+         newMessageAvailable = true;
       }
    }
 
@@ -106,7 +108,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    {
       super.update();
 
-      if (subscribed.get() && isActive() && frequencyPlot.anyPingsYet())
+      if (subscribed.get() && isActive() && newMessageAvailable)
       {
          int numberOfBytes;
          long acquisitionTimeSecondsSinceEpoch;
@@ -163,6 +165,8 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
          depthImageToPointCloudKernel.runKernel((float) horizontalFieldOfView, (float) verticalFieldOfView, pointSize.get());
 
          delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
+
+         newMessageAvailable = false;
       }
    }
 
