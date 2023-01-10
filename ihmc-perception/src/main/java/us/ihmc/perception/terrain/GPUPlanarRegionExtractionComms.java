@@ -1,4 +1,4 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.perception.terrain;
 
 import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Empty;

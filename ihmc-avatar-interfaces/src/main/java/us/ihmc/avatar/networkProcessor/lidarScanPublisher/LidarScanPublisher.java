@@ -10,7 +10,7 @@ import perception_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPointFilter;
+import us.ihmc.perception.filters.CollidingScanPointFilter;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;

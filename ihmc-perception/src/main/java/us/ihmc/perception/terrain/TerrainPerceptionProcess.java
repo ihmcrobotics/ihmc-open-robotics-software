@@ -1,26 +1,19 @@
-package us.ihmc.avatar.gpuPlanarRegions;
+package us.ihmc.perception.terrain;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import perception_msgs.msg.dds.BigVideoPacket;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
+import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.TimestampedPlanarRegionsListMessage;
 import sensor_msgs.Image;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.perception.filters.CollidingScanRegionFilter;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -40,16 +33,21 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
+import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
 import us.ihmc.perception.rapidRegions.GPURegionRing;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
-import us.ihmc.perception.terrain.GPUPlanarRegionExtractionComms;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -62,90 +60,71 @@ import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class L515AndGPUPlanarRegionsOnRobotProcess
+public class TerrainPerceptionProcess
 {
    private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F0245563");
 
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
-   private final boolean enableROS1;
-   private ROS1Helper ros1Helper;
-   private RosImagePublisher ros1DepthPublisher;
-   private ChannelBuffer ros1DepthChannelBuffer;
-   private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
-   private RosImagePublisher ros1DebugExtractionImagePublisher;
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DepthVideoPublisher;
-   private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DebugExtractionVideoPublisher;
+   private final IHMCRealtimeROS2Publisher<ImageMessage> depthPublisher;
+   private final IHMCRealtimeROS2Publisher<ImageMessage> debugImagePublisher;
 
-   private final BigVideoPacket depthImagePacket = new BigVideoPacket();
-   private final BigVideoPacket debugExtractionImagePacket = new BigVideoPacket();
-   private BytedecoImage debugExtractionImage;
-   private ChannelBuffer ros1DebugExtractionImageChannelBuffer;
+   private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
+   private final RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
+
+   private final ImageMessage depthImagePacket = new ImageMessage();
+   private final ImageMessage debugExtractionImagePacket = new ImageMessage();
+
    private final ROS2Helper ros2Helper;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final Notification patchSizeChangedNotification;
-   private final TypedNotification<Empty> reconnectROS1Notification = new TypedNotification<>();
+
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense l515;
+
    private Mat depthU16C1Image;
    private BytedecoImage depth32FC1Image;
    private int depthWidth;
    private int depthHeight;
-   private Mat depthNormalizedScaled;
-   private Mat depthRGB;
-   private Mat depthYUV420Image;
-   private BytePointer depthJPEGImageBytePointer;
-   private Mat debugYUV420Image;
-   private Mat flippedDebugImage;
-   private BytePointer debugJPEGImageBytePointer;
-   private IntPointer compressionParameters;
+
    private CameraPinholeBrown depthCameraIntrinsics;
-   private final GPUPlanarRegionExtraction gpuPlanarRegionExtraction;
    private final Runnable onPatchSizeResized = this::onPatchSizeResized;
-   private final Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
-   private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
-   private final Throttler parameterOutputThrottler = new Throttler();
-   private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final CollidingScanRegionFilter collisionFilter;
 
    private boolean publishTimestamped = false;
 
-   public L515AndGPUPlanarRegionsOnRobotProcess(DRCRobotModel robotModel, boolean enableROS1)
+   public TerrainPerceptionProcess(Supplier<ReferenceFrame> sensorFrameUpdater)
    {
-      this.enableROS1 = enableROS1;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
-
-      if (enableROS1)
-         ros1Helper = new ROS1Helper("l515_node");
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
 
-      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH_LARGE;
-      LogTools.info("Publishing ROS 2 depth video: {}", depthTopic);
-      ros2DepthVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
-      ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
-      LogTools.info("Publishing ROS 2 debug extraction video: {}", debugExtractionTopic);
-      ros2DebugExtractionVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
+      ROS2Topic<ImageMessage> depthTopic = ROS2Tools.L515_DEPTH_IMAGE;
+      LogTools.info("Publishing ROS 2 depth: {}", depthTopic);
+      depthPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      ROS2Topic<ImageMessage> debugExtractionTopic = ROS2Tools.TERRAIN_DEBUG_IMAGE;
+      LogTools.info("Publishing ROS 2 debug image: {}", debugExtractionTopic);
+      debugImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
       realtimeROS2Node.spin();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
-      ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      ros2Helper = new ROS2Helper(ros2Node);
 
-      gpuPlanarRegionExtraction = new GPUPlanarRegionExtraction();
+      rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
+      rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
+
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ROS2StoredPropertySet<?> ros2GPURegionParameters
-            = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS, gpuPlanarRegionExtraction.getParameters());
-      patchSizeChangedNotification
-            = ros2GPURegionParameters.getCommandInput().registerPropertyChangedNotification(GPUPlanarRegionExtractionParameters.patchSize);
+      ROS2StoredPropertySet<?> ros2GPURegionParameters = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS,
+                                                                                                        rapidPlanarRegionExtractor.getParameters());
+      patchSizeChangedNotification = ros2GPURegionParameters.getCommandInput()
+                                                            .registerPropertyChangedNotification(GPUPlanarRegionExtractionParameters.patchSize);
       ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS,
-                                                     gpuPlanarRegionExtraction.getPolygonizerParameters());
+                                                     rapidPlanarRegionExtractor.getPolygonizerParameters());
       ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS,
-                                                     gpuPlanarRegionExtraction.getConcaveHullFactoryParameters());
+                                                     rapidPlanarRegionExtractor.getConcaveHullFactoryParameters());
       ros2Helper.subscribeViaCallback(GPUPlanarRegionExtractionComms.RECONNECT_ROS1_NODE, reconnectROS1Notification::set);
 
       CollisionBoxProvider collisionBoxProvider = robotModel.getCollisionBoxProvider();
@@ -192,27 +171,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthWidth = l515.getDepthWidth();
             depthHeight = l515.getDepthHeight();
 
-            compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 80);
-            depthNormalizedScaled = new Mat(depthHeight, depthWidth, opencv_core.CV_32FC1);
-            depthRGB = new Mat(depthHeight, depthWidth, opencv_core.CV_8UC3);
-            depthYUV420Image = new Mat();
-            depthJPEGImageBytePointer = new BytePointer();
-            debugYUV420Image = new Mat();
-            flippedDebugImage = new Mat();
-            debugJPEGImageBytePointer = new BytePointer();
-
-            if (enableROS1)
-            {
-               String ros1DepthImageTopic = RosTools.L515_DEPTH;
-               String ros1DepthCameraInfoTopic = RosTools.L515_DEPTH_CAMERA_INFO;
-               LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
-               ros1DepthPublisher = new RosImagePublisher();
-               ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
-               ros1Helper.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
-               ros1Helper.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
-               ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * depthWidth * depthHeight);
-            }
-
             depthCameraIntrinsics = new CameraPinholeBrown();
          }
 
@@ -237,7 +195,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
                depthCameraIntrinsics.setCx(l515.getDepthPrincipalOffsetXPixels());
                depthCameraIntrinsics.setCy(l515.getDepthPrincipalOffsetYPixels());
 
-               gpuPlanarRegionExtraction.create(depthWidth,
+               rapidPlanarRegionExtractor.create(depthWidth,
                                                 depthHeight,
                                                 depth32FC1Image.getBackingDirectByteBuffer(),
                                                 depthCameraIntrinsics.fx,
@@ -263,36 +221,37 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
             syncedRobot.update();
-            ReferenceFrame cameraFrame =
-                  syncedRobot.hasReceivedFirstMessage() ? syncedRobot.getReferenceFrames().getSteppingCameraFrame() : ReferenceFrame.getWorldFrame();
+            ReferenceFrame cameraFrame = syncedRobot.hasReceivedFirstMessage() ?
+                  syncedRobot.getReferenceFrames().getSteppingCameraFrame() :
+                  ReferenceFrame.getWorldFrame();
             // TODO: Wait for frame at time of data aquisition?
 
-            int previousPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
+            int previousPatchSize = rapidPlanarRegionExtractor.getParameters().getPatchSize();
             ros2PropertySetGroup.update();
             if (patchSizeChangedNotification.poll())
             {
-               int newPatchSize = gpuPlanarRegionExtraction.getParameters().getPatchSize();
+               int newPatchSize = rapidPlanarRegionExtractor.getParameters().getPatchSize();
                if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
                {
                   LogTools.info("New patch size accepted: {}", newPatchSize);
-                  gpuPlanarRegionExtraction.setPatchSizeChanged(true);
+                  rapidPlanarRegionExtractor.setPatchSizeChanged(true);
                }
                else // Reject the parameter and revert to the previous value because it's not an even divisor
                {
-                  gpuPlanarRegionExtraction.getParameters().setPatchSize(previousPatchSize);
+                  rapidPlanarRegionExtractor.getParameters().setPatchSize(previousPatchSize);
                }
             }
 
-            gpuPlanarRegionExtraction.readFromSourceImage();
-            gpuPlanarRegionExtraction.extractPlanarRegions(onPatchSizeResized);
+            rapidPlanarRegionExtractor.readFromSourceImage();
+            rapidPlanarRegionExtractor.extractPlanarRegions(onPatchSizeResized);
 
             debugExtractionImage.getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 
-            gpuPlanarRegionExtraction.findRegions(doNothingIslandConsumer);
-            gpuPlanarRegionExtraction.findBoundariesAndHoles(doNothingRingConsumer);
-            gpuPlanarRegionExtraction.growRegionBoundaries();
-            gpuPlanarRegionExtraction.computePlanarRegions(cameraFrame);
-            PlanarRegionsList planarRegionsList = gpuPlanarRegionExtraction.getPlanarRegionsList();
+            rapidPlanarRegionExtractor.findRegions(doNothingIslandConsumer);
+            rapidPlanarRegionExtractor.findBoundariesAndHoles(doNothingRingConsumer);
+            rapidPlanarRegionExtractor.growRegionBoundaries();
+            rapidPlanarRegionExtractor.computePlanarRegions(cameraFrame);
+            PlanarRegionsList planarRegionsList = rapidPlanarRegionExtractor.getPlanarRegionsList();
 
             // Filter out regions that are colliding with the body
             collisionFilter.update();
@@ -307,7 +266,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-            if(publishTimestamped)
+            if (publishTimestamped)
             {
                TimestampedPlanarRegionsListMessage timestampedPlanarRegionsListMessage = new TimestampedPlanarRegionsListMessage();
                timestampedPlanarRegionsListMessage.getPlanarRegions().set(planarRegionsListMessage);
@@ -319,7 +278,6 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             {
                ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, planarRegionsListMessage);
             }
-
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 
@@ -337,7 +295,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             depthImagePacket.setImageWidth(depthWidth);
             depthImagePacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
             depthImagePacket.setAcquisitionTimeAdditionalNanos(now.getNano());
-            ros2DepthVideoPublisher.publish(depthImagePacket);
+            depthPublisher.publish(depthImagePacket);
 
             BytedecoOpenCVTools.flipY(debugExtractionImage.getBytedecoOpenCVMat(), flippedDebugImage);
             opencv_imgproc.cvtColor(flippedDebugImage, debugYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
@@ -351,7 +309,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
             debugExtractionImagePacket.setImageWidth(debugExtractionImage.getImageWidth());
             debugExtractionImagePacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
             debugExtractionImagePacket.setAcquisitionTimeAdditionalNanos(now.getNano());
-            ros2DebugExtractionVideoPublisher.publish(debugExtractionImagePacket);
+            debugImagePublisher.publish(debugExtractionImagePacket);
 
             if (enableROS1 && reconnectROS1Notification.poll())
             {
@@ -407,8 +365,8 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
 
    private void onPatchSizeResized()
    {
-      int patchImageWidth = gpuPlanarRegionExtraction.getPatchImageWidth();
-      int patchImageHeight = gpuPlanarRegionExtraction.getPatchImageHeight();
+      int patchImageWidth = rapidPlanarRegionExtractor.getPatchImageWidth();
+      int patchImageHeight = rapidPlanarRegionExtractor.getPatchImageHeight();
       debugExtractionImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC4);
       if (enableROS1)
       {
@@ -452,7 +410,7 @@ public class L515AndGPUPlanarRegionsOnRobotProcess
    private void destroy()
    {
       realtimeROS2Node.destroy();
-      gpuPlanarRegionExtraction.destroy();
+      rapidPlanarRegionExtractor.destroy();
       l515.deleteDevice();
       realSenseHardwareManager.deleteContext();
    }

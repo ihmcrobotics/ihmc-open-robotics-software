@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
+package us.ihmc.perception.filters;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
