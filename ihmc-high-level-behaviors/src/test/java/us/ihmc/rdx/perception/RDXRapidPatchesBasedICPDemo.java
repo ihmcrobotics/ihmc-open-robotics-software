@@ -103,7 +103,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
             pointCloudRenderer.create(depthHeight * depthWidth);
 
-            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, bytedecoDepthImage, depthWidth, depthHeight);
+            rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
             rapidPatchesBasedICP.create(openCLManager, openCLProgram, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
@@ -249,7 +249,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-      rapidPlanarRegionsExtractor.update(changed);
+      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, changed);
       rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegionsExtractor.getGPUPlanarRegions(),
                                                                  ReferenceFrame.getWorldFrame(),
                                                                  regionsWithPose);
@@ -331,14 +331,14 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
       RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
       RapidPatchesBasedICP rapidPatchesBasedICP = new RapidPatchesBasedICP();
 
-      rapidPlanarRegionsExtractor.create(openCLManager, program, bytedecoDepthImage, depthWidth, depthHeight);
+      rapidPlanarRegionsExtractor.create(openCLManager, program, depthWidth, depthHeight);
       rapidPatchesBasedICP.create(openCLManager, program, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
 
       LogTools.info("Initialization Update");
       perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, bytedecoDepthImage.getBytedecoOpenCVMat());
       opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
-      rapidPlanarRegionsExtractor.computePatchFeatureGrid();
+      rapidPlanarRegionsExtractor.computePatchFeatureGrid(bytedecoDepthImage);
       rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
 
       LogTools.info("Copying Feature Grid");
@@ -349,7 +349,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
       opencv_core.flip(bytedecoDepthImage.getBytedecoOpenCVMat(), bytedecoDepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
 
       LogTools.info("Extracting Patch Graph");
-      rapidPlanarRegionsExtractor.computePatchFeatureGrid();
+      rapidPlanarRegionsExtractor.computePatchFeatureGrid(bytedecoDepthImage);
       rapidPatchesBasedICP.update(rapidPlanarRegionsExtractor.getPreviousFeatureGrid(), rapidPlanarRegionsExtractor.getCurrentFeatureGrid());
    }
 }

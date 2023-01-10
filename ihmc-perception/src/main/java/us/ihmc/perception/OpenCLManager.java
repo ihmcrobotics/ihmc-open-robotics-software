@@ -5,6 +5,7 @@ import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -119,13 +120,13 @@ public class OpenCLManager
       for (String includedHeader : includedHeaders)
       {
          Path headerFilePath = Paths.get("openCL", includedHeader);
-         LogTools.info("Loading OpenCL program: {}", includedHeader);
-         sourceAsString += OpenCLTools.readFile(headerFilePath) + "\n";
+         LogTools.info("Loading OpenCL header: {}", includedHeader);
+         sourceAsString += ResourceTools.readResourceToString(headerFilePath.toString()) + "\n";
       }
 
       Path programPath = Paths.get("openCL", programName + ".cl");
       LogTools.info("Loading OpenCL program: {}", programPath);
-      sourceAsString += OpenCLTools.readFile(programPath);
+      sourceAsString += ResourceTools.readResourceToString(programPath.toString());
 
       // Support loading from CRLF (Windows) checkouts
       sourceAsString = sourceAsString.replaceAll("\\r\\n", "\n");

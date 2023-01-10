@@ -27,8 +27,6 @@ public class RapidPlanarRegionsExtractor
 {
    private final int TOTAL_NUM_PARAMS = 21;
 
-   private BytedecoImage inputU16DepthImage;
-
    public enum SensorModel
    {
       SPHERICAL, PERSPECTIVE
@@ -100,12 +98,11 @@ public class RapidPlanarRegionsExtractor
     * @param imageWidth  width of the input depth image
     * @param imageHeight height of the input depth image
     */
-   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage, int imageWidth, int imageHeight, double fx, double fy, double cx, double cy)
+   public void create(OpenCLManager openCLManager, _cl_program program, int imageWidth, int imageHeight, double fx, double fy, double cx, double cy)
    {
       this.sensorModel = SensorModel.PERSPECTIVE;
       this.openCLManager = openCLManager;
       this.planarRegionExtractionProgram = program;
-      this.inputU16DepthImage = depthImage;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
@@ -119,12 +116,11 @@ public class RapidPlanarRegionsExtractor
       this.create();
    }
 
-   public void create(OpenCLManager openCLManager, _cl_program program, BytedecoImage depthImage, int imageWidth, int imageHeight)
+   public void create(OpenCLManager openCLManager, _cl_program program, int imageWidth, int imageHeight)
    {
       this.sensorModel = SensorModel.SPHERICAL;
       this.openCLManager = openCLManager;
       this.planarRegionExtractionProgram = program;
-      this.inputU16DepthImage = depthImage;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
@@ -154,19 +150,23 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
-   public void update(boolean changed)
+   public void update(BytedecoImage input16UC1DepthImage, boolean changed)
    {
       debugger.clearDebugImage();
       wholeAlgorithmDurationStopwatch.start();
 
+      LogTools.info("Input Image: {}", input16UC1DepthImage);
+
       if (changed)
       {
          // Flip so the Y+ goes up instead of down.
-         opencv_core.flip(inputU16DepthImage.getBytedecoOpenCVMat(), inputU16DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
+         opencv_core.flip(input16UC1DepthImage.getBytedecoOpenCVMat(), input16UC1DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
       }
 
+      LogTools.info("Computing Patch Graph");
+
       gpuDurationStopwatch.start();
-      computePatchFeatureGrid();
+      computePatchFeatureGrid(input16UC1DepthImage);
       gpuDurationStopwatch.suspend();
 
 //      debugger.printPatchGraph(patchGraph);
@@ -174,6 +174,7 @@ public class RapidPlanarRegionsExtractor
       //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
       //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
+      LogTools.info("Computing Regions");
       depthFirstSearchDurationStopwatch.start();
       findRegions();
       findBoundariesAndHoles();
@@ -189,7 +190,7 @@ public class RapidPlanarRegionsExtractor
    /**
     * Extracts features and generates patch graph from the input depth image on the GPU.
     */
-   public void computePatchFeatureGrid()
+   public void computePatchFeatureGrid(BytedecoImage input16UC1DepthImage)
    {
       calculateDerivativeParameters();
 
@@ -233,7 +234,7 @@ public class RapidPlanarRegionsExtractor
       {
          LogTools.info("First Run.");
          firstRun = false;
-         inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         input16UC1DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
          currentFeatureGrid.createOpenCLImages();
          previousFeatureGrid.createOpenCLImages();
@@ -244,11 +245,12 @@ public class RapidPlanarRegionsExtractor
       }
       else
       {
-         inputU16DepthImage.writeOpenCLImage(openCLManager);
+         LogTools.info("Writing to OpenCL Image");
+         input16UC1DepthImage.writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
-      _cl_mem inputImage = inputU16DepthImage.getOpenCLImageObject();
+      _cl_mem inputImage = input16UC1DepthImage.getOpenCLImageObject();
 
       openCLManager.setKernelArgument(packKernel, 0, inputImage);
       openCLManager.setKernelArgument(packKernel, 1, currentFeatureGrid.getNxImage().getOpenCLImageObject());
@@ -629,7 +631,6 @@ public class RapidPlanarRegionsExtractor
    {
       currentFeatureGrid.destroy();
       patchGraph.destroy(openCLManager);
-      inputU16DepthImage.destroy(openCLManager);
       openCLManager.destroy();
       // TODO: Destroy the rest
    }

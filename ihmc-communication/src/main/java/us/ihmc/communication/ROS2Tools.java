@@ -131,7 +131,7 @@ public class ROS2Tools
    public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
          = IHMC_ROOT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
-   public static final ROS2Topic<BigVideoPacket> TERRAIN_DEBUG_IMAGE
+   public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION
          = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("debug_extraction");
    public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO
          = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left").withType(BigVideoPacket.class).withSuffix("video"),

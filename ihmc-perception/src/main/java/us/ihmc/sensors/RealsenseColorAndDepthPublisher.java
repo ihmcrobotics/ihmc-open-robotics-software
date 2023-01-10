@@ -10,7 +10,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
@@ -50,7 +49,7 @@ public class RealsenseColorAndDepthPublisher
 
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense sensor;
-   private Mat depthU16C1Image;
+   private Mat depth16UC1Image;
    private Mat color8UC3Image;
 
    private volatile boolean running = true;
@@ -132,7 +131,7 @@ public class RealsenseColorAndDepthPublisher
             Instant now = Instant.now();
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
-            depthU16C1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
+            depth16UC1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
             setDepthExtrinsics(sensor, depthImageMessage.getIntrinsicParameters());
 
             MutableBytePointer colorFrameData = sensor.getColorFrameData();
@@ -154,7 +153,7 @@ public class RealsenseColorAndDepthPublisher
             MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
 
             compressedDepthPointer = new BytePointer();
-            BytedecoOpenCVTools.compressImagePNG(depthU16C1Image, compressedDepthPointer);
+            BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
             BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(this.depthTopic, depthImageMessage);
 
@@ -228,8 +227,8 @@ public class RealsenseColorAndDepthPublisher
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      //String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
+      // Tripod: F1121365, F0245563
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
       new RealsenseColorAndDepthPublisher(l515SerialNumber,
                                           1024,
                                           768,
