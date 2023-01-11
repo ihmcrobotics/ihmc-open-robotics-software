@@ -34,6 +34,7 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactive
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -262,8 +263,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          hasNotConvergedCounts.increment();
       }
 
-      DMatrixRMaj qDDotSolution = qpSolver.getJointAccelerations();
-      DMatrixRMaj rhoSolution = qpSolver.getRhos();
+      NativeMatrix qDDotSolution = qpSolver.getJointAccelerations();
+      NativeMatrix rhoSolution = qpSolver.getRhos();
 
       Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
