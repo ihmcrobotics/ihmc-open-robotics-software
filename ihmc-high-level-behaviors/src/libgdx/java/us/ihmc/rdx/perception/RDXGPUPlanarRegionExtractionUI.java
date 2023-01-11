@@ -498,11 +498,6 @@ public class RDXGPUPlanarRegionExtractionUI
       return gpuPlanarRegionExtraction.getPlanarRegionsList();
    }
 
-   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
-   {
-      return gpuPlanarRegionExtraction.getPlanarRegionsListWithPose();
-   }
-
    public ImBoolean getEnabled()
    {
       return enabled;

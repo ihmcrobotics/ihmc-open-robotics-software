@@ -16,6 +16,9 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 
 import java.nio.FloatBuffer;
 
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
+
 public class RapidRegionsDebutOutputGenerator
 {
    private Mat debugImage;
@@ -149,14 +152,14 @@ public class RapidRegionsDebutOutputGenerator
 
    public void printPatchGraph(BytedecoImage patchGraph)
    {
-      for(int i = 0; i<patchGraph.getImageHeight(); i++)
+      for (int i = 0; i < patchGraph.getImageHeight(); i++)
       {
-         for(int j = 0; j<patchGraph.getImageWidth(); j++)
+         for (int j = 0; j < patchGraph.getImageWidth(); j++)
          {
             int value = patchGraph.getCharDirect(i, j);
-            if(value == 255)
+            if (value == 255)
                System.out.print("o");
-            else if(value > 0)
+            else if (value > 0)
                System.out.print("+");
             else
                System.out.print(".");
@@ -193,9 +196,23 @@ public class RapidRegionsDebutOutputGenerator
       debugImage.put(new Scalar(0, 0, 0, 0));
    }
 
-   public void showDebugImage()
+   public void displayInputDepth(Mat depth, int delay)
    {
-      BytedecoOpenCVTools.display("Debug Output", debugImage, 0);
+      Mat depthDisplay = new Mat();
+      BytedecoOpenCVTools.clampTo8BitUnsignedChar(depth, depthDisplay, 0.0, 255.0);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthDisplay, depthDisplay);
+
+      imshow("Depth", depthDisplay);
+      int code = waitKeyEx(delay);
+      if (code == 113)
+      {
+         System.exit(0);
+      }
+   }
+
+   public void showDebugImage(int delay)
+   {
+      BytedecoOpenCVTools.display("Debug Output", debugImage, delay);
    }
 
    public Mat getDebugImage()

@@ -7,6 +7,7 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.IntrinsicParametersMessage;
 import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
@@ -41,6 +42,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Activator;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
@@ -58,6 +60,7 @@ import static org.bytedeco.opencv.global.opencv_highgui.*;
  */
 public class TerrainPerceptionProcessWithDriver
 {
+   private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
@@ -83,14 +86,12 @@ public class TerrainPerceptionProcessWithDriver
    private BytePointer compressedColorPointer;
    private BytePointer compressedDepthPointer;
 
-   private final String serialNumber;
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
    private final RealtimeROS2Node realtimeROS2Node;
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final OpenCLManager openCLManager;
-   private final _cl_program openCLProgram;
 
    private final IHMCRealtimeROS2Publisher<ImageMessage> depthPublisher;
    private final IHMCRealtimeROS2Publisher<ImageMessage> debugImagePublisher;
@@ -98,6 +99,7 @@ public class TerrainPerceptionProcessWithDriver
    private final ImageMessage depthImagePacket = new ImageMessage();
    private final ImageMessage debugExtractionImagePacket = new ImageMessage();
 
+   private _cl_program openCLProgram;
    private Mat depth16UC1Mat;
    private BytedecoImage depth16UC1Image;
 
@@ -116,39 +118,27 @@ public class TerrainPerceptionProcessWithDriver
                                              ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic,
                                              Supplier<ReferenceFrame> sensorFrameUpdater)
    {
-      this.serialNumber = realsenseConfiguration.getSerialNumber();
       this.colorTopic = colorTopic;
       this.depthTopic = depthTopic;
       this.regionsWithPoseTopic = regionsWithPoseTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
       this.realsenseConfiguration = realsenseConfiguration;
 
-      depthCameraIntrinsics = new CameraPinholeBrown();
-      nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
+      this.nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
-      this.openCLManager = new OpenCLManager();
-      this.openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_publisher");
-      depthPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
-      debugImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.TERRAIN_DEBUG_IMAGE, ROS2QosProfile.BEST_EFFORT());
+      this.depthCameraIntrinsics = new CameraPinholeBrown();
+      this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_publisher");
+      this.depthPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      this.debugImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.TERRAIN_DEBUG_IMAGE, ROS2QosProfile.BEST_EFFORT());
 
       realtimeROS2Node.spin();
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "terrain_perception_node");
       ros2Helper = new ROS2Helper(ros2Node);
 
+      openCLManager = new OpenCLManager();
       rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidPlanarRegionsExtractor.create(openCLManager,
-                                         openCLProgram,
-                                         realsenseConfiguration.getDepthWidth(),
-                                         realsenseConfiguration.getDepthHeight(),
-                                         depthCameraIntrinsics.fx,
-                                         depthCameraIntrinsics.fy,
-                                         depthCameraIntrinsics.cx,
-                                         depthCameraIntrinsics.cy);
-
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
@@ -158,14 +148,10 @@ public class TerrainPerceptionProcessWithDriver
       ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS,
                                                      rapidPlanarRegionsCustomizer.getConcaveHullFactoryParameters());
 
-      while (running)
-      {
-         update();
-         throttler.waitAndRun(outputPeriod); // do the waiting after we send to remove unecessary latency
-      }
-
-      destroy();
-      System.exit(0);
+      thread = new PausablePeriodicThread("TerrainPerceptionNode", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
+      LogTools.info("Starting loop.");
+      thread.start();
    }
 
    private void update()
@@ -180,7 +166,7 @@ public class TerrainPerceptionProcessWithDriver
 
             if (sensor.getDevice() == null)
             {
-               running = false;
+               thread.stop();
                throw new RuntimeException("Device not found. Set -Dd435.serial.number=00000000000");
             }
             sensor.enableColor(realsenseConfiguration.getColorWidth(), realsenseConfiguration.getColorHeight(), realsenseConfiguration.getColorFPS());
@@ -207,13 +193,23 @@ public class TerrainPerceptionProcessWithDriver
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depth16UC1Mat = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
-            depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
 
-            BytedecoImage depth32FC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_32FC1);
-            depth16UC1Mat.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, 1.0f, 0.0);
+            if(depth16UC1Image == null)
+            {
+               this.depth16UC1Image = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+               this.openCLManager.create();
+               openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
+               rapidPlanarRegionsExtractor.create(openCLManager,
+                                                  openCLProgram,
+                                                  realsenseConfiguration.getDepthWidth(),
+                                                  realsenseConfiguration.getDepthHeight(),
+                                                  depthCameraIntrinsics.fx,
+                                                  depthCameraIntrinsics.fy,
+                                                  depthCameraIntrinsics.cx,
+                                                  depthCameraIntrinsics.cy);
+            }
+            opencv_core.copyTo(depth16UC1Mat, depth16UC1Image.getBytedecoOpenCVMat(), new Mat());
 
-            int resultType = opencv_core.CV_16UC1;
-            depth32FC1Image.getBytedecoOpenCVMat().convertTo(depth16UC1Image.getBytedecoOpenCVMat(), resultType, 1, 0);
 
             setDepthExtrinsics(sensor, depthImageMessage.getIntrinsicParameters());
 
@@ -232,7 +228,7 @@ public class TerrainPerceptionProcessWithDriver
             colorImageMessage.setSequenceNumber(colorSequenceNumber++);
             depthImageMessage.setSequenceNumber(depthSequenceNumber++);
 
-//            display(depth16UC1Mat, color8UC3Image, 0);
+            //display(depth16UC1Mat, color8UC3Image, 0);
 
             LogTools.info("Depth Image: {}", depth16UC1Image);
 
@@ -330,7 +326,7 @@ public class TerrainPerceptionProcessWithDriver
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
       new TerrainPerceptionProcessWithDriver(new RealsenseConfiguration(l515SerialNumber, 768, 1024, 30, true, 720, 1280, 30),
                                              ROS2Tools.L515_DEPTH_IMAGE,
                                              ROS2Tools.L515_COLOR_IMAGE,
