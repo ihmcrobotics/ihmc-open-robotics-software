@@ -187,7 +187,7 @@ public class ProMPAssistant
       {
          if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
          {
-            FramePose3D lastObservedPose = new FramePose3D();
+            Pose3D lastObservedPose = new Pose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
             lastObservedPose.getOrientation()
                             .set(observedPose.getOrientation().getX(),
@@ -202,12 +202,17 @@ public class ProMPAssistant
                LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
                if (!bodyPartGoal.isEmpty() && objectFrame != null) // if there is an observable object and goal
                { // immediately update the task with first observation transformed in task frame
-                  lastObservedPose.changeFrame(objectFrame);
+                  FramePose3D lastObservedFramePose = new FramePose3D(lastObservedPose);
+                  lastObservedFramePose.changeFrame(objectFrame);
+                  lastObservedPose.getPosition().set(lastObservedFramePose.getTranslation());
+                  lastObservedPose.getOrientation().set(lastObservedFramePose.getRotation());
                   LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
-                  lastObservedPose.changeFrame(ReferenceFrame.getWorldFrame()); // switch back to world frame for replay preview
+                  lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame()); // switch back to world frame for replay preview
+                  lastObservedPose.getPosition().set(lastObservedFramePose.getTranslation());
+                  lastObservedPose.getOrientation().set(lastObservedFramePose.getRotation());
                   LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
                   LogTools.info("Generating prediction ...");
                }
@@ -233,7 +238,7 @@ public class ProMPAssistant
       {
          if ((proMPManagers.get(currentTask).getBodyPartsGeometry()).containsKey(bodyPart)) // if bodyPart is used in current task
          {
-            FramePose3D lastObservedPose = new FramePose3D();
+            Pose3D lastObservedPose = new Pose3D();
             lastObservedPose.getPosition().set(observedPose.getPosition().getX(), observedPose.getPosition().getY(), observedPose.getPosition().getZ());
             lastObservedPose.getOrientation()
                             .set(observedPose.getOrientation().getX(),
@@ -286,7 +291,7 @@ public class ProMPAssistant
       return !currentTask.isEmpty();
    }
 
-   private boolean userIsMoving(FramePose3DReadOnly lastObservedPose, String bodyPart)
+   private boolean userIsMoving(Pose3DReadOnly lastObservedPose, String bodyPart)
    {
       if (bodyPart.equals(bodyPartRecognition) && !isMoving)
       {
