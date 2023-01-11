@@ -39,6 +39,7 @@ public class ProMPManager
    private final int numberBasisFunctions;
    private final long speedFactor;
    private final int numberOfInferredSpeeds;
+   private double meanEndValueQS;
 
    /** Class constructor
     * @param taskName: name of the task
@@ -121,6 +122,9 @@ public class ProMPManager
          trainingTrajectory.load_csv_trajectories(fileListStringVectorTraining, doFsSizeTVector);
          // make all training trajectories have the same length (= mean length)
          int meanLengthTraining = (int) trainingTrajectory.normalize_length();
+         // get mean end value of quaternion S, will be used to check and eventually change sign of observed goal quaternion
+         if (dofs.size() != 3)
+            meanEndValueQS = trainingTrajectory.get_mean_end_value(3);
          trainingTrajectories.put(bodyPart, trainingTrajectory);
          learnedProMPs.put(bodyPart, new ProMP(trainingTrajectory, numberBasisFunctions));
 
@@ -415,5 +419,10 @@ public class ProMPManager
    public HashMap<String, String> getBodyPartsGeometry()
    {
       return bodyPartsGeometry;
+   }
+
+   public double getMeanEndValueQS()
+   {
+      return meanEndValueQS;
    }
 }
