@@ -199,31 +199,34 @@ public class ProMPAssistant
             {
                // store observed pose
                bodyPartObservedTrajectoryMap.get(bodyPart).add(lastObservedPose);
-               LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
-               if (!bodyPartGoal.isEmpty() && objectFrame != null) // if there is an observable object and goal
-               { // immediately update the task with first observation transformed in task frame
-                  FramePose3D lastObservedFramePose = new FramePose3D(lastObservedPose);
-                  lastObservedFramePose.changeFrame(objectFrame);
-                  lastObservedPose.getPosition().set(lastObservedFramePose.getTranslation());
-                  lastObservedPose.getOrientation().set(lastObservedFramePose.getRotation());
-                  LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
-                  updateTask();
-                  generateTaskTrajectories();
-                  doneInitialProcessingTask = true;
-                  lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame()); // switch back to world frame for replay preview
-                  lastObservedPose.getPosition().set(lastObservedFramePose.getTranslation());
-                  lastObservedPose.getOrientation().set(lastObservedFramePose.getRotation());
-                  LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
-                  LogTools.info("Generating prediction ...");
-               }
-               else // if there is no observable object and goal, wait to get few observations before updating
+               // update the proMP prediction according to observations and generate mean trajectory
+               if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
                {
-                  // update the proMP prediction according to observations and generate mean trajectory
-                  if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
+                  if (!bodyPartGoal.isEmpty() && objectFrame != null) // if there is an observable object and goal
+                  {
+                     // update the task with observation transformed in task frame
+                     FramePose3D lastObservedFramePose = new FramePose3D(lastObservedPose);
+                     lastObservedFramePose.changeFrame(objectFrame);
+                     lastObservedPose.getPosition().set(lastObservedFramePose.getTranslation());
+                     lastObservedPose.getOrientation().set(lastObservedFramePose.getRotation());
+
+                     updateTask();
+                     generateTaskTrajectories();
+                     doneInitialProcessingTask = true;
+
+                     // switch back to world frame for replay preview
+                     lastObservedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+                     lastObservedPose.getPosition().set(lastObservedFramePose.getTranslation());
+                     lastObservedPose.getOrientation().set(lastObservedFramePose.getRotation());
+
+                     LogTools.info("Generating prediction ...");
+                  }
+                  else // if there is no observable object and goal, wait to get few observations before updating
                   {
                      updateTask();
                      generateTaskTrajectories();
                      doneInitialProcessingTask = true;
+
                      LogTools.info("Generating prediction ...");
                   }
                }
