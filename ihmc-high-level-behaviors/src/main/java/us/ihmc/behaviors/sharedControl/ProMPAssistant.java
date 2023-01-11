@@ -204,24 +204,10 @@ public class ProMPAssistant
                   {
                      taskGoalPose = new FramePose3D(objectPose);
                      taskGoalPose.appendTransform(taskTransformGoalMap.get(currentTask));
+                     // check resulting frame is not in the wrong 2pi range of quaternion [-2pi,2pi]. q = -q but the ProMPs do not know that
+                     if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * taskGoalPose.getOrientation().getS()) == -1)
+                        taskGoalPose.getOrientation().negate();
                   }
-                  LogTools.info("Object world: {}", objectPose);
-                  FramePose3D detectedObjectPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                   new Point3D(1.015, -0.232, 0.777),
-                                                                   new Quaternion(-0.001, 1.000, 0.001, -0.001));
-                  FramePose3D recordedGoalPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                                 new Point3D(0.878, -0.267, 0.608),
-                                                                 new Quaternion(0.677, -0.184, 0.158, 0.695));
-
-                  taskGoalPose = detectedObjectPose;
-                  taskGoalPose.appendTransform(taskTransformGoalMap.get(currentTask));
-                  // check resulting frame is not in the wrong 2pi range of quaternion [-2pi,2pi]. q = -q but the ProMPs do not know that
-                  if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * taskGoalPose.getOrientation().getS()) == -1)
-                     taskGoalPose.getOrientation().negate();
-
-                  //                  taskGoalPose = recordedGoalPose;
-                  LogTools.info("Recorded GOAL world: {}", recordedGoalPose);
-                  LogTools.info("GOAL world: {}", taskGoalPose);
                   updateTask();
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
