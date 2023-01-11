@@ -12,6 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -30,6 +31,7 @@ public class RemoteHeightMapUpdater
    private static final long updateDTMillis = 100;
    private static final int initialPublishFrequency = 5;
 
+   private static final FramePose3DReadOnly zeroPose = new FramePose3D();
 
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
@@ -62,7 +64,7 @@ public class RemoteHeightMapUpdater
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
             Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
             PointCloudData pointCloudData = new PointCloudData(data);
-            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, new FramePose3D(), gridCenter));
+            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, zeroPose, gridCenter));
          }
       });
 
