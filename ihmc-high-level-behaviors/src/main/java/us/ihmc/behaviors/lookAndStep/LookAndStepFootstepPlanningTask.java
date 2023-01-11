@@ -6,7 +6,6 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import perception_msgs.msg.dds.TimestampedPlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
@@ -191,11 +190,11 @@ public class LookAndStepFootstepPlanningTask
          stepsStartedWhilePlanning.add(footstepStatusMessage);
       }
 
-      public void acceptPlanarRegions(TimestampedPlanarRegionsListMessage planarRegionsListMessage)
+      public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
-         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdatedSecondsSinceEpoch(),
-                                                        planarRegionsListMessage.getLastUpdatedAdditionalNanos()));
-         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage.getPlanarRegions()));
+         planarRegionDelay.set(TimeTools.calculateDelay(planarRegionsListMessage.getLastUpdated().getSecondsSinceEpoch(),
+                                                        planarRegionsListMessage.getLastUpdated().getAdditionalNanos()));
+         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       }
 
       public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)

@@ -104,4 +104,14 @@ public class JointLowLevelControlSimulator implements RobotController
    {
       return getName();
    }
+
+   public OneDegreeOfFreedomJoint getSimulatedJoint()
+   {
+      return simulatedJoint;
+   }
+
+   public String getJointName()
+   {
+      return simulatedJoint.getName();
+   }
 }

@@ -53,6 +53,8 @@ public class RDXPerceptionUI
          @Override
          public void create()
          {
+            globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Mapsense Regions", ros2Node, ROS2Tools.MAPSENSE_REGIONS));
+
             globalVisualizersUI.addVisualizer(new RDXROS2DepthImageVisualizer("Ouster Depth",
                                                                               PubSubImplementation.FAST_RTPS,
                                                                               ROS2Tools.OUSTER_DEPTH_IMAGE));
