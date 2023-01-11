@@ -8,7 +8,7 @@
   "numberOfInferredSpeeds": 30,
   "tasks":[
     {
-      "name":"PushDoor",
+      "name":"PushDoorOF",
       "bodyPartForRecognition": "rightHand",
       "bodyPartWithObservableGoal": "rightHand",
       "translationGoalToEE": [0.135, -0.027,  0.174],
