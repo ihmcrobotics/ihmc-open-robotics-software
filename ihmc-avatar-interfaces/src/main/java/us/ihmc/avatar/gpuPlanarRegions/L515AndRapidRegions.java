@@ -48,7 +48,7 @@ import java.util.function.Consumer;
 
 public class L515AndRapidRegions
 {
-   private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F0245563");
+   private static final String SERIAL_NUMBER = System.getProperty("l515.serial.number", "F1121365");
 
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;

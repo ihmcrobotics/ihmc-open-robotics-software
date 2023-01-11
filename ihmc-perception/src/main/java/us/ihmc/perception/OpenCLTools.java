@@ -24,11 +24,6 @@ public class OpenCLTools
 
    public static String readFile(Path path)
    {
-      File file = path.toFile();
-      if(!file.exists())
-      {
-         throw new RuntimeException("File does not exist: " + path.toAbsolutePath());
-      }
       return ExceptionTools.handle(() -> Resources.toString(ResourceTools.getResourceSystem(path), StandardCharsets.UTF_8),
                                    DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
