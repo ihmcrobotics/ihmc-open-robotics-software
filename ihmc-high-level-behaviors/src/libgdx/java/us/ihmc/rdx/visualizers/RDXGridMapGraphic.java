@@ -40,9 +40,9 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   private final AtomicBoolean inPaintHeight = new AtomicBoolean(false);
-   private final AtomicBoolean renderGroundCells = new AtomicBoolean(false);
-   private final AtomicBoolean renderGroundPlane = new AtomicBoolean(false);
+   private boolean inPaintHeight = false;
+   private boolean renderGroundCells = false;
+   private boolean renderGroundPlane = false;
 
    private final AtomicReference<List<RDXMultiColorMeshBuilder>> latestMeshBuilder = new AtomicReference<>(null);
    private final AtomicReference<ModelInstance> latestModel = new AtomicReference<>(null);
@@ -60,17 +60,17 @@ public class RDXGridMapGraphic implements RenderableProvider
 
    public void setInPaintHeight(boolean inPaintHeight)
    {
-      this.inPaintHeight.set(inPaintHeight);
+      this.inPaintHeight = inPaintHeight;
    }
 
    public void setRenderGroundPlane(boolean renderGroundPlane)
    {
-      this.renderGroundPlane.set(renderGroundPlane);
+      this.renderGroundPlane = renderGroundPlane;
    }
 
    public void setRenderGroundCells(boolean renderGroundCells)
    {
-      this.renderGroundCells.set(renderGroundCells);
+      this.renderGroundCells = renderGroundCells;
    }
 
    public void generateMeshesAsync(HeightMapMessage heightMapMessage)
@@ -105,7 +105,7 @@ public class RDXGridMapGraphic implements RenderableProvider
                      heightMapMessage.getGridCenterX(),
                      heightMapMessage.getGridCenterY(),
                      heightMapMessage.getEstimatedGroundHeight(),
-                     inPaintHeight.get());
+                     inPaintHeight);
    }
 
    private void generateMeshes(IntToDoubleFunction heightsProvider,
@@ -129,9 +129,9 @@ public class RDXGridMapGraphic implements RenderableProvider
                                                                         gridCenterY,
                                                                         groundHeight,
                                                                         inPaintHeight,
-                                                                        renderGroundCells.get());
+                                                                        renderGroundCells);
 
-      if (renderGroundPlane.get())
+      if (renderGroundPlane)
          meshBuilders.add(generateGroundPlaneMesh(gridSizeXy, gridCenterX, gridCenterY, groundHeight));
 
       latestMeshBuilder.set(meshBuilders);
