@@ -400,7 +400,7 @@ void kernel packKernel(  read_only image2d_t in,
     float3 normal;
     float3 centroid;
 
-//    if(rIndex==0 && cIndex==0) printf("PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n",
+//    printf("[r:%d,c:%d] -> PackKernel:(%d,%d,%d,%d,%d,%d,%d,%.2lf,%.2lf)\n", rIndex, cIndex,
 //                            (int)params[INPUT_HEIGHT],
 //                            (int)params[INPUT_WIDTH],
 //                            (int)params[SUB_H],

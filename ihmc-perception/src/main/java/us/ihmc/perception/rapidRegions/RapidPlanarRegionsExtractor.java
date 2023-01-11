@@ -169,8 +169,8 @@ public class RapidPlanarRegionsExtractor
       computePatchFeatureGrid(input16UC1DepthImage);
       gpuDurationStopwatch.suspend();
 
-//      debugger.printPatchGraph(patchGraph);
-//      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
+      //debugger.printPatchGraph(patchGraph);
+      //      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
       //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
       //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
@@ -184,7 +184,8 @@ public class RapidPlanarRegionsExtractor
       copyFeatureGridMapUsingOpenCL();
       wholeAlgorithmDurationStopwatch.suspend();
 
-      //debugger.showDebugImage();
+      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
+      debugger.showDebugImage(0);
    }
 
    /**
@@ -249,6 +250,8 @@ public class RapidPlanarRegionsExtractor
          input16UC1DepthImage.writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
+
+      LogTools.info("Done Writing Input Image");
 
       _cl_mem inputImage = input16UC1DepthImage.getOpenCLImageObject();
 

@@ -38,14 +38,12 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -101,8 +99,6 @@ public class GPUPlanarRegionExtraction
    private final Stack<GPUPlanarRegionExtractionDepthFirstSearchQuery> depthFirstSearchStack = new Stack<>();
 
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-   private final PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-   private final RigidBodyTransform sensorToWorldFrameTransform = new RigidBodyTransform();
    private final GPUPlanarRegionIsland tempIsland = new GPUPlanarRegionIsland();
    private boolean firstRun = true;
 
@@ -559,8 +555,6 @@ public class GPUPlanarRegionExtraction
    private boolean printedException = false;
    public void computePlanarRegions(ReferenceFrame cameraFrame)
    {
-      AtomicBoolean listCaughtException = new AtomicBoolean(false);
-
       List<List<PlanarRegion>> listOfListsOfRegions = gpuPlanarRegions.parallelStream()
       .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
       .map(gpuPlanarRegion ->
@@ -574,9 +568,6 @@ public class GPUPlanarRegionExtraction
             linearTransform3D.normalize();
             orientation.setIncludingFrame(cameraFrame, linearTransform3D.getAsQuaternion());
             orientation.changeFrame(ReferenceFrame.getWorldFrame());
-
-            if (!MathTools.epsilonEquals(gpuPlanarRegion.getNormal().norm(), 1.0, 1e-4))
-               throw new RuntimeException("The planar region norm isn't valid");
 
             // First compute the set of concave hulls for this region
             FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
@@ -655,19 +646,10 @@ public class GPUPlanarRegionExtraction
       })
       .collect(Collectors.toList());
       planarRegionsList.clear();
-      if (!listCaughtException.get())
+      for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
       {
-         for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
-         {
-            planarRegionsList.addPlanarRegions(planarRegions);
-         }
+         planarRegionsList.addPlanarRegions(planarRegions);
       }
-      //sensorToWorldFrameTransform.set(cameraFrame.getTransformToWorldFrame());
-
-      LogTools.info("Planar Regions Found: {}", planarRegionsList.getNumberOfPlanarRegions());
-
-      planarRegionsListWithPose.setPlanarRegionsList(planarRegionsList.copy());
-      planarRegionsListWithPose.setSensorToWorldFrameTransform(sensorToWorldFrameTransform);
    }
 
    private void calculateDerivativeParameters()
@@ -726,11 +708,6 @@ public class GPUPlanarRegionExtraction
    public PlanarRegionsList getPlanarRegionsList()
    {
       return planarRegionsList;
-   }
-
-   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
-   {
-      return planarRegionsListWithPose;
    }
 
    public int getPatchImageWidth()
