@@ -185,7 +185,7 @@ public class RapidPlanarRegionsExtractor
       wholeAlgorithmDurationStopwatch.suspend();
 
       debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
-      debugger.showDebugImage(0);
+      debugger.showDebugImage(1);
    }
 
    /**

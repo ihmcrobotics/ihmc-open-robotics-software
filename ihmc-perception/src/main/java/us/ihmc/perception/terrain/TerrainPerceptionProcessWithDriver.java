@@ -91,7 +91,6 @@ public class TerrainPerceptionProcessWithDriver
 
    private final RealtimeROS2Node realtimeROS2Node;
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private final OpenCLManager openCLManager;
 
    private final IHMCRealtimeROS2Publisher<ImageMessage> depthPublisher;
    private final IHMCRealtimeROS2Publisher<ImageMessage> debugImagePublisher;
@@ -99,6 +98,7 @@ public class TerrainPerceptionProcessWithDriver
    private final ImageMessage depthImagePacket = new ImageMessage();
    private final ImageMessage debugExtractionImagePacket = new ImageMessage();
 
+   private final OpenCLManager openCLManager;
    private _cl_program openCLProgram;
    private Mat depth16UC1Mat;
    private BytedecoImage depth16UC1Image;
