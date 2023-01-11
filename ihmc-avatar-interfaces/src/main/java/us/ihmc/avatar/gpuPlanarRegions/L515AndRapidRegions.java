@@ -8,9 +8,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.BigVideoPacket;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.TimestampedPlanarRegionsListMessage;
+import perception_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -30,6 +28,7 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.terrain.GPUPlanarRegionExtractionComms;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -45,6 +44,7 @@ import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class L515AndRapidRegions
 {
@@ -53,8 +53,6 @@ public class L515AndRapidRegions
    private final PausablePeriodicThread thread;
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DepthVideoPublisher;
-   private final IHMCRealtimeROS2Publisher<BigVideoPacket> ros2DebugExtractionVideoPublisher;
 
    private final BigVideoPacket depthImagePacket = new BigVideoPacket();
    private final BigVideoPacket debugExtractionImagePacket = new BigVideoPacket();
@@ -79,11 +77,6 @@ public class L515AndRapidRegions
    private CameraPinholeBrown depthCameraIntrinsics;
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
    private final RapidPlanarRegionsCustomizer rapidRegionsCustomizer;
-   private final Runnable onPatchSizeResized = this::onPatchSizeResized;
-   private final Consumer<GPUPlanarRegionIsland> doNothingIslandConsumer = this::onFindRegionIsland;
-   private final Consumer<GPURegionRing> doNothingRingConsumer = this::onFindBoundariesAndHolesRing;
-   private final Throttler parameterOutputThrottler = new Throttler();
-   private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
 
    private final OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -95,13 +88,6 @@ public class L515AndRapidRegions
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_videopub");
-
-      ROS2Topic<BigVideoPacket> depthTopic = ROS2Tools.L515_DEPTH_LARGE;
-      LogTools.info("Publishing ROS 2 depth video: {}", depthTopic);
-      ros2DepthVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
-      ROS2Topic<BigVideoPacket> debugExtractionTopic = ROS2Tools.L515_DEBUG_EXTRACTION;
-      LogTools.info("Publishing ROS 2 debug extraction video: {}", debugExtractionTopic);
-      ros2DebugExtractionVideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, debugExtractionTopic, ROS2QosProfile.BEST_EFFORT());
       realtimeROS2Node.spin();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "l515_node");
@@ -126,11 +112,6 @@ public class L515AndRapidRegions
       LogTools.info("Starting loop.");
       thread.start();
    }
-
-   int val0;
-   int val1;
-   int val2;
-   int val3;
 
    private void update()
    {
@@ -200,28 +181,7 @@ public class L515AndRapidRegions
                LogTools.info("Initialized.");
             }
 
-            val0 = Short.toUnsignedInt(depthU16C1Image.ptr(0, 0).getShort());
-            val1 = Short.toUnsignedInt(depthU16C1Image.ptr(100, 200).getShort());
-            val2 = Short.toUnsignedInt(depthU16C1Image.ptr(400, 200).getShort());
-            val3 = Short.toUnsignedInt(depthU16C1Image.ptr(600, 50).getShort());
-
             depthU16C1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
-
-            //int previousPatchSize = rapidRegionsExtractor.getParameters().getPatchSize();
-            //ros2PropertySetGroup.update();
-            //if (patchSizeChangedNotification.poll())
-            //{
-            //   int newPatchSize = rapidRegionsExtractor.getParameters().getPatchSize();
-            //   if (depthWidth % newPatchSize == 0 && depthHeight % newPatchSize == 0)
-            //   {
-            //      LogTools.info("New patch size accepted: {}", newPatchSize);
-            //      rapidRegionsExtractor.setPatchSizeChanged(true);
-            //   }
-            //   else // Reject the parameter and revert to the previous value because it's not an even divisor
-            //   {
-            //      rapidRegionsExtractor.getParameters().setPatchSize(previousPatchSize);
-            //   }
-            //}
 
             PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
             rapidRegionsExtractor.update(depthBytedecoImage, true);
@@ -245,38 +205,6 @@ public class L515AndRapidRegions
             {
                ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, planarRegionsListMessage);
             }
-
-            int depthFrameDataSize = l515.getDepthFrameDataSize();
-
-            depthBytedecoImage.rewind();
-            BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthBytedecoImage.getBytedecoOpenCVMat(), depthNormalizedScaled, 0.0, 255.0);
-            BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(depthNormalizedScaled, depthRGB);
-            opencv_imgproc.cvtColor(depthRGB, depthYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
-            opencv_imgcodecs.imencode(".jpg", depthYUV420Image, depthJPEGImageBytePointer, compressionParameters);
-
-            byte[] heapByteArrayData = new byte[depthJPEGImageBytePointer.asBuffer().remaining()];
-            depthJPEGImageBytePointer.asBuffer().get(heapByteArrayData);
-            depthImagePacket.getData().resetQuick();
-            depthImagePacket.getData().add(heapByteArrayData);
-            depthImagePacket.setImageHeight(depthHeight);
-            depthImagePacket.setImageWidth(depthWidth);
-            depthImagePacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
-            depthImagePacket.setAcquisitionTimeAdditionalNanos(now.getNano());
-            ros2DepthVideoPublisher.publish(depthImagePacket);
-
-            BytedecoOpenCVTools.flipY(debugExtractionImage.getBytedecoOpenCVMat(), flippedDebugImage);
-            opencv_imgproc.cvtColor(flippedDebugImage, debugYUV420Image, opencv_imgproc.COLOR_RGB2YUV_I420);
-            opencv_imgcodecs.imencode(".jpg", debugYUV420Image, debugJPEGImageBytePointer, compressionParameters);
-
-            heapByteArrayData = new byte[debugJPEGImageBytePointer.asBuffer().remaining()];
-            debugJPEGImageBytePointer.asBuffer().get(heapByteArrayData);
-            debugExtractionImagePacket.getData().resetQuick();
-            debugExtractionImagePacket.getData().add(heapByteArrayData);
-            debugExtractionImagePacket.setImageHeight(debugExtractionImage.getImageHeight());
-            debugExtractionImagePacket.setImageWidth(debugExtractionImage.getImageWidth());
-            debugExtractionImagePacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
-            debugExtractionImagePacket.setAcquisitionTimeAdditionalNanos(now.getNano());
-            ros2DebugExtractionVideoPublisher.publish(debugExtractionImagePacket);
          }
       }
    }
@@ -286,38 +214,6 @@ public class L515AndRapidRegions
       int patchImageWidth = rapidRegionsExtractor.getPatchImageWidth();
       int patchImageHeight = rapidRegionsExtractor.getPatchImageHeight();
       debugExtractionImage = new BytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC4);
-   }
-
-   private void onFindRegionIsland(GPUPlanarRegionIsland island)
-   {
-      for (Point2D regionIndex : island.planarRegion.getRegionIndices())
-      {
-         int x = (int) regionIndex.getX();
-         int y = (int) regionIndex.getY();
-         int r = (island.planarRegionIslandIndex + 1) * 312 % 255;
-         int g = (island.planarRegionIslandIndex + 1) * 123 % 255;
-         int b = (island.planarRegionIslandIndex + 1) * 231 % 255;
-         BytePointer pixel = debugExtractionImage.getBytedecoOpenCVMat().ptr(y, x);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
-      }
-   }
-
-   private void onFindBoundariesAndHolesRing(GPURegionRing regionRing)
-   {
-      for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
-      {
-         int x = (int) boundaryIndex.getX();
-         int y = (int) boundaryIndex.getY();
-         int r = (regionRing.getIndex() + 1) * 130 % 255;
-         int g = (regionRing.getIndex() + 1) * 227 % 255;
-         int b = (regionRing.getIndex() + 1) * 332 % 255;
-         BytePointer pixel = debugExtractionImage.getBytedecoOpenCVMat().ptr(y, x);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
-      }
    }
 
    private void destroy()
