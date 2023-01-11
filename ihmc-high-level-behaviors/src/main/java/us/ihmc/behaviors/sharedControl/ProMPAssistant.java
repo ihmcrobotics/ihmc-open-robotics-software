@@ -216,7 +216,7 @@ public class ProMPAssistant
                   taskGoalPose = detectedObjectPose;
                   taskGoalPose.appendTransform(taskTransformGoalMap.get(currentTask));
                   // check resulting frame is not in the wrong 2pi range of quaternion [-2pi,2pi]. q = -q but the ProMPs do not know that
-                  if (Math.signum(lastObservedPose.getOrientation().getS() * taskGoalPose.getOrientation().getS()) == -1)
+                  if (Math.signum(proMPManagers.get(currentTask).getMeanEndValueQS() * taskGoalPose.getOrientation().getS()) == -1)
                      taskGoalPose.getOrientation().negate();
 
                   //                  taskGoalPose = recordedGoalPose;
