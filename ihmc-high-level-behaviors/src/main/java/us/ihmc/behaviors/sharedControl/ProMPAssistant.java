@@ -208,6 +208,7 @@ public class ProMPAssistant
                   generateTaskTrajectories();
                   doneInitialProcessingTask = true;
                   lastObservedPose.changeFrame(ReferenceFrame.getWorldFrame()); // switch back to world frame for replay preview
+                  LogTools.info("lastObservedPose in Map: {}",bodyPartObservedTrajectoryMap.get(bodyPart).get(0));
                   LogTools.info("Generating prediction ...");
                }
                else // if there is no observable object and goal, wait to get few observations before updating
