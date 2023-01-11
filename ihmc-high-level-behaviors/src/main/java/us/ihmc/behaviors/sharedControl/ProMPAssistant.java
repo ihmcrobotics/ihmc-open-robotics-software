@@ -269,7 +269,7 @@ public class ProMPAssistant
 
    private boolean taskDetected(String objectName)
    {
-      objectName="PushDoor";
+      objectName="PushDoorOF";
       if (currentTask.isEmpty() && !objectName.isEmpty())
       {
          // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
