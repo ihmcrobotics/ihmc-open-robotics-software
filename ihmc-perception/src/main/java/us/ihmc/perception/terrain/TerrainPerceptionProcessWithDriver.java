@@ -326,7 +326,7 @@ public class TerrainPerceptionProcessWithDriver
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
       new TerrainPerceptionProcessWithDriver(new RealsenseConfiguration(l515SerialNumber, 768, 1024, 30, true, 720, 1280, 30),
                                              ROS2Tools.L515_DEPTH_IMAGE,
                                              ROS2Tools.L515_COLOR_IMAGE,
