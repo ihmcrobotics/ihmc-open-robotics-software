@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionDataLogger;
@@ -9,6 +10,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.logging.PerceptionDataLoadingPanel;
 import us.ihmc.rdx.logging.PerceptionDataLoggingPanel;
+import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -35,6 +37,8 @@ public class RDXPerceptionUI
    private RDXBuildingConstructor buildingConstructor;
    private RDXROS2BigVideoVisualizer blackflyRightVisualizer;
    private RDXROS2VideoVisualizer videoVisualizer;
+
+   private RDXRemotePerceptionUI rapidRegionsExtractionUI;
 
    private Activator nativesLoadedActivator;
 
@@ -112,6 +116,9 @@ public class RDXPerceptionUI
 
             baseUI.create();
             baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI, RDXSceneLevel.VIRTUAL);
+
+            rapidRegionsExtractionUI = new RDXRemotePerceptionUI(new ROS2Helper(ros2Node));
+            baseUI.getImGuiPanelManager().addPanel(rapidRegionsExtractionUI.getPanel());
 
             environmentBuilder.create();
             environmentBuilder.loadEnvironment("DemoPullDoor.json");

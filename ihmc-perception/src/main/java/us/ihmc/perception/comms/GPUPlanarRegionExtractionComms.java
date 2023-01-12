@@ -1,4 +1,4 @@
-package us.ihmc.perception.terrain;
+package us.ihmc.perception.comms;
 
 import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Empty;

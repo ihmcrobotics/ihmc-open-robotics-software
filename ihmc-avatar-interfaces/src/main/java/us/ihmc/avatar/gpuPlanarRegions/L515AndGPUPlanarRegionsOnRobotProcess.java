@@ -44,7 +44,7 @@ import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
 import us.ihmc.perception.rapidRegions.GPURegionRing;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
-import us.ihmc.perception.terrain.GPUPlanarRegionExtractionComms;
+import us.ihmc.perception.comms.GPUPlanarRegionExtractionComms;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

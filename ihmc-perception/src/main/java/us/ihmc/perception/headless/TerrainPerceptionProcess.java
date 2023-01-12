@@ -1,4 +1,4 @@
-package us.ihmc.perception.terrain;
+package us.ihmc.perception.headless;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import org.bytedeco.opencl._cl_program;
@@ -23,6 +23,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.comms.GPUPlanarRegionExtractionComms;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
-import us.ihmc.perception.terrain.GPUPlanarRegionExtractionComms;
+import us.ihmc.perception.comms.GPUPlanarRegionExtractionComms;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiPanel;

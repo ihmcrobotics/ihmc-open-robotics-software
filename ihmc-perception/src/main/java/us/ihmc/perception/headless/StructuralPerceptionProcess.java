@@ -1,4 +1,4 @@
-package us.ihmc.perception.ouster;
+package us.ihmc.perception.headless;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.pubsub.DomainFactory;
@@ -29,7 +30,7 @@ import java.util.function.Supplier;
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
-public class OusterDriverAndDepthImagePublisher
+public class StructuralPerceptionProcess
 {
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -50,7 +51,7 @@ public class OusterDriverAndDepthImagePublisher
    private long sequenceNumber = 0;
    private final ImageMessage outputImageMessage = new ImageMessage();
 
-   public OusterDriverAndDepthImagePublisher(Supplier<ReferenceFrame> sensorFrameUpdater)
+   public StructuralPerceptionProcess(Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.sensorFrameUpdater = sensorFrameUpdater;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
@@ -70,12 +71,12 @@ public class OusterDriverAndDepthImagePublisher
       ouster.setOnFrameReceived(this::onFrameReceived);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
-      {
-         ouster.setOnFrameReceived(null);
-         ouster.destroy();
-         ThreadTools.sleepSeconds(0.5);
-         extractCompressAndPublishThread.destroy();
-      }, getClass().getSimpleName() + "Shutdown"));
+                                                      {
+                                                         ouster.setOnFrameReceived(null);
+                                                         ouster.destroy();
+                                                         ThreadTools.sleepSeconds(0.5);
+                                                         extractCompressAndPublishThread.destroy();
+                                                      }, getClass().getSimpleName() + "Shutdown"));
    }
 
    // If we aren't doing anything, copy the data and publish it.
@@ -96,6 +97,8 @@ public class OusterDriverAndDepthImagePublisher
             depthHeight = ouster.getImageHeight();
             numberOfPointsPerFullScan = depthWidth * depthHeight;
             LogTools.info("Ouster width: {} height: {} # points: {}", depthWidth, depthHeight, numberOfPointsPerFullScan);
+
+            // TODO: Combine rapid region extraction and depth extraction kernels into single program
 
             openCLProgram = openCLManager.loadProgram("OusterDepthImageExtraction");
             depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, openCLProgram);
@@ -143,6 +146,6 @@ public class OusterDriverAndDepthImagePublisher
 
    public static void main(String[] args)
    {
-      new OusterDriverAndDepthImagePublisher(ReferenceFrame::getWorldFrame);
+      new StructuralPerceptionProcess(ReferenceFrame::getWorldFrame);
    }
 }

@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import imgui.ImGui;
 import imgui.type.ImFloat;
+import org.bytedeco.opencl._cl_program;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.*;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
@@ -33,6 +34,7 @@ public class RDXNettyOusterUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private int numberOfDepthPoints;
    private OpenCLManager openCLManager;
+   private _cl_program openCLProgram;
    private OusterDepthExtractionKernel depthExtractionKernel;
    private RDXOusterDepthImageToPointCloudKernel depthImageToPointCloudKernel;
    private RDXPointCloudRenderer pointCloudRenderer;
@@ -114,7 +116,8 @@ public class RDXNettyOusterUI
 
                      numberOfDepthPoints = ouster.getImageWidth() * ouster.getImageHeight();
 
-                     depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
+                     openCLProgram = openCLManager.loadProgram("OusterDepthImageExtraction");
+                     depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, openCLProgram);
 
                      pointCloudRenderer = new RDXPointCloudRenderer();
                      pointCloudRenderer.create(numberOfDepthPoints);
