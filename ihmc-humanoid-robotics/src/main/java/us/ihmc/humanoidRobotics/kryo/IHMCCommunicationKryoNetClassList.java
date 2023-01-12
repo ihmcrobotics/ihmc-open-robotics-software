@@ -514,6 +514,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(TransitionPubSubType.class);
       registerPacketField(InteractiveMarkerPosePubSubType.class);
       registerPacketField(DrillDetectionPacketPubSubType.class);
+      registerPacketField(InstantMessage.class);
 
       registerPacketClass(Packet.class);
 

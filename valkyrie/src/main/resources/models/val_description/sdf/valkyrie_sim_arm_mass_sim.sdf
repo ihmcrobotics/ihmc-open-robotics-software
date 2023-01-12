@@ -1007,14 +1007,14 @@
       <pose frame=''>0.04191 0 0.0203 0 -0 0</pose>
       <inertial>
         <pose frame=''>-0.095548 -0.003337 0.243098 0 -0 0</pose>
-        <mass>39.47</mass>
+        <mass>30.87</mass>
         <inertia>
-          <ixx>0.873269</ixx>
-          <ixy>9.95625e-05</ixy>
-          <ixz>0.0613452</ixz>
-          <iyy>1.01085</iyy>
+          <ixx>0.858969</ixx>
+          <ixy>9.9563e-05</ixy>
+          <ixz>0.061345211</ixz>
+          <iyy>0.99655</iyy>
           <iyz>0.00181849</iyz>
-          <izz>0.778398</izz>
+          <izz>0.764098</izz>
         </inertia>
       </inertial>
       <collision name='torso_collision'>
@@ -1232,7 +1232,7 @@
         <limit>
           <lower>-1.519</lower>
           <upper>1.266</upper>
-          <effort>190</effort>
+          <effort>350</effort>
           <velocity>3.5</velocity>			<!-- it used to be 5.89. Shoulder roll was tested within -1.47 ~ 5.31 (rad/sec)-->
         </limit>
         <dynamics>
@@ -1490,8 +1490,8 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <lower>-1.0472</lower>
-          <upper>1.0472</upper>
+          <lower>-1.04719755</lower>
+          <upper>1.04719755</upper>
           <effort>26</effort>
           <velocity>5</velocity>
         </limit>
@@ -1602,7 +1602,7 @@
       <sensor name='stereo_camera' type='multicamera'>
         <update_rate>10</update_rate>
         <camera name='left'>
-          <horizontal_fov>1.39626</horizontal_fov>
+          <horizontal_fov>1.3962634</horizontal_fov>
           <image>
             <width>1024</width>
             <height>544</height>
@@ -1620,7 +1620,7 @@
         </camera>
         <camera name='right'>
           <pose frame=''>0 -0.07 0 0 -0 0</pose>
-          <horizontal_fov>1.39626</horizontal_fov>
+          <horizontal_fov>1.3962634</horizontal_fov>
           <image>
             <width>1024</width>
             <height>544</height>
@@ -1745,8 +1745,8 @@
             <horizontal>
               <samples>1081</samples>
               <resolution>1</resolution>
-              <min_angle>-2.35619</min_angle>
-              <max_angle>2.35619</max_angle>
+              <min_angle>-2.356194</min_angle>
+              <max_angle>2.356194</max_angle>
             </horizontal>
           </scan>
           <range>
@@ -1767,7 +1767,7 @@
       <child>hokuyo_link</child>
       <parent>upperNeckPitchLink</parent>
       <axis>
-        <xyz>1.0 0 0</xyz>
+        <xyz>0.9914 0.0 -0.1305</xyz>
         <limit>
           <lower>-1e+16</lower>
           <upper>1e+16</upper>
@@ -1897,7 +1897,7 @@
         <limit>
           <lower>-1.266</lower>
           <upper>1.519</upper>
-          <effort>190</effort>
+          <effort>350</effort>
           <velocity>3.5</velocity>			<!-- it used to be 5.89. Shoulder roll was tested within -5.31 ~ 1.47 (rad/sec)-->
         </limit>
         <dynamics>

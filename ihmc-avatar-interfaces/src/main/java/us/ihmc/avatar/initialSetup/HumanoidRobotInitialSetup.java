@@ -133,6 +133,10 @@ public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloa
       robot.getRootJoint().getPosition().addZ(initialGroundHeight);
       robot.getRootJoint().setOrientation(rootJointOrientation);
       robot.getRootJoint().getOrientation().prependYawRotation(initialYaw);
+
+      robot.getRootJoint().setVelocity(rootJointLinearVelocityInWorld);
+      robot.getRootJoint().setAngularVelocityInBody(rootJointAngularVelocityInBody);
+
       robot.update();
    }
 
@@ -163,20 +167,31 @@ public class HumanoidRobotInitialSetup implements RobotInitialSetup<HumanoidFloa
          }
       }
 
+      /* Root joint position */
       if (applyRootJointPose && rootBody.getChildrenJoints().size() == 1)
       {
          JointBasics rootJoint = rootBody.getChildrenJoints().get(0);
 
-         if (rootJoint instanceof FloatingJointBasics)
+         if (rootJoint instanceof FloatingJointBasics floatingJoint)
          {
-            FloatingJointBasics floatingJoint = (FloatingJointBasics) rootJoint;
             Pose3DBasics jointPose = floatingJoint.getJointPose();
-            FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
             jointPose.getPosition().set(rootJointPosition);
             jointPose.getPosition().add(additionalOffset);
             jointPose.getPosition().addZ(initialGroundHeight);
             jointPose.getOrientation().set(rootJointOrientation);
             jointPose.getOrientation().prependYawRotation(initialYaw);
+         }
+      }
+
+      /* Root joint velocity */
+      if (rootBody.getChildrenJoints().size() == 1)
+      {
+         JointBasics rootJoint = rootBody.getChildrenJoints().get(0);
+
+         if (rootJoint instanceof FloatingJointBasics floatingJoint)
+         {
+            Pose3DBasics jointPose = floatingJoint.getJointPose();
+            FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
             jointTwist.getAngularPart().set(rootJointAngularVelocityInBody);
             jointPose.getOrientation().inverseTransform(rootJointLinearVelocityInWorld, jointTwist.getLinearPart());
          }
