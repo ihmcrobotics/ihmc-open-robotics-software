@@ -1,7 +1,7 @@
 kernel void extractDepthImage(global float* parameters,
                               global int* pixelShifts,
                               global unsigned char* lidarFrameBuffer,
-                              write_only image2d_t depthImage16UC1)
+                              read_write image2d_t depthImage16UC1)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
