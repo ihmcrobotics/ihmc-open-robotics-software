@@ -289,21 +289,29 @@ public class AStarFootstepPlanner
          int size2 = path.size();
          for (int i = 0; i < Math.min(size1, size2); ++i)
          {
+            // the nth node from previous and current plan
             FootstepGraphNode nodeDesired = desiredPath.get(i);
             FootstepGraphNode nodeCurrent = path.get(i);
+
+            // Distance difference between the nodes
             double xyDistanceFirst = EuclidCoreTools.norm(nodeDesired.getFirstStep().getX() - nodeCurrent.getFirstStep().getX(),
                                                                           nodeDesired.getFirstStep().getY() - nodeCurrent.getFirstStep().getY());
             double xyDistanceSecond = EuclidCoreTools.norm(nodeDesired.getSecondStep().getX() - nodeCurrent.getSecondStep().getX(),
                                                           nodeDesired.getSecondStep().getY() - nodeCurrent.getSecondStep().getY());
+
+            // Angle difference between the nodes
             double yawDistanceFirst = EuclidCoreTools.angleDifferenceMinusPiToPi(nodeDesired.getFirstStep().getYaw(), nodeCurrent.getFirstStep().getYaw());
             double yawDistanceSecond = EuclidCoreTools.angleDifferenceMinusPiToPi(nodeDesired.getSecondStep().getYaw(), nodeCurrent.getSecondStep().getYaw());
 
+            // penalty for deviance.
             double penalty = alpha * (xyDistanceFirst + xyDistanceSecond) + beta * (Math.abs(yawDistanceFirst) + Math.abs(yawDistanceSecond));
             double originalCost = iterationConductor.getGraph().getNodeCostMap().get(nodeCurrent).getNodeCost();
+
+            // update the node's cost with penalty
             iterationConductor.getGraph().getNodeCostMap().put(nodeCurrent, new NodeCost(originalCost + penalty));
          }
       }
-
+      
       for (int i = 1; i < path.size(); i++)
       {
          FootstepGraphNode footstepNode = path.get(i);
