@@ -15,6 +15,7 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -77,6 +78,9 @@ public class PerceptionDataLogger
 
       channels.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new AtomicReference<>(null));
+
+      channels.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0, 0));
+      references.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
@@ -176,6 +180,16 @@ public class PerceptionDataLogger
          var zed2StereoSubscription = ros2Helper.subscribe(ROS2Tools.ZED2_STEREO_COLOR);
          zed2StereoSubscription.addCallback(this::logColorZED2);
          runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
+      }
+
+      // Add callback for Blackfly Color images
+      if(channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+      {
+         byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
+         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
+         var blackflySubscription = ros2Helper.subscribe(ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
+         blackflySubscription.addCallback(this::logColorBlackfly);
+         runnablesToStopLogging.addLast(blackflySubscription::destroy);
       }
 
       // Add callback for Ouster depth maps
@@ -304,7 +318,7 @@ public class PerceptionDataLogger
 
    public void logColorZED2(VideoPacket videoPacket)
    {
-      LogTools.info("Logging L515 Color: ", videoPacket.toString());
+      LogTools.info("Logging ZED2 Color: ", videoPacket.toString());
 
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
@@ -315,10 +329,46 @@ public class PerceptionDataLogger
       //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
    }
 
+   public void logColorBlackfly(BigVideoPacket videoPacket)
+   {
+      LogTools.info("Logging Blackfly Color: ", videoPacket.toString());
+
+      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+      {
+         channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).incrementCount();
+         storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, videoPacket);
+      }
+
+      //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
+   }
+
    /*
     *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
     */
    public void storeCompressedImage(String namespace, VideoPacket packet)
+   {
+      executorService.submit(() ->
+                             {
+                                Group group = hdf5Manager.getGroup(namespace);
+
+                                byte[] heapArray = byteBuffers.get(namespace);
+                                int imageCount = counts.get(namespace);
+                                IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+
+                                LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+                                counts.put(namespace, imageCount + 1);
+
+                                imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+                                HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+
+                                LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                             });
+   }
+
+   /*
+    *  Store methods which actually deploy threads and call HDF5 specific functions for storing compressed data.
+    */
+   public void storeCompressedImage(String namespace, BigVideoPacket packet)
    {
       executorService.submit(() ->
                              {

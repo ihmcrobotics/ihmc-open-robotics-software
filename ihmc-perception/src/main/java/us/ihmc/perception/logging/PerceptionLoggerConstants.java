@@ -16,6 +16,8 @@ public class PerceptionLoggerConstants
    public static final String OUSTER_SENSOR_POSITION = "/ouster/sensor/position";
    public static final String OUSTER_SENSOR_ORIENTATION = "/ouster/sensor/orientation";
 
+   public static final String BLACKFLY_COLOR_NAME = "/blackfly/color";
+
    public static final String D435_DEPTH_NAME = "/d435/depth/";
    public static final String D435_COLOR_NAME = "/d435/color/";
 
