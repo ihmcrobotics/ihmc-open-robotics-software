@@ -184,8 +184,8 @@ public class RapidPlanarRegionsExtractor
       copyFeatureGridMapUsingOpenCL();
       wholeAlgorithmDurationStopwatch.suspend();
 
-      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
-      debugger.showDebugImage(1);
+//      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
+//      debugger.showDebugImage(1);
    }
 
    /**

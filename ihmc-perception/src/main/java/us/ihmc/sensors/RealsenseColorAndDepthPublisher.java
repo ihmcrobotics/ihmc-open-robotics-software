@@ -15,6 +15,7 @@ import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
+import us.ihmc.perception.tools.PerceptionTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -132,11 +133,11 @@ public class RealsenseColorAndDepthPublisher
 
             MutableBytePointer depthFrameData = sensor.getDepthFrameData();
             depth16UC1Image = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1, depthFrameData);
-            setDepthExtrinsics(sensor, depthImageMessage.getIntrinsicParameters());
+            PerceptionTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage.getIntrinsicParameters());
 
             MutableBytePointer colorFrameData = sensor.getColorFrameData();
             color8UC3Image = new Mat(this.colorHeight, this.colorWidth, opencv_core.CV_8UC3, colorFrameData);
-            setColorExtrinsics(sensor, colorImageMessage.getIntrinsicParameters());
+            PerceptionTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage.getIntrinsicParameters());
 
             // Important not to store as a field, as update() needs to be called each frame
             ReferenceFrame cameraFrame = sensorFrameUpdater.get();
@@ -154,12 +155,12 @@ public class RealsenseColorAndDepthPublisher
 
             compressedDepthPointer = new BytePointer();
             BytedecoOpenCVTools.compressImagePNG(depth16UC1Image, compressedDepthPointer);
-            BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, sensor.getDepthHeight(), sensor.getDepthWidth());
+            BytedecoOpenCVTools.fillImageMessage(compressedDepthPointer, depthImageMessage, cameraPose, depthSequenceNumber, sensor.getDepthHeight(), sensor.getDepthWidth());
             ros2Helper.publish(this.depthTopic, depthImageMessage);
 
             compressedColorPointer = new BytePointer();
             BytedecoOpenCVTools.compressRGBImageJPG(color8UC3Image, yuvColorImage, compressedColorPointer);
-            BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, sensor.getColorHeight(), sensor.getColorWidth());
+            BytedecoOpenCVTools.fillImageMessage(compressedColorPointer, colorImageMessage, cameraPose, colorSequenceNumber, sensor.getColorHeight(), sensor.getColorWidth());
             ros2Helper.publish(this.colorTopic, colorImageMessage);
 
             /* Debug Only: Show depth and color for quick sensor testing on systems with display */
@@ -182,24 +183,6 @@ public class RealsenseColorAndDepthPublisher
             //                            colorWidth));
          }
       }
-   }
-
-   private void setDepthExtrinsics(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
-   {
-      intrinsicParametersMessage.setFx(sensor.getDepthFocalLengthPixelsX());
-      intrinsicParametersMessage.setFy(sensor.getDepthFocalLengthPixelsY());
-      intrinsicParametersMessage.setSkew(0.0);
-      intrinsicParametersMessage.setCx(sensor.getDepthPrincipalOffsetXPixels());
-      intrinsicParametersMessage.setCy(sensor.getDepthPrincipalOffsetYPixels());
-   }
-
-   private void setColorExtrinsics(BytedecoRealsense sensor, IntrinsicParametersMessage intrinsicParametersMessage)
-   {
-      intrinsicParametersMessage.setFx(sensor.getColorFocalLengthPixelsX());
-      intrinsicParametersMessage.setFy(sensor.getColorFocalLengthPixelsY());
-      intrinsicParametersMessage.setSkew(0.0);
-      intrinsicParametersMessage.setCx(sensor.getColorPrincipalOffsetXPixels());
-      intrinsicParametersMessage.setCy(sensor.getColorPrincipalOffsetYPixels());
    }
 
    private void display(Mat depth, Mat color)
