@@ -211,4 +211,9 @@ public class DirectedGraph<N>
    {
       return edgeCostMap;
    }
+
+   public HashMap<N, NodeCost> getNodeCostMap()
+   {
+      return nodeCostMap;
+   }
 }

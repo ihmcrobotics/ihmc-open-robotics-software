@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -15,6 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepPlannerRequest
 {
@@ -118,6 +120,11 @@ public class FootstepPlannerRequest
     * Requested swing planner. Sets swing parameters to avoid collisions
     */
    private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
+
+   /**
+    * Requested initial desired footstep plan
+    */
+   private List<FootstepGraphNode> desiredPath = new ArrayList<>();
 
    public FootstepPlannerRequest()
    {
@@ -283,6 +290,11 @@ public class FootstepPlannerRequest
       this.swingPlannerType = swingPlannerType;
    }
 
+   public void setDesiredPath(List<FootstepGraphNode> desiredPath)
+   {
+      this.desiredPath = desiredPath;
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -381,6 +393,11 @@ public class FootstepPlannerRequest
    public SwingPlannerType getSwingPlannerType()
    {
       return swingPlannerType;
+   }
+
+   public List<FootstepGraphNode> getDesiredPath()
+   {
+      return desiredPath;
    }
 
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
@@ -489,6 +506,8 @@ public class FootstepPlannerRequest
       this.assumeFlatGround = other.assumeFlatGround;
       this.statusPublishPeriod = other.statusPublishPeriod;
       this.swingPlannerType = other.swingPlannerType;
+
+      this.desiredPath = other.desiredPath;
 
       if(other.planarRegionsList != null)
       {
