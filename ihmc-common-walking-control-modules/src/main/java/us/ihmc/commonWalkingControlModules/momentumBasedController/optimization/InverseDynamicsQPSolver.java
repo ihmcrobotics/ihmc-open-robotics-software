@@ -518,7 +518,6 @@ public class InverseDynamicsQPSolver
       nativeSolverInput_f.multAddBlock(-1.0, taskWeight, taskObjective, offset, 0);
    }
 
-
    private void addTaskInternal(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, int offset)
    {
       int taskSize = taskJacobian.getNumRows();
@@ -839,6 +838,9 @@ public class InverseDynamicsQPSolver
       addTorqueMinimizationObjective(tempJtW, torqueObjective);
    }
 
+   private final NativeMatrix nativeAdditionalExternalWrench = new NativeMatrix(1, 1);
+   private final NativeMatrix nativeGravityWrench = new NativeMatrix(1, 1);
+
    /**
     * Need to be called before {@link #solve()}. It sets up the constraint that ensures that the
     * solution is dynamically feasible:
@@ -884,8 +886,8 @@ public class InverseDynamicsQPSolver
          CommonOps_DDRM.insert(rhoJacobian, tempWrenchConstraint_J, 0, numberOfDoFs);
 
          double weight = 150.0;
-         nativeSolverInput_H.multAddTransA(weight, tempWrenchConstraint_J, tempWrenchConstraint_J);
-         nativeSolverInput_f.multAddTransA(-weight, tempWrenchConstraint_J, tempWrenchConstraint_RHS);
+         MatrixTools.multAddInner(weight, tempWrenchConstraint_J, solverInput_H);
+         CommonOps_DDRM.multAddTransA(-weight, tempWrenchConstraint_J, tempWrenchConstraint_RHS, solverInput_f);
       }
       else
       {
@@ -910,9 +912,9 @@ public class InverseDynamicsQPSolver
       this.accelerationVariablesSubstitution.concatenate(substitution);
    }
 
-   private final NativeMatrix tempWrenchConstraint_J = new NativeMatrix(Wrench.SIZE, 200);
-   private final NativeMatrix tempWrenchConstraint_LHS = new NativeMatrix(Wrench.SIZE, 1);
-   private final NativeMatrix tempWrenchConstraint_RHS = new NativeMatrix(Wrench.SIZE, 1);
+   private final DMatrixRMaj tempWrenchConstraint_J = new DMatrixRMaj(Wrench.SIZE, 200);
+   private final DMatrixRMaj tempWrenchConstraint_LHS = new DMatrixRMaj(Wrench.SIZE, 1);
+   private final DMatrixRMaj tempWrenchConstraint_RHS = new DMatrixRMaj(Wrench.SIZE, 1);
 
    public boolean solve()
    {
@@ -992,7 +994,7 @@ public class InverseDynamicsQPSolver
       {
          if (hasFloatingBase)
          {
-            tempWrenchConstraint_LHS.mult(tempWrenchConstraint_J, solverOutput);
+            CommonOps_DDRM.mult(tempWrenchConstraint_J, new DMatrixRMaj(solverOutput), tempWrenchConstraint_LHS);
             int index = 0;
             wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
             wrenchEquilibriumTorqueError.setY(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));

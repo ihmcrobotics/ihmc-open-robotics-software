@@ -24,20 +24,20 @@ import java.util.Arrays;
  * 
  * @author Sylvain Bertrand
  */
-public class NativeQPVariableSubstitution
+public class NativeQPVariableSubstitution implements QPVariableSubstitutionInterface<NativeMatrix>
 {
    /** Refers to the number of elements in {@code x} that are to be substituted. */
-   public int numberOfVariablesToSubstitute;
+   private int numberOfVariablesToSubstitute;
    /** Refers to the index of each element in {@code x} that is to be substituted. */
-   public int[] variableIndices = new int[4];
+   private int[] variableIndices = new int[4];
    /** Refers to the indices of each element in {@code y} that represent the actuated joints. */
-   public TIntArrayList activeIndices = new TIntArrayList(4, -1);
+   private TIntArrayList activeIndices = new TIntArrayList(4, -1);
    private TIntArrayList inactiveIndices = new TIntArrayList(4, -1);
 
    /** Refers to the transformation matrix {@code G}. */
-   public final NativeMatrix transformation = new NativeMatrix(4, 1);
+   private final NativeMatrix transformation = new NativeMatrix(4, 1);
    /** Refers to the bias vector {@code g}. */
-   public final NativeMatrix bias = new NativeMatrix(4, 1);
+   private final NativeMatrix bias = new NativeMatrix(4, 1);
    /**
     * When {@code true}, the operations related to concatenating and substituting will be simplified
     * assuming that the bias is zero.
@@ -57,6 +57,36 @@ public class NativeQPVariableSubstitution
    public NativeQPVariableSubstitution()
    {
       reset();
+   }
+
+   @Override
+   public int getNumberOfVariablesToSubstitute()
+   {
+      return numberOfVariablesToSubstitute;
+   }
+
+   @Override
+   public NativeMatrix getTransformation()
+   {
+      return transformation;
+   }
+
+   @Override
+   public NativeMatrix getBias()
+   {
+      return bias;
+   }
+
+   @Override
+   public int[] getVariableIndices()
+   {
+      return variableIndices;
+   }
+
+   @Override
+   public TIntArrayList getActiveIndices()
+   {
+      return activeIndices;
    }
 
    public void reset()
@@ -91,38 +121,38 @@ public class NativeQPVariableSubstitution
     * 
     * @param other the other substitution to add to this. Not modified.
     */
-   public void concatenate(NativeQPVariableSubstitution other)
+   public void concatenate(QPVariableSubstitutionInterface<NativeMatrix> other)
    {
       int oldSizeX = numberOfVariablesToSubstitute;
       int oldSizeY = transformation.getNumCols();
-      int newSizeX = oldSizeX + other.numberOfVariablesToSubstitute;
-      int newSizeY = oldSizeY + other.transformation.getNumCols();
+      int newSizeX = oldSizeX + other.getNumberOfVariablesToSubstitute();
+      int newSizeY = oldSizeY + other.getTransformation().getNumCols();
 
       if (variableIndices.length < newSizeX)
          variableIndices = Arrays.copyOf(variableIndices, newSizeX);
 
-      for (int i = 0; i < other.numberOfVariablesToSubstitute; i++)
+      for (int i = 0; i < other.getNumberOfVariablesToSubstitute(); i++)
       {
-         variableIndices[i + oldSizeX] = other.variableIndices[i];
+         variableIndices[i + oldSizeX] = other.getVariableIndices()[i];
       }
 
-      for (int i = 0; i < other.activeIndices.size(); i++)
+      for (int i = 0; i < other.getActiveIndices().size(); i++)
       {
-         activeIndices.add(other.activeIndices.get(i) + oldSizeX);
+         activeIndices.add(other.getActiveIndices().get(i) + oldSizeX);
       }
 
       tempA.set(transformation);
       transformation.reshape(newSizeX, newSizeY);
       transformation.zero();
       transformation.insert(tempA, 0, 0);
-      transformation.insert(other.transformation, oldSizeX, oldSizeY);
+      transformation.insert(other.getTransformation(), oldSizeX, oldSizeY);
 
       if (!ignoreBias)
       {
          // Since bias is a vector, it is safe to reshape it and trust that the coefficients won't be shifted.
          bias.reshape(newSizeX, 1);
          bias.zero();
-         bias.insert(other.bias, oldSizeX, oldSizeY);
+         bias.insert(other.getBias(), oldSizeX, oldSizeY);
       }
 
       numberOfVariablesToSubstitute = newSizeX;

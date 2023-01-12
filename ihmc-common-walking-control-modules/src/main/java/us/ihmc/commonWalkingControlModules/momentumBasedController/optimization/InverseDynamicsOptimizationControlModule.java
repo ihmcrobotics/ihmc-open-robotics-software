@@ -34,7 +34,6 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactive
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -69,7 +68,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final QPInputTypeA motionQPInput;
    private final NativeQPInputTypeA nativeMotionQPInput;
    private final QPInputTypeA rhoQPInput;
-   private final QPVariableSubstitution motionQPVariableSubstitution;
+   private final NativeQPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
@@ -82,6 +81,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final OneDoFJointBasics[] oneDoFJoints;
    private final DMatrixRMaj qDDotMinMatrix, qDDotMaxMatrix;
    private final DMatrixRMaj customQDDotMinMatrix, customQDDotMaxMatrix;
+   private final DMatrixRMaj qDDotSolution = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj rhoSolution = new DMatrixRMaj(1, 1);
 
    private final JointIndexHandler jointIndexHandler;
    private final TIntArrayList inactiveJointIndices = new TIntArrayList();
@@ -140,7 +141,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       nativeMotionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       directMotionQPInput = new QPInputTypeB(numberOfDoFs);
       rhoQPInput = new QPInputTypeA(rhoSize);
-      motionQPVariableSubstitution = new QPVariableSubstitution();
+      motionQPVariableSubstitution = new NativeQPVariableSubstitution();
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -263,8 +264,8 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
          hasNotConvergedCounts.increment();
       }
 
-      NativeMatrix qDDotSolution = qpSolver.getJointAccelerations();
-      NativeMatrix rhoSolution = qpSolver.getRhos();
+      qDDotSolution.set(qpSolver.getJointAccelerations());
+      rhoSolution.set(qpSolver.getRhos());
 
       Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
