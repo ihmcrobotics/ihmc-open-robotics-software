@@ -12,6 +12,7 @@ import net.jpountz.lz4.LZ4Decompressor;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
@@ -22,6 +23,7 @@ import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.PerceptionMessageTools;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
@@ -107,6 +109,15 @@ public class PointCloudData
 
       pointCloud = MessageTools.unpackScanPoint3ds(sensorData);
       numberOfPoints = sensorData.getNumberOfPoints();
+      colors = null;
+   }
+
+   public PointCloudData(ImageMessage sensorData)
+   {
+      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTimeSecondsSinceEpoch()) + sensorData.getAcquisitionTimeAdditionalNanos();
+
+      pointCloud = PerceptionMessageTools.unpackDepthImageToPointCloud(sensorData, 2.0 * Math.PI, Math.PI / 2.0);
+      numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
       colors = null;
    }
 
