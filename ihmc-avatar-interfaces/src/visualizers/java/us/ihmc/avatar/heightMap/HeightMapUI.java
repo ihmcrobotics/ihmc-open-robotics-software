@@ -21,6 +21,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.ApplicationNoModule;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -40,12 +41,18 @@ public abstract class HeightMapUI extends ApplicationNoModule
    private ROS2SyncedRobotModel syncedRobot;
    private RealtimeROS2Node ros2Node;
    private BorderPane mainPane;
+   private final PerceptionMessageTools perceptionMessageTools;
 
    @FXML
    private HeightMapParametersUIController heightMapParametersUIController;
 
    private static final boolean SHOW_HEIGHT_MAP = true;
    private static final boolean SHOW_POINT_CLOUD = true;
+
+   public HeightMapUI()
+   {
+      this.perceptionMessageTools = new PerceptionMessageTools();
+   }
 
    public abstract DRCRobotModel getRobotModel();
 
@@ -57,6 +64,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
       new HeightMapUpdaterForUI(messager, ros2Node, stage);
+
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -98,7 +106,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
             ImageMessage data = subscriber.readNextData();
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
             Point3D gridCenter = new Point3D(data.getPosition().getX(), data.getPosition().getY(), groundHeight);
-            PointCloudData pointCloudData = new PointCloudData(data);
+            PointCloudData pointCloudData = new PointCloudData(perceptionMessageTools, data);
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, new FramePose3D(), gridCenter));
          }
       });
@@ -163,6 +171,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
    public void stop()
    {
+      perceptionMessageTools.destroy();
       ros2Node.destroy();
       if (SHOW_HEIGHT_MAP)
          heightMapVisualizer.stop();

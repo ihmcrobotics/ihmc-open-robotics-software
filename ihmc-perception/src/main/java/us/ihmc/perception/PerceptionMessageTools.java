@@ -1,92 +1,153 @@
 package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencl._cl_kernel;
+import org.bytedeco.opencl._cl_program;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.opencl.OpenCLFloatParameters;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.nio.FloatBuffer;
 
 public class PerceptionMessageTools
 {
-   public static Point3D[] unpackDepthImageToPointCloud(ImageMessage imageMessage, double horizontalFieldOfView, double verticalFieldOfView)
-   {
-      RigidBodyTransform sensorTransform = new RigidBodyTransform(imageMessage.getOrientation(), imageMessage.getPosition());
-      Mat compressedDepthImageMat = new Mat(1, 1, opencv_core.CV_8UC1);
-      ByteBuffer dataByteBuffer = ByteBuffer.wrap(imageMessage.getData().toArray());
-      compressedDepthImageMat.cols(dataByteBuffer.limit());
-      compressedDepthImageMat.data(new BytePointer(dataByteBuffer));
+   private int totalNumberOfPoints;
+   private final OpenCLManager openCLManager;
+   private final _cl_program openCLProgram;
+   private final _cl_kernel unpackPointCloudKernel;
 
-      return unpackDepthImageToPointCloud(compressedDepthImageMat,
-                                          imageMessage.getImageHeight(),
-                                          imageMessage.getImageWidth(),
-                                          horizontalFieldOfView,
-                                          verticalFieldOfView,
-                                          sensorTransform);
+   private ByteBuffer decompressionInputBuffer;
+   private BytePointer decompressionInputBytePointer;
+   private Mat decompressionInputMat;
+   private BytedecoImage decompressionOutputImage;
+   private OpenCLFloatBuffer pointCloudVertexBuffer;
+   private final OpenCLFloatParameters parametersOpenCLFloatBuffer = new OpenCLFloatParameters();
+   private int depthWidth;
+   private int depthHeight;
+   private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
+
+   public PerceptionMessageTools()
+   {
+      openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
+      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
    }
 
-   public static Point3D[] unpackDepthImageToPointCloud(Mat compressedDepthImage,
-                                                        int imageHeight,
-                                                        int imageWidth,
-                                                        double horizontalFieldOfView,
-                                                        double verticalFieldOfView,
-                                                        RigidBodyTransform sensorTransform)
+   public void destroy()
    {
-      Mat decompressedDepthImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
-      opencv_imgcodecs.imdecode(compressedDepthImage, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthImage);
+      openCLProgram.close();
+      unpackPointCloudKernel.close();
 
-      return convertDepthMatToPointCloud(decompressedDepthImage, horizontalFieldOfView, verticalFieldOfView, sensorTransform);
+      decompressionOutputImage.destroy(openCLManager);
+      pointCloudVertexBuffer.destroy(openCLManager);
+
+      openCLProgram.close();
    }
 
-   private static Point3D[] convertDepthMatToPointCloud(Mat depthMat,
-                                                        double horizontalFieldOfView,
-                                                        double verticalFieldOfView,
-                                                        RigidBodyTransform sensorTransform)
+   private void resizeDepthImageData(int depthHeight, int depthWidth)
    {
-      int depthImageWidth = depthMat.cols();
-      int depthImageHeight = depthMat.rows();
+      if (this.depthHeight == depthHeight && this.depthWidth == depthWidth)
+         return;
 
-      double discreteResolution = 0.001f;
+      this.depthWidth = depthWidth;
+      this.depthHeight = depthHeight;
+      totalNumberOfPoints = depthWidth * depthHeight;
+      decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
+      decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
+      decompressionOutputImage.resize(depthWidth, depthHeight, openCLManager, null);
+      pointCloudVertexBuffer.resize(totalNumberOfPoints * 3, openCLManager);
+   }
 
-      Point3D[] pointCloudToPopulate = new Point3D[depthImageHeight * depthImageWidth];
-      int index = 0;
-      for (int y = 0; y < depthImageHeight; y++)
+   public Point3D[] unpackDepthImage(ImageMessage imageMessage, double verticalFieldOfView, double horizontalFieldOfView)
+   {
+      int numberOfBytes;
+
+      if (decompressionInputBuffer == null)
       {
-
-         int yFromCenter = y - (depthImageHeight / 2);
-         double angleYFromCenter = yFromCenter / (double) depthImageHeight * verticalFieldOfView;
-
-         RotationMatrix angledRotationMatrixFixedY = new RotationMatrix();
-         angledRotationMatrixFixedY.setToPitchOrientation(angleYFromCenter);
-
-         for (int x = 0; x < depthImageWidth; x++)
-         {
-            double eyeDepthInMeters = depthMat.ptr(x, y).getShort() * discreteResolution;
-
-            int xFromCenter = -x - (depthImageWidth / 2); // flip
-
-            double angleXFromCenter = xFromCenter / (double) depthImageWidth * horizontalFieldOfView;
-
-            // Create additional rotation only transform
-            RigidBodyTransform angledRotationTransform = new RigidBodyTransform();
-            angledRotationTransform.getRotation().set(angledRotationMatrixFixedY);
-            angledRotationTransform.prependYawRotation(angleXFromCenter);
-
-            Point3D beamFramePoint = new Point3D(eyeDepthInMeters, 0.0, 0.0);
-
-            beamFramePoint.applyTransform(angledRotationTransform);
-
-            pointCloudToPopulate[index++] = beamFramePoint;
-         }
+         depthWidth = imageMessage.getImageWidth();
+         depthHeight = imageMessage.getImageHeight();
+         totalNumberOfPoints = depthWidth * depthHeight;
+         decompressionInputBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
+         decompressionInputBytePointer = new BytePointer(decompressionInputBuffer);
+         decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
+         decompressionOutputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+         decompressionOutputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * 3);
+         pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+         LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
+      }
+      else
+      {
+         resizeDepthImageData(imageMessage.getImageHeight(), imageMessage.getImageWidth());
       }
 
-      Arrays.stream(pointCloudToPopulate).parallel().forEach(sensorTransform::transform);
+      numberOfBytes = imageMessage.getData().size();
+      decompressionInputBuffer.rewind();
+      decompressionInputBuffer.limit(totalNumberOfPoints * 2);
+      for (int i = 0; i < numberOfBytes; i++)
+      {
+         decompressionInputBuffer.put(imageMessage.getData().get(i));
+      }
+      decompressionInputBuffer.flip();
 
-      return pointCloudToPopulate;
+      decompressionInputBytePointer.position(0);
+      decompressionInputBytePointer.limit(numberOfBytes);
+
+      decompressionInputMat.cols(numberOfBytes);
+      decompressionInputMat.data(decompressionInputBytePointer);
+
+      decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+      opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressionOutputImage.getBytedecoOpenCVMat());
+      decompressionOutputImage.getBackingDirectByteBuffer().rewind();
+
+      sensorTransformToWorld.getTranslation().set(imageMessage.getPosition());
+      sensorTransformToWorld.getRotation().set(imageMessage.getOrientation());
+
+      parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
+      parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
+      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
+      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
+      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
+      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
+      parametersOpenCLFloatBuffer.setParameter(depthWidth);
+      parametersOpenCLFloatBuffer.setParameter(depthHeight);
+
+      parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
+      decompressionOutputImage.writeOpenCLImage(openCLManager);
+      pointCloudVertexBuffer.syncWithBackingBuffer();
+
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, decompressionOutputImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
+      openCLManager.execute2D(unpackPointCloudKernel, depthWidth, depthHeight);
+
+      pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+
+      openCLManager.finish();
+
+      Point3D[] pointCloud = new Point3D[totalNumberOfPoints];
+      FloatBuffer pointElementBuffer = pointCloudVertexBuffer.getBackingDirectFloatBuffer();
+      pointElementBuffer.rewind();
+      for (int i = 0; i < totalNumberOfPoints; i++)
+         pointCloud[i] = new Point3D(pointElementBuffer.get(), pointElementBuffer.get(), pointElementBuffer.get());
+
+      return pointCloud;
    }
 }

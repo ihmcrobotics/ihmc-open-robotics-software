@@ -71,49 +71,76 @@ float16 newRotationMatrix()
                      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // unused values
 }
 
-int discretize(float value, float discretization)
+
+float angle(float x1, float y1, float x2, float y2)
 {
-    return round(value / discretization);
+   float cosTheta = x1 * x2 + y1 * y2;
+   float sinTheta = x1 * y2 - y1 * x2;
+   return atan2(sinTheta, cosTheta);
 }
 
-kernel void extractDepthImage(global float* parameters,
-                              global int* pixelShifts,
-                              global unsigned char* lidarFrameBuffer,
-                              write_only image2d_t depthImage16UC1)
+bool intervalContains(float value, float lowerEndpoint, float upperEndpoint)
 {
-   int x = get_global_id(0);
-   int y = get_global_id(1);
-
-   int columnsPerFrame = parameters[0];
-   int measurementBlockSize = parameters[1];
-   int headerBlockBytes = parameters[2];
-   int channelDataBlockBytes = parameters[3];
-   int columnsPerMeasurementBlock = parameters[4];
-
-   int shiftedX = x;
-   shiftedX += pixelShifts[y];
-
-   if (shiftedX < 0)
-      shiftedX = columnsPerFrame + shiftedX;
-   if (shiftedX > columnsPerFrame - 1)
-      shiftedX -= columnsPerFrame;
-
-   int bytesToColumnDataBlockStart = x * measurementBlockSize
-                                     + headerBlockBytes
-                                     + y * channelDataBlockBytes;
-
-   // Ouster data is little endian
-   unsigned char range_MSB = lidarFrameBuffer[bytesToColumnDataBlockStart];
-   unsigned char range_LSB = lidarFrameBuffer[bytesToColumnDataBlockStart + 1];
-   // OpenCV is little endian
-   unsigned short range = (range_LSB << 8) | range_MSB;
-
-   write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
+   return value >= lowerEndpoint && value <= upperEndpoint;
 }
 
-kernel void imageToDiscretizedPointCloud(global float* parameters,
+double interpolate(double a, double b, double alpha)
+{
+  return (1.0 - alpha) * a + alpha * b;
+}
+
+float4 createRGB(double input)
+{
+   // Using interpolation between keu color points
+   double r = 0, g = 0, b = 0;
+   double redR = 1.0, redG = 0.0, redB = 0.0;
+   double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
+   double orangeR = 1.0, orangeG = 200.0 / 255.0, orangeB = 0.0;
+   double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
+   double blueR = 0.0, blueG = 0.0, blueB = 1.0;
+   double greenR = 0.0, greenG = 1.0, greenB = 0.0;
+   double gradientSize = 0.2;
+   double gradientLength = 1;
+   double alpha = fmod(input, gradientLength);
+   if (alpha < 0)
+      alpha = 1 + alpha;
+   if (alpha <= gradientSize * 1)
+   {
+      r = interpolate(magentaR, blueR, (alpha) / gradientSize);
+      g = interpolate(magentaG, blueG, (alpha) / gradientSize);
+      b = interpolate(magentaB, blueB, (alpha) / gradientSize);
+   }
+   else if (alpha <= gradientSize * 2)
+   {
+      r = interpolate(blueR, greenR, (alpha - gradientSize * 1) / gradientSize);
+      g = interpolate(blueG, greenG, (alpha - gradientSize * 1) / gradientSize);
+      b = interpolate(blueB, greenB, (alpha - gradientSize * 1) / gradientSize);
+   }
+   else if (alpha <= gradientSize * 3)
+   {
+      r = interpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
+      g = interpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
+      b = interpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
+   }
+   else if (alpha <= gradientSize * 4)
+   {
+      r = interpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
+      g = interpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
+      b = interpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
+   }
+   else if (alpha <= gradientSize * 5)
+   {
+      r = interpolate(orangeR, redR, (alpha - gradientSize * 4) / gradientSize);
+      g = interpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
+      b = interpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
+   }
+
+   return (float4) (r, g, b, 1.0);
+}
+
+kernel void imageToPointCloud(global float* parameters,
                               read_only image2d_t discretizedDepthImage,
-                              global int* pointCloudVertexBuffer)
+                              global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -134,7 +161,6 @@ kernel void imageToDiscretizedPointCloud(global float* parameters,
    float rotationMatrixM22 = parameters[13];
    int depthImageWidth = parameters[14];
    int depthImageHeight = parameters[15];
-   float pointResolution = parameters[16];
 
    float discreteResolution = 0.001f;
    float eyeDepthInMeters = read_imageui(discretizedDepthImage, (int2) (x, y)).x * discreteResolution;
@@ -170,19 +196,34 @@ kernel void imageToDiscretizedPointCloud(global float* parameters,
                                        angledRotationMatrix.s7,
                                        angledRotationMatrix.s8);
 
+   float4 worldFramePoint = transform(sensorFramePoint.x,
+                                      sensorFramePoint.y,
+                                      sensorFramePoint.z,
+                                      translationX,
+                                      translationY,
+                                      translationZ,
+                                      rotationMatrixM00,
+                                      rotationMatrixM01,
+                                      rotationMatrixM02,
+                                      rotationMatrixM10,
+                                      rotationMatrixM11,
+                                      rotationMatrixM12,
+                                      rotationMatrixM20,
+                                      rotationMatrixM21,
+                                      rotationMatrixM22);
 
    int pointStartIndex = (depthImageWidth * y + x) * 3;
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudVertexBuffer[pointStartIndex]     = nan(0);
-      pointCloudVertexBuffer[pointStartIndex + 1] = nan(0);
-      pointCloudVertexBuffer[pointStartIndex + 2] = nan(0);
+      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
    }
    else
    {
-      pointCloudVertexBuffer[pointStartIndex]     = discretize(sensorFramePoint.x, pointResolution);
-      pointCloudVertexBuffer[pointStartIndex + 1] = discretize(sensorFramePoint.y, pointResolution);
-      pointCloudVertexBuffer[pointStartIndex + 2] = discretize(sensorFramePoint.z, pointResolution);
+      pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
+      pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
    }
 }
