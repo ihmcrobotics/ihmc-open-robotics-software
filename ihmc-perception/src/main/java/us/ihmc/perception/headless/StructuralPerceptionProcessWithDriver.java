@@ -3,7 +3,6 @@ package us.ihmc.perception.headless;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -17,13 +16,16 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.OpenCVImageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.tools.PerceptionTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -94,7 +96,7 @@ public class StructuralPerceptionProcessWithDriver
       realtimeROS2Node.spin();
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsCustomizer = new RapidPlanarRegionsCustomizer("Spherical");
+      rapidRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
@@ -148,6 +150,7 @@ public class StructuralPerceptionProcessWithDriver
                                          openCLProgram,
                                          depthWidth,
                                          depthHeight);
+            rapidRegionsExtractor.setPatchSizeChanged(false);
          }
 
          // Fast memcopy while the ouster thread is blocked
@@ -191,6 +194,8 @@ public class StructuralPerceptionProcessWithDriver
       PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
       extractPlanarRegionsListWithPose(depthImage, ReferenceFrame.getWorldFrame(), planarRegionsListWithPose);
       PlanarRegionsList planarRegionsList = planarRegionsListWithPose.getPlanarRegionsList();
+
+      LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
       PerceptionTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
    }

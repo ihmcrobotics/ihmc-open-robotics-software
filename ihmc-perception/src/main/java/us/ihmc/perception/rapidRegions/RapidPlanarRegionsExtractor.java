@@ -155,15 +155,11 @@ public class RapidPlanarRegionsExtractor
       debugger.clearDebugImage();
       wholeAlgorithmDurationStopwatch.start();
 
-      LogTools.info("Input Image: {}", input16UC1DepthImage);
-
       if (changed)
       {
          // Flip so the Y+ goes up instead of down.
          opencv_core.flip(input16UC1DepthImage.getBytedecoOpenCVMat(), input16UC1DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
       }
-
-      LogTools.info("Computing Patch Graph");
 
       gpuDurationStopwatch.start();
       computePatchFeatureGrid(input16UC1DepthImage);
@@ -174,7 +170,6 @@ public class RapidPlanarRegionsExtractor
       //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
       //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
-      LogTools.info("Computing Regions");
       depthFirstSearchDurationStopwatch.start();
       findRegions();
       findBoundariesAndHoles();
@@ -235,7 +230,7 @@ public class RapidPlanarRegionsExtractor
       {
          LogTools.info("First Run.");
          firstRun = false;
-         input16UC1DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+//         input16UC1DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
 
          currentFeatureGrid.createOpenCLImages();
          previousFeatureGrid.createOpenCLImages();
