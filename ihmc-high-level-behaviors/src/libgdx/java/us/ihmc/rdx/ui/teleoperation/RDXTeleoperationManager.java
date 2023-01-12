@@ -130,7 +130,6 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       teleoperationParameters = new RDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
       teleoperationParameters.load();
-      teleoperationParameters.save();
 
       syncedRobot = communicationHelper.newSyncedRobot();
 
@@ -172,7 +171,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
-      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), footstepPlanning::plan);
+      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), false, footstepPlanning::plan);
       teleoperationParametersTuner.create(teleoperationParameters);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
@@ -684,6 +683,11 @@ public class RDXTeleoperationManager extends ImGuiPanel
       desiredRobot.setActive(true);
 
       return visualizers;
+   }
+
+   public ImBoolean getInteractablesEnabled()
+   {
+      return interactablesEnabled;
    }
 
    public RDXRobotCollisionModel getSelfCollisionModel()

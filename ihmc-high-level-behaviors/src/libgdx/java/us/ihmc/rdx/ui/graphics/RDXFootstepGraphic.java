@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
@@ -11,8 +10,14 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelInstance;
+import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
+import us.ihmc.rdx.ui.gizmo.BoxRayIntersection;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -29,8 +34,12 @@ public class RDXFootstepGraphic implements RenderableProvider
 
    private final Color color;
    private final ConvexPolygon2D defaultContactPoints = new ConvexPolygon2D();
-   private ModelInstance modelInstance;
+   private RDXModelInstance modelInstance;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final BoxRayIntersection boxRayIntersection = new BoxRayIntersection();
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private boolean mouseHovering = false;
+   private RDX3DPanelTooltip tooltip;
 
    public RDXFootstepGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints, RobotSide side)
    {
@@ -54,10 +63,39 @@ public class RDXFootstepGraphic implements RenderableProvider
                                    0.0);
       }
 
-      modelInstance = RDXModelBuilder.buildModelInstance(meshBuilder ->
+      modelInstance = new RDXModelInstance(RDXModelBuilder.buildModelInstance(meshBuilder ->
       {
          meshBuilder.addMultiLine(vertices, 0.01, color, true);
-      }, "footstepGraphic" + INDEX.getAndIncrement());
+      }, "footstepGraphic" + INDEX.getAndIncrement()));
+   }
+
+   public void setupTooltip(RDX3DPanel panel3D, String text)
+   {
+      tooltip = new RDX3DPanelTooltip(panel3D);
+      panel3D.addImGuiOverlayAddition(() ->
+      {
+         if (mouseHovering)
+            tooltip.render(text);
+      });
+   }
+
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      LibGDXTools.toEuclid(modelInstance.transform, tempTransform);
+      boxRayIntersection.intersect(0.2, 0.1, 0.02, tempTransform, input.getPickRayInWorld());
+      if (boxRayIntersection.getIntersects())
+      {
+         pickResult.setDistanceToCamera(boxRayIntersection.getFirstIntersectionToPack().distance(input.getPickRayInWorld().getPoint()));
+         input.addPickResult(pickResult);
+      }
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      mouseHovering = pickResult == input.getClosestPick();
+      modelInstance.setOpacity(mouseHovering ? 0.5f : 1.0f);
+      if (tooltip != null)
+         tooltip.setInput(input);
    }
 
    public void setTransparency(double opacity)
@@ -86,5 +124,10 @@ public class RDXFootstepGraphic implements RenderableProvider
    public void destroy()
    {
 
+   }
+
+   public boolean getMouseHovering()
+   {
+      return mouseHovering;
    }
 }

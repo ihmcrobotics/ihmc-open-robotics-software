@@ -144,7 +144,7 @@ public class RDXRealsenseL515UI
                   frameReadFrequency.ping();
                   depthU16C1Image.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, l515.getDepthToMeterConversion(), 0.0);
 
-                  depthImagePanel.drawFloatImage(depth32FC1Image.getBytedecoOpenCVMat());
+                  depthImagePanel.drawDepthImage(depth32FC1Image.getBytedecoOpenCVMat());
 
                   colorRGBImage.changeAddress(l515.getColorFrameData().address());
 //                  colorRGBImageMat.copyTo(colorRGBImage.getBytedecoOpenCVMat());

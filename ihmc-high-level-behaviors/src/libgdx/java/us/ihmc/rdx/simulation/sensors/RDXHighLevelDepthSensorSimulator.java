@@ -256,7 +256,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
       {
          openCLManager = new OpenCLManager();
          openCLManager.create();
-         openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator");
+         openCLProgram = openCLManager.loadProgram("HighLevelDepthSensorSimulator", "PerceptionCommon.cl");
          discretizePointsKernel = openCLManager.createKernel(openCLProgram, "discretizePoints");
          parametersBuffer = new OpenCLFloatBuffer(5);
          parametersBuffer.createOpenCLBufferObject(openCLManager);
@@ -515,14 +515,18 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
          if (pointCloudMessageType.equals(LidarScanMessage.class) || pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
          {
             ros2PointsToPublish.clear();
-            for (int i = 0; i < depthSensorSimulator.getNumberOfPoints() && (Float.BYTES * 8 * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
+            for (int i = 0; i < depthSensorSimulator.getNumberOfPoints()
+                            && (Float.BYTES * 8 * i + 2) < depthSensorSimulator.getPointCloudBuffer().limit(); i++)
             {
                float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
                float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
                float z = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 2);
-               ros2PointsToPublish.add().set(x, y, z);
-               if (ros2ColorsToPublish != null)
-                  ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
+               if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(y))
+               {
+                  ros2PointsToPublish.add().set(x, y, z);
+                  if (ros2ColorsToPublish != null)
+                     ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
+               }
             }
 
             if (!ros2PointsToPublish.isEmpty())
@@ -553,6 +557,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                                                                                                             null);
                      message.getSensorPosition().set(tempSensorFramePose.getPosition());
                      message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
+                     message.setIsDataLocalToSensor(false);
                      //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
                      ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
                   }
