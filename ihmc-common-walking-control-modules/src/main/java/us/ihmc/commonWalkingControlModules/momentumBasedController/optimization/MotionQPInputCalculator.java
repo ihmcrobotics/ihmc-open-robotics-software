@@ -377,7 +377,7 @@ public class MotionQPInputCalculator
     * @see InverseDynamicsQPSolver#addAccelerationSubstitution(QPVariableSubstitution)
     * @see InverseKinematicsQPSolver#addVariableSubstitution(QPVariableSubstitution)
     */
-   public void convertKinematicLoopFunction(KinematicLoopFunction function, QPVariableSubstitution qpVariableSubstitutionToPack)
+   public void convertKinematicLoopFunction(KinematicLoopFunction function, QPVariableSubstitutionInterface<?> qpVariableSubstitutionToPack)
    {
       DMatrixRMaj loopJacobian = function.getLoopJacobian();
       DMatrixRMaj loopConvectiveTerm = function.getLoopConvectiveTerm();
@@ -398,17 +398,17 @@ public class MotionQPInputCalculator
 
       qpVariableSubstitutionToPack.reshape(loopJoints.size(), loopJacobian.getNumRows());
 
-      qpVariableSubstitutionToPack.transformation.set(loopJacobian);
-      qpVariableSubstitutionToPack.bias.set(loopConvectiveTerm);
+      qpVariableSubstitutionToPack.getTransformation().set(loopJacobian);
+      qpVariableSubstitutionToPack.getBias().set(loopConvectiveTerm);
 
       for (int i = 0; i < loopJoints.size(); i++)
       {
-         qpVariableSubstitutionToPack.variableIndices[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
+         qpVariableSubstitutionToPack.getVariableIndices()[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
       }
 
       for (int i = 0; i < actuatedJointIndices.length; i++)
       {
-         qpVariableSubstitutionToPack.activeIndices.add(actuatedJointIndices[i]);
+         qpVariableSubstitutionToPack.getActiveIndices().add(actuatedJointIndices[i]);
       }
    }
 
