@@ -4,6 +4,9 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -12,6 +15,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -86,8 +90,8 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
 
          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
          String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
-         perceptionLogPath.set(perceptionLogPath.get() + File.separator + logFileName);
-         logger.startLogging(perceptionLogPath.get(), "Nadia");
+         FileTools.ensureDirectoryExists(Paths.get(perceptionLogPath.get()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+         logger.startLogging(perceptionLogPath.get() + File.separator + logFileName, "Nadia");
       }
 
       if(ImGui.button(labels.get("Stop Logging")))
