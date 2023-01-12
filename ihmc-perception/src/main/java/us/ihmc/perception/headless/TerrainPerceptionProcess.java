@@ -195,7 +195,7 @@ public class TerrainPerceptionProcess
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-            ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
+            ros2Helper.publish(ROS2Tools.PERSPECTIVE_RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 

@@ -17,6 +17,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,16 +47,22 @@ public class LocalizationAndMappingProcess
    private ScheduledFuture<?> updateMapFuture;
    private boolean enableLiveMode = false;
 
-   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Node ros2Node, boolean smoothing)
+   private ROS2Topic<PlanarRegionsListWithPoseMessage> terrainRegionsTopic;
+   private ROS2Topic<PlanarRegionsListWithPoseMessage> structuralRegionsTopic;
+
+   public LocalizationAndMappingProcess(String simpleRobotName, ROS2Topic<PlanarRegionsListWithPoseMessage> terrainRegionsTopic, ROS2Topic<PlanarRegionsListWithPoseMessage> structuralRegionsTopic, ROS2Node ros2Node, boolean smoothing)
    {
       planarRegionMap = new PlanarRegionMap(true);
+
+      this.terrainRegionsTopic = terrainRegionsTopic;
+      this.structuralRegionsTopic = structuralRegionsTopic;
 
       this.ros2Node = ros2Node;
       this.ros2Helper = new ROS2Helper(ros2Node);
 
       launchMapper();
       controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
-      ros2Helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, latestIncomingRegions::set);
+      ros2Helper.subscribeViaCallback(terrainRegionsTopic, latestIncomingRegions::set);
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
       {
@@ -117,6 +124,7 @@ public class LocalizationAndMappingProcess
    public static void main(String[] args)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "slam_node");
-      new LocalizationAndMappingProcess("Nadia", ros2Node, true);
+      new LocalizationAndMappingProcess("Nadia", ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                        ROS2Tools.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Node, true);
    }
 }
