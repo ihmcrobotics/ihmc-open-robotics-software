@@ -11,6 +11,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXCVImagePanel;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.thread.Activator;
@@ -21,11 +22,13 @@ import java.nio.ByteOrder;
 public class RDXFFMPEGPlaybackDemo
 {
    private final Activator nativesLoadedActivator = BytedecoTools.loadNativesOnAThread(opencv_core.class, ffmpeg.class);
-   private final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private final String logDirectory = IHMCCommonPaths.LOGS_DIRECTORY + File.separator;
 
-   //example.webm contains licensing information at attribution.txt in same directory. Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
+   // example.webm contains licensing information at attribution.txt in same directory.
+   // Used with permission from https://en.wikipedia.org/wiki/File:Schlossbergbahn.webm
    private final WorkspaceFile exampleVideo = new WorkspaceFile(new WorkspaceDirectory("ihmc-open-robotics-software",
-                                                                                       "ihmc-high-level-behaviors/src/main/resources/us/ihmc/gdx/logging"),
+                                                                                       "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                                                       RDXFFMPEGPlaybackDemo.class),
                                                                 "example.webm");
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
