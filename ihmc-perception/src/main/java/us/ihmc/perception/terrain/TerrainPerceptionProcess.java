@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.TimestampedPlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -195,18 +194,7 @@ public class TerrainPerceptionProcess
 
             PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
-            if (publishTimestamped)
-            {
-               TimestampedPlanarRegionsListMessage timestampedPlanarRegionsListMessage = new TimestampedPlanarRegionsListMessage();
-               timestampedPlanarRegionsListMessage.getPlanarRegions().set(planarRegionsListMessage);
-               timestampedPlanarRegionsListMessage.setLastUpdatedSecondsSinceEpoch(now.getEpochSecond());
-               timestampedPlanarRegionsListMessage.setLastUpdatedAdditionalNanos(now.getNano());
-               ros2Helper.publish(ROS2Tools.RAPID_REGIONS, timestampedPlanarRegionsListMessage);
-            }
-            else
-            {
-               ros2Helper.publish(ROS2Tools.MAPSENSE_REGIONS, planarRegionsListMessage);
-            }
+            ros2Helper.publish(ROS2Tools.RAPID_REGIONS, planarRegionsListMessage);
 
             int depthFrameDataSize = l515.getDepthFrameDataSize();
 

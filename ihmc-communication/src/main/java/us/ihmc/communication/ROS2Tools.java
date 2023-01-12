@@ -178,6 +178,7 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> MAPSENSE_REGIONS = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Rapid regions are generated in Java, come with epoch second and nano timestamp, are pre-filtered for body collisions, and in world frame.
     *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
+   public static final ROS2Topic<PlanarRegionsListWithPoseMessage> MAPSENSE_REGIONS_WITH_POSE = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListWithPoseMessage.class);
    public static final ROS2Topic<PlanarRegionsListMessage> RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
