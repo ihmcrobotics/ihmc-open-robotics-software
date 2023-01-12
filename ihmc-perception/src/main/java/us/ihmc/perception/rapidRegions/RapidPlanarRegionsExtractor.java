@@ -230,7 +230,7 @@ public class RapidPlanarRegionsExtractor
       {
          LogTools.info("First Run.");
          firstRun = false;
-//         input16UC1DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         input16UC1DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
          currentFeatureGrid.createOpenCLImages();
          previousFeatureGrid.createOpenCLImages();
@@ -241,12 +241,12 @@ public class RapidPlanarRegionsExtractor
       }
       else
       {
-         LogTools.info("Writing to OpenCL Image");
+//         LogTools.info("Writing to OpenCL Image");
          input16UC1DepthImage.writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
 
-      LogTools.info("Done Writing Input Image");
+//      LogTools.info("Done Writing Input Image");
 
       _cl_mem inputImage = input16UC1DepthImage.getOpenCLImageObject();
 
