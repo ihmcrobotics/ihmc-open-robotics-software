@@ -13,14 +13,19 @@ import org.bytedeco.ffmpeg.global.avformat;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.ffmpeg.global.swscale;
 import org.bytedeco.ffmpeg.swscale.SwsContext;
+import org.bytedeco.hdf5.Group;
+import org.bytedeco.hdf5.global.hdf5;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.PointerPointer;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.logging.HDF5Manager;
+import us.ihmc.perception.logging.HDF5Tools;
 
 import java.nio.ByteBuffer;
 
-public class FFMPEGFileReader implements IFFMPEGFileReader
+public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
 {
    private final AVFormatContext avFormatContext;
    private int streamIndex;
@@ -37,9 +42,16 @@ public class FFMPEGFileReader implements IFFMPEGFileReader
    private final long duration;
    private final long startTime;
 
-   public FFMPEGFileReader(String file)
+   private HDF5Manager hdf5Manager;
+   private Group framesGroup;
+
+   //Due to the current intermediate design of the FFMPEGHDF5Logger, there are two files which the log needs to read from, one of which contains all the metadata required for FFMPEG
+   //There surely is some way to
+   public FFMPEGHDF5FileReader(String hdf5File)
    {
       avutil.av_log_set_level(avutil.AV_LOG_WARNING);
+
+      String file = hdf5File.replaceFirst(".hdf5", ""); //BAD
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();
@@ -97,6 +109,11 @@ public class FFMPEGFileReader implements IFFMPEGFileReader
                                              (DoublePointer) null);
          FFMPEGTools.checkPointer(swsContext, "Allocating SWS context");
       }
+
+      hdf5Manager = new HDF5Manager(hdf5File, hdf5.H5F_ACC_RDONLY);
+      hdf5Manager.getFile().openFile(hdf5File, hdf5.H5F_ACC_RDONLY);
+
+      framesGroup = hdf5Manager.getGroup(FFMPEGHDF5Logger.NAMESPACE_ROOT);
    }
 
    //Adapted from demuxing_decoding.c. Currently assumes video stream, but could be adapted for audio use, too
@@ -119,25 +136,7 @@ public class FFMPEGFileReader implements IFFMPEGFileReader
    @Override
    public long seek(long timestamp)
    {
-      FFMPEGTools.checkNegativeError(avformat.av_seek_frame(avFormatContext, streamIndex, timestamp, avformat.AVSEEK_FLAG_BACKWARD),
-                                     "Seeking frame via timestamp",
-                                     false);
-
-      boolean firstRun = true;
-
-      do
-      {
-         if (firstRun)
-            firstRun = false;
-         else
-            avutil.av_frame_unref(videoFrame);
-
-         if (!loadNextFrame())
-            return -1;
-      }
-      while (videoFrame.best_effort_timestamp() < timestamp);
-
-      return getNextFrame(false);
+      return 0; //not yet implemented
    }
 
    private boolean loadNextFrame()
@@ -145,10 +144,12 @@ public class FFMPEGFileReader implements IFFMPEGFileReader
       int returnCode;
       do
       {
-         returnCode = avformat.av_read_frame(avFormatContext, packet);
-         if (returnCode == avutil.AVERROR_EOF())
-            return false;
-         FFMPEGTools.checkNegativeError(returnCode, "Getting next frame from stream");
+
+         avformat.av_read_frame(avFormatContext, packet);
+         //get packet from HDF5
+         byte[] rawData = HDF5Tools.loadRawByteArray(framesGroup, streamIndex);
+         BytePointer packetData = new BytePointer(ByteBuffer.wrap(rawData));
+         BytePointer.memcpy(packet.data(), packetData, rawData.length);
       }
       while (packet.stream_index() != streamIndex);
 

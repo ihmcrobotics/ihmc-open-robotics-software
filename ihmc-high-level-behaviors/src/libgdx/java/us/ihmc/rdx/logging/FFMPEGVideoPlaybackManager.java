@@ -9,7 +9,7 @@ import us.ihmc.tools.thread.Throttler;
 
 public class FFMPEGVideoPlaybackManager
 {
-   private final FFMPEGFileReader file;
+   private final IFFMPEGFileReader file;
    private final BytedecoImage image;
    private final AVRational timeBase;
    private long previousBaseUnitsTimestamp;
@@ -21,7 +21,11 @@ public class FFMPEGVideoPlaybackManager
 
    public FFMPEGVideoPlaybackManager(String file)
    {
-      this.file = new FFMPEGFileReader(file);
+      if (file.endsWith(".hdf5"))
+         this.file = new FFMPEGHDF5FileReader(file);
+      else
+         this.file = new FFMPEGFileReader(file);
+
       timeBase = this.file.getTimeBase();
 
       image = new BytedecoImage(getWidth(), getHeight(), opencv_core.CV_8UC4, this.file.getFrameDataBuffer());
@@ -58,7 +62,7 @@ public class FFMPEGVideoPlaybackManager
 
       while (!isPaused)
       {
-         long returnCode = file.getNextFrame();
+         long returnCode = file.getNextFrame(true);
 
          if (returnCode == -1) //EOF
          {

@@ -324,6 +324,20 @@ public class HDF5Tools
       dataset.close();
    }
 
+   public static void storeBytesFromPointer(Group group, long index, BytePointer bytes, long size)
+   {
+      LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
+      long[] dims = {size};
+
+      DataSpace ds = new DataSpace(1, dims);
+      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), ds);
+
+      dataset.write(bytes, new DataType(PredType.NATIVE_UCHAR()));
+
+      ds.close();
+      dataset.close();
+   }
+
    /* TODO: Does not work yet. Needs to be fixed. */
 
    public static byte[] loadRawByteArray(Group group, int index)
