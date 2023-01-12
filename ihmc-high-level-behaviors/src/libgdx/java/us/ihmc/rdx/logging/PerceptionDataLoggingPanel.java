@@ -7,19 +7,29 @@ import imgui.type.ImString;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 
+/**
+ * Set the `perception.log.directory` JVM property to override the initial log directory.
+ * You can also set this in the UI, though.
+ */
 public class PerceptionDataLoggingPanel extends ImGuiPanel
 {
+   public static final String PERCEPTION_DIRECTORY_NAME = "perception";
+   public static final String PERCEPTION_LOGS_DEFAULT_DIRECTORY
+         = System.getProperty("perception.log.directory", IHMCCommonPaths.LOGS_DIRECTORY.resolve(PERCEPTION_DIRECTORY_NAME).toString());
+
    private PerceptionDataLogger logger;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImString perceptionLogPath = new ImString();
+   private final ImString perceptionLogPath = new ImString(PERCEPTION_LOGS_DEFAULT_DIRECTORY);
    private final ImInt topicIndex = new ImInt(0);
    private final ImInt objectIndex = new ImInt(0);
 
@@ -60,6 +70,7 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
          ImGui.checkbox(channel.getName() + "\tTotal: " + channel.getCount(), channelFlags.get(channel.getName()));
       }
 
+      ImGuiTools.inputText(labels.get("Log directory"), perceptionLogPath);
       if (ImGui.button(labels.get("Start Logging")))
       {
          modified = true;
@@ -74,13 +85,8 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
          }
 
          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-
-         String defaultLogDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
-         String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
          String logFileName = dateFormat.format(new Date()) + "_" + "PerceptionLog.hdf5";
-
-         perceptionLogPath.set(logDirectory + logFileName);
-
+         perceptionLogPath.set(perceptionLogPath.get() + File.separator + logFileName);
          logger.startLogging(perceptionLogPath.get(), "Nadia");
       }
 
