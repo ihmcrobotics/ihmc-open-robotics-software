@@ -9,7 +9,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 
@@ -27,25 +27,25 @@ public class OusterDepthExtractionKernel
    private final BytePointer lidarFrameByteBufferPointerCopy;
 
    private final OpenCLManager openCLManager;
-   private final _cl_program depthImageExtractionProgram;
+   private final _cl_program openCLProgram;
    private final _cl_kernel extractDepthImageKernel;
    private final _cl_mem lidarFrameBufferObject;
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final BytedecoImage extractedDepthImage;
    private final OpenCLIntBuffer pixelShiftOpenCLBuffer;
 
-   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager)
+   public OusterDepthExtractionKernel(NettyOuster nettyOuster, OpenCLManager openCLManager, _cl_program openCLProgram)
    {
       this.nettyOuster = nettyOuster;
       this.openCLManager = openCLManager;
+      this.openCLProgram = openCLProgram;
 
       lidarFrameByteBufferCopy = ByteBuffer.allocateDirect(nettyOuster.getLidarFrameByteBuffer().limit());
       lidarFrameByteBufferPointerCopy = new BytePointer(lidarFrameByteBufferCopy);
       lidarFrameByteBufferPointer = new BytePointer(nettyOuster.getLidarFrameByteBuffer());
 
       extractedDepthImage = new BytedecoImage(nettyOuster.getImageWidth(), nettyOuster.getImageHeight(), opencv_core.CV_16UC1);
-      depthImageExtractionProgram = openCLManager.loadProgram("OusterDepthImageExtraction");
-      extractDepthImageKernel = openCLManager.createKernel(depthImageExtractionProgram, "extractDepthImage");
+      extractDepthImageKernel = openCLManager.createKernel(this.openCLProgram, "extractDepthImage");
       lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
       extractedDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       pixelShiftOpenCLBuffer = new OpenCLIntBuffer(nettyOuster.getPixelShiftBuffer());

@@ -1,4 +1,4 @@
-package us.ihmc.perception.terrain;
+package us.ihmc.perception.headless;
 
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
@@ -7,19 +7,17 @@ import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
+import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
-import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
@@ -51,7 +49,6 @@ public class TerrainPerceptionProcessWithDriver
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ROS2Helper ros2Helper;
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private final Notification patchSizeChangedNotification;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense sensor;
    private Mat depthU16C1Image;
@@ -105,12 +102,9 @@ public class TerrainPerceptionProcessWithDriver
       rapidRegionsCustomizer = new RapidPlanarRegionsCustomizer();
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ROS2StoredPropertySet<?> ros2GPURegionParameters = ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.PARAMETERS,
-                                                                                                        rapidRegionsExtractor.getParameters());
-      patchSizeChangedNotification = ros2GPURegionParameters.getCommandInput()
-                                                            .registerPropertyChangedNotification(RapidRegionsExtractorParameters.patchSize);
-      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.POLYGONIZER_PARAMETERS, rapidRegionsCustomizer.getPolygonizerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(GPUPlanarRegionExtractionComms.CONVEX_HULL_FACTORY_PARAMETERS,
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS, rapidRegionsCustomizer.getPolygonizerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
                                                      rapidRegionsCustomizer.getConcaveHullFactoryParameters());
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
@@ -176,12 +170,12 @@ public class TerrainPerceptionProcessWithDriver
                cameraPose.setToZero(cameraFrame);
                cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-               depthImageMessage.getPosition().set(cameraPose.getPosition());
-               depthImageMessage.getOrientation().set(cameraPose.getOrientation());
-               colorImageMessage.getPosition().set(cameraPose.getPosition());
-               colorImageMessage.getOrientation().set(cameraPose.getOrientation());
-               colorImageMessage.setSequenceNumber(colorSequenceNumber++);
-               depthImageMessage.setSequenceNumber(depthSequenceNumber++);
+               //depthImageMessage.getPosition().set(cameraPose.getPosition());
+               //depthImageMessage.getOrientation().set(cameraPose.getOrientation());
+               //colorImageMessage.getPosition().set(cameraPose.getPosition());
+               //colorImageMessage.getOrientation().set(cameraPose.getOrientation());
+               //colorImageMessage.setSequenceNumber(colorSequenceNumber++);
+               //depthImageMessage.setSequenceNumber(depthSequenceNumber++);
 
                MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
                MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
@@ -271,7 +265,7 @@ public class TerrainPerceptionProcessWithDriver
          Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
       */
 
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563"); // Benchtop L515: F1120592, Tripod: F1121365, Local: F0245563
       new TerrainPerceptionProcessWithDriver(new RealsenseConfiguration(l515SerialNumber, 768, 1024, 30, true, 720, 1280, 30),
                                              ROS2Tools.L515_DEPTH_IMAGE,
                                              ROS2Tools.L515_COLOR_IMAGE,
