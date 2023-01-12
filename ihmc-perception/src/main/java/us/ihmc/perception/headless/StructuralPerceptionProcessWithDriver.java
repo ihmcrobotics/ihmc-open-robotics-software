@@ -5,6 +5,8 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PlanarRegionsListWithPoseMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -30,7 +32,7 @@ import java.util.function.Supplier;
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
-public class StructuralPerceptionProcess
+public class StructuralPerceptionProcessWithDriver
 {
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
@@ -51,8 +53,16 @@ public class StructuralPerceptionProcess
    private long sequenceNumber = 0;
    private final ImageMessage outputImageMessage = new ImageMessage();
 
-   public StructuralPerceptionProcess(Supplier<ReferenceFrame> sensorFrameUpdater)
+   private ROS2Topic<ImageMessage> depthTopic;
+   private ROS2Topic<PlanarRegionsListMessage> regionsTopic;
+   private ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic;
+
+   public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic, ROS2Topic<PlanarRegionsListMessage> regionsTopic,
+                                                ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic, Supplier<ReferenceFrame> sensorFrameUpdater)
    {
+      this.depthTopic = depthTopic;
+      this.regionsTopic = regionsTopic;
+      this.regionsWithPoseTopic = regionsWithPoseTopic;
       this.sensorFrameUpdater = sensorFrameUpdater;
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
@@ -60,9 +70,8 @@ public class StructuralPerceptionProcess
       ouster.bind();
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
-      ROS2Topic<ImageMessage> topic = ROS2Tools.OUSTER_DEPTH_IMAGE;
-      LogTools.info("Publishing ROS 2 depth images: {}", topic);
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT());
+      LogTools.info("Publishing ROS 2 depth images: {}", depthTopic);
+      ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
       LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
 
@@ -146,6 +155,7 @@ public class StructuralPerceptionProcess
 
    public static void main(String[] args)
    {
-      new StructuralPerceptionProcess(ReferenceFrame::getWorldFrame);
+      new StructuralPerceptionProcessWithDriver(ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                                ReferenceFrame::getWorldFrame);
    }
 }

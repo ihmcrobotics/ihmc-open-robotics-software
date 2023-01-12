@@ -207,7 +207,7 @@ public class TerrainPerceptionProcessWithDriver
             // TODO:  Filter out regions that are colliding with the body before publishing
             //            PerceptionTools.publishPlanarRegionsListWithPose(planarRegionsListWithPose, ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, ros2Helper);
 
-            PerceptionTools.publishPlanarRegionsList(planarRegionsList, ROS2Tools.RAPID_REGIONS, ros2Helper);
+            PerceptionTools.publishPlanarRegionsList(planarRegionsList, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
             PerceptionTools.publishCompressedDepth(depthU16C1Image, depthTopic, depthImageMessage, ros2Helper, cameraPose, now,
                                                    depthSequenceNumber, depthHeight, depthWidth);
             PerceptionTools.publishCompressedColor(color8UC3Image, colorTopic, colorImageMessage, ros2Helper, cameraPose, now,
@@ -269,8 +269,8 @@ public class TerrainPerceptionProcessWithDriver
       new TerrainPerceptionProcessWithDriver(new RealsenseConfiguration(l515SerialNumber, 768, 1024, 30, true, 720, 1280, 30),
                                              ROS2Tools.L515_DEPTH_IMAGE,
                                              ROS2Tools.L515_COLOR_IMAGE,
-                                             ROS2Tools.MAPSENSE_REGIONS_WITH_POSE,
-                                             ROS2Tools.RAPID_REGIONS,
+                                             ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+                                             ROS2Tools.PERSPECTIVE_RAPID_REGIONS,
                                              ReferenceFrame::getWorldFrame);
    }
 }

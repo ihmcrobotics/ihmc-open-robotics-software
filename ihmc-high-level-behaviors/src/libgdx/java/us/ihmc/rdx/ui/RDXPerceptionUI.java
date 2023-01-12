@@ -61,7 +61,7 @@ public class RDXPerceptionUI
 
             globalVisualizersUI.addVisualizer(new RDXROS2PlanarRegionsVisualizer("Rapid Regions",
                                                                                  ros2Node,
-                                                                                 ROS2Tools.RAPID_REGIONS));
+                                                                                 ROS2Tools.PERSPECTIVE_RAPID_REGIONS));
 
             globalVisualizersUI.addVisualizer(new RDXROS2DepthImageVisualizer("Ouster Depth",
                                                                               PubSubImplementation.FAST_RTPS,
