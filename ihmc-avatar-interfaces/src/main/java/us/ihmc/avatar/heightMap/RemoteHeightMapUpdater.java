@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -37,7 +38,7 @@ public class RemoteHeightMapUpdater
    private static final int initialPublishFrequency = 5;
 
    private static final FramePose3D zeroPose = new FramePose3D();
-
+   private final PerceptionMessageTools perceptionMessageTools = new PerceptionMessageTools();
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
    private ROS2SyncedRobotModel syncedRobot;
@@ -74,25 +75,25 @@ public class RemoteHeightMapUpdater
       });
 
       AtomicBoolean renderedFirst = new AtomicBoolean(false);
-//      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
-//      {
-//         @Override
-//         public void onNewDataMessage(Subscriber<ImageMessage> subscriber)
-//         {
-//               LogTools.info("got height map");
-//               syncedRobot.update();
-//
-//               double groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
-//
-//               ImageMessage data = subscriber.readNextData();
-//               //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
-//               Point3D gridCenter = new Point3D(data.getPosition().getX(), data.getPosition().getY(), groundHeight);
-//               PointCloudData pointCloudData = new PointCloudData(data);
-//               heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, zeroPose, gridCenter));
-//
-//            renderedFirst.set(true);
-//         }
-//      });
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
+      {
+         @Override
+         public void onNewDataMessage(Subscriber<ImageMessage> subscriber)
+         {
+               LogTools.info("got height map");
+               syncedRobot.update();
+
+               double groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
+
+               ImageMessage data = subscriber.readNextData();
+               //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+               Point3D gridCenter = new Point3D(data.getPosition().getX(), data.getPosition().getY(), groundHeight);
+               PointCloudData pointCloudData = new PointCloudData(perceptionMessageTools, data);
+               heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, zeroPose, gridCenter));
+
+            renderedFirst.set(true);
+         }
+      });
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(new ROS2Helper(ros2Node));
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());
@@ -123,5 +124,6 @@ public class RemoteHeightMapUpdater
    {
       ros2Node.destroy();
       executorService.shutdown();
+      perceptionMessageTools.destroy();
    }
 }

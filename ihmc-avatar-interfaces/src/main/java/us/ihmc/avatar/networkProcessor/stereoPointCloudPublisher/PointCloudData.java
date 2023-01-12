@@ -112,13 +112,13 @@ public class PointCloudData
       colors = null;
    }
 
-   public PointCloudData(ImageMessage sensorData)
+   public PointCloudData(PerceptionMessageTools perceptionMessageTools, ImageMessage sensorData)
    {
       timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTimeSecondsSinceEpoch()) + sensorData.getAcquisitionTimeAdditionalNanos();
-
-      pointCloud = PerceptionMessageTools.unpackDepthImageToPointCloud(sensorData, 2.0 * Math.PI, Math.PI / 2.0);
       numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
       colors = null;
+
+      pointCloud = perceptionMessageTools.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
    }
 
    public long getTimestamp()
