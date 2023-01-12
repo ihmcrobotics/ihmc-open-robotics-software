@@ -51,6 +51,7 @@ public class ProMPAssistant
    private final ArrayList<Pose3DReadOnly> observationRecognitionPart = new ArrayList<>();
    private boolean isMoving = false;
    private ReferenceFrame objectFrame;
+   private double isMovingThreshold = -1;
 
    public ProMPAssistant()
    {
@@ -254,7 +255,6 @@ public class ProMPAssistant
 
    private boolean taskDetected(String objectName)
    {
-      objectName="PushDoorOF";
       if (currentTask.isEmpty() && !objectName.isEmpty())
       {
          // TODO A.1. if multiple tasks are available for a single object, use also promp-to-object initial values to identify correct task
@@ -283,7 +283,10 @@ public class ProMPAssistant
             double distance = (observationRecognitionPart.get(observationRecognitionPart.size() - 1)).getTranslation()
                                                                                                      .distance(observationRecognitionPart.get(0)
                                                                                                                                          .getTranslation());
-            isMoving = distance > 0.04;
+            if (isMovingThreshold < 0)
+               isMoving = distance > 0.04;
+            else
+               isMoving = distance > isMovingThreshold;
             LogTools.info("IsMoving {}, distance {}", isMoving, distance);
          }
       }
@@ -431,6 +434,12 @@ public class ProMPAssistant
    {
       return testNumber;
    }
+
+   public void setIsMovingThreshold(double distance)
+   {
+      isMovingThreshold = distance;
+   }
+
 
    public void setCurrentTaskDone(boolean doneCurrentTask)
    {

@@ -46,6 +46,8 @@ public class ProMPAssistantTest
       // replay that file
       TrajectoryRecordReplay<Double> trajectoryPlayer = new TrajectoryRecordReplay<>(Double.class, testFilePath, 2); //2 body parts: the hands
       trajectoryPlayer.setDoneReplay(false);
+      // start parsing data immedediately, assuming user is moving from beginning of recorded test trajectory
+      proMPAssistant.setIsMovingThreshold(0.0);
 
       //let's focus on the hands
       List<String> bodyParts = new ArrayList<>();
@@ -54,8 +56,7 @@ public class ProMPAssistantTest
       TrajectoryRecordReplay<Double> trajectoryRecorder = new TrajectoryRecordReplay<>(Double.class, directoryAbsolutePath, bodyParts.size());
       trajectoryRecorder.setRecordFileName("generatedMotion.csv");
       LogTools.info("Processing trajectory ...");
-      boolean observedGoal = false;
-      FramePose3D observedGoalPose = new FramePose3D();
+
       while (!trajectoryPlayer.hasDoneReplay())
       {
          for (String bodyPart : bodyParts)
@@ -64,17 +65,6 @@ public class ProMPAssistantTest
             framePose.setFromReferenceFrame(ReferenceFrame.getWorldFrame());
             // Read file with stored trajectories: read set point per timestep until file is over
             Double[] dataPoint = trajectoryPlayer.play(true);
-            if (!observedGoal)
-            {
-               // get final set point
-               ArrayList<Double[]> dataTrajectory = trajectoryPlayer.getData();
-               Double[] dataGoal = dataTrajectory.get(dataTrajectory.size() - 1);
-               // we consider only the right hand
-               observedGoalPose.getOrientation().set(dataGoal[7], dataGoal[8], dataGoal[9], dataGoal[10]);
-               observedGoalPose.getPosition().set(dataGoal[11], dataGoal[12], dataGoal[13]);
-               observedGoal = true;
-            }
-
             // [0,1,2,3] quaternion of body segment; [4,5,6] position of body segment
             framePose.getOrientation().set(dataPoint[0], dataPoint[1], dataPoint[2], dataPoint[3]);
             framePose.getPosition().set(dataPoint[4], dataPoint[5], dataPoint[6]);
@@ -87,6 +77,7 @@ public class ProMPAssistantTest
             else
             {
                assertTrue(!proMPAssistant.readyToPack());
+               FramePose3D observedGoalPose = null; // no observed goal
                //do not change the frame, just observe it in order to generate a prediction later
                proMPAssistant.processFrameAndObjectInformation(framePose, bodyPart, observedGoalPose, "PushDoor");
             }
