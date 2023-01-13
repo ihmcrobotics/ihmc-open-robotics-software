@@ -49,6 +49,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -112,6 +113,8 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
    private final YoBoolean areJointTorqueLimitsConsidered;
 
    private final double controlDT;
+   private final ExecutionTimer setupTimer;
+   private final ExecutionTimer outputTimer;
 
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -152,6 +155,9 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
       areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
+
+      setupTimer = new ExecutionTimer("inverseDynamicsSetupTimer", registry);
+      outputTimer = new ExecutionTimer("inverseDynamicsOutputTimer", registry);
 
       parentRegistry.addChild(registry);
    }
@@ -198,6 +204,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
 
    public void compute()
    {
+      setupTimer.startMeasurement();
       if (USE_DYNAMIC_MATRIX_CALCULATOR)
       {
          dynamicsMatrixCalculator.compute();
@@ -209,6 +216,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
          dynamicsMatrixCalculator.compute();
          optimizationControlModule.setupTorqueMinimizationCommand();
       }
+      setupTimer.stopMeasurement();
 
       if (!optimizationControlModule.compute())
       {
@@ -216,6 +224,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
          // Don't crash and burn. Instead do the best you can with what you have.
          // Or maybe just use the previous ticks solution.
       }
+      outputTimer.startMeasurement();
       MomentumModuleSolution momentumModuleSolution = optimizationControlModule.getMomentumModuleSolution();
 
       DMatrixRMaj jointAccelerations = momentumModuleSolution.getJointAccelerations();
@@ -302,6 +311,7 @@ public class WholeBodyInverseDynamicsSolver implements SCS2YoGraphicHolder
       planeContactWrenchProcessor.compute(externalWrenchSolution);
       if (wrenchVisualizer != null)
          wrenchVisualizer.visualize(externalWrenchSolution);
+      outputTimer.stopMeasurement();
    }
 
    private final DMatrixRMaj kinematicLoopJointTau = new DMatrixRMaj(4, 1);
