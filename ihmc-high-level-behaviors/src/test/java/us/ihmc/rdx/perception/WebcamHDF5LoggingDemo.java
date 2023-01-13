@@ -1,20 +1,33 @@
 package us.ihmc.rdx.perception;
 
+import imgui.ImGui;
+import imgui.type.ImString;
+import org.bytedeco.hdf5.*;
+import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
+
+import java.io.File;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class WebcamHDF5LoggingDemo
 {
@@ -23,19 +36,21 @@ public class WebcamHDF5LoggingDemo
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "Webcam HDF5 Logging Demo");
-   private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Logging", this::renderImGuiWidgets);
    private RDXOpenCVWebcamReader webcamReader;
-   private BytePointer jpegImageBytePointer;
-   private Mat yuv420Image;
+   private Mat bgrWebcamCopy;
+   private volatile boolean running = true;
+   private HDF5Manager hdf5Manager = null;
+   private final ImString logDirectory = new ImString(IHMCCommonPaths.LOGS_DIRECTORY.toString());
+   private String logFile;
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
    private final ImPlotFrequencyPlot publishFrequencyPlot = new ImPlotFrequencyPlot("Publish frequency");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
-   private final Stopwatch threadOneDuration = new Stopwatch();
-   private final Stopwatch threadTwoDuration = new Stopwatch();
    private IntPointer compressionParameters;
-   private final Runnable encodeAndPublish = this::encodeAndPublish;
-   private final Object measurementSyncObject = new Object();
-   private final Object encodeAndPublishMakeSureTheresOne = new Object();
+   private BytePointer pngImageBuffer;
+   private Group imageGroup;
+   private long imageIndex;
 
    public WebcamHDF5LoggingDemo()
    {
@@ -62,48 +77,20 @@ public class WebcamHDF5LoggingDemo
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
 
-                  yuv420Image = new Mat();
-                  jpegImageBytePointer = new BytePointer();
-
-                  compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
+                  compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
+                  pngImageBuffer = new BytePointer((long) webcamReader.getImageWidth() * webcamReader.getImageHeight() * 3); // BGR8
+                  bgrWebcamCopy = new Mat();
 
                   ThreadTools.startAsDaemon(() ->
                   {
-                     while (true)
+                     while (running)
                      {
-                        // If encoding is running slower than reading, we want to wait a little so the read
-                        // is freshest going into the encode and publish. We do this because we don't want
-                        // to there to be more than one publish thread going
-                        boolean shouldSleep;
-                        double sleepTime;
-                        synchronized (measurementSyncObject)
-                        {
-                           double averageThreadTwoDuration = threadTwoDuration.averageLap();
-                           double averageThreadOneDuration = threadOneDuration.averageLap();
-                           shouldSleep = !Double.isNaN(averageThreadTwoDuration) && !Double.isNaN(averageThreadOneDuration)
-                                       && averageThreadTwoDuration > averageThreadOneDuration;
-                           sleepTime = averageThreadTwoDuration - averageThreadOneDuration;
-
-                           if (Double.isNaN(threadOneDuration.lap()))
-                              threadOneDuration.reset();
-                        }
-
-                        if (shouldSleep)
-                           ThreadTools.sleepSeconds(sleepTime);
-
-                        // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
-
                         webcamReader.readWebcamImage();
 
-                        opencv_imgproc.cvtColor(webcamReader.getBGRImage(), yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
-
-                        synchronized (measurementSyncObject)
+                        synchronized (this)
                         {
-                           threadOneDuration.suspend();
+                           webcamReader.getBGRImage().copyTo(bgrWebcamCopy);
                         }
-
-                        ThreadTools.startAThread(encodeAndPublish, "EncodeAndPublish");
-//                        encodeAndPublish.run();
                      }
                   }, "CameraRead");
                }
@@ -118,36 +105,11 @@ public class WebcamHDF5LoggingDemo
          @Override
          public void dispose()
          {
+            running = false;
             webcamReader.dispose();
             baseUI.dispose();
          }
       });
-   }
-
-   private void encodeAndPublish()
-   {
-      synchronized (encodeAndPublishMakeSureTheresOne)
-      {
-         synchronized (measurementSyncObject)
-         {
-            if (Double.isNaN(threadTwoDuration.lap()))
-               threadTwoDuration.reset();
-         }
-
-         encodeDurationPlot.start();
-         opencv_imgcodecs.imencode(".jpg", yuv420Image, jpegImageBytePointer, compressionParameters);
-         encodeDurationPlot.stop();
-
-         byte[] heapByteArrayData = new byte[jpegImageBytePointer.asBuffer().remaining()];
-         jpegImageBytePointer.asBuffer().get(heapByteArrayData);
-
-         publishFrequencyPlot.ping();
-
-         synchronized (measurementSyncObject)
-         {
-            threadTwoDuration.suspend();
-         }
-      }
    }
 
    private void renderImGuiWidgets()
@@ -158,6 +120,54 @@ public class WebcamHDF5LoggingDemo
          encodeDurationPlot.renderImGuiWidgets();
          compressedBytesPlot.renderImGuiWidgets();
       }
+
+      if (hdf5Manager == null)
+      {
+         ImGuiTools.inputText(labels.get("Log directory"), logDirectory);
+
+         // TODO: Radio buttons for PNG, JPEG
+
+         if (ImGui.button(labels.get("Begin")))
+         {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+            String logFileName = dateFormat.format(new Date()) + "_" + "Webcam.hdf5";
+            FileTools.ensureDirectoryExists(Paths.get(logDirectory.get()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+            logFile = logDirectory.get() + File.separator + logFileName;
+            hdf5Manager = new HDF5Manager(logFile, hdf5.H5F_ACC_TRUNC);
+
+            imageGroup = hdf5Manager.getGroup("image");
+            imageIndex = 0;
+         }
+      }
+      else
+      {
+         ImGui.text(logFile);
+         if (ImGui.button(labels.get("Close file")))
+         {
+            hdf5Manager.closeFile();
+            hdf5Manager = null;
+         }
+
+         if (ImGui.button("Capture image"))
+         {
+            synchronized (this)
+            {
+               opencv_imgcodecs.imencode(".png", bgrWebcamCopy, pngImageBuffer, compressionParameters);
+            }
+
+            int rank = 1;
+            long[] dimensions = { pngImageBuffer.limit() };
+            DataSpace dataSpace = new DataSpace(rank, dimensions);
+            DataType dataType = new DataType(PredType.NATIVE_B8());
+            DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), dataType, dataSpace);
+            dataSet.write(pngImageBuffer, dataType);
+            dataSet.close();
+            dataSpace.close();
+
+            ++imageIndex;
+         }
+      }
+
    }
 
    public static void main(String[] args)
