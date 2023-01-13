@@ -153,6 +153,32 @@ public class JointIndexHandler
       }
    }
 
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointReadOnly> joints, NativeMatrix compactMatrix, NativeMatrix fullMatrix)
+   {
+      fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
+      fullMatrix.zero();
+
+      int rows = compactMatrix.getNumRows();
+
+      for (int index = 0; index < joints.size(); index++)
+      {
+         JointReadOnly joint = joints.get(index);
+         indicesIntoCompactBlock.reset();
+         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
+         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
+
+         if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
+            continue;
+
+         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
+         {
+            int compactBlockIndex = indicesIntoCompactBlock.get(i);
+            int fullBlockIndex = indicesIntoFullBlock[i];
+            fullMatrix.insert(compactMatrix, 0, rows, compactBlockIndex, compactBlockIndex + 1, 0, fullBlockIndex);
+         }
+      }
+   }
+
    public void compactBlockToFullBlockIgnoreUnindexedJoints(JointBasics[] joints, DMatrixRMaj compactMatrix, DMatrixRMaj fullMatrix)
    {
       fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
