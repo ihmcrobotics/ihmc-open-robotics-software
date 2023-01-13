@@ -71,7 +71,7 @@ public class InverseDynamicsQPSolver
    private final NativeMatrix solverInput_lb_previous;
    private final NativeMatrix solverInput_ub_previous;
 
-   private final DMatrixRMaj solverInput_activeIndices;
+   private final NativeMatrix solverInput_activeIndices;
 
    private final NativeMatrix solverOutput;
    private final NativeMatrix solverOutput_jointAccelerations;
@@ -152,8 +152,8 @@ public class InverseDynamicsQPSolver
       solverInput_lb.fill(Double.NEGATIVE_INFINITY);
       solverInput_ub.fill(Double.POSITIVE_INFINITY);
 
-      solverInput_activeIndices = new DMatrixRMaj(problemSize, 1);
-      CommonOps_DDRM.fill(solverInput_activeIndices, 1.0);
+      solverInput_activeIndices = new NativeMatrix(problemSize, 1);
+      solverInput_activeIndices.fill(1.0);
 
       solverOutput = new NativeMatrix(problemSize, 1);
       solverOutput_jointAccelerations = new NativeMatrix(numberOfDoFs, 1);
@@ -166,7 +166,11 @@ public class InverseDynamicsQPSolver
       jointTorqueWeight.set(0.001);
       regularizationMatrix = new NativeMatrix(problemSize, problemSize);
 
+//      for (int i = 0; i < numberOfDoFs; i++)
+//         regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
       double defaultRhoRegularization = 0.00001;
+//      for (int i = numberOfDoFs; i < problemSize; i++)
+//         regularizationMatrix.set(i, i, defaultRhoRegularization);
       regularizationMatrix.zero();
       regularizationMatrix.addDiagonal(0, 0, numberOfDoFs, jointAccelerationRegularization.getDoubleValue());
       regularizationMatrix.addDiagonal(numberOfDoFs, numberOfDoFs, problemSize - numberOfDoFs, defaultRhoRegularization);
@@ -204,6 +208,8 @@ public class InverseDynamicsQPSolver
 
    public void setRhoRegularizationWeight(DMatrixRMaj weight)
    {
+//      CommonOps_DDRM.insert(weight, regularizationMatrix, numberOfDoFs, numberOfDoFs);
+
       regularizationMatrix.insert(weight, numberOfDoFs, numberOfDoFs);
    }
 
@@ -250,7 +256,7 @@ public class InverseDynamicsQPSolver
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
 
-      CommonOps_DDRM.fill(solverInput_activeIndices, 1.0);
+      solverInput_activeIndices.fill(1.0);
    }
 
    private void addRegularization()
@@ -271,11 +277,8 @@ public class InverseDynamicsQPSolver
    private void addJointJerkRegularization()
    {
       double factor = dt * dt / jointJerkRegularization.getDoubleValue();
-      nativeSolverInput_H.addDiagonal(0, 0, numberOfDoFs, factor);
-      for (int i = 0; i < numberOfDoFs; i++)
-      {
-         solverInput_f.add(i, 0, -solverOutput_jointAccelerations.get(i, 0) / factor);
-      }
+      nativeSolverInput_H.addDiagonal(0, 0, numberOfDoFs, 1.0 / factor);
+      nativeSolverInput_f.addBlock(solverOutput_jointAccelerations, 0, 0, 0, 0, numberOfDoFs, 1, -1.0 / factor);
    }
 
    public void addMotionInput(NativeQPInputTypeA input)
@@ -965,10 +968,10 @@ public class InverseDynamicsQPSolver
          }
       }
 
-      numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
+      numberOfActiveVariables.set((int) solverInput_activeIndices.sum());
       qpSolver.setQuadraticCostFunction(finalSolverInput_H, finalSolverInput_f);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      qpSolver.setActiveVariables(solverInput_activeIndices);
+      qpSolver.setActiveVariables(new DMatrixRMaj(solverInput_activeIndices)); // FIXME
       qpSolver.setLinearInequalityConstraints(finalSolverInput_Ain, finalSolverInput_bin);
       qpSolver.setLinearEqualityConstraints(finalSolverInput_Aeq, finalSolverInput_beq);
 
@@ -984,9 +987,8 @@ public class InverseDynamicsQPSolver
          return false;
       }
 
-      // TODO use native tools
-      CommonOps_DDRM.extract(solverOutput, 0, numberOfDoFs, 0, 1, solverOutput_jointAccelerations, 0, 0);
-      CommonOps_DDRM.extract(solverOutput, numberOfDoFs, problemSize, 0, 1, solverOutput_rhos, 0, 0);
+      solverOutput_jointAccelerations.insert(solverOutput, 0, numberOfDoFs, 0, 1, 0, 0);
+      solverOutput_rhos.insert(solverOutput, numberOfDoFs, problemSize, 0, 1, 0, 0);
 
       addRateRegularization.set(true);
 
@@ -994,6 +996,7 @@ public class InverseDynamicsQPSolver
       {
          if (hasFloatingBase)
          {
+            // FIXME
             CommonOps_DDRM.mult(tempWrenchConstraint_J, new DMatrixRMaj(solverOutput), tempWrenchConstraint_LHS);
             int index = 0;
             wrenchEquilibriumTorqueError.setX(tempWrenchConstraint_LHS.get(index, 0) - tempWrenchConstraint_RHS.get(index++, 0));
@@ -1091,6 +1094,6 @@ public class InverseDynamicsQPSolver
 
    public void setActiveRhos(DMatrixRMaj activeRhoMatrix)
    {
-      CommonOps_DDRM.insert(activeRhoMatrix, solverInput_activeIndices, numberOfDoFs, 0);
+      solverInput_activeIndices.insert(activeRhoMatrix, numberOfDoFs, 0);
    }
 }
