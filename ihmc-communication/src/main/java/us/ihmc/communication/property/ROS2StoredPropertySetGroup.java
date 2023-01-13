@@ -1,6 +1,7 @@
 package us.ihmc.communication.property;
 
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class ROS2StoredPropertySetGroup
    {
       for (ROS2StoredPropertySet<?> ros2StoredPropertySet : ros2StoredPropertySets)
       {
+         LogTools.info("Updating: {}", ros2StoredPropertySet);
          ros2StoredPropertySet.updateAndPublishThrottledStatus();
       }
    }
