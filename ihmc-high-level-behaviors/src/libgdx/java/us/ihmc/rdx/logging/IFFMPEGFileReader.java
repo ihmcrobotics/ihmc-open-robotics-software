@@ -16,13 +16,19 @@ public interface IFFMPEGFileReader
 
    AVRational getTimeBase();
 
-   AVRational getFramerate();
+   AVRational getAverageFramerate();
 
    int getWidth();
 
    int getHeight();
 
+   /**
+    * @return Duration in unit of time base.
+    */
    long getDuration();
 
+   /**
+    * @return Start time in unit of time base.
+    */
    long getStartTime();
 }

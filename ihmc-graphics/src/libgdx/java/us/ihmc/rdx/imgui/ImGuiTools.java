@@ -3,14 +3,12 @@ package us.ihmc.rdx.imgui;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import imgui.*;
+import imgui.flag.ImGuiDataType;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiKey;
 import imgui.internal.ImGuiContext;
-import imgui.type.ImDouble;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import imgui.type.ImString;
+import imgui.type.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
@@ -102,6 +100,18 @@ public class ImGuiTools
       int inputTextFlags = ImGuiInputTextFlags.None;
       inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
       return ImGui.inputInt(label, imInt, step, 100, inputTextFlags);
+   }
+
+   public static boolean volatileInputLong(String label, ImLong imLong)
+   {
+      return volatileInputLong(label, imLong, 1);
+   }
+
+   public static boolean volatileInputLong(String label, ImLong imLong, long step)
+   {
+      int inputTextFlags = ImGuiInputTextFlags.None;
+      inputTextFlags += ImGuiInputTextFlags.EnterReturnsTrue;
+      return ImGui.inputScalar(label, ImGuiDataType.U32, imLong, step, 100, "%d", inputTextFlags);
    }
 
    public static boolean volatileInputFloat(String label, ImFloat imFloat)
