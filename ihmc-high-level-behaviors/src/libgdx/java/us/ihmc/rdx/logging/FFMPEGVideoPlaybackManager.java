@@ -2,6 +2,7 @@ package us.ihmc.rdx.logging;
 
 import org.bytedeco.ffmpeg.avutil.AVRational;
 import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -33,9 +34,16 @@ public class FFMPEGVideoPlaybackManager
       treatAsStream = this.file.getDuration() < 0;
    }
 
-   public void seek(long milliseconds)
+   public void seekFrame(long frameNumber)
    {
-      long returnCode = file.seek(millisToBaseUnits(milliseconds) + file.getStartTime());
+      seek((long) Math.floor(frameNumber * Conversions.secondsToMilliseconds(calculateVideoFramePeriod())));
+   }
+
+   public void seek(long timebaseUnit)
+   {
+//      pause(); // Currently pausing is required to seek
+
+      long returnCode = file.seek(timebaseUnit + file.getStartTime());
 
       if (returnCode == -1) //EOF
       {
@@ -58,7 +66,7 @@ public class FFMPEGVideoPlaybackManager
 
    private void playbackThread()
    {
-      double period = 1 / FFMPEGTools.rationalToFloatingPoint(file.getFramerate());
+      double period = calculateVideoFramePeriod();
 
       while (!isPaused)
       {
@@ -93,18 +101,54 @@ public class FFMPEGVideoPlaybackManager
       }
    }
 
-   public boolean hasDuration() {
-      return !treatAsStream;
+   public double calculateTimeBaseSeconds()
+   {
+      return FFMPEGTools.rationalToFloatingPoint(file.getTimeBase());
+   }
+
+   public double calculateAverageFramerateHz()
+   {
+      return FFMPEGTools.rationalToFloatingPoint(file.getAverageFramerate());
+   }
+
+   public double calculateVideoFramePeriod()
+   {
+      return 1.0 / calculateAverageFramerateHz();
+   }
+
+   public IFFMPEGFileReader getFile()
+   {
+      return file;
+   }
+
+   public double calculateVideoDuration()
+   {
+      return file.getDuration() * calculateTimeBaseSeconds();
+   }
+
+   public double calculateNumberOfFrames()
+   {
+      return calculateVideoDuration() / calculateVideoFramePeriod();
+   }
+
+   public boolean isAStream()
+   {
+      return treatAsStream;
    }
 
    public long getVideoDurationInMillis()
    {
-      return baseUnitsToMillis(file.getDuration());
+      return file.getDuration();
    }
 
    public long getCurrentTimestampInMillis()
    {
-      return baseUnitsToMillis(previousBaseUnitsTimestamp - file.getStartTime());
+      return previousBaseUnitsTimestamp - file.getStartTime();
+   }
+
+   public double getCurrentTimestamp()
+   {
+      return Conversions.millisecondsToSeconds(getCurrentTimestampInMillis());
    }
 
    private long millisToBaseUnits(long millis)

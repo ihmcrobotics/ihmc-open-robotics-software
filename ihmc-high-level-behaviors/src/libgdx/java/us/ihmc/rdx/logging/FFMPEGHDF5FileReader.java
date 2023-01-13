@@ -237,7 +237,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    }
 
    @Override
-   public AVRational getFramerate()
+   public AVRational getAverageFramerate()
    {
       return framerate;
    }
