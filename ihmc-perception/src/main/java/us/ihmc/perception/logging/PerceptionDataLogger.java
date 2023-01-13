@@ -61,6 +61,7 @@ public class PerceptionDataLogger
 
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> references = new HashMap<>();
+   private HashMap<String, AtomicReference<BigVideoPacket>> bigVideoPacketReferences = new HashMap<>();
 
    public PerceptionDataLogger()
    {
@@ -80,7 +81,7 @@ public class PerceptionDataLogger
       references.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0, 0));
-      references.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new AtomicReference<>(null));
+      bigVideoPacketReferences.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
@@ -182,16 +183,6 @@ public class PerceptionDataLogger
          runnablesToStopLogging.addLast(zed2StereoSubscription::destroy);
       }
 
-      // Add callback for Blackfly Color images
-      if(channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
-      {
-         byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
-         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
-         var blackflySubscription = ros2Helper.subscribe(ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
-         blackflySubscription.addCallback(this::logColorBlackfly);
-         runnablesToStopLogging.addLast(blackflySubscription::destroy);
-      }
-
       // Add callback for Ouster depth maps
       if(channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
@@ -206,6 +197,35 @@ public class PerceptionDataLogger
             subscriber.takeNextData(imageMessage, sampleInfo);
             references.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).set(imageMessage);
             logDepthOuster(references.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).getAndSet(null));
+         });
+      }
+
+//      // Add callback for Blackfly Color images
+//      if(channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+//      {
+//         byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
+//         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
+//         var blackflySubscription = realtimeROS2Helper.subscribe(ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
+//         blackflySubscription.addCallback(this::logColorBlackfly);
+//         runnablesToStopLogging.addLast(blackflySubscription::destroy);
+//      }
+
+      // Add callback for Blackfly Color images
+      LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
+      if(channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+      {
+         SampleInfo sampleInfo = new SampleInfo();
+         byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
+         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
+         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+         {
+
+            BigVideoPacket imageMessage = new BigVideoPacket();
+            subscriber.takeNextData(imageMessage, sampleInfo);
+            bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).set(imageMessage);
+            logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
+
+            LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
          });
       }
 
@@ -338,7 +358,6 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, videoPacket);
       }
-
       //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
    }
 
@@ -517,7 +536,8 @@ public class PerceptionDataLogger
 //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
       //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
 
-      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
+      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
+//      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
 
