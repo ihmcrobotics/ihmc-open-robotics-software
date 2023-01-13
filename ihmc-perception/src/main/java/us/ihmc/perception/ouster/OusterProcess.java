@@ -261,7 +261,6 @@ public class OusterProcess
             LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan, lidarScanMessage, (i, j) -> pointCloudXYZBuffer.getBackingDirectFloatBuffer().get(3 * i + j));
 
             publisherMap.get(topic).publish(lidarScanMessage);
-            LogTools.info("Published lidar scan on topic " + topic.getName());
          }
          else
          {
