@@ -57,6 +57,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -85,6 +86,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private static final MutableInt INDEX = new MutableInt();
    private final String sensorName;
    private final ReferenceFrame sensorFrame;
+   private final ReferenceFrame sensorZUpFrame;
    private final Matrix4 gdxTransform = new Matrix4();
    private final RDXLowLevelDepthSensorSimulator depthSensorSimulator;
    private final LongSupplier timestampSupplier;
@@ -189,6 +191,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                                                                  simulateL515Noise);
 
       this.sensorFrame = sensorFrame;
+      this.sensorZUpFrame = new ZUpFrame(sensorFrame, sensorFrame + "ZUpFrame");
       this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
@@ -298,6 +301,7 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             LibGDXTools.toLibGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
          else
             LibGDXTools.toLibGDX(sensorFrameToWorldTransform, gdxTransform);
+         sensorZUpFrame.update();
 
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
 
@@ -526,7 +530,9 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                float z = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 2);
                if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(y))
                {
-                  ros2PointsToPublish.add().set(x, y, z);
+                  Point3D point = ros2PointsToPublish.add();
+                  point.set(x, y, z);
+                  point.applyInverseTransform(sensorFrame.getTransformToRoot());
                   if (ros2ColorsToPublish != null)
                      ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
                }
