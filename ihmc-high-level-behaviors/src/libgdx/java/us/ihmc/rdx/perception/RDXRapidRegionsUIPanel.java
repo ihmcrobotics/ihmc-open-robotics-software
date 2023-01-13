@@ -1,5 +1,9 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
@@ -10,9 +14,14 @@ import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-public class RDXRapidRegionsUIPanel
+public class RDXRapidRegionsUIPanel implements RenderableProvider
 {
+
+   private RDXPlanarRegionsGraphic planarRegionsGraphic;
+
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
    private RapidRegionsDebutOutputGenerator rapidRegionsDebutOutputGenerator;
@@ -105,6 +114,7 @@ public class RDXRapidRegionsUIPanel
       depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
       planarRegionCustomizationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
 
+      planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    }
 
    public void render()
@@ -117,6 +127,12 @@ public class RDXRapidRegionsUIPanel
       gzImagePanel.drawDepthImage(rapidPlanarRegionsExtractor.getCurrentFeatureGrid().getCzImage().getBytedecoOpenCVMat());
 
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
+   }
+
+   public void render3DGraphics(PlanarRegionsList planarRegions)
+   {
+      planarRegionsGraphic.generateMeshes(planarRegions);
+      planarRegionsGraphic.update();
    }
 
    public void renderImGuiWidgets()
@@ -173,4 +189,9 @@ public class RDXRapidRegionsUIPanel
       return render3DPlanarRegions.get();
    }
 
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      planarRegionsGraphic.getRenderables(renderables, pool);
+   }
 }
