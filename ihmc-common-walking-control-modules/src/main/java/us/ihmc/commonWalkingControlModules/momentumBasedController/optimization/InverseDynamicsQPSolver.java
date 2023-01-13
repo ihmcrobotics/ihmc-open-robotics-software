@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.spatial.Wrench;
@@ -34,7 +35,7 @@ public class InverseDynamicsQPSolver
    private final YoFrameVector3D wrenchEquilibriumTorqueError;
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
-   private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
+   private final NativeActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
    private final NativeQPVariableSubstitution accelerationVariablesSubstitution = new NativeQPVariableSubstitution();
 
@@ -102,7 +103,7 @@ public class InverseDynamicsQPSolver
 
    private final double dt;
 
-   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver,
+   public InverseDynamicsQPSolver(NativeActiveSetQPSolverWithInactiveVariablesInterface qpSolver,
                                   int numberOfDoFs,
                                   int rhoSize,
                                   boolean hasFloatingBase,
@@ -120,8 +121,8 @@ public class InverseDynamicsQPSolver
 
       nativeSolverInput_H = new NativeMatrix(problemSize, problemSize);
       nativeSolverInput_f = new NativeMatrix(problemSize, 1);
-      finalSolverInput_H = new NativeMatrix(problemSize, problemSize);
-      finalSolverInput_f = new NativeMatrix(problemSize, 1);
+      finalSolverInput_H = qpSolver.getCostHessianUnsafe();
+      finalSolverInput_f = qpSolver.getCostGradientUnsafe();
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f = new DMatrixRMaj(problemSize, 1);
 
@@ -132,10 +133,10 @@ public class InverseDynamicsQPSolver
       nativeSolverInput_beq = new NativeMatrix(problemSize, 1);
       nativeSolverInput_Ain = new NativeMatrix(problemSize, problemSize);
       nativeSolverInput_bin = new NativeMatrix(problemSize, 1);
-      finalSolverInput_Ain = new NativeMatrix(problemSize, problemSize);
-      finalSolverInput_bin = new NativeMatrix(problemSize, 1);
-      finalSolverInput_Aeq = new NativeMatrix(problemSize, problemSize);
-      finalSolverInput_beq = new NativeMatrix(problemSize, 1);
+      finalSolverInput_Ain = qpSolver.getAinUnsafe();
+      finalSolverInput_bin = qpSolver.getBinUnsafe();
+      finalSolverInput_Aeq = qpSolver.getAeqUnsafe();
+      finalSolverInput_beq = qpSolver.getBeqUnsafe();
       temp_A = new NativeMatrix(problemSize, problemSize);
       temp_b = new NativeMatrix(problemSize, 1);
       solverInput_Aeq = new DMatrixRMaj(0, problemSize);
@@ -143,8 +144,10 @@ public class InverseDynamicsQPSolver
       solverInput_Ain = new DMatrixRMaj(0, problemSize);
       solverInput_bin = new DMatrixRMaj(0, 1);
 
-      solverInput_lb = new NativeMatrix(problemSize, 1);
-      solverInput_ub = new NativeMatrix(problemSize, 1);
+      solverInput_lb = qpSolver.getLowerBoundsUnsafe();
+      solverInput_ub = qpSolver.getUpperBoundsUnsafe();
+      solverInput_lb.reshape(problemSize, 1);
+      solverInput_ub.reshape(problemSize, 1);
 
       solverInput_lb_previous = new NativeMatrix(problemSize, 1);
       solverInput_ub_previous = new NativeMatrix(problemSize, 1);
@@ -969,11 +972,7 @@ public class InverseDynamicsQPSolver
       }
 
       numberOfActiveVariables.set((int) solverInput_activeIndices.sum());
-      qpSolver.setQuadraticCostFunction(finalSolverInput_H, finalSolverInput_f);
-      qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
-      qpSolver.setActiveVariables(new DMatrixRMaj(solverInput_activeIndices)); // FIXME
-      qpSolver.setLinearInequalityConstraints(finalSolverInput_Ain, finalSolverInput_bin);
-      qpSolver.setLinearEqualityConstraints(finalSolverInput_Aeq, finalSolverInput_beq);
+      qpSolver.setActiveVariables(solverInput_activeIndices);
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
       removeSubstitution(); // This needs to be done right after solving.
