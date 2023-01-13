@@ -114,7 +114,7 @@ public class PointCloudData
 
    public PointCloudData(PerceptionMessageTools perceptionMessageTools, ImageMessage sensorData)
    {
-      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTimeSecondsSinceEpoch()) + sensorData.getAcquisitionTimeAdditionalNanos();
+      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch()) + sensorData.getAcquisitionTime().getAdditionalNanos();
       numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
       colors = null;
 
