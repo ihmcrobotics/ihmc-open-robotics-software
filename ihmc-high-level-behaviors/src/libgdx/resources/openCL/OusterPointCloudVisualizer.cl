@@ -75,18 +75,18 @@ kernel void imageToPointCloud(global float* parameters,
 
    int pointStartIndex = (depthImageWidth * y + x) * 8;
 
-//   if (eyeDepthInMeters == 0.0f)
-//   {
-//      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
-//      pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
-//      pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
-//   }
-//   else
-//   {
+   if (eyeDepthInMeters == 0.0f)
+   {
+      pointCloudVertexBuffer[pointStartIndex]     = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex + 1] = nan((uint) 0);
+      pointCloudVertexBuffer[pointStartIndex + 2] = nan((uint) 0);
+   }
+   else
+   {
       pointCloudVertexBuffer[pointStartIndex]     = worldFramePoint.x;
       pointCloudVertexBuffer[pointStartIndex + 1] = worldFramePoint.y;
       pointCloudVertexBuffer[pointStartIndex + 2] = worldFramePoint.z;
-//   }
+   }
 
    float4 rgba8888Color = calculateInterpolatedGradientColorFloat4(worldFramePoint.z);
    float pointColorR = (rgba8888Color.x);
