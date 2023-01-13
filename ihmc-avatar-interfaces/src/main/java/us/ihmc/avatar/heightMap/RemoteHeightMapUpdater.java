@@ -56,11 +56,7 @@ public class RemoteHeightMapUpdater
       IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
 
       heightMapUpdater = new HeightMapUpdater();
-      heightMapUpdater.attachHeightMapConsumer(message ->
-            {
-               LogTools.info("Publishing height map");
-                  heightMapPublisher.publish(message);
-            });
+      heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
       {
