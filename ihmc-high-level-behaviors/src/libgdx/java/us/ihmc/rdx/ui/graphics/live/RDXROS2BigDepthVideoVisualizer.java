@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.graphics.live;
 
 import imgui.type.ImBoolean;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.BigVideoPacket;
 import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
@@ -100,7 +99,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
             synchronized (this) // synchronize with the update method
             {
                updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
-
                BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
             }
          });
