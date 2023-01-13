@@ -10,6 +10,8 @@ import us.ihmc.perception.ouster.OusterDriverAndDepthImagePublisher;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 
+import java.util.Arrays;
+
 public class AtlasOusterLidarOnRobotProcess
 {
    private final ROS2SyncedRobotModel syncedRobot;
@@ -22,7 +24,7 @@ public class AtlasOusterLidarOnRobotProcess
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
-      new OusterDriverAndDepthImagePublisher(this::sensorFrameUpdater);
+      new OusterDriverAndDepthImagePublisher(this::sensorFrameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE);
    }
 
    private ReferenceFrame sensorFrameUpdater()

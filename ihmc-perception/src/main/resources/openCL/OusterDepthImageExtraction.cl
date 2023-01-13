@@ -71,11 +71,6 @@ float16 newRotationMatrix()
                      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0); // unused values
 }
 
-int discretize(float value, float discretization)
-{
-    return round(value / discretization);
-}
-
 kernel void extractDepthImage(global float* parameters,
                               global int* pixelShifts,
                               global unsigned char* lidarFrameBuffer,
@@ -111,9 +106,9 @@ kernel void extractDepthImage(global float* parameters,
    write_imageui(depthImage16UC1, (int2) (shiftedX, y), (uint4) (range, 0, 0, 0));
 }
 
-kernel void imageToDiscretizedPointCloud(global float* parameters,
-                                         read_only image2d_t discretizedDepthImage,
-                                         global float* pointCloudVertexBuffer)
+kernel void imageToPointCloud(global float* parameters,
+                              read_only image2d_t discretizedDepthImage,
+                              global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
