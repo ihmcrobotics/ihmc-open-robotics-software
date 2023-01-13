@@ -392,4 +392,9 @@ public class BytedecoOpenCVTools
 
       return outputMat;
    }
+
+   public static void convertFloatToShort(Mat metricDepth, Mat shortDepthToPack, double scale, double delta)
+   {
+      metricDepth.convertTo(shortDepthToPack, opencv_core.CV_16UC1, scale, delta);
+   }
 }

@@ -90,8 +90,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
             baseUI.create();
 
-            planarRegionsGraphic = new RDXPlanarRegionsGraphic();
-
             openCLManager = new OpenCLManager();
             openCLManager.create();
             openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
