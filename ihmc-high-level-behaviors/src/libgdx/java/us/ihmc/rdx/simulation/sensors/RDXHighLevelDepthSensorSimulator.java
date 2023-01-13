@@ -86,7 +86,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
    private static final MutableInt INDEX = new MutableInt();
    private final String sensorName;
    private final ReferenceFrame sensorFrame;
-   private final ReferenceFrame sensorZUpFrame;
    private final Matrix4 gdxTransform = new Matrix4();
    private final RDXLowLevelDepthSensorSimulator depthSensorSimulator;
    private final LongSupplier timestampSupplier;
@@ -191,7 +190,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                                                                  simulateL515Noise);
 
       this.sensorFrame = sensorFrame;
-      this.sensorZUpFrame = new ZUpFrame(sensorFrame, sensorFrame + "ZUpFrame");
       this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
@@ -301,7 +299,6 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
             LibGDXTools.toLibGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
          else
             LibGDXTools.toLibGDX(sensorFrameToWorldTransform, gdxTransform);
-         sensorZUpFrame.update();
 
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
 
