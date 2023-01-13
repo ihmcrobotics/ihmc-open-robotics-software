@@ -14,6 +14,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -47,7 +48,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
    private HeightMapParametersUIController heightMapParametersUIController;
 
    private static final boolean SHOW_HEIGHT_MAP = true;
-   private static final boolean SHOW_POINT_CLOUD = true;
+   private static final boolean SHOW_POINT_CLOUD = false;
 
    public HeightMapUI()
    {
@@ -76,7 +77,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       DRCRobotModel robotModel = getRobotModel();
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, ROS2Tools.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
@@ -89,10 +90,12 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
             PointCloudData pointCloudData = new PointCloudData(data);
             Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
+            FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
 
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, new FramePose3D(), gridCenter));
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, sensorPose, gridCenter));
          }
       } );
+      /*
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
       {
          @Override
@@ -110,6 +113,8 @@ public abstract class HeightMapUI extends ApplicationNoModule
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Triple.of(pointCloudData, new FramePose3D(), gridCenter));
          }
       });
+
+       */
 
 
       stage.setTitle(getClass().getSimpleName());

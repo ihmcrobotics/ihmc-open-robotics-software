@@ -38,19 +38,12 @@ public class LidarPointCloudCompression
       }
 
       ByteBuffer compressedPointCloudBuffer = ByteBuffer.allocate(pointCloudSizeInBytes);
-      compressPointCloud(pointCloudSize, messageToPack, byteBuffer, compressedPointCloudBuffer);
-   }
-
-   public static void compressPointCloud(int pointCloudSize, LidarScanMessage messageToPack, ByteBuffer discretizedPointCloud, ByteBuffer compressedPointCloudBuffer)
-   {
-      // 3 coordinates per point, 4 bytes per coordinate
-      int pointCloudSizeInBytes = Integer.BYTES * 3 * pointCloudSize;
 
       LZ4CompressionImplementation compressor = compressorThreadLocal.get();
       int compressedPointCloudSize;
       try
       {
-         compressedPointCloudSize = compressor.compress(discretizedPointCloud, compressedPointCloudBuffer);
+         compressedPointCloudSize = compressor.compress(byteBuffer, compressedPointCloudBuffer);
       }
       catch (LZ4Exception e)
       {
@@ -70,7 +63,8 @@ public class LidarPointCloudCompression
       }
 
       compressedPointCloudBuffer.flip();
-      compressedPointCloudBuffer.put(compressedPointCloudBuffer);
+      for (int i = 0; i < compressedPointCloudSize; i++)
+         messageToPack.getScan().add(compressedPointCloudBuffer.get());
 
       messageToPack.setNumberOfPoints(pointCloudSize);
    }

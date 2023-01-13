@@ -14,6 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -55,9 +56,13 @@ public class RemoteHeightMapUpdater
       IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
 
       heightMapUpdater = new HeightMapUpdater();
-      heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
+      heightMapUpdater.attachHeightMapConsumer(message ->
+            {
+               LogTools.info("Publishing height map");
+                  heightMapPublisher.publish(message);
+            });
 
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, ROS2Tools.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
@@ -70,30 +75,30 @@ public class RemoteHeightMapUpdater
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
             Point3D gridCenter = new Point3D(data.getLidarPosition().getX(), data.getLidarPosition().getY(), groundHeight);
             PointCloudData pointCloudData = new PointCloudData(data);
-            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, zeroPose, gridCenter));
+            FramePose3D sensorPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+
+            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
          }
       });
 
-      AtomicBoolean renderedFirst = new AtomicBoolean(false);
+      /*
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<ImageMessage> subscriber)
          {
-               LogTools.info("got height map");
-               syncedRobot.update();
+            syncedRobot.update();
 
-               double groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
+            double groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
 
-               ImageMessage data = subscriber.readNextData();
-               //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
-               Point3D gridCenter = new Point3D(data.getPosition().getX(), data.getPosition().getY(), groundHeight);
-               PointCloudData pointCloudData = new PointCloudData(perceptionMessageTools, data);
-               heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, zeroPose, gridCenter));
-
-            renderedFirst.set(true);
+            ImageMessage data = subscriber.readNextData();
+            //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+            Point3D gridCenter = new Point3D(data.getPosition().getX(), data.getPosition().getY(), groundHeight);
+            PointCloudData pointCloudData = new PointCloudData(perceptionMessageTools, data);
+            heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, zeroPose, gridCenter));
          }
       });
+       */
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(new ROS2Helper(ros2Node));
       ros2PropertySetGroup.registerStoredPropertySet(HeightMapAPI.PARAMETERS, heightMapUpdater.getHeightMapParameters());

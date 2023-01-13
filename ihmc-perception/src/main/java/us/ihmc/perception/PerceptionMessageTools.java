@@ -38,7 +38,7 @@ public class PerceptionMessageTools
    {
       openCLManager = new OpenCLManager();
       openCLManager.create();
-      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
+      openCLProgram = openCLManager.loadProgram("PerceptionMessageTools");
       unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
    }
 

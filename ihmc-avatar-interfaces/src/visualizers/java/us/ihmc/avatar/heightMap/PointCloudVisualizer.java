@@ -9,6 +9,7 @@ import javafx.scene.shape.MeshView;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,10 +19,12 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -83,6 +86,7 @@ public class PointCloudVisualizer extends AnimationTimer
       processPointCloudInternal(pointCloudData.getLeft().getPointCloud(), pointCloudData.getMiddle());
    }
 
+   private final Random random = new Random(1738L);
    private void processPointCloudInternal(Point3D[] pointCloud, FramePose3DReadOnly ousterPose)
    {
       /* Compute mesh */
@@ -92,19 +96,24 @@ public class PointCloudVisualizer extends AnimationTimer
       {
          ousterFrame.setPoseAndUpdate(ousterPose);
 
-         for (int i = 0; i < 64; i++)
-         {
-            int v = 10;
-            for (int j = 0; j < 2048; j++)
-            {
-               FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud[2048 * i + j]);
-               point.changeFrame(ReferenceFrame.getWorldFrame());
-               pointCloud[i].set(point);
+         int pointsToProcess = 50;
+//         for (int i = 0; i < 64; i++)
+//         {
+//            int v = 10;
+//            for (int j = 0; j < 2048; j++)
+//            {
 
-               double alpha = i / 65.0;
-               meshBuilder.addCube(POINT_SIZE, point, Color.RED.interpolate(Color.BLUE, alpha));
-            }
+         for (int i = 0; i < pointsToProcess; i++)
+         {
+            int j = RandomNumbers.nextInt(random, 0, pointCloud.length - 1);
+            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud[j]);
+            point.changeFrame(ReferenceFrame.getWorldFrame());
+
+            double alpha = i / 65.0;
+            meshBuilder.addCube(POINT_SIZE, point, Color.RED.interpolate(Color.BLUE, alpha));
          }
+//            }
+//         }
 
          //         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
 //         {
