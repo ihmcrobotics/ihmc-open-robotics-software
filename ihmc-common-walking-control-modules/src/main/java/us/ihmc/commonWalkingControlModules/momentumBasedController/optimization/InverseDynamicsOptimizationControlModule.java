@@ -47,6 +47,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -98,6 +99,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
+   private final ExecutionTimer optimizationTimer = new ExecutionTimer("InvDynOptimizationTimer", registry);
 
    private final ArrayList<QPObjectiveCommand> nullspaceQPObjectiveCommands = new ArrayList<>();
 
@@ -205,6 +207,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    public boolean compute()
    {
+      optimizationTimer.startMeasurement();
       wrenchMatrixCalculator.computeMatrices();
       if (VISUALIZE_RHO_BASIS_VECTORS)
          basisVectorVisualizer.visualize(wrenchMatrixCalculator.getBasisVectors(), wrenchMatrixCalculator.getBasisVectorsOrigin());
@@ -283,6 +286,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       momentumModuleSolution.setRigidBodiesWithExternalWrench(rigidBodiesWithExternalWrench);
 
       resetCustomBounds();
+      optimizationTimer.stopMeasurement();
 
       return hasConverged;
    }
