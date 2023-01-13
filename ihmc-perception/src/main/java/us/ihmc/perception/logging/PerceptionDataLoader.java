@@ -124,14 +124,14 @@ public class PerceptionDataLoader
       String defaultLogDirectory =
             System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20230112_174628_PerceptionLog.hdf5";
+      String logFileName = "20230113_161357_Duncan_Images.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
 
       ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME);
+      long total = loader.getHDF5Manager().getCount("/image/");
 //      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
 
       //      long total = Math.min(totalColor, totalDepth);
@@ -152,7 +152,7 @@ public class PerceptionDataLoader
 
          long begin_load = System.nanoTime();
 //         loader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, i, depthImage);
-         loader.loadCompressedDepth(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, i, colorImage);
+         loader.loadCompressedDepth("/image/", i, colorImage);
          long end_load = System.nanoTime();
 
 //         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
