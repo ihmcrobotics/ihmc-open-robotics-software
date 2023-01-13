@@ -49,6 +49,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
    private OneDoFJointBasics[] controlledOneDoFJoints;
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreFeedbackControlTimer = new ExecutionTimer("controllerCoreFeedbackControlTimer", 1.0, registry);
+   private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
    @Deprecated
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoRegistry parentRegistry)
@@ -292,8 +293,10 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       if (internalCommandInput.isReinitializationRequested())
          inverseDynamicsSolver.initialize();
 
+      controllerCoreSubmitTimer.startMeasurement();
       inverseDynamicsSolver.submitInverseDynamicsCommandList(internalCommandInput.getInverseDynamicsCommandList());
       inverseDynamicsSolver.submitResetIntegratorRequests(jointDesiredOutputList);
+      controllerCoreSubmitTimer.stopMeasurement();
       inverseDynamicsSolver.compute();
       feedbackController.computeAchievedAccelerations();
 
@@ -306,7 +309,9 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
 
    private void doInverseKinematics()
    {
+      controllerCoreSubmitTimer.startMeasurement();
       inverseKinematicsSolver.submitInverseKinematicsCommandList(internalCommandInput.getInverseKinematicsCommandList());
+      controllerCoreSubmitTimer.stopMeasurement();
       inverseKinematicsSolver.compute();
 
       jointDesiredOutputList.completeWith(inverseKinematicsSolver.getOutput());
@@ -316,7 +321,9 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
 
    private void doVirtualModelControl()
    {
+      controllerCoreSubmitTimer.startMeasurement();
       virtualModelControlSolver.submitVirtualModelControlCommandList(internalCommandInput.getVirtualModelControlCommandList());
+      controllerCoreSubmitTimer.stopMeasurement();
       virtualModelControlSolver.compute();
 
       jointDesiredOutputList.completeWith(virtualModelControlSolver.getOutput());

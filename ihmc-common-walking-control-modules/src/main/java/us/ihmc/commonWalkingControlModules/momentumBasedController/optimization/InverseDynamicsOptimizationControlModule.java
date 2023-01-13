@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.visualizer.BasisVectorVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
+import us.ihmc.convexOptimization.quadraticProgram.NativeActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -168,7 +169,7 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       momentumModuleSolution = new MomentumModuleSolution();
 
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
-      ActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
+      NativeActiveSetQPSolverWithInactiveVariablesInterface activeSetQPSolver = optimizationSettings.getActiveSetQPSolver();
       double dt = toolbox.getControlDT();
       qpSolver = new InverseDynamicsQPSolver(activeSetQPSolver, numberOfDoFs, rhoSize, hasFloatingBase, dt, registry);
       qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
