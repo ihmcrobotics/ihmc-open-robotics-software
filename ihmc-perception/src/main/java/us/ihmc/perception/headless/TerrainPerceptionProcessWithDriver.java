@@ -48,7 +48,8 @@ public class TerrainPerceptionProcessWithDriver
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final ImageMessage colorImageMessage = new ImageMessage();
    private final ROS2Helper ros2Helper;
-   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+
+   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private RealSenseHardwareManager realSenseHardwareManager;
    private BytedecoRealsense sensor;
    private Mat depthU16C1Image;
@@ -101,12 +102,6 @@ public class TerrainPerceptionProcessWithDriver
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
       rapidRegionsCustomizer = new RapidPlanarRegionsCustomizer();
 
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS, rapidRegionsCustomizer.getPolygonizerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                                                     rapidRegionsCustomizer.getConcaveHullFactoryParameters());
-
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
       LogTools.info("Starting loop.");
@@ -146,7 +141,6 @@ public class TerrainPerceptionProcessWithDriver
 
          if (sensor.readFrameData())
          {
-            ros2PropertySetGroup.update();
 
             Instant now = Instant.now();
             double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
@@ -186,10 +180,19 @@ public class TerrainPerceptionProcessWithDriver
                                             sensor.getDepthPrincipalOffsetXPixels(),
                                             sensor.getDepthPrincipalOffsetYPixels());
 
+               ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
+               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS, rapidRegionsCustomizer.getPolygonizerParameters());
+               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
+                                                              rapidRegionsCustomizer.getConcaveHullFactoryParameters());
+
                onPatchSizeResized();
 
                LogTools.info("Initialized.");
             }
+
+//            LogTools.info("New Iteration: {}", dataAquisitionTime);
+            ros2PropertySetGroup.update();
 
             depthU16C1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
 

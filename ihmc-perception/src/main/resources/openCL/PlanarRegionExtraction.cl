@@ -383,17 +383,3 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
     }
 }
 
-/*
- * Segmentation Kernel for generating patch graph for colored images.
- * */
-void kernel segmentKernel(read_only image2d_t color, write_only image2d_t filteredImage, write_only image2d_t graph, global float* params)
-{
-   int y = get_global_id(0);
-   int x = get_global_id(1);
-
-   //    if(x==0 && y==0) printf("SegmentKernel\n");
-   if(y >= 0 && y < (int)params[FILTER_SUB_H] && x >= 0 && x < (int)params[FILTER_SUB_W])
-   {
-      fillDeadPixels(color, x, y, filteredImage, params);
-   }
-}

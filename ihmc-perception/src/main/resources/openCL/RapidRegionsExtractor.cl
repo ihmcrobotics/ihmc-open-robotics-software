@@ -55,7 +55,7 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
    return X;
 }
 
-float3 estimate_perspective_normal(read_only image2d_t in, int x, int y, global float* params)
+float3 estimate_perspective_normal(read_write image2d_t in, int x, int y, global float* params)
 {
    float residual = 0;
    float Z = 0;
@@ -99,7 +99,7 @@ float3 estimate_perspective_normal(read_only image2d_t in, int x, int y, global 
    return normalize((1 / (float) (count)) * normal.xyz);
 }
 
-float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex, global float* params)
+float3 estimate_spherical_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float residual = 0;
    float radius = 0;
@@ -148,7 +148,7 @@ float3 estimate_spherical_normal(read_only image2d_t in, int rIndex, int cIndex,
    return normalize((1 / (float) (count)) * normal.xyz);
 }
 
-float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, global float* params)
+float3 estimate_perspective_centroid(read_write image2d_t in, int y, int x, global float* params)
 {
    float Z = 0;
    int count = 0;
@@ -176,7 +176,7 @@ float3 estimate_perspective_centroid(read_only image2d_t in, int y, int x, globa
    return (1/(float)(count)) * centroid;
 }
 
-float3 estimate_spherical_centroid(read_only image2d_t in, int rIndex, int cIndex, global float* params)
+float3 estimate_spherical_centroid(read_write image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float radius = 0;
    int count = 0;
@@ -224,7 +224,7 @@ bool isConnected(float3 ag, float3 an, float3 bg, float3 bn, global float* param
  * Replace non-reading (0s) pixels with an approximate nearby value, so they don't
  * upset the rest of the algorithm.
  */
-void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only image2d_t out0, global float* params)
+void fillDeadPixels(read_write image2d_t inputImage, int x, int y, write_only image2d_t out0, global float* params)
 {
     uint Z = 0;
     int count = 0;
@@ -317,7 +317,7 @@ void fillDeadPixels(read_only image2d_t inputImage, int x, int y, write_only ima
     }
 }
 
-void smooth_non_boundary(read_only image2d_t in, int x, int y, write_only image2d_t out0, global float* params)
+void smooth_non_boundary(read_write image2d_t in, int x, int y, write_only image2d_t out0, global float* params)
 {
    uint Z = 0;
    int m = 5;
@@ -367,7 +367,7 @@ float3 calculateNormal(float3 p1, float3 p2, float3 p3)
  * Filters all pixels within a patch on depth map. Removes outliers, flying points, dead pixels and measurement
  * noise.
  */
-void kernel filterKernel(read_only image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float* parameters)
+void kernel filterKernel(read_write image2d_t inputImage, write_only image2d_t filteredImage, write_only image2d_t nxImage, global float* parameters)
 {
    int y = get_global_id(0);
    int x = get_global_id(1);
@@ -498,24 +498,9 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
 }
 
 /*
- * Segmentation Kernel for generating patch graph for colored images.
- * */
-void kernel segmentKernel(read_only image2d_t color, write_only image2d_t filteredImage, write_only image2d_t graph, global float* params)
-{
-   int y = get_global_id(0);
-   int x = get_global_id(1);
-
-   //    if(x==0 && y==0) printf("SegmentKernel\n");
-   if(y >= 0 && y < (int)params[FILTER_SUB_H] && x >= 0 && x < (int)params[FILTER_SUB_W])
-   {
-      fillDeadPixels(color, x, y, filteredImage, params);
-   }
-}
-
-/*
  * Perspective Back-Projection Kernel for Structured Light And Perspective Time-of-Flight Sensors
  * */
-void kernel perspectiveBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
+void kernel perspectiveBackProjectionKernel(read_write image2d_t in, global float* cloud, global float* params)
 {
         int cIndex = get_global_id(0);
         int rIndex = get_global_id(1);
@@ -545,7 +530,7 @@ void kernel perspectiveBackProjectionKernel(read_only image2d_t in, global float
 /*
  * Spherical Back-Projection Kernel for Rotating LIDARs.
  * */
-void kernel sphericalBackProjectionKernel(read_only image2d_t in, global float* cloud, global float* params)
+void kernel sphericalBackProjectionKernel(read_write image2d_t in, global float* cloud, global float* params)
 {
     int cIndex = get_global_id(0);
     int rIndex = get_global_id(1);

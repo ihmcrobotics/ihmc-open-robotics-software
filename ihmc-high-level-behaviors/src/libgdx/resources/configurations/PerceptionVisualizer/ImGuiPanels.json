@@ -12,10 +12,8 @@
     "/ihmc/video###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/video" : false,
     "Perception Loader" : true,
     "Perception Logger" : true,
+    "Perception Panel" : true,
     "VR Settings" : false,
-    "VR Thread Debugger" : false,
-    "l515/depth###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/depth" : false,
-    "l515/sensor/orientation###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/sensor/orientation" : false,
-    "l515/sensor/position###us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer:l515/sensor/position" : false
+    "VR Thread Debugger" : false
   }
 }
