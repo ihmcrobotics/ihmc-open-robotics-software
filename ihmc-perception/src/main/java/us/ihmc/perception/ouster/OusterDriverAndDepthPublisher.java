@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
-public class OusterDriverAndDepthImagePublisher
+public class OusterDriverAndDepthPublisher
 {
    private final Activator nativesLoadedActivator;
 
@@ -58,7 +58,7 @@ public class OusterDriverAndDepthImagePublisher
    private final ImageMessage outputImageMessage = new ImageMessage();
    private final LidarScanMessage lidarScanMessage = new LidarScanMessage();
 
-   public OusterDriverAndDepthImagePublisher(Supplier<ReferenceFrame> sensorFrameUpdater, ROS2Topic<?>... outputTopics)
+   public OusterDriverAndDepthPublisher(Supplier<ReferenceFrame> sensorFrameUpdater, ROS2Topic<?>... outputTopics)
    {
       this.sensorFrameUpdater = sensorFrameUpdater;
       this.outputTopics = outputTopics;
@@ -178,6 +178,6 @@ public class OusterDriverAndDepthImagePublisher
 
    public static void main(String[] args)
    {
-      new OusterDriverAndDepthImagePublisher(ReferenceFrame::getWorldFrame, ROS2Tools.OUSTER_DEPTH_IMAGE);
+      new OusterDriverAndDepthPublisher(ReferenceFrame::getWorldFrame, ROS2Tools.OUSTER_DEPTH_IMAGE);
    }
 }
