@@ -5,6 +5,7 @@
     "Diagnostics" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false,
-    "Webcam Monitor" : true
+    "Webcam Monitor" : true,
+    "Webcam Reader" : true
   }
 }
