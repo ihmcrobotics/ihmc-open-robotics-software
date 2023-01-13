@@ -146,6 +146,8 @@ public class TerrainPerceptionProcessWithDriver
 
          if (sensor.readFrameData())
          {
+            ros2PropertySetGroup.update();
+
             Instant now = Instant.now();
             double dataAquisitionTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
@@ -169,13 +171,6 @@ public class TerrainPerceptionProcessWithDriver
                ReferenceFrame cameraFrame = sensorFrameUpdater.get();
                cameraPose.setToZero(cameraFrame);
                cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
-
-               //depthImageMessage.getPosition().set(cameraPose.getPosition());
-               //depthImageMessage.getOrientation().set(cameraPose.getOrientation());
-               //colorImageMessage.getPosition().set(cameraPose.getPosition());
-               //colorImageMessage.getOrientation().set(cameraPose.getOrientation());
-               //colorImageMessage.setSequenceNumber(colorSequenceNumber++);
-               //depthImageMessage.setSequenceNumber(depthSequenceNumber++);
 
                MessageTools.toMessage(now, depthImageMessage.getAcquisitionTime());
                MessageTools.toMessage(now, colorImageMessage.getAcquisitionTime());
