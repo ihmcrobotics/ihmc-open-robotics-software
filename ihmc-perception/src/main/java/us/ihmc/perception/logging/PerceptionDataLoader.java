@@ -124,15 +124,15 @@ public class PerceptionDataLoader
       String defaultLogDirectory =
             System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20221222_141507_Ouster.hdf5";
+      String logFileName = "20230112_174628_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
 
       ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
-      //      long totalColor = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.L515_COLOR_NAME);
-      long totalDepth = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
+      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME);
+//      long total = loader.getHDF5Manager().getCount(PerceptionLoggerConstants.OUSTER_DEPTH_NAME);
 
       //      long total = Math.min(totalColor, totalDepth);
 
@@ -142,7 +142,7 @@ public class PerceptionDataLoader
 
       ArrayList<Point3D> points = new ArrayList<>();
 
-      for (int i = 0; i < totalDepth; i++)
+      for (int i = 0; i < total; i++)
       {
          //         points.clear();
          //         loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, i, points);
@@ -151,24 +151,25 @@ public class PerceptionDataLoader
          //         loader.loadCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, i, colorImage);
 
          long begin_load = System.nanoTime();
-         loader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, i, depthImage);
+//         loader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, i, depthImage);
+         loader.loadCompressedDepth(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, i, colorImage);
          long end_load = System.nanoTime();
 
-         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
-
-         long begin_decompress = System.nanoTime();
-         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
-         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
-
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
-         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+//         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
+//
+//         long begin_decompress = System.nanoTime();
+//         Mat displayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC1);
+//         Mat finalDisplayDepth = new Mat(depthImage.rows(), depthImage.cols(), opencv_core.CV_8UC3);
+//
+//         BytedecoOpenCVTools.clampTo8BitUnsignedChar(depthImage, displayDepth, 0.0, 255.0);
+//         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
          //         long end_decompress = System.nanoTime();
 
          //         LogTools.info("Loading Time: {} ms", (end_load - begin_load) / 1e6);
          //         LogTools.info("Decompression Time: {} ms", (end_decompress - begin_decompress) / 1e6f);
 
-         //         imshow("/l515/color", colorImage);
-         imshow(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, finalDisplayDepth);
+                  imshow("/l515/color", colorImage);
+//         imshow(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, finalDisplayDepth);
          int code = waitKeyEx(100);
          if (code == 113)
          {
