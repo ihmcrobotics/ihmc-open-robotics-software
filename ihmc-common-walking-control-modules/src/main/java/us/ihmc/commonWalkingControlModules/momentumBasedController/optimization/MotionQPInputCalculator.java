@@ -224,6 +224,15 @@ public class MotionQPInputCalculator
 
    public boolean computePrivilegedJointAccelerations(NativeQPInputTypeA qpInputToPack)
    {
+      // TODO duplicate this stuff to use the native values directly
+      boolean success = computePrivilegedJointAccelerations(tempInputTypeA);
+      qpInputToPack.set(tempInputTypeA);
+
+      return success;
+   }
+
+   public boolean computePrivilegedJointAccelerations(QPInputTypeA qpInputToPack)
+   {
       if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
 
@@ -253,10 +262,9 @@ public class MotionQPInputCalculator
                                                          nullspaceProjectionAlpha.getValue());
             //            NativeCommonOps.projectOnNullspace(tempTaskJacobian, allTaskJacobian, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());
 
-            qpInputToPack.taskJacobian.insert(projectedTaskJacobian, taskSize, 0);
-            // TODO make this a native type
-            qpInputToPack.taskObjective.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), taskSize, 0);
-            qpInputToPack.taskWeightMatrix.insert(privilegedConfigurationHandler.getWeights(), taskSize, taskSize);
+            projectedTaskJacobian.extract(qpInputToPack.taskJacobian, taskSize, 0);
+            CommonOps_DDRM.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), qpInputToPack.taskObjective, taskSize, 0);
+            CommonOps_DDRM.insert(privilegedConfigurationHandler.getWeights(), qpInputToPack.taskWeightMatrix, taskSize, taskSize);
          }
       }
 
@@ -463,7 +471,7 @@ public class MotionQPInputCalculator
    }
 
    /**
-    * Converts a {@link SpatialAccelerationCommand} into a {@link QPInputTypeA}.
+    * Converts a {@link SpatialAccelerationCommand} into a {@link NativeQPInputTypeA}.
     * <p>
     * The idea is to convert the information held in the {@code commandToConvert} such that it ends up
     * being formulated as follows:<br>
@@ -477,32 +485,54 @@ public class MotionQPInputCalculator
     */
    public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, NativeQPInputTypeA qpInputToPack)
    {
+      tempInputTypeA.setNumberOfVariables(qpInputToPack.getNumberOfVariables());
+      tempInputTypeA.reshape(commandToConvert.getSelectionMatrix().getNumberOfSelectedAxes());
+
+      boolean success = convertSpatialAccelerationCommand(commandToConvert, tempInputTypeA);
+
+      qpInputToPack.set(tempInputTypeA);
+
+      return success;
+   }
+
+   /**
+    * Converts a {@link SpatialAccelerationCommand} into a {@link QPInputTypeA}.
+    * <p>
+    * The idea is to convert the information held in the {@code commandToConvert} such that it ends up
+    * being formulated as follows:<br>
+    * J<sub>MxN</sub> * vDot<sub>Nx1</sub> = p<sub>Mx1</sub> <br>
+    * where J is the M-by-N Jacobian matrix, vDot is the N-by-1 desired joint acceleration vector that
+    * the QP solver is solving for, and p is the M-by-1 objective vector. M is called the task size and
+    * N is the overall number of degrees of freedom (DoFs) to be controlled.
+    * </p>
+    *
+    * @return true if the command was successfully converted.
+    */
+   public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, QPInputTypeA qpInputToPack)
+   {
       commandToConvert.getControlFrame(controlFrame);
       // Gets the M-by-6 selection matrix S.
       commandToConvert.getSelectionMatrix(controlFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
       // TODO check the weights to determine the task size as well.
 
-      tempInputTypeA.setNumberOfVariables(qpInputToPack.getNumberOfVariables());
-      tempInputTypeA.reshape(taskSize);
-
       // TODO probably need to resize the weight matrix
       // TODO stop just doing things in java land and pushing to native!
       if (taskSize == 0)
          return false;
 
-      tempInputTypeA.reshape(taskSize);
-      tempInputTypeA.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
+      qpInputToPack.reshape(taskSize);
+      qpInputToPack.setConstraintType(commandToConvert.isHardConstraint() ? ConstraintType.EQUALITY : ConstraintType.OBJECTIVE);
       // If the task is setup as a hard constraint, there is no need for a weight matrix.
       if (!commandToConvert.isHardConstraint())
       {
          // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
-         tempInputTypeA.setUseWeightScalar(false);
+         qpInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
          tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
          commandToConvert.getWeightMatrix(controlFrame, tempTaskWeight);
          CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, tempInputTypeA.taskWeightMatrix);
+         CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
       }
 
       RigidBodyBasics base = commandToConvert.getBase();
@@ -523,7 +553,7 @@ public class MotionQPInputCalculator
        */
       commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
       CommonOps_DDRM.subtractEquals(tempTaskObjective, jacobianCalculator.getConvectiveTermMatrix());
-      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, tempInputTypeA.taskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
       // Compute the M-by-N task Jacobian: J = S * J
       // Step 1, let's get the 'small' Jacobian matrix j.
@@ -536,19 +566,19 @@ public class MotionQPInputCalculator
       List<JointReadOnly> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
       // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, tempInputTypeA.taskJacobian);
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, qpInputToPack.taskJacobian);
 
       if (primaryBase == null)
       { // No primary base provided for this task.
         // Record the resulting Jacobian matrix for the privileged configuration.
-         recordTaskJacobian(tempInputTypeA.taskJacobian);
+         recordTaskJacobian(qpInputToPack.taskJacobian);
          // We're done!
       }
       else
       { // A primary base has been provided, two things are happening here:
         // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
         // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
-         tempPrimaryTaskJacobian.set(tempInputTypeA.taskJacobian);
+         tempPrimaryTaskJacobian.set(qpInputToPack.taskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
@@ -570,7 +600,7 @@ public class MotionQPInputCalculator
                      scaleFactor = commandToConvert.getSecondaryTaskJointWeightScale();
 
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
-                  MatrixTools.scaleColumn(scaleFactor, dofIndex, tempInputTypeA.taskJacobian);
+                  MatrixTools.scaleColumn(scaleFactor, dofIndex, qpInputToPack.taskJacobian);
                   // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
                   MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
@@ -582,7 +612,6 @@ public class MotionQPInputCalculator
          // We're done!
       }
 
-      qpInputToPack.set(tempInputTypeA);
       return true;
    }
 
@@ -717,6 +746,20 @@ public class MotionQPInputCalculator
     */
    public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, NativeQPInputTypeA qpInputToPack)
    {
+      tempInputTypeA.setNumberOfVariables(qpInputToPack.getNumberOfVariables());
+      boolean success = convertMomentumRateCommand(commandToConvert, tempInputTypeA);
+      qpInputToPack.set(tempInputTypeA);
+
+      return success;
+   }
+
+   /**
+    * Converts a {@link MomentumRateCommand} into a {@link QPInputTypeA}.
+    *
+    * @return true if the command was successfully converted.
+    */
+   public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, QPInputTypeA qpInputToPack)
+   {
       commandToConvert.getSelectionMatrix(centerOfMassFrame, tempSelectionMatrix);
       int taskSize = tempSelectionMatrix.getNumRows();
       // TODO check the weights to determine the task size as well.
@@ -724,31 +767,29 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
-      tempInputTypeA.setNumberOfVariables(qpInputToPack.getNumberOfVariables());
-
-      tempInputTypeA.reshape(taskSize);
-      tempInputTypeA.setUseWeightScalar(false);
-      tempInputTypeA.setConstraintType(ConstraintType.OBJECTIVE);
+      qpInputToPack.reshape(taskSize);
+      qpInputToPack.setUseWeightScalar(false);
+      qpInputToPack.setConstraintType(ConstraintType.OBJECTIVE);
 
       // Compute the weight: W = S * W * S^T
       tempTaskWeight.reshape(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
       tempTaskWeightSubspace.reshape(taskSize, SpatialAcceleration.SIZE);
       commandToConvert.getWeightMatrix(tempTaskWeight);
       CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, tempInputTypeA.taskWeightMatrix);
+      CommonOps_DDRM.multTransB(tempTaskWeightSubspace, tempSelectionMatrix, qpInputToPack.taskWeightMatrix);
 
       // Compute the task Jacobian: J = S * A
       DMatrixRMaj centroidalMomentumMatrix = getCentroidalMomentumMatrix();
 
       if (commandToConvert.isConsiderAllJoints())
       {
-         CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempInputTypeA.taskJacobian);
+         CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, qpInputToPack.taskJacobian);
       }
       else
       {
          tempTaskJacobian.reshape(taskSize, numberOfDoFs);
          CommonOps_DDRM.mult(tempSelectionMatrix, centroidalMomentumMatrix, tempTaskJacobian);
-         tempInputTypeA.taskJacobian.zero();
+         qpInputToPack.taskJacobian.zero();
          List<JointReadOnly> jointSelection = commandToConvert.getJointSelection();
 
          for (int i = 0; i < jointSelection.size(); i++)
@@ -756,7 +797,7 @@ public class MotionQPInputCalculator
             int[] jointIndices = jointIndexHandler.getJointIndices(jointSelection.get(i));
             int jointFirstIndex = jointIndices[0];
             int jointLastIndex = jointIndices[jointIndices.length - 1];
-            CommonOps_DDRM.extract(tempTaskJacobian, 0, taskSize, jointFirstIndex, jointLastIndex + 1, tempInputTypeA.taskJacobian, 0, jointFirstIndex);
+            CommonOps_DDRM.extract(tempTaskJacobian, 0, taskSize, jointFirstIndex, jointLastIndex + 1, qpInputToPack.taskJacobian, 0, jointFirstIndex);
          }
       }
 
@@ -784,11 +825,9 @@ public class MotionQPInputCalculator
             tempTaskObjective.set(3 + axis.ordinal(), linearMomentum.getElement(axis) - tempTaskObjective.get(3 + axis.ordinal()));
          }
       }
-      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, tempInputTypeA.taskObjective);
+      CommonOps_DDRM.mult(tempSelectionMatrix, tempTaskObjective, qpInputToPack.taskObjective);
 
-      recordTaskJacobian(tempInputTypeA.taskJacobian);
-
-      qpInputToPack.set(tempInputTypeA);
+      recordTaskJacobian(qpInputToPack.taskJacobian);
 
       return true;
    }
