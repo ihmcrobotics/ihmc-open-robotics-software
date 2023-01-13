@@ -112,8 +112,8 @@ kernel void extractDepthImage(global float* parameters,
 }
 
 kernel void imageToDiscretizedPointCloud(global float* parameters,
-                              read_only image2d_t discretizedDepthImage,
-                              global int* pointCloudVertexBuffer)
+                                         read_only image2d_t discretizedDepthImage,
+                                         global float* pointCloudVertexBuffer)
 {
    int x = get_global_id(0);
    int y = get_global_id(1);
@@ -175,14 +175,14 @@ kernel void imageToDiscretizedPointCloud(global float* parameters,
 
    if (eyeDepthInMeters == 0.0f)
    {
-      pointCloudVertexBuffer[pointStartIndex]     = nan(0);
-      pointCloudVertexBuffer[pointStartIndex + 1] = nan(0);
-      pointCloudVertexBuffer[pointStartIndex + 2] = nan(0);
+      pointCloudVertexBuffer[pointStartIndex]     = 0.0f;
+      pointCloudVertexBuffer[pointStartIndex + 1] = 0.0f;
+      pointCloudVertexBuffer[pointStartIndex + 2] = 0.0f;
    }
    else
    {
-      pointCloudVertexBuffer[pointStartIndex]     = discretize(sensorFramePoint.x, pointResolution);
-      pointCloudVertexBuffer[pointStartIndex + 1] = discretize(sensorFramePoint.y, pointResolution);
-      pointCloudVertexBuffer[pointStartIndex + 2] = discretize(sensorFramePoint.z, pointResolution);
+      pointCloudVertexBuffer[pointStartIndex]     = sensorFramePoint.x;
+      pointCloudVertexBuffer[pointStartIndex + 1] = sensorFramePoint.y;
+      pointCloudVertexBuffer[pointStartIndex + 2] = sensorFramePoint.z;
    }
 }

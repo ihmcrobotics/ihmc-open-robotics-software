@@ -46,8 +46,6 @@ public class OusterProcess
    private static final double horizontalFieldOfView = Math.PI * 2.0;
    private static final double verticalFieldOfView = Math.PI / 2.0;
 
-   public enum SensorDataTypes {DEPTH_IMAGE, LIDAR_SCAN_MESSAGE};
-
    private final Activator nativesLoadedActivator;
    private final RealtimeROS2Node realtimeROS2Node;
    private Supplier<ReferenceFrame> sensorFrameUpdater;
@@ -66,7 +64,7 @@ public class OusterProcess
    private _cl_kernel imageToPointCloudKernel;
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final OpenCLFloatParameters sensorValuesBuffer = new OpenCLFloatParameters();
-   private OpenCLIntBuffer pointCloudXYZBuffer;
+   private OpenCLFloatBuffer pointCloudXYZBuffer;
    private ByteBuffer compressedPointCloudBuffer;
    private OpenCLIntBuffer pixelShiftOpenCLBuffer;
    private _cl_mem lidarFrameBufferObject;
@@ -140,7 +138,7 @@ public class OusterProcess
             compressionInputImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
             pngImageBytePointer = new BytePointer(pngImageBuffer);
-            pointCloudXYZBuffer = new OpenCLIntBuffer(3 * depthHeight * depthWidth);
+            pointCloudXYZBuffer = new OpenCLFloatBuffer(3 * depthHeight * depthWidth);
          }
 
          // copy while the ouster thread is blocked
@@ -182,11 +180,11 @@ public class OusterProcess
     */
    private synchronized void extractCompressAndPublish()
    {
-      if (openCLProgram == null)
+      if (openCLProgram == null || pixelShiftOpenCLBuffer == null)
       {
-         openCLProgram = openCLManager.loadProgram(getClass().getSimpleName());
+         openCLProgram = openCLManager.loadProgram("OusterDepthImagePublisher");
          extractDepthImageKernel = openCLManager.createKernel(openCLProgram, "extractDepthImage");
-         imageToPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
+         imageToPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToDiscretizedPointCloud");
 
          lidarFrameBufferObject = openCLManager.createBufferObject(lidarFrameByteBufferCopy.capacity(), lidarFrameByteBufferPointerCopy);
          compressionInputImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
@@ -246,7 +244,7 @@ public class OusterProcess
                outputImageMessage.getData().add(pngImageBytePointer.get(i));
             }
             outputImageMessage.setFormat(OpenCVImageFormat.PNG.ordinal());
-            outputImageMessage.setSequenceNumber(sequenceNumber++);
+            outputImageMessage.setSequenceNumber(sequenceNumber);
             outputImageMessage.setImageWidth(depthWidth);
             outputImageMessage.setImageHeight(depthHeight);
 
@@ -254,21 +252,24 @@ public class OusterProcess
          }
          else if (topic.getType().equals(LidarScanMessage.class))
          {
+            lidarScanMessage.setUniqueId(sequenceNumber);
             lidarScanMessage.getLidarPosition().set(cameraPose.getPosition());
             lidarScanMessage.getLidarOrientation().set(cameraPose.getOrientation());
             lidarScanMessage.setRobotTimestamp(Conversions.secondsToNanoseconds(ouster.getAquisitionInstant().getEpochSecond()) + ouster.getAquisitionInstant().getNano());
-            LidarPointCloudCompression.compressPointCloud(depthHeight * depthWidth,
-                                                          lidarScanMessage,
-                                                          pointCloudXYZBuffer.getOpenCLBufferObject().asByteBuffer(),
-                                                          compressedPointCloudBuffer);
+            lidarScanMessage.getScan().reset();
+//            compressedPointCloudBuffer.rewind();
+            LidarPointCloudCompression.compressPointCloud(numberOfPointsPerFullScan, lidarScanMessage, (i, j) -> pointCloudXYZBuffer.getBackingDirectFloatBuffer().get(3 * i + j));
 
             publisherMap.get(topic).publish(lidarScanMessage);
+            LogTools.info("Published lidar scan on topic " + topic.getName());
          }
          else
          {
             throw new RuntimeException("We don't have the ability to publish this type of message");
          }
       }
+
+      sequenceNumber++;
    }
 
    public static void main(String[] args)
