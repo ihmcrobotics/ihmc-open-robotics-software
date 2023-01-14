@@ -151,8 +151,8 @@ public class PerceptionDataLoader
          //         loader.loadCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, i, colorImage);
 
          long begin_load = System.nanoTime();
-//         loader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, i, depthImage);
-         loader.loadCompressedDepth("/image/", i, colorImage);
+         loader.loadCompressedImage("/image/", i, colorImage);
+//         loader.loadCompressedDepth("/image/", i, colorImage);
          long end_load = System.nanoTime();
 
 //         LogTools.info("Depth Image Format: {} {}", BytedecoOpenCVTools.getTypeString(depthImage.type()), depthImage.channels());
