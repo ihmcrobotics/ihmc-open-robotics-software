@@ -2,8 +2,8 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : true,
-    "Constructor###java.lang.Class:Constructor" : true,
-    "Environment###java.lang.Class:Environment" : true,
+    "Constructor###java.lang.Class:Constructor" : false,
+    "Environment###java.lang.Class:Environment" : false,
     "Global Visualizers" : true,
     "/ihmc/blackflyright/video###us.ihmc.rdx.ui.graphics.live.RDXROS2BigVideoVisualizer:/ihmc/blackflyright/video" : false,
     "/ihmc/d435/depth###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/d435/depth" : false,
@@ -12,7 +12,7 @@
     "/ihmc/video###us.ihmc.rdx.ui.graphics.live.RDXROS2VideoVisualizer:/ihmc/video" : false,
     "Perception Loader" : true,
     "Perception Logger" : true,
-    "Perception Panel" : true,
+    "Perception Panel" : false,
     "VR Settings" : false,
     "VR Thread Debugger" : false
   }

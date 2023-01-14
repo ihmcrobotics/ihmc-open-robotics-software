@@ -346,6 +346,17 @@ public class BytedecoOpenCVTools
       }
    }
 
+   public static void displayDepth(String tag, Mat image, int delay)
+   {
+      Mat displayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC1);
+      Mat finalDisplayDepth = new Mat(image.rows(), image.cols(), opencv_core.CV_8UC3);
+
+      BytedecoOpenCVTools.clampTo8BitUnsignedChar(image, displayDepth, 0.0, 255.0);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(displayDepth, finalDisplayDepth);
+
+      display("/l515/depth", finalDisplayDepth, delay);
+   }
+
    public static void fillVideoPacket(BytePointer compressedBytes, byte[] heapArray, VideoPacket packet, int height, int width, long nanoTime)
    {
       compressedBytes.asBuffer().get(heapArray, 0, compressedBytes.asBuffer().remaining());

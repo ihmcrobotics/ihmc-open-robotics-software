@@ -3,6 +3,9 @@ package us.ihmc.rdx.logging;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -16,9 +19,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static org.bytedeco.opencv.global.opencv_highgui.*;
+
 public class PerceptionDataLoadingPanel extends ImGuiPanel
 {
    private RDXBaseUI baseUI;
+
+   private Mat cvImage;
 
    private PerceptionDataLoader loader;
    private RDXPointCloudRenderer pointCloudRenderer;
@@ -38,7 +45,6 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
    private String currentTopic;
 
    private boolean modified = false;
-   private boolean playEnabled = false;
    private int numDatasetsInCurrentGroup = 0;
    private int numGroupsInCurrentGroup = 0;
 
@@ -112,6 +118,11 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
          for (PerceptionLogChannel channel : channels.values())
          {
             ImGui.text("Channel: " + channel.getName() + " Count: " + channel.getCount() + " Index: " + channel.getIndex());
+            ImGui.sameLine();
+            if(ImGui.button("Play"))
+            {
+               channel.setEnabled(true);
+            }
          }
       }
 
@@ -129,28 +140,46 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
 //         modified = false;
 //      }
 
-      if(playEnabled)
-      {
-         for(String name : loader.getChannels().keySet())
+         for(PerceptionLogChannel channel  : loader.getChannels().values())
          {
-            if(name.contains("depth"))
+//            LogTools.info("Checking Play Enable: {}", channel.isEnabled());
+            if(channel.isEnabled())
             {
+               if (channel.getIndex() < channel.getCount())
+               {
+                  if(channel.getName().contains("depth"))
+                  {
+                     cvImage = new Mat();
+                     loader.loadCompressedDepth(channel.getName(), channel.getIndex(), cvImage);
+                     BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+                  }
+                  else if(channel.getName().contains("color"))
+                  {
+                     cvImage = new Mat();
+                     loader.loadCompressedImage(channel.getName(), channel.getIndex(), cvImage);
+                     BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+                  }
+                  else if(channel.getName().contains("position"))
+                  {
+                     LogTools.info("Position: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
+                  }
+                  else if(channel.getName().contains("orientation"))
+                  {
+                     LogTools.info("Orientation: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
+                  }
 
-            }
-            PerceptionLogChannel channel = loader.getChannels().get(name);
-            if (channel.getIndex() < channel.getCount())
-            {
-               loader.loadCompressedDepth(name, channel.getIndex(), imagePanels.get(name).getRGBA8Mat());
-               channel.incrementIndex();
-            }
-            else
-            {
-               playEnabled = false;
+                  channel.incrementIndex();
+               }
+               else
+               {
+                  channel.setEnabled(false);
+                  channel.resetIndex();
+                  destroyAllWindows();
+               }
             }
          }
 
 
-      }
    }
 
    public void setBaseUI(RDXBaseUI baseUI)
