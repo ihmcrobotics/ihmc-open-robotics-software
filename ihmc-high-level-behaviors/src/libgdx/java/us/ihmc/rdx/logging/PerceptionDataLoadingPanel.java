@@ -3,6 +3,7 @@ package us.ihmc.rdx.logging;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLogChannel;
 import us.ihmc.rdx.RDXPointCloudRenderer;
@@ -70,7 +71,7 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
          logFilesInDirectory.clear();
          for (File logFile : logFiles)
          {
-            if (logFile.getName().endsWith(".hdf5"))
+            if (logFile.getName().endsWith(HDF5Tools.HDF5_FILE_EXTENSION))
             {
                logFilesInDirectory.add(logFile.getName());
             }

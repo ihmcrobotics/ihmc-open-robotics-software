@@ -93,7 +93,7 @@ public class RDXFootstepPlannerLogViewer
                                      logName -> footstepPlannerLog != null && footstepPlannerLog.getLogName().equals(logName),
                                      pathEntry -> pathEntry.type() == BasicPathVisitor.PathType.DIRECTORY
                                         && pathEntry.path().getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX),
-                                     this::logSelectedAction);
+                                     this::onLogSelected);
 
       goalGraphic = new RDXSphereAndArrowGraphic();
       goalGraphic.create(0.027, 0.027 * 6.0, Color.GREEN);
@@ -195,7 +195,7 @@ public class RDXFootstepPlannerLogViewer
       }
    }
 
-   private void logSelectedAction(String logName)
+   private void onLogSelected(String logName)
    {
       footstepPlannerLog = null;
       ThreadTools.startAThread(() ->

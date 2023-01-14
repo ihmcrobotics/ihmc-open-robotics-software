@@ -51,7 +51,7 @@ public class FFMPEGHDF5FileReader implements IFFMPEGFileReader
    {
       avutil.av_log_set_level(avutil.AV_LOG_WARNING);
 
-      String file = hdf5File.replaceFirst(".hdf5", ""); //BAD
+      String file = hdf5File.replaceFirst(HDF5Tools.HDF5_FILE_EXTENSION, ""); //BAD
 
       LogTools.info("Initializing ffmpeg contexts for playback from {}", file);
       avFormatContext = avformat.avformat_alloc_context();

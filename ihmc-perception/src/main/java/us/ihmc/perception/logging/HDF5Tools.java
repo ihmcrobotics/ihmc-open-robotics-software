@@ -13,10 +13,10 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HDF5Tools
 {
+   public static final String HDF5_FILE_EXTENSION = ".hdf5";
    static final int NUMBER_OF_FIELDS_PER_POINT = 3;
 
    /**
@@ -26,7 +26,7 @@ public class HDF5Tools
     * @param dimension     The dimension or axis along which the length is requested
     * @return The length of the dataset along the requested dimension or axis
     */
-   private static int extractShape(DataSet dataSet, int dimension)
+   public static int extractShape(DataSet dataSet, int dimension)
    {
       DataSpace dataSpace = dataSet.getSpace();
       int dimensions = dataSpace.getSimpleExtentNdims();

@@ -5,6 +5,7 @@ import org.bytedeco.ffmpeg.ffmpeg;
 import org.bytedeco.ffmpeg.global.avutil;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -29,7 +30,7 @@ public class RDXFFMPEGHDF5LoggingDemo
    private BytedecoImage image;
    private final boolean lossless = true;
    private final int framerate = 30;
-   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + ".hdf5",
+   private final FFMPEGLoggerDemoHelper ffmpegLoggerDemoHelper = new FFMPEGLoggerDemoHelper(this.getClass().getSimpleName() + HDF5Tools.HDF5_FILE_EXTENSION,
                                                                                             avutil.AV_PIX_FMT_RGBA,
                                                                                             avutil.AV_PIX_FMT_YUV420P,
                                                                                             lossless,
