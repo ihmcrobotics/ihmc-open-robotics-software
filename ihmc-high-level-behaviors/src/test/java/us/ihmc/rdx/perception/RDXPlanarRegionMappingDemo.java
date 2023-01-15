@@ -1,10 +1,13 @@
 package us.ihmc.rdx.perception;
 
+import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -21,7 +24,12 @@ public class RDXPlanarRegionMappingDemo
    private static final File regionLogDirectory = new File(
          System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
-   private RDXGPUPlanarRegionExtractionUI planarRegionExtractionUI;
+   private OpenCLManager openCLManager;
+   private _cl_program openCLProgram;
+   private RDXRapidRegionsUIPanel rapidRegionsUIPanel;
+   private RapidPlanarRegionsExtractor rapidRegionsExtractor;
+   private RapidPlanarRegionsCustomizer rapidRegionCustomizer;
+
    private PlanarRegionMappingUIPanel planarRegionMappingUI;
    private PlanarRegionMappingManager mappingManager;
    private BytedecoImage depth32FC1Image;
@@ -41,26 +49,26 @@ public class RDXPlanarRegionMappingDemo
                   Color: [fx:901.3026, fy:901.8400, cx:635.2337, cy:350.9427, h:720, w:1280]
                   Depth: [fx:730.7891, fy:731.0859, cx:528.6094, cy:408.1602, h:768, w:1024]
              */
-            planarRegionExtractionUI = new RDXGPUPlanarRegionExtractionUI();
-            planarRegionExtractionUI.create(1024,
-                                            768,
-                                            depth32FC1Image.getBackingDirectByteBuffer(),
-                                            730.7891,
-                                            731.0859,
-                                            528.6094,
-                                            408.1602,
-                                            ReferenceFrame.getWorldFrame());
+            openCLManager = new OpenCLManager();
+            openCLManager.create();
+            openCLProgram = openCLManager.loadProgram("RapidRegionsExtractor");
 
-            planarRegionExtractionUI.getRender3DPlanarRegions().set(false);
-            planarRegionExtractionUI.getRender3DBoundaries().set(false);
-            planarRegionExtractionUI.getRender3DGrownBoundaries().set(false);
+            rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
+            rapidRegionCustomizer = new RapidPlanarRegionsCustomizer();
 
-            planarRegionExtractionUI.getEnabled().set(true);
+            rapidRegionsExtractor.create(openCLManager, openCLProgram, 1024, 768,
+                                         730.7891,
+                                         731.0859,
+                                         528.6094,
+                                         408.1602);
 
-            mappingManager = new PlanarRegionMappingManager(regionLogDirectory, true);
+            mappingManager = new PlanarRegionMappingManager(rapidRegionsExtractor, rapidRegionCustomizer, true);
 
-            baseUI.getImGuiPanelManager().addPanel(planarRegionExtractionUI.getPanel());
-            baseUI.getPrimaryScene().addRenderableProvider(planarRegionExtractionUI::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+            rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
+            rapidRegionsUIPanel.create(rapidRegionsExtractor, rapidRegionCustomizer);
+            rapidRegionsUIPanel.getEnabled().set(true);
+            baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
+            baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel, RDXSceneLevel.VIRTUAL);
 
             planarRegionMappingUI = new PlanarRegionMappingUIPanel("Filtered Map", mappingManager);
             baseUI.getImGuiPanelManager().addPanel(planarRegionMappingUI.getImGuiPanel());
@@ -79,7 +87,15 @@ public class RDXPlanarRegionMappingDemo
                planarRegionMappingUI.setCaptured(false);
             }
 
+            //rapidRegionsUIPanel.renderImGuiWidgets();
+
             planarRegionMappingUI.renderPlanarRegions();
+
+            if(mappingManager.isModified())
+            {
+               rapidRegionsUIPanel.render3DGraphics(mappingManager.getPlanarRegionsListWithPose().getPlanarRegionsList());
+               mappingManager.setModified(false);
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

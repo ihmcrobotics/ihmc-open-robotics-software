@@ -13,11 +13,14 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.ros2.ROS2Node;
@@ -56,12 +59,15 @@ public class PlanarRegionMappingManager
 
    private boolean enableCapture = false;
    private boolean enableLiveMode = false;
+   private boolean modified = false;
 
    private static final File logDirectory = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator);
 
    private PlanarRegionsReplayBuffer planarRegionsListBuffer = null;
 
-   private RDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtractionUI;
+   private RapidPlanarRegionsExtractor regionsExtractor;
+   private RapidPlanarRegionsCustomizer regionsCustomizer;
+
    private PlanarRegionsListWithPose planarRegionsListWithPose;
    private PlanarRegionMap planarRegionMap;
    private PlanarRegionsListLogger planarRegionsListLogger;
@@ -72,7 +78,7 @@ public class PlanarRegionMappingManager
    private float depthToMetersScalar = 2.500000118743628E-4f;
 
    private final Mat depthImage = new Mat(768, 1024, opencv_core.CV_16UC1);
-   private BytedecoImage depth32FC1Image;
+   private BytedecoImage depth16UC1Image;
 
    private PerceptionDataLoader perceptionDataLoader;
 
@@ -111,13 +117,15 @@ public class PlanarRegionMappingManager
       }
    }
 
-   public PlanarRegionMappingManager(RDXGPUPlanarRegionExtractionUI gpuPlanarRegionExtractionUI, BytedecoImage depth32FC1Image, boolean smoothing)
+   public PlanarRegionMappingManager(RapidPlanarRegionsExtractor regionsExtractor, RapidPlanarRegionsCustomizer regionsCustomizer, boolean smoothing)
    {
       source = DataSource.PERCEPTION_LOG;
-      planarRegionMap = new PlanarRegionMap(smoothing);
 
-      this.gpuPlanarRegionExtractionUI = gpuPlanarRegionExtractionUI;
-      this.depth32FC1Image = depth32FC1Image;
+      this.regionsExtractor = regionsExtractor;
+      this.regionsCustomizer = regionsCustomizer;
+      this.depth16UC1Image = new BytedecoImage(regionsExtractor.getImageWidth(), regionsExtractor.getImageHeight(), opencv_core.CV_16UC1);
+
+      planarRegionMap = new PlanarRegionMap(smoothing);
 
       perceptionDataLoader = new PerceptionDataLoader();
       perceptionDataLoader.openLogFile(perceptionLogDirectory + logFileName);
@@ -204,24 +212,24 @@ public class PlanarRegionMappingManager
          LogTools.info("Loading Perception Log: {}", perceptionLogIndex);
 
          planarRegionsListWithPose = getRegionsFromPerceptionLog(perceptionDataLoader, perceptionLogIndex);
-         if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
-         {
-            planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
-         }
+         modified = true;
+         //if (planarRegionsListWithPose.getPlanarRegionsList().getNumberOfPlanarRegions() > 0)
+         //{
+         //   planarRegionMap.submitRegionsUsingIterativeReduction(planarRegionsListWithPose);
+         //}
          perceptionLogIndex++;
       }
    }
 
    private PlanarRegionsListWithPose getRegionsFromPerceptionLog(PerceptionDataLoader loader, int index)
    {
-      loader.loadCompressedDepth("/l515/depth/", index, depthImage);
+      loader.loadCompressedDepth("/l515/depth/", index, depth16UC1Image.getBytedecoOpenCVMat());
 
-      depthImage.convertTo(depth32FC1Image.getBytedecoOpenCVMat(), opencv_core.CV_32FC1, depthToMetersScalar, 0.0);
+      PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
+      regionsExtractor.update(depth16UC1Image, true);
+      regionsCustomizer.createCustomPlanarRegionsList(regionsExtractor.getGPUPlanarRegions(), ReferenceFrame.getWorldFrame(), regionsWithPose);
 
-      PlanarRegionsListWithPose planarRegionsListWithPose = new PlanarRegionsListWithPose();
-      gpuPlanarRegionExtractionUI.extractPlanarRegions();
-      planarRegionsListWithPose.setPlanarRegionsList(gpuPlanarRegionExtractionUI.getPlanarRegionsList().copy());
-      return planarRegionsListWithPose;
+      return regionsWithPose;
    }
 
    public PlanarRegionsList pollMapRegions()
@@ -286,5 +294,20 @@ public class PlanarRegionMappingManager
    public void setEnableLiveMode(boolean enableLiveMode)
    {
       this.enableLiveMode = enableLiveMode;
+   }
+
+   public boolean isModified()
+   {
+      return modified;
+   }
+
+   public void setModified(boolean modified)
+   {
+      this.modified = modified;
+   }
+
+   public PlanarRegionsListWithPose getPlanarRegionsListWithPose()
+   {
+      return planarRegionsListWithPose;
    }
 }
