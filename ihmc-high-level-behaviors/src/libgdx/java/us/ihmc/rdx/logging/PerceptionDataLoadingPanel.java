@@ -153,17 +153,17 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
                      loader.loadCompressedDepth(channel.getName(), channel.getIndex(), cvImage);
                      BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
                   }
-                  else if(channel.getName().contains("color"))
+                  if(channel.getName().contains("color"))
                   {
                      cvImage = new Mat();
                      loader.loadCompressedImage(channel.getName(), channel.getIndex(), cvImage);
                      BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
                   }
-                  else if(channel.getName().contains("position"))
+                  if(channel.getName().contains("position"))
                   {
                      LogTools.info("Position: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
                   }
-                  else if(channel.getName().contains("orientation"))
+                  if(channel.getName().contains("orientation"))
                   {
                      LogTools.info("Orientation: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
                   }
