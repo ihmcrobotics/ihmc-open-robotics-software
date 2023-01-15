@@ -57,6 +57,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -526,7 +527,9 @@ public class RDXHighLevelDepthSensorSimulator extends ImGuiPanel
                float z = depthSensorSimulator.getPointCloudBuffer().get(FLOATS_PER_POINT * i + 2);
                if (!Float.isNaN(x) && !Float.isNaN(y) && !Float.isNaN(y))
                {
-                  ros2PointsToPublish.add().set(x, y, z);
+                  Point3D point = ros2PointsToPublish.add();
+                  point.set(x, y, z);
+                  point.applyInverseTransform(sensorFrame.getTransformToRoot());
                   if (ros2ColorsToPublish != null)
                      ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
                }
