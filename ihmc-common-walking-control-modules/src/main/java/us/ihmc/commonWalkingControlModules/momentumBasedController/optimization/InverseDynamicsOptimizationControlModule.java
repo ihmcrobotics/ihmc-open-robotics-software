@@ -67,7 +67,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
    private final QPInputTypeB directMotionQPInput;
-   private final QPInputTypeA motionQPInput;
    private final NativeQPInputTypeA nativeMotionQPInput;
    private final QPInputTypeA rhoQPInput;
    private final NativeQPVariableSubstitution motionQPVariableSubstitution;
@@ -140,7 +139,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       else
          basisVectorVisualizer = null;
 
-      motionQPInput = new QPInputTypeA(numberOfDoFs);
       nativeMotionQPInput = new NativeQPInputTypeA(numberOfDoFs);
       directMotionQPInput = new QPInputTypeB(numberOfDoFs);
       rhoQPInput = new QPInputTypeA(rhoSize);
@@ -418,9 +416,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
    {
       if (command.getConstraintType() == ConstraintType.OBJECTIVE || command.getConstraintType() == ConstraintType.EQUALITY)
       {
-         boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
+         boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, nativeMotionQPInput);
          if (success)
-            qpSolver.addMotionInput(motionQPInput);
+            qpSolver.addMotionInput(nativeMotionQPInput);
       }
       else
       {
