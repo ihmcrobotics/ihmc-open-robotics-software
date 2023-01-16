@@ -76,9 +76,6 @@ public class RDXImagePanel
       {
          image.put(rgbImage);
          display();
-
-         imshow("Image", image);
-         waitKey(1);
       }
    }
 

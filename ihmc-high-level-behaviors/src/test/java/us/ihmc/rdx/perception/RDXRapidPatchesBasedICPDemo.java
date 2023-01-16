@@ -107,7 +107,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
             rapidPatchesBasedICP.create(openCLManager, openCLProgram, rapidPlanarRegionsExtractor.getPatchImageHeight(), rapidPlanarRegionsExtractor.getPatchImageWidth());
             planarRegionsGraphic = new RDXPlanarRegionsGraphic();
 
-            rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor, rapidPlanarRegionsCustomizer);
+            rapidRegionsUIPanel.create(rapidPlanarRegionsExtractor);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
 
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
@@ -249,10 +249,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-      rapidPlanarRegionsExtractor.update(bytedecoDepthImage);
-      rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegionsExtractor.getGPUPlanarRegions(),
-                                                                 ReferenceFrame.getWorldFrame(),
-                                                                 regionsWithPose);
+      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, regionsWithPose);
 
       PlanarRegionsList planarRegions = regionsWithPose.getPlanarRegionsList();
 

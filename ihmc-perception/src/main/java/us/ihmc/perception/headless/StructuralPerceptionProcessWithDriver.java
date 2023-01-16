@@ -23,7 +23,6 @@ import us.ihmc.perception.OpenCVImageFormat;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
-import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionTools;
@@ -69,13 +68,14 @@ public class StructuralPerceptionProcessWithDriver
    private ROS2Topic<ImageMessage> depthTopic;
    private ROS2Topic<PlanarRegionsListMessage> regionsTopic;
    private ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic;
-   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
-   private final RapidPlanarRegionsCustomizer rapidRegionsCustomizer;
 
-   public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic, ROS2Topic<PlanarRegionsListMessage> regionsTopic,
-                                                ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic, Supplier<ReferenceFrame> sensorFrameUpdater)
+   public StructuralPerceptionProcessWithDriver(ROS2Topic<ImageMessage> depthTopic,
+                                                ROS2Topic<PlanarRegionsListMessage> regionsTopic,
+                                                ROS2Topic<PlanarRegionsListWithPoseMessage> regionsWithPoseTopic,
+                                                Supplier<ReferenceFrame> sensorFrameUpdater)
    {
       this.depthTopic = depthTopic;
       this.regionsTopic = regionsTopic;
@@ -96,13 +96,6 @@ public class StructuralPerceptionProcessWithDriver
       realtimeROS2Node.spin();
 
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
-
-      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS, rapidRegionsCustomizer.getPolygonizerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_CONVEX_HULL_FACTORY_PARAMETERS,
-                                                     rapidRegionsCustomizer.getConcaveHullFactoryParameters());
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
@@ -138,7 +131,6 @@ public class StructuralPerceptionProcessWithDriver
 
             // TODO: Combine rapid region extraction and depth extraction kernels into single program
 
-
             openCLProgram = openCLManager.loadProgram("OusterDepthImageExtraction", "RapidRegionsExtractor.cl");
 
             depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, openCLProgram);
@@ -146,11 +138,15 @@ public class StructuralPerceptionProcessWithDriver
             pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
             pngImageBytePointer = new BytePointer(pngImageBuffer);
 
-            rapidRegionsExtractor.create(openCLManager,
-                                         openCLProgram,
-                                         depthWidth,
-                                         depthHeight);
+            rapidRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
             rapidRegionsExtractor.setPatchSizeChanged(false);
+
+            ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_POLYGONIZER_PARAMETERS,
+                                                           rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
+            ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.SPHERICAL_CONVEX_HULL_FACTORY_PARAMETERS,
+                                                           rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
          }
 
          // Fast memcopy while the ouster thread is blocked
@@ -202,13 +198,14 @@ public class StructuralPerceptionProcessWithDriver
 
    private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
    {
-      rapidRegionsExtractor.update(depthImage);
-      rapidRegionsCustomizer.createCustomPlanarRegionsList(rapidRegionsExtractor.getGPUPlanarRegions(), cameraFrame, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, planarRegionsListWithPose);
    }
 
    public static void main(String[] args)
    {
-      new StructuralPerceptionProcessWithDriver(ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
+      new StructuralPerceptionProcessWithDriver(ROS2Tools.OUSTER_DEPTH_IMAGE,
+                                                ROS2Tools.PERSPECTIVE_RAPID_REGIONS,
+                                                ROS2Tools.PERSPECTIVE_RAPID_REGIONS_WITH_POSE,
                                                 ReferenceFrame::getWorldFrame);
    }
 }

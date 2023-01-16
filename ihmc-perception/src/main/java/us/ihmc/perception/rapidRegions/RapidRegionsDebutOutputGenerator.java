@@ -13,8 +13,10 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.FloatBuffer;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
 import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
@@ -118,6 +120,7 @@ public class RapidRegionsDebutOutputGenerator
                                             BytedecoImage nyImage,
                                             BytedecoImage nzImage)
    {
+
       FloatBuffer cxBuffer = cxImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer cyBuffer = cyImage.getBackingDirectByteBuffer().asFloatBuffer();
       FloatBuffer czBuffer = czImage.getBackingDirectByteBuffer().asFloatBuffer();

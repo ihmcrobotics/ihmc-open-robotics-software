@@ -65,7 +65,7 @@ public class RDXPlanarRegionMappingDemo
             mappingManager = new PlanarRegionMappingManager(rapidRegionsExtractor, rapidRegionCustomizer, true);
 
             rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
-            rapidRegionsUIPanel.create(rapidRegionsExtractor, rapidRegionCustomizer);
+            rapidRegionsUIPanel.create(rapidRegionsExtractor);
             rapidRegionsUIPanel.getEnabled().set(true);
             baseUI.getImGuiPanelManager().addPanel(rapidRegionsUIPanel.getPanel());
             baseUI.getPrimaryScene().addRenderableProvider(rapidRegionsUIPanel, RDXSceneLevel.VIRTUAL);
