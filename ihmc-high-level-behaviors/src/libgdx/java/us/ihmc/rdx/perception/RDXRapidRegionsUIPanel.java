@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.rapidRegions.RapidRegionsDebutOutputGenerator;
@@ -62,11 +63,10 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    private int imageWidth = 0;
    private int imageHeight = 0;
 
-   public void create(RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor,
-                      RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer)
+   public void create(RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor)
    {
       this.rapidPlanarRegionsExtractor = rapidPlanarRegionsExtractor;
-      this.rapidPlanarRegionsCustomizer = rapidPlanarRegionsCustomizer;
+      this.rapidPlanarRegionsCustomizer = rapidPlanarRegionsExtractor.getRapidPlanarRegionsCustomizer();
       this.rapidRegionsDebutOutputGenerator = rapidPlanarRegionsExtractor.getDebugger();
 
       patchImageWidth = rapidPlanarRegionsExtractor.getPatchImageWidth();
@@ -112,7 +112,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
       gpuDurationPlot = new ImGuiPlot(labels.get("GPU processing duration"), 1000, 300, 50);
       depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
-      planarRegionCustomizationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
+      planarRegionCustomizationDurationPlot = new ImGuiPlot(labels.get("Region customization duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    }
@@ -131,6 +131,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
    public void render3DGraphics(PlanarRegionsList planarRegions)
    {
+      LogTools.info("Rendering " + planarRegions.getNumberOfPlanarRegions() + " planar regions.");
       planarRegionsGraphic.generateMeshes(planarRegions);
       planarRegionsGraphic.update();
    }
@@ -165,6 +166,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
 
    public void destroy()
    {
+      planarRegionsGraphic.destroy();
       rapidPlanarRegionsExtractor.destroy();
       // TODO: Destroy the rest
    }

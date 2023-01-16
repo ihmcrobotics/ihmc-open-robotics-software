@@ -16,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
 import us.ihmc.perception.comms.PerceptionComms;
-import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
@@ -56,7 +55,6 @@ public class TerrainPerceptionProcessWithDriver
    private Mat color8UC3Image;
    private BytedecoImage depthBytedecoImage;
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
-   private final RapidPlanarRegionsCustomizer rapidRegionsCustomizer;
 
    private final OpenCLManager openCLManager;
    private _cl_program openCLProgram;
@@ -100,7 +98,6 @@ public class TerrainPerceptionProcessWithDriver
 
       openCLManager = new OpenCLManager();
       rapidRegionsExtractor = new RapidPlanarRegionsExtractor();
-      rapidRegionsCustomizer = new RapidPlanarRegionsCustomizer();
 
       thread = new PausablePeriodicThread("L515Node", UnitConversions.hertzToSeconds(31.0), 1, false, this::update);
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "L515Shutdown"));
@@ -182,16 +179,17 @@ public class TerrainPerceptionProcessWithDriver
 
                ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
                ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, rapidRegionsExtractor.getParameters());
-               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS, rapidRegionsCustomizer.getPolygonizerParameters());
+               ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_POLYGONIZER_PARAMETERS,
+                                                              rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getPolygonizerParameters());
                ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_CONVEX_HULL_FACTORY_PARAMETERS,
-                                                              rapidRegionsCustomizer.getConcaveHullFactoryParameters());
+                                                              rapidRegionsExtractor.getRapidPlanarRegionsCustomizer().getConcaveHullFactoryParameters());
 
                onPatchSizeResized();
 
                LogTools.info("Initialized.");
             }
 
-//            LogTools.info("New Iteration: {}", dataAquisitionTime);
+            //            LogTools.info("New Iteration: {}", dataAquisitionTime);
             ros2PropertySetGroup.update();
 
             depthU16C1Image.convertTo(depthBytedecoImage.getBytedecoOpenCVMat(), opencv_core.CV_16UC1, 1, 0);
@@ -200,18 +198,32 @@ public class TerrainPerceptionProcessWithDriver
             extractPlanarRegionsListWithPose(depthBytedecoImage, ReferenceFrame.getWorldFrame(), planarRegionsListWithPose);
             PlanarRegionsList planarRegionsList = planarRegionsListWithPose.getPlanarRegionsList();
 
-//            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
+            //            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
 
             // TODO:  Filter out regions that are colliding with the body before publishing
             //            PerceptionTools.publishPlanarRegionsListWithPose(planarRegionsListWithPose, ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, ros2Helper);
 
             PerceptionTools.publishPlanarRegionsList(planarRegionsList, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
-            PerceptionTools.publishCompressedDepth(depthU16C1Image, depthTopic, depthImageMessage, ros2Helper, cameraPose, now,
-                                                   depthSequenceNumber, depthHeight, depthWidth);
-            PerceptionTools.publishCompressedColor(color8UC3Image, colorTopic, colorImageMessage, ros2Helper, cameraPose, now,
-                                                   colorSequenceNumber, colorHeight, colorWidth);
+            PerceptionTools.publishCompressedDepth(depthU16C1Image,
+                                                   depthTopic,
+                                                   depthImageMessage,
+                                                   ros2Helper,
+                                                   cameraPose,
+                                                   now,
+                                                   depthSequenceNumber,
+                                                   depthHeight,
+                                                   depthWidth);
+            PerceptionTools.publishCompressedColor(color8UC3Image,
+                                                   colorTopic,
+                                                   colorImageMessage,
+                                                   ros2Helper,
+                                                   cameraPose,
+                                                   now,
+                                                   colorSequenceNumber,
+                                                   colorHeight,
+                                                   colorWidth);
 
-//            display(depthU16C1Image, color8UC3Image, 1);
+            //            display(depthU16C1Image, color8UC3Image, 1);
          }
       }
    }
@@ -225,8 +237,7 @@ public class TerrainPerceptionProcessWithDriver
 
    private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
    {
-      rapidRegionsExtractor.update(depthImage);
-      rapidRegionsCustomizer.createCustomPlanarRegionsList(rapidRegionsExtractor.getGPUPlanarRegions(), cameraFrame, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, planarRegionsListWithPose);
    }
 
    private void destroy()

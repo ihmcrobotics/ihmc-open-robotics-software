@@ -9,6 +9,7 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -32,6 +33,7 @@ public class RapidPlanarRegionsExtractor
       SPHERICAL, PERSPECTIVE
    }
 
+   private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
    private RapidRegionsExtractorParameters parameters;
 
    private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
@@ -51,6 +53,8 @@ public class RapidPlanarRegionsExtractor
    private DMatrixRMaj regionMatrix;
 
    private boolean patchSizeChanged = true;
+   private boolean modified = true;
+   private boolean processing = false;
 
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
@@ -112,6 +116,7 @@ public class RapidPlanarRegionsExtractor
       this.parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
       this.parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
 
+      rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
       perspectiveBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "perspectiveBackProjectionKernel");
       this.create();
    }
@@ -125,6 +130,8 @@ public class RapidPlanarRegionsExtractor
       this.imageHeight = imageHeight;
 
       this.parameters = new RapidRegionsExtractorParameters("Spherical");
+
+      rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer("ForSphericalRapidRegions");
       sphericalBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "sphericalBackProjectionKernel");
       this.create();
    }
@@ -150,31 +157,40 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
-   public void update(BytedecoImage input16UC1DepthImage)
+   public void update(BytedecoImage input16UC1DepthImage, PlanarRegionsListWithPose regionsWithPose)
    {
-      debugger.clearDebugImage();
-      wholeAlgorithmDurationStopwatch.start();
+      if(!processing)
+      {
+         processing = true;
+         debugger.clearDebugImage();
+         wholeAlgorithmDurationStopwatch.start();
 
-      gpuDurationStopwatch.start();
-      computePatchFeatureGrid(input16UC1DepthImage);
-      gpuDurationStopwatch.suspend();
+         gpuDurationStopwatch.start();
+         computePatchFeatureGrid(input16UC1DepthImage);
+         gpuDurationStopwatch.suspend();
 
-      //debugger.printPatchGraph(patchGraph);
-      //      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
-      //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
-      //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
+         //debugger.printPatchGraph(patchGraph);
+         //      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
+         //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
+         //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
-      depthFirstSearchDurationStopwatch.start();
-      findRegions();
-      findBoundariesAndHoles();
-      growRegionBoundaries();
-      depthFirstSearchDurationStopwatch.suspend();
+         depthFirstSearchDurationStopwatch.start();
+         findRegions();
+         findBoundariesAndHoles();
+         growRegionBoundaries();
+         depthFirstSearchDurationStopwatch.suspend();
 
-      copyFeatureGridMapUsingOpenCL();
-      wholeAlgorithmDurationStopwatch.suspend();
+         copyFeatureGridMapUsingOpenCL();
 
-//      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
-//      debugger.showDebugImage(1);
+         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(gpuPlanarRegions, ReferenceFrame.getWorldFrame(), regionsWithPose);
+
+         wholeAlgorithmDurationStopwatch.suspend();
+
+         //      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
+         debugger.showDebugImage(1);
+
+         modified = true;
+      }
    }
 
    /**
@@ -627,6 +643,11 @@ public class RapidPlanarRegionsExtractor
       // TODO: Destroy the rest
    }
 
+   public RapidPlanarRegionsCustomizer getRapidPlanarRegionsCustomizer()
+   {
+      return rapidPlanarRegionsCustomizer;
+   }
+
    public PlanarRegionsList getPlanarRegionsList()
    {
       return planarRegionsList;
@@ -730,6 +751,26 @@ public class RapidPlanarRegionsExtractor
    public PatchFeatureGrid getPreviousFeatureGrid()
    {
       return previousFeatureGrid;
+   }
+
+   public boolean isModified()
+   {
+      return modified;
+   }
+
+   public void setModified(boolean modified)
+   {
+      this.modified = modified;
+   }
+
+   public boolean isProcessing()
+   {
+      return processing;
+   }
+
+   public void setProcessing(boolean processing)
+   {
+      this.processing = processing;
    }
 }
 
