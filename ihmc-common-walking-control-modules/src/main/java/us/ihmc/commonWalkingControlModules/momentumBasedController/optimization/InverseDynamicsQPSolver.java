@@ -947,19 +947,35 @@ public class InverseDynamicsQPSolver
       finalSolverInput_H.addEquals(nativeSolverInput_H);
       finalSolverInput_f.addEquals(nativeSolverInput_f);
 
-      finalSolverInput_Ain.reshape(solverInput_Ain.getNumRows() + nativeSolverInput_Ain.getNumRows(), problemSize);
-      finalSolverInput_bin.reshape(solverInput_bin.getNumRows() + nativeSolverInput_bin.getNumRows(), 1);
-      finalSolverInput_Ain.insert(solverInput_Ain, 0, 0);
-      finalSolverInput_Ain.insert(nativeSolverInput_Ain, solverInput_Ain.getNumRows(), 0);
-      finalSolverInput_bin.insert(solverInput_bin, 0, 0);
-      finalSolverInput_bin.insert(nativeSolverInput_bin, solverInput_bin.getNumRows(), 0);
+      if (solverInput_Ain.getNumRows() > 0)
+      {
+         finalSolverInput_Ain.reshape(solverInput_Ain.getNumRows() + nativeSolverInput_Ain.getNumRows(), problemSize);
+         finalSolverInput_bin.reshape(solverInput_bin.getNumRows() + nativeSolverInput_bin.getNumRows(), 1);
+         finalSolverInput_Ain.insert(solverInput_Ain, 0, 0);
+         finalSolverInput_Ain.insert(nativeSolverInput_Ain, solverInput_Ain.getNumRows(), 0);
+         finalSolverInput_bin.insert(solverInput_bin, 0, 0);
+         finalSolverInput_bin.insert(nativeSolverInput_bin, solverInput_bin.getNumRows(), 0);
+      }
+      else
+      {
+         finalSolverInput_Ain.set(nativeSolverInput_Ain);
+         finalSolverInput_bin.set(nativeSolverInput_bin);
+      }
 
-      finalSolverInput_Aeq.reshape(solverInput_Aeq.getNumRows() + nativeSolverInput_Aeq.getNumRows(), problemSize);
-      finalSolverInput_beq.reshape(solverInput_beq.getNumRows() + nativeSolverInput_beq.getNumRows(), 1);
-      finalSolverInput_Aeq.insert(solverInput_Aeq, 0, 0);
-      finalSolverInput_Aeq.insert(nativeSolverInput_Aeq, solverInput_Aeq.getNumRows(), 0);
-      finalSolverInput_beq.insert(solverInput_beq, 0, 0);
-      finalSolverInput_beq.insert(nativeSolverInput_beq, solverInput_beq.getNumRows(), 0);
+      if (solverInput_Aeq.getNumRows() > 0)
+      {
+         finalSolverInput_Aeq.reshape(solverInput_Aeq.getNumRows() + nativeSolverInput_Aeq.getNumRows(), problemSize);
+         finalSolverInput_beq.reshape(solverInput_beq.getNumRows() + nativeSolverInput_beq.getNumRows(), 1);
+         finalSolverInput_Aeq.insert(solverInput_Aeq, 0, 0);
+         finalSolverInput_Aeq.insert(nativeSolverInput_Aeq, solverInput_Aeq.getNumRows(), 0);
+         finalSolverInput_beq.insert(solverInput_beq, 0, 0);
+         finalSolverInput_beq.insert(nativeSolverInput_beq, solverInput_beq.getNumRows(), 0);
+      }
+      else
+      {
+         finalSolverInput_Aeq.set(nativeSolverInput_Aeq);
+         finalSolverInput_beq.set(nativeSolverInput_beq);
+      }
 
       TIntArrayList inactiveIndices = applySubstitution(); // This needs to be done right before configuring the QP and solving.
 
