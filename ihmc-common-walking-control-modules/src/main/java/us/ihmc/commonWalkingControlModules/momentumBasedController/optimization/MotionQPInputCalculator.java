@@ -582,10 +582,8 @@ public class MotionQPInputCalculator
             }
          }
 
-         // FIXME replace with native ops
-         tempTaskJacobian.set(nativeTempPrimaryTaskJacobian);
          // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.
-         recordTaskJacobian(tempTaskJacobian);
+         recordTaskJacobian(nativeTempPrimaryTaskJacobian);
          // We're done!
       }
 
