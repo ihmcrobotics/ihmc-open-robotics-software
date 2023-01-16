@@ -49,10 +49,11 @@ float4 back_project_spherical(int2 pos, float depth, global float* params)
 
 float4 back_project_perspective(int2 pos, float Z, global float* params)
 {
-   float px = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
-   float py = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
-   float4 X = (float4) (px, py, Z, 0);
-   return X;
+   float X = (pos.x - params[DEPTH_CX]) / params[DEPTH_FX] * Z;
+   float Y = (pos.y - params[DEPTH_CY]) / params[DEPTH_FY] * Z;
+
+   float4 point = (float4) (Z, -X, -Y, 0);
+   return point;
 }
 
 float3 estimate_perspective_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)

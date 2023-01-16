@@ -150,16 +150,10 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
-   public void update(BytedecoImage input16UC1DepthImage, boolean changed)
+   public void update(BytedecoImage input16UC1DepthImage)
    {
       debugger.clearDebugImage();
       wholeAlgorithmDurationStopwatch.start();
-
-      if (changed)
-      {
-         // Flip so the Y+ goes up instead of down.
-         opencv_core.flip(input16UC1DepthImage.getBytedecoOpenCVMat(), input16UC1DepthImage.getBytedecoOpenCVMat(), BytedecoOpenCVTools.FLIP_Y);
-      }
 
       gpuDurationStopwatch.start();
       computePatchFeatureGrid(input16UC1DepthImage);

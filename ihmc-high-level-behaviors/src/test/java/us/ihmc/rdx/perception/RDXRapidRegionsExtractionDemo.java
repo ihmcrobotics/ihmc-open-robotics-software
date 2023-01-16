@@ -147,11 +147,11 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   baseUI.getPerspectiveManager().reloadPerspective();
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
 
-                  updateRapidRegionsExtractor(true);
-                  updatePointCloudRenderer(true);
+                  updateRapidRegionsExtractor();
+                  updatePointCloudRenderer();
                }
 
-               updateRapidRegionsExtractor(false);
+               updateRapidRegionsExtractor();
 
                rapidRegionsUIPanel.render();
             }
@@ -181,8 +181,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             {
                perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
                rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
-               updateRapidRegionsExtractor(true);
-               updatePointCloudRenderer(true);
+               updateRapidRegionsExtractor();
+               updatePointCloudRenderer();
             }
          }
 
@@ -195,7 +195,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       });
    }
 
-   public void updatePointCloudRenderer(boolean forceUpdate)
+   public void updatePointCloudRenderer()
    {
       if (rapidRegionsUIPanel.getPointCloudRenderEnabled())
       {
@@ -256,12 +256,12 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       pointCloudRenderer.updateMeshFastestAfterKernel();
    }
 
-   private void updateRapidRegionsExtractor(boolean changed)
+   private void updateRapidRegionsExtractor()
    {
 
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, changed);
+      rapidPlanarRegionsExtractor.update(bytedecoDepthImage);
       rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(rapidPlanarRegionsExtractor.getGPUPlanarRegions(),
                                                                  ReferenceFrame.getWorldFrame(),
                                                                  regionsWithPose);
