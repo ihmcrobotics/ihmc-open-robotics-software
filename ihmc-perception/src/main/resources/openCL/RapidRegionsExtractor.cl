@@ -55,48 +55,53 @@ float4 back_project_perspective(int2 pos, float Z, global float* params)
    return X;
 }
 
-float3 estimate_perspective_normal(read_write image2d_t in, int x, int y, global float* params)
+float3 estimate_perspective_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)
 {
    float residual = 0;
-   float Z = 0;
-   int m = (int)params[NORMAL_PACK_RANGE];
-   int count = 0;
-   float4 normal = (float4)(0,0,0,0);
-   if (y >= 0 && y < (int) params[SUB_H] && x >= 0 && x < (int) params[SUB_W])
-   {
-      for (int i = 0; i < (int) params[PATCH_HEIGHT] - m; i++)
+      float radius = 0;
+      int m = (int)params[NORMAL_PACK_RANGE];
+      int count = 0;
+      float4 normal = (float4)(0,0,0,0);
+
+      if   (
+               rIndex >= m && cIndex >= m
+               && (rIndex * ((int) params[PATCH_HEIGHT]) + 2*m) < ((int) params[INPUT_HEIGHT])
+               && (cIndex * ((int) params[PATCH_WIDTH]) + 2*m) < ((int) params[INPUT_WIDTH])
+           )
       {
-         for( int j = 0; j < (int) params[PATCH_WIDTH] - m; j++)
+         for (int i = 0; i < (int) m; i++)
          {
-            count++;
-            int gx = x * (int) params[PATCH_HEIGHT] + i;
-            int gy = y * (int) params[PATCH_WIDTH] + j;
-            int2 pos = (int2) (gx, gy);
+            for( int j = 0; j < (int) m; j++)
+            {
+               count++;
+               int grIndex = rIndex * (int) params[PATCH_HEIGHT] + i;
+               int gcIndex = cIndex * (int) params[PATCH_WIDTH] + j;
+               int2 pos = (int2) (gcIndex, grIndex);
 
-            pos = (int2) (gx, gy);
-            Z = ((float) read_imageui(in, pos).x) / (float) 1000;
-            float4 va = back_project_perspective(pos, Z, params);
+               pos = (int2) (gcIndex, grIndex);
+               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+               float4 va = back_project_perspective(pos, radius, params);
 
-            pos = (int2) (gx + m, gy);
-            Z = ((float) read_imageui(in, pos).x) / (float) 1000;
-            float4 vb = back_project_perspective(pos, Z, params);
+               pos = (int2) (gcIndex + m, grIndex);
+               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+               float4 vb = back_project_perspective(pos, radius, params);
 
-            pos = (int2) (gx + m, gy + m);
-            Z = ((float) read_imageui(in, pos).x) / (float) 1000;
-            float4 vc = back_project_perspective(pos, Z, params);
+               pos = (int2) (gcIndex + m, grIndex + m);
+               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+               float4 vc = back_project_perspective(pos, radius, params);
 
-            pos = (int2) (gx, gy + m);
-            Z = ((float) read_imageui(in, pos).x) / (float) 1000;
-            float4 vd = back_project_perspective(pos, Z, params);
+               pos = (int2) (gcIndex, grIndex + m);
+               radius = ((float) read_imageui(in, pos).x) / (float) 1000;
+               float4 vd = back_project_perspective(pos, radius, params);
 
-            normal += cross((vc - vb),(vb - va));
-            normal += cross((vd - vc),(vc - vb));
-            normal += cross((va - vd),(vd - vc));
-            normal += cross((vb - va),(va - vd));
+               normal += cross((vc - vb),(vb - va));
+               normal += cross((vd - vc),(vc - vb));
+               normal += cross((va - vd),(vd - vc));
+               normal += cross((vb - va),(va - vd));
+            }
          }
       }
-   }
-   return normalize((1 / (float) (count)) * normal.xyz);
+      return normalize((1 / (float) (count)) * normal.xyz);
 }
 
 float3 estimate_spherical_normal(read_write image2d_t in, int rIndex, int cIndex, global float* params)

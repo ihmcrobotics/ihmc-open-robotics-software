@@ -51,7 +51,9 @@ import java.util.ArrayList;
 
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
-   String PERCEPTION_LOG_FILE = System.getProperty("user.home") + "/.ihmc/logs/perception/20230114_155447_PerceptionLog.hdf5";
+
+   String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
+   String PERCEPTION_LOG_FILE = "20230114_155447_PerceptionLog.hdf5";
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -101,14 +103,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new ImGuiPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            //createL515(768, 1024);
-            createOuster(128, 2048);
+            createL515(768, 1024);
+            //createOuster(128, 2048);
          }
 
          private void createOuster(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.OUSTER_DEPTH_NAME;
-            perceptionDataLoader.openLogFile(PERCEPTION_LOG_FILE);
+            perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
             pointCloudRenderer.create(depthHeight * depthWidth);
@@ -122,7 +124,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          private void createL515(int depthHeight, int depthWidth)
          {
             sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
-            perceptionDataLoader.openLogFile(PERCEPTION_LOG_FILE);
+            perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight,730.7891, 731.0859, 528.6094, 408.1602);
