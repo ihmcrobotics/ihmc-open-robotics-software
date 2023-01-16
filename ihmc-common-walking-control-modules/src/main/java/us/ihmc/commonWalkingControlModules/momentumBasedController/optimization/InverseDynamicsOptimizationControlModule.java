@@ -402,9 +402,9 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
 
    private void submitQPObjectiveCommandNow(QPObjectiveCommand command)
    {
-      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, motionQPInput);
+      boolean success = motionQPInputCalculator.convertQPObjectiveCommand(command, nativeMotionQPInput);
       if (success)
-         qpSolver.addMotionInput(motionQPInput);
+         qpSolver.addMotionInput(nativeMotionQPInput);
    }
 
    public void submitSpatialAccelerationCommand(SpatialAccelerationCommand command)
