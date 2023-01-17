@@ -6,15 +6,12 @@ import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
-import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.HDF5Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -27,7 +24,6 @@ import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.Activator;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,10 +40,9 @@ public class WebcamHDF5LoggingDemo
                                                   "Webcam HDF5 Logging Demo");
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXOpenCVWebcamReader webcamReader;
-//   private Mat bgrWebcamCopy;
-   private BytedecoImage bgrWebcamCopy;
+   private Mat bgrWebcamCopy;
    private volatile boolean running = true;
-   private HDF5Manager hdf5Manager = null;
+   private H5File h5File = null;
    private final ImString logDirectory = new ImString(IHMCCommonPaths.LOGS_DIRECTORY.toString());
    private String logFile;
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
@@ -55,8 +50,10 @@ public class WebcamHDF5LoggingDemo
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
    private IntPointer compressionParameters;
    private BytePointer pngImageBuffer;
+   private DataType nativeByteType;
    private Group imageGroup;
    private long imageIndex;
+   private final Object syncObject = new Object();
 
    public WebcamHDF5LoggingDemo()
    {
@@ -85,8 +82,8 @@ public class WebcamHDF5LoggingDemo
 
                   compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
                   pngImageBuffer = new BytePointer((long) webcamReader.getImageWidth() * webcamReader.getImageHeight() * 3); // BGR8
-//                  bgrWebcamCopy = new Mat();
-                  bgrWebcamCopy = new BytedecoImage(1920, 1080, opencv_core.CV_8UC3);
+                  bgrWebcamCopy = new Mat();
+                  nativeByteType = new DataType(PredType.NATIVE_B8());
 
                   ThreadTools.startAsDaemon(() ->
                   {
@@ -94,10 +91,9 @@ public class WebcamHDF5LoggingDemo
                      {
                         webcamReader.readWebcamImage();
 
-                        synchronized (this)
+                        synchronized (syncObject)
                         {
-//                           webcamReader.getBGRImage().copyTo(bgrWebcamCopy);
-                           webcamReader.getBGRImage().copyTo(bgrWebcamCopy.getBytedecoOpenCVMat());
+                           webcamReader.getBGRImage().copyTo(bgrWebcamCopy);
                         }
                      }
                   }, "CameraRead");
@@ -129,7 +125,7 @@ public class WebcamHDF5LoggingDemo
          compressedBytesPlot.renderImGuiWidgets();
       }
 
-      if (hdf5Manager == null)
+      if (h5File == null)
       {
          ImGuiTools.inputText(labels.get("Log directory"), logDirectory);
 
@@ -141,9 +137,9 @@ public class WebcamHDF5LoggingDemo
             String logFileName = dateFormat.format(new Date()) + "_" + FILE_SUFFIX;
             FileTools.ensureDirectoryExists(Paths.get(logDirectory.get()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
             logFile = Paths.get(logDirectory.get(), logFileName).toString();
-            hdf5Manager = new HDF5Manager(logFile, hdf5.H5F_ACC_TRUNC);
+            h5File = new H5File(logFile, hdf5.H5F_ACC_TRUNC);
 
-            imageGroup = hdf5Manager.getGroup(IMAGE_GROUP_NAME);
+            imageGroup = h5File.createGroup(IMAGE_GROUP_NAME);
             imageIndex = 0;
          }
       }
@@ -152,28 +148,26 @@ public class WebcamHDF5LoggingDemo
          ImGui.text(logFile);
          if (ImGui.button(labels.get("Close file")))
          {
-            hdf5Manager.closeFile();
-            hdf5Manager = null;
+            imageGroup.close();
+            imageGroup = null;
+            h5File.close();
+            h5File = null;
          }
 
          if (ImGui.button("Capture image"))
          {
-            synchronized (this)
+            synchronized (syncObject)
             {
-//               opencv_imgcodecs.imencode(".png", bgrWebcamCopy, pngImageBuffer, compressionParameters);
-            HDF5Tools.storeBytesFromPointer(imageGroup, imageIndex, bgrWebcamCopy.getBytedecoByteBufferPointer(), bgrWebcamCopy.getBytedecoByteBufferPointer().limit());
+               opencv_imgcodecs.imencode(".png", bgrWebcamCopy, pngImageBuffer, compressionParameters);
             }
 
-//            HDF5Tools.storeBytesFromPointer(imageGroup, imageIndex, pngImageBuffer, pngImageBuffer.limit());
-
-//            int rank = 1;
-//            long[] dimensions = { pngImageBuffer.limit() };
-//            DataSpace dataSpace = new DataSpace(rank, dimensions);
-//            DataType dataType = new DataType(PredType.NATIVE_B8());
-//            DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), dataType, dataSpace);
-//            dataSet.write(pngImageBuffer, dataType);
-//            dataSet.close();
-//            dataSpace.close();
+            int rank = 1;
+            long[] dimensions = { pngImageBuffer.limit() };
+            DataSpace dataSpace = new DataSpace(rank, dimensions);
+            DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), nativeByteType, dataSpace);
+            dataSet.write(pngImageBuffer, nativeByteType);
+            dataSet.close();
+            dataSpace.close();
 
             ++imageIndex;
          }
