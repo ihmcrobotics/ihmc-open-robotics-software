@@ -311,7 +311,7 @@ public class HDF5Test
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
 
-      // Workaround wrapping in ShortPointer
+      // Workaround wrapping with ShortPointer
       dataPointer = new BytePointer(writeData.length);
       dataSet.read(new ShortPointer(dataPointer), dataType);
       LogTools.info("Read    {} bytes", dataPointer.limit());
