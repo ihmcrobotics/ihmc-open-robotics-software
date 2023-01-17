@@ -15,6 +15,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepPlannerRequest
 {
@@ -119,6 +120,11 @@ public class FootstepPlannerRequest
     */
    private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
 
+   /**
+    * Reference footstep plan. When provided, the planner will try to match this plan by having the cost function's minima be at these steps.
+    */
+   private FootstepPlan referencePlan = null;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -146,6 +152,7 @@ public class FootstepPlannerRequest
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
       swingPlannerType = SwingPlannerType.NONE;
+      referencePlan = null;
    }
 
    public void setRequestId(int requestId)
@@ -283,6 +290,11 @@ public class FootstepPlannerRequest
       this.swingPlannerType = swingPlannerType;
    }
 
+   public void setReferencePlan(FootstepPlanReadOnly referencePlan)
+   {
+      this.referencePlan = new FootstepPlan(referencePlan);
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -382,6 +394,18 @@ public class FootstepPlannerRequest
    {
       return swingPlannerType;
    }
+
+   public FootstepPlan getReferencePlan()
+   {
+      return referencePlan;
+   }
+
+   public boolean hasReferenceFootstepPlan()
+   {
+      return referencePlan != null;
+   }
+
+   // TODO add ROS field if needed. probably should be added to be loggable
 
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
@@ -501,5 +525,6 @@ public class FootstepPlannerRequest
       }
 
       this.heightMapMessage = other.heightMapMessage;
+      this.referencePlan = new FootstepPlan(other.referencePlan);
    }
 }
