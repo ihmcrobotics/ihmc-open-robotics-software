@@ -170,7 +170,7 @@ public class RapidPlanarRegionsExtractor
          gpuDurationStopwatch.suspend();
 
          //debugger.printPatchGraph(patchGraph);
-         //      debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
+         //debugger.constructPointCloud(cloudBuffer.getBackingDirectFloatBuffer(), imageWidth * imageHeight);
          //debugger.constructCentroidPointCloud(cxImage, cyImage, czImage, cxImage.getImageHeight(), cxImage.getImageWidth());
          //debugger.constructCentroidSurfelCloud(cxImage, cyImage, czImage, nxImage, nyImage, nzImage);
 
@@ -187,7 +187,7 @@ public class RapidPlanarRegionsExtractor
          wholeAlgorithmDurationStopwatch.suspend();
 
          //      debugger.displayInputDepth(input16UC1DepthImage.getBytedecoOpenCVMat(), 1);
-         debugger.showDebugImage(1);
+         //debugger.showDebugImage(1);
 
          modified = true;
       }

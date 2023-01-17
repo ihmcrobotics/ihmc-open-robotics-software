@@ -146,11 +146,6 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       framePose.changeFrame(ReferenceFrame.getWorldFrame());
       LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
 
-      LogTools.info("Sensor Transform: {}", cameraFrame.getTransformToWorldFrame());
-      LogTools.info("Frame Pose Transform: {}", framePose);
-      LogTools.info("Sensor Graphic Transform: {}", sensorFrameGraphic.transform);
-
-
       planarRegionsGraphic.generateMeshes(planarRegions);
       planarRegionsGraphic.update();
    }

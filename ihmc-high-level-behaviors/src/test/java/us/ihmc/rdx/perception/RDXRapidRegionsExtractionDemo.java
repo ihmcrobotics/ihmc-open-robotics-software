@@ -34,7 +34,6 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -72,8 +71,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
                                                                                                               ReferenceFrame.getWorldFrame(),
                                                                                                               sensorTransformToWorld);
-   private final ArrayList<Point3D> cameraPositionBuffer = new ArrayList<>();
-   private final ArrayList<Quaternion> cameraOrientationBuffer = new ArrayList<>();
+   private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
+   private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
    ;
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
@@ -113,6 +112,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             //createOuster(128, 2048);
 
             updateRapidRegionsExtractor();
+            updatePointCloudRenderer();
          }
 
          private void createOuster(int depthHeight, int depthWidth)
@@ -121,6 +121,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, sensorPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, sensorOrientationBuffer);
             pointCloudRenderer.create(depthHeight * depthWidth);
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight);
 
@@ -134,8 +136,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
-            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPositionBuffer);
-            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraOrientationBuffer);
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight, 730.7891, 731.0859, 528.6094, 408.1602);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
@@ -154,8 +156,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
-
-                  updatePointCloudRenderer();
                }
 
                if (initialized)
@@ -190,16 +190,23 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             if (changed || !initialized)
             {
                perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+
+               updateRapidRegionsExtractor();
+               updatePointCloudRenderer();
                rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
 
+
                if (!initialized)
+               {
                   initialized = true;
+               }
             }
          }
 
          @Override
          public void dispose()
          {
+            rapidPlanarRegionsExtractor.setProcessing(false);
             perceptionDataLoader.destroy();
             rapidRegionsUIPanel.destroy();
             baseUI.dispose();
@@ -275,8 +282,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          ThreadTools.startAsDaemon(() ->
                                    {
 
-                                      Point3D position = cameraPositionBuffer.get(frameIndex.get());
-                                      Quaternion orientation = cameraOrientationBuffer.get(frameIndex.get());
+                                      Point3D position = sensorPositionBuffer.get(frameIndex.get());
+                                      Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
 
                                       sensorTransformToWorld.getTranslation().set(position);
                                       sensorTransformToWorld.getRotation().set(orientation);
