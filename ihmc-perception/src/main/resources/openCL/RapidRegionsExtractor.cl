@@ -30,7 +30,7 @@ float4 back_project_spherical(int2 pos, float depth, global float* params)
    int y = pos.y;
 
    int xFromCenter = -x - (params[INPUT_WIDTH] / 2);
-   int yFromCenter = y - (params[INPUT_HEIGHT] / 2);
+   int yFromCenter = -(y - (params[INPUT_HEIGHT] / 2));
 
    float yaw = xFromCenter / (float) params[INPUT_WIDTH] * totalYaw;
    float pitch = yFromCenter / (float) params[INPUT_HEIGHT] * totalPitch;
