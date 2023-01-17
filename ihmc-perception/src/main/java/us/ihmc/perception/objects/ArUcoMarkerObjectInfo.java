@@ -1,11 +1,9 @@
-package us.ihmc.perception;
+package us.ihmc.perception.objects;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
@@ -21,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class ArUcoObjectInfo
+public class ArUcoMarkerObjectInfo
 {
    private final List<Integer> markerIds = new ArrayList<>();
    private final List<String> objectNames = new ArrayList<>();
@@ -29,14 +27,14 @@ public class ArUcoObjectInfo
    private final List<List<Double>> objectTranslations = new ArrayList<>();
    private final List<List<Double>> objectRotations = new ArrayList<>();
 
-   public ArUcoObjectInfo()
+   public ArUcoMarkerObjectInfo()
    {
       // read parameters regarding the properties of available objects with ArUco markers attached
       try
       {
          WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-perception/src/main/resources");
          String directoryAbsolutePath = directory.getDirectoryPath().toAbsolutePath().toString();
-         String configurationFile = "/us/ihmc/perception/objectDetection/ArUcoObjectsInfo.json";
+         String configurationFile = "/us/ihmc/perception/objects/ArUcoObjectsInfo.json";
          String demoDirectory = directoryAbsolutePath + configurationFile;
          Path pathFile = Paths.get(demoDirectory);
          LogTools.info("Loading parameters from resource: {}", configurationFile);

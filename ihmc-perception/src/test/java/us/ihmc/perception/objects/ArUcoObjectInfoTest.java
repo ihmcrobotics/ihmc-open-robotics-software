@@ -1,8 +1,7 @@
-package us.ihmc.perception.objectDetection;
+package us.ihmc.perception.objects;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.ArUcoObjectInfo;
 
 import static org.junit.Assert.assertTrue;
 
@@ -11,7 +10,7 @@ public class ArUcoObjectInfoTest
    @Test
    public void infoAruCoObjectTest()
    {
-      ArUcoObjectInfo arucoInfo = new ArUcoObjectInfo();
+      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
       String name = arucoInfo.getObjectName(0);
       System.out.println("Name: " + name);
       assertTrue(!name.isEmpty());

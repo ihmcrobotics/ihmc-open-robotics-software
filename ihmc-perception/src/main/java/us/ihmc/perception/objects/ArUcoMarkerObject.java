@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.objects;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -6,20 +6,20 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
-public class ArUcoObject
+public class ArUcoMarkerObject
 {
    private RigidBodyTransform markerToWorld = new RigidBodyTransform();
    private final ReferenceFrame markerFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                                      markerToWorld);
-   private final RigidBodyTransform transformToObject = new RigidBodyTransform();
+   private final RigidBodyTransform objectToMarker = new RigidBodyTransform();
    // object frame might be different than marker location, for example the door handle is not exactly where the marker is on the door
    private ReferenceFrame objectFrame;
    private FramePose3D objectPose = new FramePose3D();
 
-   public ArUcoObject(int id, ArUcoObjectInfo arucoInfo)
+   public ArUcoMarkerObject(int id, ArUcoMarkerObjectInfo arucoInfo)
    {
-      transformToObject.set(arucoInfo.getObjectYawPitchRoll(id), arucoInfo.getObjectTranslation(id));
-      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, transformToObject);
+      objectToMarker.set(arucoInfo.getObjectYawPitchRoll(id), arucoInfo.getObjectTranslation(id));
+      objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectToMarker);
    }
 
    public void update()
@@ -31,7 +31,7 @@ public class ArUcoObject
    public void computeObjectPose(FramePose3DBasics markerPose)
    {
       objectPose.set(markerPose);
-      objectPose.appendTransform(transformToObject);
+      objectPose.appendTransform(objectToMarker);
    }
 
    public RigidBodyTransform getMarkerToWorld()
