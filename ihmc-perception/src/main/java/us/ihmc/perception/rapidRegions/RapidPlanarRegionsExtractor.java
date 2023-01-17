@@ -368,7 +368,11 @@ public class RapidPlanarRegionsExtractor
                }
                else
                {
-                  gpuPlanarRegions.remove(gpuPlanarRegions.size() - 1);
+                  int totalGPURegions = gpuPlanarRegions.size();
+                  if(totalGPURegions > 0)
+                  {
+                     gpuPlanarRegions.remove(gpuPlanarRegions.size() - 1);
+                  }
                }
                if (numberOfRegionPatches > regionMaxSearchDepth)
                   regionMaxSearchDepth = numberOfRegionPatches;
