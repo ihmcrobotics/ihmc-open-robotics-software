@@ -86,6 +86,7 @@ public class LookAndStepFootstepPlanningTask
    protected YoDouble planarRegionDelay;
    protected YoDouble footstepPlanningDuration;
    protected YoDouble moreInclusivePlanningDuration;
+   protected FootstepPlan previousFootstepPlan;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -427,6 +428,12 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setSnapGoalSteps(true);
       footstepPlannerRequest.setMaximumIterations(100);
 
+      // TODO check if looks ok
+      if (previousFootstepPlan != null && !previousFootstepPlan.isEmpty())
+      {
+         footstepPlannerRequest.setReferencePlan(previousFootstepPlan);
+      }
+
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.clearCustomTerminationConditions();
@@ -452,6 +459,12 @@ public class LookAndStepFootstepPlanningTask
                         footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
                         plannerTimeout));
       footstepPlanningDuration.set(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds());
+
+      // TODO check if looks ok
+      if (footstepPlannerOutput.getFootstepPlanningResult().validForExecution())
+      {
+         previousFootstepPlan = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
+      }
 
       String latestLogDirectory = FootstepPlannerLogger.generateALogFolderName();
       statusLogger.info("Footstep planner log folder: {}", latestLogDirectory);
