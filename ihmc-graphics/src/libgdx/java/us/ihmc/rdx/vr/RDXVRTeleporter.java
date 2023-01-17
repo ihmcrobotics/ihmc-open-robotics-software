@@ -46,6 +46,7 @@ public class RDXVRTeleporter
    private long tPressedPrevious;
    private long tPressed = 0;
    private final double doubleClickTimeThresholdInMilliseconds = 20;
+   private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
 
    public void create(RDXVRContext context)
    {
@@ -75,6 +76,28 @@ public class RDXVRTeleporter
       meshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color);
    }
 
+   private void snapToMidFeetZUp(RDXVRContext vrContext)
+   {
+      if (robotMidFeetZUpReferenceFrame != null)
+      {
+         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+          {
+             xyYawHeadsetToTeleportTransform.setIdentity();
+             vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
+                                                   {
+                                                      headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                                                      xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                                                      xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                                                   });
+             teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+             teleportIHMCZUpToIHMCZUpWorld.invert();
+             // set tempTransform to incoming rigidbodyTransform.
+             tempTransform.set(robotMidFeetZUpReferenceFrame.getTransformToWorldFrame());
+             tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+          });
+      }
+   }
+
    private void processVRInput(RDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -94,6 +117,7 @@ public class RDXVRTeleporter
             if (timeElapsedInMilliseconds < doubleClickTimeThresholdInMilliseconds)
             {
                // Teleport to some place ( robot pelvis? sensor position? )
+               snapToMidFeetZUp(vrContext);
             }
          }
 
@@ -183,5 +207,15 @@ public class RDXVRTeleporter
          ring.getRenderables(renderables, pool);
          arrow.getRenderables(renderables, pool);
       }
+   }
+
+   public ReferenceFrame getRobotMidFeetZUpReferenceFrame()
+   {
+      return robotMidFeetZUpReferenceFrame;
+   }
+
+   public void setRobotMidFeetZUpReferenceFrame(ReferenceFrame robotMidFeetZUpReferenceFrame)
+   {
+      this.robotMidFeetZUpReferenceFrame = robotMidFeetZUpReferenceFrame;
    }
 }
