@@ -267,7 +267,7 @@ public class HDF5Tools
 
       for (int i = 0; i < file.getNumObjs(); i++)
       {
-         String objectName = file.getObjnameByIdx(i).getString();
+         String objectName = "/" + file.getObjnameByIdx(i).getString();
          Group group = file.openGroup(objectName);
          recursivelyExploreHDF5File(group, names, objectName);
       }
@@ -303,7 +303,7 @@ public class HDF5Tools
 
       if (numberOfGroups == 0)
       {
-         names.add(prefix);
+         names.add(prefix + "/");
       }
    }
 

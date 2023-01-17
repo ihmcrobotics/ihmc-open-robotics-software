@@ -37,6 +37,7 @@ public class HDF5Manager
    {
       file = new H5File(filePath, flag);
       groups = new HashMap<>();
+      counts = new HashMap<>();
       floatBuffers = new HashMap<>();
       longBuffers = new HashMap<>();
    }
@@ -138,15 +139,29 @@ public class HDF5Manager
     * @param namespace The namespace or topic name for which the file count has been requested
     * @return The file count for the namespace or topic name requested
     */
-   public long getCount(String namespace)
+   public int getCount(String namespace)
    {
+      int count = 0;
       if (groups.containsKey(namespace))
-         return groups.get(namespace).getNumObjs();
+      {
+         if (counts.containsKey(namespace))
+         {
+            count = counts.get(namespace);
+            counts.put(namespace, count);
+         }
+         else
+         {
+            count = (int) groups.get(namespace).getNumObjs();
+         }
+         return count;
+      }
       else if (file.nameExists(namespace))
       {
          Group group = file.openGroup(namespace);
          groups.put(namespace, group);
-         return group.getNumObjs();
+         count = (int) group.getNumObjs();
+         counts.put(namespace, count);
+         return count;
       }
       else
          return 0;
@@ -194,7 +209,7 @@ public class HDF5Manager
 
    public void closeFile()
    {
-      for(Group group : groups.values())
+      for (Group group : groups.values())
       {
          group.close();
       }
