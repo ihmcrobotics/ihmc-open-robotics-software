@@ -43,6 +43,9 @@ public class RDXVRTeleporter
    private double lineLength = 1.0;
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
+   private long tPressedPrevious;
+   private long tPressed = 0;
+   private final double doubleClickTimeThresholdInMilliseconds = 20;
 
    public void create(RDXVRContext context)
    {
@@ -79,6 +82,20 @@ public class RDXVRTeleporter
          InputDigitalActionData bButton = controller.getBButtonActionData();
          preparingToTeleport = bButton.bState();
          boolean bChanged = bButton.bChanged();
+
+         // b button clicked
+         if (bChanged)
+         {
+            tPressedPrevious = tPressed;
+            tPressed = System.nanoTime();
+            double timeElapsedInMilliseconds = (tPressed - tPressedPrevious) / 1e6;
+
+            // Double-clicked
+            if (timeElapsedInMilliseconds < doubleClickTimeThresholdInMilliseconds)
+            {
+               // Teleport to some place ( robot pelvis? sensor position? )
+            }
+         }
 
          if (preparingToTeleport || bChanged)
          {
