@@ -1,4 +1,4 @@
-package us.ihmc.perception.objectDetection;
+package us.ihmc.perception.objects;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,8 +9,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.ArUcoObject;
-import us.ihmc.perception.ArUcoObjectInfo;
 import us.ihmc.perception.OpenCVArUcoMarker;
 
 import java.util.ArrayList;
@@ -24,9 +22,9 @@ public class ArUcoObjectPoseTest
    @Test
    public void framePoseTransformsArUcoTest()
    {
-      ArUcoObjectInfo arucoInfo = new ArUcoObjectInfo();
+      ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
       ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
-      ArUcoObject objectWithArUco;
+      ArUcoMarkerObject objectWithArUco;
 
       // add markers with their respective info
       for (int id : arucoInfo.getMarkersId())
@@ -39,7 +37,7 @@ public class ArUcoObjectPoseTest
       int objectId = marker.getId();
 
       // get object with attached aruco marker
-      objectWithArUco = new ArUcoObject(objectId, arucoInfo);
+      objectWithArUco = new ArUcoMarkerObject(objectId, arucoInfo);
       // get marker pose in world frame, in reality this would be detected by camera
       FramePose3DBasics markerPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      new Point3D(1.073, -0.146, 1.016),

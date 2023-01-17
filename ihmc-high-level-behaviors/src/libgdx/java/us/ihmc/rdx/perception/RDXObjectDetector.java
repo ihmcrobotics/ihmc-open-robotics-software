@@ -5,8 +5,8 @@ import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
-import us.ihmc.perception.ArUcoObject;
-import us.ihmc.perception.ArUcoObjectInfo;
+import us.ihmc.perception.objects.ArUcoMarkerObject;
+import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
 import us.ihmc.perception.OpenCVArUcoMarker;
 import us.ihmc.perception.OpenCVArUcoMarkerDetection;
 import us.ihmc.rdx.imgui.ImGuiPanel;
@@ -21,19 +21,16 @@ public class RDXObjectDetector
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private boolean objectDetected = false;
-   private final ArUcoObjectInfo arucoInfo = new ArUcoObjectInfo();
+   private final ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
-   private RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator;
    private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
 //   private final ArrayList<ArUcoObject> objecstWithArUco = new ArrayList<>();
-   private ArUcoObject objectWithArUco;
+   private ArUcoMarkerObject objectWithArUco;
    private String objectName = "";
 
-   public void create(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator)
+   public RDXObjectDetector(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator)
    {
-      this.objectDetectionBlackflySimulator = objectDetectionBlackflySimulator;
-
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
       arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage(),
                                   objectDetectionBlackflySimulator.getDepthCameraIntrinsics(),
@@ -65,7 +62,7 @@ public class RDXObjectDetector
                // use VR eye tracking to see what we are focusing on (closer object to where the eye is focusing)
                // highlight selected object and user confirms with button A, rejects button B
 //               objecstWithArUco.add(new ArUcoObject(marker.getId(),arucoInfo)); // get object with attached marker
-               objectWithArUco = new ArUcoObject(objectId,arucoInfo);
+               objectWithArUco = new ArUcoMarkerObject(objectId, arucoInfo);
                FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(marker); // get marker pose in camera frame
                markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform in world frame
                markerPose.get(objectWithArUco.getMarkerToWorld()); // pack transform marker to world from marker pose
