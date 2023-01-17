@@ -1,12 +1,15 @@
 package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
@@ -18,7 +21,6 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -32,6 +34,7 @@ public class WebcamHDF5LoggingDemo
 {
    public static final String FILE_SUFFIX = "Images" + HDF5Tools.HDF5_FILE_EXTENSION;
    public static final String IMAGE_GROUP_NAME = "image";
+   public static final String ENCODING_NAME = "encoding";
 
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
@@ -46,14 +49,19 @@ public class WebcamHDF5LoggingDemo
    private final ImString logDirectory = new ImString(IHMCCommonPaths.LOGS_DIRECTORY.toString());
    private String logFile;
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
-   private final ImPlotFrequencyPlot publishFrequencyPlot = new ImPlotFrequencyPlot("Publish frequency");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
-   private IntPointer compressionParameters;
-   private BytePointer pngImageBuffer;
+   private final ImInt jpegQuality = new ImInt(95);
+   private IntPointer pngCompressionParameters;
+   private IntPointer jpegCompressionParameters;
+   private Mat yuv420Image;
+   private BytePointer compressedImageBuffer;
    private DataType nativeByteType;
    private Group imageGroup;
    private long imageIndex;
    private final Object syncObject = new Object();
+
+   private enum Encoding { PNG, JPEG }
+   private Encoding encodingSelection = Encoding.PNG;
 
    public WebcamHDF5LoggingDemo()
    {
@@ -80,8 +88,10 @@ public class WebcamHDF5LoggingDemo
                   baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
                   baseUI.getPerspectiveManager().reloadPerspective();
 
-                  compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
-                  pngImageBuffer = new BytePointer((long) webcamReader.getImageWidth() * webcamReader.getImageHeight() * 3); // BGR8
+                  pngCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
+                  jpegCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, jpegQuality.get());
+                  yuv420Image = new Mat();
+                  compressedImageBuffer = new BytePointer((long) webcamReader.getImageWidth() * webcamReader.getImageHeight() * 3); // BGR8
                   bgrWebcamCopy = new Mat();
                   nativeByteType = new DataType(PredType.NATIVE_B8());
 
@@ -120,7 +130,6 @@ public class WebcamHDF5LoggingDemo
    {
       if (nativesLoadedActivator.peek())
       {
-         publishFrequencyPlot.renderImGuiWidgets();
          encodeDurationPlot.renderImGuiWidgets();
          compressedBytesPlot.renderImGuiWidgets();
       }
@@ -129,7 +138,24 @@ public class WebcamHDF5LoggingDemo
       {
          ImGuiTools.inputText(labels.get("Log directory"), logDirectory);
 
-         // TODO: Radio buttons for PNG, JPEG
+         ImGui.text("Encoding");
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("PNG"), encodingSelection == Encoding.PNG))
+         {
+            encodingSelection = Encoding.PNG;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("JPEG"), encodingSelection == Encoding.JPEG))
+         {
+            encodingSelection = Encoding.JPEG;
+         }
+         if (encodingSelection == Encoding.JPEG)
+         {
+            if (ImGui.sliderInt(labels.get("JPEG Quality"), jpegQuality.getData(), 0, 100))
+            {
+               jpegCompressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, jpegQuality.get());
+            }
+         }
 
          if (ImGui.button(labels.get("Begin")))
          {
@@ -138,6 +164,16 @@ public class WebcamHDF5LoggingDemo
             FileTools.ensureDirectoryExists(Paths.get(logDirectory.get()), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
             logFile = Paths.get(logDirectory.get(), logFileName).toString();
             h5File = new H5File(logFile, hdf5.H5F_ACC_TRUNC);
+
+            CharPointer encodingPointer = new CharPointer(encodingSelection.name().toLowerCase());
+            int rank = 1;
+            long[] dimensions = { encodingPointer.limit() };
+            DataSpace dataSpace = new DataSpace(rank, dimensions);
+            DataType dataType = new DataType(PredType.NATIVE_CHAR());
+            DataSet dataSet = h5File.createDataSet(ENCODING_NAME, dataType, dataSpace);
+            dataSet.write(encodingPointer, dataType);
+            dataSet.close();
+            dataSpace.close();
 
             imageGroup = h5File.createGroup(IMAGE_GROUP_NAME);
             imageIndex = 0;
@@ -158,14 +194,26 @@ public class WebcamHDF5LoggingDemo
          {
             synchronized (syncObject)
             {
-               opencv_imgcodecs.imencode(".png", bgrWebcamCopy, pngImageBuffer, compressionParameters);
+               encodeDurationPlot.start();
+               if (encodingSelection == Encoding.PNG)
+               {
+                  opencv_imgcodecs.imencode(".png", bgrWebcamCopy, compressedImageBuffer, pngCompressionParameters);
+               }
+               else
+               {
+                  opencv_imgproc.cvtColor(bgrWebcamCopy, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
+                  opencv_imgcodecs.imencode(".jpg", yuv420Image, compressedImageBuffer, jpegCompressionParameters);
+               }
+               encodeDurationPlot.stop();
             }
 
+            compressedBytesPlot.addValue((int) compressedImageBuffer.limit());
+
             int rank = 1;
-            long[] dimensions = { pngImageBuffer.limit() };
+            long[] dimensions = {compressedImageBuffer.limit() };
             DataSpace dataSpace = new DataSpace(rank, dimensions);
             DataSet dataSet = imageGroup.createDataSet(String.valueOf(imageIndex), nativeByteType, dataSpace);
-            dataSet.write(pngImageBuffer, nativeByteType);
+            dataSet.write(compressedImageBuffer, nativeByteType);
             dataSet.close();
             dataSpace.close();
 

@@ -6,6 +6,7 @@ import imgui.type.ImLong;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.ShortPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -43,6 +44,9 @@ public class HDF5ImageBrowserDemo
    private ShortPointer shortPointerForReadingHDF5;
    private Mat decompressionInputMat;
    private Mat bgrImage;
+   private Mat yuv420Image;
+   private boolean isPNG;
+   private String encoding;
 
    public HDF5ImageBrowserDemo()
    {
@@ -77,7 +81,13 @@ public class HDF5ImageBrowserDemo
                   nativeBytesType = new DataType(PredType.NATIVE_B8());
 
                   decompressionInputMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                  yuv420Image = new Mat(1, 1, opencv_core.CV_8UC1);
                   bgrImage = new Mat(1080, 1920, opencv_core.CV_8UC3);
+
+                  if (h5File != null)
+                  {
+                     loadDatasetImage();
+                  }
                }
 
                imagePanel.draw();
@@ -117,6 +127,7 @@ public class HDF5ImageBrowserDemo
          {
             long numberOfObjects = imageGroup.getNumObjs();
             ImGui.text(String.format("Number of objects: %d", numberOfObjects));
+            ImGui.text(isPNG ? "png" : encoding);
 
             if (pngBytesPointer != null)
             {
@@ -131,13 +142,24 @@ public class HDF5ImageBrowserDemo
 
    private void onHDF5FileSelected(String hdf5FileName)
    {
+      selectedFileName = hdf5FileName;
+      openFile = Paths.get(logDirectory.getDirectoryName(), hdf5FileName).toString();
+      h5File = new H5File(openFile, hdf5.H5F_ACC_RDONLY);
+      imageGroup = h5File.openGroup(WebcamHDF5LoggingDemo.IMAGE_GROUP_NAME);
+      imageIndex.set(0);
+
+      isPNG = true;
+      if (h5File.exists(WebcamHDF5LoggingDemo.ENCODING_NAME))
+      {
+         CharPointer charPointer = new CharPointer(100);
+         DataSet dataSet = h5File.openDataSet(WebcamHDF5LoggingDemo.ENCODING_NAME);
+         dataSet.read(charPointer, new DataType(PredType.NATIVE_CHAR()));
+         encoding = charPointer.getString();
+         isPNG = encoding.equals("png");
+      }
+
       if (bgrImage != null)
       {
-         selectedFileName = hdf5FileName;
-         openFile = Paths.get(logDirectory.getDirectoryName(), hdf5FileName).toString();
-         h5File = new H5File(openFile, hdf5.H5F_ACC_RDONLY);
-         imageGroup = h5File.openGroup(WebcamHDF5LoggingDemo.IMAGE_GROUP_NAME);
-         imageIndex.set(0);
          loadDatasetImage();
       }
    }
@@ -151,8 +173,16 @@ public class HDF5ImageBrowserDemo
       decompressionInputMat.cols((int) pngBytesPointer.limit());
       decompressionInputMat.data(pngBytesPointer);
 
-      opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, bgrImage);
-      opencv_imgproc.cvtColor(bgrImage, imagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+      if (isPNG)
+      {
+         opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, bgrImage);
+         opencv_imgproc.cvtColor(bgrImage, imagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
+      }
+      else
+      {
+         opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, yuv420Image);
+         opencv_imgproc.cvtColor(yuv420Image, imagePanel.getBytedecoImage().getBytedecoOpenCVMat(), opencv_imgproc.COLOR_YUV2RGBA_I420);
+      }
    }
 
    public static void main(String[] args)
