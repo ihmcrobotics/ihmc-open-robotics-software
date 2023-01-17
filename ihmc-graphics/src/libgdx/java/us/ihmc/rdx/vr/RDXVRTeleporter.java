@@ -45,7 +45,7 @@ public class RDXVRTeleporter
    private double lastTouchpadY = Double.NaN;
    private long tPressedPrevious;
    private long tPressed = 0;
-   private final double doubleClickTimeThresholdInMilliseconds = 500;      // ms
+   private final double doubleClickTimeThresholdInMilliseconds = 500;      // 500 ms = 0.5 sec
    private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
 
    public void create(RDXVRContext context)
@@ -84,11 +84,11 @@ public class RDXVRTeleporter
           {
              xyYawHeadsetToTeleportTransform.setIdentity();
              vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
-                                                   {
-                                                      headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-                                                      xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-                                                      xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-                                                   });
+             {
+                headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+             });
              teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
              teleportIHMCZUpToIHMCZUpWorld.invert();
              // set tempTransform to incoming rigidbodyTransform.
@@ -106,6 +106,7 @@ public class RDXVRTeleporter
          preparingToTeleport = bButton.bState();
          boolean bChanged = bButton.bChanged();
          boolean snappedToRobot = false;
+
          // b button clicked
          if (bChanged)
          {
@@ -116,7 +117,7 @@ public class RDXVRTeleporter
             // Double-clicked
             if (timeElapsedInMilliseconds < doubleClickTimeThresholdInMilliseconds)
             {
-               // Teleport to some place ( robot pelvis? sensor position? )
+               // Teleport headset and play area to robot midfeetzup
                snapToMidFeetZUp(vrContext);
                snappedToRobot = true;
             }
