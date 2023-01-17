@@ -244,7 +244,7 @@ public class HDF5Test
       String datasetId = "bytes";
 
       byte[] writeData = new byte[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'f',
-                                      -0x02, -0x01, 0x01, 0x02, 0x03, 0x04, 0x05, Byte.MIN_VALUE, Byte.MAX_VALUE };
+                                      -2, -1, 1, 2, 3, 4, Byte.MIN_VALUE, Byte.MAX_VALUE };
       BytePointer dataPointer = new BytePointer(writeData);
 
       int rank = 1;
@@ -311,18 +311,11 @@ public class HDF5Test
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
 
-      // Workaround wrapping with ShortPointer
-      dataPointer = new BytePointer(writeData.length);
-      dataSet.read(new ShortPointer(dataPointer), dataType);
-      LogTools.info("Read    {} bytes", dataPointer.limit());
-      byte[] workaroundReadData = new byte[(int) dataPointer.limit()];
-      dataPointer.get(workaroundReadData);
-      LogTools.info("Read:   {}", Arrays.toString(workaroundReadData));
-
-      // This should work but doesn't
+      // Casting to Pointer required to avoid calling the string method
+      // Until this is fixed
       // See https://github.com/bytedeco/javacpp-presets/issues/1311
       dataPointer = new BytePointer(writeData.length);
-      dataSet.read(dataPointer, dataType);
+      dataSet.read((Pointer) dataPointer, dataType);
       LogTools.info("Read    {} bytes", dataPointer.limit());
       byte[] readData = new byte[(int) dataPointer.limit()];
       dataPointer.get(readData);
@@ -331,7 +324,6 @@ public class HDF5Test
       dataSet.close();
       h5File.close();
 
-      Assertions.assertArrayEquals(writeData, workaroundReadData);
       Assertions.assertArrayEquals(writeData, readData);
    }
 
