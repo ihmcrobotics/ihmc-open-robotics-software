@@ -1,11 +1,15 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsCustomizer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
@@ -14,14 +18,20 @@ import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.utilities.ros.RosTools;
 
 public class RDXRapidRegionsUIPanel implements RenderableProvider
 {
 
    private RDXPlanarRegionsGraphic planarRegionsGraphic;
+   private ModelInstance sensorFrameGraphic;
+   private final FramePose3D framePose = new FramePose3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    private RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor;
    private RapidPlanarRegionsCustomizer rapidPlanarRegionsCustomizer;
@@ -115,6 +125,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       planarRegionCustomizationDurationPlot = new ImGuiPlot(labels.get("Region customization duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new RDXPlanarRegionsGraphic();
+      sensorFrameGraphic = RDXModelBuilder.createCoordinateFrameInstance(0.3);
    }
 
    public void render()
@@ -129,9 +140,17 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
       debugExtractionPanel.displayByte(rapidRegionsDebutOutputGenerator.getDebugImage());
    }
 
-   public void render3DGraphics(PlanarRegionsList planarRegions)
+   public void render3DGraphics(PlanarRegionsList planarRegions, ReferenceFrame cameraFrame)
    {
-      LogTools.info("Rendering " + planarRegions.getNumberOfPlanarRegions() + " planar regions.");
+      framePose.setToZero(cameraFrame);
+      framePose.changeFrame(ReferenceFrame.getWorldFrame());
+      LibGDXTools.toLibGDX(framePose, tempTransform, sensorFrameGraphic.transform);
+
+      LogTools.info("Sensor Transform: {}", cameraFrame.getTransformToWorldFrame());
+      LogTools.info("Frame Pose Transform: {}", framePose);
+      LogTools.info("Sensor Graphic Transform: {}", sensorFrameGraphic.transform);
+
+
       planarRegionsGraphic.generateMeshes(planarRegions);
       planarRegionsGraphic.update();
    }
@@ -194,6 +213,7 @@ public class RDXRapidRegionsUIPanel implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      sensorFrameGraphic.getRenderables(renderables, pool);
       planarRegionsGraphic.getRenderables(renderables, pool);
    }
 }

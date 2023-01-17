@@ -157,7 +157,7 @@ public class RapidPlanarRegionsExtractor
       regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
    }
 
-   public void update(BytedecoImage input16UC1DepthImage, PlanarRegionsListWithPose regionsWithPose)
+   public void update(BytedecoImage input16UC1DepthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose regionsWithPose)
    {
       if(!processing)
       {
@@ -182,7 +182,7 @@ public class RapidPlanarRegionsExtractor
 
          copyFeatureGridMapUsingOpenCL();
 
-         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(gpuPlanarRegions, ReferenceFrame.getWorldFrame(), regionsWithPose);
+         rapidPlanarRegionsCustomizer.createCustomPlanarRegionsList(gpuPlanarRegions, cameraFrame, regionsWithPose);
 
          wholeAlgorithmDurationStopwatch.suspend();
 

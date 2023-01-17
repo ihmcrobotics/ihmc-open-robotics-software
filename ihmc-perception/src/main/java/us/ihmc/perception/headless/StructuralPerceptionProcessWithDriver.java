@@ -198,7 +198,7 @@ public class StructuralPerceptionProcessWithDriver
 
    private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
    {
-      rapidRegionsExtractor.update(depthImage, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, cameraFrame, planarRegionsListWithPose);
    }
 
    public static void main(String[] args)
