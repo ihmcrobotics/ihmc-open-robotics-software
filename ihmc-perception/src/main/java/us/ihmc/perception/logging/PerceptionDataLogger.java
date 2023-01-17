@@ -1,5 +1,6 @@
 package us.ihmc.perception.logging;
 
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TLongArrayList;
@@ -8,7 +9,9 @@ import org.bytedeco.hdf5.global.hdf5;
 import perception_msgs.msg.dds.*;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
@@ -52,7 +55,6 @@ public class PerceptionDataLogger
                                                                                                         ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
-   private ROS2Helper realtimeROS2Helper;
    private HDF5Manager hdf5Manager;
    private RealtimeROS2Node realtimeROS2Node;
 
@@ -62,6 +64,7 @@ public class PerceptionDataLogger
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> references = new HashMap<>();
    private HashMap<String, AtomicReference<BigVideoPacket>> bigVideoPacketReferences = new HashMap<>();
+   private HashMap<String, AtomicReference<RigidBodyTransformMessage>> transformMessageReferences = new HashMap<>();
 
    public PerceptionDataLogger()
    {
@@ -85,6 +88,9 @@ public class PerceptionDataLogger
 
       channels.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new PerceptionLogChannel(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0, 0));
       references.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new AtomicReference<>(null));
+
+      channels.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new PerceptionLogChannel(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0, 0));
+      transformMessageReferences.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new AtomicReference<>(null));
 
       channels.put(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME,
                    new PerceptionLogChannel(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, 0, 0));
@@ -123,7 +129,6 @@ public class PerceptionDataLogger
       ros2Helper = new ROS2Helper(ros2Node);
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
-      realtimeROS2Helper = new ROS2Helper(realtimeROS2Node);
 
       // Add callback for Robot Configuration Data
       if(channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
@@ -226,6 +231,23 @@ public class PerceptionDataLogger
             logColorBlackfly(bigVideoPacketReferences.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).getAndSet(null));
 
             LogTools.info("BlackFly Image Received: {}", imageMessage.getAcquisitionTimeSecondsSinceEpoch());
+         });
+      }
+
+      // Add callback for MoCap data
+      LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
+      if(channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
+      {
+         counts.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0);
+         ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+         {
+            RigidBodyTransformMessage transformMessage = new RigidBodyTransformMessage();
+            subscriber.takeNextData(transformMessage, new SampleInfo());
+
+            transformMessageReferences.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).set(transformMessage);
+            logMocapRigidBody(transformMessageReferences.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).getAndSet(null));
+
+            LogTools.info("Mocap Rigid Body Received: {} {} {}", transformMessage.getX(), transformMessage.getY(), transformMessage.getZ());
          });
       }
 
@@ -359,6 +381,22 @@ public class PerceptionDataLogger
          storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, videoPacket);
       }
       //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
+   }
+
+   public void logMocapRigidBody(RigidBodyTransformMessage transformMessage)
+   {
+      LogTools.info("Logging Mocap Rigid Body");
+
+      if(channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
+      {
+         channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).incrementCount();
+
+         RigidBodyTransform transform = new RigidBodyTransform();
+         MessageTools.toEuclid(transformMessage, transform);
+         Quaternion orientation = new Quaternion(transform.getRotation());
+         storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, new Point3D(transform.getTranslation()));
+         storeFloatArray(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, orientation);
+      }
    }
 
    /*
@@ -536,8 +574,10 @@ public class PerceptionDataLogger
 //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
       //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
 
-      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
+//      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
 //      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
+
+      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
 
