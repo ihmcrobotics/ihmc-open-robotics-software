@@ -249,7 +249,7 @@ public class RDXRapidPatchesBasedICPDemo implements RenderableProvider
 
       // Get the planar regions from the planar region extractor
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, regionsWithPose);
+      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, ReferenceFrame.getWorldFrame(), regionsWithPose);
 
       PlanarRegionsList planarRegions = regionsWithPose.getPlanarRegionsList();
 

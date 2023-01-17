@@ -1,9 +1,7 @@
 package us.ihmc.perception.logging;
 
-import gnu.trove.list.array.TFloatArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
@@ -78,33 +75,46 @@ public class PerceptionDataLoader
       return null;
    }
 
-   public void loadPointList(String namespace, int index, ArrayList<Point3D> points)
+   public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
       executorService.submit(() ->
       {
-         float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
-         loadFloatArray(namespace, index, pointFloatArray);
-
-         for (int i = 0; i < pointFloatArray.length / 3; i++)
+         int count = (int) hdf5Manager.getCount(namespace);
+         for(int index = 0; index < count; index++)
          {
-            points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
-            LogTools.info("Topic: {}, Point: {}", namespace, points.get(i));
+            float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
+            loadFloatArray(namespace, index, pointFloatArray);
+
+            for (int i = 0; i < pointFloatArray.length / 3; i++)
+            {
+               points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
+               //LogTools.info("[{}]: Topic: {}, Point: {}", index * HDF5Manager.MAX_BUFFER_SIZE + i, namespace, points.get(points.size() - 1));
+            }
          }
+
+         LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
       });
    }
 
-   public void loadQuaternionList(String namespace, int index, ArrayList<Quaternion> quaternions)
+   public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
    {
       executorService.submit(() ->
       {
-        float[] pointFloatArray = new float[4 * HDF5Manager.MAX_BUFFER_SIZE];
-        loadFloatArray(namespace, index, pointFloatArray);
+         int count = (int) hdf5Manager.getCount(namespace);
+         for(int index = 0; index < count; index++)
+         {
+            float[] pointFloatArray = new float[4 * HDF5Manager.MAX_BUFFER_SIZE];
+            loadFloatArray(namespace, index, pointFloatArray);
 
-        for (int i = 0; i < pointFloatArray.length / 4; i++)
-        {
-           quaternions.add(new Quaternion(pointFloatArray[i * 4], pointFloatArray[i * 4 + 1], pointFloatArray[i * 4 + 2], pointFloatArray[i * 4 + 3]));
-           LogTools.info("Topic: {}, Quaternion: {}", namespace, quaternions.get(i));
-        }
+            for (int i = 0; i < pointFloatArray.length / 4; i++)
+            {
+               quaternions.add(new Quaternion(pointFloatArray[i * 4], pointFloatArray[i * 4 + 1], pointFloatArray[i * 4 + 2], pointFloatArray[i * 4 + 3]));
+               //LogTools.info("[{}]: Topic: {}, Quaternion: {}", index * HDF5Manager.MAX_BUFFER_SIZE + i, namespace, quaternions.get(quaternions.size() - 1));
+            }
+         }
+
+         LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
+
       });
    }
 
@@ -166,16 +176,16 @@ public class PerceptionDataLoader
       //      long total = Math.min(totalColor, totalDepth);
 
       ArrayList<Point3D> l515PositionList = new ArrayList<>();
-      loader.loadPointList(PerceptionLoggerConstants.L515_SENSOR_POSITION, 0, l515PositionList);
+      loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, l515PositionList);
 
       ArrayList<Quaternion> l515OrientationList = new ArrayList<>();
-      loader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, 0, l515OrientationList);
+      loader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, l515OrientationList);
 
       ArrayList<Point3D> ousterPositionList = new ArrayList<>();
-      loader.loadPointList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, 0, ousterPositionList);
+      loader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, ousterPositionList);
 
       ArrayList<Quaternion> ousterOrientationList = new ArrayList<>();
-      loader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, 0, ousterOrientationList);
+      loader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, ousterOrientationList);
 
 
       //Mat colorImage = new Mat();

@@ -237,7 +237,7 @@ public class TerrainPerceptionProcessWithDriver
 
    private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
    {
-      rapidRegionsExtractor.update(depthImage, planarRegionsListWithPose);
+      rapidRegionsExtractor.update(depthImage, cameraFrame, planarRegionsListWithPose);
    }
 
    private void destroy()

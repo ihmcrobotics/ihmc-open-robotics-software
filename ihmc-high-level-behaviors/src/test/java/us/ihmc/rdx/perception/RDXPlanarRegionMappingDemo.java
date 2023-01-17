@@ -3,6 +3,7 @@ package us.ihmc.rdx.perception;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLManager;
@@ -93,7 +94,7 @@ public class RDXPlanarRegionMappingDemo
 
             if(mappingManager.isModified())
             {
-               rapidRegionsUIPanel.render3DGraphics(mappingManager.getPlanarRegionsListWithPose().getPlanarRegionsList());
+               rapidRegionsUIPanel.render3DGraphics(mappingManager.getPlanarRegionsListWithPose().getPlanarRegionsList(), ReferenceFrame.getWorldFrame());
                mappingManager.setModified(false);
             }
 

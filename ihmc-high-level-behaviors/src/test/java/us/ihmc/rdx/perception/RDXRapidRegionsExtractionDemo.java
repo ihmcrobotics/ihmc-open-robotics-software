@@ -22,14 +22,19 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -41,7 +46,6 @@ import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.tools.thread.Activator;
 
@@ -63,8 +67,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RigidBodyTransform sensorTransformToWorld = new RigidBodyTransform();
 
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
-   private final PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();   ;
-
+   private final PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
+   ;
+   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
+                                                                                                              ReferenceFrame.getWorldFrame(),
+                                                                                                              sensorTransformToWorld);
+   private final ArrayList<Point3D> cameraPositionBuffer = new ArrayList<>();
+   private final ArrayList<Quaternion> cameraOrientationBuffer = new ArrayList<>();
+   ;
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
    private OpenCLFloatBuffer pointCloudVertexBuffer;
@@ -124,6 +134,8 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, cameraPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, cameraOrientationBuffer);
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight, 730.7891, 731.0859, 528.6094, 408.1602);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
@@ -146,7 +158,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                   updatePointCloudRenderer();
                }
 
-               if(initialized)
+               if (initialized)
                {
                   updateRapidRegionsExtractor();
                }
@@ -180,7 +192,7 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
                rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
 
-               if(!initialized)
+               if (!initialized)
                   initialized = true;
             }
          }
@@ -258,26 +270,33 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
    private void updateRapidRegionsExtractor()
    {
-      if(!rapidPlanarRegionsExtractor.isProcessing())
+      if (!rapidPlanarRegionsExtractor.isProcessing())
       {
          ThreadTools.startAsDaemon(() ->
                                    {
+
+                                      Point3D position = cameraPositionBuffer.get(frameIndex.get());
+                                      Quaternion orientation = cameraOrientationBuffer.get(frameIndex.get());
+
+                                      sensorTransformToWorld.getTranslation().set(position);
+                                      sensorTransformToWorld.getRotation().set(orientation);
+
+                                      cameraFrame.update();
+
+                                      //LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
+
                                       regionsWithPose.getPlanarRegionsList().clear();
-                                      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, regionsWithPose);
-
+                                      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
                                    }, getClass().getSimpleName() + "RapidRegions");
-
-
       }
 
       if (rapidPlanarRegionsExtractor.isModified())
       {
-         rapidRegionsUIPanel.render3DGraphics(regionsWithPose.getPlanarRegionsList());
+         rapidRegionsUIPanel.render3DGraphics(regionsWithPose.getPlanarRegionsList(), cameraFrame);
          rapidRegionsUIPanel.render();
          rapidPlanarRegionsExtractor.setModified(false);
          rapidPlanarRegionsExtractor.setProcessing(false);
       }
-
    }
 
    // TODO: Complete this for visualizing the patch centroids and normals

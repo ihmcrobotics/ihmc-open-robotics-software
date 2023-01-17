@@ -226,7 +226,7 @@ public class PlanarRegionMappingManager
       loader.loadCompressedDepth("/l515/depth/", index, depth16UC1Image.getBytedecoOpenCVMat());
 
       PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
-      regionsExtractor.update(depth16UC1Image, regionsWithPose);
+      regionsExtractor.update(depth16UC1Image, ReferenceFrame.getWorldFrame(), regionsWithPose);
 
       return regionsWithPose;
    }
