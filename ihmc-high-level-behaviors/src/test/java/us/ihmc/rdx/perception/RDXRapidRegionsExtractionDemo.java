@@ -22,6 +22,7 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -46,6 +47,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.thread.Activator;
 
 import java.util.ArrayList;
@@ -53,7 +55,7 @@ import java.util.ArrayList;
 public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 {
    String PERCEPTION_LOG_DIRECTORY = System.getProperty("user.home") + "/.ihmc/logs/perception/";
-   String PERCEPTION_LOG_FILE = "20230114_160058_PerceptionLog.hdf5";
+   String PERCEPTION_LOG_FILE = "20230117_161540_PerceptionLog.hdf5";
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/test/resources");
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
@@ -68,9 +70,11 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
    ;
-   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
-                                                                                                              ReferenceFrame.getWorldFrame(),
-                                                                                                              sensorTransformToWorld);
+//   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
+//                                                                                                              ReferenceFrame.getWorldFrame(),
+//                                                                                                              sensorTransformToWorld);
+   private final Pose3D cameraPose = new Pose3D();
+   private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
    ;
@@ -282,13 +286,16 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
          ThreadTools.startAsDaemon(() ->
                                    {
 
+
+
                                       Point3D position = sensorPositionBuffer.get(frameIndex.get());
                                       Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
 
-                                      sensorTransformToWorld.getTranslation().set(position);
-                                      sensorTransformToWorld.getRotation().set(orientation);
+//                                      sensorTransformToWorld.set(orientation, position);
+                                      cameraPose.set(position, orientation);
+                                      cameraFrame.setPoseAndUpdate(cameraPose);
 
-                                      cameraFrame.update();
+//                                      cameraFrame.update();
 
                                       //LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
 
