@@ -27,4 +27,7 @@ public class PerceptionLoggerConstants
    public static final String L515_SENSOR_ORIENTATION = "/l515/sensor/orientation/";
    public static final String L515_DEPTH_NAME = "/l515/depth/";
    public static final String L515_COLOR_NAME = "/l515/color/";
+
+   public static final String MOCAP_RIGID_BODY_POSITION = "/mocap/rigid_body/position";
+   public static final String MOCAP_RIGID_BODY_ORIENTATION = "/mocap/rigid_body/orientation";
 }

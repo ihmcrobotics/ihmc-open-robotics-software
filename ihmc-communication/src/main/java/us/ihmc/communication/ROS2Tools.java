@@ -169,6 +169,11 @@ public class ROS2Tools
                                                                                                  .withModule("frame_update")
                                                                                                  .withSuffix("ouster_lidar");
 
+   /** MoCap Topics */
+   public static final ROS2Topic<RigidBodyTransformMessage> MOCAP_RIGID_BODY = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
+                                                                                                 .withModule("frame_update")
+                                                                                                 .withSuffix("mocap");
+
    /** Output regions from Lidar (Multisense) from REA */
    public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withTypeName(PlanarRegionsListMessage.class);
    public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_REA = ROS2Tools.REA.withOutput().withPrefix("stereo").withTypeName(PlanarRegionsListMessage.class);
