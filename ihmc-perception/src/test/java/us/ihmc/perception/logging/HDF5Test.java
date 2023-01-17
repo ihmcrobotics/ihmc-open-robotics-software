@@ -12,7 +12,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
 
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
@@ -312,14 +311,16 @@ public class HDF5Test
       h5File = new H5File(filePath, hdf5.H5F_ACC_RDONLY);
       dataSet = h5File.openDataSet(datasetId);
 
-      ShortPointer shortPointer = new ShortPointer(writeData.length);
-      dataSet.read(shortPointer, dataType);
-      LogTools.info("Read    {} shorts", shortPointer.limit());
-      ByteBuffer byteBuffer = shortPointer.asByteBuffer();
-      byte[] shortReadData = new byte[(int) writeData.length];
-      byteBuffer.get(shortReadData);
-      LogTools.info("Read:   {}", Arrays.toString(shortReadData));
+      // Workaround wrapping in ShortPointer
+      dataPointer = new BytePointer(writeData.length);
+      dataSet.read(new ShortPointer(dataPointer), dataType);
+      LogTools.info("Read    {} bytes", dataPointer.limit());
+      byte[] workaroundReadData = new byte[(int) dataPointer.limit()];
+      dataPointer.get(workaroundReadData);
+      LogTools.info("Read:   {}", Arrays.toString(workaroundReadData));
 
+      // This should work but doesn't
+      // See https://github.com/bytedeco/javacpp-presets/issues/1311
       dataPointer = new BytePointer(writeData.length);
       dataSet.read(dataPointer, dataType);
       LogTools.info("Read    {} bytes", dataPointer.limit());
@@ -330,7 +331,7 @@ public class HDF5Test
       dataSet.close();
       h5File.close();
 
-      Assertions.assertArrayEquals(writeData, shortReadData);
+      Assertions.assertArrayEquals(writeData, workaroundReadData);
       Assertions.assertArrayEquals(writeData, readData);
    }
 
