@@ -27,6 +27,7 @@ public class ROS2StoredPropertySet<T extends StoredPropertySetBasics>
       this.topicPair = topicPair;
       this.storedPropertySet = storedPropertySet;
       commandInput = new StoredPropertySetROS2Input(ros2PublishSubscribeAPI, topicPair.getCommandTopic(), storedPropertySet);
+      ros2PublishSubscribeAPI.createPublisher(topicPair.getStatusTopic());
    }
 
    public void updateAndPublishThrottledStatus()

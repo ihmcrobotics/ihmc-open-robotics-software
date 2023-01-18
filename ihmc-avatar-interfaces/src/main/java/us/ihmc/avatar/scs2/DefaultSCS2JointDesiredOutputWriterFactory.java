@@ -4,7 +4,7 @@ import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 
-public class DefaultSCS2JointDesiredOutputWriterFactory
+public class DefaultSCS2JointDesiredOutputWriterFactory implements SCS2JointDesiredOutputWriterFactory
 {
    private JointDesiredOutputWriter customOutputWriter = null;
    private boolean writeBeforeEstimatorTick = true;

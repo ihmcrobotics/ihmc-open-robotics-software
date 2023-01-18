@@ -22,36 +22,33 @@ public class ROS2PublisherMap
       this.ros2Node = ros2Node;
    }
 
-   public <T> void publish(ROS2Topic<T> topic, T message)
+   public <T> IHMCROS2Publisher getOrCreatePublisher(ROS2Topic<T> topic)
    {
       IHMCROS2Publisher publisher = map.get(topic);
       if (publisher == null)
       {
          publisher = new IHMCROS2Publisher<>(ros2Node, topic);
-         map.put(topic, publisher);
+         map.put(topic, new IHMCROS2Publisher(ros2Node, topic));
       }
+
+      return publisher;
+   }
+
+   public <T> void publish(ROS2Topic<T> topic, T message)
+   {
+      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
       publisher.publish(message);
    }
 
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
-      IHMCROS2Publisher publisher = map.get(topic);
-      if (publisher == null)
-      {
-         publisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, topic);
-         map.put(topic, publisher);
-      }
+      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
       publisher.publish(message);
    }
 
    public void publish(ROS2Topic<Empty> topic)
    {
-      IHMCROS2Publisher publisher = map.get(topic);
-      if (publisher == null)
-      {
-         publisher = new IHMCROS2Publisher<>(ros2Node, topic);
-         map.put(topic, publisher);
-      }
+      IHMCROS2Publisher publisher = getOrCreatePublisher(topic);
       Empty message = new Empty();
       publisher.publish(message);
    }
