@@ -70,7 +70,6 @@ public class PerceptionManager
    private final HashMap<Long, BiConsumer<Tuple3DReadOnly, QuaternionReadOnly>> markerUpdaters = new HashMap<>();
    private final DoorPerceptionManager pullDoorManager;
    private final DoorPerceptionManager pushDoorManager;
-   private final ArUcoMarkerObject box = new ArUcoMarkerObject(BOX_MARKER_ID, "Box");
    private final ROS2Helper ros2;
 
    private final ArrayList<DetectedObjectPublisher> detectedObjectPublishers = new ArrayList<>();
@@ -90,9 +89,6 @@ public class PerceptionManager
       pushDoorManager.getDoorFrame().setObjectTransformToMarker(transform -> transform.set(PUSH_DOOR_FRAME_TRANSFORM_TO_MARKER));
       pushDoorManager.getDoorPanel().setObjectTransformToMarker(transform -> transform.set(PUSH_DOOR_PANEL_TRANSFORM_TO_MARKER));
       markerUpdaters.put(PUSH_DOOR_MARKER_ID, pushDoorManager::updateMarkerTransform);
-
-      box.setObjectTransformToMarker(transform -> transform.set(BOX_TRANSFORM_TO_MARKER));
-      markerUpdaters.put(BOX_MARKER_ID, box::updateMarkerTransform);
 
       detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
                                                                DETECTED_PULL_DOOR_FRAME,
@@ -152,10 +148,5 @@ public class PerceptionManager
    public DoorPerceptionManager getPullDoorManager()
    {
       return pullDoorManager;
-   }
-
-   public ArUcoMarkerObject getBox()
-   {
-      return box;
    }
 }
