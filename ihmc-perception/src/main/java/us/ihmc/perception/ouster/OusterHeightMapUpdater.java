@@ -2,6 +2,7 @@ package us.ihmc.perception.ouster;
 
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -41,6 +42,7 @@ public class OusterHeightMapUpdater
       this.groundFrameProvider = groundFrameProvider;
 
       IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
@@ -65,6 +67,17 @@ public class OusterHeightMapUpdater
       PointCloudData pointCloudData = new PointCloudData(instant, numberOfPoints, pointCloudInSensorFrame);
 
       heightMapUpdater.addPointCloudToQueue(Triple.of(pointCloudData, sensorPose, gridCenter));
+   }
+
+   public void consumeStateRequestMessage(HeightMapStateRequestMessage message)
+   {
+      if (message.getRequestPause())
+         heightMapUpdater.requestPause();
+      else if (message.getRequestResume())
+         heightMapUpdater.requestResume();
+
+      if (message.getRequestClear())
+         heightMapUpdater.requestClear();
    }
 
    public void update()
