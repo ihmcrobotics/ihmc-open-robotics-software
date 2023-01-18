@@ -42,7 +42,8 @@ public class OusterDriverDepthAndHeightMapPublisher
    private OusterDepthPublisher depthPublisher;
    private OpenCLManager openCLManager;
 
-   public OusterDriverDepthAndHeightMapPublisher(RealtimeROS2Node realtimeROS2Node,
+   public OusterDriverDepthAndHeightMapPublisher(String robotName,
+                                                 RealtimeROS2Node realtimeROS2Node,
                                                  FrameUpdater frameUpdater,
                                                  ROS2Topic<?>... outputTopics)
    {
@@ -52,7 +53,7 @@ public class OusterDriverDepthAndHeightMapPublisher
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
-      heightMapUpdater = new OusterHeightMapUpdater(realtimeROS2Node);
+      heightMapUpdater = new OusterHeightMapUpdater(robotName, realtimeROS2Node);
       ouster = new NettyOuster();
       ouster.bind();
 
@@ -158,6 +159,6 @@ public class OusterDriverDepthAndHeightMapPublisher
             return ReferenceFrame.getWorldFrame();
          }
       };
-      new OusterDriverDepthAndHeightMapPublisher(realtimeROS2Node, frameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE);
+      new OusterDriverDepthAndHeightMapPublisher("", realtimeROS2Node, frameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE);
    }
 }

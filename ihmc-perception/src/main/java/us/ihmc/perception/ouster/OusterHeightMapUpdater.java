@@ -1,8 +1,11 @@
 package us.ihmc.perception.ouster;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -11,6 +14,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
@@ -37,10 +41,11 @@ public class OusterHeightMapUpdater
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                     ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   public OusterHeightMapUpdater(RealtimeROS2Node ros2Node)
+   public OusterHeightMapUpdater(String robotName, RealtimeROS2Node ros2Node)
    {
       IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ControllerAPIDefinition.getOutputTopic(robotName), m -> consumeStateChangedMessage(m.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
@@ -75,6 +80,16 @@ public class OusterHeightMapUpdater
          heightMapUpdater.requestResume();
 
       if (message.getRequestClear())
+         heightMapUpdater.requestClear();
+   }
+
+   public void consumeStateChangedMessage(HighLevelStateChangeStatusMessage message)
+   {
+      HighLevelControllerName fromState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
+      HighLevelControllerName toState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+      if (fromState == HighLevelControllerName.WALKING && toState != HighLevelControllerName.CUSTOM1)
+         heightMapUpdater.requestClear();
+      else if (fromState != HighLevelControllerName.CUSTOM1 && toState == HighLevelControllerName.WALKING)
          heightMapUpdater.requestClear();
    }
 
