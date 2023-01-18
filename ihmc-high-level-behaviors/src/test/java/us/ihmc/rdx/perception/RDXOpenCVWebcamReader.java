@@ -10,9 +10,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
+import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanelData;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
 import us.ihmc.tools.thread.Activator;
+
+import java.util.function.Consumer;
 
 public class RDXOpenCVWebcamReader
 {
@@ -28,6 +31,10 @@ public class RDXOpenCVWebcamReader
    private ImGuiOpenCVSwapVideoPanel swapCVPanel;
    private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
+   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnLowPriorityThread = this::accessOnLowPriorityThread;
+   private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
+   private boolean imageWasRead = false;
+   private long numberOfImagesRead = 0;
 
    public RDXOpenCVWebcamReader(Activator nativesLoadedActivator)
    {
@@ -47,6 +54,14 @@ public class RDXOpenCVWebcamReader
 
       backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
 
+      // Set buffer size low to make sure not to get backed up
+      videoCapture.set(opencv_videoio.CAP_PROP_BUFFERSIZE, 2);
+
+      // Return an RGBA image so we don't have to do an extra conversion
+      // These don't appear to work though
+//      videoCapture.set(opencv_videoio.CAP_PROP_FORMAT, opencv_core.CV_8UC4);
+//      videoCapture.set(opencv_videoio.CAP_PROP_CONVERT_RGB, 1);
+
       videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, imageWidth);
       videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
       // MJPG (Motion-JPEG) means to send each frame over USB as a JPEG compressed image
@@ -62,6 +77,7 @@ public class RDXOpenCVWebcamReader
       bgrImage = new Mat();
 
       swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Webcam Monitor", false);
+      swapCVPanel.getDataSwapReferenceManager().initializeBoth(data -> data.updateOnImageUpdateThread(imageWidth, imageHeight));
    }
 
    /**
@@ -73,20 +89,15 @@ public class RDXOpenCVWebcamReader
    public void readWebcamImage()
    {
       readDurationPlot.start();
-      boolean imageWasRead = videoCapture.read(bgrImage);
+      swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(accessOnLowPriorityThread);
       readDurationPlot.stop();
       readFrequencyPlot.ping();
+   }
 
-      if (!imageWasRead)
-      {
-         LogTools.error("Image was not read!");
-      }
-
-      swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-      {
-         data.updateOnImageUpdateThread(imageWidth, imageHeight);
-         opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-      });
+   private void accessOnLowPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   {
+      imageWasRead = videoCapture.read(bgrImage);
+      opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
    }
 
    /**
@@ -95,10 +106,17 @@ public class RDXOpenCVWebcamReader
     */
    public void update()
    {
-      swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
+      if (imageWasRead)
       {
-         data.updateOnUIThread(swapCVPanel.getVideoPanel());
-      });
+         imageWasRead = false;
+         ++numberOfImagesRead;
+         swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+      }
+   }
+
+   private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   {
+      data.updateOnUIThread(swapCVPanel.getVideoPanel());
    }
 
    public void renderImGuiWidgets()
@@ -109,6 +127,7 @@ public class RDXOpenCVWebcamReader
          ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
          ImGui.text("Reported fps: " + reportedFPS);
          ImGui.text("Backend name: " + backendName);
+         ImGui.text("Number of images read: " + numberOfImagesRead);
          readFrequencyPlot.renderImGuiWidgets();
          readDurationPlot.renderImGuiWidgets();
       }
