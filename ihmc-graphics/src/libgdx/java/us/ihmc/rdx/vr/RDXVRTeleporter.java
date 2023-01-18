@@ -107,20 +107,9 @@ public class RDXVRTeleporter
          preparingToTeleport = bButton.bState();
          boolean bChanged = bButton.bChanged();
 
+
          if (preparingToTeleport || bChanged)
          {
-            // save time point when b button clicked
-            bTimePressedNanosPrevious = bTimePressedNanos;
-            bTimePressedNanos = System.nanoTime();
-            doubleClickTimeElapsedInMilliseconds = (bTimePressedNanos - bTimePressedNanosPrevious) / 1e6;
-
-            // Double-clicked
-            if (robotMidFeetZUpReferenceFrame != null && doubleClickTimeElapsedInMilliseconds < DOUBLE_CLICK_TIME_THRESHOLD)
-            {
-               // Teleport headset and play area to robot mid-feet z-up
-               snapToMidFeetZUp(vrContext);
-            }
-
             // Ray teleport
             pickRay.setToZero(controller.getXForwardZUpControllerFrame());
             pickRay.getDirection().set(Axis3D.X);
@@ -178,6 +167,21 @@ public class RDXVRTeleporter
                 proposedTeleportPose.get(tempTransform);
                 tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
             });
+         }
+
+         if (bChanged)
+         {
+            // save time point when b button clicked
+            bTimePressedNanosPrevious = bTimePressedNanos;
+            bTimePressedNanos = System.nanoTime();
+            doubleClickTimeElapsedInMilliseconds = (bTimePressedNanos - bTimePressedNanosPrevious) / 1e6;
+
+            // Double-clicked
+            if (robotMidFeetZUpReferenceFrame != null && doubleClickTimeElapsedInMilliseconds < DOUBLE_CLICK_TIME_THRESHOLD)
+            {
+               // Teleport headset and play area to robot mid-feet z-up
+               snapToMidFeetZUp(vrContext);
+            }
          }
 
          if (controller.getTouchpadTouchedActionData().bState())
