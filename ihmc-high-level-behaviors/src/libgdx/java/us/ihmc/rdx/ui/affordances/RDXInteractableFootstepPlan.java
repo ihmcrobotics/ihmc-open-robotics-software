@@ -189,6 +189,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
          messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
+      messageList.setOffsetFootstepsHeightWithExecutionError(true);
       communicationHelper.publishToController(messageList);
 
       // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
