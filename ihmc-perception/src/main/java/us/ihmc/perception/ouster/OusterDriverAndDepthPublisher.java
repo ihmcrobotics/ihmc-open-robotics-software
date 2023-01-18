@@ -2,7 +2,6 @@ package us.ihmc.perception.ouster;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
@@ -16,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.*;
-import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -51,7 +50,6 @@ public class OusterDriverAndDepthPublisher
    private int numberOfPointsPerFullScan;
    private OusterDepthExtractionKernel depthExtractionKernel;
    private OpenCLManager openCLManager;
-   private _cl_program openCLProgram;
    private IntPointer compressionParameters;
    private ByteBuffer pngImageBuffer;
    private BytePointer pngImageBytePointer;
