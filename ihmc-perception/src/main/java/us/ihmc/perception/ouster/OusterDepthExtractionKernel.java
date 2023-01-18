@@ -16,7 +16,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLIntBuffer;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 
