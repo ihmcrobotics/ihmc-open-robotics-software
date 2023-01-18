@@ -7,12 +7,12 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.simulation.environment.object.objects.door.RDXVirtualGhostObject;
 import us.ihmc.ros2.ROS2Topic;
 
-public class COPY_RDXPerceptionObjectUpdater
+public class RDXPerceptionObjectUpdater
 {
    private final RDXVirtualGhostObject object;
    private final IHMCROS2Input<DetectedObjectMessage> subscription;
 
-   public COPY_RDXPerceptionObjectUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String modelFileName, String frameName)
+   public RDXPerceptionObjectUpdater(ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectMessage> updateTopic, String modelFileName, String frameName)
    {
       object = new RDXVirtualGhostObject(modelFileName, frameName);
       subscription = ros2.subscribe(updateTopic);
