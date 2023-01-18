@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.ouster.OusterDriverAndDepthPublisher;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class AtlasOusterLidarOnRobotProcess
 {
@@ -18,11 +19,12 @@ public class AtlasOusterLidarOnRobotProcess
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_standalone_node");
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
+
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, realtimeROS2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
-      new OusterDriverAndDepthPublisher(this::sensorFrameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE);
+      new OusterDriverAndDepthPublisher(realtimeROS2Node, this::sensorFrameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE);
    }
 
    private ReferenceFrame sensorFrameUpdater()

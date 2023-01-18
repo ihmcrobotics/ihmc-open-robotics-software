@@ -1,21 +1,12 @@
 package us.ihmc.perception.ouster;
 
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.IntPointer;
-import org.bytedeco.opencv.global.opencv_imgcodecs;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.LidarPointCloudCompression;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.*;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.BytedecoTools;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -25,14 +16,15 @@ import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
  * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
  */
-public class OusterDriverAndDepthPublisher
+public class OusterDriverDepthAndHeightMapPublisher
 {
    private final Activator nativesLoadedActivator;
 
@@ -44,11 +36,15 @@ public class OusterDriverAndDepthPublisher
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
    private final NettyOuster ouster;
+   private final OusterHeightMapUpdater heightMapUpdater;
    private OusterDepthExtractionKernel depthExtractionKernel;
    private OusterDepthPublisher depthPublisher;
    private OpenCLManager openCLManager;
 
-   public OusterDriverAndDepthPublisher(RealtimeROS2Node realtimeROS2Node, Supplier<ReferenceFrame> sensorFrameUpdater, ROS2Topic<?>... outputTopics)
+   public OusterDriverDepthAndHeightMapPublisher(RealtimeROS2Node realtimeROS2Node,
+                                                 Supplier<ReferenceFrame> sensorFrameUpdater,
+                                                 Supplier<ReferenceFrame> groundFrameUpdater,
+                                                 ROS2Topic<?>... outputTopics)
    {
       this.sensorFrameUpdater = sensorFrameUpdater;
       this.outputTopics = outputTopics;
@@ -56,6 +52,7 @@ public class OusterDriverAndDepthPublisher
 
       nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
 
+      heightMapUpdater = new OusterHeightMapUpdater(groundFrameUpdater, realtimeROS2Node);
       ouster = new NettyOuster();
       ouster.bind();
 
@@ -78,6 +75,7 @@ public class OusterDriverAndDepthPublisher
                                                          realtimeROS2Node.destroy();
                                                          ThreadTools.sleepSeconds(0.5);
                                                          extractCompressAndPublishThread.destroy();
+                                                         heightMapUpdater.stop();
                                                       }, getClass().getSimpleName() + "Shutdown"));
    }
 
@@ -112,12 +110,16 @@ public class OusterDriverAndDepthPublisher
          depthExtractionKernel.copyLidarFrameBuffer();
          extractCompressAndPublishThread.clearQueueAndExecute(() -> depthPublisher.extractCompressAndPublish(depthExtractionKernel,
                                                                                                              ouster.getAquisitionInstant()));
+         heightMapUpdater.updateWithDataBuffer(sensorFrameUpdater.get(),
+                                               depthExtractionKernel.getPointCloudInSensorFrame(),
+                                               ouster.getImageHeight() * ouster.getImageWidth(),
+                                               ouster.getAquisitionInstant());
       }
    }
 
    public static void main(String[] args)
    {
       RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
-      new OusterDriverAndDepthPublisher(realtimeROS2Node, ReferenceFrame::getWorldFrame, ROS2Tools.OUSTER_DEPTH_IMAGE);
+      new OusterDriverDepthAndHeightMapPublisher(realtimeROS2Node, ReferenceFrame::getWorldFrame, ReferenceFrame::getWorldFrame, ROS2Tools.OUSTER_DEPTH_IMAGE);
    }
 }
