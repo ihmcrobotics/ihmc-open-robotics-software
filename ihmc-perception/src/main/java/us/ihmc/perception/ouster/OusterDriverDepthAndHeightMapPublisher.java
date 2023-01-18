@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * This class publishes a PNG compressed depth image from the Ouster as fast as the frames come in.
+ * This class publishes a PNG compressed depth image, possibly an LZ4 compressed LidarScanMessage, and a height map from the Ouster as fast as the frames come in.
  */
 public class OusterDriverDepthAndHeightMapPublisher
 {
