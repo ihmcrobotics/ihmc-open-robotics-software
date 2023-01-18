@@ -5,6 +5,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
+import us.ihmc.perception.ObjectDetector;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
 import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
 import us.ihmc.perception.OpenCVArUcoMarker;
@@ -20,6 +21,8 @@ public class RDXObjectDetector
    private final ImGuiPanel panel = new ImGuiPanel("Object Detector", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
+   private final ObjectDetector objectDetector = new
+
    private boolean objectDetected = false;
    private final ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
