@@ -92,8 +92,10 @@ public class RemoteHeightMapUpdater
 
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);
       heightMapUpdater.setEnableUpdates(true);
+   }
 
-      ros2Node.spin();
+   public void start()
+   {
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
@@ -121,7 +123,7 @@ public class RemoteHeightMapUpdater
       if (message.getRequestClear())
          heightMapUpdater.requestClear();
    }
-   
+
    public void stop()
    {
       ros2Node.destroy();
