@@ -204,7 +204,7 @@ public class ICPController implements ICPControllerInterface
 
       copConstraintHandler = new ICPCoPConstraintHandler(bipedSupportPolygons, icpControlPolygons, useICPControlPolygons, hasICPControlPolygons, registry);
 
-      parameters.createFeedForwardAlphaCalculator(registry, null);
+      parameters.createFeedForwardAlphaCalculator(registry, yoGraphicsListRegistry);
       parameters.createFeedbackAlphaCalculator(registry, null);
       parameters.createFeedbackProjectionOperator(registry, null);
 
@@ -223,6 +223,11 @@ public class ICPController implements ICPControllerInterface
                                                             0.005,
                                                             YoAppearance.Darkorange(),
                                                             YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition feedForwardCoP = new YoGraphicPosition(yoNamePrefix + "ReferenceFeedForwardCoP",
+                                                            this.referenceFeedForwardCoP,
+                                                            0.005,
+                                                            YoAppearance.Red(),
+                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
 
       YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCoP",
                                                                          this.unconstrainedFeedbackCMP,
@@ -231,6 +236,7 @@ public class ICPController implements ICPControllerInterface
                                                                          GraphicType.BALL_WITH_CROSS);
 
       artifactList.add(feedbackCoP.createArtifact());
+      artifactList.add(feedForwardCoP.createArtifact());
       artifactList.add(unconstrainedFeedbackCMP.createArtifact());
 
       artifactList.setVisible(VISUALIZE);
@@ -369,8 +375,12 @@ public class ICPController implements ICPControllerInterface
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      computeUnconstrainedFeedbackCMP();
       computeFeedForwardAndFeedBackAlphas();
+
+      referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
+      referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
+
+      computeUnconstrainedFeedbackCMP();
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
@@ -392,8 +402,7 @@ public class ICPController implements ICPControllerInterface
 
    private boolean solveQP()
    {
-      referenceFeedForwardCMPOffset.setAndScale(1.0 - feedForwardAlpha.getDoubleValue(), perfectCMPOffset);
-      referenceFeedForwardCoP.interpolate(perfectCoP, desiredICP, feedForwardAlpha.getDoubleValue());
+
 
       boolean converged = solver.compute(icpError, referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
@@ -415,7 +424,7 @@ public class ICPController implements ICPControllerInterface
    {
       unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
       unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
-      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
+      unconstrainedFeedbackCMP.add(referenceFeedForwardCoP, referenceFeedForwardCMPOffset);
       unconstrainedFeedbackCMP.add(unconstrainedFeedback);
    }
 
