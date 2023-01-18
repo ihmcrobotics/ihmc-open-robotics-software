@@ -65,7 +65,6 @@ public class OusterDriverAndDepthPublisher
          LogTools.info("Publishing ROS 2 depth images: {}", outputTopic);
          publisherMap.put(outputTopic, ROS2Tools.createPublisher(realtimeROS2Node, outputTopic, ROS2QosProfile.BEST_EFFORT()));
       }
-      LogTools.info("Spinning Realtime ROS 2 node");
 
       extractCompressAndPublishThread = MissingThreadTools.newSingleThreadExecutor("CopyAndPublish", true, 1);
       // Using incoming Ouster UDP Netty events as the thread scheduler. Only called on last datagram of frame.
@@ -83,6 +82,7 @@ public class OusterDriverAndDepthPublisher
 
    public void start()
    {
+      LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
    }
 
@@ -105,12 +105,13 @@ public class OusterDriverAndDepthPublisher
             int numberOfPointsPerFullScan = depthWidth * depthHeight;
             LogTools.info("Ouster width: {} height: {} # points: {}", depthWidth, depthHeight, numberOfPointsPerFullScan);
             depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, outputTopicsTypes);
-            depthPublisher = new OusterDepthPublisher(sensorFrameUpdater, publisherMap, depthWidth, depthHeight, outputTopics);
+            depthPublisher = new OusterDepthPublisher(publisherMap, depthWidth, depthHeight, outputTopics);
          }
 
          // Fast memcopy while the ouster thread is blocked
          depthExtractionKernel.copyLidarFrameBuffer();
-         extractCompressAndPublishThread.clearQueueAndExecute(() -> depthPublisher.extractCompressAndPublish(depthExtractionKernel,
+         extractCompressAndPublishThread.clearQueueAndExecute(() -> depthPublisher.extractCompressAndPublish(sensorFrameUpdater.get(),
+                                                                                                             depthExtractionKernel,
                                                                                                              ouster.getAquisitionInstant()));
       }
    }

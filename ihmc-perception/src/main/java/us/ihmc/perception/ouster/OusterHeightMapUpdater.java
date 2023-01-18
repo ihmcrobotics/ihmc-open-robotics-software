@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
+import us.ihmc.log.LogTools;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
@@ -31,16 +32,13 @@ public class OusterHeightMapUpdater
 
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
-   private final Supplier<ReferenceFrame> groundFrameProvider;
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
                                                                                                     ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   public OusterHeightMapUpdater(Supplier<ReferenceFrame> groundFrameProvider, RealtimeROS2Node ros2Node)
+   public OusterHeightMapUpdater(RealtimeROS2Node ros2Node)
    {
-      this.groundFrameProvider = groundFrameProvider;
-
       IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
 
@@ -57,9 +55,9 @@ public class OusterHeightMapUpdater
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
-   public void updateWithDataBuffer(ReferenceFrame sensorFrame, FloatBuffer pointCloudInSensorFrame, int numberOfPoints, Instant instant)
+   public void updateWithDataBuffer(ReferenceFrame sensorFrame, ReferenceFrame groundFrame, FloatBuffer pointCloudInSensorFrame, int numberOfPoints, Instant instant)
    {
-      double groundHeight = groundFrameProvider.get().getTransformToRoot().getTranslationZ();
+      double groundHeight = groundFrame.getTransformToRoot().getTranslationZ();
 
       FramePose3D sensorPose = new FramePose3D(sensorFrame);
       sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
