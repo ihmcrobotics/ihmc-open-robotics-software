@@ -257,10 +257,17 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
 
    private void updateStuff()
    {
+      leftStanceFootPose.setToZero(footFrames.get(RobotSide.LEFT));
+      leftStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      rightStanceFootPose.setToZero(footFrames.get(RobotSide.RIGHT));
+      rightStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double lowestStanceZ = Math.min(leftStanceFootPose.getZ(), rightStanceFootPose.getZ());
+      leftStanceFootPose.setZ(lowestStanceZ);
+      rightStanceFootPose.setZ(lowestStanceZ);
+
       goalFrame.update();
       goalPose.setToZero(goalFrame);
-      double lowestStanceZ = Math.min(leftStanceFootPose.getZ(), rightStanceFootPose.getZ());
-
       //      goalPose.appendRotation(walkFacingDirection);
 
       leftGoalFootPose.setIncludingFrame(goalPose);
@@ -271,12 +278,7 @@ public class RDXWalkPathControlRing implements PathTypeStepParameters
       rightGoalFootPose.getPosition().subY(halfIdealFootstepWidth);
       rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightGoalFootPose.setZ(lowestStanceZ);
-      leftStanceFootPose.setToZero(footFrames.get(RobotSide.LEFT));
-      leftStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightStanceFootPose.setToZero(footFrames.get(RobotSide.RIGHT));
-      rightStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      leftStanceFootPose.setZ(lowestStanceZ);
-      rightStanceFootPose.setZ(lowestStanceZ);
+
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
       goalPose.setZ(lowestStanceZ);
 
