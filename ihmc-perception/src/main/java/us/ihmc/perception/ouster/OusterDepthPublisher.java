@@ -42,7 +42,6 @@ public class OusterDepthPublisher
    private final ROS2Topic<?>[] outputTopics;
    private final HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap;
 
-   private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
 
    private final IntPointer compressionParameters;
@@ -57,13 +56,11 @@ public class OusterDepthPublisher
    private final int depthWidth;
    private final int numberOfPointsPerFullScan;
 
-   public OusterDepthPublisher(Supplier<ReferenceFrame> sensorFrameUpdater,
-                               HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap,
+   public OusterDepthPublisher(HashMap<ROS2Topic<?>, IHMCRealtimeROS2Publisher> publisherMap,
                                int depthWidth,
                                int depthHeight,
                                ROS2Topic<?>... outputTopics)
    {
-      this.sensorFrameUpdater = sensorFrameUpdater;
       this.outputTopics = outputTopics;
       this.publisherMap = publisherMap;
       this.depthHeight = depthHeight;
@@ -80,15 +77,14 @@ public class OusterDepthPublisher
     * Synchronized to make sure it's only running ever once at a time.
     * This should also be guaranteed by the ResettableExceptionHandlingExecutorService.
     */
-   public synchronized void extractCompressAndPublish(OusterDepthExtractionKernel depthExtractionKernel, Instant acquisitionInstant)
+   public synchronized void extractCompressAndPublish(ReferenceFrame sensorFrame, OusterDepthExtractionKernel depthExtractionKernel, Instant acquisitionInstant)
    {
       for (ROS2Topic<?> topic : outputTopics)
       {
          if (topic.getType().equals(ImageMessage.class))
          {
             // Important not to store as a field, as update() needs to be called each frame
-            ReferenceFrame cameraFrame = sensorFrameUpdater.get();
-            cameraPose.setToZero(cameraFrame);
+            cameraPose.setToZero(sensorFrame);
             cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
             depthExtractionKernel.runKernel(cameraPose);

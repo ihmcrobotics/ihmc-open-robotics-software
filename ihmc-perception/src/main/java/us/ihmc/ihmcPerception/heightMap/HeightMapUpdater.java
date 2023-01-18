@@ -43,8 +43,8 @@ public class HeightMapUpdater
    private static final boolean printQueueSize = false;
    private static final int maxQueueLength = 5;
 
-   static final boolean USE_OUSTER_FRAME = true;
-   static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
+   public static final boolean USE_OUSTER_FRAME = true;
+   public static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
    static
    {
 //      double ousterPitch = Math.toRadians(21.5);
@@ -278,7 +278,9 @@ public class HeightMapUpdater
          message.setEstimatedGroundHeight(estimatedGroundHeight);
 
          for (Consumer<HeightMapMessage> heightMapConsumer : heightMapConsumers)
+         {
             heightMapConsumer.accept(message);
+         }
 
          publishFrequencyCounter = publishFrequency.get();
          latestMessage.set(message);
