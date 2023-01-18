@@ -4,6 +4,8 @@ import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -77,8 +79,8 @@ public class PerceptionDataLoader
 
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
-      executorService.submit(() ->
-      {
+      //executorService.submit(() ->
+      //{
          int count = (int) hdf5Manager.getCount(namespace);
          for(int index = 0; index < count; index++)
          {
@@ -93,13 +95,13 @@ public class PerceptionDataLoader
          }
 
          LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
-      });
+      //});
    }
 
    public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
    {
-      executorService.submit(() ->
-      {
+      //executorService.submit(() ->
+      //{
          int count = (int) hdf5Manager.getCount(namespace);
          for(int index = 0; index < count; index++)
          {
@@ -115,7 +117,7 @@ public class PerceptionDataLoader
 
          LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
 
-      });
+      //});
    }
 
    public void loadFloatArray(String namespace, int index, float[] array)
@@ -164,7 +166,7 @@ public class PerceptionDataLoader
       String defaultLogDirectory =
             System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "perception" + File.separator;
       String LOG_DIRECTORY = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = "20230114_155447_PerceptionLog.hdf5";
+      String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
       PerceptionDataLoader loader = new PerceptionDataLoader();
       loader.openLogFile(LOG_DIRECTORY + logFileName);
@@ -175,18 +177,66 @@ public class PerceptionDataLoader
 
       //      long total = Math.min(totalColor, totalDepth);
 
-      ArrayList<Point3D> l515PositionList = new ArrayList<>();
-      loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, l515PositionList);
+      //ArrayList<Point3D> l515PositionList = new ArrayList<>();
+      //loader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, l515PositionList);
+      //
+      //ArrayList<Quaternion> l515OrientationList = new ArrayList<>();
+      //loader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, l515OrientationList);
 
-      ArrayList<Quaternion> l515OrientationList = new ArrayList<>();
-      loader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, l515OrientationList);
+      //ArrayList<Point3D> ousterPositionList = new ArrayList<>();
+      //loader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, ousterPositionList);
+      //
+      //ArrayList<Quaternion> ousterOrientationList = new ArrayList<>();
+      //loader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, ousterOrientationList);
 
-      ArrayList<Point3D> ousterPositionList = new ArrayList<>();
-      loader.loadPoint3DList(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, ousterPositionList);
+      ArrayList<Point3D> mocapPositionList = new ArrayList<>();
+      loader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionList);
 
-      ArrayList<Quaternion> ousterOrientationList = new ArrayList<>();
-      loader.loadQuaternionList(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, ousterOrientationList);
+      ArrayList<Quaternion> mocapOrientationList = new ArrayList<>();
+      loader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationList);
 
+
+
+      for(int i = 0; i<mocapPositionList.size(); i++)
+      {
+         if((i % HDF5Manager.MAX_BUFFER_SIZE) == HDF5Manager.MAX_BUFFER_SIZE - 1)
+         {
+            if(i == mocapPositionList.size() - 1)
+            {
+               mocapPositionList.get(i).set(mocapPositionList.get(i-1));
+            }
+            else
+            {
+               Point3D point1 = mocapPositionList.get(i-1);
+               Point3D point2 = mocapPositionList.get(i+1);
+               mocapPositionList.get(i).set(EuclidCoreTools.interpolate(point1.getX(), point2.getX(), 0.5f),
+                                            EuclidCoreTools.interpolate(point1.getY(), point2.getY(), 0.5f),
+                                            EuclidCoreTools.interpolate(point1.getZ(), point2.getZ(), 0.5f));
+            }
+         }
+         LogTools.info("[{}] Point3D: {}", i, mocapPositionList.get(i));
+      }
+
+      for(int i = 0; i<mocapOrientationList.size(); i++)
+      {
+         if((i % HDF5Manager.MAX_BUFFER_SIZE) == HDF5Manager.MAX_BUFFER_SIZE - 1)
+         {
+            if(i == mocapOrientationList.size() - 1)
+            {
+               mocapOrientationList.get(i).set(mocapOrientationList.get(i-1));
+            }
+            else
+            {
+               Quaternion point1 = mocapOrientationList.get(i-1);
+               Quaternion point2 = mocapOrientationList.get(i+1);
+               mocapOrientationList.get(i).set(EuclidCoreTools.interpolate(point1.getX(), point2.getX(), 0.5f),
+                                            EuclidCoreTools.interpolate(point1.getY(), point2.getY(), 0.5f),
+                                            EuclidCoreTools.interpolate(point1.getZ(), point2.getZ(), 0.5f),
+                                               EuclidCoreTools.interpolate(point1.getS(), point2.getS(), 0.5f));
+            }
+         }
+         LogTools.info("[{}] Quaternion: {}", i, mocapOrientationList.get(i));
+      }
 
       //Mat colorImage = new Mat();
       //Mat depthImage = new Mat(128, 2048, opencv_core.CV_16UC1);

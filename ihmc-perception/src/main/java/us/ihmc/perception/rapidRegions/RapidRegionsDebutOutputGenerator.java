@@ -1,6 +1,7 @@
 package us.ihmc.perception.rapidRegions;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -11,11 +12,16 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.OpenCLFloatBuffer;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.bytedeco.opencv.global.opencv_highgui.imshow;
@@ -232,4 +238,92 @@ public class RapidRegionsDebutOutputGenerator
    {
       return debugNormals;
    }
+
+   ///* A one-time method to convert depth map to renderable pointcloud. */
+   //public void submitToPointCloudRenderer(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
+   //{
+   //
+   //   openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
+   //   unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
+   //
+   //   bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+   //
+   //   totalNumberOfPoints = height * width;
+   //   pointCloudRenderer.create(totalNumberOfPoints);
+   //
+   //   pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
+   //   pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
+   //   LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
+   //
+   //   // TODO: Create tuners for these
+   //   double verticalFieldOfView = Math.PI / 2.0;
+   //   double horizontalFieldOfView = 2.0 * Math.PI;
+   //
+   //   parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
+   //   parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
+   //   parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
+   //   parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
+   //   parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
+   //   parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
+   //   parametersOpenCLFloatBuffer.setParameter(width);
+   //   parametersOpenCLFloatBuffer.setParameter(height);
+   //   parametersOpenCLFloatBuffer.setParameter(0.01f);
+   //
+   //   parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
+   //   bytedecoImage.writeOpenCLImage(openCLManager);
+   //   pointCloudRenderer.updateMeshFastestBeforeKernel();
+   //   pointCloudVertexBuffer.syncWithBackingBuffer();
+   //
+   //   openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
+   //   openCLManager.setKernelArgument(unpackPointCloudKernel, 1, bytedecoImage.getOpenCLImageObject());
+   //   openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
+   //   openCLManager.execute2D(unpackPointCloudKernel, width, height);
+   //
+   //   pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
+   //   pointCloudRenderer.updateMeshFastestAfterKernel();
+   //}
+
+   //// TODO: Complete this for visualizing the patch centroids and normals
+   //private RDXModelInstance constructSurfelMesh()
+   //{
+   //   RecyclingArrayList<Point3D32> debugPoints = rapidPlanarRegionsExtractor.getDebugger().getDebugPoints();
+   //
+   //   ModelBuilder modelBuilder = new ModelBuilder();
+   //   modelBuilder.begin();
+   //
+   //   RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+   //
+   //   ArrayList<Point3DReadOnly> points = new ArrayList<>();
+   //   for (int i = 0; i < debugPoints.size(); i++)
+   //   {
+   //      points.clear();
+   //
+   //      points.add(debugPoints.get(i));
+   //
+   //      Point3D32 point = debugPoints.get(i);
+   //      meshBuilder.addPolygon(points, new Color(0.5f, 0.6f, 0.0f, 1.0f)); // dark red
+   //   }
+   //
+   //   Mesh mesh = meshBuilder.generateMesh();
+   //   MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL20.GL_TRIANGLES);
+   //   Material material = new Material();
+   //   Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
+   //   material.set(TextureAttribute.createDiffuse(paletteTexture));
+   //   material.set(ColorAttribute.createDiffuse(com.badlogic.gdx.graphics.Color.WHITE));
+   //   modelBuilder.part(meshPart, material);
+   //
+   //   Model model = modelBuilder.end();
+   //
+   //   RDXModelInstance modelInstance = new RDXModelInstance(model);
+   //   return modelInstance;
+   //}
+
 }
