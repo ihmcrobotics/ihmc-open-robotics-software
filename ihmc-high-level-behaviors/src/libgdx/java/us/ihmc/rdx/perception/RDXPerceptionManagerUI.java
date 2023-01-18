@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * Should just display the ghost objects and provide the reference frame library.
  */
-public class COPY_RDXPerceptionManagerUI
+public class RDXPerceptionManagerUI
 {
    private final ImGuiPanel panel = new ImGuiPanel("Perception Manager", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -27,7 +27,7 @@ public class COPY_RDXPerceptionManagerUI
    private final RDXPerceptionObjectUpdater pushDoorFrame;
    private final RDXPerceptionObjectUpdater pushDoorPanel;
 
-   public COPY_RDXPerceptionManagerUI(ROS2PublishSubscribeAPI ros2)
+   public RDXPerceptionManagerUI(ROS2PublishSubscribeAPI ros2)
    {
       this.ros2 = ros2;
 

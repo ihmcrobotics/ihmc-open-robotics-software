@@ -10,7 +10,7 @@ import us.ihmc.tools.thread.SwapReference;
 import java.util.HashMap;
 import java.util.List;
 
-public class COPY_OpenCVArUcoMarkerROS2Publisher
+public class OpenCVArUcoMarkerROS2Publisher
 {
    private final OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private final HashMap<Integer, OpenCVArUcoMarker> arUcoMarkersToTrack = new HashMap<>();
@@ -19,10 +19,10 @@ public class COPY_OpenCVArUcoMarkerROS2Publisher
    private final ReferenceFrame cameraFrame;
    private final ROS2PublishSubscribeAPI ros2;
 
-   public COPY_OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
-                                              List<OpenCVArUcoMarker> arUcoMarkersToTrack,
-                                              ReferenceFrame cameraFrame,
-                                              ROS2PublishSubscribeAPI ros2)
+   public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetection arUcoMarkerDetection,
+                                         List<OpenCVArUcoMarker> arUcoMarkersToTrack,
+                                         ReferenceFrame cameraFrame,
+                                         ROS2PublishSubscribeAPI ros2)
    {
       this.arUcoMarkerDetection = arUcoMarkerDetection;
       this.cameraFrame = cameraFrame;
