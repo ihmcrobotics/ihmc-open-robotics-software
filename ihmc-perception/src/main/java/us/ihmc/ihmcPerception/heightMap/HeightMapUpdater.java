@@ -69,6 +69,8 @@ public class HeightMapUpdater
    private final AtomicDouble gridCenterY = new AtomicDouble();
    private final AtomicDouble maxHeight = new AtomicDouble(0.4);
 
+   private final AtomicBoolean isPaused = new AtomicBoolean(false);
+
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
 
@@ -145,6 +147,16 @@ public class HeightMapUpdater
       this.gridCenterConsumer = gridCenterConsumer;
    }
 
+   public void requestPause()
+   {
+      isPaused.set(true);
+   }
+
+   public void requestResume()
+   {
+      isPaused.set(false);
+   }
+
    public void exportOnThread()
    {
       ThreadTools.startAThread(this::export, "Height map exporter");
@@ -152,7 +164,8 @@ public class HeightMapUpdater
 
    public void addPointCloudToQueue(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
    {
-      this.pointCloudQueue.add(pointCloudData);
+      if (!isPaused.get())
+         this.pointCloudQueue.add(pointCloudData);
    }
 
    public boolean runUpdateThread()

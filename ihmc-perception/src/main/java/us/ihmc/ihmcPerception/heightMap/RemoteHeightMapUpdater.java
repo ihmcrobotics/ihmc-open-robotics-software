@@ -2,6 +2,7 @@ package us.ihmc.ihmcPerception.heightMap;
 
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -44,6 +45,7 @@ public class RemoteHeightMapUpdater
       this.ros2Node = ros2Node;
 
       IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
@@ -109,6 +111,17 @@ public class RemoteHeightMapUpdater
       }
    }
 
+   public void consumeStateRequestMessage(HeightMapStateRequestMessage message)
+   {
+      if (message.getRequestPause())
+         heightMapUpdater.requestPause();
+      else if (message.getRequestResume())
+         heightMapUpdater.requestResume();
+
+      if (message.getRequestClear())
+         heightMapUpdater.requestClear();
+   }
+   
    public void stop()
    {
       ros2Node.destroy();
