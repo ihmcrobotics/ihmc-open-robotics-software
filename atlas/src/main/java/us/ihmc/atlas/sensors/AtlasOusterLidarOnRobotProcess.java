@@ -24,7 +24,7 @@ public class AtlasOusterLidarOnRobotProcess
       syncedRobot = new ROS2SyncedRobotModel(robotModel, realtimeROS2Node);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
-      new OusterDriverAndDepthPublisher(realtimeROS2Node, this::sensorFrameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE);
+      new OusterDriverAndDepthPublisher(realtimeROS2Node, this::sensorFrameUpdater, ROS2Tools.OUSTER_DEPTH_IMAGE).start();
    }
 
    private ReferenceFrame sensorFrameUpdater()
