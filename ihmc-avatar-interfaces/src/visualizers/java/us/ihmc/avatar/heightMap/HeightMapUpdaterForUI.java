@@ -2,22 +2,16 @@ package us.ihmc.avatar.heightMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.ihmcPerception.heightMap.HeightMapUpdater;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.io.*;

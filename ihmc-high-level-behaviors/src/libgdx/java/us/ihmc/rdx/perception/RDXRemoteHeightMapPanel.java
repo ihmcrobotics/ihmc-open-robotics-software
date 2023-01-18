@@ -1,6 +1,6 @@
 package us.ihmc.rdx.perception;
 
-import us.ihmc.avatar.heightMap.HeightMapAPI;
+import us.ihmc.ihmcPerception.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
