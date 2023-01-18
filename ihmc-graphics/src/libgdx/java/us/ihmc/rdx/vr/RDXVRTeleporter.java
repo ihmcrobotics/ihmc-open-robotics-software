@@ -49,6 +49,7 @@ public class RDXVRTeleporter
    private long bTimePressedNanos = 0;
    private static final double DOUBLE_CLICK_TIME_THRESHOLD = 500; // 500 ms
    private double doubleClickTimeElapsedInMilliseconds;
+   private boolean isDoubleClick = false;
    // Reference frame of mid-feet to be set from syncedRobot
    private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
 
@@ -107,8 +108,24 @@ public class RDXVRTeleporter
          preparingToTeleport = bButton.bState();
          boolean bChanged = bButton.bChanged();
 
+         // Assess if user double clicks
+         if (bChanged)
+         {
+            // save time point when b button clicked
+            bTimePressedNanosPrevious = bTimePressedNanos;
+            bTimePressedNanos = System.nanoTime();
+            doubleClickTimeElapsedInMilliseconds = (bTimePressedNanos - bTimePressedNanosPrevious) / 1e6;
+            // Double-clicked
+            isDoubleClick = robotMidFeetZUpReferenceFrame != null && doubleClickTimeElapsedInMilliseconds < DOUBLE_CLICK_TIME_THRESHOLD;
+         }
 
-         if (preparingToTeleport || bChanged)
+         //  b button double click
+         if (isDoubleClick)
+         {
+            // Teleport headset and play area to robot mid-feet z-up
+            snapToMidFeetZUp(vrContext);
+         }
+         else if (preparingToTeleport || bChanged)
          {
             // Ray teleport
             pickRay.setToZero(controller.getXForwardZUpControllerFrame());
@@ -167,21 +184,6 @@ public class RDXVRTeleporter
                 proposedTeleportPose.get(tempTransform);
                 tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
             });
-         }
-
-         if (bChanged)
-         {
-            // save time point when b button clicked
-            bTimePressedNanosPrevious = bTimePressedNanos;
-            bTimePressedNanos = System.nanoTime();
-            doubleClickTimeElapsedInMilliseconds = (bTimePressedNanos - bTimePressedNanosPrevious) / 1e6;
-
-            // Double-clicked
-            if (robotMidFeetZUpReferenceFrame != null && doubleClickTimeElapsedInMilliseconds < DOUBLE_CLICK_TIME_THRESHOLD)
-            {
-               // Teleport headset and play area to robot mid-feet z-up
-               snapToMidFeetZUp(vrContext);
-            }
          }
 
          if (controller.getTouchpadTouchedActionData().bState())
