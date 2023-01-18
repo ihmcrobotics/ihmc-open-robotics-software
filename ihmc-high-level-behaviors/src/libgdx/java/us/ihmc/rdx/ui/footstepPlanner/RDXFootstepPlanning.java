@@ -183,9 +183,9 @@ public class RDXFootstepPlanning
       return hasNewPlanAvailable.getAndSet(false);
    }
 
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public FootstepPlannerParametersReadOnly getFootstepPlannerParameters()
    {
-      return footstepPlannerParameters;
+      return footstepPlanner.getFootstepPlannerParameters();
    }
 
    public FootstepPlannerOutput pollOutput()
@@ -209,7 +209,9 @@ public class RDXFootstepPlanning
    }
 
    public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
-   {}
+   {
+      this.footstepPlannerParametersReference.set(footstepPlannerParameters);
+   }
 
    public boolean isReadyToWalk()
    {
