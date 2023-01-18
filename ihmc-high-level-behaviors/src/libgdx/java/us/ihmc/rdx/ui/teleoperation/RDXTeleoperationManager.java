@@ -295,7 +295,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       syncedRobot.update();
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
-      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep();
+      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal();
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
