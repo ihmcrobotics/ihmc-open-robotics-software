@@ -106,17 +106,21 @@ public class RDXOpenCVWebcamReader
     */
    public void update()
    {
+      swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+   }
+
+   /**
+    * For advanced use, allow the user to call more stuff on the high priority thread.
+    * You would call this instead of update()
+    */
+   public void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
+   {
       if (imageWasRead)
       {
          imageWasRead = false;
          ++numberOfImagesRead;
-         swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+         data.updateOnUIThread(swapCVPanel.getVideoPanel());
       }
-   }
-
-   private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
-   {
-      data.updateOnUIThread(swapCVPanel.getVideoPanel());
    }
 
    public void renderImGuiWidgets()
@@ -136,6 +140,11 @@ public class RDXOpenCVWebcamReader
    public void dispose()
    {
       videoCapture.release();
+   }
+
+   public boolean getImageWasRead()
+   {
+      return imageWasRead;
    }
 
    public Mat getBGRImage()
