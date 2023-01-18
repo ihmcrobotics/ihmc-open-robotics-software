@@ -1,40 +1,27 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.model.MeshPart;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImInt;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
-import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.logging.HDF5Manager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
@@ -42,10 +29,10 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
-import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.visualizers.RDXTrajectoryGraphic;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.thread.Activator;
@@ -61,6 +48,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RDXRapidRegionsUIPanel rapidRegionsUIPanel = new RDXRapidRegionsUIPanel();
    private ImGuiPanel navigationPanel;
 
+   private final RDXTrajectoryGraphic mocapGraphic = new RDXTrajectoryGraphic(0.02f, Color.YELLOW);
+   private final RDXTrajectoryGraphic rootJointGraphic = new RDXTrajectoryGraphic(0.02f, Color.RED);
+
    private String sensorTopicName;
 
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
@@ -70,13 +60,17 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final RapidPlanarRegionsExtractor rapidPlanarRegionsExtractor = new RapidPlanarRegionsExtractor();
    private final PlanarRegionsListWithPose regionsWithPose = new PlanarRegionsListWithPose();
    ;
-//   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
-//                                                                                                              ReferenceFrame.getWorldFrame(),
-//                                                                                                              sensorTransformToWorld);
+   //   private final ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("l515ReferenceFrame",
+   //                                                                                                              ReferenceFrame.getWorldFrame(),
+   //                                                                                                              sensorTransformToWorld);
    private final Pose3D cameraPose = new Pose3D();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
+
    private final ArrayList<Point3D> sensorPositionBuffer = new ArrayList<>();
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
+
+   private final ArrayList<Point3D> mocapPositionBuffer = new ArrayList<>();
+   private final ArrayList<Quaternion> mocapOrientationBuffer = new ArrayList<>();
    ;
    private Activator nativesLoadedActivator;
    private BytedecoImage bytedecoDepthImage;
@@ -87,8 +81,6 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private PerceptionDataLoader perceptionDataLoader;
 
    private ImInt frameIndex = new ImInt(0);
-
-   private int totalNumberOfPoints;
 
    private boolean initialized = false;
 
@@ -139,9 +131,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             sensorTopicName = PerceptionLoggerConstants.L515_DEPTH_NAME;
             perceptionDataLoader.openLogFile(PERCEPTION_LOG_DIRECTORY + PERCEPTION_LOG_FILE);
             bytedecoDepthImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
+
             perceptionDataLoader.loadCompressedDepth(PerceptionLoggerConstants.L515_DEPTH_NAME, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
             perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.L515_SENSOR_POSITION, sensorPositionBuffer);
             perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, sensorOrientationBuffer);
+
+            perceptionDataLoader.loadPoint3DList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, mocapPositionBuffer);
+            perceptionDataLoader.loadQuaternionList(PerceptionLoggerConstants.MOCAP_RIGID_BODY_ORIENTATION, mocapOrientationBuffer);
+
             rapidPlanarRegionsExtractor.create(openCLManager, openCLProgram, depthWidth, depthHeight, 730.7891, 731.0859, 528.6094, 408.1602);
 
             pointCloudRenderer.create(depthHeight * depthWidth);
@@ -157,6 +154,17 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
+
+                  adjustMocapPositionsOffset(mocapPositionBuffer, sensorPositionBuffer.get(0));
+
+                  mocapGraphic.generateMeshes(mocapPositionBuffer, 10);
+                  mocapGraphic.update();
+
+                  rootJointGraphic.generateMeshes(sensorPositionBuffer, 5);
+                  rootJointGraphic.update();
+
+                  baseUI.getPrimaryScene().addRenderableProvider(mocapGraphic, RDXSceneLevel.VIRTUAL);
+                  baseUI.getPrimaryScene().addRenderableProvider(rootJointGraphic, RDXSceneLevel.VIRTUAL);
 
                   baseUI.getPerspectiveManager().reloadPerspective();
                   navigationPanel.setRenderMethod(this::renderNavigationPanel);
@@ -193,12 +201,14 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
             if (changed || !initialized)
             {
-               perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+               if((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+               {
+                  perceptionDataLoader.loadCompressedDepth(sensorTopicName, frameIndex.get(), bytedecoDepthImage.getBytedecoOpenCVMat());
+                  updateRapidRegionsExtractor();
+               }
 
-               updateRapidRegionsExtractor();
                updatePointCloudRenderer();
                rapidPlanarRegionsExtractor.getDebugger().getDebugPoints().clear();
-
 
                if (!initialized)
                {
@@ -227,130 +237,57 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
       }
    }
 
-   /* A one-time method to convert depth map to renderable pointcloud. */
-   public void submitToPointCloudRenderer(int width, int height, BytedecoImage bytedecoImage, OpenCLManager openCLManager)
-   {
-
-      openCLProgram = openCLManager.loadProgram("OusterPointCloudVisualizer");
-      unpackPointCloudKernel = openCLManager.createKernel(openCLProgram, "imageToPointCloud");
-
-      bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-
-      totalNumberOfPoints = height * width;
-      pointCloudRenderer.create(totalNumberOfPoints);
-
-      pointCloudVertexBuffer = new OpenCLFloatBuffer(totalNumberOfPoints * RDXPointCloudRenderer.FLOATS_PER_VERTEX, pointCloudRenderer.getVertexBuffer());
-      pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
-      LogTools.info("Allocated new buffers. {} points.", totalNumberOfPoints);
-
-      // TODO: Create tuners for these
-      double verticalFieldOfView = Math.PI / 2.0;
-      double horizontalFieldOfView = 2.0 * Math.PI;
-
-      parametersOpenCLFloatBuffer.setParameter((float) horizontalFieldOfView);
-      parametersOpenCLFloatBuffer.setParameter((float) verticalFieldOfView);
-      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getX32());
-      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getY32());
-      parametersOpenCLFloatBuffer.setParameter(sensorTransformToWorld.getTranslation().getZ32());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM00());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM01());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM02());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM10());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM11());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM12());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM20());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM21());
-      parametersOpenCLFloatBuffer.setParameter((float) sensorTransformToWorld.getRotation().getM22());
-      parametersOpenCLFloatBuffer.setParameter(width);
-      parametersOpenCLFloatBuffer.setParameter(height);
-      parametersOpenCLFloatBuffer.setParameter(0.01f);
-
-      parametersOpenCLFloatBuffer.writeOpenCLBufferObject(openCLManager);
-      bytedecoImage.writeOpenCLImage(openCLManager);
-      pointCloudRenderer.updateMeshFastestBeforeKernel();
-      pointCloudVertexBuffer.syncWithBackingBuffer();
-
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 0, parametersOpenCLFloatBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 1, bytedecoImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(unpackPointCloudKernel, 2, pointCloudVertexBuffer.getOpenCLBufferObject());
-      openCLManager.execute2D(unpackPointCloudKernel, width, height);
-
-      pointCloudVertexBuffer.readOpenCLBufferObject(openCLManager);
-      pointCloudRenderer.updateMeshFastestAfterKernel();
-   }
-
    private void updateRapidRegionsExtractor()
    {
       if (!rapidPlanarRegionsExtractor.isProcessing())
       {
-         ThreadTools.startAsDaemon(() ->
-                                   {
+         if((frameIndex.get() % HDF5Manager.MAX_BUFFER_SIZE) != (HDF5Manager.MAX_BUFFER_SIZE - 1))
+         {
+            ThreadTools.startAsDaemon(() ->
+                                      {
+                                         Point3D position = sensorPositionBuffer.get(frameIndex.get());
+                                         Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
 
+                                         //                                      sensorTransformToWorld.set(orientation, position);
+                                         cameraPose.set(position, orientation);
+                                         cameraFrame.setPoseAndUpdate(cameraPose);
 
+                                         //                                      cameraFrame.update();
 
-                                      Point3D position = sensorPositionBuffer.get(frameIndex.get());
-                                      Quaternion orientation = sensorOrientationBuffer.get(frameIndex.get());
+                                         //LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
 
-//                                      sensorTransformToWorld.set(orientation, position);
-                                      cameraPose.set(position, orientation);
-                                      cameraFrame.setPoseAndUpdate(cameraPose);
+                                         regionsWithPose.getPlanarRegionsList().clear();
+                                         rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
+                                      }, getClass().getSimpleName() + "RapidRegions");
 
-//                                      cameraFrame.update();
-
-                                      //LogTools.info("Transform to World: {}", cameraFrame.getTransformToWorldFrame());
-
-                                      regionsWithPose.getPlanarRegionsList().clear();
-                                      rapidPlanarRegionsExtractor.update(bytedecoDepthImage, cameraFrame, regionsWithPose);
-                                   }, getClass().getSimpleName() + "RapidRegions");
+         }
       }
 
+      generateMesh(regionsWithPose.getPlanarRegionsList());
+
+   }
+
+   public synchronized void generateMesh(PlanarRegionsList regionsList)
+   {
       if (rapidPlanarRegionsExtractor.isModified())
       {
-         rapidRegionsUIPanel.render3DGraphics(regionsWithPose.getPlanarRegionsList(), cameraFrame);
+         rapidRegionsUIPanel.render3DGraphics(regionsList, cameraFrame);
          rapidRegionsUIPanel.render();
          rapidPlanarRegionsExtractor.setModified(false);
          rapidPlanarRegionsExtractor.setProcessing(false);
       }
    }
 
-   // TODO: Complete this for visualizing the patch centroids and normals
-   private RDXModelInstance constructSurfelMesh()
+   public void adjustMocapPositionsOffset(ArrayList<Point3D> mocapPositionBuffer, Point3D origin)
    {
-      RecyclingArrayList<Point3D32> debugPoints = rapidPlanarRegionsExtractor.getDebugger().getDebugPoints();
-
-      ModelBuilder modelBuilder = new ModelBuilder();
-      modelBuilder.begin();
-
-      RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
-
-      ArrayList<Point3DReadOnly> points = new ArrayList<>();
-      for (int i = 0; i < debugPoints.size(); i++)
+      Point3D offset = new Point3D(mocapPositionBuffer.get(0).getX(), -mocapPositionBuffer.get(0).getZ(), mocapPositionBuffer.get(0).getY());
+      offset.sub(origin);
+      LogTools.info("Offset: {}", offset);
+      for (Point3D point : mocapPositionBuffer)
       {
-         points.clear();
-
-         points.add(debugPoints.get(i));
-
-         Point3D32 point = debugPoints.get(i);
-         meshBuilder.addPolygon(points, new Color(0.5f, 0.6f, 0.0f, 1.0f)); // dark red
+         point.set(point.getX(), -point.getZ(), point.getY());
+         point.sub(offset);
       }
-
-      Mesh mesh = meshBuilder.generateMesh();
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL20.GL_TRIANGLES);
-      Material material = new Material();
-      Texture paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
-      material.set(TextureAttribute.createDiffuse(paletteTexture));
-      material.set(ColorAttribute.createDiffuse(com.badlogic.gdx.graphics.Color.WHITE));
-      modelBuilder.part(meshPart, material);
-
-      Model model = modelBuilder.end();
-
-      RDXModelInstance modelInstance = new RDXModelInstance(model);
-      return modelInstance;
-   }
-
-   public static void main(String[] args)
-   {
-      new RDXRapidRegionsExtractionDemo();
    }
 
    @Override
@@ -361,5 +298,10 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
 
       if (rapidRegionsUIPanel.get3DPlanarRegionsRenderEnabled())
          rapidRegionsUIPanel.getRenderables(renderables, pool);
+   }
+
+   public static void main(String[] args)
+   {
+      new RDXRapidRegionsExtractionDemo();
    }
 }

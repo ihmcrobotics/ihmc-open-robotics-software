@@ -74,7 +74,7 @@ public class RapidPlanarRegionsCustomizer
                                                                                                             concaveHullFactoryParameters);
 
          //applyConcaveHullFilters(concaveHullCollection);
-         createPlanarRegion(rapidPlanarRegion.getId(), origin, orientation, concaveHullCollection, planarRegions);
+         createAndInsertPlanarRegion(rapidPlanarRegion.getId(), origin, orientation, concaveHullCollection, planarRegions);
 
       }
       catch (NotARotationMatrixException notARotationMatrixException)
@@ -144,8 +144,8 @@ public class RapidPlanarRegionsCustomizer
       stopWatch.suspend();
    }
 
-   public void createPlanarRegion(int regionId, FramePoint3D origin, FrameQuaternion orientation, ConcaveHullCollection concaveHullCollection,
-                                  List<PlanarRegion> planarRegions)
+   public void createAndInsertPlanarRegion(int regionId, FramePoint3D origin, FrameQuaternion orientation, ConcaveHullCollection concaveHullCollection,
+                                           List<PlanarRegion> planarRegions)
    {
       int hullCounter = 0;
 

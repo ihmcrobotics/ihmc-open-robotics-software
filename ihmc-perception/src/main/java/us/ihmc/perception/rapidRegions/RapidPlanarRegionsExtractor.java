@@ -12,6 +12,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -633,7 +634,10 @@ public class RapidPlanarRegionsExtractor
          if (count != 8)
          {
             boundaryMatrix.set(row, column, true);
-            planarRegion.getBorderIndices().add().set(column, row);
+            Point2D boundaryPoint = planarRegion.getBorderIndices().add();
+
+            if(boundaryPoint != null)
+               boundaryPoint.set(column, row);
             //debugger.drawBoundaryNode(planarRegionIslandIndex, column, row, patchHeight, patchWidth);
          }
       }

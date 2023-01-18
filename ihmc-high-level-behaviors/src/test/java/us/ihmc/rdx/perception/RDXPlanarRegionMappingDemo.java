@@ -22,8 +22,14 @@ public class RDXPlanarRegionMappingDemo
    private PlanarRegionMappingUIPanel planarRegionMappingUI;
 
    private final String perceptionLogDirectory = System.getProperty("user.home") + "/.ihmc/logs/perception/";
-   private final String logFileName = "20230114_160058_PerceptionLog.hdf5";
+   private final String logFileName = "20230117_161540_PerceptionLog.hdf5";
 
+   // Full
+   //20230117_161540_PerceptionLog.hdf5 (311 MB)
+   //20230117_162417_PerceptionLog.hdf5 (231 MB)
+   //20230117_162825_PerceptionLog.hdf5 (328 MB)
+
+   // Partial
    // 20230114_155447_PerceptionLog.hdf5
    // 20230114_155627_PerceptionLog.hdf5
    // 20230114_160058_PerceptionLog.hdf5
