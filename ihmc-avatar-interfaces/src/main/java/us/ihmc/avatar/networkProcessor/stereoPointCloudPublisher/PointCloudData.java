@@ -1,17 +1,30 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Decompressor;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.PerceptionMessageTools;
+import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 
@@ -88,6 +101,24 @@ public class PointCloudData
 
          numberOfPoints = maxSize;
       }
+   }
+
+   public PointCloudData(LidarScanMessage sensorData)
+   {
+      timestamp = sensorData.getRobotTimestamp();
+
+      pointCloud = MessageTools.unpackScanPoint3ds(sensorData);
+      numberOfPoints = sensorData.getNumberOfPoints();
+      colors = null;
+   }
+
+   public PointCloudData(PerceptionMessageTools perceptionMessageTools, ImageMessage sensorData)
+   {
+      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch()) + sensorData.getAcquisitionTime().getAdditionalNanos();
+      numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
+      colors = null;
+
+      pointCloud = perceptionMessageTools.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
    }
 
    public long getTimestamp()
