@@ -2,11 +2,10 @@
   "dockspacePanels" : { },
   "windows" : {
     "3D View" : false,
-    "Diagnostics" : true,
-    "Test Image 1" : true,
-    "Undistorted Video" : true,
+    "Calibration Pattern" : true,
     "VR Settings" : false,
     "VR Thread Debugger" : false,
-    "Video" : true
+    "Webcam Monitor" : true,
+    "Webcam Reader" : true
   }
 }

@@ -67,12 +67,12 @@ public class RDXCameraCalibrationDemo
    private float gridWidth;
    private boolean releaseObject;
    private Size imageSize;
-   private final Size boardSize = new Size(9, 6);
+   private final Size boardSize = new Size(8, 11);
    private final int squareSize = 13;
 
    private enum CalibrationPattern { NOT_EXISTING, CHESSBOARD, CIRCLES_GRID, ASYMMETRIC_CIRCLES_GRID }
 
-   private final CalibrationPattern calibrationPattern = CalibrationPattern.CHESSBOARD;
+   private final CalibrationPattern calibrationPattern = CalibrationPattern.CIRCLES_GRID;
    private Point3fVectorVector objectPoints;
 
    private final Size patternSize = new Size(9, 6); //width, height
@@ -232,7 +232,7 @@ public class RDXCameraCalibrationDemo
                   {
                      newCameraMatrix = opencv_calib3d.getOptimalNewCameraMatrix(cameraMatrix, distortionCoefficients, imageSize, 1.0);
 
-                     data.getBytedecoImage().getBytedecoOpenCVMat().copyTo(tempMat);
+                     data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(tempMat);
                      opencv_calib3d.undistort(tempMat,
                                               undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat(),
                                               cameraMatrix,
@@ -243,7 +243,7 @@ public class RDXCameraCalibrationDemo
                   if (takingPhotosIsActive.get() && throttler.run(0.5))
                   {
 
-                     opencv_imgproc.cvtColor(data.getBytedecoImage().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
+                     opencv_imgproc.cvtColor(data.getRGBA8Image().getBytedecoOpenCVMat(), tempMat, opencv_imgproc.COLOR_BGR2RGB);
                      opencv_imgcodecs.imwrite(calibrationPhotoDirectory + "CameraCalibrationPhoto" + (currentNumberOfImagesInDirectory /*+1*/) + ".jpg",
                                               tempMat);
                      currentNumberOfImagesInDirectory++;
@@ -306,9 +306,9 @@ public class RDXCameraCalibrationDemo
       LogTools.info("There are {} many photos", images.size());
       //numOfImagesInDirectory = (int) images.size();
 
-      if (data != null && data.getBytedecoImage() != null && data.getBytedecoImage().getBytedecoOpenCVMat() != null)
+      if (data != null && data.getRGBA8Image() != null && data.getRGBA8Image().getBytedecoOpenCVMat() != null)
       {
-         data.getBytedecoImage().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
+         data.getRGBA8Image().getBytedecoOpenCVMat().copyTo(undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat());
          undistortedVideoPanel.getBytedecoImage().getBytedecoOpenCVMat().copyTo(tempMat);
          gridWidth = (float) squareSize * (boardSize.width() - 1);
 
@@ -347,7 +347,7 @@ public class RDXCameraCalibrationDemo
             }
          }
 
-         //For testing, show an image with the ChessboardCorners drawn
+         // For testing, show an image with the ChessboardCorners drawn
          if (cameraMatrix != null)
          {
             imageAtIndex = images.get(20);
