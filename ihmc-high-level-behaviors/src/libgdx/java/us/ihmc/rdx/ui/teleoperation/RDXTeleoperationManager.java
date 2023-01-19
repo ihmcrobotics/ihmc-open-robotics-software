@@ -158,7 +158,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
-      footstepPlanning = new RDXFootstepPlanning(robotModel, syncedRobot);
+      footstepPlanning = new RDXFootstepPlanning(robotModel, teleoperationParameters, syncedRobot);
       // TODO remove ros from this module, and have it call from the higher level.
       ros2Helper.subscribeViaCallback(ROS2Tools.RAPID_REGIONS, regions -> footstepPlanning.setPlanarRegions(regions));
       ros2Helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, footstepPlanning::setHeightMapData);
@@ -315,7 +315,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       {
          FootstepPlannerOutput output = footstepPlanning.pollOutput();
          interactableFootstepPlan.updateFromPlan(output.getFootstepPlan());
-         if (output.getBodyPath().size() > 0 && output.getBodyPathPlanningResult().validForExecution())
+         if (output.getBodyPath().size() > 0)
             bodyPathPlanGraphic.generateMeshesAsync(output.getBodyPath());
          else
             bodyPathPlanGraphic.clear();
