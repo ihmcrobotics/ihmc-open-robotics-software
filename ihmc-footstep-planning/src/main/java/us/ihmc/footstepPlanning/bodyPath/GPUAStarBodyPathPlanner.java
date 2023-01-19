@@ -604,7 +604,14 @@ public class GPUAStarBodyPathPlanner
          for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
          {
             BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
+
             int neighborNodeKey = getNodeGraphKey(neighbor);
+            if (neighborNodeKey < 0)
+            {
+               rejectionReason.set(RejectionReason.INVALID_SNAP);
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
 
             int edgeKey = edgeKeyStart + neighborIndex;
 
@@ -651,8 +658,12 @@ public class GPUAStarBodyPathPlanner
 
    private int getNodeGraphKey(BodyPathLatticePoint node)
    {
+      int nodesPerSide = 2 * nodeCenterIndex + 1;
       int nodeGraphXIdx = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
       int nodeGraphYIdx = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
+
+      if (nodeGraphYIdx < 0 || nodeGraphXIdx < 0 || nodeGraphXIdx >= nodesPerSide || nodeGraphYIdx >= nodesPerSide)
+         return -1;
 
       return HeightMapTools.indicesToKey(nodeGraphXIdx, nodeGraphYIdx, nodeCenterIndex);
    }
@@ -988,10 +999,16 @@ public class GPUAStarBodyPathPlanner
          roll.set(rollMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
          rollCost.set(rollCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
 
-         Point2D bodyPose = new Point2D(neighbor.getX() + node.getX(), neighbor.getY() + node.getY());
-         bodyPose.scale(0.5);
-         leastSqNormal.set(getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
-                                                                           bodyPose.getY(),
+         double bodyX = 0.5 * (neighbor.getX() + node.getX());
+         double bodyY = 0.5 * (neighbor.getY() + node.getY());
+
+         // ensure that this body position is within bounds. Sometimes rounding errors cause this to fail.
+         double halfWidth = heightMapData.getGridSizeXY() / 2.0;
+         bodyX = MathTools.clamp(bodyX, heightMapData.getGridCenter().getX() - halfWidth, heightMapData.getGridCenter().getX() + halfWidth);
+         bodyY = MathTools.clamp(bodyY, heightMapData.getGridCenter().getY() - halfWidth, heightMapData.getGridCenter().getY() + halfWidth);
+
+         leastSqNormal.set(getSurfaceNormal(HeightMapTools.coordinateToKey(bodyX,
+                                                                           bodyY,
                                                                            heightMapData.getGridCenter().getX(),
                                                                            heightMapData.getGridCenter().getY(),
                                                                            heightMapData.getGridResolutionXY(),
