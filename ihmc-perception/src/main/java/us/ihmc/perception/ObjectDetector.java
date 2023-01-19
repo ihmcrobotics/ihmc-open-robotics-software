@@ -28,39 +28,18 @@ public class ObjectDetector
    private final HashMap<Long, BiConsumer<Tuple3DReadOnly, QuaternionReadOnly>> markerUpdaters = new HashMap<>();
    private final ROS2Helper ros2;
 
-   public ObjectDetector(ReferenceFrame cameraFrame)
+   public ObjectDetector()
    {
       ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
-
       arUcoMarkerPosesSubscription = ros2.subscribe(ARUCO_MARKER_POSES);
 
-      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
-                                                               DETECTED_PULL_DOOR_FRAME,
-                                                               PULL_DOOR_MARKER_ID,
-                                                               pullDoorManager.getDoorFrame().getObjectFrame()));
-      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
-                                                               DETECTED_PULL_DOOR_PANEL,
-                                                               PULL_DOOR_MARKER_ID,
-                                                               pullDoorManager.getDoorPanel().getObjectFrame()));
-      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
-                                                               DETECTED_PUSH_DOOR_FRAME,
-                                                               PUSH_DOOR_MARKER_ID,
-                                                               pushDoorManager.getDoorFrame().getObjectFrame()));
-      detectedObjectPublishers.add(new DetectedObjectPublisher(ros2,
-                                                               DETECTED_PUSH_DOOR_PANEL,
-                                                               PUSH_DOOR_MARKER_ID,
-                                                               pushDoorManager.getDoorPanel().getObjectFrame()));
+
    }
 
    public void update()
    {
       if (arUcoMarkerPosesSubscription.getMessageNotification().poll())
       {
-         for (DetectedObjectPublisher detectedObjectPublisher : detectedObjectPublishers)
-         {
-            detectedObjectPublisher.reset();
-         }
-
          ArUcoMarkerPoses arUcoMarkerPosesMessage = arUcoMarkerPosesSubscription.getMessageNotification().read();
          for (int i = 0; i < arUcoMarkerPosesMessage.getMarkerId().size(); i++)
          {

@@ -2,10 +2,12 @@ package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.perception.ObjectDetector;
+import us.ihmc.perception.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.objects.ArUcoMarkerObject;
 import us.ihmc.perception.objects.ArUcoMarkerObjectInfo;
 import us.ihmc.perception.OpenCVArUcoMarker;
@@ -21,19 +23,24 @@ public class RDXObjectDetector
    private final ImGuiPanel panel = new ImGuiPanel("Object Detector", this::renderImGuiWidgets);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
-   private final ObjectDetector objectDetector = new
+   private ObjectDetector objectDetector;
+   private boolean simulatedCamera;
 
    private boolean objectDetected = false;
-   private final ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
-   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
-   private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
-   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
 //   private final ArrayList<ArUcoObject> objecstWithArUco = new ArrayList<>();
    private ArUcoMarkerObject objectWithArUco;
    private String objectName = "";
 
-   public RDXObjectDetector(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator)
+   // simulated camera related
+   private final ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
+   private final ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack = new ArrayList<>();
+   private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
+   private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
+   private OpenCVArUcoMarkerROS2Publisher arUcoMarkerROS2Publisher;
+
+   public RDXObjectDetector(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator, ROS2PublishSubscribeAPI ros2)
    {
+      simulatedCamera = true;
       arUcoMarkerDetection = new OpenCVArUcoMarkerDetection();
       arUcoMarkerDetection.create(objectDetectionBlackflySimulator.getLowLevelSimulator().getRGBA8888ColorImage(),
                                   objectDetectionBlackflySimulator.getDepthCameraIntrinsics(),
@@ -41,19 +48,36 @@ public class RDXObjectDetector
       arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
 
       for (int id : arucoInfo.getMarkersId()){
-         markersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
+         arUcoMarkersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
       }
-
-      arUcoMarkerDetectionUI.create(arUcoMarkerDetection, markersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
+      arUcoMarkerROS2Publisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
+                                                                    arUcoMarkersToTrack,
+                                                                          objectDetectionBlackflySimulator.getSensorFrame(),
+                                                                          ros2);
+      arUcoMarkerDetectionUI.create(arUcoMarkerDetection, arUcoMarkersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
       panel.addChild(arUcoMarkerDetectionUI.getMainPanel());
+
+      objectDetector = new ObjectDetector();
+   }
+
+   public RDXObjectDetector()
+   {
+      simulatedCamera = false;
+      objectDetector = new ObjectDetector();
    }
 
    public void update()
    {
       if (enabled.get())
       {
-         arUcoMarkerDetection.update();
-         for (OpenCVArUcoMarker marker : markersToTrack)
+         if(simulatedCamera)
+         {
+            arUcoMarkerDetection.update();
+            arUcoMarkerROS2Publisher.update();
+            arUcoMarkerDetectionUI.update();
+         }
+
+         for (OpenCVArUcoMarker marker : arUcoMarkersToTrack)
          {
             if (arUcoMarkerDetection.isDetected(marker)) // check if a marker between those that we have in the config file is detected
             {
@@ -77,7 +101,6 @@ public class RDXObjectDetector
                objectDetected = false;
          }
 
-         arUcoMarkerDetectionUI.update();
       }
    }
 

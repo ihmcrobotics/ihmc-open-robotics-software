@@ -67,7 +67,6 @@ public class DualBlackflyCamera
    private final Stopwatch copyDuration = new Stopwatch();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
 
-   private final ArrayList<OpenCVArUcoMarker> markersToTrack = new ArrayList<>();
    private final FramePose3D framePoseOfMarker = new FramePose3D();
    private final ArUcoMarkerPoses arUcoMarkerPoses = new ArUcoMarkerPoses();
    private final HashMap<Integer, OpenCVArUcoMarker> arUcoMarkersToTrack = new HashMap<>();
@@ -97,8 +96,6 @@ public class DualBlackflyCamera
       blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
       blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
       blackfly.startAcquiringImages();
-
-      markersToTrack.add(new OpenCVArUcoMarker(0,0.2032));
    }
 
    public void update()
