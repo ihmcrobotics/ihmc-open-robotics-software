@@ -235,7 +235,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             visibilityGraphPlanner.computeBestEffortPlan(horizonLength);
          }
 
-         bodyPathPlanHolder.setPoseWaypoints(waypoints);
+
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
@@ -264,6 +264,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathWaypoints.add(new Pose3D(startMidFootPose));
             bodyPathWaypoints.add(new Pose3D(goalMidFootPose));
          }
+
+         // ste the start orientation to be the heading
+         double dx = bodyPathWaypoints.get(1).getX() - bodyPathWaypoints.get(0).getX();
+         double dy = bodyPathWaypoints.get(1).getY() - bodyPathWaypoints.get(0).getY();
+         ((Pose3DBasics) bodyPathWaypoints.get(0)).getOrientation().setToYawOrientation(Math.atan2(dy, dx));
 
          bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
