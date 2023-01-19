@@ -9,6 +9,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
+import us.ihmc.avatar.gpuPlanarRegions.*;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -16,16 +17,16 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
 import us.ihmc.perception.rapidRegions.GPUPlanarRegionIsland;
+import us.ihmc.perception.rapidRegions.GPURegionRing;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVideoPanel;
-import us.ihmc.perception.rapidRegions.GPUPlanarRegion;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtraction;
 import us.ihmc.avatar.gpuPlanarRegions.GPUPlanarRegionExtractionParameters;
-import us.ihmc.perception.rapidRegions.GPURegionRing;
 import us.ihmc.rdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.rdx.visualizers.RDXHeightMapGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
@@ -35,7 +36,6 @@ import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMapUpdater;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
 import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.thread.ZeroCopySwapReference;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -481,11 +481,6 @@ public class RDXGPUPlanarRegionExtractionUI
       gpuPlanarRegionExtraction.destroy();
       simpleGPUHeightMapUpdater.destroy();
       // TODO: Destroy the rest
-   }
-
-   public GPUPlanarRegionExtraction getGpuPlanarRegionExtraction()
-   {
-      return gpuPlanarRegionExtraction;
    }
 
    public ImGuiPanel getPanel()

@@ -28,7 +28,6 @@ public class RDXTrajectoryGraphic implements RenderableProvider
    private ModelInstance modelInstance;
    private Model lastModel;
 
-   private ArrayList<Point3D> points;
    private Color color;
    private float lineWidth = 0.1f;
 
@@ -65,18 +64,10 @@ public class RDXTrajectoryGraphic implements RenderableProvider
       if (points == null)
          points = new ArrayList<>();
 
-      Point3D diff = new Point3D();
       RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
       for (int i = skip; i < points.size(); i+= skip)
       {
-         diff.set(points.get(i));
-         diff.sub(points.get(i-skip));
-         if(diff.norm() < 1.0f)
-         {
-            LogTools.info("Line Added: {} -> {}", points.get(i-skip), points.get(i));
-            meshBuilder.addLine(points.get(i - skip), points.get(i), lineWidth, color);
-         }
-
+         meshBuilder.addLine(points.get(i - skip), points.get(i), lineWidth, color);
       }
       buildMeshAndCreateModelInstance = () ->
       {
@@ -93,7 +84,7 @@ public class RDXTrajectoryGraphic implements RenderableProvider
             lastModel.dispose();
 
          lastModel = modelBuilder.end();
-         modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+         modelInstance = new ModelInstance(lastModel);
       };
    }
 

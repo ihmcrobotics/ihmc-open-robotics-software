@@ -58,8 +58,7 @@ public class PerceptionDataLogger
    private HDF5Manager hdf5Manager;
    private RealtimeROS2Node realtimeROS2Node;
 
-   private int pointCloudCount = 0;
-   private int depthMapCount = 0;
+   private AtomicReference<Boolean> stopLoggingRequest = new AtomicReference<Boolean>(false);
 
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> references = new HashMap<>();
@@ -103,7 +102,6 @@ public class PerceptionDataLogger
       File f = new File(logFileName);
       if (!f.exists() && !f.isDirectory())
       {
-
          LogTools.info("Creating HDF5 File: " + logFileName);
          hdf5Manager = new HDF5Manager(logFileName, hdf5.H5F_ACC_TRUNC);
          hdf5Manager.getFile().openFile(logFileName, hdf5.H5F_ACC_RDWR);
@@ -131,7 +129,7 @@ public class PerceptionDataLogger
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_logger_realtime_node");
 
       // Add callback for Robot Configuration Data
-      if(channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
          var robotConfigurationDataSubscription = ros2Helper.subscribe(ROS2Tools.getRobotConfigurationDataTopic(simpleRobotName));
          robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
@@ -139,7 +137,7 @@ public class PerceptionDataLogger
       }
 
       // Add callback for D435 Color images
-      if(channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
       {
          byteBuffers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.D435_COLOR_NAME, 0);
@@ -149,7 +147,7 @@ public class PerceptionDataLogger
       }
 
       // Add callback for D435 Depth images
-      if(channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
       {
          byteBuffers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.D435_DEPTH_NAME, 0);
@@ -159,7 +157,7 @@ public class PerceptionDataLogger
       }
 
       // Add callback for L515 Depth Maps
-      if(channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
          byteBuffers.put(PerceptionLoggerConstants.L515_DEPTH_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.L515_DEPTH_NAME, 0);
@@ -169,7 +167,7 @@ public class PerceptionDataLogger
       }
 
       // Add callback for L515 Color Images
-      if(channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
          byteBuffers.put(PerceptionLoggerConstants.L515_COLOR_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.L515_COLOR_NAME, 0);
@@ -179,7 +177,7 @@ public class PerceptionDataLogger
       }
 
       // Add callback for D435 Color images
-      if(channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
          byteBuffers.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.ZED2_COLOR_NAME, 0);
@@ -189,7 +187,7 @@ public class PerceptionDataLogger
       }
 
       // Add callback for Ouster depth maps
-      if(channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          SampleInfo sampleInfo = new SampleInfo();
          byteBuffers.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[BUFFER_SIZE]);
@@ -205,19 +203,9 @@ public class PerceptionDataLogger
          });
       }
 
-//      // Add callback for Blackfly Color images
-//      if(channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
-//      {
-//         byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
-//         counts.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, 0);
-//         var blackflySubscription = realtimeROS2Helper.subscribe(ROS2Tools.BLACKFLY_VIDEO.get(RobotSide.RIGHT));
-//         blackflySubscription.addCallback(this::logColorBlackfly);
-//         runnablesToStopLogging.addLast(blackflySubscription::destroy);
-//      }
-
       // Add callback for Blackfly Color images
       LogTools.info("Blackfly Color Enabled: " + channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled());
-      if(channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
       {
          SampleInfo sampleInfo = new SampleInfo();
          byteBuffers.put(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, new byte[BUFFER_SIZE]);
@@ -236,7 +224,7 @@ public class PerceptionDataLogger
 
       // Add callback for MoCap data
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
-      if(channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
       {
          counts.put(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, 0);
          ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
@@ -267,6 +255,24 @@ public class PerceptionDataLogger
 
       for (PerceptionLogChannel channel : channels.values())
       {
+         if(channel.isEnabled())
+         {
+            boolean termination = false;
+            try
+            {
+               termination = executorService.awaitTermination(2, TimeUnit.SECONDS);
+            }
+            catch (InterruptedException e)
+            {
+               throw new RuntimeException(e);
+            }
+
+            if(termination)
+            {
+               LogTools.warn("Perception Logger: All Threads Could Not Be Terminated. Timeout Reached.");
+            }
+         }
+
          channel.resetIndex();
          channel.resetCount();
       }
@@ -367,8 +373,6 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, videoPacket);
       }
-
-      //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
    }
 
    public void logColorBlackfly(BigVideoPacket videoPacket)
@@ -380,14 +384,13 @@ public class PerceptionDataLogger
          channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).incrementCount();
          storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, videoPacket);
       }
-      //BytedecoOpenCVTools.displayVideoPacketColor(videoPacket);
    }
 
    public void logMocapRigidBody(RigidBodyTransformMessage transformMessage)
    {
       LogTools.info("Logging Mocap Rigid Body");
 
-      if(channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
+      if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).incrementCount();
 
@@ -471,18 +474,14 @@ public class PerceptionDataLogger
 
    public void storePointCloud(String namespace, LidarScanMessage message)
    {
-
       executorService.submit(() ->
                              {
                                 synchronized (this)
                                 {
                                    Group group = hdf5Manager.getGroup(namespace);
-                                   LogTools.info("{} Storing Buffer: {}", namespace, pointCloudCount);
-                                   pointCloudCount = (int) hdf5Manager.getCount(namespace);
-                                   HDF5Tools.storeByteArray(group, pointCloudCount, message.getScan().toArray(), message.getScan().size());
-                                   LogTools.info("{} Done Storing Buffer: {}", namespace, pointCloudCount);
-
-                                   //                                         pointCloudCount++;
+                                   int index = hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
+                                   LogTools.info("{} Done Storing Buffer: {}", namespace, index);
                                 }
                              });
    }
@@ -493,39 +492,46 @@ public class PerceptionDataLogger
                              {
                                 Group group = hdf5Manager.getGroup(namespace);
                                 TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
-                                buffer.addAll(array);
 
                                 int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-                                if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
+                                if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
                                 {
                                    long count = hdf5Manager.getCount(namespace);
                                    HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                                    hdf5Manager.resetBuffer(namespace);
                                 }
+                                buffer.addAll(array);
+
+                                if (stopLoggingRequest.get())
+                                {
+                                   long count = hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
+                                   channels.get(namespace).setEnabled(false);
+                                }
+
                              });
    }
 
    public void storeLongArray(String namespace, long[] array)
    {
-      Group group = hdf5Manager.getGroup(namespace);
-      TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
-      buffer.addAll(array);
+      executorService.submit(() ->
+                             {
+                                Group group = hdf5Manager.getGroup(namespace);
+                                TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
 
-      int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-      //LogTools.info("Buffer Index: {} {}", bufferSize, HDF5Manager.MAX_BUFFER_SIZE - 1);
-      if (bufferSize == (HDF5Manager.MAX_BUFFER_SIZE - 1))
-      {
-         hdf5Manager.resetBuffer(namespace);
-
-         executorService.submit(() ->
+                                int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
+                                if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
                                 {
+                                   hdf5Manager.resetBuffer(namespace);
+
                                    synchronized (this)
                                    {
                                       long count = hdf5Manager.getCount(namespace);
                                       HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                                    }
-                                });
-      }
+                                }
+                                buffer.addAll(array);
+                             });
    }
 
    public void storeLongArray(String namespace, long value)
@@ -570,27 +576,27 @@ public class PerceptionDataLogger
 
       PerceptionDataLogger logger = new PerceptionDataLogger();
 
-      //logger.setChannelEnabled(logger.PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, true);
-//      logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
+      logger.setChannelEnabled(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME, true);
+      //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_DEPTH_NAME, true);
       //      logger.setChannelEnabled(PerceptionLoggerConstants.L515_COLOR_NAME, true);
 
-//      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
-//      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
+      //      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
+      //      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
 
-      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
+//      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
 
       // TEST ROS2 node for Ouster Depth
 
-//      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase("logger_realtime_ros2_node"));
-//
-//      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (message) -> {
-//         LogTools.info("Message Received: {}", message);
-//      });
-//
-//      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-//      executor.scheduleAtFixedRate(realtimeROS2Node::spin, 0, 10, TimeUnit.MILLISECONDS);
+      //      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase("logger_realtime_ros2_node"));
+      //
+      //      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (message) -> {
+      //         LogTools.info("Message Received: {}", message);
+      //      });
+      //
+      //      ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+      //      executor.scheduleAtFixedRate(realtimeROS2Node::spin, 0, 10, TimeUnit.MILLISECONDS);
    }
 }
 

@@ -4,7 +4,6 @@ import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -14,15 +13,11 @@ import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
-import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ScheduledExecutorService;
-
-import static org.bytedeco.opencv.global.opencv_highgui.imshow;
-import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class PerceptionDataLoader
 {
@@ -67,20 +62,10 @@ public class PerceptionDataLoader
       HDF5Tools.loadPointCloud(hdf5Manager.getGroup(namespace), index, points, rows, cols);
    }
 
-   public FloatBuffer loadCompressedPointCloud(String namespace, int index)
-   {
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-
-      LogTools.info("Byte Array: {} {} {}", compressedByteArray[0], compressedByteArray[1], compressedByteArray[2]);
-
-      return null;
-   }
-
    public void loadPoint3DList(String namespace, ArrayList<Point3D> points)
    {
-      //executorService.submit(() ->
-      //{
+      executorService.submit(() ->
+      {
          int count = (int) hdf5Manager.getCount(namespace);
          for(int index = 0; index < count; index++)
          {
@@ -90,18 +75,17 @@ public class PerceptionDataLoader
             for (int i = 0; i < pointFloatArray.length / 3; i++)
             {
                points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
-               //LogTools.info("[{}]: Topic: {}, Point: {}", index * HDF5Manager.MAX_BUFFER_SIZE + i, namespace, points.get(points.size() - 1));
             }
          }
 
          LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
-      //});
+      });
    }
 
    public void loadQuaternionList(String namespace, ArrayList<Quaternion> quaternions)
    {
-      //executorService.submit(() ->
-      //{
+      executorService.submit(() ->
+      {
          int count = (int) hdf5Manager.getCount(namespace);
          for(int index = 0; index < count; index++)
          {
@@ -111,13 +95,11 @@ public class PerceptionDataLoader
             for (int i = 0; i < pointFloatArray.length / 4; i++)
             {
                quaternions.add(new Quaternion(pointFloatArray[i * 4], pointFloatArray[i * 4 + 1], pointFloatArray[i * 4 + 2], pointFloatArray[i * 4 + 3]));
-               //LogTools.info("[{}]: Topic: {}, Quaternion: {}", index * HDF5Manager.MAX_BUFFER_SIZE + i, namespace, quaternions.get(quaternions.size() - 1));
             }
          }
 
          LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
-
-      //});
+      });
    }
 
    public void loadFloatArray(String namespace, int index, float[] array)

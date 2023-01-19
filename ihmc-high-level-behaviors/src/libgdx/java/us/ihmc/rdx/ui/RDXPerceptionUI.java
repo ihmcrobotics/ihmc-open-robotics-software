@@ -107,7 +107,6 @@ public class RDXPerceptionUI
             baseUI.getImGuiPanelManager().addPanel(perceptionLoggingPanel);
 
             perceptionLogLoaderPanel = new PerceptionDataLoadingPanel(perceptionDataLoader);
-            perceptionLogLoaderPanel.setBaseUI(baseUI);
             baseUI.getImGuiPanelManager().addPanel(perceptionLogLoaderPanel);
 
             baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);

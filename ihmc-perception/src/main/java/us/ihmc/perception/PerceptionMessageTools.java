@@ -11,7 +11,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.memory.NativeMemoryTools;
+import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.opencl.OpenCLFloatParameters;
 
 import java.nio.ByteBuffer;
