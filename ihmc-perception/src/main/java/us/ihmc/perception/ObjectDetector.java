@@ -34,7 +34,7 @@ public class ObjectDetector
 
    public ObjectDetector(ArUcoMarkerObjectInfo arUcoInfo, ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack)
    {
-      ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_manager");
+      ros2 = new ROS2Helper(DomainFactory.PubSubImplementation.FAST_RTPS, "object_detector");
       arUcoMarkerPosesSubscription = ros2.subscribe(ARUCO_MARKER_POSES);
 
       this.arUcoMarkersToTrack = arUcoMarkersToTrack;
