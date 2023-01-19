@@ -20,7 +20,7 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.BytedecoRealsense;
 import us.ihmc.perception.realsense.RealSenseHardwareManager;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
-import us.ihmc.perception.tools.PerceptionTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
@@ -53,6 +53,7 @@ public class TerrainPerceptionProcessWithDriver
    private BytedecoRealsense sensor;
    private Mat depthU16C1Image;
    private Mat color8UC3Image;
+   private Mat yuvColorImage = new Mat();
    private BytedecoImage depthBytedecoImage;
    private final RapidPlanarRegionsExtractor rapidRegionsExtractor;
 
@@ -155,8 +156,8 @@ public class TerrainPerceptionProcessWithDriver
                depthBytedecoImage = new BytedecoImage(depthWidth, depthHeight, opencv_core.CV_16UC1);
                color8UC3Image = new Mat(colorHeight, colorWidth, opencv_core.CV_8UC3, colorFrameData);
 
-               PerceptionTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage.getIntrinsicParameters());
-               PerceptionTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage.getIntrinsicParameters());
+               PerceptionMessageTools.setDepthExtrinsicsFromRealsense(sensor, depthImageMessage.getIntrinsicParameters());
+               PerceptionMessageTools.setColorExtrinsicsFromRealsense(sensor, colorImageMessage.getIntrinsicParameters());
 
                // Important not to store as a field, as update() needs to be called each frame
                ReferenceFrame cameraFrame = sensorFrameUpdater.get();
@@ -201,27 +202,28 @@ public class TerrainPerceptionProcessWithDriver
             //            LogTools.info("Planar regions: {}", planarRegionsList.getNumberOfPlanarRegions());
 
             // TODO:  Filter out regions that are colliding with the body before publishing
-            //            PerceptionTools.publishPlanarRegionsListWithPose(planarRegionsListWithPose, ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, ros2Helper);
+            //            PerceptionMessageTools.publishPlanarRegionsListWithPose(planarRegionsListWithPose, ROS2Tools.MAPSENSE_REGIONS_WITH_POSE, ros2Helper);
 
-            PerceptionTools.publishPlanarRegionsList(planarRegionsList, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
-            PerceptionTools.publishCompressedDepth(depthU16C1Image,
-                                                   depthTopic,
-                                                   depthImageMessage,
-                                                   ros2Helper,
-                                                   cameraPose,
-                                                   now,
-                                                   depthSequenceNumber,
-                                                   depthHeight,
-                                                   depthWidth);
-            PerceptionTools.publishCompressedColor(color8UC3Image,
-                                                   colorTopic,
-                                                   colorImageMessage,
-                                                   ros2Helper,
-                                                   cameraPose,
-                                                   now,
-                                                   colorSequenceNumber,
-                                                   colorHeight,
-                                                   colorWidth);
+            PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, ROS2Tools.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+            PerceptionMessageTools.publishPNGCompressedDepthImage(depthU16C1Image,
+                                                           depthTopic,
+                                                           depthImageMessage,
+                                                           ros2Helper,
+                                                           cameraPose,
+                                                           now,
+                                                           depthSequenceNumber,
+                                                           depthHeight,
+                                                           depthWidth);
+            PerceptionMessageTools.publishJPGCompressedColorImage(color8UC3Image,
+                                                           yuvColorImage,
+                                                           colorTopic,
+                                                           colorImageMessage,
+                                                           ros2Helper,
+                                                           cameraPose,
+                                                           now,
+                                                           colorSequenceNumber,
+                                                           colorHeight,
+                                                           colorWidth);
 
             //            display(depthU16C1Image, color8UC3Image, 1);
          }

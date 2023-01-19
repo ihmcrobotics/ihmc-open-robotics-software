@@ -141,7 +141,7 @@ public class ROS2Tools
    public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
 
-   public static final ROS2Topic<VideoPacket> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(VideoPacket.class).withSuffix("color_stereo");
+   public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);

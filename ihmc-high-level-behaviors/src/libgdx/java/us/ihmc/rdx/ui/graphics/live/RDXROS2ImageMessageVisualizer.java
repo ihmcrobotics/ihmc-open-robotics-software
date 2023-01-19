@@ -5,10 +5,13 @@ import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -24,7 +27,10 @@ import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 
-public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
+import static org.bytedeco.opencv.global.opencv_highgui.imshow;
+import static org.bytedeco.opencv.global.opencv_highgui.waitKey;
+
+public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -35,19 +41,20 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
    private final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-   private int depthWidth;
-   private int depthHeight;
+   private int imageWidth;
+   private int imageHeight;
    private int numberOfPixels;
+   private int bytesIfUncompressed = 0;
    private ByteBuffer incomingCompressedImageBuffer;
    private BytePointer incomingCompressedImageBytePointer;
-   private Mat inputCompressedDepthMat;
-   private Mat decompressedDepthMat;
+   private Mat compressedBytesMat;
+   private Mat decompressedImage;
    private Mat normalizedScaledImage;
    private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
 
-   public RDXROS2DepthImageVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
+   public RDXROS2ImageMessageVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
       super(title + " (ROS 2)", topic.getName(), false);
       titleBeforeAdditions = title;
@@ -80,27 +87,40 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
          int imageFormat;
          synchronized (syncObject) // For interacting with the ImageMessage
          {
-            depthWidth = imageMessage.getImageWidth();
-            depthHeight = imageMessage.getImageHeight();
-            numberOfPixels = depthWidth * depthHeight;
-            imageFormat = imageMessage.getFormat(); // TODO: Use this when we introduce more formats
+            imageWidth = imageMessage.getImageWidth();
+            imageHeight = imageMessage.getImageHeight();
+            numberOfPixels = imageWidth * imageHeight;
+            imageFormat = imageMessage.getFormat();
 
             if (incomingCompressedImageBuffer == null)
             {
-               // TODO: Store bytes per pixel in ImageMessage
-               // TODO: Split ImageMessage into ColorImageMessage and DepthImageMessage
-               int bytesIfUncompressed = numberOfPixels * Short.BYTES;
-               incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
-               incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+               if(imageFormat == ImageMessageFormat.DEPTH_PNG_COMPRESSED_16)
+               {
+                  LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_COMPRESSED_16", topic.getName());
+                  bytesIfUncompressed = numberOfPixels * 2;
+                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                  incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
 
-               inputCompressedDepthMat = new Mat(1, 1, opencv_core.CV_8UC1);
-               decompressedDepthMat = new Mat(depthHeight, depthWidth, opencv_core.CV_16UC1);
-               normalizedScaledImage = new Mat(depthHeight, depthWidth, opencv_core.CV_32FC1);
+                  compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                  decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+                  normalizedScaledImage = new Mat(imageHeight, imageWidth, opencv_core.CV_32FC1);
+               }
+               else if(imageFormat == ImageMessageFormat.COLOR_JPEG_COMPRESSED_24)
+               {
+                  LogTools.info("Creating Image Message Visualizer for {} with type COLOR_JPEG_COMPRESSED_24", topic.getName());
+                  bytesIfUncompressed = numberOfPixels * 3;
+                  incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                  incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+
+                  compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                  decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+               }
+
             }
 
             numberOfBytes = imageMessage.getData().size();
             incomingCompressedImageBuffer.rewind();
-            incomingCompressedImageBuffer.limit(depthWidth * depthHeight * Short.BYTES);
+            incomingCompressedImageBuffer.limit(bytesIfUncompressed);
             for (int i = 0; i < numberOfBytes; i++)
             {
                incomingCompressedImageBuffer.put(imageMessage.getData().get(i));
@@ -111,17 +131,25 @@ public class RDXROS2DepthImageVisualizer extends RDXOpenCVVideoVisualizer
             sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
          }
 
-         inputCompressedDepthMat.cols(numberOfBytes);
-         inputCompressedDepthMat.data(incomingCompressedImageBytePointer);
+         compressedBytesMat.cols(numberOfBytes);
+         compressedBytesMat.data(incomingCompressedImageBytePointer);
+         opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedImage);
 
-         opencv_imgcodecs.imdecode(inputCompressedDepthMat, opencv_imgcodecs.IMREAD_UNCHANGED, decompressedDepthMat);
-
-         BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedDepthMat, normalizedScaledImage, 0.0, 255.0);
 
          synchronized (this) // synchronize with the update method
          {
             updateImageDimensions(imageMessage.getImageWidth(), imageMessage.getImageHeight());
-            BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
+
+            if(imageFormat == ImageMessageFormat.DEPTH_PNG_COMPRESSED_16)
+            {
+               BytedecoOpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);
+               BytedecoOpenCVTools.convertGrayToRGBA(normalizedScaledImage, getRGBA8Mat());
+            }
+            else if (imageFormat == ImageMessageFormat.COLOR_JPEG_COMPRESSED_24)
+            {
+               opencv_imgproc.cvtColor(decompressedImage, decompressedImage, opencv_imgproc.COLOR_YUV2RGBA_I420);
+               opencv_imgproc.cvtColor(decompressedImage, getRGBA8Mat(), opencv_imgproc.COLOR_RGB2RGBA);
+            }
          }
       });
    }
