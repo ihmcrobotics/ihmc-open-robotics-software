@@ -161,7 +161,7 @@ public class ZED2ColorStereoPublisher
 
    public static void main(String[] args)
    {
-      String cameraId = System.getProperty("zed2.camera.id", "/dev/v4l/by-id/usb-Technologies__Inc._ZED-video-index0");
+      String cameraId = System.getProperty("zed2.camera.id", "/dev/v4l/by-id/usb-Technologies__Inc._ZED_2-video-index0");
       ZED2ColorStereoPublisher zed = new ZED2ColorStereoPublisher(cameraId, 720, 2560, 30, ROS2Tools.ZED2_STEREO_COLOR, ReferenceFrame::getWorldFrame);
    }
 }
