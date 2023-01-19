@@ -30,7 +30,6 @@ public class ROS2StoredPropertySetGroup
    {
       for (ROS2StoredPropertySet<?> ros2StoredPropertySet : ros2StoredPropertySets)
       {
-//         LogTools.info("Updating: {}", ros2StoredPropertySet);
          ros2StoredPropertySet.updateAndPublishThrottledStatus();
       }
    }

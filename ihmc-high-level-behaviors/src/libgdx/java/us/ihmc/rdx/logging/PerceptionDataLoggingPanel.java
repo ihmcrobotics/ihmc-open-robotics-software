@@ -34,17 +34,9 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString perceptionLogPath = new ImString(PERCEPTION_LOGS_DEFAULT_DIRECTORY);
-   private final ImInt topicIndex = new ImInt(0);
-   private final ImInt objectIndex = new ImInt(0);
-
-   private String[] names;
-   private String currentTopic;
 
    private boolean modified = false;
    private boolean loggerEnabled = false;
-
-   private int numDatasetsInCurrentGroup = 0;
-   private int numGroupsInCurrentGroup = 0;
 
    private final HashMap<String, ImBoolean> channelFlags = new HashMap<>();
 
@@ -98,34 +90,5 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
       {
          logger.stopLogging();
       }
-
-      //if (!logger.getChannels().isEmpty())
-      //{
-      //   ImGui.text("Loaded Log: " + logger.getFilePath());
-      //
-      //   ImGui.text("Number of topics: " + logger.getChannels().size());
-      //
-      //   ImGui.combo("Topic Names", topicIndex, names);
-      //   currentTopic = logger.getChannels().get(topicIndex.get()).getName();
-      //   ImGui.text("Total Files: " + logger.getChannels().get(topicIndex.get()).getCount());
-      //
-      //   ImGui.sliderInt("Object Index", objectIndex.getData(), 0, 10);
-      //
-      //   ArrayList<PerceptionLogChannel> channels = logger.getChannels();
-      //   for (PerceptionLogChannel channel : channels)
-      //   {
-      //      ImGui.text("Channel: " + channel.getName() + " Count: " + channel.getCount() + " Index: " + channel.getIndex());
-      //   }
-      //}
-   }
-
-   public boolean isModified()
-   {
-      return modified;
-   }
-
-   public void setModified(boolean modified)
-   {
-      this.modified = modified;
    }
 }

@@ -131,9 +131,7 @@ public class StructuralPerceptionProcessWithDriver
 
             // TODO: Combine rapid region extraction and depth extraction kernels into single program
 
-            openCLProgram = openCLManager.loadProgram("OusterDepthImageExtraction", "RapidRegionsExtractor.cl");
-
-            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager, openCLProgram);
+            depthExtractionKernel = new OusterDepthExtractionKernel(ouster, openCLManager);
             compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_PNG_COMPRESSION, 1);
             pngImageBuffer = NativeMemoryTools.allocate(depthWidth * depthHeight * 2);
             pngImageBytePointer = new BytePointer(pngImageBuffer);
@@ -166,7 +164,7 @@ public class StructuralPerceptionProcessWithDriver
       cameraPose.setToZero(cameraFrame);
       cameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      depthExtractionKernel.runKernel();
+      depthExtractionKernel.runKernel(cameraPose);
       // Encode as PNG which is lossless and handles single channel images.
       opencv_imgcodecs.imencode(".png", depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat(), pngImageBytePointer, compressionParameters);
 

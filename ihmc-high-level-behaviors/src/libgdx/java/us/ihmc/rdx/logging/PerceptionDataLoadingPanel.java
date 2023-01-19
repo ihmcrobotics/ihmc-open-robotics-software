@@ -8,45 +8,37 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLogChannel;
-import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.live.RDXOpenCVVideoVisualizer;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_highgui.destroyAllWindows;
 
 public class PerceptionDataLoadingPanel extends ImGuiPanel
 {
-   private RDXBaseUI baseUI;
-
-   private Mat cvImage;
 
    private PerceptionDataLoader loader;
-   private RDXPointCloudRenderer pointCloudRenderer;
+   private Mat cvImage;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString perceptionLogPath = new ImString(System.getProperty("user.home") + "/.ihmc/logs/perception/");
 
    private final ImInt fileIndex = new ImInt(0);
    private final ImInt topicIndex = new ImInt(0);
-   private final ImInt objectIndex = new ImInt(0);
 
+   // TODO: Use these image panels instead of OpenCV image visualization
    private final HashMap<String, RDXOpenCVVideoVisualizer> imagePanels = new HashMap<>();
    ArrayList<String> logFilesInDirectory = new ArrayList<>();
 
    private String[] topicNamesArray;
    private String[] fileNamesArray;
-   private String currentTopic;
 
    private boolean modified = false;
-   private int numDatasetsInCurrentGroup = 0;
-   private int numGroupsInCurrentGroup = 0;
 
    public PerceptionDataLoadingPanel(PerceptionDataLoader loader)
    {
@@ -58,11 +50,6 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
       super(panelName);
       setRenderMethod(this::renderImGuiWidgets);
       this.loader = loader;
-   }
-
-   public void setPointCloudRenderer(RDXPointCloudRenderer pointCloudRenderer)
-   {
-      this.pointCloudRenderer = pointCloudRenderer;
    }
 
    public void renderImGuiWidgets()
@@ -105,95 +92,75 @@ public class PerceptionDataLoadingPanel extends ImGuiPanel
       if (!loader.getChannels().isEmpty())
       {
          ImGui.text("Loaded Log: " + loader.getFilePath());
-
          ImGui.text("Number of topics: " + loader.getChannels().size());
-
          ImGui.combo("Topic Names", topicIndex, topicNamesArray);
-//         currentTopic = loader.getChannels().get(topicNamesArray[topicIndex.get()]).getName();
-//         ImGui.text("Total Files: " + loader.getChannels().get(topicNamesArray[topicIndex.get()]).getCount());
-//
-//         ImGui.sliderInt("Object Index", objectIndex.getData(), 0, 10);
 
          HashMap<String, PerceptionLogChannel> channels = loader.getChannels();
          for (PerceptionLogChannel channel : channels.values())
          {
             ImGui.text("Channel: " + channel.getName() + " Count: " + channel.getCount() + " Index: " + channel.getIndex());
             ImGui.sameLine();
-            if(ImGui.button("Play"))
+            if (ImGui.button("Play"))
             {
                channel.setEnabled(true);
             }
          }
       }
 
-//      if (modified)
-//      {
-//         imagePanels.clear();
-//         loader.getChannels().keySet().forEach(channelName ->
-//                                      {
-//                                         RDXOpenCVVideoVisualizer imagePanel = new RDXOpenCVVideoVisualizer("Perception Log: " + channelName,
-//                                                                                                            channelName,
-//                                                                                                            false);
-//                                         imagePanels.put(channelName, imagePanel);
-//                                         baseUI.getImGuiPanelManager().addPanel(imagePanel.getPanel());
-//                                      });
-//         modified = false;
-//      }
+      // TODO: Populate ImGui-GDX image panels based on image channels inside the HDF5
+      //      if (modified)
+      //      {
+      //         imagePanels.clear();
+      //         loader.getChannels().keySet().forEach(channelName ->
+      //                                      {
+      //                                         RDXOpenCVVideoVisualizer imagePanel = new RDXOpenCVVideoVisualizer("Perception Log: " + channelName,
+      //                                                                                                            channelName,
+      //                                                                                                            false);
+      //                                         imagePanels.put(channelName, imagePanel);
+      //                                         baseUI.getImGuiPanelManager().addPanel(imagePanel.getPanel());
+      //                                      });
+      //         modified = false;
+      //      }
 
-         for(PerceptionLogChannel channel  : loader.getChannels().values())
+      for (PerceptionLogChannel channel : loader.getChannels().values())
+      {
+         if (channel.isEnabled())
          {
-//            LogTools.info("Checking Play Enable: {}", channel.isEnabled());
-            if(channel.isEnabled())
+            if (channel.getIndex() < channel.getCount())
             {
-               if (channel.getIndex() < channel.getCount())
+               // TODO: Replace this with setting images into image panels populated earlier
+               if (channel.getName().contains("depth"))
                {
-                  if(channel.getName().contains("depth"))
-                  {
-                     cvImage = new Mat();
-                     loader.loadCompressedDepth(channel.getName(), channel.getIndex(), cvImage);
-                     BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
-                  }
-                  if(channel.getName().contains("color"))
-                  {
-                     cvImage = new Mat();
-                     loader.loadCompressedImage(channel.getName(), channel.getIndex(), cvImage);
-                     BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
-                  }
-                  if(channel.getName().contains("position"))
-                  {
-                     LogTools.info("Position: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
-                  }
-                  if(channel.getName().contains("orientation"))
-                  {
-                     LogTools.info("Orientation: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
-                  }
+                  cvImage = new Mat();
+                  loader.loadCompressedDepth(channel.getName(), channel.getIndex(), cvImage);
+                  BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+               }
+               if (channel.getName().contains("color"))
+               {
+                  cvImage = new Mat();
+                  loader.loadCompressedImage(channel.getName(), channel.getIndex(), cvImage);
+                  BytedecoOpenCVTools.displayDepth(channel.getName(), cvImage, 1);
+               }
 
-                  channel.incrementIndex();
-               }
-               else
+               // TODO: Maybe replace these with trajectory graphics buffer replay
+               if (channel.getName().contains("position"))
                {
-                  channel.setEnabled(false);
-                  channel.resetIndex();
-                  destroyAllWindows();
+                  LogTools.info("Position: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
                }
+               if (channel.getName().contains("orientation"))
+               {
+                  LogTools.info("Orientation: ({},{}) -> {}", channel.getName(), channel.getIndex(), 0);
+               }
+
+               channel.incrementIndex();
+            }
+            else
+            {
+               channel.setEnabled(false);
+               channel.resetIndex();
+               destroyAllWindows();
             }
          }
-
-
-   }
-
-   public void setBaseUI(RDXBaseUI baseUI)
-   {
-      this.baseUI = baseUI;
-   }
-
-   public boolean isModified()
-   {
-      return modified;
-   }
-
-   public void setModified(boolean modified)
-   {
-      this.modified = modified;
+      }
    }
 }

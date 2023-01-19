@@ -1,18 +1,18 @@
 {
   "title" : "GPU planar region extraction parameters",
   "Merge distance threshold" : {
-    "value" : 1.0,
+    "value" : 0.00553,
     "lowerBound" : 0.0,
-    "upperBound" : 10.0
+    "upperBound" : 0.1
   },
   "Merge angular threshold" : {
-    "value" : 0.8,
+    "value" : 0.972851,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Filter disparity threshold" : 2000.0,
   "Patch size" : {
-    "value" : 2,
+    "value" : 4,
     "lowerBound" : 2,
     "upperBound" : 20
   },
