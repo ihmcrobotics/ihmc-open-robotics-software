@@ -168,6 +168,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public <T> void createPublisher(ROS2Topic<T> topic)
+   {
+      ros2Helper.createPublisher(topic);
+   }
+
+   @Override
    public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass)
    {
       return subscribe(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()));
@@ -177,6 +183,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
       subscribeViaCallback(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
+   }
+
+   @Override
+   public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
+   {
+      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)

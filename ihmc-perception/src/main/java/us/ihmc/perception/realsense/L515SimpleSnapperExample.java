@@ -176,7 +176,7 @@ public class L515SimpleSnapperExample implements FootstepAdjustment, L515DepthIm
     * different Z heights at the specified sample locations 
     */
    @Override
-   public boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   public boolean adjustFootstep(FramePose3DReadOnly stancePose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       desiredFootstepPose.set(footstepPose);
       desiredFootstepFrame.setPoseAndUpdate(desiredFootstepPose);

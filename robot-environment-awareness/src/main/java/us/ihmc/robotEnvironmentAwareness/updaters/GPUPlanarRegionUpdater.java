@@ -62,10 +62,10 @@ public class GPUPlanarRegionUpdater
    {
       new IHMCROS2Callback<>(ros2Node,
                              ROS2Tools.CONCAVE_HULL_FACTORY_PARAMETERS,
-                             parameters -> concaveHullFactoryParameters.setFromString(parameters.getParameters().toString()));
+                             parameters -> concaveHullFactoryParameters.setFromColonCommaString(parameters.getParameters().toString()));
       new IHMCROS2Callback<>(ros2Node,
                              ROS2Tools.POLYGONIZER_PARAMETERS,
-                             parameters -> polygonizerParameters.setFromString(parameters.getParameters().toString()));
+                             parameters -> polygonizerParameters.setFromColonCommaString(parameters.getParameters().toString()));
    }
 
    public void logRawGPURegions(RawGPUPlanarRegionList rawGPUPlanarRegionList)

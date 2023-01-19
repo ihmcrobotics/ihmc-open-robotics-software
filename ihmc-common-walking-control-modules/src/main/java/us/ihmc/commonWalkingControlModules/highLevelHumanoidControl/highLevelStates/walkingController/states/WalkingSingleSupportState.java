@@ -18,7 +18,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -26,7 +25,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -99,7 +97,7 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                                                "swingTimeOverrunToInitializeFreeFall",
                                                                                registry,
                                                                                walkingControllerParameters.getSwingTimeOverrunToInitializeFreeFall());
-      resubmitStepsInSwingEveryTick.set(walkingControllerParameters.resubmitStepsInTransferEveryTick());
+      resubmitStepsInSwingEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
 
       additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
@@ -127,13 +125,15 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.computeICPPlan();
       updateWalkingTrajectoryPath();
 
-      boolean requestSwingSpeedUp = balanceManager.shouldAjudstTimeFromTrackingError();
+      // call this here, too, so that the time in state is updated properly for all the swing speed up stuff, so it doesn't get out of sequence. This is
+      // normally called in the WalkingHighLevelHumanoidController.balanceManager#compute
+      balanceManager.updateTimeInState();
+      boolean requestSwingSpeedUp = balanceManager.shouldAdjustTimeFromTrackingError();
 
       boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
       if (footstepIsBeingAdjusted)
       {
-         requestSwingSpeedUp = true;
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          failureDetectionControlModule.setNextFootstep(nextFootstep);
          updateFootstepParameters();
@@ -144,16 +144,16 @@ public class WalkingSingleSupportState extends SingleSupportState
                                            balanceManager.getFinalDesiredCoMAcceleration(),
                                            swingTime);
 
-         balanceManager.adjustFootstep(nextFootstep);
+         balanceManager.adjustFootstepInCoPPlan(nextFootstep);
          // FIXME I don't need to be computing this again
          balanceManager.computeICPPlan();
 
          updateHeightManager();
       }
 
-      if (requestSwingSpeedUp)
+      if (requestSwingSpeedUp || footstepIsBeingAdjusted)
       {
-         double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
+         double swingTimeRemaining = requestSwingSpeedUpInFeetManagerIfNeeded();
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
@@ -330,7 +330,7 @@ public class WalkingSingleSupportState extends SingleSupportState
     *
     * @return the current swing time remaining for the swing foot trajectory
     */
-   private double requestSwingSpeedUpIfNeeded()
+   private double requestSwingSpeedUpInFeetManagerIfNeeded()
    {
       double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentState();
       double adjustedRemainingTime = Math.max(0.0,

@@ -242,7 +242,8 @@ void smooth_non_boundary(read_only image2d_t in, int x, int y, write_only image2
    }
 }
 
-float4 transform(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
+// This isn't used and isn't documented
+float4 transform_unused(float4 point, float4 r1, float4 r2, float4 r3, float4 t)
 {
    return (float4)(dot(r1, point) + t.x, dot(r2, point) + t.y, dot(r3, point) + t.z, 0);
 }

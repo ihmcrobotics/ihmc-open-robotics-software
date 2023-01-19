@@ -16,7 +16,9 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -25,7 +27,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Wa
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -103,7 +104,6 @@ public class DRCFlatGroundWalkingTrack
       SplitFractionCalculatorParametersReadOnly splitFractionParameters = model.getSplitFractionCalculatorParameters();
       HumanoidRobotSensorInformation sensorInformation = model.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       RobotContactPointParameters<RobotSide> contactPointParameters = model.getContactPointParameters();
@@ -119,7 +119,6 @@ public class DRCFlatGroundWalkingTrack
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
@@ -131,10 +130,10 @@ public class DRCFlatGroundWalkingTrack
       if (customControllerStateFactory != null)
          controllerFactory.addCustomControlState(customControllerStateFactory);
 
-      HeightMap heightMapForFootstepZ = null;
+      FootstepAdjustment footstepAdjustment = null;
       if (cheatWithGroundHeightAtForFootstep)
       {
-         heightMapForFootstepZ = scsInitialSetup.getHeightMap();
+         footstepAdjustment = new HeightMapBasedFootstepAdjustment(scsInitialSetup.getHeightMap());
       }
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
@@ -147,7 +146,7 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setRealtimeROS2Node(realtimeROS2Node);
       avatarSimulationFactory.setCreateYoVariableServer(createYoVariableServer);
-      avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript, heightMapForFootstepZ, walkingScriptParameters);
+      avatarSimulationFactory.setComponentBasedFootstepDataMessageGeneratorParameters(useVelocityAndHeadingScript, footstepAdjustment, walkingScriptParameters);
 
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);

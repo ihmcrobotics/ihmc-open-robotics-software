@@ -9,6 +9,7 @@ ihmc {
    loadProductProperties("../product.properties")
    
    configureDependencyResolution()
+   javaDirectory("main", "generated-java")
    configurePublications()
 }
 
@@ -18,6 +19,7 @@ mainDependencies {
       exclude(group = "org.jmonkeyengine")
       exclude(group = "org.lwjgl.lwjgl") // exclude lwjgl 2
    }
+   api("us.ihmc:promp:source")
 }
 
 javafxDependencies {
@@ -30,7 +32,7 @@ javafxDependencies {
 }
 
 missionControlDependencies {
-   api("us.ihmc:ihmc-commons:0.31.0")
+   api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:ihmc-ros2-library:0.22.2")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -44,8 +46,9 @@ libgdxDependencies {
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
+   api("us.ihmc:ihmc-perception-bytedeco:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-simulation:17-0.10.2")
+   api("us.ihmc:scs2-simulation:17-0.11.1")
    api("us.ihmc:mecano-graphviz:17-0.11.5")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
@@ -61,6 +64,9 @@ testDependencies {
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
+   api("us.ihmc:scs2-examples:17-0.11.1")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.11.1")
+   api("us.ihmc:example-simulations:source")
 }
 
 app.entrypoint(ihmc.sourceSetProject("mission-control"),

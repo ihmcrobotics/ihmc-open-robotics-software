@@ -126,6 +126,14 @@ public class WholeBodyControllerCoreFactory
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
+
+      String[] inactiveJoints = walkingControllerParameters.getInactiveJoints();
+      if (inactiveJoints != null)
+      {
+         for (String inactiveJoint : inactiveJoints)
+            toolbox.addInactiveJoint(fullRobotModel.getOneDoFJointByName(inactiveJoint));
+      }
+
       toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
       fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
       // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.

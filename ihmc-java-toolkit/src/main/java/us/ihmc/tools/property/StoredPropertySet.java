@@ -1,9 +1,7 @@
 package us.ihmc.tools.property;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
+import com.fasterxml.jackson.databind.node.*;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -13,6 +11,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspaceDirectory;
 import us.ihmc.tools.io.WorkspaceFile;
+import us.ihmc.tools.string.StringTools;
 
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -87,6 +86,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    private String saveFileNameJSON;
    private String currentVersionSuffix;
    private Class<?> classForLoading;
+   private Class<?> basePropertySetClass;
    private String directoryNameToAssumePresent;
    private String subsequentPathToResourceFolder;
    private final WorkspaceDirectory workspaceDirectory;
@@ -111,11 +111,22 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             String subsequentPathToResourceFolder,
                             String versionSuffix)
    {
+      this(keys, classForLoading, classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, versionSuffix);
+   }
+
+   public StoredPropertySet(StoredPropertyKeyList keys,
+                            Class<?> classForLoading,
+                            Class<?> basePropertySetClass,
+                            String directoryNameToAssumePresent,
+                            String subsequentPathToResourceFolder,
+                            String versionSuffix)
+   {
       this.keys = keys;
-      this.uncapitalizedClassName = StringUtils.uncapitalize(classForLoading.getSimpleName());
-      this.capitalizedClassName = classForLoading.getSimpleName();
+      this.uncapitalizedClassName = StringUtils.uncapitalize(basePropertySetClass.getSimpleName());
+      this.capitalizedClassName = basePropertySetClass.getSimpleName();
       this.classForLoading = classForLoading;
       title = classForLoading.getSimpleName();
+      this.basePropertySetClass = basePropertySetClass;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       workspaceDirectory = new WorkspaceDirectory(directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading);
@@ -134,7 +145,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
    public void generateJavaFiles(String subsequentPathToJavaFolder)
    {
-      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(classForLoading,
+      StoredPropertySetJavaGenerator generator = new StoredPropertySetJavaGenerator(basePropertySetClass,
                                                                                     directoryNameToAssumePresent,
                                                                                     subsequentPathToResourceFolder,
                                                                                     subsequentPathToJavaFolder);
@@ -159,19 +170,31 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public double get(DoubleStoredPropertyKey key)
    {
-      return (Double) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning Double.NaN.", key.getTitleCasedName());
+      return isNull ? Double.NaN : (Double) value;
    }
 
    @Override
    public int get(IntegerStoredPropertyKey key)
    {
-      return (Integer) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning -1.", key.getTitleCasedName());
+      return isNull ? -1 : (Integer) value;
    }
 
    @Override
    public boolean get(BooleanStoredPropertyKey key)
    {
-      return (Boolean) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning false.", key.getTitleCasedName());
+      return isNull ? false : (Boolean) value;
    }
 
    /**
@@ -180,7 +203,11 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public <T> T get(StoredPropertyKey<T> key)
    {
-      return (T) values[key.getIndex()];
+      Object value = values[key.getIndex()];
+      boolean isNull = value == null;
+      if (isNull)
+         LogTools.warn("Value for key {} is null. Returning null.", key.getTitleCasedName());
+      return isNull ? null : (T) value;
    }
 
    @Override
@@ -249,6 +276,12 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   @Override
+   public void set(StoredPropertySetReadOnly other)
+   {
+      setAll(other.getAll());
+   }
+
    private void setInternal(StoredPropertyKey key, Object newValue)
    {
       boolean valueChanged;
@@ -312,7 +345,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
       currentVersionSuffix = versionSuffix;
       legacyFileNameINI = uncapitalizedClassName + currentVersionSuffix + ".ini";
       workspaceLegacyINIFile = new WorkspaceFile(workspaceDirectory, legacyFileNameINI);
-      saveFileNameJSON = classForLoading.getSimpleName() + currentVersionSuffix + ".json";
+      saveFileNameJSON = basePropertySetClass.getSimpleName() + currentVersionSuffix + ".json";
       workspaceJSONFile = new WorkspaceFile(workspaceDirectory, saveFileNameJSON);
    }
 
@@ -348,6 +381,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    {
       if (jsonResourceExists())
       {
+         LogTools.info("Loading parameters from resource: {}/{}", classForLoading.getPackageName().replaceAll("\\.", "/"), saveFileNameJSON);
          JSONFileTools.loadFromClasspath(classForLoading, workspaceJSONFile.getPathForResourceLoadingPathFiltered(), node ->
          {
             if (node instanceof ObjectNode objectNode)
@@ -375,20 +409,70 @@ public class StoredPropertySet implements StoredPropertySetBasics
                   if (propertyNode instanceof ArrayNode arrayNode)
                   {
                      stringValue = arrayNode.get(0).asText();
-                     key.setDescription(arrayNode.get(1).asText());
+                     if (stringValue.equals("null"))
+                     {
+                        LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
+                     }
+                     else
+                     {
+                        setInternal(key, deserializeString(key, stringValue));
+                     }
+                     key.setDescription(arrayNode.get(1).textValue());
+                  }
+                  else if (propertyNode instanceof ObjectNode keyObjectNode)
+                  {
+                     JsonNode valueNode = keyObjectNode.get("value");
+                     JsonNode descriptionNode = keyObjectNode.get("description");
+                     if (descriptionNode != null)
+                        key.setDescription(descriptionNode.textValue());
+
+                     if (key instanceof DoubleStoredPropertyKey doubleKey)
+                     {
+                        setInternal(key, valueNode.doubleValue());
+                        JsonNode lowerBound = keyObjectNode.get("lowerBound");
+                        if (lowerBound != null)
+                           doubleKey.setLowerBound(lowerBound.doubleValue());
+                        JsonNode upperBound = keyObjectNode.get("upperBound");
+                        if (upperBound != null)
+                           doubleKey.setUpperBound(upperBound.doubleValue());
+
+                     }
+                     else if (key instanceof IntegerStoredPropertyKey integerKey)
+                     {
+                        setInternal(key, valueNode.intValue());
+                        JsonNode lowerBound = keyObjectNode.get("lowerBound");
+                        if (lowerBound != null)
+                           integerKey.setLowerBound(lowerBound.intValue());
+                        JsonNode upperBound = keyObjectNode.get("upperBound");
+                        if (upperBound != null)
+                           integerKey.setUpperBound(upperBound.intValue());
+                        JsonNode validValues = keyObjectNode.get("validValues");
+                        if (validValues instanceof ArrayNode validValuesArray)
+                        {
+                           int[] validValuesPrimitiveArray = new int[validValuesArray.size()];
+                           for (int i = 0; i < validValuesArray.size(); i++)
+                           {
+                              validValuesPrimitiveArray[i] = validValuesArray.get(i).intValue();
+                           }
+                           integerKey.setValidValues(validValuesPrimitiveArray);
+                        }
+                     }
+                     else if (key instanceof BooleanStoredPropertyKey booleanKey)
+                     {
+                        setInternal(key, valueNode.booleanValue());
+                     }
                   }
                   else
                   {
                      stringValue = propertyNode.asText();
-                  }
-
-                  if (stringValue.equals("null"))
-                  {
-                     LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
-                  }
-                  else
-                  {
-                     setInternal(key, deserializeString(key, stringValue));
+                     if (stringValue.equals("null"))
+                     {
+                        LogTools.warn("{} is being loaded as null. Please set it in {}", key.getCamelCasedName(), saveFileNameJSON);
+                     }
+                     else
+                     {
+                        setInternal(key, deserializeString(key, stringValue));
+                     }
                   }
                }
             }
@@ -401,7 +485,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
             Properties properties = new Properties();
             InputStream streamForLoading = workspaceLegacyINIFile.getClasspathResourceAsStream();
 
-            LogTools.info("Loading parameters from {}", legacyFileNameINI);
+            LogTools.info("Loading parameters from resource: {}/{}", classForLoading.getPackageName().replaceAll("\\.", "/"), legacyFileNameINI);
             properties.load(streamForLoading);
 
             for (StoredPropertyKey<?> key : keys.keys())
@@ -449,17 +533,77 @@ public class StoredPropertySet implements StoredPropertySetBasics
    public void save()
    {
       Path fileForSaving = findFileForSaving();
-      LogTools.info("Saving parameters to {}", fileForSaving.getFileName());
       if (workspaceDirectory.isFileAccessAvailable())
       {
+         LogTools.info(StringTools.format("Saving parameters to workspace: {}/{}/{}/{}",
+                                          directoryNameToAssumePresent,
+                                          subsequentPathToResourceFolder,
+                                          classForLoading.getPackageName().replaceAll("\\.", "/"),
+                                          saveFileNameJSON));
          FileTools.ensureDirectoryExists(workspaceDirectory.getDirectoryPath(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      }
+      else
+      {
+         LogTools.info("Saving parameters to working directory: {}", fileForSaving);
       }
       JSONFileTools.save(fileForSaving, jsonRootObjectNode ->
       {
          jsonRootObjectNode.put("title", title);
          for (StoredPropertyKey<?> key : keys.keys())
          {
-            if (!key.getDescription().isEmpty())
+            boolean isDoubleKeyAndHasExtras = false;
+            if (key instanceof DoubleStoredPropertyKey doubleKey)
+            {
+               isDoubleKeyAndHasExtras |= doubleKey.hasLowerBound();
+               isDoubleKeyAndHasExtras |= doubleKey.hasUpperBound();
+            }
+            boolean isIntegerKeyAndHasExtras = false;
+            if (key instanceof IntegerStoredPropertyKey integerKey)
+            {
+               isIntegerKeyAndHasExtras |= integerKey.hasLowerBound();
+               isIntegerKeyAndHasExtras |= integerKey.hasUpperBound();
+               isIntegerKeyAndHasExtras |= integerKey.hasSpecifiedValidValues();
+            }
+
+            if (isDoubleKeyAndHasExtras || isIntegerKeyAndHasExtras)
+            {
+               ObjectNode keyObjectNode = jsonRootObjectNode.putObject(key.getTitleCasedName());
+
+               boolean valueIsNull = get(key) == null;
+               boolean defaultValueIsNull = key.getDefaultValue() == null;
+               if (isDoubleKeyAndHasExtras)
+               {
+                  DoubleStoredPropertyKey doubleKey = (DoubleStoredPropertyKey) key;
+                  keyObjectNode.put("value", valueIsNull ? (defaultValueIsNull ? 0.0 : (double) key.getDefaultValue()) : get(doubleKey));
+                  if (doubleKey.hasLowerBound())
+                     keyObjectNode.put("lowerBound", doubleKey.getLowerBound());
+                  if (doubleKey.hasUpperBound())
+                     keyObjectNode.put("upperBound", doubleKey.getUpperBound());
+               }
+               else if (isIntegerKeyAndHasExtras)
+               {
+                  IntegerStoredPropertyKey integerKey = (IntegerStoredPropertyKey) key;
+                  keyObjectNode.put("value", valueIsNull ? (defaultValueIsNull ? 0 : (int) key.getDefaultValue()) : get(integerKey));
+                  if (integerKey.hasLowerBound())
+                     keyObjectNode.put("lowerBound", integerKey.getLowerBound());
+                  if (integerKey.hasUpperBound())
+                     keyObjectNode.put("upperBound", integerKey.getUpperBound());
+                  if (integerKey.hasSpecifiedValidValues())
+                  {
+                     ArrayNode validValuesJSONArray = keyObjectNode.putArray("validValues");
+                     for (int validValue : integerKey.getValidValues())
+                     {
+                        validValuesJSONArray.add(validValue);
+                     }
+                  }
+               }
+
+               if (key.hasDescription())
+               {
+                  keyObjectNode.put("description", key.getDescription());
+               }
+            }
+            else if (key.hasDescription())
             {
                ArrayNode arrayNode = jsonRootObjectNode.putArray(key.getTitleCasedName());
                boolean valueIsNull = get(key) == null;
@@ -610,6 +754,63 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   /**
+    * Sets the properties from a colon-comma string containing all the keys
+    * in their natural order. This method does not handle partial subsets or
+    * out of order parameters. They are assumed to be of the form:
+    * <pre>
+    * camelCaseKeyName: value, camelCasedKeyName2: value2, camelCasedKeyName3: value2
+    * </pre>
+    */
+   @Override
+   public void setFromColonCommaString(String colonCommaString)
+   {
+      colonCommaString = colonCommaString.replace(",", "");
+      Scanner scanner = new Scanner(colonCommaString);
+      for (StoredPropertyKey<?> key : keys.keys())
+      {
+         if (key instanceof DoubleStoredPropertyKey doubleKey)
+         {
+            while (!scanner.hasNextDouble())
+               scanner.next();
+            set(doubleKey, scanner.nextDouble());
+         }
+         else if (key instanceof IntegerStoredPropertyKey integerKey)
+         {
+            while (!scanner.hasNextInt())
+               scanner.next();
+            set(integerKey, scanner.nextInt());
+         }
+         else if (key instanceof BooleanStoredPropertyKey booleanKey)
+         {
+            while (!scanner.hasNextBoolean())
+               scanner.next();
+            set(booleanKey, scanner.nextBoolean());
+         }
+      }
+      scanner.close();
+   }
+
+   @Override
+   public String toString()
+   {
+      List<StoredPropertyKey<?>> storedPropertyKeys = keys.keys();
+      StringBuilder result = new StringBuilder();
+      for (int i = 0; i < storedPropertyKeys.size(); i++)
+      {
+         StoredPropertyKey<?> key = storedPropertyKeys.get(i);
+         result.append(key.getCamelCasedName());
+         result.append(": ");
+         result.append(serializeValue(get(key)));
+         if (i < storedPropertyKeys.size() - 1)
+         {
+            result.append(", ");
+         }
+      }
+      return result.toString();
+   }
+
+   @Override
    public String getCurrentVersionSuffix()
    {
       return currentVersionSuffix;
@@ -620,8 +821,15 @@ public class StoredPropertySet implements StoredPropertySetBasics
       return capitalizedClassName;
    }
 
+   @Override
    public String getTitle()
    {
       return title;
+   }
+
+   @Override
+   public void setTitle(String title)
+   {
+      this.title = title;
    }
 }
