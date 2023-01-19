@@ -26,18 +26,14 @@ public class RDXObjectDetector
    private ObjectDetector objectDetector;
    private boolean simulatedCamera;
 
-   private boolean objectDetected = false;
-//   private final ArrayList<ArUcoObject> objecstWithArUco = new ArrayList<>();
-   private ArUcoMarkerObject objectWithArUco;
-   private String objectName = "";
-
    // simulated camera related
-   private final ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
+   private final ArUcoMarkerObjectInfo arUcoInfo = new ArUcoMarkerObjectInfo();
    private final ArrayList<OpenCVArUcoMarker> arUcoMarkersToTrack = new ArrayList<>();
    private OpenCVArUcoMarkerDetection arUcoMarkerDetection;
    private RDXOpenCVArUcoMarkerDetectionUI arUcoMarkerDetectionUI;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerROS2Publisher;
 
+   /** Constructor for object detector with simulated camera, which publishes on ROS detected markers */
    public RDXObjectDetector(RDXHighLevelDepthSensorSimulator objectDetectionBlackflySimulator, ROS2PublishSubscribeAPI ros2)
    {
       simulatedCamera = true;
@@ -47,8 +43,8 @@ public class RDXObjectDetector
                                   objectDetectionBlackflySimulator.getSensorFrame());
       arUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI("from Blackfly Right");
 
-      for (int id : arucoInfo.getMarkersId()){
-         arUcoMarkersToTrack.add(new OpenCVArUcoMarker(id, arucoInfo.getMarkerSize(id)));
+      for (int id : arUcoInfo.getMarkersId()){
+         arUcoMarkersToTrack.add(new OpenCVArUcoMarker(id, arUcoInfo.getMarkerSize(id)));
       }
       arUcoMarkerROS2Publisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetection,
                                                                     arUcoMarkersToTrack,
@@ -57,13 +53,17 @@ public class RDXObjectDetector
       arUcoMarkerDetectionUI.create(arUcoMarkerDetection, arUcoMarkersToTrack, objectDetectionBlackflySimulator.getSensorFrame());
       panel.addChild(arUcoMarkerDetectionUI.getMainPanel());
 
-      objectDetector = new ObjectDetector();
+      objectDetector = new ObjectDetector(arUcoInfo, arUcoMarkersToTrack);
    }
 
+   /** Constructor for object detector with real camera */
    public RDXObjectDetector()
    {
       simulatedCamera = false;
-      objectDetector = new ObjectDetector();
+      for (int id : arUcoInfo.getMarkersId()){
+         arUcoMarkersToTrack.add(new OpenCVArUcoMarker(id, arUcoInfo.getMarkerSize(id)));
+      }
+      objectDetector = new ObjectDetector(arUcoInfo, arUcoMarkersToTrack);
    }
 
    public void update()
@@ -76,31 +76,7 @@ public class RDXObjectDetector
             arUcoMarkerROS2Publisher.update();
             arUcoMarkerDetectionUI.update();
          }
-
-         for (OpenCVArUcoMarker marker : arUcoMarkersToTrack)
-         {
-            if (arUcoMarkerDetection.isDetected(marker)) // check if a marker between those that we have in the config file is detected
-            {
-               objectDetected = true;
-               int objectId = marker.getId();
-               objectName = arucoInfo.getObjectName(objectId);
-               //TODO - EXTENSION TO SIMULTANEOUS DETECTION MULTIPLE OBJECTS
-               // if multiple objects detected,
-               // use VR eye tracking to see what we are focusing on (closer object to where the eye is focusing)
-               // highlight selected object and user confirms with button A, rejects button B
-//               objecstWithArUco.add(new ArUcoObject(marker.getId(),arucoInfo)); // get object with attached marker
-               objectWithArUco = new ArUcoMarkerObject(objectId, arucoInfo);
-               FramePose3DBasics markerPose = arUcoMarkerDetection.getPose(marker); // get marker pose in camera frame
-               markerPose.changeFrame(ReferenceFrame.getWorldFrame()); // transform in world frame
-               markerPose.get(objectWithArUco.getMarkerToWorld()); // pack transform marker to world from marker pose
-               objectWithArUco.update(); // update frame of the object
-               objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
-               break;
-            }
-            else
-               objectDetected = false;
-         }
-
+         objectDetector.update();
       }
    }
 
@@ -111,17 +87,17 @@ public class RDXObjectDetector
 
    public String getObjectName()
    {
-      return objectName;
+      return objectDetector.getObjectName();
    }
 
    public FramePose3D getObjectPose()
    {
-      return objectWithArUco.getObjectPose();
+      return objectDetector.getObjectPose();
    }
 
    public ReferenceFrame getObjectFrame()
    {
-      return objectWithArUco.getObjectFrame();
+      return objectDetector.getObjectFrame();
    }
 
    public RDXOpenCVArUcoMarkerDetectionUI getArUcoMarkerDetectionUI()
@@ -141,6 +117,6 @@ public class RDXObjectDetector
 
    public boolean hasDetectedObject()
    {
-      return objectDetected;
+      return objectDetector.hasDetectedObject();
    }
 }

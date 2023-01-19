@@ -44,7 +44,7 @@ public class ArUcoObjectPoseTest
                                                      new Quaternion(-0.002, 1.000, 0.001, 0.003));
       // create from this pose, the associated transform stored in objectWithArUco
       markerPose.get(objectWithArUco.getMarkerToWorld());
-      objectWithArUco.update(); // update frame of the object
+      objectWithArUco.updateFrame(); // update frame of the object
       objectWithArUco.computeObjectPose(markerPose); // compute object pose from marker pose
       LogTools.info("Marker: {}", markerPose);
 

@@ -22,7 +22,7 @@ public class ArUcoMarkerObject
       objectFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(markerFrame, objectToMarker);
    }
 
-   public void update()
+   public void updateFrame()
    {
       markerFrame.update();
       objectFrame.update();
