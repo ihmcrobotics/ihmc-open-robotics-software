@@ -109,6 +109,8 @@ public class NettyOuster
    private long nextExpectedMeasurementID = -1;
    private String lidarMode;
 
+   private boolean printedWarning = false;
+
    public NettyOuster()
    {
       group = new NioEventLoopGroup();
@@ -138,9 +140,10 @@ public class NettyOuster
 
                // Ouster data is little endian
                int measurementID = content.getUnsignedShortLE(TIMESTAMP_BYTES);
-               if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID)
+               if (nextExpectedMeasurementID > 0 && measurementID != nextExpectedMeasurementID && !printedWarning)
                {
-                  LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}", nextExpectedMeasurementID, measurementID);
+                  printedWarning = true;
+                  LogTools.warn("UDP datagram skipped! Expected measurement ID {} but was {}. Skipping this warning in the future", nextExpectedMeasurementID, measurementID);
                }
                nextExpectedMeasurementID = (measurementID + MEASUREMENT_BLOCKS_PER_UDP_DATAGRAM) % columnsPerFrame;
 

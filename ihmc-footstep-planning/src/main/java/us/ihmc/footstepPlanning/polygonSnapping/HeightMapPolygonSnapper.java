@@ -51,6 +51,7 @@ public class HeightMapPolygonSnapper
       bestFitPlane.setToNaN();
       Point2D gridCenter = heightMap.getGridCenter();
 
+      // collect all the height map points that are underneath the foothold
       int centerIndex = HeightMapTools.computeCenterIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
       int minIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMinX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
       int maxIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
@@ -71,7 +72,7 @@ public class HeightMapPolygonSnapper
             double x = HeightMapTools.indexToCoordinate(xIndex, gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
             double y = HeightMapTools.indexToCoordinate(yIndex, gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
 
-            if (polygonToSnap.distance(new Point2D(x, y)) > epsilonDistance)
+            if (polygonToSnap.signedDistance(new Point2D(x, y)) > epsilonDistance)
             {
                continue;
             }

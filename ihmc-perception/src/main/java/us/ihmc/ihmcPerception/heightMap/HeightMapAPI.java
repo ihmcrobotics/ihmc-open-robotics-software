@@ -1,4 +1,4 @@
-package us.ihmc.avatar.heightMap;
+package us.ihmc.ihmcPerception.heightMap;
 
 import ihmc_common_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Empty;
