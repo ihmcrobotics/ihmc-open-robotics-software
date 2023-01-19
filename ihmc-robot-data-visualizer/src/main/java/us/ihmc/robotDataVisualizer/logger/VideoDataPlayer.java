@@ -334,10 +334,10 @@ public class VideoDataPlayer
       Camera camera = new Camera();
       camera.setName("test");
       camera.setInterlaced(false);
-      camera.setTimestampFile("Camera-1_Timestamps.dat");
-      camera.setVideoFile("Camera-1_Video.mov");
+      camera.setTimestampFile("ValkyrieTripodNorth_Timestamps.dat");
+      camera.setVideoFile("recordedVideo.mov");
 
-      File dataDirectory = new File("/home/jesper/robotLogs/20170724_135638_AtlasControllerFactory/");
+      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
