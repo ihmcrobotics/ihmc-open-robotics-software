@@ -195,7 +195,7 @@ public class RealsenseColorAndDepthPublisher
       */
 
       // Tripod: F1121365, F0245563
-      String l515SerialNumber = System.getProperty("l515.serial.number", "F0245563");
+      String l515SerialNumber = System.getProperty("l515.serial.number", "F1121365");
       new RealsenseColorAndDepthPublisher(l515SerialNumber,
                                           1024,
                                           768,

@@ -7,6 +7,7 @@ import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.Group;
 import org.bytedeco.hdf5.global.hdf5;
 import perception_msgs.msg.dds.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -22,14 +23,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,8 +55,9 @@ public class PerceptionDataLogger
    private ROS2Helper ros2Helper;
    private HDF5Manager hdf5Manager;
    private RealtimeROS2Node realtimeROS2Node;
+   private String filePath;
 
-   private AtomicReference<Boolean> stopLoggingRequest = new AtomicReference<Boolean>(false);
+   private AtomicReference<Boolean> stopLoggingRequest = new AtomicReference<>(false);
 
    private HashMap<String, PerceptionLogChannel> channels = new HashMap<>();
    private HashMap<String, AtomicReference<ImageMessage>> references = new HashMap<>();
@@ -99,6 +98,7 @@ public class PerceptionDataLogger
 
    public void openLogFile(String logFileName)
    {
+      this.filePath = logFileName;
       File f = new File(logFileName);
       if (!f.exists() && !f.isDirectory())
       {
@@ -141,7 +141,7 @@ public class PerceptionDataLogger
       {
          byteBuffers.put(PerceptionLoggerConstants.D435_COLOR_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.D435_COLOR_NAME, 0);
-         var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_VIDEO);
+         var d435VideoSubscription = ros2Helper.subscribe(ROS2Tools.D435_COLOR);
          d435VideoSubscription.addCallback(this::logColorD435);
          runnablesToStopLogging.addLast(d435VideoSubscription::destroy);
       }
@@ -151,7 +151,7 @@ public class PerceptionDataLogger
       {
          byteBuffers.put(PerceptionLoggerConstants.D435_DEPTH_NAME, new byte[BUFFER_SIZE]);
          counts.put(PerceptionLoggerConstants.D435_DEPTH_NAME, 0);
-         var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH);
+         var d435DepthSubscription = ros2Helper.subscribe(ROS2Tools.D435_DEPTH_IMAGE);
          d435DepthSubscription.addCallback(this::logDepthD435);
          runnablesToStopLogging.addLast(d435DepthSubscription::destroy);
       }
@@ -248,36 +248,36 @@ public class PerceptionDataLogger
 
    public void stopLogging()
    {
-      while (!runnablesToStopLogging.isEmpty())
-      {
-         runnablesToStopLogging.pollFirst().run();
-      }
+      stopLoggingRequest.set(true);
 
       for (PerceptionLogChannel channel : channels.values())
       {
-         if(channel.isEnabled())
+         if (channel.isEnabled())
          {
             boolean termination = false;
             try
             {
-               termination = executorService.awaitTermination(2, TimeUnit.SECONDS);
+               termination = executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
             }
             catch (InterruptedException e)
             {
                throw new RuntimeException(e);
             }
 
-            if(termination)
-            {
-               LogTools.warn("Perception Logger: All Threads Could Not Be Terminated. Timeout Reached.");
-            }
+            LogTools.warn("Perception Logger: Thread Terminated [{}]: {}", channel.getName(), termination);
          }
 
          channel.resetIndex();
          channel.resetCount();
+
+         while (!runnablesToStopLogging.isEmpty())
+         {
+            runnablesToStopLogging.pollFirst().run();
+         }
       }
 
       hdf5Manager.closeFile();
+      LogTools.info("HDF5 File Saved: {}", filePath);
    }
 
    public void collectStatistics()
@@ -312,77 +312,98 @@ public class PerceptionDataLogger
       if (channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.OUSTER_DEPTH_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, message);
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
+         storeLongArray(PerceptionLoggerConstants.OUSTER_SENSOR_TIME, timestamp);
          storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_POSITION, message.getPosition());
          storeFloatArray(PerceptionLoggerConstants.OUSTER_SENSOR_ORIENTATION, message.getOrientation());
-      }
-   }
-
-   public void logColorD435(VideoPacket videoPacket)
-   {
-      LogTools.info("Logging D435 Color: ", videoPacket.toString());
-
-      if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
-      {
-         channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.D435_COLOR_NAME, videoPacket);
-      }
-   }
-
-   public void logDepthD435(VideoPacket videoPacket)
-   {
-      LogTools.info("Logging D435 Depth: ", videoPacket.toString());
-
-      if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
-      {
-         channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.D435_DEPTH_NAME, videoPacket);
+         storeCompressedImage(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, message);
       }
    }
 
    public void logDepthL515(ImageMessage message)
    {
-      LogTools.info("Logging L515 Depth: ", message.toString());
+      LogTools.info("Logging L515 Depth: {} {}", message.getAcquisitionTime().getSecondsSinceEpoch(), message.getAcquisitionTime().getAdditionalNanos());
 
       if (channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.L515_DEPTH_NAME).incrementCount();
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
+         storeLongArray(PerceptionLoggerConstants.L515_SENSOR_TIME, timestamp);
          storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_POSITION, message.getPosition());
          storeFloatArray(PerceptionLoggerConstants.L515_SENSOR_ORIENTATION, message.getOrientation());
          storeCompressedImage(PerceptionLoggerConstants.L515_DEPTH_NAME, message);
       }
    }
 
-   public void logColorL515(ImageMessage videoPacket)
+   public void logColorL515(ImageMessage message)
    {
-      LogTools.info("Logging L515 Color: ", videoPacket.toString());
+      LogTools.info("Logging L515 Color: ", message.toString());
 
       if (channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.L515_COLOR_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, videoPacket);
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
+         storeCompressedImage(PerceptionLoggerConstants.L515_COLOR_NAME, message);
       }
    }
 
-   public void logColorZED2(ImageMessage imageMessage)
+   public void logDepthD435(ImageMessage message)
    {
-      LogTools.info("Logging ZED2 Color: ", imageMessage.toString());
+      LogTools.info("Logging D435 Depth: ", message.toString());
+
+      if (channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).isEnabled())
+      {
+         channels.get(PerceptionLoggerConstants.D435_DEPTH_NAME).incrementCount();
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
+         storeLongArray(PerceptionLoggerConstants.D435_SENSOR_TIME, timestamp);
+         storeFloatArray(PerceptionLoggerConstants.D435_SENSOR_POSITION, message.getPosition());
+         storeFloatArray(PerceptionLoggerConstants.D435_SENSOR_ORIENTATION, message.getOrientation());
+         storeCompressedImage(PerceptionLoggerConstants.D435_DEPTH_NAME, message);
+      }
+   }
+
+   public void logColorD435(ImageMessage message)
+   {
+      LogTools.info("Logging D435 Color: ", message.toString());
+
+      if (channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).isEnabled())
+      {
+         channels.get(PerceptionLoggerConstants.D435_COLOR_NAME).incrementCount();
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
+         storeCompressedImage(PerceptionLoggerConstants.D435_COLOR_NAME, message);
+      }
+   }
+
+   public void logColorZED2(ImageMessage message)
+   {
+      LogTools.info("Logging ZED2 Color: ", message.toString());
 
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, imageMessage);
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTime().getSecondsSinceEpoch()) + message.getAcquisitionTime().getAdditionalNanos();
+         storeLongArray(PerceptionLoggerConstants.ZED2_SENSOR_TIME, timestamp);
+         storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, message);
       }
    }
 
-   public void logColorBlackfly(BigVideoPacket videoPacket)
+   public void logColorBlackfly(BigVideoPacket message)
    {
-      LogTools.info("Logging Blackfly Color: ", videoPacket.toString());
+      LogTools.info("Logging Blackfly Color: ", message.toString());
 
       if (channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, videoPacket);
+         long timestamp =
+               Conversions.secondsToNanoseconds(message.getAcquisitionTimeSecondsSinceEpoch()) + message.getAcquisitionTimeAdditionalNanos();
+         storeLongArray(PerceptionLoggerConstants.BLACKFLY_COLOR_TIME, timestamp);
+         storeCompressedImage(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, message);
       }
    }
 
@@ -409,19 +430,22 @@ public class PerceptionDataLogger
    {
       executorService.submit(() ->
                              {
-                                Group group = hdf5Manager.getGroup(namespace);
+                                synchronized (hdf5Manager)
+                                {
+                                   Group group = hdf5Manager.getGroup(namespace);
 
-                                byte[] heapArray = byteBuffers.get(namespace);
-                                int imageCount = counts.get(namespace);
-                                IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+                                   byte[] heapArray = byteBuffers.get(namespace);
+                                   int imageCount = counts.get(namespace);
+                                   IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
-                                LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
-                                counts.put(namespace, imageCount + 1);
+                                   LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+                                   counts.put(namespace, imageCount + 1);
 
-                                imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-                                HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+                                   imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
-                                LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                                   LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                                }
                              });
    }
 
@@ -432,19 +456,22 @@ public class PerceptionDataLogger
    {
       executorService.submit(() ->
                              {
-                                Group group = hdf5Manager.getGroup(namespace);
+                                synchronized (hdf5Manager)
+                                {
+                                   Group group = hdf5Manager.getGroup(namespace);
 
-                                byte[] heapArray = byteBuffers.get(namespace);
-                                int imageCount = counts.get(namespace);
-                                IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+                                   byte[] heapArray = byteBuffers.get(namespace);
+                                   int imageCount = counts.get(namespace);
+                                   IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
-                                LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
-                                counts.put(namespace, imageCount + 1);
+                                   LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
+                                   counts.put(namespace, imageCount + 1);
 
-                                imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-                                HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+                                   imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
-                                LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                                   LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                                }
                              });
    }
 
@@ -455,20 +482,23 @@ public class PerceptionDataLogger
       long begin_store = System.nanoTime();
       executorService.submit(() ->
                              {
-                                Group group = hdf5Manager.getGroup(namespace);
-
-                                byte[] heapArray = byteBuffers.get(namespace);
-                                int imageCount = counts.get(namespace);
-                                IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
-
-                                counts.put(namespace, imageCount + 1);
-
-                                imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
-                                HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
-
-                                if(stopLoggingRequest.get())
+                                synchronized (hdf5Manager)
                                 {
-                                   channels.get(namespace).setEnabled(false);
+                                   Group group = hdf5Manager.getGroup(namespace);
+
+                                   byte[] heapArray = byteBuffers.get(namespace);
+                                   int imageCount = counts.get(namespace);
+                                   IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
+
+                                   counts.put(namespace, imageCount + 1);
+
+                                   imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
+                                   HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
+
+                                   if (stopLoggingRequest.get())
+                                   {
+                                      channels.get(namespace).setEnabled(false);
+                                   }
                                 }
                              });
       long end_store = System.nanoTime();
@@ -478,14 +508,17 @@ public class PerceptionDataLogger
    {
       executorService.submit(() ->
                              {
+                                synchronized (hdf5Manager)
+                                {
                                    Group group = hdf5Manager.getGroup(namespace);
                                    int index = hdf5Manager.getCount(namespace);
                                    HDF5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
 
-                                   if(stopLoggingRequest.get())
+                                   if (stopLoggingRequest.get())
                                    {
                                       channels.get(namespace).setEnabled(false);
                                    }
+                                }
                              });
    }
 
@@ -493,25 +526,28 @@ public class PerceptionDataLogger
    {
       executorService.submit(() ->
                              {
-                                Group group = hdf5Manager.getGroup(namespace);
-                                TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
-
-                                int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-                                if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
+                                synchronized (hdf5Manager)
                                 {
-                                   long count = hdf5Manager.getCount(namespace);
-                                   HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                   hdf5Manager.resetBuffer(namespace);
-                                }
-                                buffer.addAll(array);
+                                   Group group = hdf5Manager.getGroup(namespace);
+                                   TFloatArrayList buffer = hdf5Manager.getFloatBuffer(namespace);
 
-                                if (stopLoggingRequest.get())
-                                {
-                                   long count = hdf5Manager.getCount(namespace);
-                                   HDF5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
-                                   channels.get(namespace).setEnabled(false);
-                                }
+                                   int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
+                                   if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
+                                   {
+                                      long count = hdf5Manager.getCount(namespace);
+                                      HDF5Tools.storeFloatArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+                                      hdf5Manager.resetBuffer(namespace);
+                                   }
+                                   buffer.addAll(array);
 
+                                   if (stopLoggingRequest.get())
+                                   {
+                                      LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
+                                      long count = hdf5Manager.getCount(namespace);
+                                      HDF5Tools.storeFloatArray2D(group, count, buffer, bufferSize, array.length);
+                                      channels.get(namespace).setEnabled(false);
+                                   }
+                                }
                              });
    }
 
@@ -519,23 +555,27 @@ public class PerceptionDataLogger
    {
       executorService.submit(() ->
                              {
-                                Group group = hdf5Manager.getGroup(namespace);
-                                TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
-
-                                int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
-                                if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
+                                synchronized (hdf5Manager)
                                 {
-                                   long count = hdf5Manager.getCount(namespace);
-                                   HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                   hdf5Manager.resetBuffer(namespace);
-                                }
-                                buffer.addAll(array);
+                                   Group group = hdf5Manager.getGroup(namespace);
+                                   TLongArrayList buffer = hdf5Manager.getLongBuffer(namespace);
 
-                                if (stopLoggingRequest.get())
-                                {
-                                   long count = hdf5Manager.getCount(namespace);
-                                   HDF5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
-                                   channels.get(namespace).setEnabled(false);
+                                   int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
+                                   if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
+                                   {
+                                      long count = hdf5Manager.getCount(namespace);
+                                      HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
+                                      hdf5Manager.resetBuffer(namespace);
+                                   }
+                                   buffer.addAll(array);
+
+                                   if (stopLoggingRequest.get())
+                                   {
+                                      LogTools.warn("Logging Last Remaining: [{}] -> Count: [{}]", namespace, bufferSize);
+                                      long count = hdf5Manager.getCount(namespace);
+                                      HDF5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
+                                      channels.get(namespace).setEnabled(false);
+                                   }
                                 }
                              });
    }
@@ -545,6 +585,13 @@ public class PerceptionDataLogger
       long[] pointArray = new long[1];
       pointArray[0] = value;
       storeLongArray(namespace, pointArray);
+   }
+
+   public void storeFloatArray(String namespace, float value)
+   {
+      float[] pointArray = new float[1];
+      pointArray[0] = value;
+      storeFloatArray(namespace, pointArray);
    }
 
    public void storeFloatArray(String namespace, Point3D point)
@@ -589,7 +636,7 @@ public class PerceptionDataLogger
       //      logger.setChannelEnabled(PerceptionLoggerConstants.BLACKFLY_COLOR_NAME, true);
       //      logger.setChannelEnabled(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, true);
 
-//      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
+      //      logger.setChannelEnabled(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION, true);
 
       logger.startLogging(logDirectory + logFileName, "Nadia");
 

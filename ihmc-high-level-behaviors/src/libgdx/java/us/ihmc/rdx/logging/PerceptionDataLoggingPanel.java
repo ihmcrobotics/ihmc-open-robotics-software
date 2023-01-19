@@ -91,4 +91,9 @@ public class PerceptionDataLoggingPanel extends ImGuiPanel
          logger.stopLogging();
       }
    }
+
+   public void destroy()
+   {
+      logger.stopLogging();
+   }
 }
