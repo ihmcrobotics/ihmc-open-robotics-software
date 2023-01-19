@@ -44,16 +44,10 @@ public class RDXVRTeleporter
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
 
-   // Double-clicks
-   private long bTimePressedNanosPrevious;
-   private long bTimePressedNanos = 0;
-   private static final double DOUBLE_CLICK_TIME_THRESHOLD = 500; // 500 ms
-   private double doubleClickTimeElapsedInMilliseconds;
-   private boolean isDoubleClick = false;
-   // Reference frame of mid-feet to be set from syncedRobot
+   // Reference frame of mid-feet to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
    private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
-
-   private final ClickEvaluator bButtonClickEvaluator = new ClickEvaluator();
+   //
+   private final ClickTools bButtonClickTools = new ClickTools();
 
    public void create(RDXVRContext context)
    {
@@ -109,19 +103,29 @@ public class RDXVRTeleporter
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
+         preparingToTeleport = false;
          InputDigitalActionData bButton = controller.getBButtonActionData();
          InputDigitalActionData bButtonDoubleClick = controller.getBButtonDoubleClickActionData();
-         boolean bButtonPressed = preparingToTeleport = bButton.bState();
-         boolean bChanged = bButton.bChanged();
-         boolean released = !bButtonPressed && bChanged;
+         boolean bButtonDown = bButton.bState() && bButtonClickTools.resume();
+         // button released just now
+         boolean released = !bButtonDown && bButton.bChanged();
+         // button clicked just now
+         boolean bJustPushed = bButtonDown && bButton.bChanged();
+
+         if (bJustPushed)
+         {
+            bButtonClickTools.delay();
+         }
 
          // Double-clicked
          if (bButtonDoubleClick.bChanged() && !bButtonDoubleClick.bState())
          {
             snapToMidFeetZUp(vrContext);
          }
-         else if (bButtonPressed)
+         else if (bButtonDown && bButtonClickTools.resume())
          {
+            // This needs to be set here, otherwise it will render the ray even when double-clicking
+            preparingToTeleport = true;
             // Ray teleport
             pickRay.setToZero(controller.getXForwardZUpControllerFrame());
             pickRay.getDirection().set(Axis3D.X);
@@ -162,7 +166,7 @@ public class RDXVRTeleporter
             LibGDXTools.toLibGDX(tempTransform, ring.transform);
             LibGDXTools.toLibGDX(tempTransform, arrow.transform);
          }
-         else if (released)
+         else if (released && bButtonClickTools.resume())
          {
             vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
             {
