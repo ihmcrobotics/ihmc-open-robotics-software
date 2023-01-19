@@ -27,6 +27,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
+import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
