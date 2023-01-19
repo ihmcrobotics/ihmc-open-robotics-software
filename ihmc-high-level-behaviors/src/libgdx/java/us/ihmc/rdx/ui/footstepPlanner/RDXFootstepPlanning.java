@@ -132,7 +132,7 @@ public class RDXFootstepPlanning
          assumeFlatGround = false;
       }
 
-      request.setPlanBodyPath(false);
+      request.setPlanBodyPath(true);
       // TODO: Set start footholds!!
       //      request.setPlanarRegionsList(...);
       request.setAssumeFlatGround(assumeFlatGround);
