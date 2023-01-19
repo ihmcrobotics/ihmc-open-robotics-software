@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 public class ArUcoObjectInfoTest
 {
    @Test
-   public void infoAruCoObjectTest()
+   public void infoArUcoObjectTest()
    {
       ArUcoMarkerObjectInfo arucoInfo = new ArUcoMarkerObjectInfo();
       String name = arucoInfo.getObjectName(0);
