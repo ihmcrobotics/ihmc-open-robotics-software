@@ -135,6 +135,7 @@ public class RDXPerceptionUI
          public void dispose()
          {
             environmentBuilder.destroy();
+            perceptionLoggingPanel.destroy();
             globalVisualizersUI.destroy();
             baseUI.dispose();
             ros2Node.destroy();
