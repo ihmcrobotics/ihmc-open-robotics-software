@@ -22,8 +22,8 @@ mainDependencies {
    api("commons-net:commons-net:3.6")
    api("org.lz4:lz4-java:1.8.0")
 
-   api("us.ihmc:euclid:0.19.0")
-   api("us.ihmc:euclid-geometry:0.19.0")
+   api("us.ihmc:euclid:0.19.1")
+   api("us.ihmc:euclid-geometry:0.19.1")
    api("us.ihmc:ihmc-ros2-library:0.22.2")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")

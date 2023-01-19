@@ -10,9 +10,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
@@ -20,6 +20,8 @@ import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
+import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
+import us.ihmc.avatar.StepGeneratorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
@@ -37,11 +39,14 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -103,7 +108,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class SCS2AvatarSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
+   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory
+         = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
    protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>("realtimeROS2Node");
@@ -112,7 +118,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
    protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
-   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber
+         = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
@@ -129,7 +136,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
-   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
+   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters
+         = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
    protected final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
@@ -137,7 +145,8 @@ public class SCS2AvatarSimulationFactory
 
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
    private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
-   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
+   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters
+         = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
@@ -305,8 +314,8 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = outputWriterFactory.get()
-                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
+      simulationOutputWriter = outputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
+                                                               robot.getControllerManager().getControllerOutput());
    }
 
    private void setupStateEstimationThread()
@@ -389,22 +398,52 @@ public class SCS2AvatarSimulationFactory
    private void setupStepGeneratorThread()
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
-      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-      if (useHeadingAndVelocityScript.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript.get());
-      else
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
-      if (headingAndVelocityEvaluationScriptParameters.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
-      if (heightMapForFootstepZ.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ.get());
 
-      stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory,
+      HumanoidSteppingPluginFactory steppingFactory;
+      HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
+      boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
+      HeadingAndVelocityEvaluationScriptParameters parameters = null;
+      if (headingAndVelocityEvaluationScriptParameters.hasValue())
+         parameters = headingAndVelocityEvaluationScriptParameters.get();
+      if (useHeadingAndVelocityScript || parameters != null)
+      {
+         ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+         componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
+         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
+         if (parameters != null)
+            componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(parameters);
+         if (heightMapForFootstepZ.hasValue())
+            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+
+         steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
+      }
+      else
+      {
+         JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
+         if (heightMapForFootstepZ.hasValue())
+            joystickPluginFactory.setFootStepAdjustment(new HeightMapBasedFootstepAdjustment(heightMapForFootstepZ.get()));
+         else
+         {
+            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                                      robotModel.get().getSteppingEnvironmentalConstraintParameters());
+            stepSnapperUpdatable.setShouldSnapToRegions(true);
+         }
+
+         steppingFactory = joystickPluginFactory;
+      }
+
+      RealtimeROS2Node ros2Node = null;
+      if (realtimeROS2Node.hasBeenSet())
+         ros2Node = realtimeROS2Node.get();
+      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get());
+                                                          robotModel.get(),
+                                                          stepSnapperUpdatable,
+                                                          ros2Node);
+      simulationConstructionSet.addYoGraphics(SCS1GraphicConversionTools.toYoGraphicDefinitions(stepGeneratorThread.getYoGraphicsListRegistry()));
    }
 
    private void setupMultiThreadedRobotController()
@@ -423,11 +462,11 @@ public class SCS2AvatarSimulationFactory
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / simulationDT.get());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, simulationDT.get(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, simulationDT.get(), masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator",
-                                                                      stepGeneratorThread,
-                                                                      stepGeneratorDivisor,
-                                                                      simulationDT.get(),
-                                                                      masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator",
+                                                                         stepGeneratorThread,
+                                                                         stepGeneratorDivisor,
+                                                                         simulationDT.get(),
+                                                                         masterFullRobotModel);
 
       SimulatedHandControlTask handControlTask = null;
       AvatarSimulatedHandControlThread handControlThread = null;
@@ -642,7 +681,6 @@ public class SCS2AvatarSimulationFactory
       CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
-      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
@@ -661,12 +699,12 @@ public class SCS2AvatarSimulationFactory
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,
-                                                                                                    feetContactSensorNames,
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
                                                                                                     pushRecoveryControllerParameters,
-                                                                                                    copTrajectoryParameters);
+                                                                                                    copTrajectoryParameters,
+                                                                                                    robotModel.getSplitFractionCalculatorParameters());
       HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
@@ -863,5 +901,10 @@ public class SCS2AvatarSimulationFactory
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
       this.heightMapForFootstepZ.set(heightMapForFootstepZ);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
+   }
+
+   public AvatarStepGeneratorThread getStepGeneratorThread()
+   {
+      return stepGeneratorThread;
    }
 }

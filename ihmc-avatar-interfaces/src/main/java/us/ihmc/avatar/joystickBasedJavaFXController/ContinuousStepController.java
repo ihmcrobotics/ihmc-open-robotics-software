@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -356,7 +357,7 @@ public class ContinuousStepController
                                                  yoGraphicsListRegistry);
    }
 
-   private boolean adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
+   private boolean adjustFootstep(FramePose3DReadOnly stanceFootPose, FramePose2DReadOnly footstepPose, RobotSide footSide, FixedFramePose3DBasics adjustedFootstep)
    {
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());

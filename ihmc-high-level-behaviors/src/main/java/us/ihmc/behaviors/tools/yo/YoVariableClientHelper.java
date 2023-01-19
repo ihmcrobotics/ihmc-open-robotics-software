@@ -150,6 +150,27 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
          {
             publishDoubleValueToYoVariable(variableName, set ? 1.0 : 0.0);
          }
+
+         @Override
+         public String getName()
+         {
+            YoVariable variable = tryToGetVariable(variableName);
+            return variable == null ? variableName.substring(variableName.lastIndexOf(".")) : variable.getName();
+         }
+
+         @Override
+         public String getFullName()
+         {
+            YoVariable variable = tryToGetVariable(variableName);
+            return variable == null ? "" : variable.getFullNameString();
+         }
+
+         @Override
+         public String getDescription()
+         {
+            YoVariable variable = tryToGetVariable(variableName);
+            return variable == null ? "" : variable.getDescription();
+         }
       };
    }
 

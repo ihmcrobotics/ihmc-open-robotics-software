@@ -574,7 +574,7 @@ public class PlanarRegionFileTools
 
    private static void writePlanarRegionVertices(OutputStreamWriter fileWriter, PlanarRegion region) throws IOException
    {
-      for (Point2D vertex : region.getConcaveHull())
+      for (Point2DReadOnly vertex : region.getConcaveHull())
       {
          fileWriter.write(vertex.getX() + ", " + vertex.getY() + "\n");
       }

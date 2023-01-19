@@ -103,4 +103,9 @@ public class StoredPropertyKey<T>
    {
       return description;
    }
+
+   public boolean hasDescription()
+   {
+      return !description.isEmpty();
+   }
 }

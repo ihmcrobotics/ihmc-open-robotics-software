@@ -20,16 +20,19 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -100,7 +103,7 @@ public class AvatarSimulationFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
 
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
-   private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
+   private final OptionalFactoryField<FootstepAdjustment> footstepAdjustment = new OptionalFactoryField<>("footstepAdjustment");
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
 
    // TO CONSTRUCT
@@ -307,22 +310,48 @@ public class AvatarSimulationFactory
    private void setupStepGeneratorThread()
    {
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
-      ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
-      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
-      if (useHeadingAndVelocityScript.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript.get());
-      else
-         componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
-      if (headingAndVelocityEvaluationScriptParameters.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
-      if (heightMapForFootstepZ.hasValue())
-         componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ.get());
+      HumanoidSteppingPluginFactory steppingFactory;
+      HumanoidSteppingPluginEnvironmentalConstraints stepSnapperUpdatable = null;
+      boolean useHeadingAndVelocityScript = this.useHeadingAndVelocityScript.hasValue() ? this.useHeadingAndVelocityScript.get() : false;
 
-      stepGeneratorThread = new AvatarStepGeneratorThread(componentBasedFootstepDataMessageGeneratorFactory,
+      if (useHeadingAndVelocityScript || headingAndVelocityEvaluationScriptParameters.hasValue())
+      {
+         ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+         componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
+         if (useHeadingAndVelocityScript)
+            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
+         else
+            componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(false);
+         if (headingAndVelocityEvaluationScriptParameters.hasValue())
+            componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters.get());
+         if (footstepAdjustment.hasValue())
+            componentBasedFootstepDataMessageGeneratorFactory.setFootStepAdjustment(footstepAdjustment.get());
+
+         steppingFactory = componentBasedFootstepDataMessageGeneratorFactory;
+      }
+      else
+      {
+         JoystickBasedSteppingPluginFactory joystickPluginFactory = new JoystickBasedSteppingPluginFactory();
+         if (footstepAdjustment.hasValue())
+            joystickPluginFactory.setFootStepAdjustment(footstepAdjustment.get());
+         else
+         {
+            stepSnapperUpdatable = new HumanoidSteppingPluginEnvironmentalConstraints(robotModel.get().getContactPointParameters(),
+                                                                                      robotModel.get().getWalkingControllerParameters().getSteppingParameters(),
+                                                                                      robotModel.get().getSteppingEnvironmentalConstraintParameters());
+            stepSnapperUpdatable.setShouldSnapToRegions(true);
+         }
+
+         steppingFactory = joystickPluginFactory;
+      }
+
+      stepGeneratorThread = new AvatarStepGeneratorThread(steppingFactory,
                                                           contextDataFactory,
                                                           highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                           highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                          robotModel.get());
+                                                          robotModel.get(),
+                                                          stepSnapperUpdatable,
+                                                          realtimeROS2Node.get());
    }
 
    private void createMasterContext()
@@ -344,7 +373,7 @@ public class AvatarSimulationFactory
       int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
-      HumanoidRobotControlTask stepGeneratorTask = new ControllerTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
+      HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
 
       AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
       SimulatedHandControlTask handControlTask = null;
@@ -767,11 +796,11 @@ public class AvatarSimulationFactory
    }
 
    public void setComponentBasedFootstepDataMessageGeneratorParameters(boolean useHeadingAndVelocityScript,
-                                                                       HeightMap heightMapForFootstepZ,
+                                                                       FootstepAdjustment footstepAdjustment,
                                                                        HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
    {
       this.useHeadingAndVelocityScript.set(useHeadingAndVelocityScript);
-      this.heightMapForFootstepZ.set(heightMapForFootstepZ);
+      this.footstepAdjustment.set(footstepAdjustment);
       this.headingAndVelocityEvaluationScriptParameters.set(headingAndVelocityEvaluationScriptParameters);
    }
 }

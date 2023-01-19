@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.robotics.stateMachine.core.StateTransition.TransitionRequest;
 import us.ihmc.robotics.stateMachine.extra.EventState;
 import us.ihmc.robotics.stateMachine.factories.EventBasedStateMachineFactory;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -235,7 +236,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
          return false;
       }
 
-      StateTransition<K>.TransitionRequest transitionRequest = stateTransition.isTransitionRequested(clock.getTimeInCurrentState());
+      TransitionRequest<K> transitionRequest = stateTransition.isTransitionRequested(clock.getTimeInCurrentState());
 
       if (transitionRequest == null)
       {
@@ -264,7 +265,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * @param transitionRequest the info about the transition requested.
     * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
     */
-   void performTransition(StateTransition<K>.TransitionRequest transitionRequest)
+   void performTransition(TransitionRequest<K> transitionRequest)
    {
       K nextStateKey = transitionRequest.getDestinationKey();
       boolean performOnExit = transitionRequest.isPerformOnExit();

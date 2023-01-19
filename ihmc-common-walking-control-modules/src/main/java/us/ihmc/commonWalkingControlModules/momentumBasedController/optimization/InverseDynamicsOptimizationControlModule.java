@@ -8,6 +8,7 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
@@ -78,6 +79,7 @@ public class InverseDynamicsOptimizationControlModule
    private final DMatrixRMaj customQDDotMinMatrix, customQDDotMaxMatrix;
 
    private final JointIndexHandler jointIndexHandler;
+   private final TIntArrayList inactiveJointIndices = new TIntArrayList();
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJointBasics, YoDouble> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumAccelerations = new HashMap<>();
@@ -106,6 +108,9 @@ public class InverseDynamicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
+
+      for (OneDoFJointBasics inactiveJoint : toolbox.getInactiveOneDoFJoints())
+         inactiveJointIndices.add(jointIndexHandler.getOneDoFJointIndex(inactiveJoint));
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
@@ -176,6 +181,7 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.reset();
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
+      inactiveJointIndices.clear();
    }
 
    public void resetCustomBounds()
@@ -197,6 +203,11 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
+
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      {
+         qpSolver.setActiveDoF(inactiveJointIndices.get(i), false);
+      }
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
       qpSolver.setMaxRho(wrenchMatrixCalculator.getRhoMaxMatrix());
@@ -494,5 +505,19 @@ public class InverseDynamicsOptimizationControlModule
          qpSolver.setJerkRegularizationWeight(command.getJointJerkWeight());
       if (command.hasJointTorqueWeight())
          qpSolver.setJointTorqueWeight(command.getJointTorqueWeight());
+      for (int i = 0; i < command.getJointsToActivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToActivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         inactiveJointIndices.remove(jointIndex);
+      }
+      for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+      {
+         OneDoFJointBasics joint = command.getJointsToDeactivate().get(i);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
+         // Prevent duplicates in the list.
+         if (!inactiveJointIndices.contains(jointIndex))
+            inactiveJointIndices.add(jointIndex);
+      }
    }
 }

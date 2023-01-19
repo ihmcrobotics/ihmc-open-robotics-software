@@ -1,0 +1,9 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "Image" : true,
+    "Playback Video" : true,
+    "VR Thread Debugger" : false
+  }
+}

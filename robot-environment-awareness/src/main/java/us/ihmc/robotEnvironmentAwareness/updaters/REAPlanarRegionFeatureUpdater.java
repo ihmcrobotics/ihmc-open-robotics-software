@@ -258,11 +258,19 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
       String planarRegionConcaveHullFactoryParametersFile = filePropertyHelper.loadProperty(planarRegionsConcaveHullParametersTopic.getName());
       if (planarRegionConcaveHullFactoryParametersFile != null)
-         concaveHullFactoryParameters.set(ConcaveHullFactoryParameters.parse(planarRegionConcaveHullFactoryParametersFile));
+      {
+         ConcaveHullFactoryParameters concaveHullFactoryParametersStoredPropertySet = new ConcaveHullFactoryParameters();
+         concaveHullFactoryParametersStoredPropertySet.setFromColonCommaString(planarRegionConcaveHullFactoryParametersFile);
+         concaveHullFactoryParameters.set(concaveHullFactoryParametersStoredPropertySet);
+      }
 
       String polygonizerParametersFile = filePropertyHelper.loadProperty(planarRegionsPolygonizerParametersTopic.getName());
       if (polygonizerParametersFile != null)
-         polygonizerParameters.set(PolygonizerParameters.parse(polygonizerParametersFile));
+      {
+         PolygonizerParameters polygonizerParametersStoredPropertySet = new PolygonizerParameters();
+         polygonizerParametersStoredPropertySet.setFromColonCommaString(polygonizerParametersFile);
+         polygonizerParameters.set(polygonizerParametersStoredPropertySet);
+      }
 
       String intersectionEstimationParametersFile = filePropertyHelper.loadProperty(planarRegionsIntersectionParametersTopic.getName());
       if (intersectionEstimationParametersFile != null)

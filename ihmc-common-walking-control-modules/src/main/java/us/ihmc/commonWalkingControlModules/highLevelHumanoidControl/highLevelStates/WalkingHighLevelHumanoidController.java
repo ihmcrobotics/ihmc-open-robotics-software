@@ -77,6 +77,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -851,6 +852,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          {
             controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
             controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
+
+            if (bodyManager.getJointDesiredData() != null)
+            {
+               controllerCoreCommand.completeLowLevelJointData(bodyManager.getJointDesiredData());
+            }
          }
       }
 

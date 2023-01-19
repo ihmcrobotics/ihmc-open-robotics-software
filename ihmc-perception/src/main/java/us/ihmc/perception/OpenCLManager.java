@@ -6,8 +6,10 @@ import org.bytedeco.opencl.*;
 import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.log.LogTools;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.TreeSet;
 
@@ -71,7 +73,7 @@ public class OpenCLManager
       checkReturnCode();
 
       /* Create Command Queue */
-      IntPointer properties = null;
+      LongPointer properties = null;
       commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
       checkReturnCode();
    }
@@ -100,15 +102,33 @@ public class OpenCLManager
       });
    }
 
-   public _cl_kernel loadSingleFunctionProgramAndCreateKernel(String programName)
+   public _cl_kernel loadSingleFunctionProgramAndCreateKernel(String programName, String... headerFilesToInclude)
    {
-      _cl_program program = loadProgram(programName);
+      _cl_program program = loadProgram(programName, headerFilesToInclude);
       return createKernel(program, StringUtils.uncapitalize(programName));
    }
 
-   public _cl_program loadProgram(String programName)
+   public _cl_program loadProgram(String programName, String... headerFilesToInclude)
    {
-      String sourceAsString = OpenCLTools.readFile(Paths.get("openCL", programName + ".cl"));
+      String sourceAsString = "";
+
+      ArrayList<String> includedHeaders = new ArrayList<>();
+      includedHeaders.add("EuclidCommon.cl");
+      includedHeaders.addAll(Arrays.asList(headerFilesToInclude));
+
+      for (String includedHeader : includedHeaders)
+      {
+         Path headerFilePath = Paths.get("openCL", includedHeader);
+         LogTools.info("Loading OpenCL program: {}", includedHeader);
+         sourceAsString += OpenCLTools.readFile(headerFilePath) + "\n";
+      }
+
+      Path programPath = Paths.get("openCL", programName + ".cl");
+      LogTools.info("Loading OpenCL program: {}", programPath);
+      sourceAsString += OpenCLTools.readFile(programPath);
+
+      // Support loading from CRLF (Windows) checkouts
+      sourceAsString = sourceAsString.replaceAll("\\r\\n", "\n");
 
       /* Create Kernel program from the read in source */
       int count = 1;

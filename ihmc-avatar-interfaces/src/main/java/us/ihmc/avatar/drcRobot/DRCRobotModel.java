@@ -1,5 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import us.ihmc.avatar.AvatarSimulatedHandControlThread;
@@ -17,8 +18,10 @@ import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingEnvironmentalConstraintParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -201,9 +204,19 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default LookAndStepBehaviorParameters getLookAndStepParameters()
+   {
+      return null;
+   }
+
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
+   }
+
+   default SteppingEnvironmentalConstraintParameters getSteppingEnvironmentalConstraintParameters()
+   {
+      return new SteppingEnvironmentalConstraintParameters();
    }
 
    default String getStepReachabilityResourceName()
@@ -271,6 +284,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return null;
+   }
+
+   default Path getMultiContactScriptPath()
    {
       return null;
    }

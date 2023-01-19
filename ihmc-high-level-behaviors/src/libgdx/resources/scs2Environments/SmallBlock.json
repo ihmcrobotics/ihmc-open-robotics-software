@@ -1,7 +1,7 @@
 {
   "ambientLight" : 0.4,
   "objects" : [ {
-    "type" : "GDXSCS2SmallCinderBlockRoughed",
+    "type" : "RDXSCS2SmallCinderBlockRoughed",
     "x" : -0.18735769477436026,
     "y" : 0.35960940459466517,
     "z" : 0.0,

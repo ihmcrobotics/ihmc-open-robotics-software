@@ -141,7 +141,7 @@ public abstract class TransferState extends WalkingState
          boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
 
          // if you're outside at all, but taking the next step will recover, go ahead and do it.
-         if ((distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
+         if (distanceToSupport > 0.0 && (isICPInsideNextSupportPolygon || nextFootstep.getIsAdjustable()))
             return true;
          // if you're done, and your error is low, trigger the next step
          else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
