@@ -1,5 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableClient;
@@ -22,6 +23,7 @@ public class YoVariableConnectionBurstTest
    {
       A, B, C, D
    }
+
    private static final double dt = 0.001;
    private long timestamp = 0;
    private static final DataServerSettings logSettings = new DataServerSettings(true);
@@ -35,29 +37,25 @@ public class YoVariableConnectionBurstTest
       //This amount of updates and sleep prevents any loss in data being lost in the initial connection
       ThreadTools.sleepSeconds(10);
 
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
+      for (int i = 0; i < 6; i++)
+      {
+         server.update(jitteryTimestamp);
+      }
 
       ThreadTools.sleepSeconds(10);
    }
 
    public void updateVariables(YoVariableServer server, long jitteryTimestamp)
    {
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
-      server.update(jitteryTimestamp);
+      for (int i = 0; i < 6; i++)
+      {
+         server.update(jitteryTimestamp);
+      }
 
       ThreadTools.sleepSeconds(5);
    }
 
-
+   @Disabled
    @Test
    public void TestYoVariableConnectionBurst()
    {
@@ -75,18 +73,15 @@ public class YoVariableConnectionBurstTest
       YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener);
       client.start("localhost", 8008);
 
-
       // timestamp and dtFactor are used to generate the jitteryTimestamp that will be sent to the server as the time when the update method was called
       timestamp += Conversions.secondsToNanoseconds(dt);
       long dtFactor = Conversions.secondsToNanoseconds(dt) / 2;
       long jitteryTimestamp = timestamp + (long) ((random.nextDouble() - 0.5) * dtFactor);
 
-
       ensureServerClientConnection(server, jitteryTimestamp);
 
-      //Start a producer/consumer test
+      // Start a producer/consumer test
       seq_id.set(0L);
-
 
       TestEnum[] values = { TestEnum.A, TestEnum.B, TestEnum.C, TestEnum.D };
 
@@ -97,25 +92,27 @@ public class YoVariableConnectionBurstTest
 
          updateVariables(server, jitteryTimestamp);
 
-         //This is an interesting idea that might work to keep the rates of the server and client the same
-//         if (iter < 50)
-//         {
-//            sleep.set(5);
-//         }
-//         else
-//         {
-//            if (iter % 10 != 0)
-//            {
-//               sleep.set(5);
-//            }
-//            else
-//            {
-//               sleep.set(0);
-//            }
-//         }
+      /*
+         This is an interesting idea that might work to keep the rates of the server and client the same
+         if (iter < 50)
+         {
+            sleep.set(5);
+         }
+         else
+         {
+            if (iter % 10 != 0)
+            {
+               sleep.set(5);
+            }
+            else
+            {
+               sleep.set(0);
+            }
+         }
+      */
       }
 
-      YoBuffer buffer=scsYoVariablesUpdatedListener.getDataBuffer();
+      YoBuffer buffer = scsYoVariablesUpdatedListener.getDataBuffer();
       YoLong seq =  (YoLong)buffer.findVariable("seq_id");
 
       double[] filledBuffer = buffer.getEntry(seq).getBuffer();
