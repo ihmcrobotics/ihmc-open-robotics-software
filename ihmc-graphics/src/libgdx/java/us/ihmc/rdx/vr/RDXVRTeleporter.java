@@ -47,7 +47,7 @@ public class RDXVRTeleporter
    // Reference frame of mid-feet to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
    private ReferenceFrame robotMidFeetZUpReferenceFrame = null;
    //
-   private final ClickTools bButtonClickTools = new ClickTools();
+   private final ClickDelayCalculator bButtonClickDelayCalculator = new ClickDelayCalculator();
 
    public void create(RDXVRContext context)
    {
@@ -77,28 +77,6 @@ public class RDXVRTeleporter
       meshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color);
    }
 
-   private void snapToMidFeetZUp(RDXVRContext vrContext)
-   {
-      if (robotMidFeetZUpReferenceFrame != null)
-      {
-         vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
-         {
-            xyYawHeadsetToTeleportTransform.setIdentity();
-            vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
-            {
-               headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
-               xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
-               xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
-            });
-            teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
-            teleportIHMCZUpToIHMCZUpWorld.invert();
-            // set tempTransform to incoming rigidbodyTransform.
-            tempTransform.set(robotMidFeetZUpReferenceFrame.getTransformToWorldFrame());
-            tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
-         });
-      }
-   }
-
    private void processVRInput(RDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -106,7 +84,7 @@ public class RDXVRTeleporter
          preparingToTeleport = false;
          InputDigitalActionData bButton = controller.getBButtonActionData();
          InputDigitalActionData bButtonDoubleClick = controller.getBButtonDoubleClickActionData();
-         boolean bButtonDown = bButton.bState() && bButtonClickTools.resume();
+         boolean bButtonDown = bButton.bState() && bButtonClickDelayCalculator.resume();
          // button released just now
          boolean released = !bButtonDown && bButton.bChanged();
          // button clicked just now
@@ -114,15 +92,15 @@ public class RDXVRTeleporter
 
          if (bJustPushed)
          {
-            bButtonClickTools.delay();
+            bButtonClickDelayCalculator.delay();
          }
 
          // Double-clicked
-         if (bButtonDoubleClick.bChanged() && !bButtonDoubleClick.bState())
+         if (robotMidFeetZUpReferenceFrame != null && bButtonDoubleClick.bChanged() && !bButtonDoubleClick.bState())
          {
             snapToMidFeetZUp(vrContext);
          }
-         else if (bButtonDown && bButtonClickTools.resume())
+         else if (bButtonDown && bButtonClickDelayCalculator.resume())
          {
             // This needs to be set here, otherwise it will render the ray even when double-clicking
             preparingToTeleport = true;
@@ -166,7 +144,7 @@ public class RDXVRTeleporter
             LibGDXTools.toLibGDX(tempTransform, ring.transform);
             LibGDXTools.toLibGDX(tempTransform, arrow.transform);
          }
-         else if (released && bButtonClickTools.resume())
+         else if (released && bButtonClickDelayCalculator.resume())
          {
             vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
             {
@@ -199,6 +177,25 @@ public class RDXVRTeleporter
             lastTouchpadY = Double.NaN;
          }
       });
+   }
+
+   private void snapToMidFeetZUp(RDXVRContext vrContext)
+   {
+      vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+                         {
+                            xyYawHeadsetToTeleportTransform.setIdentity();
+                            vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
+                                                                  {
+                                                                     headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                                                                     xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                                                                     xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+                                                                  });
+                            teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+                            teleportIHMCZUpToIHMCZUpWorld.invert();
+                            // set tempTransform to incoming rigidbodyTransform.
+                            tempTransform.set(robotMidFeetZUpReferenceFrame.getTransformToWorldFrame());
+                            tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
+                         });
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
