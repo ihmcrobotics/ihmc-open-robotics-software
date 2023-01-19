@@ -1,17 +1,9 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.jpountz.lz4.LZ4Compressor;
-import net.jpountz.lz4.LZ4Decompressor;
-import net.jpountz.lz4.LZ4Factory;
-import net.jpountz.lz4.LZ4FastDecompressor;
-import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -23,8 +15,7 @@ import us.ihmc.communication.packets.ScanPointFilter;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.PerceptionMessageTools;
-import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 

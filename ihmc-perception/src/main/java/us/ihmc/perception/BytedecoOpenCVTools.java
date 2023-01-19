@@ -368,13 +368,20 @@ public class BytedecoOpenCVTools
       packet.setVideoSource(VideoSource.MULTISENSE_LEFT_EYE.toByte());
    }
 
-   public static void fillImageMessage(BytePointer compressedBytes, ImageMessage imageMessage, FramePose3D cameraPose, long seq,  int height, int width)
+   public static void fillImageMessage(BytePointer compressedBytes,
+                                       ImageMessage imageMessage,
+                                       FramePose3D cameraPose,
+                                       long seq,
+                                       int height,
+                                       int width,
+                                       int format)
    {
       imageMessage.getData().resetQuick();
       for (int i = 0; i < compressedBytes.limit(); i++)
       {
          imageMessage.getData().add(compressedBytes.get(i));
       }
+      imageMessage.setFormat(format);
       imageMessage.setImageHeight(height);
       imageMessage.setImageWidth(width);
       imageMessage.getPosition().set(cameraPose.getPosition());

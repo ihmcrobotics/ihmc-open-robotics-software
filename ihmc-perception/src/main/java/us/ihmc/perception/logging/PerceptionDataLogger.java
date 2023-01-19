@@ -364,14 +364,14 @@ public class PerceptionDataLogger
       }
    }
 
-   public void logColorZED2(VideoPacket videoPacket)
+   public void logColorZED2(ImageMessage imageMessage)
    {
-      LogTools.info("Logging ZED2 Color: ", videoPacket.toString());
+      LogTools.info("Logging ZED2 Color: ", imageMessage.toString());
 
       if (channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).isEnabled())
       {
          channels.get(PerceptionLoggerConstants.ZED2_COLOR_NAME).incrementCount();
-         storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, videoPacket);
+         storeCompressedImage(PerceptionLoggerConstants.ZED2_COLOR_NAME, imageMessage);
       }
    }
 
@@ -461,13 +461,15 @@ public class PerceptionDataLogger
                                 int imageCount = counts.get(namespace);
                                 IDLSequence.Byte imageEncodedTByteArrayList = packet.getData();
 
-                                LogTools.info("{} Storing Buffer: {}", namespace, imageCount);
                                 counts.put(namespace, imageCount + 1);
 
                                 imageEncodedTByteArrayList.toArray(heapArray, 0, packet.getData().size() + 4);
                                 HDF5Tools.storeByteArray(group, imageCount, heapArray, imageEncodedTByteArrayList.size() + 4);
 
-                                LogTools.info("{} Done Storing Buffer: {}", namespace, imageCount);
+                                if(stopLoggingRequest.get())
+                                {
+                                   channels.get(namespace).setEnabled(false);
+                                }
                              });
       long end_store = System.nanoTime();
    }
@@ -476,13 +478,14 @@ public class PerceptionDataLogger
    {
       executorService.submit(() ->
                              {
-                                synchronized (this)
-                                {
                                    Group group = hdf5Manager.getGroup(namespace);
                                    int index = hdf5Manager.getCount(namespace);
                                    HDF5Tools.storeByteArray(group, index, message.getScan().toArray(), message.getScan().size());
-                                   LogTools.info("{} Done Storing Buffer: {}", namespace, index);
-                                }
+
+                                   if(stopLoggingRequest.get())
+                                   {
+                                      channels.get(namespace).setEnabled(false);
+                                   }
                              });
    }
 
@@ -522,23 +525,26 @@ public class PerceptionDataLogger
                                 int bufferSize = hdf5Manager.getBufferIndex(namespace) / array.length;
                                 if (bufferSize == HDF5Manager.MAX_BUFFER_SIZE)
                                 {
+                                   long count = hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
                                    hdf5Manager.resetBuffer(namespace);
-
-                                   synchronized (this)
-                                   {
-                                      long count = hdf5Manager.getCount(namespace);
-                                      HDF5Tools.storeLongArray2D(group, count, buffer, HDF5Manager.MAX_BUFFER_SIZE, array.length);
-                                   }
                                 }
                                 buffer.addAll(array);
+
+                                if (stopLoggingRequest.get())
+                                {
+                                   long count = hdf5Manager.getCount(namespace);
+                                   HDF5Tools.storeLongArray2D(group, count, buffer, bufferSize, array.length);
+                                   channels.get(namespace).setEnabled(false);
+                                }
                              });
    }
 
    public void storeLongArray(String namespace, long value)
    {
-      float[] pointArray = new float[1];
+      long[] pointArray = new long[1];
       pointArray[0] = value;
-      storeFloatArray(namespace, pointArray);
+      storeLongArray(namespace, pointArray);
    }
 
    public void storeFloatArray(String namespace, Point3D point)

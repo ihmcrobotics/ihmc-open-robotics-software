@@ -25,7 +25,7 @@ import us.ihmc.perception.netty.NettyOuster;
 import us.ihmc.perception.ouster.OusterDepthExtractionKernel;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionTools;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListWithPose;
@@ -191,7 +191,7 @@ public class StructuralPerceptionProcessWithDriver
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
 
-      PerceptionTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
+      PerceptionMessageTools.publishPlanarRegionsList(planarRegionsList, regionsTopic, ros2Helper);
    }
 
    private void extractPlanarRegionsListWithPose(BytedecoImage depthImage, ReferenceFrame cameraFrame, PlanarRegionsListWithPose planarRegionsListWithPose)
