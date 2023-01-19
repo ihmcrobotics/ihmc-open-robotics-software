@@ -104,8 +104,7 @@ public class RDXBallAndArrowPosePlacement implements RenderableProvider
 
          if (placingPosition)
          {
-            double z = pickPointInWorld.getZ();
-            sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), (float) z);
+            sphere.transform.setTranslation(pickPointInWorld.getX32(), pickPointInWorld.getY32(), pickPointInWorld.getZ32());
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
