@@ -1,8 +1,10 @@
-package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
+package us.ihmc.ihmcPerception.depthData;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -120,6 +122,19 @@ public class PointCloudData
 
       pointCloud = perceptionMessageTools.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
    }
+
+   public PointCloudData(Instant instant, int numberOfPoints, FloatBuffer pointCloudBuffer)
+   {
+      timestamp = Conversions.secondsToNanoseconds(instant.getEpochSecond()) + instant.getNano();
+      this.numberOfPoints = numberOfPoints;
+      colors = null;
+
+      pointCloud = new Point3D[numberOfPoints];
+      pointCloudBuffer.rewind();
+      for (int i = 0; i < numberOfPoints; i++)
+         pointCloud[i] = new Point3D(pointCloudBuffer.get(), pointCloudBuffer.get(), pointCloudBuffer.get());
+   }
+
 
    public long getTimestamp()
    {

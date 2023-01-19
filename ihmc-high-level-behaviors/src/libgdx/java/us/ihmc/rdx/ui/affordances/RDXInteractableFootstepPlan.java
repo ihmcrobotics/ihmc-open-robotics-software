@@ -19,6 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -47,7 +48,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
                       RDXTeleoperationParameters teleoperationParameters,
-                      FootstepPlannerParametersBasics footstepPlannerParameters)
+                      FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
@@ -188,6 +189,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          messageList.getQueueingProperties().setExecutionMode(ExecutionMode.QUEUE.toByte());
          messageList.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       }
+      messageList.setOffsetFootstepsHeightWithExecutionError(true);
       communicationHelper.publishToController(messageList);
 
       // Note: set stance and swing as last two steps of the footstepArrayList (if this list is not empty)
