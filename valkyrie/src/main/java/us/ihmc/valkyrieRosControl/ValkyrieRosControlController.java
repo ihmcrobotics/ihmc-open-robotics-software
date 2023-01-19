@@ -147,9 +147,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
    }
 
-   public static final String[] readForceTorqueSensors = {"leftFootSixAxis", "rightFootSixAxis"};
-   public static final String[] forceTorqueSensorModelNames = {"leftAnkleRoll", "rightAnkleRoll"};
-
    public static final double gravity = 9.80665;
 
    public static final String VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
@@ -258,6 +255,38 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    {
       LogTools.info("Valkyrie robot version: " + VERSION);
       /*
+       * Create Robot model
+       */
+
+      ValkyrieRobotModel robotModel;
+      if (isGazebo)
+      {
+         robotModel = new ValkyrieRobotModel(RobotTarget.GAZEBO, VERSION);
+      }
+      else
+      {
+         robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, VERSION);
+      }
+
+      { // Custom robot loading management.
+        // First attempt to load a custom robot from a given VM argument indicating path to the custom robot.
+         String vmArgumentValue = System.getProperty(CUSTOM_ROBOT_PATH_ARG);
+
+         if (vmArgumentValue != null)
+         {
+            LogTools.info("Loading custom robot from properties: {}", vmArgumentValue);
+            robotModel.setCustomModel(vmArgumentValue);
+         }
+         else
+         { // Otherwise, attempt to load custom robot via environment variable
+            robotModel.setCustomModelFromEnvironment();
+         }
+      }
+
+      String robotName = robotModel.getSimpleRobotName();
+      ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
+
+      /*
        * Create joints
        */
 
@@ -308,44 +337,16 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       }
 
       HashMap<String, ForceTorqueSensorHandle> forceTorqueSensorHandles = new HashMap<>();
-      for (int i = 0; i < readForceTorqueSensors.length; i++)
+      for (String ftSensorName : sensorInformation.getForceSensorNames())
       {
-         String forceTorqueSensor = readForceTorqueSensors[i];
-         String modelName = forceTorqueSensorModelNames[i];
-         forceTorqueSensorHandles.put(modelName, createForceTorqueSensorHandle(forceTorqueSensor));
+         ForceTorqueSensorHandle ftSensorHandle = createForceTorqueSensorHandle(ftSensorName);
+         LogTools.info("Creating FT sensor handle for {}, exists: {}", ftSensorName, ftSensorHandle != null);
+         forceTorqueSensorHandles.put(ftSensorName, ftSensorHandle);
       }
 
       /*
        * Create registries
        */
-
-      ValkyrieRobotModel robotModel;
-      if (isGazebo)
-      {
-         robotModel = new ValkyrieRobotModel(RobotTarget.GAZEBO, VERSION);
-      }
-      else
-      {
-         robotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT, VERSION);
-      }
-
-      { // Custom robot loading management.
-        // First attempt to load a custom robot from a given VM argument indicating path to the custom robot.
-         String vmArgumentValue = System.getProperty(CUSTOM_ROBOT_PATH_ARG);
-
-         if (vmArgumentValue != null)
-         {
-            LogTools.info("Loading custom robot from properties: {}", vmArgumentValue);
-            robotModel.setCustomModel(vmArgumentValue);
-         }
-         else
-         { // Otherwise, attempt to load custom robot via environment variable
-            robotModel.setCustomModelFromEnvironment();
-         }
-      }
-
-      String robotName = robotModel.getSimpleRobotName();
-      ValkyrieSensorInformation sensorInformation = robotModel.getSensorInformation();
 
       /*
        * Create network servers/clients
