@@ -117,7 +117,9 @@ public class DualBlackflyAndAruCoMarkerOnRobotProcess
       {
          blackflies.get(side).destroy();
       }
+      ThreadTools.sleep(300); // Sleeps to try and let the Blackfly shutdown more gracefully
       spinnakerSystemManager.destroy();
+      ThreadTools.sleep(300);
    }
 
    public static void main(String[] args)
