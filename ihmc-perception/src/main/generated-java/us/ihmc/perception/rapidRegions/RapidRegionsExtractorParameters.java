@@ -41,7 +41,8 @@ public class RapidRegionsExtractorParameters extends StoredPropertySet implement
    public static final IntegerStoredPropertyKey svdReductionFactor = keys.addIntegerKey("SVD reduction factor");
    public static final IntegerStoredPropertyKey gaussianSize = keys.addIntegerKey("Gaussian size");
    public static final DoubleStoredPropertyKey gaussianSigma = keys.addDoubleKey("Gaussian sigma");
-   public static final IntegerStoredPropertyKey searchDepthLimit = keys.addIntegerKey("Search depth limit");
+   public static final IntegerStoredPropertyKey internalSearchDepthLimit = keys.addIntegerKey("Internal search depth limit");
+   public static final IntegerStoredPropertyKey boundarySearchDepthLimit = keys.addIntegerKey("Boundary search depth limit");
    public static final IntegerStoredPropertyKey regionMinPatches = keys.addIntegerKey("Region min patches");
    public static final IntegerStoredPropertyKey boundaryMinPatches = keys.addIntegerKey("Boundary min patches");
    public static final DoubleStoredPropertyKey regionGrowthFactor = keys.addDoubleKey("Region growth factor");

@@ -105,9 +105,14 @@ public interface RapidRegionsExtractorParametersReadOnly extends StoredPropertyS
       return get(gaussianSigma);
    }
 
-   default int getSearchDepthLimit()
+   default int getInternalSearchDepthLimit()
    {
-      return get(searchDepthLimit);
+      return get(internalSearchDepthLimit);
+   }
+
+   default int getBoundarySearchDepthLimit()
+   {
+      return get(boundarySearchDepthLimit);
    }
 
    default int getRegionMinPatches()

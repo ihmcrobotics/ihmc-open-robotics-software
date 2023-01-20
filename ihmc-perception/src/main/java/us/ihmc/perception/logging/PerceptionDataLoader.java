@@ -66,19 +66,22 @@ public class PerceptionDataLoader
    {
       executorService.submit(() ->
       {
-         int count = (int) hdf5Manager.getCount(namespace);
-         for(int index = 0; index < count; index++)
+         synchronized (hdf5Manager)
          {
-            float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
-            loadFloatArray(namespace, index, pointFloatArray);
-
-            for (int i = 0; i < pointFloatArray.length / 3; i++)
+            int count = (int) hdf5Manager.getCount(namespace);
+            for(int index = 0; index < count; index++)
             {
-               points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
-            }
-         }
+               float[] pointFloatArray = new float[3 * HDF5Manager.MAX_BUFFER_SIZE];
+               loadFloatArray(namespace, index, pointFloatArray);
 
-         LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
+               for (int i = 0; i < pointFloatArray.length / 3; i++)
+               {
+                  points.add(new Point3D(pointFloatArray[i * 3], pointFloatArray[i * 3 + 1], pointFloatArray[i * 3 + 2]));
+               }
+            }
+
+            LogTools.info("[{}] Total Point3Ds Loaded: {}", namespace, points.size());
+         }
       });
    }
 
@@ -86,40 +89,52 @@ public class PerceptionDataLoader
    {
       executorService.submit(() ->
       {
-         int count = (int) hdf5Manager.getCount(namespace);
-         for(int index = 0; index < count; index++)
+         synchronized (hdf5Manager)
          {
-            float[] pointFloatArray = new float[4 * HDF5Manager.MAX_BUFFER_SIZE];
-            loadFloatArray(namespace, index, pointFloatArray);
-
-            for (int i = 0; i < pointFloatArray.length / 4; i++)
+            int count = (int) hdf5Manager.getCount(namespace);
+            for(int index = 0; index < count; index++)
             {
-               quaternions.add(new Quaternion(pointFloatArray[i * 4], pointFloatArray[i * 4 + 1], pointFloatArray[i * 4 + 2], pointFloatArray[i * 4 + 3]));
-            }
-         }
+               float[] pointFloatArray = new float[4 * HDF5Manager.MAX_BUFFER_SIZE];
+               loadFloatArray(namespace, index, pointFloatArray);
 
-         LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
+               for (int i = 0; i < pointFloatArray.length / 4; i++)
+               {
+                  quaternions.add(new Quaternion(pointFloatArray[i * 4], pointFloatArray[i * 4 + 1], pointFloatArray[i * 4 + 2], pointFloatArray[i * 4 + 3]));
+               }
+            }
+
+            LogTools.info("[{}] Total Quaternions Loaded: {}", namespace, quaternions.size());
+         }
       });
    }
 
    public void loadFloatArray(String namespace, int index, float[] array)
    {
-        Group group = hdf5Manager.openGroup(namespace);
-        HDF5Tools.loadFloatArray(group, index, array);
-        group.close();
+      synchronized (hdf5Manager)
+      {
+         Group group = hdf5Manager.getGroup(namespace);
+         HDF5Tools.loadFloatArray(group, index, array);
+      }
    }
 
    public void loadCompressedImage(String namespace, int index, Mat mat)
    {
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
-      mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
+      synchronized (hdf5Manager)
+      {
+         Group group = hdf5Manager.getGroup(namespace);
+         byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+         mat.put(BytedecoOpenCVTools.decompressImageJPGUsingYUV(compressedByteArray));
+      }
    }
 
    public void loadCompressedDepth(String namespace, int index, Mat mat)
    {
-      Group group = hdf5Manager.getGroup(namespace);
-      byte[] compressedByteArray = HDF5Tools.loadByteArray(group, index);
+      byte[] compressedByteArray;
+      synchronized (hdf5Manager)
+      {
+         Group group = hdf5Manager.getGroup(namespace);
+         compressedByteArray = HDF5Tools.loadByteArray(group, index);
+      }
       BytedecoOpenCVTools.decompressDepthPNG(compressedByteArray, mat);
    }
 

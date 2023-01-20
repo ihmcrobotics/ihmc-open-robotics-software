@@ -156,7 +156,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       });
       footstepPlanning = new RDXFootstepPlanning(robotModel, syncedRobot);
       // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(ROS2Tools.RAPID_REGIONS, regions -> footstepPlanning.setPlanarRegions(regions));
+      ros2Helper.subscribeViaCallback(ROS2Tools.SPHERICAL_RAPID_REGIONS, footstepPlanning::setPlanarRegions);
       ros2Helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, footstepPlanning::setHeightMapData);
 
 
