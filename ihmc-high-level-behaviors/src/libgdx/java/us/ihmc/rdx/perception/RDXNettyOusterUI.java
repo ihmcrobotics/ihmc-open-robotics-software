@@ -134,7 +134,7 @@ public class RDXNettyOusterUI
                   // operations occur. Probably in the finish method.
                   synchronized (this)
                   {
-                     depthExtractionKernel.runKernel();
+                     depthExtractionKernel.runKernel(ousterInteractable.getReferenceFrame().getTransformToRoot());
                   }
 
                   imagePanel.drawDepthImage(depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat());

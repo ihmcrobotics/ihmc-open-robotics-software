@@ -85,7 +85,7 @@ public class RDXJoystickBasedStepping
    private final ConcurrentLinkedQueue<Runnable> queuedTasksToProcess = new ConcurrentLinkedQueue<>();
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
-   private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(false);
+   private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(true);
    private boolean supportFootPosesInitialized = false;
    private boolean userNotClickingAnImGuiPanel;
 
