@@ -577,7 +577,6 @@ public class AStarBodyPathPlanner
    {
       while (!stack.isEmpty())
       {
-//         BodyPathLatticePoint nextNode = stack.pollFirst();
          BodyPathLatticePoint nextNode = stack.poll();
          if (!expandedNodeSet.contains(nextNode))
          {
