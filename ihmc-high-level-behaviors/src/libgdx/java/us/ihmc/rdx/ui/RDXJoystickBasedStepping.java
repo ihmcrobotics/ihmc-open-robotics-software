@@ -85,6 +85,9 @@ public class RDXJoystickBasedStepping
    private final ConcurrentLinkedQueue<Runnable> queuedTasksToProcess = new ConcurrentLinkedQueue<>();
    private final AtomicReference<FootstepDataListMessage> footstepsToSendReference = new AtomicReference<>(null);
    private final AtomicBoolean isWalking = new AtomicBoolean(false);
+   // Set to true initially because this class shouldn't be sending pause walking messages unless it's being used
+   // This prevents the controller from getting pause walking messages while the operator is still starting up
+   // but they have run the UI.
    private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(true);
    private boolean supportFootPosesInitialized = false;
    private boolean userNotClickingAnImGuiPanel;
