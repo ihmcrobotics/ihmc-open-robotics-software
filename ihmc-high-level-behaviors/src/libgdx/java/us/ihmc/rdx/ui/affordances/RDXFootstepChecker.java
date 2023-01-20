@@ -9,6 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -29,7 +30,7 @@ public class RDXFootstepChecker
    private final RDX3DPanel primary3DPanel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
@@ -46,7 +47,7 @@ public class RDXFootstepChecker
    private ImGui3DViewInput latestInput;
    private boolean renderTooltip = false;
 
-   public RDXFootstepChecker(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersBasics footstepPlannerParameters)
+   public RDXFootstepChecker(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       primary3DPanel = baseUI.getPrimary3DPanel();
