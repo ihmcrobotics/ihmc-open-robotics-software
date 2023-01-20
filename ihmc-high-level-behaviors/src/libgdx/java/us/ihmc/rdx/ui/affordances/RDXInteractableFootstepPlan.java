@@ -8,12 +8,15 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import imgui.ImGui;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,6 +31,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -83,6 +87,16 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       {
          selectedFootstep.calculate3DViewPick(input);
       }
+   }
+
+   public void setPlanarRegionsList(PlanarRegionsListMessage planarRegionsList)
+   {
+      swingPlanningModule.setPlanarRegionList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList));
+   }
+
+   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   {
+      swingPlanningModule.setHeightMapData(heightMapMessage);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
