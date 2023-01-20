@@ -47,6 +47,7 @@ mainDependencies {
 testDependencies {
    api("org.jfree:jfreechart:1.0.19")
    api("org.jfree:jcommon:1.0.24")
+   api("org.hamcrest:hamcrest:2.2")
 
    api("us.ihmc:euclid-test:0.19.1")
    api("us.ihmc:simulation-construction-set:0.22.10")
