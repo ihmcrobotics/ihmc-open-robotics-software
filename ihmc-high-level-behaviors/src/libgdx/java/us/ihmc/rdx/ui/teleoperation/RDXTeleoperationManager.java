@@ -713,6 +713,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
       walkPathControlRing.destroy();
       footstepsSentToControllerGraphic.destroy();
       bodyPathPlanGraphic.destroy();
+      interactableFootstepPlan.destroy();
    }
 
    public List<RDXVisualizer> getVisualizers()

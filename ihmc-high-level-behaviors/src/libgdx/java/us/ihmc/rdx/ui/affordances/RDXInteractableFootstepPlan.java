@@ -91,7 +91,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
    public void setPlanarRegionsList(PlanarRegionsListMessage planarRegionsList)
    {
-      swingPlanningModule.setPlanarRegionList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsList));
+      swingPlanningModule.setPlanarRegionList(planarRegionsList);
    }
 
    public void setHeightMapMessage(HeightMapMessage heightMapMessage)
@@ -287,5 +287,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public RDXFootstepChecker getStepChecker()
    {
       return stepChecker;
+   }
+
+   public void destroy()
+   {
+      swingPlanningModule.destroy();
    }
 }
