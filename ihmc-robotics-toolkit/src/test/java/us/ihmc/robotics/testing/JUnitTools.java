@@ -4,6 +4,8 @@ import static us.ihmc.robotics.Assert.*;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import Jama.Matrix;
+import static org.hamcrest.MatcherAssert.*;
+import static org.hamcrest.Matchers.*;
 
 public class JUnitTools
 {
@@ -43,5 +45,15 @@ public class JUnitTools
       assertEquals("Size is not equal. Expected " + expected.size() + ", received " + actual.size() + ".", expected.size(), actual.size());
       for (int i = 0; i < expected.size(); i++)
          assertEquals("Value " + i + " is not equal. Expected " + expected.get(i) + ", received " + actual.get(i) + ".", expected.get(i), actual.get(i), epsilon);
+   }
+
+   public static void assertEpsilonEquals(double a, double b, double epsilon)
+   {
+      assertThat(a, closeTo(b, epsilon));
+   }
+
+   public static void assertEpsilonEquals(double a, double b, double epsilon, String reason)
+   {
+      assertThat(reason, a, closeTo(b, epsilon));
    }
 }
