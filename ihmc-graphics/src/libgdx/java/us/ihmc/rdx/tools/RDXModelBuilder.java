@@ -14,6 +14,7 @@ import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 
 import java.util.function.Consumer;
@@ -161,6 +162,14 @@ public class RDXModelBuilder
                              new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0),
                              color);
       }, "arrow");
+   }
+
+   public static ModelInstance createLine(Point3DReadOnly start, Point3DReadOnly end, double lineWidth, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+        meshBuilder.addLine(start, end, lineWidth, color);
+      }, "line");
    }
 
    public static ModelInstance createPose(double radius, Color color)

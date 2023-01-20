@@ -61,7 +61,7 @@ public class ProMPAssistant
       List<HashMap<String, String>> bodyPartsGeometries = new ArrayList<>();
       List<Point3D> goalToEETranslations = new ArrayList<>();
       List<Quaternion> goalToEERotations = new ArrayList<>();
-      boolean logEnabled = false;
+      boolean logEnabled;
       // read parameters regarding the properties of available learned tasks from json file
       try
       {
@@ -204,11 +204,11 @@ public class ProMPAssistant
                // update the proMP prediction according to observations and generate mean trajectory
                if (bodyPartObservedTrajectoryMap.get(bodyPart).size() > numberObservations) // if observed a sufficient number of poses
                {
-                     updateTask();
-                     generateTaskTrajectories();
-                     doneInitialProcessingTask = true;
+                  updateTask();
+                  generateTaskTrajectories();
+                  doneInitialProcessingTask = true;
 
-                     LogTools.info("Generating prediction ...");
+                  LogTools.info("Generating prediction ...");
                }
             }
          }
@@ -334,10 +334,10 @@ public class ProMPAssistant
       // for each body part generate the mean trajectory of the learned promp
       for (String bodyPart : bodyPartObservedTrajectoryMap.keySet())
       {
-         if(objectFrame != null)
-            bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart,objectFrame));
+         if (objectFrame != null)
+            bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, objectFrame));
          else
-            bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart,ReferenceFrame.getWorldFrame()));
+            bodyPartGeneratedTrajectoryMap.put(bodyPart, proMPManagers.get(currentTask).generateTaskTrajectory(bodyPart, ReferenceFrame.getWorldFrame()));
          // start using it after the last sample we observed, not from the beginning. We do not want to restart the motion
          setStartTrajectories(numberObservations);
       }
@@ -365,28 +365,28 @@ public class ProMPAssistant
          int sampleCounter = bodyPartTrajectorySampleCounter.get(bodyPart);
          if (sampleCounter < generatedFramePoseTrajectory.size())
          {
-            if (sampleCounter < numberObservations) // replay the observed motion, do not want the unconditioned ProMP mean for the first part
-            {
-               FramePose3D observedFramePose = observedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
-               if (objectFrame != null)
+            if (sampleCounter < numberObservations) // this statement is true only during replay preview
+            { // replay the observed motion, do not want the unconditioned ProMP mean for the first part
+               FramePose3D observedFramePose = observedFramePoseTrajectory.get(sampleCounter);
+               if (objectFrame != null) // change to object frame if one is available
                   observedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(observedFramePose.getPosition());
                framePose.getOrientation().set(observedFramePose.getOrientation());
             }
             else
-            {
-               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart));
-               if (objectFrame != null)
+            { // pack the frame using the trajectory generated from prediction
+               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter);
+               if (objectFrame != null) // change back to world frame if before it was changed to object frame
                   generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(generatedFramePose.getPosition());
                framePose.getOrientation().set(generatedFramePose.getOrientation());
             }
 
             // take the next sample from the trajectory next time
-            bodyPartTrajectorySampleCounter.replace(bodyPart, bodyPartTrajectorySampleCounter.get(bodyPart) + 1);
+            bodyPartTrajectorySampleCounter.replace(bodyPart, sampleCounter + 1);
          }
          else
-         {
+         { // motion is over
             // check that inferred timesteps are not lower than the observed setpoints.
             if (generatedFramePoseTrajectory.size() < numberObservations)
             {
@@ -399,7 +399,7 @@ public class ProMPAssistant
             else
             {
                // take previous sample (frame) to avoid jump when exiting assistance mode
-               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(bodyPartTrajectorySampleCounter.get(bodyPart) - 1);
+               FramePose3D generatedFramePose = generatedFramePoseTrajectory.get(sampleCounter - 1);
                if (objectFrame != null)
                   generatedFramePose.changeFrame(ReferenceFrame.getWorldFrame());
                framePose.getPosition().set(generatedFramePose.getPosition());
@@ -439,7 +439,6 @@ public class ProMPAssistant
    {
       isMovingThreshold = distance;
    }
-
 
    public void setCurrentTaskDone(boolean doneCurrentTask)
    {
