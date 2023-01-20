@@ -113,7 +113,7 @@ public class DualBlackflyCamera
          {
             imageWidth = blackfly.getWidth(spinImage);
             imageHeight = blackfly.getHeight(spinImage);
-            LogTools.info("Blackfly {} resolution detected: {}x{}", serialNumber, imageWidth, imageHeight);
+            LogTools.info("Blackfly {} resolution detected: {} x {}", serialNumber, imageWidth, imageHeight);
             numberOfBytesInFrame = imageWidth * imageHeight * 4;
             spinImageDataPointer = new BytePointer((long) numberOfBytesInFrame);
 
@@ -251,6 +251,7 @@ public class DualBlackflyCamera
 
    public void destroy()
    {
+      blackfly.stopAcquiringImages();
       Spinnaker_C.spinImageRelease(spinImage);
    }
 
