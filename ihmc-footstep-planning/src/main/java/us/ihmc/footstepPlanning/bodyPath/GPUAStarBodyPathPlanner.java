@@ -8,16 +8,12 @@ import org.bytedeco.opencl._cl_program;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
@@ -52,18 +48,14 @@ public class GPUAStarBodyPathPlanner
 
    private static final boolean debug = false;
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   // Inputs to the planner
    private final FootstepPlannerParametersReadOnly parameters;
    private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
-   private final AStarBodyPathEdgeData edgeData;
    private HeightMapData heightMapData;
-   private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
-   private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
-   private final TIntArrayList neighborsOffsetX = new TIntArrayList();
-   private final TIntArrayList neighborsOffsetY = new TIntArrayList();
-   private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
 
+   // yo variables to be logged
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean containsCollision = new YoBoolean("containsCollision", registry);
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
    private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
@@ -77,15 +69,17 @@ public class GPUAStarBodyPathPlanner
    private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
+   private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
 
    private final SideDependentList<YoDouble> stanceScore;
    private final SideDependentList<YoDouble> stepScores;
    private final YoDouble stanceTraversibility;
 
+   // parameters used for the actual planning process
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
    private BodyPathLatticePoint leastCostNode = null;
-   private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
+   private double leastCost = Double.POSITIVE_INFINITY;
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
@@ -101,6 +95,14 @@ public class GPUAStarBodyPathPlanner
    private final AtomicBoolean haltRequested = new AtomicBoolean();
    private static final int maxIterations = 3000;
 
+   private final AStarBodyPathEdgeData edgeData;
+   private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
+   private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
+   private final TIntArrayList neighborsOffsetX = new TIntArrayList();
+   private final TIntArrayList neighborsOffsetY = new TIntArrayList();
+   private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
+
+   /////// all the open cl memory, programs, and kernels /////
    private final OpenCLManager openCLManager;
    private _cl_program pathPlannerProgram;
    private _cl_kernel computeNormalsWithLeastSquaresKernel;
@@ -109,33 +111,33 @@ public class GPUAStarBodyPathPlanner
    private _cl_kernel computeEdgeDataKernel;
    private _cl_kernel computeHeuristicCostKernel;
 
-   private OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
-   private OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(31);
-   private OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
+   private final OpenCLFloatBuffer heightMapParametersBuffer = new OpenCLFloatBuffer(6);
+   private final OpenCLFloatBuffer pathPlanningParametersBuffer = new OpenCLFloatBuffer(31);
+   private final OpenCLFloatBuffer ransacNormalParametersBuffer = new OpenCLFloatBuffer(8);
 
-   private OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
-   private OpenCLIntBuffer ransacOffsetBuffer = new OpenCLIntBuffer(4);
-   private OpenCLIntBuffer snapOffsetsBuffer = new OpenCLIntBuffer(6);
-   private OpenCLIntBuffer traversibilityOffsetsBuffer = new OpenCLIntBuffer(8);
-   private OpenCLIntBuffer collisionOffsetsBuffer = new OpenCLIntBuffer(8);
-   private OpenCLIntBuffer neighborOffsetsBuffer = new OpenCLIntBuffer(33);
+   private final OpenCLIntBuffer leastSquaresOffsetBuffer = new OpenCLIntBuffer(6);
+   private final OpenCLIntBuffer ransacOffsetBuffer = new OpenCLIntBuffer(4);
+   private final OpenCLIntBuffer snapOffsetsBuffer = new OpenCLIntBuffer(6);
+   private final OpenCLIntBuffer traversibilityOffsetsBuffer = new OpenCLIntBuffer(8);
+   private final OpenCLIntBuffer collisionOffsetsBuffer = new OpenCLIntBuffer(8);
+   private final OpenCLIntBuffer neighborOffsetsBuffer = new OpenCLIntBuffer(33);
 
-   private OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatMem ransacNormalXYZBuffer = new OpenCLFloatMem(1);
-   private OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLIntBuffer edgeRejectionReasonBuffer = new OpenCLIntBuffer(1);
-   private OpenCLFloatBuffer deltaHeightMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer inclineMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer rollMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer stanceTraversibilityMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer stepTraversibilityMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer inclineCostMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer rollCostMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer traversibilityCostMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer edgeCostMapBuffer = new OpenCLFloatBuffer(1);
-   private OpenCLFloatBuffer heuristicCostMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer heightMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer leastSquaresNormalXYZBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatMem ransacNormalXYZBuffer = new OpenCLFloatMem(1);
+   private final OpenCLFloatBuffer sampledHeightBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer snappedNodeHeightBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLIntBuffer edgeRejectionReasonBuffer = new OpenCLIntBuffer(1);
+   private final OpenCLFloatBuffer deltaHeightMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer inclineMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer rollMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer stanceTraversibilityMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer stepTraversibilityMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer inclineCostMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer rollCostMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer traversibilityCostMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer edgeCostMapBuffer = new OpenCLFloatBuffer(1);
+   private final OpenCLFloatBuffer heuristicCostMapBuffer = new OpenCLFloatBuffer(1);
 
    private final GPUAStarBodyPathSmoother smoother;
 
@@ -170,19 +172,23 @@ public class GPUAStarBodyPathPlanner
       this.plannerParameters = plannerParameters;
       this.statusCallbacks = statusCallbacks;
       this.stopwatch = stopwatch;
-      stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
+      stack = new PriorityQueue<>(new NodeComparator<>(graph, this::getHeuristicCost));
 
       this.stanceScore = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StanceScore", registry));
       this.stepScores = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "StepScore", registry));
       this.stanceTraversibility = new YoDouble("stanceTraversibility", registry);
 
+      // These is the 16 neighbor offsets
       packNeighborOffsets(neighborsOffsetX, neighborsOffsetY);
 
       openCLManager = new OpenCLManager();
+      // Makes sure to destroy the open CL memory by adding a shutdown hook
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroyOpenCLStuff));
 
+      // Sets up the post-processing waypoint smoother
       smoother = new GPUAStarBodyPathSmoother(plannerParameters, null, openCLManager, null, null);
 
+      // Load all the native data on the thread. This effectively just loads all the bytedeco stuff to be used by the planner
       Activator nativeLoader = BytedecoTools.loadNativesOnAThread();
       boolean doneLoading = false;
 
@@ -198,6 +204,8 @@ public class GPUAStarBodyPathPlanner
          }
       }
 
+      // this sets up all the data to be stored by the logger. This callback is called whenever the graph is expanded, where it then creates a new big of edge
+      // data, and stores it in a map, and resets all the variables. This gets called inside the planning loop.
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
       graph.setGraphExpansionCallback(edge ->
@@ -232,7 +240,10 @@ public class GPUAStarBodyPathPlanner
                                       });
    }
 
-   public void createOpenCLStuff(int numberOfCells, int numberOfNodes)
+   /**
+    * This creates all the open cl managers, programs, and kernels used in the planner
+    */
+   private void createOpenCLStuff(int numberOfCells, int numberOfNodes)
    {
       cellsPerSide = numberOfCells;
       this.nodesPerSide = numberOfNodes;
@@ -250,7 +261,11 @@ public class GPUAStarBodyPathPlanner
       smoother.createOpenCLStuff(pathPlannerProgram, numberOfCells, numberOfNodes);
    }
 
-   public void firstTickSetup()
+   /**
+    * On the first time the planner is called, this sets up all the OpenCL memory. It's useful to do this after creation to allow the process to start
+    * more quickly.
+    */
+   private void firstTickSetup()
    {
       heightMapParametersBuffer.createOpenCLBufferObject(openCLManager);
       pathPlanningParametersBuffer.createOpenCLBufferObject(openCLManager);
@@ -284,6 +299,9 @@ public class GPUAStarBodyPathPlanner
       firstTick = false;
    }
 
+   /**
+    * Deallocates everything from OpenCL memory, and destroys the OpenCL manager. Nominally, this is called when the process is terminated.
+    **/
    public void destroyOpenCLStuff()
    {
       pathPlannerProgram.close();
@@ -324,6 +342,250 @@ public class GPUAStarBodyPathPlanner
       openCLManager.destroy();
    }
 
+   /**
+    * Sets the height map data for the path planner to use.
+    */
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
+   }
+
+   private enum RejectionReason
+   {
+      INVALID_SNAP,
+      TOO_STEEP,
+      STEP_TOO_HIGH,
+      COLLISION,
+      NON_TRAVERSIBLE
+   }
+
+   /**
+    * Computes the body path plan using the information contained in {@param request}, and packs into the output {@param outputToPack}. For this to work,
+    * {@link #setHeightMapData(HeightMapData)} must be called first.
+    */
+   public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
+   {
+      if (firstTick)
+      {
+         firstTickSetup();
+      }
+      if (cellsPerSide != heightMapData.getCellsPerAxis())
+      {
+         this.cellsPerSide = heightMapData.getCellsPerAxis();
+         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getGridSizeXY(), BodyPathLatticePoint.gridSizeXY);
+         this.nodesPerSide = 2 * nodeCenterIndex + 1;
+         resizeOpenCLObjects();
+         smoother.resizeOpenCLObjects(cellsPerSide);
+      }
+
+      haltRequested.set(false);
+      int iterations = 0;
+      reachedGoal = false;
+      stopwatch.start();
+      result = BodyPathPlanningResult.PLANNING;
+      planningStartTime = stopwatch.totalElapsed();
+      stopwatch.lap();
+
+      iterationData.clear();
+      edgeDataMap.clear();
+
+      /////// set up the planner preliminaries, like the start and goal pose, nominal incline, and the search stack ///////
+      // Get the start and goal midfoot buffers
+      Pose3D startPose = new Pose3D();
+      Pose3D goalPose = new Pose3D();
+
+      startPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
+      goalPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
+
+      startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY());
+      goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY());
+      stack.clear();
+      stack.add(startNode);
+      graph.initialize(startNode);
+      expandedNodeSet.clear();
+      leastCostNode = startNode;
+      nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
+
+      /////// set up the GPU buffers with all the input data including parameters and search directions ///////
+      // compute the offset vertices for getting the node height from the height map
+      AStarBodyPathPlanner.packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
+
+      // populate the offset vertices for node height into a GPU buffer
+      populateSnapHeightOffsetsBuffer();
+      // populate the offset vertices for computing the traversibility into a GPU buffer
+      populateTraversibilityOffsetsBuffer();
+      // populate the offset vertices for checking for collisions into a GPU buffer
+      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
+      // populate the offset vertices for computing the children node into the GPU buffer
+      populateNeighborOffsetsBuffer();
+      // populate the parameters that define the height map extrinsics
+      double patchWidth = 0.3;
+      populateHeightMapParameterBuffer(patchWidth);
+      // populate the buffer that includes all the path planning parameters
+      populatePathPlanningParametersBuffer();
+      // populate the buffer that represents the height map
+      populateHeightMapBuffer();
+
+      /////// compute all the data on the GPU, and get the results out back into CPU memory ///////
+      // compute the snapped node height from the height map data
+      computeSnapHeightsOnTheGPU();
+      // Compute the two different versions of the height map normal, one which fits the local slope, and one that is better at deadling with discontinuous
+      // surfaces (RANSAC)
+      if (plannerParameters.getComputeSurfaceNormalCost())
+      {
+         computeSurfaceNormalsWithLeastSquares(patchWidth);
+         computeSurfaceNormalsWithRansac();
+      }
+      // Compute the heuristic cost for every possible location
+      computeHeuristicCostMapOnTheGPU();
+      // Compute all data for all the possible edges that could be included in the plan
+      computeEdgeDataCostAndValidityOnTheGPU();
+
+      // Get the current lowest cost ending node
+      leastCost = getHeuristicCost(leastCostNode);
+
+      /////// perform the actual search, using the data that was precomputed on the GPU ///////
+      planningLoop:
+      while (true)
+      {
+         iterations++;
+         // update the number of iterations we've taken.
+         outputToPack.getPlannerTimings().setPathPlanningIterations(iterations);
+
+         if (stopwatch.totalElapsed() >= request.getTimeout())
+         {
+            // we're out of time. Terminate the planning loop and report the result
+            result = BodyPathPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
+            break;
+         }
+         if (haltRequested.get())
+         {
+            // Someone requested that we halt planning. Termiante the planning loop and report the result.
+            result = BodyPathPlanningResult.HALTED;
+            break;
+         }
+         if (iterations > maxIterations)
+         {
+            // We've taken more iterations than allowed. Terminate the planning loop and report the result.
+            result = BodyPathPlanningResult.MAXIMUM_ITERATIONS_REACHED;
+            break;
+         }
+
+         // Get the next node. This will be the cheapest node in the stack, with the cost being the path to that node plus the heuristic to goal.
+         BodyPathLatticePoint node = getNextNode();
+         if (node == null)
+         {
+            // There are no more nodes that haven't been expanded. This means we've either exhaustively searched the entire grid map and there are no more
+            // children nodes, or there are no viable transitions to get to the goal. The goal is either off the modeled world, or in an island that is
+            // unreachable.
+            result = BodyPathPlanningResult.NO_PATH_EXISTS;
+            if (debug)
+            {
+               LogTools.info("Stack is empty, no path exists...");
+            }
+            break;
+         }
+
+         // Get the buffer key of the parent node.
+         int parentNodeGraphKey = getNodeGraphKey(node);
+         // Get the edge key of the first possible child of the parent node. Each node has (nubmerOfneighborsPerExpansion) possible children, so use this value.
+         int edgeKeyStart = parentNodeGraphKey * numberOfNeighborsPerExpansion;
+         // Compute all the candidate children nodes. Not all of these are feasible, but that's determined in the search
+         populateNeighbors(node);
+
+         // Get the height of the current node being expanded.
+         double parentSnapHeight = getSnapHeight(parentNodeGraphKey);
+         // Search through all the possible children, and check the viability and score of each.
+         for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
+         {
+            BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
+
+            // This is the node key for the candidate child node.
+            int neighborNodeKey = getNodeGraphKey(neighbor);
+            // If the node key is invalid, it's off the modeled environment, so we shouldn't allow that transition. This information is polled from the GPU
+            // buffers
+            if (neighborNodeKey < 0)
+            {
+               rejectionReason.set(RejectionReason.INVALID_SNAP);
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
+
+            // This is the key for the edge data of the candidate node.
+            int edgeKey = edgeKeyStart + neighborIndex;
+
+            // Check if this edge is valid. If it's not, this method adds that edge to the graph with infinite weight
+            if (!checkEdge(node, neighbor, neighborNodeKey, edgeKey))
+               continue;
+
+            // Populate the heuristic cost of the child node.
+            heuristicCost.set(heuristicCostMapBuffer.getBackingDirectFloatBuffer().get(neighborNodeKey));
+
+            // Get the data for this edge cost from the GPU buffers.
+            computeEdgeCost(node, neighbor, edgeKey);
+
+            // The total cost of this node is the cost to get to the node from the start plus the estimated cost to the goal.
+            totalCost.set(heuristicCost.getValue() + edgeCost.getValue());
+            // add this data to the graph. the expansion callback records it into the log.
+            graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
+            // add the node to the stack.
+            stack.add(neighbor);
+
+            // If this candidate node is the goal, terminate the plan. This could be a local minima, and there could be a cheaper path, but that doesn't matter.
+            if (neighbor.equals(goalNode))
+            {
+               reachedGoal = true;
+               result = BodyPathPlanningResult.FOUND_SOLUTION;
+               break planningLoop;
+            }
+            // always keep track of the least cost node, as this is the terminal node if we terminate without having reached the goal.
+            else if (heuristicCost.getValue() < leastCost)
+            {
+               leastCostNode = neighbor;
+               leastCost = heuristicCost.getValue();
+            }
+         }
+
+         // Record that this node has been expanded, so that we don't expand it again
+         expandedNodeSet.add(node);
+
+         // record all the iteration data for this newly expanded node. This could be done before or after the evaluation loop
+         AStarBodyPathIterationData iterationData = new AStarBodyPathIterationData();
+         iterationData.setParentNode(node);
+         iterationData.getChildNodes().addAll(neighbors);
+         iterationData.setParentNodeHeight(parentSnapHeight);
+         this.iterationData.add(iterationData);
+
+         // If we've not reported the status in a while, reprot it.
+         if (shouldPublishStatus(request))
+         {
+            reportStatus(request, outputToPack);
+            stopwatch.lap();
+         }
+      }
+
+      // Report the result of the planning step.
+      reportStatus(request, outputToPack);
+   }
+
+   /**
+    * Convenience method for getting the key of a planning node. Returns -1 if the location is out of bounds.
+    */
+   private int getNodeGraphKey(BodyPathLatticePoint node)
+   {
+      int nodesPerSide = 2 * nodeCenterIndex + 1;
+      int nodeGraphXIdx = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
+      int nodeGraphYIdx = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
+
+      if (nodeGraphYIdx < 0 || nodeGraphXIdx < 0 || nodeGraphXIdx >= nodesPerSide || nodeGraphYIdx >= nodesPerSide)
+         return -1;
+
+      return HeightMapTools.indicesToKey(nodeGraphXIdx, nodeGraphYIdx, nodeCenterIndex);
+   }
+
+   /**
+    * Makes sure all the OpenCL objects are the correct size in memory
+    */
    private void resizeOpenCLObjects()
    {
       int totalCells = cellsPerSide * cellsPerSide;
@@ -348,12 +610,12 @@ public class GPUAStarBodyPathPlanner
       heuristicCostMapBuffer.resize(totalEdges, openCLManager);
    }
 
-   public void setHeightMapData(HeightMapData heightMapData)
-   {
-      this.heightMapData = heightMapData;
-   }
 
-   void populateRadialOffsetsBuffer()
+   /**
+    * Populates the GPU buffer with the indices of the neighboring cells to use when computing the average height at a snapped location. These is used for
+    * determining the height of the body path from the height map.
+    */
+   private void populateSnapHeightOffsetsBuffer()
    {
       int connections = xSnapOffsets.size();
       snapOffsetsBuffer.resize(2 * connections + 1, openCLManager);
@@ -373,6 +635,10 @@ public class GPUAStarBodyPathPlanner
       snapOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Populates the GPU buffer with the indices of the neighboring cells to check when calculating the traversibility. This sets the search radius for the
+    * traversibility metric.
+    */
    private void populateTraversibilityOffsetsBuffer()
    {
       TIntArrayList zeroDegCollisionOffsetsX = new TIntArrayList();
@@ -431,6 +697,10 @@ public class GPUAStarBodyPathPlanner
       traversibilityOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Populates the GPU buffer with the indices of the neighboring cells to check when looking for collisions. These are offset from the cell in question.
+    * These include cells at different angles.
+    */
    private void populateCollisionsOffsetsBuffer(double gridResolutionXY, double boxSizeX, double boxSizeY)
    {
       TIntArrayList collisionOffsetsX1 = new TIntArrayList();
@@ -473,6 +743,42 @@ public class GPUAStarBodyPathPlanner
       collisionOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Computes the offset indices for the neighboring nodes when performing the search. These are the grid coordinates of the candidate child nodes when
+    * expanding the cheapest node in the A* planner.
+    */
+   private static void packNeighborOffsets(TIntArrayList xOffsets, TIntArrayList yOffsets)
+   {
+      xOffsets.clear();
+      yOffsets.clear();
+
+      xOffsets.add(1); yOffsets.add(0);
+      xOffsets.add(2); yOffsets.add(1);
+      xOffsets.add(1); yOffsets.add(1);
+      xOffsets.add(1); yOffsets.add(2);
+
+      xOffsets.add(0); yOffsets.add(1);
+      xOffsets.add(-1); yOffsets.add(2);
+      xOffsets.add(-1); yOffsets.add(1);
+      xOffsets.add(-2); yOffsets.add(1);
+
+      xOffsets.add(-1); yOffsets.add(0);
+      xOffsets.add(-2); yOffsets.add(-1);
+      xOffsets.add(-1); yOffsets.add(-1);
+      xOffsets.add(-1); yOffsets.add(-2);
+
+      xOffsets.add(0); yOffsets.add(-1);
+      xOffsets.add(1); yOffsets.add(-2);
+      xOffsets.add(1); yOffsets.add(-1);
+      xOffsets.add(2); yOffsets.add(-1);
+
+      if (xOffsets.size() != numberOfNeighborsPerExpansion || yOffsets.size() != numberOfNeighborsPerExpansion)
+         throw new RuntimeException("Neighbor set is wrong.");
+   }
+
+   /**
+    * Populates the GPU buffer with the indices of the candidate children when performing the path plan.
+    */
    private void populateNeighborOffsetsBuffer()
    {
       int offsets = neighborsOffsetX.size();
@@ -490,185 +796,10 @@ public class GPUAStarBodyPathPlanner
       neighborOffsetsBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
-
-   private enum RejectionReason
-   {
-      INVALID_SNAP,
-      TOO_STEEP,
-      STEP_TOO_HIGH,
-      COLLISION,
-      NON_TRAVERSIBLE
-   }
-
-   public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
-   {
-      if (firstTick)
-      {
-         firstTickSetup();
-      }
-      if (cellsPerSide != heightMapData.getCellsPerAxis())
-      {
-         this.cellsPerSide = heightMapData.getCellsPerAxis();
-         this.nodeCenterIndex = HeightMapTools.computeCenterIndex(heightMapData.getGridSizeXY(), BodyPathLatticePoint.gridSizeXY);
-         this.nodesPerSide = 2 * nodeCenterIndex + 1;
-         resizeOpenCLObjects();
-         smoother.resizeOpenCLObjects(cellsPerSide);
-      }
-
-      haltRequested.set(false);
-      int iterations = 0;
-      reachedGoal = false;
-      stopwatch.start();
-      result = BodyPathPlanningResult.PLANNING;
-      planningStartTime = stopwatch.totalElapsed();
-      stopwatch.lap();
-
-      iterationData.clear();
-      edgeDataMap.clear();
-
-      AStarBodyPathPlanner.packRadialOffsets(heightMapData, plannerParameters.getSnapRadius(), xSnapOffsets, ySnapOffsets);
-
-      populateRadialOffsetsBuffer();
-      populateTraversibilityOffsetsBuffer();
-      populateCollisionsOffsetsBuffer(heightMapData.getGridResolutionXY(), plannerParameters.getCollisionBoxSizeX(), plannerParameters.getCollisionBoxSizeY());
-      populateNeighborOffsetsBuffer();
-
-      Pose3D startPose = new Pose3D();
-      Pose3D goalPose = new Pose3D();
-
-      startPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
-      goalPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
-
-      startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY());
-      goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY());
-      stack.clear();
-      stack.add(startNode);
-      graph.initialize(startNode);
-      expandedNodeSet.clear();
-      leastCostNode = startNode;
-      nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
-
-      populateHeightMapImage();
-
-      double patchWidth = 0.3;
-      populateHeightMapParameterBuffer(patchWidth);
-      populatePathPlanningParametersBuffer();
-
-      computeSnapHeights();
-      if (plannerParameters.getComputeSurfaceNormalCost())
-      {
-         computeSurfaceNormalsWithLeastSquares(patchWidth);
-         computeSurfaceNormalsWithRansac();
-      }
-      computeHeuristicCost();
-      computeEdgeData();
-
-      planningLoop:
-      while (true)
-      {
-         iterations++;
-         outputToPack.getPlannerTimings().setPathPlanningIterations(iterations);
-
-         if (stopwatch.totalElapsed() >= request.getTimeout())
-         {
-            result = BodyPathPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
-            break;
-         }
-         if (haltRequested.get())
-         {
-            result = BodyPathPlanningResult.HALTED;
-            break;
-         }
-         if (iterations > maxIterations)
-         {
-            result = BodyPathPlanningResult.MAXIMUM_ITERATIONS_REACHED;
-            break;
-         }
-
-         BodyPathLatticePoint node = getNextNode();
-         if (node == null)
-         {
-            result = BodyPathPlanningResult.NO_PATH_EXISTS;
-            if (debug)
-            {
-               LogTools.info("Stack is empty, no path exists...");
-            }
-            break;
-         }
-
-         int parentNodeGraphKey = getNodeGraphKey(node);
-         int edgeKeyStart = parentNodeGraphKey * numberOfNeighborsPerExpansion;
-         populateNeighbors(node);
-
-         double parentSnapHeight = snap(parentNodeGraphKey);
-         for (int neighborIndex = 0; neighborIndex < neighbors.size(); neighborIndex++)
-         {
-            BodyPathLatticePoint neighbor = neighbors.get(neighborIndex);
-
-            int neighborNodeKey = getNodeGraphKey(neighbor);
-            if (neighborNodeKey < 0)
-            {
-               rejectionReason.set(RejectionReason.INVALID_SNAP);
-               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-               continue;
-            }
-
-            int edgeKey = edgeKeyStart + neighborIndex;
-
-            if (!checkEdge(node, neighbor, neighborNodeKey, edgeKey))
-               continue;
-
-            heuristicCost.set(heuristicCostMapBuffer.getBackingDirectFloatBuffer().get(neighborNodeKey));
-
-            computeEdgeCost(node, neighbor, edgeKey);
-
-            totalCost.set(heuristicCost.getValue() + edgeCost.getValue());
-            graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
-            stack.add(neighbor);
-
-            if (node.equals(goalNode))
-            {
-               reachedGoal = true;
-               result = BodyPathPlanningResult.FOUND_SOLUTION;
-               break planningLoop;
-            }
-            else if (heuristics(node) < heuristics(leastCostNode))
-            {
-               leastCostNode = node;
-            }
-         }
-
-         expandedNodeSet.add(node);
-
-         AStarBodyPathIterationData iterationData = new AStarBodyPathIterationData();
-         iterationData.setParentNode(node);
-         iterationData.getChildNodes().addAll(neighbors);
-         iterationData.setParentNodeHeight(parentSnapHeight);
-         this.iterationData.add(iterationData);
-
-         if (publishStatus(request))
-         {
-            reportStatus(request, outputToPack);
-            stopwatch.lap();
-         }
-      }
-
-      reportStatus(request, outputToPack);
-   }
-
-   private int getNodeGraphKey(BodyPathLatticePoint node)
-   {
-      int nodesPerSide = 2 * nodeCenterIndex + 1;
-      int nodeGraphXIdx = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
-      int nodeGraphYIdx = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), BodyPathLatticePoint.gridSizeXY, nodeCenterIndex);
-
-      if (nodeGraphYIdx < 0 || nodeGraphXIdx < 0 || nodeGraphXIdx >= nodesPerSide || nodeGraphYIdx >= nodesPerSide)
-         return -1;
-
-      return HeightMapTools.indicesToKey(nodeGraphXIdx, nodeGraphYIdx, nodeCenterIndex);
-   }
-
-   private void populateHeightMapImage()
+   /**
+    * Populates the height map data buffer, which contains the height map values in a buffered list.
+    */
+   private void populateHeightMapBuffer()
    {
       for (int x = 0; x < cellsPerSide; x++)
       {
@@ -682,6 +813,9 @@ public class GPUAStarBodyPathPlanner
       heightMapBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Populates the parameter buffer used for representing the height map data.
+    */
    private void populateHeightMapParameterBuffer(double patchWidth)
    {
       double maxIncline = Math.toRadians(45.0);
@@ -698,6 +832,9 @@ public class GPUAStarBodyPathPlanner
       heightMapParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Populates the parameter buffer used for path planning.
+    */
    private void populatePathPlanningParametersBuffer()
    {
       FloatPointer floatPointer = pathPlanningParametersBuffer.getBytedecoFloatBufferPointer();
@@ -736,6 +873,9 @@ public class GPUAStarBodyPathPlanner
       pathPlanningParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Populates the ransac offset buffer, which is the array of offsets to search with RANSAC. This has to be called before you can compute the surface normals.
+    */
    private void populateLeastSquaresOffsetBuffer(double patchWidth)
    {
       int patchCellHalfWidth = (int) ((patchWidth / 2.0) / heightMapData.getGridResolutionXY());
@@ -762,6 +902,9 @@ public class GPUAStarBodyPathPlanner
       leastSquaresOffsetBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Computes the surface normal using least squares at each location of the height map on the GPU, and then reads these data back into the CPU.
+    */
    private void computeSurfaceNormalsWithLeastSquares(double patchWidth)
    {
       populateLeastSquaresOffsetBuffer(patchWidth);
@@ -783,6 +926,9 @@ public class GPUAStarBodyPathPlanner
       openCLManager.finish();
    }
 
+   /**
+    * Populates the parameter buffer for the ransac calculator. This has to be called before you can compute the surface normals.
+    */
    private void populateRansacNormalParametersBuffer()
    {
       FloatPointer floatPointer = ransacNormalParametersBuffer.getBytedecoFloatBufferPointer();
@@ -794,6 +940,9 @@ public class GPUAStarBodyPathPlanner
       ransacNormalParametersBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Populates the ransac offset buffer, which is the array of offsets to search with RANSAC. This has to be called before you can compute the surface normals.
+    */
    private void populateRansacOffsetBuffer()
    {
       int maxOffset = (int) Math.round(HeightMapRANSACNormalCalculator.maxRansacRadius / heightMapData.getGridResolutionXY());
@@ -847,6 +996,9 @@ public class GPUAStarBodyPathPlanner
       ransacOffsetBuffer.writeOpenCLBufferObject(openCLManager);
    }
 
+   /**
+    * Computes the surface normal using ransac at each location of the height map on the GPU, and then reads these data back into the CPU.
+    */
    private void computeSurfaceNormalsWithRansac()
    {
       populateRansacNormalParametersBuffer();
@@ -865,7 +1017,10 @@ public class GPUAStarBodyPathPlanner
       openCLManager.finish();
    }
 
-   private void computeSnapHeights()
+   /**
+    * Computes the height at each planning node from the height map as the approximately locally averaged height on the GPU, and then reads these data back into the CPU.
+    */
+   private void computeSnapHeightsOnTheGPU()
    {
       openCLManager.setKernelArgument(snapVerticesKernel, 0, heightMapParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(snapVerticesKernel, 1, pathPlanningParametersBuffer.getOpenCLBufferObject());
@@ -881,7 +1036,10 @@ public class GPUAStarBodyPathPlanner
       openCLManager.finish();
    }
 
-   private void computeHeuristicCost()
+   /**
+    * Computes the heuristic cost at every possible location in the mapped world on the GPU, and then reads these data back into the CPU.
+    */
+   private void computeHeuristicCostMapOnTheGPU()
    {
       openCLManager.setKernelArgument(computeHeuristicCostKernel, 0, heightMapParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeHeuristicCostKernel, 1, pathPlanningParametersBuffer.getOpenCLBufferObject());
@@ -895,7 +1053,10 @@ public class GPUAStarBodyPathPlanner
       openCLManager.finish();
    }
 
-   private void computeEdgeData()
+   /**
+    * Computes the edge validity and cost metrics for the entire map on the GPU, and then reads these data back into the CPU.
+    */
+   private void computeEdgeDataCostAndValidityOnTheGPU()
    {
       openCLManager.setKernelArgument(computeEdgeDataKernel, 0, heightMapParametersBuffer.getOpenCLBufferObject());
       openCLManager.setKernelArgument(computeEdgeDataKernel, 1, pathPlanningParametersBuffer.getOpenCLBufferObject());
@@ -933,6 +1094,10 @@ public class GPUAStarBodyPathPlanner
       openCLManager.finish();
    }
 
+   /**
+    * Convenience method to get the surface normal found using least squares from the GPU buffer at a certain location.
+    * @return Surface normal using least squares at this location.
+    */
    private UnitVector3DReadOnly getSurfaceNormal(int key)
    {
       float x = leastSquaresNormalXYZBuffer.getBackingDirectFloatBuffer().get(3 * key);
@@ -941,6 +1106,11 @@ public class GPUAStarBodyPathPlanner
       return new UnitVector3D(x, y, z);
    }
 
+   /**
+    * Computes whether the edge is a valid edge, and populates the different metrics from the GPU memory. The only value that is actively used in the planning
+    * process is the rejection reason, which is used to compute the return of this method. The rest of the fields are used for logging.
+    * @return whether the edge is valid, and can be used.
+    */
    private boolean checkEdge(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, int childNodeKey, int edgeKey)
    {
       int localRejectionReason = edgeRejectionReasonBuffer.getBackingDirectIntBuffer().get(edgeKey);
@@ -952,7 +1122,7 @@ public class GPUAStarBodyPathPlanner
          graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
          return false;
       }
-      this.snapHeight.set(snap(childNodeKey));
+      this.snapHeight.set(getSnapHeight(childNodeKey));
 
       deltaHeight.set(deltaHeightMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
       incline.set(inclineMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
@@ -989,16 +1159,25 @@ public class GPUAStarBodyPathPlanner
       return true;
    }
 
+   /**
+    * Populates the edge cost fields from the GPU buffers. The only one that is actively used by the planner is the {@link #edgeCost}, as the rest of the costs
+    * compose this edge cost. The rest of the variables are only used for logging.
+    */
    private void computeEdgeCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, int edgeKey)
    {
+      // composite cost, which consists of other values like roll cost and traversibility cost. Calculated on the GPU.
       edgeCost.set(edgeCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
+      // Cost of that edge, when compared to the nominal incline. Calculated on the GPU. Purely a function of the start, goal, and edge beginning and end heights.
       inclineCost.set(inclineCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
 
       if (plannerParameters.getComputeSurfaceNormalCost())
       {
+         // This the roll of the current edge, which is the incline of the world perpendicular to the edge direction.
          roll.set(rollMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
+         // The cost of the roll
          rollCost.set(rollCostMapBuffer.getBackingDirectFloatBuffer().get(edgeKey));
 
+         // Get the midpoint of the edge.
          double bodyX = 0.5 * (neighbor.getX() + node.getX());
          double bodyY = 0.5 * (neighbor.getY() + node.getY());
 
@@ -1007,6 +1186,7 @@ public class GPUAStarBodyPathPlanner
          bodyX = MathTools.clamp(bodyX, heightMapData.getGridCenter().getX() - halfWidth, heightMapData.getGridCenter().getX() + halfWidth);
          bodyY = MathTools.clamp(bodyY, heightMapData.getGridCenter().getY() - halfWidth, heightMapData.getGridCenter().getY() + halfWidth);
 
+         // Sets the normal value at the midpoint of the edge, found using least squares on the GPU.
          leastSqNormal.set(getSurfaceNormal(HeightMapTools.coordinateToKey(bodyX,
                                                                            bodyY,
                                                                            heightMapData.getGridCenter().getX(),
@@ -1021,6 +1201,9 @@ public class GPUAStarBodyPathPlanner
       }
    }
 
+   /**
+    * Takes the output body path found by the A star search and converts it into an Output message. This includes optionally performing a smoothing step.
+    */
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       if (debug)
@@ -1028,24 +1211,29 @@ public class GPUAStarBodyPathPlanner
          LogTools.info("Reporting status");
       }
 
+      // We don't want to do any real smoothing if we didn't reach the goal.
       boolean performSmoothing = plannerParameters.getPerformSmoothing() && result == BodyPathPlanningResult.FOUND_SOLUTION;
 
+      // reset the initial aspects of the output message
       outputToPack.setBodyPathPlanningResult(result);
       outputToPack.getBodyPath().clear();
       outputToPack.getBodyPathUnsmoothed().clear();
 
+      // If we don't reach the goal, we want the node that has the lowest predicted cost to the goal.
       BodyPathLatticePoint terminalNode = reachedGoal ? goalNode : leastCostNode;
+      // This is the optimal path in the grid map coordinates
       List<BodyPathLatticePoint> path = graph.getPathFromStart(terminalNode);
+      // This is the body path that will either be smoothed or added to the output message
       List<Point3D> bodyPath = new ArrayList<>();
 
       for (int i = 0; i < path.size(); i++)
       {
-         Point3D waypoint = new Point3D(path.get(i).getX(), path.get(i).getY(), snap(getNodeGraphKey(path.get(i))));
+         // get the waypoint from the 2D path position and the snapped height at that position
+         Point3D waypoint = new Point3D(path.get(i).getX(), path.get(i).getY(), getSnapHeight(getNodeGraphKey(path.get(i))));
+         // pack that waypoint into the body path
          bodyPath.add(waypoint);
+         // set that waypoint as part of the unsmoothed body path
          outputToPack.getBodyPathUnsmoothed().add(waypoint);
-
-         if (!performSmoothing)
-            outputToPack.getBodyPath().add(new Pose3D(waypoint, new Quaternion()));
       }
 
       if (performSmoothing)
@@ -1065,11 +1253,13 @@ public class GPUAStarBodyPathPlanner
 
             if (i == 0)
             {
+               // Set the starting yaw as the middle of the stance feet
                double yaw = AngleTools.interpolateAngle(request.getStartFootPoses().get(RobotSide.LEFT).getYaw(), request.getStartFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
                waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
             }
             else if (i == bodyPath.size() - 1)
             {
+               // Set the ending yaw as the middle of the goal feet
                double yaw = AngleTools.interpolateAngle(request.getGoalFootPoses().get(RobotSide.LEFT).getYaw(), request.getGoalFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
                waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
             }
@@ -1077,12 +1267,42 @@ public class GPUAStarBodyPathPlanner
             outputToPack.getBodyPath().add(waypoint);
          }
       }
+      else
+      {
+         for (int i = 0 ; i < bodyPath.size(); i++)
+         {
+            Pose3D waypoint = new Pose3D();
+            waypoint.getPosition().set(bodyPath.get(i));
+
+            if (i == 0)
+            {
+               // Set the starting yaw as the middle of the stance feet
+               double yaw = AngleTools.interpolateAngle(request.getStartFootPoses().get(RobotSide.LEFT).getYaw(), request.getStartFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
+               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+            else if (i == bodyPath.size() - 1)
+            {
+               // Set the ending yaw as the middle of the goal feet
+               double yaw = AngleTools.interpolateAngle(request.getGoalFootPoses().get(RobotSide.LEFT).getYaw(), request.getGoalFootPoses().get(RobotSide.RIGHT).getYaw(), 0.5);
+               waypoint.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+            }
+            else
+            {
+               // Since we didn't do smoothing, set the yaw as the heading to get to the next waypoint.
+               waypoint.getOrientation().setToYawOrientation(AngleTools.calculateHeading(bodyPath.get(i), bodyPath.get(i + 1), 0.0));
+            }
+
+            outputToPack.getBodyPath().add(waypoint);
+         }
+
+      }
 
       outputToPack.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.totalElapsed() - planningStartTime);
       outputToPack.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed());
 
       if (reachedGoal)
       {
+         // If we reached the goal, move onto the planning step.
          outputToPack.setFootstepPlanningResult(FootstepPlanningResult.PLANNING);
       }
 
@@ -1090,13 +1310,22 @@ public class GPUAStarBodyPathPlanner
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
+   /**
+    *  This clears out the old logged data maps. If this isn't done, these maps will continue to get populated on subsequent steps. However, this should not
+    *  be done automatically as part of the planning process, since the logs are saved aftwards.
+     */
+
    public void clearLoggedData()
    {
       edgeDataMap.clear();
       iterationData.clear();
    }
 
-   private boolean publishStatus(FootstepPlannerRequest request)
+   /**
+    * Computes whether the planner should incrementally publish its status. This allows the planner to output its current status to a remote process, if
+    * the plan is taking a long time, using the {@link #reportStatus(FootstepPlannerRequest, FootstepPlannerOutput)} message.
+    */
+   private boolean shouldPublishStatus(FootstepPlannerRequest request)
    {
       double statusPublishPeriod = request.getStatusPublishPeriod();
       if (statusPublishPeriod <= 0.0)
@@ -1117,11 +1346,13 @@ public class GPUAStarBodyPathPlanner
       }
    }
 
-   public BodyPathLatticePoint getNextNode()
+   /**
+    * Returns the best next node to expand from the plan queue.
+    */
+   private BodyPathLatticePoint getNextNode()
    {
       while (!stack.isEmpty())
       {
-//         BodyPathLatticePoint nextNode = stack.pollFirst();
          BodyPathLatticePoint nextNode = stack.poll();
          if (!expandedNodeSet.contains(nextNode))
          {
@@ -1132,34 +1363,6 @@ public class GPUAStarBodyPathPlanner
       return null;
    }
 
-   static void packNeighborOffsets(TIntArrayList xOffsets, TIntArrayList yOffsets)
-   {
-      xOffsets.clear();
-      yOffsets.clear();
-
-      xOffsets.add(1); yOffsets.add(0);
-      xOffsets.add(2); yOffsets.add(1);
-      xOffsets.add(1); yOffsets.add(1);
-      xOffsets.add(1); yOffsets.add(2);
-
-      xOffsets.add(0); yOffsets.add(1);
-      xOffsets.add(-1); yOffsets.add(2);
-      xOffsets.add(-1); yOffsets.add(1);
-      xOffsets.add(-2); yOffsets.add(1);
-
-      xOffsets.add(-1); yOffsets.add(0);
-      xOffsets.add(-2); yOffsets.add(-1);
-      xOffsets.add(-1); yOffsets.add(-1);
-      xOffsets.add(-1); yOffsets.add(-2);
-
-      xOffsets.add(0); yOffsets.add(-1);
-      xOffsets.add(1); yOffsets.add(-2);
-      xOffsets.add(1); yOffsets.add(-1);
-      xOffsets.add(2); yOffsets.add(-1);
-
-      if (xOffsets.size() != numberOfNeighborsPerExpansion || yOffsets.size() != numberOfNeighborsPerExpansion)
-         throw new RuntimeException("Neighbor set is wrong.");
-   }
 
    /**
     * Populates a 16-connected grid starting along +x and moving clockwise
@@ -1174,26 +1377,42 @@ public class GPUAStarBodyPathPlanner
       }
    }
 
-   private double snap(int nodeKey)
+   /**
+    * Returns the snapped height as a certain location. As the grid size of the planning map is different than the height map, this is approximately the local
+    * average height of the height map at this location.
+    */
+   private double getSnapHeight(int nodeKey)
    {
       return snappedNodeHeightBuffer.getBackingDirectFloatBuffer().get(nodeKey);
    }
 
-   private double heuristics(BodyPathLatticePoint node)
+   /**
+    * Returns the heuristic cost for the node point.
+    */
+   private double getHeuristicCost(BodyPathLatticePoint node)
    {
       return heuristicCostMapBuffer.getBackingDirectFloatBuffer().get(getNodeGraphKey(node));
    }
 
+   /**
+    * Ceases the iterative planning at the current iteration, and will return the best un-smoothed plan that has been found so far
+    */
    public void halt()
    {
       haltRequested.set(true);
    }
 
+   /**
+    * Retuns the list of all the iteration data for the planner. This is used for logging.
+    */
    public List<AStarBodyPathIterationData> getIterationData()
    {
       return iterationData;
    }
 
+   /**
+    * Returns the map of all edge data in the graph that has been calculated so far. This is used for logging.
+    */
    public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap()
    {
       return edgeDataMap;
