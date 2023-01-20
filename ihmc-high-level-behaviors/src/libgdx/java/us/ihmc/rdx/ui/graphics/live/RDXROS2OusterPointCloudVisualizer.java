@@ -15,7 +15,7 @@ import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.tools.NativeMemoryTools;
+import us.ihmc.perception.memory.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
