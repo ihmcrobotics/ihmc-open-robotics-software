@@ -1,10 +1,12 @@
 package us.ihmc.perception.logging;
 
 import gnu.trove.list.array.TFloatArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import org.bytedeco.hdf5.*;
 import org.bytedeco.hdf5.global.hdf5;
-import org.bytedeco.javacpp.*;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.javacpp.IntPointer;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -13,6 +15,7 @@ import us.ihmc.log.LogTools;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class HDF5Tools
 {
@@ -26,7 +29,7 @@ public class HDF5Tools
     * @param dimension     The dimension or axis along which the length is requested
     * @return The length of the dataset along the requested dimension or axis
     */
-   public static int extractShape(DataSet dataSet, int dimension)
+   private static int extractShape(DataSet dataSet, int dimension)
    {
       DataSpace dataSpace = dataSet.getSpace();
       int dimensions = dataSpace.getSimpleExtentNdims();
@@ -175,25 +178,6 @@ public class HDF5Tools
    }
 
    /**
-    * Stores a 2D long array passed as TLongArrayList into an HDF5 dataset
-    *
-    * @param group The HDF5 group where the requested is stored
-    * @param index The index of the dataset within the requested group.
-    * @param data  The long data for the 2D matrix to be stored
-    * @param rows  Number of rows in the 2D matrix to be stored
-    * @param cols  Number of columns in the 2D matrix to be stored
-    */
-   public static void storeLongArray2D(Group group, long index, TLongArrayList data, int rows, int cols)
-   {
-      // Log the timestamps buffer as separate dataset with same index
-      long[] dimensions = {rows, cols};
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_LONG()), new DataSpace(2, dimensions));
-      long[] array = data.toArray();
-      dataset.write(new LongPointer(array), new DataType(PredType.NATIVE_LONG()));
-      dataset.close();
-   }
-
-   /**
     * Stores a 2D float array passed as TFloatArrayList into an HDF5 dataset
     *
     * @param group The HDF5 group where the requested is stored
@@ -204,38 +188,12 @@ public class HDF5Tools
     */
    public static void storeFloatArray2D(Group group, long index, TFloatArrayList data, int rows, int cols)
    {
-      // Log the data buffer as separate dataset with same index
       long[] dimensions = {rows, cols};
+
       DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_FLOAT()), new DataSpace(2, dimensions));
       float[] dataObject = data.toArray();
       dataset.write(new FloatPointer(dataObject), new DataType(PredType.NATIVE_FLOAT()));
       dataset.close();
-   }
-
-   /**
-    * Loads a 2D float array from an HDF5 dataset
-    *
-    * @param group The HDF5 group where the requested float array is stored
-    * @param index The index of the dataset within the requested group.
-    */
-   public static float[] loadFloatArray(Group group, long index)
-   {
-      DataSet dataset = group.openDataSet(String.valueOf(index));
-
-      int size = extractShape(dataset, 0);
-      int cols = extractShape(dataset, 1);
-
-      LogTools.info("Shape: {} {}", size, cols);
-
-      float[] floatArray = new float[size * cols];
-
-      FloatPointer floatPointer = new FloatPointer(floatArray);
-      dataset.read(floatPointer, new DataType(PredType.NATIVE_FLOAT()));
-      floatPointer.get(floatArray, 0, floatArray.length);
-
-      dataset.close();
-
-      return floatArray;
    }
 
    /**
@@ -321,20 +279,6 @@ public class HDF5Tools
       dataset.write(new BytePointer(data), new DataType(PredType.NATIVE_UCHAR()));
 
       dataSpace.close();
-      dataset.close();
-   }
-
-   public static void storeBytesFromPointer(Group group, long index, BytePointer bytes, long size)
-   {
-      LogTools.info("Store Byte Array: Index: {} Size: {}", index, size);
-      long[] dims = {size};
-
-      DataSpace ds = new DataSpace(1, dims);
-      DataSet dataset = group.createDataSet(String.valueOf(index), new DataType(PredType.NATIVE_UCHAR()), ds);
-
-      dataset.write(bytes, new DataType(PredType.NATIVE_UCHAR()));
-
-      ds.close();
       dataset.close();
    }
 
