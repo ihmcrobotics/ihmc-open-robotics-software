@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
@@ -21,6 +22,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SwingPlanningModule
@@ -76,23 +79,34 @@ public class SwingPlanningModule
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
    {
-      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      computeSwingWaypoints(planarRegionsList, null, footstepPlan, startFootPoses, swingPlannerType);
+   }
+
+   public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
+                                     HeightMapMessage heightMapData,
+                                     FootstepPlan footstepPlan,
+                                     SideDependentList<? extends Pose3DReadOnly> startFootPoses,
+                                     SwingPlannerType swingPlannerType)
+   {
+      boolean hasPlanarRegions = (planarRegionsList == null || planarRegionsList.isEmpty());
+      if ( hasPlanarRegions && heightMapData == null)
       {
          return;
       }
 
-      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null)
+      if (swingPlannerType == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null && hasPlanarRegions)
       {
          adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
          adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
       }
-      else if (swingPlannerType == SwingPlannerType.TWO_WAYPOINT_POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
+      else if (swingPlannerType == SwingPlannerType.TWO_WAYPOINT_POSITION && swingOverPlanarRegionsTrajectoryExpander != null && hasPlanarRegions)
       {
          computeSwingWaypoints(planarRegionsList, footstepPlan, startFootPoses);
       }
       else if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
       {
          collisionFreeSwingCalculator.setPlanarRegionsList(planarRegionsList);
+         collisionFreeSwingCalculator.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapData));
          collisionFreeSwingCalculator.computeSwingTrajectories(startFootPoses, footstepPlan);
       }
    }

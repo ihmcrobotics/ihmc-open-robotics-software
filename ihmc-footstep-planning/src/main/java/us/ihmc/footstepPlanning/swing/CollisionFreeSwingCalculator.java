@@ -34,6 +34,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -80,6 +81,7 @@ public class CollisionFreeSwingCalculator
    private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
 
    private PlanarRegionsList planarRegionsList;
+   private HeightMapData heightMapData;
    private final int footstepGraphicCapacity = 100;
    private final SideDependentList<FootstepVisualizer[]> footstepVisualizers = new SideDependentList<>();
    private final SideDependentList<MutableInt> footstepVisualizerIndices = new SideDependentList<>(side -> new MutableInt());
@@ -171,9 +173,14 @@ public class CollisionFreeSwingCalculator
       this.planarRegionsList = planarRegionsList;
    }
 
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
+   }
+
    public void computeSwingTrajectories(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
-      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      if ((planarRegionsList == null || planarRegionsList.isEmpty()) && (heightMapData == null))
       {
          return;
       }
@@ -314,7 +321,7 @@ public class CollisionFreeSwingCalculator
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
 
             // collision gradient
-            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList);
+            boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData);
             if (collisionDetected)
             {
                collisionFound.set(true);
