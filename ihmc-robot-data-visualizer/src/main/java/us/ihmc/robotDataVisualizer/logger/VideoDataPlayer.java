@@ -338,6 +338,7 @@ public class VideoDataPlayer
       camera.setVideoFile("recordedVideo.mov");
 
       File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
+//      File dataDirectory = new File("C:/Users/nkitchel/Documents/security-camera/repository-group/ihmc-video-codecs/src/test/resources/");
 
       VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, true);
 
