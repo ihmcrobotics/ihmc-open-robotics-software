@@ -1,26 +1,20 @@
 package us.ihmc.rdx.perception;
 
 import perception_msgs.msg.dds.BigVideoPacket;
-import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.global.opencv_videoio;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_videoio.VideoCapture;
-import org.bytedeco.opencv.opencv_videoio.VideoWriter;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ImGuiOpenCVSwapVideoPanel;
 import us.ihmc.rdx.ui.tools.ImPlotFrequencyPlot;
 import us.ihmc.rdx.ui.tools.ImPlotIntegerPlot;
 import us.ihmc.rdx.ui.tools.ImPlotStopwatchPlot;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.time.TimeTools;
@@ -38,19 +32,10 @@ public class WebcamROS2PublisherDemo
                                                   "ihmc-high-level-behaviors/src/test/resources",
                                                   "ROS 2 Webcam Publisher");
    private final ImGuiPanel diagnosticPanel = new ImGuiPanel("Diagnostics", this::renderImGuiWidgets);
-   private VideoCapture videoCapture;
-   private int imageWidth = 1920;
-   private int imageHeight = 1080;
-   private double requestedFPS = 30.0;
-   private double reportedFPS = 30.0;
-   private String backendName = "";
-   private Mat bgrImage;
+   private RDXOpenCVWebcamReader webcamReader;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
-   private ImGuiOpenCVSwapVideoPanel swapCVPanel;
-   private final ImPlotStopwatchPlot readDurationPlot = new ImPlotStopwatchPlot("Read duration");
    private final ImPlotStopwatchPlot encodeDurationPlot = new ImPlotStopwatchPlot("Encode duration");
-   private final ImPlotFrequencyPlot readFrequencyPlot = new ImPlotFrequencyPlot("Read frequency");
    private final ImPlotFrequencyPlot publishFrequencyPlot = new ImPlotFrequencyPlot("Publish frequency");
    private final ImPlotIntegerPlot compressedBytesPlot = new ImPlotIntegerPlot("Compressed bytes");
    private final Stopwatch threadOneDuration = new Stopwatch();
@@ -72,6 +57,7 @@ public class WebcamROS2PublisherDemo
          public void create()
          {
             baseUI.create();
+            webcamReader = new RDXOpenCVWebcamReader(nativesLoadedActivator);
 
             realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
@@ -94,36 +80,12 @@ public class WebcamROS2PublisherDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  videoCapture = new VideoCapture(0);
+                  webcamReader.create();
+                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
+                  baseUI.getPerspectiveManager().reloadPerspective();
 
-                  int reportedImageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
-                  int reportedImageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-                  reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
-
-                  LogTools.info("Default resolution: {} x {}", reportedImageWidth, reportedImageHeight);
-                  LogTools.info("Default fps: {}", reportedFPS);
-
-                  backendName = BytedecoTools.stringFromByteBuffer(videoCapture.getBackendName());
-
-                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, imageWidth);
-                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, imageHeight);
-                  videoCapture.set(opencv_videoio.CAP_PROP_FOURCC, VideoWriter.fourcc((byte) 'M', (byte) 'J', (byte) 'P', (byte) 'G'));
-                  videoCapture.set(opencv_videoio.CAP_PROP_FPS, requestedFPS);
-//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_WIDTH, 1280.0);
-//                  videoCapture.set(opencv_videoio.CAP_PROP_FRAME_HEIGHT, 720.0);
-
-                  imageWidth = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_WIDTH);
-                  imageHeight = (int) videoCapture.get(opencv_videoio.CAP_PROP_FRAME_HEIGHT);
-                  reportedFPS = videoCapture.get(opencv_videoio.CAP_PROP_FPS);
-                  LogTools.info("Format: {}", videoCapture.get(opencv_videoio.CAP_PROP_FORMAT));
-
-                  bgrImage = new Mat();
                   yuv420Image = new Mat();
                   jpegImageBytePointer = new BytePointer();
-
-                  swapCVPanel = new ImGuiOpenCVSwapVideoPanel("Video", false);
-                  baseUI.getImGuiPanelManager().addPanel(swapCVPanel.getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
 
                   compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
 
@@ -151,25 +113,11 @@ public class WebcamROS2PublisherDemo
                         if (shouldSleep)
                            ThreadTools.sleepSeconds(sleepTime);
 
-                        readDurationPlot.start();
-                        boolean imageWasRead = videoCapture.read(bgrImage);
-                        readDurationPlot.stop();
-                        readFrequencyPlot.ping();
-
-                        if (!imageWasRead)
-                        {
-                           LogTools.error("Image was not read!");
-                        }
-
                         // Convert colors are pretty fast. Encoding is slow, so let's do it in parallel.
 
-                        swapCVPanel.getDataSwapReferenceManager().accessOnLowPriorityThread(data ->
-                        {
-                           data.updateOnImageUpdateThread(imageWidth, imageHeight);
-                           opencv_imgproc.cvtColor(bgrImage, data.getRGBA8Mat(), opencv_imgproc.COLOR_BGR2RGBA, 0);
-                        });
+                        webcamReader.readWebcamImage();
 
-                        opencv_imgproc.cvtColor(bgrImage, yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
+                        opencv_imgproc.cvtColor(webcamReader.getBGRImage(), yuv420Image, opencv_imgproc.COLOR_BGR2YUV_I420);
 
                         synchronized (measurementSyncObject)
                         {
@@ -182,10 +130,7 @@ public class WebcamROS2PublisherDemo
                   }, "CameraRead");
                }
 
-               swapCVPanel.getDataSwapReferenceManager().accessOnHighPriorityThread(data ->
-               {
-                  data.updateOnUIThread(swapCVPanel.getVideoPanel());
-               });
+               webcamReader.update();
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -195,7 +140,7 @@ public class WebcamROS2PublisherDemo
          @Override
          public void dispose()
          {
-            videoCapture.release();
+            webcamReader.dispose();
             baseUI.dispose();
          }
       });
@@ -223,8 +168,8 @@ public class WebcamROS2PublisherDemo
          Instant now = TimeTools.now();
          videoPacket.setAcquisitionTimeSecondsSinceEpoch(now.getEpochSecond());
          videoPacket.setAcquisitionTimeAdditionalNanos(now.getNano());
-         videoPacket.setImageWidth(imageWidth);
-         videoPacket.setImageHeight(imageHeight);
+         videoPacket.setImageWidth(webcamReader.getImageWidth());
+         videoPacket.setImageHeight(webcamReader.getImageHeight());
          publisher.publish(videoPacket);
 
          publishFrequencyPlot.ping();
@@ -240,13 +185,8 @@ public class WebcamROS2PublisherDemo
    {
       if (nativesLoadedActivator.peek())
       {
-         ImGui.text("Is open: " + videoCapture.isOpened());
-         ImGui.text("Image dimensions: " + imageWidth + " x " + imageHeight);
-         ImGui.text("Reported fps: " + reportedFPS);
-         ImGui.text("Backend name: " + backendName);
-         readFrequencyPlot.renderImGuiWidgets();
+         webcamReader.renderImGuiWidgets();
          publishFrequencyPlot.renderImGuiWidgets();
-         readDurationPlot.renderImGuiWidgets();
          encodeDurationPlot.renderImGuiWidgets();
          compressedBytesPlot.renderImGuiWidgets();
       }

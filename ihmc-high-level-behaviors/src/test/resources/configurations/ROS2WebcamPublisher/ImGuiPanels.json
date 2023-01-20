@@ -3,7 +3,8 @@
   "windows" : {
     "3D View" : false,
     "Diagnostics" : true,
+    "VR Settings" : false,
     "VR Thread Debugger" : false,
-    "Video" : true
+    "Webcam Monitor" : true
   }
 }

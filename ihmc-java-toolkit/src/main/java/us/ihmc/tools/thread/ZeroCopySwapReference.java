@@ -36,6 +36,15 @@ public class ZeroCopySwapReference<T>
    }
 
    /**
+    * If desired, call once at the beginning to initialize the data.
+    */
+   public void initializeBoth(Consumer<T> consumer)
+   {
+      consumer.accept(a);
+      consumer.accept(b);
+   }
+
+   /**
     * This thread does all the necessary waiting.
     * It's got access to its data straight away, that it got access to
     * last time it handed off to thread two.

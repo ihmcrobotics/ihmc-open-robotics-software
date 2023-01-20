@@ -1,0 +1,10 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : false,
+    "HDF5 Browsing" : true,
+    "Image Monitor" : true,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}

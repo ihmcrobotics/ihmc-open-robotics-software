@@ -55,7 +55,7 @@ public class ImGuiOpenCVSwapVideoPanelData
       return bytedecoImage.getBytedecoOpenCVMat();
    }
 
-   public BytedecoImage getBytedecoImage()
+   public BytedecoImage getRGBA8Image()
    {
       return bytedecoImage;
    }
