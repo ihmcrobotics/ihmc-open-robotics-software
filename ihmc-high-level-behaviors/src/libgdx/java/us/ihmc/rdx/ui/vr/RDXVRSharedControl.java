@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.vr;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -15,6 +16,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.perception.RDXObjectDetector;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
+import us.ihmc.rdx.visualizers.RDXSplineGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -22,11 +24,13 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
-   private ImBoolean enabledReplay;
-   private ImBoolean enabledIKStreaming;
+   private final ImBoolean enabledReplay;
+   private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);
    private final ProMPAssistant proMPAssistant = new ProMPAssistant();
    private RDXObjectDetector objectDetector;
@@ -34,9 +38,11 @@ public class RDXVRSharedControl implements TeleoperationAssistant
    private FramePose3D objectPose;
    private ReferenceFrame objectFrame;
    private boolean previewValidated = false;
-   private FullHumanoidRobotModel ghostRobotModel;
-   private RDXMultiBodyGraphic ghostRobotGraphic;
-   private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
+   private final FullHumanoidRobotModel ghostRobotModel;
+   private final RDXMultiBodyGraphic ghostRobotGraphic;
+   private final HashMap<String, RDXSplineGraphic> splineGraphics = new HashMap<>();
+   private final HashMap<String, List<Pose3DReadOnly>> bodyPartReplayMotionMap = new HashMap<>();
+   private final OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private boolean previewSetToActive = true; // once the validated motion is executed and preview disabled, activate ghostRobotGraphic based on this
    private final ArrayList<KinematicsToolboxOutputStatus> assistanceStatusList = new ArrayList<>();
    private boolean firstPreview = true;
@@ -91,10 +97,33 @@ public class RDXVRSharedControl implements TeleoperationAssistant
          ghostOneDoFJointsExcludingHands[i].setQ(status.getDesiredJointAngles().get(i));
       }
       ghostRobotModel.getElevator().updateFramesRecursively();
+      replaySplinesPreview();
 
       replayPreviewCounter++;
-      if (replayPreviewCounter>=assistanceStatusList.size())
-         replayPreviewCounter=0;
+      if (replayPreviewCounter >= assistanceStatusList.size())
+         replayPreviewCounter = 0;
+   }
+
+   private void replaySplinesPreview()
+   {
+      // draw spline for the computed trajectories from assistance
+      if (replayPreviewCounter == 0)
+      {
+         for (String bodyPart : bodyPartReplayMotionMap.keySet())
+         {
+            splineGraphics.put(bodyPart, new RDXSplineGraphic());
+            splineGraphics.get(bodyPart).createStart(bodyPartReplayMotionMap.get(bodyPart).get(0).getPosition(), Color.BLUE);
+         }
+      }
+      else
+      {
+         for (String bodyPart : bodyPartReplayMotionMap.keySet())
+            splineGraphics.get(bodyPart).createAdditionalPoint(bodyPartReplayMotionMap.get(bodyPart).get(replayPreviewCounter).getPosition(), Color.YELLOW);
+      }
+
+      if (replayPreviewCounter == assistanceStatusList.size() - 1)
+         for (String bodyPart : bodyPartReplayMotionMap.keySet())
+            splineGraphics.get(bodyPart).createEnd(Color.BLUE);
    }
 
    @Override
@@ -103,7 +132,14 @@ public class RDXVRSharedControl implements TeleoperationAssistant
       proMPAssistant.processFrameAndObjectInformation(observedPose, bodyPart, objectFrame, objectName);
 
       if (previewSetToActive)
+      {
          ghostRobotGraphic.setActive(false); // do not show ghost robot since there is no preview available yet
+         // start storing current frames for replay preview with splines
+         if (!bodyPartReplayMotionMap.containsKey(bodyPart))
+            bodyPartReplayMotionMap.put(bodyPart, new ArrayList<>());
+         else
+            bodyPartReplayMotionMap.get(bodyPart).add(observedPose);
+      }
    }
 
    @Override
@@ -127,10 +163,16 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             ghostRobotGraphic.setActive(false); // stop displaying preview ghost robot
             previewValidated = true;
          }
-         if (!firstPreview) // if second replay or more, keep promp asistant in pause at beginning
+         if (!firstPreview) // if second replay or more, keep promp assistant in pause at beginning
             proMPAssistant.setStartTrajectories(0);
+         else
+         { // if first preview
+            // keep storing current frames for replay preview with splines
+            if (bodyPartReplayMotionMap.containsKey(bodyPart))
+               bodyPartReplayMotionMap.get(bodyPart).add(framePose);
+         }
       }
-      else if(!previewSetToActive || previewValidated) // if user did not use the preview or preview has been validated
+      else // if user did not use the preview or preview has been validated
       {
          if (proMPAssistant.isCurrentTaskDone())  // do not want the assistant to keep recomputing trajectories for the same task over and over
             setEnabled(false); // exit promp assistance when the current task is over, reactivate it in VR or UI when you want to use it again
@@ -192,15 +234,22 @@ public class RDXVRSharedControl implements TeleoperationAssistant
             firstPreview = true;
             previewValidated = false;
             replayPreviewCounter = 0;
+            bodyPartReplayMotionMap.clear();
             assistanceStatusList.clear();
             ghostRobotGraphic.setActive(previewSetToActive); // set it back to what it was (graphic is disabled when using assistance after validation)
+            splineGraphics.clear();
          }
       }
    }
 
-   public RDXMultiBodyGraphic getPreviewGraphic()
+   public RDXMultiBodyGraphic getGhostPreviewGraphic()
    {
       return ghostRobotGraphic;
+   }
+
+   public HashMap<String, RDXSplineGraphic> getSplinePreviewGraphic()
+   {
+      return splineGraphics;
    }
 
    public FullHumanoidRobotModel getPreviewModel()

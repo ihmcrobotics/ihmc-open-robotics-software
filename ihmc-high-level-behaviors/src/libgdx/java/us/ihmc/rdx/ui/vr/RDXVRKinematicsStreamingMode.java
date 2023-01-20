@@ -306,6 +306,7 @@ public class RDXVRKinematicsStreamingMode
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
 
+            // update preview assistance
             if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive()) // if preview is enabled
             {
                if (sharedControlAssistant.isFirstPreview()) // first preview
@@ -330,7 +331,7 @@ public class RDXVRKinematicsStreamingMode
       }
       ghostRobotGraphic.update();
       if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewGraphicActive()) // if graphic active update also graphic
-         sharedControlAssistant.getPreviewGraphic().update();
+         sharedControlAssistant.getGhostPreviewGraphic().update();
    }
 
    public void renderImGuiWidgets()
@@ -423,7 +424,12 @@ public class RDXVRKinematicsStreamingMode
       {
          ghostRobotGraphic.getRenderables(renderables, pool);
          if(sharedControlAssistant.isActive() && sharedControlAssistant.isPreviewActive())
-            sharedControlAssistant.getPreviewGraphic().getRenderables(renderables, pool);
+         {
+            sharedControlAssistant.getGhostPreviewGraphic().getRenderables(renderables, pool);
+            var splineGraphics = sharedControlAssistant.getSplinePreviewGraphic();
+            for (var spline : splineGraphics.keySet())
+               splineGraphics.get(spline).getRenderables(renderables, pool);
+         }
       }
       if (showReferenceFrameGraphics.get())
       {
