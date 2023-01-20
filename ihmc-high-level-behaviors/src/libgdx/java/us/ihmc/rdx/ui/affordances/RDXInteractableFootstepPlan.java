@@ -101,8 +101,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
          stepChecker.getInput(input);
       }
 
-      Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
-
       // Check validity of footsteps
       stepChecker.checkValidStepList(footsteps);
 
