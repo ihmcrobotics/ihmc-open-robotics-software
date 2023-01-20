@@ -285,6 +285,7 @@ public class AStarFootstepPlanner
       if (!request.getAssumeFlatGround())
       {
          swingPlanningModule.computeSwingWaypoints(request.getPlanarRegionsList(),
+                                                   request.getHeightMapMessage(),
                                                    outputToPack.getFootstepPlan(),
                                                    request.getStartFootPoses(),
                                                    request.getSwingPlannerType());
