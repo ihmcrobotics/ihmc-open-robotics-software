@@ -225,8 +225,6 @@ public class HDF5Tools
       int size = extractShape(dataset, 0);
       int cols = extractShape(dataset, 1);
 
-      LogTools.info("Shape: {} {}", size, cols);
-
       float[] floatArray = new float[size * cols];
 
       FloatPointer floatPointer = new FloatPointer(floatArray);

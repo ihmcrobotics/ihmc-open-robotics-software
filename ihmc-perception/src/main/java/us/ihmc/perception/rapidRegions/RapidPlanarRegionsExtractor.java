@@ -359,7 +359,7 @@ public class RapidPlanarRegionsExtractor
 
                // Create final rapid region if the connected island has enough patches
                //LogTools.info("Min Patch Count: {} | Number of Patches: {} | Island: {}", 20, numberOfRegionPatches, planarRegionIslandIndex);
-               if (numberOfRegionPatches >= 20)
+               if (numberOfRegionPatches >= parameters.getRegionMinPatches())
                {
                   //LogTools.info("Region Found: {}", planarRegionIslandIndex);
                   planarRegionIslandIndex++;
@@ -402,7 +402,7 @@ public class RapidPlanarRegionsExtractor
                                                                                                              regionRing,
                                                                                                              leafPatchIndex,
                                                                                                              1);
-                                                      if (numberOfBoundaryPatches >= 5)
+                                                      if (numberOfBoundaryPatches >= parameters.getBoundaryMinPatches())
                                                       {
                                                          //debugger.drawRegionRing(regionRing, patchHeight, patchWidth);
 
@@ -475,7 +475,7 @@ public class RapidPlanarRegionsExtractor
 
    private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GPURegionRing regionRing, int leafPatchIndex, int searchDepth)
    {
-      if (boundaryVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
+      if (boundaryVisitedMatrix.get(row, column) || searchDepth > parameters.getBoundarySearchDepthLimit())
          return 0;
 
       if (searchDepth > boundaryMaxSearchDepth)
@@ -584,7 +584,7 @@ public class RapidPlanarRegionsExtractor
 
       public void expandBlock()
       {
-         if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getSearchDepthLimit())
+         if (regionVisitedMatrix.get(row, column) || searchDepth > parameters.getInternalSearchDepthLimit())
             return;
 
          LogTools.debug("Expanding block at row: {}, column: {}, searchDepth: {}", row, column, searchDepth);
@@ -595,13 +595,6 @@ public class RapidPlanarRegionsExtractor
          ++numberOfRegionPatches;
          regionVisitedMatrix.set(row, column, true);
          regionMatrix.set(row, column, planarRegionIslandIndex);
-         // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
-         //float ny = -nxImage.getFloatDirect(row, column);
-         //float nz = nyImage.getFloatDirect(row, column);
-         //float nx = nzImage.getFloatDirect(row, column);
-         //float cy = -cxImage.getFloatDirect(row, column);
-         //float cz = cyImage.getFloatDirect(row, column);
-         //float cx = czImage.getFloatDirect(row, column);
 
          float nx = currentFeatureGrid.getNxImage().getFloatDirect(row, column);
          float ny = currentFeatureGrid.getNyImage().getFloatDirect(row, column);

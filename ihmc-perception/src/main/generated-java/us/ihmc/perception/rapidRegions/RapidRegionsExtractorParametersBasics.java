@@ -103,9 +103,14 @@ public interface RapidRegionsExtractorParametersBasics extends RapidRegionsExtra
       set(RapidRegionsExtractorParameters.gaussianSigma, gaussianSigma);
    }
 
-   default void setSearchDepthLimit(int searchDepthLimit)
+   default void setInternalSearchDepthLimit(int internalSearchDepthLimit)
    {
-      set(RapidRegionsExtractorParameters.searchDepthLimit, searchDepthLimit);
+      set(RapidRegionsExtractorParameters.internalSearchDepthLimit, internalSearchDepthLimit);
+   }
+
+   default void setBoundarySearchDepthLimit(int boundarySearchDepthLimit)
+   {
+      set(RapidRegionsExtractorParameters.boundarySearchDepthLimit, boundarySearchDepthLimit);
    }
 
    default void setRegionMinPatches(int regionMinPatches)

@@ -71,18 +71,23 @@
     "lowerBound" : 0.23,
     "upperBound" : 10.0
   },
-  "Search depth limit" : {
-    "value" : 45500,
+  "Internal search depth limit" : {
+    "value" : 35000,
     "lowerBound" : 1,
     "upperBound" : 50000
   },
+  "Boundary search depth limit" : {
+    "value" : 8000,
+    "lowerBound" : 1,
+    "upperBound" : 15000
+  },
   "Region min patches" : {
-    "value" : 455,
+    "value" : 80,
     "lowerBound" : 1,
     "upperBound" : 3000
   },
   "Boundary min patches" : {
-    "value" : 60,
+    "value" : 50,
     "lowerBound" : 1,
     "upperBound" : 1000
   },
