@@ -167,7 +167,7 @@ public class FFMPEGLoggerDemoHelper
       }
 
       if (logger == null)
-         logger = new FFMPEGLogger(imageWidth,
+         logger = new FFMPEGFileLogger(imageWidth,
                                    imageHeight,
                                    lossless,
                                    framerate.get(),
