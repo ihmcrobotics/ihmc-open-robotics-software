@@ -253,7 +253,7 @@ public class HDF5Test
       DataType dataType = new DataType(PredType.NATIVE_B8());
       DataSet dataSet = h5File.createDataSet(datasetId, dataType, fileSpace);
 
-      dataSet.write(dataPointer, dataType);
+      dataSet.write((Pointer) dataPointer, dataType);
 
       dataSet.close();
       fileSpace.close();
@@ -263,7 +263,7 @@ public class HDF5Test
       dataSet = h5File.openDataSet(datasetId);
 
       dataPointer = new BytePointer(writeData.length);
-      dataSet.read(dataPointer, dataType);
+      dataSet.read((Pointer) dataPointer, dataType);
 
       byte[] readData = new byte[(int) dataPointer.limit()];
       dataPointer.get(readData);
@@ -301,7 +301,7 @@ public class HDF5Test
       DataType dataType = new DataType(PredType.NATIVE_B8());
       DataSet dataSet = h5File.createDataSet(datasetId, dataType, fileSpace);
 
-      dataSet.write(dataPointer, dataType);
+      dataSet.write((Pointer) dataPointer, dataType);
       LogTools.info("Wrote:  {}", Arrays.toString(writeData));
 
       dataSet.close();
