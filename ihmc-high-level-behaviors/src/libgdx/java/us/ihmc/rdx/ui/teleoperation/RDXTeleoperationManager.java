@@ -16,6 +16,8 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -70,6 +72,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
    private final RDXFootstepPlanGraphic footstepsSentToControllerGraphic;
    private final RDXRobotLowLevelMessenger robotLowLevelMessenger;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private final RDXFootstepPlanning footstepPlanning;
    private RDXLegControlMode legControlMode = RDXLegControlMode.DISABLED;
@@ -125,6 +128,8 @@ public class RDXTeleoperationManager extends ImGuiPanel
       ros2Helper = new ROS2ControllerHelper(ros2Node, robotModel);
       this.yoVariableClientHelper = yoVariableClientHelper;
 
+      this.footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+
       teleoperationParameters = new RDXTeleoperationParameters(robotRepoName, robotSubsequentPathToResourceFolder, robotModel.getSimpleRobotName());
       teleoperationParameters.load();
 
@@ -148,6 +153,10 @@ public class RDXTeleoperationManager extends ImGuiPanel
          footstepsSentToControllerGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
       footstepPlanning = new RDXFootstepPlanning(robotModel, syncedRobot);
+      // TODO remove ros from this module, and have it call from the higher level.
+      ros2Helper.subscribeViaCallback(ROS2Tools.RAPID_REGIONS, regions -> footstepPlanning.setPlanarRegions(regions));
+      ros2Helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, footstepPlanning::setHeightMapData);
+
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -169,7 +178,7 @@ public class RDXTeleoperationManager extends ImGuiPanel
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
-      footstepPlanningParametersTuner.create(footstepPlanning.getFootstepPlannerParameters(), false, footstepPlanning::plan);
+      footstepPlanningParametersTuner.create(footstepPlannerParameters, false, () -> footstepPlanning.setFootstepPlannerParameters(footstepPlannerParameters));
       teleoperationParametersTuner.create(teleoperationParameters);
       swingTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.swingTime, 0.3, 2.5);
       transferTimeSlider = teleoperationParametersTuner.createDoubleSlider(RDXTeleoperationParameters.transferTime, 0.3, 2.5);
@@ -284,24 +293,21 @@ public class RDXTeleoperationManager extends ImGuiPanel
       syncedRobot.update();
       desiredRobot.update();
       footstepsSentToControllerGraphic.update();
-      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep();
+      boolean isCurrentlyPlacingFootstep = getManualFootstepPlacement().isPlacingFootstep() || ballAndArrowMidFeetPosePlacement.isPlacingGoal();
       if (isPlacingFootstep != isCurrentlyPlacingFootstep)
          baseUI.setModelSceneMouseCollisionEnabled(isCurrentlyPlacingFootstep);
       isPlacingFootstep = isCurrentlyPlacingFootstep;
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll())
       {
-         footstepPlanning.getMidFeetGoalPose().set(ballAndArrowMidFeetPosePlacement.getGoalPose());
-         footstepPlanning.setGoalFootPosesFromMidFeetPose();
-         footstepPlanning.setStanceSideToClosestToGoal();
-         // TODO: Call planAsync
-         footstepPlanning.plan();
+         footstepPlanning.setMidFeetGoalPose(ballAndArrowMidFeetPosePlacement.getGoalPose());
+         footstepPlanning.planAsync();
+      }
 
-         // TODO: make footsteps from footstepPlan interactable (modifiable)
-         if (footstepPlanning.isReadyToWalk()) // failed
-         {
-            interactableFootstepPlan.updateFromPlan(footstepPlanning.getOutput().getFootstepPlan());
-         }
+      // TODO: make footsteps from footstepPlan interactable (modifiable)
+      if (footstepPlanning.pollHasNewPlanAvailable()) // failed
+      {
+         interactableFootstepPlan.updateFromPlan(footstepPlanning.pollOutput().getFootstepPlan());
       }
 
       if (interactablesEnabled.get())

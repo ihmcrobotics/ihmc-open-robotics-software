@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -20,7 +20,7 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    protected final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
    private final String simpleRobotName;
 
-   public ROS2ControllerHelper(DomainFactory.PubSubImplementation pubSubImplementation, String nodeName, DRCRobotModel robotModel)
+   public ROS2ControllerHelper(PubSubImplementation pubSubImplementation, String nodeName, DRCRobotModel robotModel)
    {
       this(ROS2Tools.createROS2Node(pubSubImplementation, nodeName), robotModel);
    }

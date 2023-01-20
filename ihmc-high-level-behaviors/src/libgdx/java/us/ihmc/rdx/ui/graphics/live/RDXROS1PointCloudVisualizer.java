@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import sensor_msgs.PointCloud2;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;

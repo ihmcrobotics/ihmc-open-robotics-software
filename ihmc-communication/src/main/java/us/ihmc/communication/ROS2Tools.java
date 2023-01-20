@@ -147,6 +147,7 @@ public class ROS2Tools
                                                                                                        .withSuffix("d435_color");
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> OUSTER_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
                                                                                                  .withSuffix("ouster");
+   public static final ROS2Topic<LidarScanMessage> OUSTER_LIDAR_SCAN = IHMC_ROOT.withType(LidarScanMessage.class).withSuffix("ouster");
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD
          = IHMC_ROOT.withModule(MULTISENSE_NAME).withType(StereoVisionPointCloudMessage.class).withSuffix("pointcloud");
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD
@@ -184,6 +185,7 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    public static final ROS2Topic<Float64> MAPSENSE_REGIONS_DELAY_OFFSET = MAPSENSE_MODULE.withType(Float64.class).withSuffix("delay_offset");
    public static final ROS2Topic<HeightMapMessage> HEIGHT_MAP_OUTPUT = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapMessage.class);
+   public static final ROS2Topic<HeightMapStateRequestMessage> HEIGHT_MAP_STATE_REQUEST = HEIGHT_MAP_MODULE.withOutput().withTypeName(HeightMapStateRequestMessage.class);
 
    public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput();
    public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = ROS2Tools.BEHAVIOR_MODULE.withOutput();
