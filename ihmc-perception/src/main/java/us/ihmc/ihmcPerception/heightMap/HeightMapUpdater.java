@@ -1,4 +1,4 @@
-package us.ihmc.avatar.heightMap;
+package us.ihmc.ihmcPerception.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.commons.lang3.tuple.Triple;
@@ -6,8 +6,7 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
-import us.ihmc.commons.Conversions;
+import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -20,7 +19,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -38,7 +36,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.stream.StreamSupport;
 
 public class HeightMapUpdater
 {
@@ -46,8 +43,8 @@ public class HeightMapUpdater
    private static final boolean printQueueSize = false;
    private static final int maxQueueLength = 5;
 
-   static final boolean USE_OUSTER_FRAME = true;
-   static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
+   public static final boolean USE_OUSTER_FRAME = true;
+   public static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
    static
    {
 //      double ousterPitch = Math.toRadians(21.5);
@@ -71,6 +68,8 @@ public class HeightMapUpdater
    private final AtomicDouble gridCenterX = new AtomicDouble();
    private final AtomicDouble gridCenterY = new AtomicDouble();
    private final AtomicDouble maxHeight = new AtomicDouble(0.4);
+
+   private final AtomicBoolean isPaused = new AtomicBoolean(false);
 
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
@@ -148,6 +147,16 @@ public class HeightMapUpdater
       this.gridCenterConsumer = gridCenterConsumer;
    }
 
+   public void requestPause()
+   {
+      isPaused.set(true);
+   }
+
+   public void requestResume()
+   {
+      isPaused.set(false);
+   }
+
    public void exportOnThread()
    {
       ThreadTools.startAThread(this::export, "Height map exporter");
@@ -155,7 +164,8 @@ public class HeightMapUpdater
 
    public void addPointCloudToQueue(Triple<PointCloudData, FramePose3D, Point3D> pointCloudData)
    {
-      this.pointCloudQueue.add(pointCloudData);
+      if (!isPaused.get())
+         this.pointCloudQueue.add(pointCloudData);
    }
 
    public boolean runUpdateThread()
@@ -268,7 +278,9 @@ public class HeightMapUpdater
          message.setEstimatedGroundHeight(estimatedGroundHeight);
 
          for (Consumer<HeightMapMessage> heightMapConsumer : heightMapConsumers)
+         {
             heightMapConsumer.accept(message);
+         }
 
          publishFrequencyCounter = publishFrequency.get();
          latestMessage.set(message);

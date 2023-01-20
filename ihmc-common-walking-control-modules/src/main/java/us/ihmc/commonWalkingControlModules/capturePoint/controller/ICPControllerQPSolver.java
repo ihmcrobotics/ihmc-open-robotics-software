@@ -478,7 +478,7 @@ public class ICPControllerQPSolver
    public void setDesiredFeedbackDirection(FrameVector2DReadOnly desiredFeedbackDirection, double directionWeight)
    {
       desiredFeedbackDirection.get(this.desiredFeedbackDirection);
-      CommonOps_DDRM.scale(1.0 / desiredFeedbackDirection.length(), this.desiredFeedbackDirection);
+      CommonOps_DDRM.scale(1.0 / desiredFeedbackDirection.norm(), this.desiredFeedbackDirection);
       this.feedbackDirectionWeight = directionWeight;
    }
 

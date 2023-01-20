@@ -1,11 +1,9 @@
-package us.ihmc.avatar.heightMap;
+package us.ihmc.ihmcPerception.heightMap;
 
 import org.apache.commons.lang3.tuple.Triple;
 import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -14,8 +12,8 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.ihmcPerception.depthData.PointCloudData;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -25,30 +23,30 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class RemoteHeightMapUpdater
 {
-   private final RealtimeROS2Node ros2Node;
-
    private static final long updateDTMillis = 100;
    private static final int initialPublishFrequency = 5;
 
+   private final RealtimeROS2Node ros2Node;
    private static final FramePose3D zeroPose = new FramePose3D();
    private final PerceptionMessageTools perceptionMessageTools = new PerceptionMessageTools();
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final HeightMapUpdater heightMapUpdater;
-   private ROS2SyncedRobotModel syncedRobot;
 
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()),
-                                                                                                    ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
-   public RemoteHeightMapUpdater(DRCRobotModel robotModel)
-   {
-      ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+                                                                                                                  ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-      IHMCRealtimeROS2Publisher<HeightMapMessage > heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
+   public RemoteHeightMapUpdater(Supplier<ReferenceFrame> groundFrameProvider, RealtimeROS2Node ros2Node)
+   {
+      this.ros2Node = ros2Node;
+
+      IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
@@ -58,9 +56,7 @@ public class RemoteHeightMapUpdater
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
          {
-            syncedRobot.update();
-
-            double groundHeight = syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToRoot().getTranslationZ();
+            double groundHeight = groundFrameProvider.get().getTransformToRoot().getTranslationZ();
 
             LidarScanMessage data = subscriber.readNextData();
             //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
@@ -97,8 +93,10 @@ public class RemoteHeightMapUpdater
 
       heightMapUpdater.setPublishFrequency(initialPublishFrequency);
       heightMapUpdater.setEnableUpdates(true);
+   }
 
-      ros2Node.spin();
+   public void start()
+   {
       executorService.scheduleAtFixedRate(this::update, 0, updateDTMillis, TimeUnit.MILLISECONDS);
    }
 
@@ -114,6 +112,17 @@ public class RemoteHeightMapUpdater
             updateThreadIsRunning.set(false);
          }
       }
+   }
+
+   public void consumeStateRequestMessage(HeightMapStateRequestMessage message)
+   {
+      if (message.getRequestPause())
+         heightMapUpdater.requestPause();
+      else if (message.getRequestResume())
+         heightMapUpdater.requestResume();
+
+      if (message.getRequestClear())
+         heightMapUpdater.requestClear();
    }
 
    public void stop()

@@ -1,12 +1,8 @@
-package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
+package us.ihmc.ihmcPerception.depthData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
@@ -18,6 +14,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
+
+import java.nio.FloatBuffer;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class PointCloudData
 {
@@ -44,6 +46,7 @@ public class PointCloudData
          colors = null;
       }
    }
+
    public PointCloudData(PointCloud2 rosPointCloud2, int maxSize, boolean hasColors)
    {
       timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
@@ -105,11 +108,24 @@ public class PointCloudData
 
    public PointCloudData(PerceptionMessageTools perceptionMessageTools, ImageMessage sensorData)
    {
-      timestamp = Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch()) + sensorData.getAcquisitionTime().getAdditionalNanos();
+      timestamp =
+            Conversions.secondsToNanoseconds(sensorData.getAcquisitionTime().getSecondsSinceEpoch()) + sensorData.getAcquisitionTime().getAdditionalNanos();
       numberOfPoints = sensorData.getImageHeight() * sensorData.getImageWidth();
       colors = null;
 
       pointCloud = perceptionMessageTools.unpackDepthImage(sensorData, Math.PI / 2.0, 2.0 * Math.PI);
+   }
+
+   public PointCloudData(Instant instant, int numberOfPoints, FloatBuffer pointCloudBuffer)
+   {
+      timestamp = Conversions.secondsToNanoseconds(instant.getEpochSecond()) + instant.getNano();
+      this.numberOfPoints = numberOfPoints;
+      colors = null;
+
+      pointCloud = new Point3D[numberOfPoints];
+      pointCloudBuffer.rewind();
+      for (int i = 0; i < numberOfPoints; i++)
+         pointCloud[i] = new Point3D(pointCloudBuffer.get(), pointCloudBuffer.get(), pointCloudBuffer.get());
    }
 
    public long getTimestamp()
