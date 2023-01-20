@@ -83,7 +83,7 @@ public class SwingPlanningModule
    }
 
    public void computeSwingWaypoints(PlanarRegionsList planarRegionsList,
-                                     HeightMapMessage heightMapData,
+                                     HeightMapData heightMapData,
                                      FootstepPlan footstepPlan,
                                      SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                      SwingPlannerType swingPlannerType)
@@ -106,7 +106,7 @@ public class SwingPlanningModule
       else if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
       {
          collisionFreeSwingCalculator.setPlanarRegionsList(planarRegionsList);
-         collisionFreeSwingCalculator.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapData));
+         collisionFreeSwingCalculator.setHeightMapData(heightMapData);
          collisionFreeSwingCalculator.computeSwingTrajectories(startFootPoses, footstepPlan);
       }
    }

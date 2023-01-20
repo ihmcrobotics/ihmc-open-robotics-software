@@ -4,12 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -21,13 +18,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
-import us.ihmc.rdx.mesh.RDXMeshGraphicTools;
-import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -132,7 +125,21 @@ public class RDXInteractableFootstep
       }
 
       updatePose(plannedFootstep.getFootstepPose());
-      updateTrajectory(plannedFootstep);
+   }
+
+   public void updatePlannedTrajectory(PlannedFootstep other)
+   {
+      plannedFootstepInternal.setTrajectoryType(other.getTrajectoryType());
+      plannedFootstepInternal.getCustomWaypointProportions().clear();
+      for (int i = 0; i < other.getCustomWaypointProportions().size(); i++)
+      {
+         plannedFootstepInternal.getCustomWaypointProportions().add(other.getCustomWaypointProportions().get(i));
+      }
+      plannedFootstepInternal.getCustomWaypointPositions().clear();
+      for (int i = 0; i < other.getCustomWaypointPositions().size(); i++)
+      {
+         plannedFootstepInternal.getCustomWaypointPositions().add(new Point3D(other.getCustomWaypointPositions().get(i)));
+      }
    }
 
    public void update()
@@ -148,6 +155,8 @@ public class RDXInteractableFootstep
       textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       LibGDXTools.toLibGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
       footstepIndexText.scale((float) textHeight);
+
+      updateTrajectoryModel(plannedFootstepInternal);
    }
 
    public void calculate3DViewPick(ImGui3DViewInput input)
@@ -319,7 +328,7 @@ public class RDXInteractableFootstep
       plannedFootstepInternal.getFootstepPose().set(footstepPose);
    }
 
-   public void updateTrajectory(PlannedFootstep footstep)
+   private void updateTrajectoryModel(PlannedFootstep footstep)
    {
       trajectoryModel.clear();
       if (footstep.getTrajectoryType() == TrajectoryType.CUSTOM)
