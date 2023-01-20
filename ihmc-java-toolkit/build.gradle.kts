@@ -33,7 +33,5 @@ mainDependencies {
 }
 
 testDependencies {
-   api("org.hamcrest:hamcrest:2.2")
-
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
