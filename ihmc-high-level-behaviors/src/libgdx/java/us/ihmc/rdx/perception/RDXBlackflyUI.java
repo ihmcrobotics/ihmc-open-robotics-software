@@ -3,10 +3,12 @@ package us.ihmc.rdx.perception;
 import imgui.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
+import org.bytedeco.spinnaker.Spinnaker_C.spinImageProcessor;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.perception.spinnaker.SpinnakerTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiPanel;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -25,6 +27,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXBlackflyUI
 {
+   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
+
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
                                                   "ihmc-high-level-behaviors/src/main/resources");
@@ -32,6 +36,7 @@ public class RDXBlackflyUI
    private SpinnakerBlackfly blackfly;
    private AtomicBoolean doImageAcquisition;
    private Thread imageAcquisitionService;
+   private spinImageProcessor spinImageProcessor;
    private AtomicReference<spinImage> currentUnprocessedImage;
    private spinImage previousImage = null;
    private spinImage currentImage = null;
@@ -41,7 +46,6 @@ public class RDXBlackflyUI
    private FrequencyCalculator frameReadFrequency = new FrequencyCalculator();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImPlotStopwatchPlot processDurationPlot = new ImPlotStopwatchPlot("Process duration");
-   private String serialNumber;
 
    public RDXBlackflyUI()
    {
@@ -66,13 +70,14 @@ public class RDXBlackflyUI
                if (nativesLoadedActivator.isNewlyActivated())
                {
                   spinnakerSystemManager = new SpinnakerSystemManager();
-                  serialNumber = "17403057";
-                  blackfly = spinnakerSystemManager.createBlackfly(serialNumber);
+                  blackfly = spinnakerSystemManager.createBlackfly(BLACKFLY_SERIAL_NUMBER);
                   blackfly.setAcquisitionMode(Spinnaker_C.spinAcquisitionModeEnums.AcquisitionMode_Continuous);
                   blackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGB8);
                   blackfly.startAcquiringImages();
                   // Image acquisition needs to run on a different thread so that the whole program doesn't need to wait for new images
                   doImageAcquisition = new AtomicBoolean(true);
+                  spinImageProcessor = new spinImageProcessor();
+                  SpinnakerTools.assertNoError(Spinnaker_C.spinImageProcessorCreate(spinImageProcessor), "Error creating image processor");
                   currentUnprocessedImage = new AtomicReference<>(null);
                   imageAcquisitionService = ThreadTools.startAThread(() ->
                   {
@@ -90,7 +95,7 @@ public class RDXBlackflyUI
                         currentUnprocessedImage.set(spinImage);
                         Spinnaker_C.spinImageRelease(oldImage);
                      }
-                  }, "Blackfly " + serialNumber + " Image Acquisition");
+                  }, "Blackfly " + BLACKFLY_SERIAL_NUMBER + " Image Acquisition");
                }
 
                if (getLatestBlackflyImage())
@@ -99,7 +104,7 @@ public class RDXBlackflyUI
                   {
                      int imageWidth = blackfly.getWidth(currentImage);
                      int imageHeight = blackfly.getHeight(currentImage);
-                     LogTools.info("Blackfly {} resolution detected: {}x{}", serialNumber, imageWidth, imageHeight);
+                     LogTools.info("Blackfly {} resolution detected: {}x{}", BLACKFLY_SERIAL_NUMBER, imageWidth, imageHeight);
                      imagePanel = new RDXCVImagePanel("Blackfly Image", imageWidth, imageHeight);
                      baseUI.getImGuiPanelManager().addPanel(imagePanel.getVideoPanel());
 
@@ -132,7 +137,10 @@ public class RDXBlackflyUI
 
             spinImage spinImage = new spinImage();
             Spinnaker_C.spinImageCreateEmpty(spinImage);
-            Spinnaker_C.spinImageConvert(currentUnprocessedImage.get(), Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGBa8, spinImage);
+            Spinnaker_C.spinImageProcessorConvert(spinImageProcessor,
+                                                  currentUnprocessedImage.get(),
+                                                  spinImage,
+                                                  Spinnaker_C.spinPixelFormatEnums.PixelFormat_RGBa8);
 
             spinImage oldImage = currentImage;
 
