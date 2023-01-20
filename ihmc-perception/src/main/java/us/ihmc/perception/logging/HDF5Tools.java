@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 public class HDF5Tools
 {
+   public static final String HDF5_FILE_EXTENSION = ".hdf5";
    static final int NUMBER_OF_FIELDS_PER_POINT = 3;
 
    /**
