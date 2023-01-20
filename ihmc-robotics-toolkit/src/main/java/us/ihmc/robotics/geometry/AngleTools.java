@@ -327,8 +327,6 @@ public class AngleTools
 
    /**
     * Returns an angle between two points + heading Offset from -PI to PI.
-    * If the x or y components are both under the noTranslationTolerance,
-    * then the initial orientation as given in startPose will be returned.
     *
     * @param startPose              initial position and orientation
     * @param endPoint               end position
