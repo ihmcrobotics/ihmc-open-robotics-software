@@ -5,7 +5,7 @@ import java.nio.file.Paths;
 
 public class IHMCCommonPaths
 {
-   public static final String USER_HOME_STRING = System.getProperty("user.home");
+   private static final String USER_HOME_STRING = System.getProperty("user.home");
    public static final Path USER_HOME_DIRECTORY = Paths.get(USER_HOME_STRING);
 
    public static final String DOT_IHMC_DIRECTORY_NAME = ".ihmc";
