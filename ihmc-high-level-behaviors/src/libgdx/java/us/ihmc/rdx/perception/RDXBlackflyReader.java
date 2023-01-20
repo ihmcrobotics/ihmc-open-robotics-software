@@ -22,7 +22,7 @@ public class RDXBlackflyReader
 {
    private final ImGuiPanel panel = new ImGuiPanel("Blackfly Reader", this::renderImGuiWidgets);
    private final Activator nativesLoadedActivator;
-   private String serialNumber;
+   private final String serialNumber;
    private volatile long imageWidth = -1;
    private volatile long imageHeight = -1;
    private SpinnakerSystemManager spinnakerSystemManager;
@@ -159,5 +159,10 @@ public class RDXBlackflyReader
    public long getImageWidth()
    {
       return imageWidth;
+   }
+
+   public Mat getRGBImage()
+   {
+      return blackflySourceMat;
    }
 }

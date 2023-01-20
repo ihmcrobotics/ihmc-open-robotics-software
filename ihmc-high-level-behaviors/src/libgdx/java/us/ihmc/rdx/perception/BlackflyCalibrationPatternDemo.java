@@ -9,19 +9,21 @@ import us.ihmc.tools.thread.Activator;
 
 import java.util.function.Consumer;
 
-public class WebcamCalibrationPatternDemo
+public class BlackflyCalibrationPatternDemo
 {
+   private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
+
    private final Activator nativesLoadedActivator = BytedecoTools.loadOpenCVNativesOnAThread();
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/test/resources",
-                                                  "Webcam Calibration Pattern Demo");
-   private RDXOpenCVWebcamReader webcamReader;
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                  "Blackfly Calibration Pattern Demo");
+   private RDXBlackflyReader blackflyReader;
    private CalibrationPatternDetection calibrationPatternDetection;
    private volatile boolean running = true;
    private final Consumer<ImGuiOpenCVSwapVideoPanelData> accessOnHighPriorityThread = this::accessOnHighPriorityThread;
 
-   public WebcamCalibrationPatternDemo()
+   public BlackflyCalibrationPatternDemo()
    {
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -30,8 +32,8 @@ public class WebcamCalibrationPatternDemo
          {
             baseUI.create();
 
-            webcamReader = new RDXOpenCVWebcamReader(nativesLoadedActivator);
-            baseUI.getImGuiPanelManager().addPanel(webcamReader.getStatisticsPanel());
+            blackflyReader = new RDXBlackflyReader(nativesLoadedActivator, BLACKFLY_SERIAL_NUMBER);
+            baseUI.getImGuiPanelManager().addPanel(blackflyReader.getStatisticsPanel());
          }
 
          @Override
@@ -41,9 +43,8 @@ public class WebcamCalibrationPatternDemo
             {
                if (nativesLoadedActivator.isNewlyActivated())
                {
-                  webcamReader.create();
-                  baseUI.getImGuiPanelManager().addPanel(webcamReader.getSwapCVPanel().getVideoPanel());
-                  baseUI.getPerspectiveManager().reloadPerspective();
+                  blackflyReader.create();
+                  baseUI.getImGuiPanelManager().addPanel(blackflyReader.getSwapCVPanel().getVideoPanel());
 
                   calibrationPatternDetection = new CalibrationPatternDetection();
                   baseUI.getImGuiPanelManager().addPanel(calibrationPatternDetection.getPanel());
@@ -53,14 +54,15 @@ public class WebcamCalibrationPatternDemo
                   {
                      while (running)
                      {
-                        webcamReader.readWebcamImage();
-                        calibrationPatternDetection.copyBGRImage(webcamReader.getBGRImage());
+                        blackflyReader.readBlackflyImage();
+                        calibrationPatternDetection.copyRGBImage(blackflyReader.getRGBImage());
                      }
                   }, "CameraRead");
                }
 
+
                calibrationPatternDetection.update();
-               webcamReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
+               blackflyReader.getSwapCVPanel().getDataSwapReferenceManager().accessOnHighPriorityThread(accessOnHighPriorityThread);
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -71,7 +73,7 @@ public class WebcamCalibrationPatternDemo
          public void dispose()
          {
             running = false;
-            webcamReader.dispose();
+            blackflyReader.dispose();
             baseUI.dispose();
          }
       });
@@ -79,16 +81,19 @@ public class WebcamCalibrationPatternDemo
 
    private void accessOnHighPriorityThread(ImGuiOpenCVSwapVideoPanelData data)
    {
-      if (webcamReader.getImageWasRead())
+      if (data.getRGBA8Image() != null)
       {
-         calibrationPatternDetection.drawCornersOrCenters(data.getRGBA8Mat());
-      }
+         if (blackflyReader.getImageWasRead())
+         {
+            calibrationPatternDetection.drawCornersOrCenters(data.getRGBA8Mat());
+         }
 
-      webcamReader.accessOnHighPriorityThread(data);
+         blackflyReader.accessOnHighPriorityThread(data);
+      }
    }
 
    public static void main(String[] args)
    {
-      new WebcamCalibrationPatternDemo();
+      new BlackflyCalibrationPatternDemo();
    }
 }

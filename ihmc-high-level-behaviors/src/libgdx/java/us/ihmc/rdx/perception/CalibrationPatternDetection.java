@@ -47,11 +47,19 @@ public class CalibrationPatternDetection
       simpleBlobDetector = SimpleBlobDetector.create();
    }
 
-   public void copyImage(Mat bgrImageToCopy)
+   public void copyBGRImage(Mat bgrImageToCopy)
    {
       synchronized (avoidCopiedImageTearing)
       {
          bgrImageToCopy.copyTo(bgrSourceCopy);
+      }
+   }
+
+   public void copyRGBImage(Mat bgrImageToCopy)
+   {
+      synchronized (avoidCopiedImageTearing)
+      {
+         opencv_imgproc.cvtColor(bgrImageToCopy, bgrSourceCopy, opencv_imgproc.COLOR_RGB2BGR);
       }
    }
 
