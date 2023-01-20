@@ -49,7 +49,6 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:robot-environment-awareness:source")
-   api("us.ihmc:ihmc-perception-slam-wrapper:source")
 }
 
 openpnpDependencies {
@@ -67,11 +66,6 @@ bytedecoDependencies {
 javacvDependencies {
    apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiCommonBytedecoNatives()
-}
-
-slamWrapperDependencies {
-   apiBytedecoNatives("javacpp")
-   api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiCommonBytedecoNatives()
