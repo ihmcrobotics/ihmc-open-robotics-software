@@ -73,6 +73,7 @@ public class AStarBodyPathPlanner
    private BodyPathLatticePoint startNode, goalNode;
    private final HashMap<BodyPathLatticePoint, Double> gridHeightMap = new HashMap<>();
    private BodyPathLatticePoint leastCostNode = null;
+   private double leastCost = Double.POSITIVE_INFINITY;
    private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
 
    /* Indicator of how flat and planar and available footholds are, using least squares */
@@ -259,6 +260,7 @@ public class AStarBodyPathPlanner
       expandedNodeSet.clear();
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
+      leastCost = heuristics(leastCostNode);
       nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
 
       if (plannerParameters.getComputeSurfaceNormalCost())
@@ -417,15 +419,16 @@ public class AStarBodyPathPlanner
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
             stack.add(neighbor);
 
-            if (node.equals(goalNode))
+            if (neighbor.equals(goalNode))
             {
                reachedGoal = true;
                result = BodyPathPlanningResult.FOUND_SOLUTION;
                break planningLoop;
             }
-            else if (heuristics(node) < heuristics(leastCostNode))
+            else if (heuristicCost.getValue() < leastCost)
             {
-               leastCostNode = node;
+               leastCost = heuristicCost.getDoubleValue();
+               leastCostNode = neighbor;
             }
          }
 
