@@ -25,13 +25,13 @@ import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXBlackflyUI
+public class BlackflyDisplayDemo
 {
    private static final String BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.serial.number", "00000000");
 
    private final RDXBaseUI baseUI = new RDXBaseUI(getClass(),
                                                   "ihmc-open-robotics-software",
-                                                  "ihmc-high-level-behaviors/src/main/resources");
+                                                  "ihmc-high-level-behaviors/src/libgdx/resources");
    private final Activator nativesLoadedActivator;
    private SpinnakerBlackfly blackfly;
    private AtomicBoolean doImageAcquisition;
@@ -47,7 +47,7 @@ public class RDXBlackflyUI
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImPlotStopwatchPlot processDurationPlot = new ImPlotStopwatchPlot("Process duration");
 
-   public RDXBlackflyUI()
+   public BlackflyDisplayDemo()
    {
       nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
 
@@ -204,6 +204,6 @@ public class RDXBlackflyUI
 
    public static void main(String[] args)
    {
-      new RDXBlackflyUI();
+      new BlackflyDisplayDemo();
    }
 }

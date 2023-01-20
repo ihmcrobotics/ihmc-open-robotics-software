@@ -1,8 +1,10 @@
 {
   "dockspacePanels" : { },
   "windows" : {
+    "3D View" : false,
     "Blackfly" : true,
     "Blackfly Image" : true,
+    "VR Settings" : false,
     "VR Thread Debugger" : false
   }
 }
