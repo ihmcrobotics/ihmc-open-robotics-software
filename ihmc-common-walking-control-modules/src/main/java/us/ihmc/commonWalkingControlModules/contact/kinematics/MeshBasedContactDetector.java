@@ -45,6 +45,7 @@ public class MeshBasedContactDetector
    private final Map<RigidBodyBasics, List<DetectedContactPoint>> allContactPoints = new HashMap<>();
 
    private List<FrameShape3DReadOnly> environmentShapes = null;
+   private final MultiContactBalanceStatus previousMultiContactBalanceStatus = new MultiContactBalanceStatus();
    private final MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
    public MeshBasedContactDetector(RigidBodyBasics rootBody,
@@ -139,10 +140,12 @@ public class MeshBasedContactDetector
 
       updateBalanceStatus(multiContactBalanceStatus);
 
-      if (balanceStatusConsumer != null)
+      if (balanceStatusConsumer != null && !previousMultiContactBalanceStatus.epsilonEquals(multiContactBalanceStatus, 1e-5))
       {
          balanceStatusConsumer.accept(multiContactBalanceStatus);
       }
+
+      previousMultiContactBalanceStatus.set(multiContactBalanceStatus);
    }
 
    public List<RigidBodyBasics> getContactableRigidBodies()
