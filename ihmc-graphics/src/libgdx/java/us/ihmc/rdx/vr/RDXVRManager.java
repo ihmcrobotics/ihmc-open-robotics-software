@@ -283,4 +283,9 @@ public class RDXVRManager
    {
       return vrEnabled;
    }
+
+   public RDXVRTeleporter getTeleporter()
+   {
+      return teleporter;
+   }
 }
